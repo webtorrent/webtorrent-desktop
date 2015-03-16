@@ -356,6 +356,8 @@ input {
   width: 100%;
   height: 100%;
   display: flex;
+  background-size: cover;
+  background-position: center center;
 }
 
 .player video {
@@ -701,28 +703,27 @@ body.drag .torrent-placeholder span {
 /*
  * CHROMECAST / AIRPLAY CONTROLS
  */
+
 .cast-screen {
-  width: 400px;
-  margin: auto;
+  width: 100%;
+  height: 200px;
   color: #eee;
-  line-height: normal;
+  text-align: center;
+  line-height: 2;
+  align-self: center;
 }
 
-.cast-screen h1 {
-  font-size: 3em;
+.cast-screen .icon {
+  font-size: 50px;
 }
 
+.cast-screen .cast-type,
 .cast-screen .cast-status {
-  margin: 40px 0;
-  font-size: 2em;
+  font-size: 32px;
 }
 
-.cast-screen .stop-casting {
-  cursor: pointer;
-}
-
-.cast-screen .stop-casting:hover {
-  color: #9af;
+.cast-screen .cast-type {
+  font-weight: bold;
 }
 
 /*

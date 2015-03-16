@@ -76,28 +76,23 @@ function renderCastScreen (state, dispatch) {
   var isStarting = state.playing.location.endsWith('-pending')
   if (!isChromecast && !isAirplay) throw new Error('Unimplemented cast type')
 
-  // Finally, show a static title screen and the cast status
-  var header = isChromecast ? 'Chromecast' : 'AirPlay'
-  var content
-  if (isStarting) {
-    content = hx`
-      <div class='cast-status'>Connecting...</div>
-    `
-  } else {
-    content = hx`
-      <div class='cast-status'>
-        <div class='button stop-casting'
-          onclick=${() => dispatch('stopCasting')}>
-          Stop Casting
-        </div>
-      </div>
-    `
+  // Show a nice title image, if possible
+  var style = {}
+  var infoHash = state.playing.infoHash
+  var torrentSummary = state.saved.torrents.find((x) => x.infoHash === infoHash)
+  if (torrentSummary && torrentSummary.posterURL) {
+    var cleanURL = torrentSummary.posterURL.replace(/\\/g, '/')
+    style.backgroundImage = `radial-gradient(circle at center, rgba(0,0,0,0.4) 0%,rgba(0,0,0,1) 100%), url(${cleanURL})`
   }
+
+  // Show whether we're connected to Chromecast / Airplay
+  var castStatus = isStarting ? 'Connecting...' : 'Connected'
   return hx`
-    <div class='letterbox'>
+    <div class='letterbox' style=${style}>
       <div class='cast-screen'>
-        <h1>${header}</h1>
-        ${content}
+        <i class='icon'>${isAirplay ? 'airplay' : 'cast'}</i>
+        <div class='cast-type'>${isAirplay ? 'AirPlay' : 'Chromecast'}</div>
+        <div class='cast-status'>${castStatus}</div>
       </div>
     </div>
   `

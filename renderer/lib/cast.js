@@ -32,7 +32,10 @@ function init (callback) {
     addChromecastEvents()
   })
 
-  airplay.createBrowser().on('deviceOn', function (player) {
+  var browser = airplay.createBrowser()
+  var devices = browser.getDevices(true)
+  console.log('TODO GET DEVICES RET %o', devices)
+  browser.on('deviceOn', function (player) {
     state.devices.airplay = player
     addAirplayEvents()
   }).start()
@@ -47,27 +50,26 @@ function addChromecastEvents () {
     state.playing.location = 'local'
     update()
   })
-  state.devices.chromecast.on('status', handleStatus)
 }
 
 function addAirplayEvents () {}
 
 // Update our state from the remote TV
 function pollCastStatus (state) {
-  var device
-  if (state.playing.location === 'chromecast') device = state.devices.chromecast
-  else if (state.playing.location === 'airplay') device = state.devices.airplay
-  else return
-
-  device.status(function (err, status) {
-    if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
-    handleStatus(status)
-  })
-}
-
-function handleStatus (status) {
-  state.video.isCastPaused = status.playerState === 'PAUSED'
-  state.video.currentTime = status.currentTime
+  if (state.playing.location === 'chromecast') {
+    state.devices.chromecast.status(function (err, status) {
+      if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
+      state.video.isPaused = status.playerState === 'PAUSED'
+      state.video.currentTime = status.currentTime
+      update()
+    })
+  } else if (state.playing.location === 'airplay') {
+    state.devices.airplay.status(function (status) {
+      state.video.isPaused = status.rate === 0
+      state.video.currentTime = status.position
+      update()
+    })
+  }
 }
 
 function openChromecast () {
@@ -93,9 +95,16 @@ function openAirplay () {
   }
 
   state.playing.location = 'airplay-pending'
-  state.devices.airplay.play(state.server.networkURL, 0, function () {
-    console.log('Airplay', arguments) // TODO: handle airplay errors
-    state.playing.location = 'airplay'
+  state.devices.airplay.play(state.server.networkURL, 0, function (res) {
+    if (res.statusCode !== 200) {
+      state.playing.location = 'local'
+      state.errors.push({
+        time: new Date().getTime(),
+        message: 'Couldn\'t connect to Airplay'
+      })
+    } else {
+      state.playing.location = 'airplay'
+    }
     update()
   })
   update()
@@ -106,7 +115,7 @@ function stopCasting () {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.stop(stoppedCasting)
   } else if (state.playing.location === 'airplay') {
-    throw new Error('Unimplemented') // TODO stop airplay
+    state.devices.airplay.stop(stoppedCasting)
   } else if (state.playing.location.endsWith('-pending')) {
     // Connecting to Chromecast took too long or errored out. Let the user cancel
     stoppedCasting()
@@ -127,22 +136,26 @@ function isCasting () {
 }
 
 function playPause () {
-  var device = getActiveDevice()
-  if (!state.video.isPaused) device.pause(castCallback)
-  else device.play(null, null, castCallback)
+  var device
+  if (state.playing.location === 'chromecast') {
+    device = state.devices.chromecast
+    if (!state.video.isPaused) device.pause(castCallback)
+    else device.play(null, null, castCallback)
+  } else if (state.playing.location === 'airplay') {
+    device = state.devices.airplay
+    if (!state.video.isPaused) device.rate(0, castCallback)
+    else device.rate(1, castCallback)
+  }
 }
 
 function seek (time) {
-  var device = getActiveDevice()
-  device.seek(time, castCallback)
-}
-
-function getActiveDevice () {
-  if (state.playing.location === 'chromecast') return state.devices.chromecast
-  else if (state.playing.location === 'airplay') return state.devices.airplay
-  else throw new Error('getActiveDevice() called, but we\'re not casting')
+  if (state.playing.location === 'chromecast') {
+    state.devices.chromecast.seek(time, castCallback)
+  } else if (state.playing.location === 'airplay') {
+    state.devices.airplay.scrub(time, castCallback)
+  }
 }
 
 function castCallback () {
-  console.log('Cast callback: %o', arguments)
+  console.log(state.playing.location + ' callback: %o', arguments)
 }
