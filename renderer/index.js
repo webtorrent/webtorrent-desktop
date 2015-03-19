@@ -405,12 +405,14 @@ function addTorrentToList (torrent) {
 
 // Starts downloading and/or seeding a given torrent, torrentSummary or magnet URI
 function startTorrenting (infoHash) {
-  var torrent = state.client.add(infoHash, {
-    // Use downloads folder
-    path: state.saved.downloadPath
+  checkIfTorrentFileExists(infoHash, function (torrentPath, exists) {
+    var torrentID = exists ? torrentPath : infoHash
+    var torrent = state.client.add(torrentID, {
+      path: state.saved.downloadPath // Use downloads folder
+    })
+    addTorrentEvents(torrent)
+    return torrent
   })
-  addTorrentEvents(torrent)
-  return torrent
 }
 
 // Stops downloading and/or seeding. See startTorrenting
@@ -438,6 +440,8 @@ function addTorrentEvents (torrent) {
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+
+    saveTorrentFile(torrentSummary, torrent)
 
     if (!torrentSummary.posterURL) {
       generateTorrentPoster(torrent, torrentSummary)
@@ -475,6 +479,38 @@ function generateTorrentPoster (torrent, torrentSummary) {
   })
 }
 
+// Every time we resolve a magnet URI, save the torrent file so that we never
+// have to download it again. Never ask the DHT the same question twice.
+function saveTorrentFile (torrentSummary, torrent) {
+  checkIfTorrentFileExists(torrentSummary.infoHash, function (torrentPath, exists) {
+    if (exists) {
+      // We've already saved the file
+      torrentSummary.torrentPath = torrentPath
+      saveState()
+      return
+    }
+
+    // Otherwise, save the .torrent file, under the app config folder
+    fs.mkdir(config.CONFIG_TORRENT_PATH, function (_) {
+      fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
+        if (err) return console.log('Error saving torrent file %s: %o', torrentPath, err)
+        console.log('Saved torrent file %s', torrentPath)
+        torrentSummary.torrentPath = torrentPath
+        saveState()
+      })
+    })
+  })
+}
+
+// Checks whether we've already resolved a given infohash to a torrent file
+// Calls back with (torrentPath, exists). Logs, does not call back on error
+function checkIfTorrentFileExists (infoHash, cb) {
+  var torrentPath = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
+  fs.exists(torrentPath, function (exists) {
+    cb(torrentPath, exists)
+  })
+}
+
 function startServer (infoHash, index, cb) {
   if (state.server) return cb()
 
@@ -489,7 +525,7 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   if (!index) {
     // filter out file formats that the <video> tag definitely can't play
     var files = torrent.files.filter(TorrentPlayer.isPlayable)
-    if (files.length === 0) return cb(new Error('cannot play any files in torrent'))
+    if (files.length === 0) return cb(new Error('Can\'t play any files in torrent'))
     // use largest file
     var largestFile = files.reduce(function (a, b) {
       return a.length > b.length ? a : b
