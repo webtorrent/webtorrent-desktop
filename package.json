@@ -1,0 +1,44 @@
+{
+  "name": "webtorrent-app",
+  "description": "Streaming torrent client, for the desktop",
+  "version": "0.0.0",
+  "author": {
+    "name": "Feross Aboukhadijeh",
+    "email": "feross@feross.org",
+    "url": "http://feross.org"
+  },
+  "bugs": {
+    "url": "https://github.com/feross/webtorrent-app/issues"
+  },
+  "dependencies": {
+    "electron-debug": "^0.5.0"
+  },
+  "devDependencies": {
+    "electron-packager": "^5.0.0",
+    "electron-prebuilt": "^0.36.0",
+    "standard": "^5.4.1"
+  },
+  "electronVersion": "0.36.0",
+  "files": [
+    "index.js",
+    "index.html",
+    "index.css"
+  ],
+  "homepage": "https://webtorrent.io",
+  "keywords": [
+    "electron",
+    "electron-app"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "productName": "WebTorrent",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/feross/webtorrent-app.git"
+  },
+  "scripts": {
+    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion",
+    "start": "electron .",
+    "test": "standard"
+  }
+}
