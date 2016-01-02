@@ -2,7 +2,13 @@ var electron = require('electron')
 var app = electron.app
 
 // report crashes to the Electron project
-require('crash-reporter').start()
+require('crash-reporter').start({
+  // TODO: collect crash reports
+  // productName: 'WebTorrent',
+  // companyName: 'WebTorrent',
+  // submitURL: 'https://webtorrent.io/crash-report',
+  // autoSubmit: true
+})
 
 // adds debug features like hotkeys for triggering dev tools and reload
 require('electron-debug')()
