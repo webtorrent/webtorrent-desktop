@@ -11,7 +11,13 @@
     "url": "https://github.com/feross/webtorrent-app/issues"
   },
   "dependencies": {
-    "electron-debug": "^0.5.0"
+    "drag-drop": "^2.3.1",
+    "electron-debug": "^0.5.0",
+    "pretty-bytes": "^3.0.0",
+    "thunky": "^0.1.0",
+    "upload-element": "^1.0.1",
+    "webtorrent": "^0.68.0",
+    "xhr": "^2.2.0"
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
