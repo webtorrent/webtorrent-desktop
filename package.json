@@ -1,6 +1,6 @@
 {
   "name": "webtorrent-app",
-  "description": "Streaming torrent client, for the desktop",
+  "description": "WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.",
   "version": "0.0.0",
   "author": {
     "name": "Feross Aboukhadijeh",
