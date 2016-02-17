@@ -16,6 +16,7 @@
     "drag-drop": "^2.3.1",
     "electron-debug": "^0.5.0",
     "pretty-bytes": "^3.0.0",
+    "throttleit": "^1.0.0",
     "thunky": "^0.1.0",
     "upload-element": "^1.0.1",
     "webtorrent": "^0.68.0",

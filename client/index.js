@@ -4,6 +4,7 @@ var dragDrop = require('drag-drop')
 // var listify = require('listify')
 var path = require('path')
 var prettyBytes = require('pretty-bytes')
+var throttle = require('throttleit')
 var thunky = require('thunky')
 var uploadElement = require('upload-element')
 var WebTorrent = require('webtorrent')
@@ -50,7 +51,7 @@ dragDrop('body', onFiles)
 // Download via input element
 document.querySelector('form').addEventListener('submit', function (e) {
   e.preventDefault()
-  downloadTorrent(document.querySelector('form input[name=torrentId]').value)
+  downloadTorrent(document.querySelector('form input[name=torrentId]').value.trim())
 })
 
 // Download by URL hash
@@ -138,11 +139,16 @@ function onTorrent (torrent) {
 
   var torrentFileName = path.basename(torrent.name, path.extname(torrent.name)) + '.torrent'
 
+  util.log('"' + torrentFileName + '" contains ' + torrent.files.length + ' files:')
+  torrent.files.forEach(function (file) {
+    util.log('&nbsp;&nbsp;- ' + file.name + ' (' + prettyBytes(file.length) + ')')
+  })
+
   util.log(
     'Torrent info hash: ' + torrent.infoHash + ' ' +
     '<a href="/#' + torrent.infoHash + '" onclick="prompt(\'Share this link with anyone you want to download this torrent:\', this.href);return false;">[Share link]</a> ' +
     '<a href="' + torrent.magnetURI + '" target="_blank">[Magnet URI]</a> ' +
-    '<a href="' + torrent.torrentFileURL + '" target="_blank" download="' + torrentFileName + '">[Download .torrent]</a>'
+    '<a href="' + torrent.torrentFileBlobURL + '" target="_blank" download="' + torrentFileName + '">[Download .torrent]</a>'
   )
 
   function updateSpeed () {
@@ -150,13 +156,13 @@ function onTorrent (torrent) {
     util.updateSpeed(
       '<b>Peers:</b> ' + torrent.swarm.wires.length + ' ' +
       '<b>Progress:</b> ' + progress + '% ' +
-      '<b>Download speed:</b> ' + prettyBytes(window.client.downloadSpeed()) + '/s ' +
-      '<b>Upload speed:</b> ' + prettyBytes(window.client.uploadSpeed()) + '/s'
+      '<b>Download speed:</b> ' + prettyBytes(window.client.downloadSpeed) + '/s ' +
+      '<b>Upload speed:</b> ' + prettyBytes(window.client.uploadSpeed) + '/s'
     )
   }
 
-  torrent.swarm.on('download', updateSpeed)
-  torrent.swarm.on('upload', updateSpeed)
+  torrent.on('download', throttle(updateSpeed, 250))
+  torrent.on('upload', throttle(updateSpeed, 250))
   setInterval(updateSpeed, 5000)
   updateSpeed()
 
