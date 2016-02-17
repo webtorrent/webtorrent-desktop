@@ -19,7 +19,7 @@
     "throttleit": "^1.0.0",
     "thunky": "^0.1.0",
     "upload-element": "^1.0.1",
-    "webtorrent": "^0.68.0",
+    "webtorrent": "^0.76.0",
     "xhr": "^2.2.0"
   },
   "devDependencies": {
