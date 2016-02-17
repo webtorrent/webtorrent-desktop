@@ -1,4 +1,6 @@
 var electron = require('electron')
+var path = require('path')
+
 var app = electron.app
 
 // report crashes to the Electron project
@@ -28,7 +30,7 @@ function createMainWindow () {
     height: 400
   })
 
-  win.loadURL('file://' + __dirname + '/index.html')
+  win.loadURL('file://' + path.join(__dirname, 'index.html'))
   win.on('closed', onClosed)
 
   return win
