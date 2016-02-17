@@ -1,3 +1,5 @@
+/* global URL, Blob */
+
 var createTorrent = require('create-torrent')
 var debug = require('debug')('instant.io')
 var dragDrop = require('drag-drop')
@@ -9,6 +11,7 @@ var thunky = require('thunky')
 var uploadElement = require('upload-element')
 var WebTorrent = require('webtorrent')
 var xhr = require('xhr')
+var torrentPoster = require('./torrent-poster')
 
 var util = require('./util')
 
@@ -166,24 +169,32 @@ function onTorrent (torrent) {
   setInterval(updateSpeed, 5000)
   updateSpeed()
 
-  torrent.files.forEach(function (file) {
-    // append file
-    file.appendTo(util.logElem, function (err, elem) {
-      if (err) return util.error(err)
-    })
-
-    // append download link
-    file.getBlobURL(function (err, url) {
-      if (err) return util.error(err)
-
-      var a = document.createElement('a')
-      a.target = '_blank'
-      a.download = file.name
-      a.href = url
-      a.textContent = 'Download ' + file.name
-      util.log(a)
-    })
+  torrentPoster(torrent, function (err, buf) {
+    if (err) return util.error(err)
+    var img = document.createElement('img')
+    img.src = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
+    document.body.appendChild(img)
   })
+
+  // TODO: play torrent when user clicks button
+  // torrent.files.forEach(function (file) {
+  //   // append file
+  //   file.appendTo(util.logElem, function (err, elem) {
+  //     if (err) return util.error(err)
+  //   })
+
+  //   // append download link
+  //   file.getBlobURL(function (err, url) {
+  //     if (err) return util.error(err)
+
+  //     var a = document.createElement('a')
+  //     a.target = '_blank'
+  //     a.download = file.name
+  //     a.href = url
+  //     a.textContent = 'Download ' + file.name
+  //     util.log(a)
+  //   })
+  // })
 }
 
 // function onBeforeUnload (e) {
