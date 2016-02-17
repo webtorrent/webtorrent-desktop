@@ -1,12 +1,9 @@
 # WebTorrent.app
 
 [![Gitter][webtorrent-gitter-image]][webtorrent-gitter-url]
-[![Build Status][webtorrent-ti]][webtorrent-tu]
 
 [webtorrent-gitter-image]: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg
 [webtorrent-gitter-url]: https://gitter.im/feross/webtorrent
-[webtorrent-ti]: https://img.shields.io/travis/feross/webtorrent/master.svg
-[webtorrent-tu]: https://travis-ci.org/feross/webtorrent
 
 #### WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.
 
