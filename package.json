@@ -22,6 +22,7 @@
   "devDependencies": {
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "^0.36.0",
+    "pre-commit": "^1.1.2",
     "standard": "^5.4.1"
   },
   "electronVersion": "0.36.0",
