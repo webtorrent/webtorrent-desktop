@@ -13,18 +13,9 @@ var util = require('./util')
 global.WEBTORRENT_ANNOUNCE = [ 'wss://tracker.webtorrent.io', 'wss://tracker.btorrent.xyz' ]
 
 var getClient = thunky(function (cb) {
-  getRtcConfig('/rtcConfig', function (err, rtcConfig) {
-    if (err && window.location.hostname === 'instant.io') {
-      if (err) util.error(err)
-      createClient(rtcConfig)
-    } else if (err) {
-      getRtcConfig('https://instant.io/rtcConfig', function (err, rtcConfig) {
-        if (err) util.error(err)
-        createClient(rtcConfig)
-      })
-    } else {
-      createClient(rtcConfig)
-    }
+  getRtcConfig('https://instant.io/rtcConfig', function (err, rtcConfig) {
+    if (err) util.error(err)
+    createClient(rtcConfig)
   })
 
   function createClient (rtcConfig) {
