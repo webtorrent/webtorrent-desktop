@@ -1,30 +1,9 @@
-.clearfix:before,
-.clearfix:after {
-  content: '';
-  display: table
-}
-.clearfix:after {
-  clear: both
-}
-.drag-layer {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-body.drag .drag-layer {
-  display: block
-}
 *,
 *:after,
 *:before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box
+  box-sizing: border-box;
 }
+
 html,
 body {
   margin: 0;
@@ -32,70 +11,82 @@ body {
   height: 100%;
   overflow: auto;
   font-family: -apple-system, 'Helvetica Neue', Helvetica, sans-serif;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
 }
-body {
-    font-family: sans-serif;
+
+body.drag .drag-layer {
+  display: block
 }
+
 body.drag::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: rgba(255, 0, 0, 0.3);
-    border: 5px #f00 dashed;
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 0, 0, 0.3);
+  border: 5px #f00 dashed;
 }
+
 main {
   margin: 20px;
 }
+
 label {
   margin-right: 10px;
 }
+
 input,
 button {
   font-size: 16px;
 }
+
 input[name=torrentId] {
   width: 400px;
 }
+
 .log,
 .speed {
   font-family: monospace;
   font-size: 14px;
 }
+
 .speed:not(:empty) {
   padding: 20px;
   margin: 10px 0;
   background: #eee;
 }
+
 .log p {
   margin: 0;
 }
-footer {
-  font-size: .8em;
-  margin: 30px 0;
-}
+
 video,
 img,
 audio,
 iframe {
   display: block;
 }
+
 video,
 img,
 audio {
   max-width: 100%;
   margin: 10px 0;
 }
+
 video {
   min-width: 480px;
   min-height: 270px;
 }
+
 audio {
   width: 100%;
   height: 50px;
 }
+
 iframe {
   width: 1000px;
   max-width: 100%;
