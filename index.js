@@ -85,16 +85,15 @@ var template = [
     label: 'File',
     submenu: [
       {
-        label: 'Create Torrent File...',
+        label: 'Create New Torrent...',
         accelerator: 'CmdOrCtrl+N',
         click: function () {
           electron.dialog.showOpenDialog({
             title: 'Select a file or folder for the torrent file.',
-            properties: [ 'openFile', 'multiSelections' ]
+            properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
           }, function (filenames) {
-            filenames.forEach(function (filename) {
-              mainWindow.send('action', 'addTorrent', filename)
-            })
+            if (!Array.isArray(filenames)) return
+            mainWindow.send('action', 'seed', filenames)
           })
         }
       },

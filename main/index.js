@@ -69,6 +69,10 @@ function handler (action, ...args) {
     var torrentId = args[0]
     addTorrent(torrentId)
   }
+  if (action === 'seed') {
+    var files = args[0]
+    seed(files)
+  }
   if (action === 'openPlayer') {
     var torrent = args[0]
     openPlayer(torrent)
