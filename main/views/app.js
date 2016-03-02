@@ -3,10 +3,10 @@ module.exports = App
 var h = require('virtual-dom/h')
 
 function App (state, handler) {
-  if (state.player) {
+  if (state.player === 'local') {
     return h('.player', [
       h('video', {
-        src: state.player.url,
+        src: state.server.localURL,
         autoplay: true,
         controls: true
       }),
@@ -34,14 +34,38 @@ function App (state, handler) {
             })()
           ])
         ]),
-        h('a.play', {
+        h('a.btn.play', {
           className: !torrent.ready ? 'disabled' : '',
           onclick: openPlayer
-        }, '▶')
+        }, '▶'),
+        (function () {
+          if (state.chromecast) {
+            return h('a.btn.chromecast', {
+              className: !torrent.ready ? 'disabled' : '',
+              onclick: openChromecast
+            }, 'C')
+          }
+        })(),
+        (function () {
+          if (state.airplay) {
+            return h('a.btn.airplay', {
+              className: !torrent.ready ? 'disabled' : '',
+              onclick: openAirplay
+            }, 'A')
+          }
+        })()
       ])
 
       function openPlayer () {
         handler('openPlayer', torrent)
+      }
+
+      function openChromecast () {
+        handler('openChromecast', torrent)
+      }
+
+      function openAirplay () {
+        handler('openAirplay', torrent)
       }
     })
     return h('.app', [

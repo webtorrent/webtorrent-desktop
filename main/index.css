@@ -70,28 +70,43 @@ body.drag::before {
 
 .torrent .metadata {
   float: left;
-  width: calc(100% - 80px);
+  width: calc(100% - 240px);
   color: #FFF;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
-.torrent .play {
-  float: right;
-  margin-top: 25px;
-  background-color: #C62828;
+.btn {
   width: 50px;
   height: 50px;
   border-radius: 25px;
   color: #FFF;
   font-size: 24px;
-  padding-top: 14px;
-  padding-left: 3px;
-  text-align: center;
   transition: all 0.1s;
+  text-align: center;
 }
 
-.torrent .play:not(.disabled):hover {
+.btn:not(.disabled):hover {
   -webkit-filter: brightness(1.5);
+}
+
+.torrent .btn {
+  float: right;
+  margin-top: 25px;
+  padding-top: 14px;
+  margin-left: 20px;
+}
+
+.torrent .play {
+  background-color: #C62828;
+  padding-left: 3px;
+}
+
+.torrent .chromecast {
+  background-color: #64B5F6;
+}
+
+.torrent .airplay {
+  background-color: #607D8B;
 }
 
 .torrent .name {

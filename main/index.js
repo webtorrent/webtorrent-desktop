@@ -1,9 +1,12 @@
 /* global URL, Blob */
 
 // var prettyBytes = require('pretty-bytes')
+var airplay = require('airplay-js')
+var chromecasts = require('chromecasts')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
+var networkAddress = require('network-address')
 var path = require('path')
 var throttle = require('throttleit')
 var thunky = require('thunky')
@@ -26,7 +29,11 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var state = global.state = {
-  torrents: []
+  torrents: [],
+  server: null,
+  player: null,
+  chromcast: null,
+  airplay: null
 }
 
 var currentVDom, rootElement, getClient, updateThrottled
@@ -53,6 +60,15 @@ function init () {
   getClient(function () {})
 
   dragDrop('body', onFiles)
+
+  chromecasts().on('update', function (player) {
+    state.chromecasts = player
+    update()
+  })
+
+  airplay.createBrowser().on('deviceOn', function (player) {
+    state.airplay = player
+  }).start()
 }
 init()
 
@@ -66,19 +82,22 @@ function update () {
 function handler (action, ...args) {
   console.log('handler: %s %o', action, args)
   if (action === 'addTorrent') {
-    var torrentId = args[0]
-    addTorrent(torrentId)
+    addTorrent(args[0] /* torrentId */)
   }
   if (action === 'seed') {
-    var files = args[0]
-    seed(files)
+    seed(args[0] /* files */)
   }
   if (action === 'openPlayer') {
-    var torrent = args[0]
-    openPlayer(torrent)
+    openPlayer(args[0] /* torrent */)
   }
   if (action === 'closePlayer') {
     closePlayer()
+  }
+  if (action === 'openChromecast') {
+    openChromecast(args[0] /* torrent */)
+  }
+  if (action === 'openAirplay') {
+    openAirplay(args[0] /* torrent */)
   }
 }
 
@@ -161,7 +180,7 @@ function torrentReady (torrent) {
   update()
 }
 
-function openPlayer (torrent) {
+function startServer (torrent, cb) {
   // use largest file
   var index = torrent.files.indexOf(torrent.files.reduce(function (a, b) {
     return a.length > b.length ? a : b
@@ -170,18 +189,54 @@ function openPlayer (torrent) {
   var server = torrent.createServer()
   server.listen(0, function () {
     var port = server.address().port
-    state.player = {
+    var urlSuffix = ':' + port + '/' + index
+    state.server = {
       server: server,
-      url: 'http://localhost:' + port + '/' + index
+      localURL: 'http://localhost' + urlSuffix,
+      networkURL: 'http://' + networkAddress() + urlSuffix
     }
+    cb()
+  })
+}
+
+function closeServer () {
+  state.server.server.destroy()
+  state.server = null
+}
+
+function openPlayer (torrent) {
+  startServer(torrent, function () {
+    state.player = 'local'
     update()
   })
 }
 
 function closePlayer () {
-  state.player.server.destroy()
+  closeServer()
   state.player = null
   update()
+}
+
+function openChromecast (torrent) {
+  startServer(torrent, function () {
+    console.log(state.server.networkURL)
+    state.chromecast.play(state.server.networkURL, { title: torrent.name })
+    state.chromecast.on('error', function (err) {
+      err.message = 'Chromecast: ' + err.message
+      onError(err)
+    })
+    state.player = 'chromecast'
+    update()
+  })
+}
+
+function openAirplay (torrent) {
+  startServer(torrent, function () {
+    state.airplay.play(state.server.networkURL, 0, function () {})
+    // TODO: handle airplay errors
+    state.player = 'airplay'
+    update()
+  })
 }
 
 // function onTorrent (torrent) {
