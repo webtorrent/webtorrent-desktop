@@ -165,13 +165,6 @@ var template = [
     label: 'View',
     submenu: [
       {
-        label: 'Reload',
-        accelerator: 'CmdOrCtrl+R',
-        click: function (item, focusedWindow) {
-          if (focusedWindow) focusedWindow.reload()
-        }
-      },
-      {
         label: 'Toggle Full Screen',
         accelerator: (function () {
           if (process.platform === 'darwin') return 'Ctrl+Command+F'
@@ -179,6 +172,16 @@ var template = [
         })(),
         click: function (item, focusedWindow) {
           if (focusedWindow) focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: function (item, focusedWindow) {
+          reload(focusedWindow)
         }
       },
       {
