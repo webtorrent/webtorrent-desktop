@@ -101,11 +101,11 @@ var template = [
         label: 'Open Torrent File...',
         accelerator: 'CmdOrCtrl+O',
         click: function () {
-          electron.dialog.showOpenDialog({
+          electron.dialog.showOpenDialog(mainWindow, {
             title: 'Select a .torrent file to open.',
             properties: [ 'openFile', 'multiSelections' ]
           }, function (filenames) {
-            if (!Array.isArary(filenames)) return
+            if (!Array.isArray(filenames)) return
             filenames.forEach(function (filename) {
               mainWindow.send('action', 'addTorrent', filename)
             })
