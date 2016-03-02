@@ -77,7 +77,6 @@ function handler (action, ...args) {
     closePlayer()
   }
 }
-addTorrent()
 
 function onFiles (files) {
   // .torrent file = start downloading the torrent
@@ -149,19 +148,23 @@ function torrentReady (torrent) {
   torrentPoster(torrent, function (err, buf) {
     if (err) return onError(err)
     torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
-    console.log(torrent.posterURL)
     update()
   })
   update()
 }
 
 function openPlayer (torrent) {
+  // use largest file
+  var index = torrent.files.indexOf(torrent.files.reduce(function (a, b) {
+    return a.length > b.length ? a : b
+  }))
+
   var server = torrent.createServer()
   server.listen(0, function () {
     var port = server.address().port
     state.player = {
       server: server,
-      url: 'http://localhost:' + port + '/0'
+      url: 'http://localhost:' + port + '/' + index
     }
     update()
   })

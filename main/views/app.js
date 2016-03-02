@@ -10,7 +10,7 @@ function App (state, handler) {
         autoplay: true,
         controls: true
       }),
-      h('button.close', {
+      h('a.close', {
         onclick: closePlayer
       }, 'Close')
     ])
@@ -18,17 +18,22 @@ function App (state, handler) {
     var list = state.torrents.map(function (torrent) {
       var style = {}
       if (torrent.posterURL) {
-        style['background-image'] = 'url("' + torrent.posterURL + '")'
+        style['background-image'] = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)), url("' + torrent.posterURL + '")'
       }
       return h('.torrent', {
         style: style
       }, [
-        h('.name', torrent.name),
-        h('.progress', String(torrent.progress * 100) + '%'),
-        h('button.play', {
-          disabled: !torrent.ready,
+        h('.metadata', [
+          h('.name.ellipsis', torrent.name || 'Loading torrent...'),
+          h('.status', [
+            h('span.progress', Math.floor(100 * torrent.progress) + '%'),
+            (torrent.ready && torrent.files.length > 1) ? h('span.files', torrent.files.length + ' files') : ''
+          ])
+        ]),
+        h('a.play', {
+          className: !torrent.ready ? 'disabled' : '',
           onclick: openPlayer
-        }, 'Play')
+        }, '▶')
       ])
 
       function openPlayer () {

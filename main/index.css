@@ -12,11 +12,13 @@ body {
   overflow: auto;
   font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   -webkit-user-select: none;
-  -webkit-app-region: drag;
+  background: #333;
+  font-size: 16px;
+  line-height: 1.5em;
 }
 
-body.drag .drag-layer {
-  display: block
+a {
+  cursor: default;
 }
 
 body.drag::before {
@@ -30,6 +32,20 @@ body.drag::before {
   border: 5px #f00 dashed;
 }
 
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.player {
+  height: 100%;
+}
+
 .player video {
   display: block;
   width: 100%;
@@ -37,4 +53,57 @@ body.drag::before {
 
 .torrent {
   height: 150px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 50%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.1s;
+}
+
+.torrent:hover {
+  -webkit-filter: brightness(1.2);
+}
+
+.torrent .metadata {
+  float: left;
+  width: calc(100% - 80px);
+  color: #FFF;
+  text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
+}
+
+.torrent .play {
+  float: right;
+  margin-top: 25px;
+  background-color: #C62828;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  color: #FFF;
+  font-size: 24px;
+  padding-top: 14px;
+  padding-left: 3px;
+  text-align: center;
+  transition: all 0.1s;
+}
+
+.torrent .play:not(.disabled):hover {
+  -webkit-filter: brightness(1.5);
+}
+
+.torrent .name {
+  font-size: 1.6em;
+  font-weight: bold;
+  line-height: 1.5em;
+}
+
+.torrent .status {
+  opacity: 0.8;
+  font-size: 1em;
+  line-height: 1.5em;
+}
+
+.torrent .status :not(:last-child)::after {
+  content: ' — ';
 }
