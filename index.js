@@ -197,12 +197,6 @@ var template = [
         label: 'Minimize',
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize'
-      },
-      {
-        label: 'Zoom',
-        click: function () {
-          window.alert('TODO -- Darwin only')
-        }
       }
     ]
   },
