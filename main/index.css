@@ -1,3 +1,7 @@
+/*
+ * BASIC STYLES
+ */
+
 *,
 *:after,
 *:before {
@@ -6,21 +10,90 @@
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: auto;
-  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
-  -webkit-user-select: none;
   background: rgb(40, 40, 40);
+  cursor: default;
+  height: 100%;
+  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 16px;
   line-height: 1.5em;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  -webkit-user-select: none;
   -webkit-app-region: drag;
 }
+
+/*
+ * UTILITY CLASSES
+ */
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disabled {
+  opacity: 0.3;
+}
+
+/*
+ * BUTTONS
+ */
 
 a {
   cursor: default;
   -webkit-app-region: no-drag;
+}
+
+a:not(.disabled):hover {
+  -webkit-filter: brightness(1.5);
+}
+
+.btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  color: #FFF;
+  font-size: 24px;
+  transition: all 0.1s;
+  text-align: center;
+}
+
+
+/*
+ * WINDOW
+ */
+
+.header {
+  height: 37px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.header .nav {
+  color: #FFF;
+  font-size: 17px;
+  font-weight: bold;
+  margin-left: 82px;
+  margin-top: 6px;
+}
+
+.header .nav * {
+  float: left;
+  opacity: 0.6;
+}
+
+.header .nav .disabled {
+  opacity: 0.2;
+}
+
+.header .nav *:not(.disabled):hover {
+  opacity: 1;
+}
+
+.header .nav .back {
+  padding-right: 8px;
 }
 
 body.drag::before {
@@ -34,15 +107,9 @@ body.drag::before {
   border: 5px #f00 dashed;
 }
 
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.disabled {
-  opacity: 0.5;
-}
+/*
+ * PLAYER
+ */
 
 .player {
   height: 100%;
@@ -53,6 +120,10 @@ body.drag::before {
   width: 100%;
 }
 
+/*
+ * TORRENT LIST
+ */
+
 .torrent {
   height: 150px;
   padding: 20px;
@@ -60,8 +131,9 @@ body.drag::before {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   transition: all 0.1s;
+  position: relative;
 }
 
 .torrent:hover {
@@ -73,20 +145,6 @@ body.drag::before {
   width: calc(100% - 240px);
   color: #FFF;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
-}
-
-.btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
-  color: #FFF;
-  font-size: 24px;
-  transition: all 0.1s;
-  text-align: center;
-}
-
-.btn:not(.disabled):hover {
-  -webkit-filter: brightness(1.5);
 }
 
 .torrent .btn {
@@ -116,9 +174,10 @@ body.drag::before {
 }
 
 .torrent .status {
-  opacity: 0.8;
   font-size: 1em;
   line-height: 1.5em;
+  position: absolute;
+  bottom: 20px;
 }
 
 .torrent .status :not(:last-child)::after {
