@@ -150,6 +150,8 @@ var template = [
         click: function () {
           var torrentIds = electron.clipboard.readText().split('\n')
           torrentIds.forEach(function (torrentId) {
+            torrentId = torrentId.trim()
+            if (torrentId.length === 0) return
             mainWindow.send('action', 'addTorrent', torrentId)
           })
         }
