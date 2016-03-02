@@ -15,10 +15,12 @@ body {
   background: #333;
   font-size: 16px;
   line-height: 1.5em;
+  -webkit-app-region: drag;
 }
 
 a {
   cursor: default;
+  -webkit-app-region: no-drag;
 }
 
 body.drag::before {
