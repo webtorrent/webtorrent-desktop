@@ -56,7 +56,6 @@ function init () {
 init()
 
 function update () {
-  console.log('update')
   var newVDom = App(state, handler)
   var patches = diff(currentVDom, newVDom)
   rootElement = patch(rootElement, patches)
@@ -195,6 +194,7 @@ function closePlayer () {
 function onError (err) {
   console.error(err.stack)
   window.alert(err.message || err)
+  update()
 }
 
 function onWarning (err) {
