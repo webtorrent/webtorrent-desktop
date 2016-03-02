@@ -12,7 +12,7 @@ body {
   overflow: auto;
   font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   -webkit-user-select: none;
-  background: #333;
+  background: rgb(40, 40, 40);
   font-size: 16px;
   line-height: 1.5em;
   -webkit-app-region: drag;
