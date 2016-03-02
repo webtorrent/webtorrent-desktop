@@ -27,7 +27,11 @@ function App (state, handler) {
           h('.name.ellipsis', torrent.name || 'Loading torrent...'),
           h('.status', [
             h('span.progress', Math.floor(100 * torrent.progress) + '%'),
-            (torrent.ready && torrent.files.length > 1) ? h('span.files', torrent.files.length + ' files') : ''
+            (function () {
+              if (torrent.ready && torrent.files.length > 1) {
+                return h('span.files', torrent.files.length + ' files')
+              }
+            })()
           ])
         ]),
         h('a.play', {
