@@ -1,12 +1,13 @@
 /* global URL, Blob */
 
 // var prettyBytes = require('pretty-bytes')
-var torrentPoster = require('./lib/torrent-poster')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
+var electron = require('electron')
 var path = require('path')
 var throttle = require('throttleit')
 var thunky = require('thunky')
+var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 var xhr = require('xhr')
 
@@ -76,6 +77,10 @@ function handler (action, ...args) {
     closePlayer()
   }
 }
+
+electron.ipcRenderer.on('action', function (e, action, ...args) {
+  handler(action, ...args)
+})
 
 function onFiles (files) {
   // .torrent file = start downloading the torrent
