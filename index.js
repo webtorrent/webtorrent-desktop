@@ -205,19 +205,19 @@ var template = [
     role: 'help',
     submenu: [
       {
-        label: 'Report an Issue',
-        click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues') }
+        label: 'Learn more about WebTorrent',
+        click: function () { electron.shell.openExternal('https://webtorrent.io') }
       },
       {
-        label: 'Go to GitHub project',
+        label: 'Contribute on GitHub',
         click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app') }
       },
       {
         type: 'separator'
       },
       {
-        label: 'Learn more about WebTorrent',
-        click: function () { electron.shell.openExternal('https://webtorrent.io') }
+        label: 'Report an Issue...',
+        click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues') }
       }
     ]
   }
