@@ -54,15 +54,18 @@ app.on('before-quit', function () {
 
 function createMainWindow () {
   var win = new electron.BrowserWindow({
-    width: 600,
+    backgroundColor: '#282828',
     height: 400,
+    show: false,
     title: 'WebTorrent',
     titleBarStyle: 'hidden-inset',
-    show: false
+    width: 600
   })
   win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
   win.webContents.on('did-finish-load', function () {
-    win.show()
+    setTimeout(function () {
+      win.show()
+    }, 30)
   })
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
