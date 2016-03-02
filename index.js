@@ -55,6 +55,7 @@ app.on('before-quit', function () {
 function createMainWindow () {
   var win = new electron.BrowserWindow({
     backgroundColor: '#282828',
+    darkTheme: true,
     height: 400,
     show: false,
     title: 'WebTorrent',
