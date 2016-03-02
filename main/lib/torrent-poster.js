@@ -1,8 +1,8 @@
-module.exports = torrentScreenshot
+module.exports = torrentPoster
 
 var captureVideoFrame = require('./capture-video-frame')
 
-function torrentScreenshot (torrent, cb) {
+function torrentPoster (torrent, cb) {
   if (torrent.ready) onReady()
   else torrent.once('ready', onReady)
 
@@ -14,7 +14,7 @@ function torrentScreenshot (torrent, cb) {
     var video = document.createElement('video')
     file.renderTo(video)
 
-    video.currentTime = 5
+    video.currentTime = 10
     video.addEventListener('seeked', onSeeked)
 
     function onSeeked (e) {

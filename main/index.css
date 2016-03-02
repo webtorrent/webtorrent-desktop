@@ -1,0 +1,40 @@
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto;
+  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+
+body.drag .drag-layer {
+  display: block
+}
+
+body.drag::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 0, 0, 0.3);
+  border: 5px #f00 dashed;
+}
+
+.player video {
+  display: block;
+  width: 100%;
+}
+
+.torrent {
+  height: 150px;
+}

@@ -19,24 +19,31 @@ var ipc = electron.ipcMain
 require('electron-debug')()
 
 // prevent windows from being garbage collected
-var mainWindow, backgroundWindow // eslint-disable-line no-unused-vars
+var mainWindow // eslint-disable-line no-unused-vars
 
 app.on('ready', function () {
   mainWindow = createMainWindow()
-  backgroundWindow = createBackgroundWindow()
 })
 
 app.on('activate', function () {
-  if (!mainWindow) mainWindow = createMainWindow()
+  if (mainWindow) {
+    mainWindow.show()
+  } else {
+    mainWindow = createMainWindow()
+  }
 })
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
 
+var isQuitting = false
+app.on('before-quit', function () {
+  isQuitting = true
+})
+
 ipc.on('action', function (event, action, ...args) {
   debug('action %s', action)
-  backgroundWindow.webContents.send('action', action, ...args)
 })
 
 function createMainWindow () {
@@ -47,24 +54,18 @@ function createMainWindow () {
     // titleBarStyle: 'hidden',
     show: false
   })
-  win.loadURL('file://' + path.join(__dirname, 'main.html'))
+  win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
   win.webContents.on('did-finish-load', function () {
     win.show()
   })
+  win.on('close', function (e) {
+    if (process.platform === 'darwin' && !isQuitting) {
+      e.preventDefault()
+      win.hide()
+    }
+  })
   win.once('closed', function () {
     mainWindow = null
-  })
-  return win
-}
-
-function createBackgroundWindow () {
-  var opts = debug.enabled
-    ? { width: 600, height: 400, x: 0, y: 0 }
-    : { width: 0, height: 0, show: false }
-  var win = new electron.BrowserWindow(opts)
-  win.loadURL('file://' + path.join(__dirname, 'background.html'))
-  win.once('closed', function () {
-    backgroundWindow = null
   })
   return win
 }
