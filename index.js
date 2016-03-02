@@ -1,3 +1,5 @@
+var startTime = Date.now()
+
 require('debug/browser')
 
 var debug = require('debug')('index')
@@ -21,9 +23,6 @@ function onOpen (e, torrentId) {
 //   submitURL: 'https://webtorrent.io/crash-report',
 //   autoSubmit: true
 // })
-
-// adds debug features like hotkeys for triggering dev tools and reload
-require('electron-debug')()
 
 // prevent windows from being garbage collected
 var mainWindow // eslint-disable-line no-unused-vars
@@ -65,8 +64,9 @@ function createMainWindow () {
   win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
   win.webContents.on('did-finish-load', function () {
     setTimeout(function () {
+      debug('startup time: %sms', Date.now() - startTime)
       win.show()
-    }, 30)
+    }, 50)
   })
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
@@ -188,7 +188,7 @@ var template = [
           else return 'Ctrl+Shift+I'
         })(),
         click: function (item, focusedWindow) {
-          if (focusedWindow) focusedWindow.toggleDevTools()
+          devTools(focusedWindow)
         }
       }
     ]
@@ -282,6 +282,23 @@ if (process.platform === 'darwin') {
       role: 'front'
     }
   )
+}
+
+function devTools (win) {
+  win = win || electron.BrowserWindow.getFocusedWindow()
+
+  if (win) {
+    win.toggleDevTools()
+  }
+}
+
+function reload (win) {
+  win = win || electron.BrowserWindow.getFocusedWindow()
+
+  if (win) {
+    startTime = Date.now()
+    win.webContents.reloadIgnoringCache()
+  }
 }
 
 // var progress = 0
