@@ -29,7 +29,8 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var state = global.state = {
-  server: null,
+  server: null, /* local WebTorrent-to-HTTP server */
+  player: null, /* 'local', 'airplay', or 'chromecast'. persists across videos */
   view: {
     url: '/',
     dock: {
@@ -37,15 +38,18 @@ var state = global.state = {
       progress: 0
     },
     devices: {
-      airplay: null,
-      chromecast: null
+      airplay: null, /* airplay client. finds and manages AppleTVs */
+      chromecast: null /* chromecast client. finds and manages Chromecasts */
     },
-    client: null, // TODO: remove this
-    // history: [],
+    client: null, /* the WebTorrent client */
+    // history: [], /* track how we got to the current view. enables Back button */
     // historyIndex: 0,
     isFocused: true,
-    mainWindowBounds: null,
-    title: 'WebTorrent'
+    mainWindowBounds: null, /* x y width height */
+    title: 'WebTorrent' /* current window title */
+  },
+  video: {
+    isPaused: false
   }
 }
 
@@ -129,6 +133,9 @@ function dispatch (action, ...args) {
   if (action === 'openPlayer') {
     openPlayer(args[0] /* torrent */)
   }
+  if (action === 'deleteTorrent') {
+    deleteTorrent(args[0] /* torrent */)
+  }
   if (action === 'openChromecast') {
     openChromecast(args[0] /* torrent */)
   }
@@ -144,6 +151,10 @@ function dispatch (action, ...args) {
       closeServer()
     }
     state.view.url = '/'
+    update()
+  }
+  if (action === 'playPause') {
+    state.video.isPaused = !state.video.isPaused
     update()
   }
 }
@@ -239,6 +250,16 @@ function closeServer () {
 function openPlayer (torrent) {
   startServer(torrent, function () {
     state.view.url = '/player'
+    update()
+  })
+}
+
+function deleteTorrent (torrent) {
+  console.log('Deleting %o', torrent)
+  torrent.isDeleting = true
+  update()
+  state.view.client.remove(torrent.infoHash, function () {
+    console.log('Deleted torrent ' + torrent.infoHash)
     update()
   })
 }

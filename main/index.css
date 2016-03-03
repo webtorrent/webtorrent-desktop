@@ -214,7 +214,7 @@ body.drag::before {
   width: calc(100% - 170px);
 }
 
-.torrent .btn {
+.torrent .btn, .torrent .delete {
   float: right;
   margin-top: 20px;
   margin-left: 15px;
@@ -222,7 +222,12 @@ body.drag::before {
   display: none;
 }
 
-.torrent:hover .btn {
+.torrent .delete {
+  opacity: 0.5;
+  color: #bbb;
+}
+
+.torrent:hover .btn, .torrent:hover .delete {
   display: block;
 }
 
@@ -253,4 +258,51 @@ body.drag::before {
 
 .torrent .status :not(:last-child)::after {
   content: ' — ';
+}
+
+
+/*
+ * VIDEO CONTROLS
+ */
+.player-controls .bottom-bar {
+  position: fixed;
+  width: 100%;
+  height: 38px;
+  bottom: 0;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.player:hover .bottom-bar {
+ opacity: 1;
+}
+
+.player-controls .loading-bar {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.player-controls .loading-bar-part {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: rgba(100, 0, 0, 0.8);
+}
+
+.player-controls .playback-cursor {
+  position: absolute;
+  top: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  border: 3px solid #bbbbbb;
+}
+
+.player-controls .play-pause {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 5px auto;
 }
