@@ -2,7 +2,7 @@
 
 // var prettyBytes = require('pretty-bytes')
 var airplay = require('airplay-js')
-var chromecasts = require('chromecasts')
+var chromecasts = require('chromecasts')()
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -62,8 +62,8 @@ function init () {
 
   dragDrop('body', onFiles)
 
-  chromecasts().on('update', function (player) {
-    state.chromecasts = player
+  chromecasts.on('update', function (player) {
+    state.chromecast = player
     update()
   })
 
