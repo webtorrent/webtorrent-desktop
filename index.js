@@ -206,6 +206,13 @@ var template = [
         label: 'Minimize',
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Bring All to Front',
+        role: 'front'
       }
     ]
   },
