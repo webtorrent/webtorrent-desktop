@@ -142,8 +142,8 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 }
 
 .header .nav .back, .header .nav .forward {
-  font-size: 32px;
-  margin-top: -4px;
+  font-size: 30px;
+  margin-top: -3px;
 }
 
 /*
