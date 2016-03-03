@@ -55,12 +55,12 @@ function createMainWindow () {
   var win = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true,
-    height: 400,
+    minWidth: 360,
     show: false,
     title: 'WebTorrent',
     titleBarStyle: 'hidden-inset',
-    width: 600,
-    minWidth: 360
+    width: 500,
+    height: 300
   })
   win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
   win.webContents.on('did-finish-load', function () {
