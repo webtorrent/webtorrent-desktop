@@ -5,15 +5,19 @@ var h = require('virtual-dom/h')
 function Header (state, dispatch) {
   return h('.header', [
     h('.title', state.title),
-    h('.nav.left-nav', [
-      h('a.back.icon-left-open.disabled'),
-      h('a.forward.icon-right-open')
+    h('.nav.left', [
+      h('i.icon.back.disabled', 'chevron_left'),
+      h('i.icon.forward', 'chevron_right')
     ]),
-    h('.nav.right-nav', [
-      h('a.add.icon-plus', {
-        onclick: onAddTorrent
-      })
-    ])
+    (function () {
+      if (state.player !== 'local') {
+        return h('.nav.right', [
+          h('i.icon.add', {
+            onclick: onAddTorrent
+          }, 'add')
+        ])
+      }
+    })()
   ])
 
   function onAddTorrent (e) {

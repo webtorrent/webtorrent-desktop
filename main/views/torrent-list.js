@@ -6,7 +6,7 @@ function TorrentList (state, dispatch) {
   var list = state.torrents.map(function (torrent) {
     var style = {}
     if (torrent.posterURL) {
-      style['background-image'] = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)), url("' + torrent.posterURL + '")'
+      style['background-image'] = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%), url("' + torrent.posterURL + '")'
     }
     return h('.torrent', {
       style: style
@@ -22,24 +22,24 @@ function TorrentList (state, dispatch) {
           })()
         ])
       ]),
-      h('a.btn.play', {
+      h('i.btn.icon.play', {
         className: !torrent.ready ? 'disabled' : '',
         onclick: openPlayer
-      }, '▶'),
+      }, 'play_arrow'),
       (function () {
         if (state.chromecast) {
-          return h('a.btn.chromecast', {
+          return h('i.btn.icon.chromecast', {
             className: !torrent.ready ? 'disabled' : '',
             onclick: openChromecast
-          }, 'C')
+          }, 'cast')
         }
       })(),
       (function () {
         if (state.airplay) {
-          return h('a.btn.airplay', {
+          return h('i.btn.icon.airplay', {
             className: !torrent.ready ? 'disabled' : '',
             onclick: openAirplay
-          }, 'A')
+          }, 'airplay')
         }
       })()
     ])
