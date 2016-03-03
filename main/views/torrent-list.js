@@ -1,9 +1,14 @@
 module.exports = TorrentList
 
 var h = require('virtual-dom/h')
+var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
-  var list = state.torrents.map(function (torrent) {
+  var torrents = state.view.client
+    ? state.view.client.torrents
+    : []
+
+  var list = torrents.map(function (torrent) {
     var style = {}
     if (torrent.posterURL) {
       style['background-image'] = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%), url("' + torrent.posterURL + '")'
@@ -19,7 +24,10 @@ function TorrentList (state, dispatch) {
             if (torrent.ready && torrent.files.length > 1) {
               return h('span.files', torrent.files.length + ' files')
             }
-          })()
+          })(),
+          h('span', torrent.numPeers + ' ' + (torrent.numPeers === 1 ? 'peer' : 'peers')),
+          h('span', prettyBytes(torrent.downloadSpeed) + '/s'),
+          h('span', prettyBytes(torrent.uploadSpeed) + '/s')
         ])
       ]),
       h('i.btn.icon.play', {

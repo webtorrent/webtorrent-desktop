@@ -1,6 +1,5 @@
 /* global URL, Blob */
 
-// var prettyBytes = require('pretty-bytes')
 var airplay = require('airplay-js')
 var chromecasts = require('chromecasts')()
 var dragDrop = require('drag-drop')
@@ -20,7 +19,6 @@ var HEADER_HEIGHT = 38
 var App = require('./views/app')
 
 var state = global.state = {
-  torrents: [],
   server: null,
   player: null,
   currentPage: {
@@ -28,6 +26,7 @@ var state = global.state = {
   },
   view: {
     title: 'WebTorrent',
+    client: null,
     savedWindowBounds: null,
     history: [],
     historyIndex: 0,
@@ -48,7 +47,7 @@ function init () {
   getClient(function (err, client) {
     if (err) return onError(err)
     global.client = client
-    state.torrents = client.torrents // internal webtorrent array -- do not modify!
+    state.view.client = client
     client.on('warning', onWarning)
     client.on('error', onError)
   })
@@ -76,6 +75,10 @@ function update () {
   rootElement = patch(rootElement, patches)
   currentVDom = newVDom
 }
+
+setInterval(function () {
+  update()
+}, 5000)
 
 function dispatch (action, ...args) {
   console.log('dispatch: %s %o', action, args)
@@ -257,21 +260,6 @@ function restoreBounds () {
   electron.ipcRenderer.send('setBounds', state.view.savedWindowBounds, true)
 }
 
-// function onTorrent (torrent) {
-  // function updateSpeed () {
-  //   var progress = (100 * torrent.progress).toFixed(1)
-  //   util.updateSpeed(
-  //     '<b>Peers:</b> ' + torrent.swarm.wires.length + ' ' +
-  //     '<b>Progress:</b> ' + progress + '% ' +
-  //     '<b>Download speed:</b> ' + prettyBytes(window.client.downloadSpeed) + '/s ' +
-  //     '<b>Upload speed:</b> ' + prettyBytes(window.client.uploadSpeed) + '/s'
-  //   )
-  // }
-
-  // setInterval(updateSpeed, 5000)
-  // updateSpeed()
-// }
-
 function onError (err) {
   console.error(err.stack)
   window.alert(err.message || err)
@@ -281,18 +269,3 @@ function onError (err) {
 function onWarning (err) {
   console.log('warning: %s', err.message)
 }
-
-// Seed via upload input element
-// var uploadElement = require('upload-element')
-// var upload = document.querySelector('input[name=upload]')
-// uploadElement(upload, function (err, files) {
-//   if (err) return onError(err)
-//   files = files.map(function (file) { return file.file })
-//   onFiles(files)
-// })
-
-// Download via input element
-// document.querySelector('form').addEventListener('submit', function (e) {
-//   e.preventDefault()
-//   addTorrent(document.querySelector('form input[name=torrentId]').value.trim())
-// })
