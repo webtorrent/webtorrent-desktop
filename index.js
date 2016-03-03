@@ -84,7 +84,6 @@ function createMainWindow () {
 
 function addTorrentFromPaste () {
   var torrentIds = electron.clipboard.readText().split('\n')
-  console.log(torrentIds)
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
