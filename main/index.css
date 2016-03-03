@@ -162,9 +162,12 @@ body.drag::before {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  border-bottom: 1px solid rgb(20, 20, 20);
   transition: all 0.05s ease-out;
   position: relative;
+}
+
+.torrent:not(:last-child) {
+  border-bottom: 1px solid rgb(20, 20, 20);
 }
 
 .torrent:hover {
