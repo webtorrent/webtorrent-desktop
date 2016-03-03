@@ -75,12 +75,20 @@ a:not(.disabled):hover {
   color: #FFF;
   font-size: 17px;
   font-weight: bold;
-  margin-left: 82px;
+  margin-left: 80px;
+  margin-right: 7px;
   margin-top: 6px;
 }
 
-.header .nav * {
+.header .left-nav {
   float: left;
+}
+
+.header .right-nav {
+  float: right;
+}
+
+.header .nav * {
   opacity: 0.6;
 }
 

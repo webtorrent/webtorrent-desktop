@@ -70,9 +70,12 @@ function App (state, handler) {
     })
     return h('.app', [
       h('.header', [
-        h('.nav', [
+        h('.nav.left-nav', [
           h('a.back.icon-left-open.disabled'),
           h('a.forward.icon-right-open')
+        ]),
+        h('.nav.right-nav', [
+          h('a.add.icon-plus')
         ])
       ]),
       h('.torrent-list', list),
