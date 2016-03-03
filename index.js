@@ -149,7 +149,7 @@ var template = [
       {
         label: 'Open Torrent Address...',
         accelerator: 'CmdOrCtrl+U',
-        click: function () { window.alert('TODO') }
+        click: function () { electron.dialog.showMessageBox({ message: 'TODO', buttons: ['OK'] }) }
       },
       {
         type: 'separator'
