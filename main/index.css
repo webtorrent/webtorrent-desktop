@@ -216,6 +216,11 @@ body.drag::before {
   margin-top: 20px;
   margin-left: 15px;
   padding-top: 10px;
+  display: none;
+}
+
+.torrent:hover .btn {
+  display: block;
 }
 
 .torrent .play {
