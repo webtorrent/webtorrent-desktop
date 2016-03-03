@@ -86,20 +86,23 @@ function update () {
   updateDockIcon()
 }
 
+setInterval(function () {
+  updateThrottled()
+}, 1000)
+
 function updateDockIcon () {
   if (state.view.client) {
     var progress = state.view.client.progress
+    var activeTorrentsExist = state.view.client.torrents.some(function (torrent) {
+      return torrent.progress !== 1
+    })
     // Hide progress bar when client has no torrents, or progress is 100%
-    if (state.view.client.torrents.length === 0 || progress === 1) {
+    if (!activeTorrentsExist || progress === 1) {
       progress = -1
     }
     electron.ipcRenderer.send('setProgress', progress)
   }
 }
-
-setInterval(function () {
-  updateThrottled()
-}, 1000)
 
 function dispatch (action, ...args) {
   console.log('dispatch: %s %o', action, args)
