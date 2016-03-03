@@ -11,6 +11,7 @@
 html,
 body {
   background: rgb(40, 40, 40);
+  color: #FFF;
   cursor: default;
   height: 100%;
   font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
@@ -18,9 +19,14 @@ body {
   line-height: 1.5em;
   margin: 0;
   padding: 0;
-  overflow: auto;
   -webkit-user-select: none;
   -webkit-app-region: drag;
+  width: 100%;
+  overflow: hidden;
+}
+
+.app {
+  height: 100%;
 }
 
 /*
@@ -51,33 +57,39 @@ a:not(.disabled):hover {
 }
 
 .btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
-  color: #FFF;
-  font-size: 24px;
-  transition: all 0.1s;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 22px;
+  transition: all 0.05s ease-out;
   text-align: center;
 }
 
 
 /*
- * WINDOW
+ * HEADER
  */
 
 .header {
+  border-bottom: 1px solid rgb(20, 20, 20);
   height: 37px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  padding-top: 6px;
   overflow: hidden;
 }
 
+.header .title {
+  font-size: 14px;
+  opacity: 0.6;
+  position: absolute;
+  width: 100%;
+  text-align: center;
+}
+
 .header .nav {
-  color: #FFF;
   font-size: 17px;
   font-weight: bold;
   margin-left: 80px;
   margin-right: 7px;
-  margin-top: 6px;
 }
 
 .header .left-nav {
@@ -102,6 +114,17 @@ a:not(.disabled):hover {
 
 .header .nav .back {
   padding-right: 8px;
+}
+
+/*
+ * CONTENT
+ */
+
+.content {
+  width: 100%;
+  height: calc(100% - 38px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.drag::before {
@@ -133,33 +156,32 @@ body.drag::before {
  */
 
 .torrent {
-  height: 150px;
+  height: 130px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
-  transition: all 0.1s;
+  border-bottom: 1px solid rgb(20, 20, 20);
+  transition: all 0.05s ease-out;
   position: relative;
 }
 
 .torrent:hover {
-  -webkit-filter: brightness(1.2);
+  -webkit-filter: brightness(1.1);
 }
 
 .torrent .metadata {
   float: left;
   width: calc(100% - 240px);
-  color: #FFF;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
 .torrent .btn {
   float: right;
-  margin-top: 25px;
-  padding-top: 14px;
+  margin-top: 21px;
   margin-left: 20px;
+  padding-top: 9px;
 }
 
 .torrent .play {

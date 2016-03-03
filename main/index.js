@@ -29,6 +29,7 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var state = global.state = {
+  title: 'WebTorrent',
   torrents: [],
   server: null,
   player: null,
@@ -39,7 +40,7 @@ var state = global.state = {
 var currentVDom, rootElement, getClient, updateThrottled
 
 function init () {
-  currentVDom = App(state, handler)
+  currentVDom = App(state, dispatch)
   rootElement = createElement(currentVDom)
   document.body.appendChild(rootElement)
 
@@ -73,20 +74,18 @@ function init () {
   document.addEventListener('paste', function () {
     electron.ipcRenderer.send('action', 'addTorrentFromPaste')
   })
-
-  handler('addTorrent', 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4')
 }
 init()
 
 function update () {
-  var newVDom = App(state, handler)
+  var newVDom = App(state, dispatch)
   var patches = diff(currentVDom, newVDom)
   rootElement = patch(rootElement, patches)
   currentVDom = newVDom
 }
 
-function handler (action, ...args) {
-  console.log('handler: %s %o', action, args)
+function dispatch (action, ...args) {
+  console.log('dispatch: %s %o', action, args)
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrentId */)
   }
@@ -108,15 +107,17 @@ function handler (action, ...args) {
 }
 
 electron.ipcRenderer.on('action', function (e, action, ...args) {
-  handler(action, ...args)
+  dispatch(action, ...args)
 })
 
 function onFiles (files) {
   // .torrent file = start downloading the torrent
-  files.filter(isTorrentFile).forEach(addTorrent)
+  files.filter(isTorrentFile).forEach(function (torrentFile) {
+    dispatch('addTorrent', torrentFile)
+  })
 
   // everything else = seed these files
-  seed(files.filter(isNotTorrentFile))
+  dispatch('seed', files.filter(isNotTorrentFile))
 }
 
 function isTorrentFile (file) {
@@ -146,7 +147,6 @@ function getRtcConfig (url, cb) {
 }
 
 function addTorrent (torrentId) {
-  console.log('Downloading torrent from %s', torrentId)
   getClient(function (err, client) {
     if (err) return onError(err)
     var torrent = client.add(torrentId)
@@ -156,7 +156,6 @@ function addTorrent (torrentId) {
 
 function seed (files) {
   if (files.length === 0) return
-  console.log('Seeding ' + files.length + ' files')
 
   // Seed from WebTorrent
   getClient(function (err, client) {
