@@ -69,6 +69,12 @@ function init () {
   airplay.createBrowser().on('deviceOn', function (player) {
     state.airplay = player
   }).start()
+
+  document.addEventListener('paste', function () {
+    electron.ipcRenderer.send('action', 'addTorrentFromPaste')
+  })
+
+  handler('addTorrent', 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4')
 }
 init()
 

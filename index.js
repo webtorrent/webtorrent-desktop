@@ -80,8 +80,38 @@ function createMainWindow () {
   return win
 }
 
+function addTorrentFromPaste () {
+  var torrentIds = electron.clipboard.readText().split('\n')
+  console.log(torrentIds)
+  torrentIds.forEach(function (torrentId) {
+    torrentId = torrentId.trim()
+    if (torrentId.length === 0) return
+    mainWindow.send('action', 'addTorrent', torrentId)
+  })
+}
+
+function toggleDevTools (win) {
+  win = win || electron.BrowserWindow.getFocusedWindow()
+
+  if (win) {
+    win.toggleDevTools()
+  }
+}
+
+function reloadWindow (win) {
+  win = win || electron.BrowserWindow.getFocusedWindow()
+
+  if (win) {
+    startTime = Date.now()
+    win.webContents.reloadIgnoringCache()
+  }
+}
+
 electron.ipcMain.on('action', function (event, action, ...args) {
   debug('action %s', action)
+  if (action === 'addTorrentFromPaste') {
+    addTorrentFromPaste()
+  }
 })
 
 var template = [
@@ -147,14 +177,7 @@ var template = [
       {
         label: 'Paste',
         accelerator: 'CmdOrCtrl+V',
-        click: function () {
-          var torrentIds = electron.clipboard.readText().split('\n')
-          torrentIds.forEach(function (torrentId) {
-            torrentId = torrentId.trim()
-            if (torrentId.length === 0) return
-            mainWindow.send('action', 'addTorrent', torrentId)
-          })
-        }
+        role: 'paste'
       },
       {
         label: 'Select All',
@@ -183,7 +206,7 @@ var template = [
         label: 'Reload',
         accelerator: 'CmdOrCtrl+R',
         click: function (item, focusedWindow) {
-          reload(focusedWindow)
+          reloadWindow(focusedWindow)
         }
       },
       {
@@ -193,7 +216,7 @@ var template = [
           else return 'Ctrl+Shift+I'
         })(),
         click: function (item, focusedWindow) {
-          devTools(focusedWindow)
+          toggleDevTools(focusedWindow)
         }
       }
     ]
@@ -294,23 +317,6 @@ if (process.platform === 'darwin') {
       role: 'front'
     }
   )
-}
-
-function devTools (win) {
-  win = win || electron.BrowserWindow.getFocusedWindow()
-
-  if (win) {
-    win.toggleDevTools()
-  }
-}
-
-function reload (win) {
-  win = win || electron.BrowserWindow.getFocusedWindow()
-
-  if (win) {
-    startTime = Date.now()
-    win.webContents.reloadIgnoringCache()
-  }
 }
 
 // var progress = 0
