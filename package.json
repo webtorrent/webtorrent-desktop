@@ -11,7 +11,7 @@
     "url": "https://github.com/feross/webtorrent-app/issues"
   },
   "dependencies": {
-    "airplay-js": "^0.2.16",
+    "airplay-js": "guerrerocarlos/node-airplay-js",
     "chromecasts": "^1.8.0",
     "create-torrent": "^3.22.1",
     "debug": "^2.2.0",
