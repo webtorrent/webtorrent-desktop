@@ -175,7 +175,7 @@ var template = [
         role: 'copy'
       },
       {
-        label: 'Paste',
+        label: 'Paste Torrent Address',
         accelerator: 'CmdOrCtrl+V',
         role: 'paste'
       },
