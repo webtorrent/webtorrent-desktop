@@ -27,7 +27,7 @@ function TorrentList (state, dispatch) {
         onclick: openPlayer
       }, 'play_arrow'),
       (function () {
-        if (state.chromecast) {
+        if (state.view.chromecast) {
           return h('i.btn.icon.chromecast', {
             className: !torrent.ready ? 'disabled' : '',
             onclick: openChromecast
@@ -35,7 +35,7 @@ function TorrentList (state, dispatch) {
         }
       })(),
       (function () {
-        if (state.airplay) {
+        if (state.view.airplay) {
           return h('i.btn.icon.airplay', {
             className: !torrent.ready ? 'disabled' : '',
             onclick: openAirplay

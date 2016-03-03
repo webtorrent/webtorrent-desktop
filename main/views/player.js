@@ -7,15 +7,18 @@ function Player (state, dispatch) {
     h('video', {
       src: state.server.localURL,
       autoplay: true,
-      controls: true
-    }),
-    h('a.close', {
-      onclick: closePlayer
-    }, 'Close')
+      controls: true,
+      onplaying: onPlaying
+    })
   ])
 
-  function closePlayer () {
-    dispatch('closePlayer')
+  function onPlaying (e) {
+    var video = e.target
+    var dimensions = {
+      width: video.videoWidth,
+      height: video.videoHeight
+    }
+    dispatch('setDimensions', dimensions)
   }
 }
 

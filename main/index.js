@@ -18,6 +18,8 @@ var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
+var HEADER_HEIGHT = 38
+
 var App = require('./views/app')
 
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
@@ -29,12 +31,20 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var state = global.state = {
-  title: 'WebTorrent',
   torrents: [],
   server: null,
   player: null,
-  chromcast: null,
-  airplay: null
+  currentPage: {
+    type: 'list'
+  },
+  view: {
+    title: 'WebTorrent',
+    savedWindowBounds: null,
+    history: [],
+    historyIndex: 0,
+    chromecast: null,
+    airplay: null
+  }
 }
 
 var currentVDom, rootElement, getClient, updateThrottled
@@ -63,16 +73,16 @@ function init () {
   dragDrop('body', onFiles)
 
   chromecasts.on('update', function (player) {
-    state.chromecast = player
+    state.view.chromecast = player
     update()
   })
 
   airplay.createBrowser().on('deviceOn', function (player) {
-    state.airplay = player
+    state.view.airplay = player
   }).start()
 
   document.addEventListener('paste', function () {
-    electron.ipcRenderer.send('action', 'addTorrentFromPaste')
+    electron.ipcRenderer.send('addTorrentFromPaste')
   })
 }
 init()
@@ -95,19 +105,32 @@ function dispatch (action, ...args) {
   if (action === 'openPlayer') {
     openPlayer(args[0] /* torrent */)
   }
-  if (action === 'closePlayer') {
-    closePlayer()
-  }
+  // if (action === 'closePlayer') {
+  //   closePlayer()
+  // }
   if (action === 'openChromecast') {
     openChromecast(args[0] /* torrent */)
   }
   if (action === 'openAirplay') {
     openAirplay(args[0] /* torrent */)
   }
+  if (action === 'setDimensions') {
+    setDimensions(args[0] /* dimensions */)
+  }
+  if (action === 'back') {
+    if (state.player === 'local') {
+      restoreBounds()
+      closePlayer()
+    }
+  }
 }
 
-electron.ipcRenderer.on('action', function (e, action, ...args) {
-  dispatch(action, ...args)
+electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
+  addTorrent(torrentId)
+})
+
+electron.ipcRenderer.on('seed', function (e, files) {
+  seed(files)
 })
 
 function onFiles (files) {
@@ -224,9 +247,8 @@ function closePlayer () {
 
 function openChromecast (torrent) {
   startServer(torrent, function () {
-    console.log(state.server.networkURL)
-    state.chromecast.play(state.server.networkURL, { title: 'WebTorrent — ' + torrent.name })
-    state.chromecast.on('error', function (err) {
+    state.view.chromecast.play(state.server.networkURL, { title: 'WebTorrent — ' + torrent.name })
+    state.view.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
       onError(err)
     })
@@ -237,16 +259,40 @@ function openChromecast (torrent) {
 
 function openAirplay (torrent) {
   startServer(torrent, function () {
-    state.airplay.play(state.server.networkURL, 0, function () {})
+    state.view.airplay.play(state.server.networkURL, 0, function () {})
     // TODO: handle airplay errors
     state.player = 'airplay'
     update()
   })
 }
 
+function setDimensions (dimensions) {
+  state.view.savedWindowBounds = electron.remote.getCurrentWindow().getBounds()
+
+  // Limit window size to screen size
+  var workAreaSize = electron.remote.screen.getPrimaryDisplay().workAreaSize
+  var width = Math.min(dimensions.width, workAreaSize.width)
+  var height = Math.min(dimensions.height, workAreaSize.height)
+  var aspectRatio = width / height
+
+  // add header height
+  height += HEADER_HEIGHT
+
+  // Center window on screen
+  var x = Math.floor((workAreaSize.width - width) / 2)
+  var y = Math.floor((workAreaSize.height - height) / 2)
+
+  electron.ipcRenderer.send('setAspectRatio', aspectRatio, { width: 0, height: HEADER_HEIGHT })
+  electron.ipcRenderer.send('setBounds', { x, y, width, height })
+}
+
+function restoreBounds () {
+  electron.ipcRenderer.send('setAspectRatio', 0)
+  electron.ipcRenderer.send('setBounds', state.view.savedWindowBounds, true)
+}
+
 // function onTorrent (torrent) {
   // function updateSpeed () {
-  //   ipc.send('')
   //   var progress = (100 * torrent.progress).toFixed(1)
   //   util.updateSpeed(
   //     '<b>Peers:</b> ' + torrent.swarm.wires.length + ' ' +

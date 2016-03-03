@@ -13,7 +13,7 @@ app.on('open-url', onOpen)
 
 function onOpen (e, torrentId) {
   e.preventDefault()
-  mainWindow.send('action', 'addTorrent', torrentId)
+  mainWindow.send('addTorrent', torrentId)
 }
 
 // report crashes
@@ -49,6 +49,18 @@ app.on('window-all-closed', function () {
 var isQuitting = false
 app.on('before-quit', function () {
   isQuitting = true
+})
+
+electron.ipcMain.on('addTorrentFromPaste', function (e) {
+  addTorrentFromPaste()
+})
+
+electron.ipcMain.on('setBounds', function (e, bounds) {
+  setBounds(bounds)
+})
+
+electron.ipcMain.on('setAspectRatio', function (e, aspectRatio, extraSize) {
+  setAspectRatio(aspectRatio, extraSize)
 })
 
 function createMainWindow () {
@@ -87,8 +99,20 @@ function addTorrentFromPaste () {
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
-    mainWindow.send('action', 'addTorrent', torrentId)
+    mainWindow.send('addTorrent', torrentId)
   })
+}
+
+function setBounds (bounds) {
+  if (mainWindow) {
+    mainWindow.setBounds(bounds, true)
+  }
+}
+
+function setAspectRatio (aspectRatio, extraSize) {
+  if (mainWindow) {
+    mainWindow.setAspectRatio(aspectRatio, extraSize)
+  }
 }
 
 function toggleDevTools (win) {
@@ -108,13 +132,6 @@ function reloadWindow (win) {
   }
 }
 
-electron.ipcMain.on('action', function (event, action, ...args) {
-  debug('action %s', action)
-  if (action === 'addTorrentFromPaste') {
-    addTorrentFromPaste()
-  }
-})
-
 var template = [
   {
     label: 'File',
@@ -128,7 +145,7 @@ var template = [
             properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
           }, function (filenames) {
             if (!Array.isArray(filenames)) return
-            mainWindow.send('action', 'seed', filenames)
+            mainWindow.send('seed', filenames)
           })
         }
       },
@@ -142,7 +159,7 @@ var template = [
           }, function (filenames) {
             if (!Array.isArray(filenames)) return
             filenames.forEach(function (filename) {
-              mainWindow.send('action', 'addTorrent', filename)
+              mainWindow.send('addTorrent', filename)
             })
           })
         }
