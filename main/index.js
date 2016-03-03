@@ -54,10 +54,9 @@ function init () {
 
   updateThrottled = throttle(update, 1000)
 
-  var client = new WebTorrent()
+  client = new WebTorrent()
   client.on('warning', onWarning)
   client.on('error', onError)
-
   state.view.client = client
 
   dragDrop('body', onFiles)
@@ -175,7 +174,10 @@ function seed (files) {
 
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
-  torrent.on('done', update)
+  torrent.on('done', function () {
+    electron.ipcRenderer.send('setBadge', '+')
+    update()
+  })
   torrent.on('download', updateThrottled)
   torrent.on('upload', updateThrottled)
   torrent.on('ready', function () {

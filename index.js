@@ -35,6 +35,10 @@ app.on('activate', function () {
   }
 })
 
+app.on('browser-window-focus', function () {
+  setBadge('')
+})
+
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -58,6 +62,9 @@ electron.ipcMain.on('setAspectRatio', function (e, aspectRatio, extraSize) {
   setAspectRatio(aspectRatio, extraSize)
 })
 
+electron.ipcMain.on('setBadge', function (e, text) {
+  setBadge(text)
+})
 
 electron.ipcMain.on('setProgress', function (e, progress) {
   setProgress(progress)
@@ -123,8 +130,21 @@ function setAspectRatio (aspectRatio, extraSize) {
   }
 }
 
+// Display string in dock badging area (OS X)
+function setBadge (text) {
+  debug('setBadge %s', text)
+  if (mainWindow && !mainWindow.isFocused()) {
+    if (text === '+') {
+      // special value to increment the badge number
+      text = (Number(app.dock.getBadge()) || 0) + 1
+    }
+    app.dock.setBadge(String(text))
+  }
+}
+
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
 function setProgress (progress) {
+  debug('setProgress %s', progress)
   if (mainWindow) {
     mainWindow.setProgressBar(progress)
   }
