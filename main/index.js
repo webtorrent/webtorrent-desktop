@@ -148,8 +148,6 @@ function addTorrent (torrentId) {
 
 function seed (files) {
   if (files.length === 0) return
-
-  // Seed from WebTorrent
   getClient(function (err, client) {
     if (err) return onError(err)
     var torrent = client.seed(files)
@@ -244,7 +242,6 @@ function setDimensions (dimensions) {
   var height = Math.min(dimensions.height, workAreaSize.height)
   var aspectRatio = width / height
 
-  // add header height
   height += HEADER_HEIGHT
 
   // Center window on screen
