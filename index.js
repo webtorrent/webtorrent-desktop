@@ -7,9 +7,7 @@ var electron = require('electron')
 var path = require('path')
 
 var app = electron.app
-
-// prevent windows from being garbage collected
-var mainWindow // eslint-disable-line no-unused-vars
+var mainWindow
 
 // report crashes
 // require('crash-reporter').start({
