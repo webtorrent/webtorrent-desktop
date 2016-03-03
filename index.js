@@ -229,13 +229,6 @@ var template = [
         label: 'Minimize',
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize'
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Bring All to Front',
-        role: 'front'
       }
     ]
   },
@@ -308,7 +301,7 @@ if (process.platform === 'darwin') {
   })
 
   // Window menu
-  template[3].submenu.push(
+  template[4].submenu.push(
     {
       type: 'separator'
     },
