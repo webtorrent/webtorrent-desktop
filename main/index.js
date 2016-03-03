@@ -42,7 +42,7 @@ function init () {
   rootElement = createElement(currentVDom)
   document.body.appendChild(rootElement)
 
-  updateThrottled = throttle(update, 250)
+  updateThrottled = throttle(update, 1000)
 
   getClient(function (err, client) {
     if (err) return onError(err)
