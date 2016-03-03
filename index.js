@@ -95,6 +95,7 @@ function createMainWindow () {
 }
 
 function addTorrentFromPaste () {
+  debug('addTorrentFromPaste')
   var torrentIds = electron.clipboard.readText().split('\n')
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
@@ -104,18 +105,21 @@ function addTorrentFromPaste () {
 }
 
 function setBounds (bounds) {
+  debug('setBounds %o', bounds)
   if (mainWindow) {
     mainWindow.setBounds(bounds, true)
   }
 }
 
 function setAspectRatio (aspectRatio, extraSize) {
+  debug('setAspectRatio %o %o', aspectRatio, extraSize)
   if (mainWindow) {
     mainWindow.setAspectRatio(aspectRatio, extraSize)
   }
 }
 
 function toggleDevTools (win) {
+  debug('toggleDevTools')
   win = win || electron.BrowserWindow.getFocusedWindow()
 
   if (win) {
@@ -124,6 +128,7 @@ function toggleDevTools (win) {
 }
 
 function reloadWindow (win) {
+  debug('reloadWindow')
   win = win || electron.BrowserWindow.getFocusedWindow()
 
   if (win) {
