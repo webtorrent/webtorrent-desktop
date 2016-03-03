@@ -8,13 +8,8 @@ var path = require('path')
 
 var app = electron.app
 
-app.on('open-file', onOpen)
-app.on('open-url', onOpen)
-
-function onOpen (e, torrentId) {
-  e.preventDefault()
-  mainWindow.send('addTorrent', torrentId)
-}
+// prevent windows from being garbage collected
+var mainWindow // eslint-disable-line no-unused-vars
 
 // report crashes
 // require('crash-reporter').start({
@@ -24,8 +19,8 @@ function onOpen (e, torrentId) {
 //   autoSubmit: true
 // })
 
-// prevent windows from being garbage collected
-var mainWindow // eslint-disable-line no-unused-vars
+app.on('open-file', onOpen)
+app.on('open-url', onOpen)
 
 app.on('ready', function () {
   mainWindow = createMainWindow()
@@ -43,7 +38,9 @@ app.on('activate', function () {
 })
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
 })
 
 var isQuitting = false
@@ -92,6 +89,11 @@ function createMainWindow () {
     mainWindow = null
   })
   return win
+}
+
+function onOpen (e, torrentId) {
+  e.preventDefault()
+  mainWindow.send('addTorrent', torrentId)
 }
 
 function addTorrentFromPaste () {
