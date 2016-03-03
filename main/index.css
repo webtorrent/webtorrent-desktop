@@ -207,8 +207,12 @@ body.drag::before {
 
 .torrent .metadata {
   float: left;
-  width: calc(100% - 240px);
+  width: 100%;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
+}
+
+.torrent:hover .metadata {
+  width: calc(100% - 170px);
 }
 
 .torrent .btn {
