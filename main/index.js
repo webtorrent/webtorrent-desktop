@@ -74,6 +74,19 @@ function update () {
   var patches = diff(currentVDom, newVDom)
   rootElement = patch(rootElement, patches)
   currentVDom = newVDom
+
+  updateDockIcon()
+}
+
+function updateDockIcon () {
+  if (state.view.client) {
+    var progress = state.view.client.progress
+    // Hide progress bar when client has no torrents, or progress is 100%
+    if (state.view.client.torrents.length === 0 || progress === 1) {
+      progress = -1
+    }
+    electron.ipcRenderer.send('setProgress', progress)
+  }
 }
 
 setInterval(function () {

@@ -58,6 +58,11 @@ electron.ipcMain.on('setAspectRatio', function (e, aspectRatio, extraSize) {
   setAspectRatio(aspectRatio, extraSize)
 })
 
+
+electron.ipcMain.on('setProgress', function (e, progress) {
+  setProgress(progress)
+})
+
 function createMainWindow () {
   var win = new electron.BrowserWindow({
     backgroundColor: '#282828',
@@ -115,6 +120,13 @@ function setAspectRatio (aspectRatio, extraSize) {
   debug('setAspectRatio %o %o', aspectRatio, extraSize)
   if (mainWindow) {
     mainWindow.setAspectRatio(aspectRatio, extraSize)
+  }
+}
+
+// Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
+function setProgress (progress) {
+  if (mainWindow) {
+    mainWindow.setProgressBar(progress)
   }
 }
 
@@ -334,9 +346,3 @@ if (process.platform === 'darwin') {
     }
   )
 }
-
-// var progress = 0
-// setInterval(function () {
-//   progress += 0.1
-//   mainWindow.setProgressBar(progress)
-// }, 1000)
