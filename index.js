@@ -55,7 +55,7 @@ function createMainWindow () {
   var win = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true,
-    minWidth: 360,
+    minWidth: 375,
     minHeight: 158,
     show: false,
     title: 'WebTorrent',
