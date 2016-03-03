@@ -225,7 +225,7 @@ function closePlayer () {
 function openChromecast (torrent) {
   startServer(torrent, function () {
     console.log(state.server.networkURL)
-    state.chromecast.play(state.server.networkURL, { title: torrent.name })
+    state.chromecast.play(state.server.networkURL, { title: 'WebTorrent — ' + torrent.name })
     state.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
       onError(err)
