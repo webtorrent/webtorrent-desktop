@@ -2,21 +2,31 @@
 
 var airplay = require('airplay-js')
 var chromecasts = require('chromecasts')()
+var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var networkAddress = require('network-address')
 var path = require('path')
 var throttle = require('throttleit')
 var torrentPoster = require('./lib/torrent-poster')
-var getClient = require('./lib/get-client')
+var WebTorrent = require('webtorrent')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
+var App = require('./views/app')
+
 var HEADER_HEIGHT = 38
 
-var App = require('./views/app')
+// Force use of webtorrent trackers on all torrents
+global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
+  .map(function (arr) {
+    return arr[0]
+  })
+  .filter(function (url) {
+    return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
+  })
 
 var state = global.state = {
   server: null,
@@ -26,7 +36,7 @@ var state = global.state = {
   },
   view: {
     title: 'WebTorrent',
-    client: null,
+    client: null, // TODO: remove this from the view
     savedWindowBounds: null,
     history: [],
     historyIndex: 0,
@@ -35,7 +45,7 @@ var state = global.state = {
   }
 }
 
-var currentVDom, rootElement, updateThrottled
+var client, currentVDom, rootElement, updateThrottled
 
 function init () {
   currentVDom = App(state, dispatch)
@@ -44,13 +54,11 @@ function init () {
 
   updateThrottled = throttle(update, 1000)
 
-  getClient(function (err, client) {
-    if (err) return onError(err)
-    global.client = client
-    state.view.client = client
-    client.on('warning', onWarning)
-    client.on('error', onError)
-  })
+  var client = new WebTorrent()
+  client.on('warning', onWarning)
+  client.on('error', onError)
+
+  state.view.client = client
 
   dragDrop('body', onFiles)
 
@@ -152,20 +160,14 @@ function isNotTorrentFile (file) {
 }
 
 function addTorrent (torrentId) {
-  getClient(function (err, client) {
-    if (err) return onError(err)
-    var torrent = client.add(torrentId)
-    addTorrentEvents(torrent)
-  })
+  var torrent = client.add(torrentId)
+  addTorrentEvents(torrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
-  getClient(function (err, client) {
-    if (err) return onError(err)
-    var torrent = client.seed(files)
-    addTorrentEvents(torrent)
-  })
+  var torrent = client.seed(files)
+  addTorrentEvents(torrent)
 }
 
 function addTorrentEvents (torrent) {

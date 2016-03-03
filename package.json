@@ -19,11 +19,9 @@
     "network-address": "^1.1.0",
     "pretty-bytes": "^3.0.0",
     "throttleit": "^1.0.0",
-    "thunky": "^0.1.0",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
-    "webtorrent": "^0.82.0",
-    "xhr": "^2.2.0"
+    "webtorrent": "^0.82.0"
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
