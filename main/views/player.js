@@ -8,11 +8,11 @@ function Player (state, dispatch) {
       src: state.server.localURL,
       autoplay: true,
       controls: true,
-      onplaying: onPlaying
+      onloadedmetadata: onLoadedMetadata
     })
   ])
 
-  function onPlaying (e) {
+  function onLoadedMetadata (e) {
     var video = e.target
     var dimensions = {
       width: video.videoWidth,
