@@ -3,16 +3,13 @@
 // var prettyBytes = require('pretty-bytes')
 var airplay = require('airplay-js')
 var chromecasts = require('chromecasts')()
-var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var networkAddress = require('network-address')
 var path = require('path')
 var throttle = require('throttleit')
-var thunky = require('thunky')
 var torrentPoster = require('./lib/torrent-poster')
-var WebTorrent = require('webtorrent')
-var xhr = require('xhr')
+var getClient = require('./lib/get-client')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -21,14 +18,6 @@ var patch = require('virtual-dom/patch')
 var HEADER_HEIGHT = 38
 
 var App = require('./views/app')
-
-global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
-  .map(function (arr) {
-    return arr[0]
-  })
-  .filter(function (url) {
-    return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
-  })
 
 var state = global.state = {
   torrents: [],
@@ -47,7 +36,7 @@ var state = global.state = {
   }
 }
 
-var currentVDom, rootElement, getClient, updateThrottled
+var currentVDom, rootElement, updateThrottled
 
 function init () {
   currentVDom = App(state, dispatch)
@@ -56,19 +45,13 @@ function init () {
 
   updateThrottled = throttle(update, 250)
 
-  getClient = thunky(function (cb) {
-    getRtcConfig('https://instant.io/rtcConfig', function (err, rtcConfig) {
-      if (err) console.error(err)
-      var client = global.client = new WebTorrent({ rtcConfig: rtcConfig })
-      state.torrents = client.torrents // internal webtorrent array -- do not modify!
-      client.on('warning', onWarning)
-      client.on('error', onError)
-      cb(null, client)
-    })
+  getClient(function (err, client) {
+    if (err) return onError(err)
+    global.client = client
+    state.torrents = client.torrents // internal webtorrent array -- do not modify!
+    client.on('warning', onWarning)
+    client.on('error', onError)
   })
-
-  // For performance, create the client immediately
-  getClient(function () {})
 
   dragDrop('body', onFiles)
 
@@ -150,23 +133,6 @@ function isTorrentFile (file) {
 
 function isNotTorrentFile (file) {
   return !isTorrentFile(file)
-}
-
-function getRtcConfig (url, cb) {
-  xhr(url, function (err, res) {
-    if (err || res.statusCode !== 200) {
-      cb(new Error('Could not get WebRTC config from server. Using default (without TURN).'))
-    } else {
-      var rtcConfig
-      try { rtcConfig = JSON.parse(res.body) } catch (err) {}
-      if (rtcConfig) {
-        console.log('got rtc config: %o', rtcConfig)
-        cb(null, rtcConfig)
-      } else {
-        cb(new Error('Got invalid WebRTC config from server: ' + res.body))
-      }
-    }
-  })
 }
 
 function addTorrent (torrentId) {
