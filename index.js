@@ -60,7 +60,7 @@ function createMainWindow () {
     show: false,
     title: 'WebTorrent',
     titleBarStyle: 'hidden-inset',
-    width: 500,
+    width: 450,
     height: 300
   })
   win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
