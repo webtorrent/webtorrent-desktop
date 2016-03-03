@@ -56,7 +56,7 @@ function createMainWindow () {
     backgroundColor: '#282828',
     darkTheme: true,
     minWidth: 360,
-    minHeight: 168,
+    minHeight: 158,
     show: false,
     title: 'WebTorrent',
     titleBarStyle: 'hidden-inset',

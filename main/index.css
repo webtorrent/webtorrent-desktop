@@ -15,7 +15,7 @@ body {
   cursor: default;
   height: 100%;
   font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5em;
   margin: 0;
   padding: 0;
@@ -73,12 +73,11 @@ a:not(.disabled):hover {
 .header {
   border-bottom: 1px solid rgb(20, 20, 20);
   height: 37px;
-  padding-top: 6px;
+  padding-top: 8px;
   overflow: hidden;
 }
 
 .header .title {
-  font-size: 14px;
   opacity: 0.6;
   position: absolute;
   width: 100%;
@@ -156,7 +155,7 @@ body.drag::before {
  */
 
 .torrent {
-  height: 130px;
+  height: 120px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
   background-repeat: no-repeat;
@@ -182,9 +181,9 @@ body.drag::before {
 
 .torrent .btn {
   float: right;
-  margin-top: 21px;
+  margin-top: 20px;
   margin-left: 20px;
-  padding-top: 9px;
+  padding-top: 10px;
 }
 
 .torrent .play {
@@ -201,7 +200,7 @@ body.drag::before {
 }
 
 .torrent .name {
-  font-size: 1.6em;
+  font-size: 1.5em;
   font-weight: bold;
   line-height: 1.5em;
 }
