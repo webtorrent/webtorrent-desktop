@@ -7,6 +7,12 @@
   "ascent": 850,
   "glyphs": [
     {
+      "uid": "63e91725cfc5751fe4d772325fd50830",
+      "css": "plus",
+      "code": 59393,
+      "src": "mfglabs"
+    },
+    {
       "uid": "b714be5a812a474811604f700dfc87ce",
       "css": "left-open",
       "code": 59394,
