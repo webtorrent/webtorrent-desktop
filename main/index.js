@@ -90,8 +90,8 @@ function updateDockIcon () {
 }
 
 setInterval(function () {
-  update()
-}, 5000)
+  updateThrottled()
+}, 1000)
 
 function dispatch (action, ...args) {
   console.log('dispatch: %s %o', action, args)
