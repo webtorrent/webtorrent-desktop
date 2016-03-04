@@ -310,7 +310,9 @@ function setDimensions (dimensions) {
 
 function restoreBounds () {
   electron.ipcRenderer.send('setAspectRatio', 0)
-  electron.ipcRenderer.send('setBounds', state.view.mainWindowBounds, true)
+  if (state.view.mainWindowBounds) {
+    electron.ipcRenderer.send('setBounds', state.view.mainWindowBounds, true)
+  }
 }
 
 function onError (err) {
