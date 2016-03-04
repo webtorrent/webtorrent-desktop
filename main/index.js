@@ -36,6 +36,11 @@ var state = global.state = {
   },
   view: {
     title: 'WebTorrent',
+    dock: {
+      badge: 0,
+      progress: 0
+    },
+    isFocused: true,
     client: null, // TODO: remove this from the view
     savedWindowBounds: null,
     history: [],
@@ -48,16 +53,16 @@ var state = global.state = {
 var client, currentVDom, rootElement, updateThrottled
 
 function init () {
+  client = global.client = new WebTorrent()
+  client.on('warning', onWarning)
+  client.on('error', onError)
+  state.view.client = client
+
   currentVDom = App(state, dispatch)
   rootElement = createElement(currentVDom)
   document.body.appendChild(rootElement)
 
   updateThrottled = throttle(update, 1000)
-
-  client = new WebTorrent()
-  client.on('warning', onWarning)
-  client.on('error', onError)
-  state.view.client = client
 
   dragDrop('body', onFiles)
 
@@ -72,6 +77,16 @@ function init () {
 
   document.addEventListener('paste', function () {
     electron.ipcRenderer.send('addTorrentFromPaste')
+  })
+
+  window.addEventListener('focus', function () {
+    state.view.isFocused = true
+    if (state.view.dock.badge > 0) electron.ipcRenderer.send('setBadge', '')
+    state.view.dock.badge = 0
+  })
+
+  window.addEventListener('blur', function () {
+    state.view.isFocused = false
   })
 }
 init()
@@ -90,15 +105,16 @@ setInterval(function () {
 }, 1000)
 
 function updateDockIcon () {
-  if (state.view.client) {
-    var progress = state.view.client.progress
-    var activeTorrentsExist = state.view.client.torrents.some(function (torrent) {
-      return torrent.progress !== 1
-    })
-    // Hide progress bar when client has no torrents, or progress is 100%
-    if (!activeTorrentsExist || progress === 1) {
-      progress = -1
-    }
+  var progress = state.view.client.progress
+  var activeTorrentsExist = state.view.client.torrents.some(function (torrent) {
+    return torrent.progress !== 1
+  })
+  // Hide progress bar when client has no torrents, or progress is 100%
+  if (!activeTorrentsExist || progress === 1) {
+    progress = -1
+  }
+  if (progress !== state.view.dock.progress) {
+    state.view.dock.progress = progress
     electron.ipcRenderer.send('setProgress', progress)
   }
 }
@@ -175,7 +191,10 @@ function seed (files) {
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
   torrent.on('done', function () {
-    electron.ipcRenderer.send('setBadge', '+')
+    if (!state.view.isFocused) {
+      state.view.dock.badge += 1
+      electron.ipcRenderer.send('setBadge', state.view.dock.badge)
+    }
     update()
   })
   torrent.on('download', updateThrottled)

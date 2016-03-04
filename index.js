@@ -35,10 +35,6 @@ app.on('activate', function () {
   }
 })
 
-app.on('browser-window-focus', function () {
-  setBadge('')
-})
-
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -133,11 +129,7 @@ function setAspectRatio (aspectRatio, extraSize) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   debug('setBadge %s', text)
-  if (mainWindow && !mainWindow.isFocused()) {
-    if (text === '+') {
-      // special value to increment the badge number
-      text = (Number(app.dock.getBadge()) || 0) + 1
-    }
+  if (mainWindow) {
     app.dock.setBadge(String(text))
   }
 }
