@@ -21,7 +21,7 @@ app.on('open-file', onOpen)
 app.on('open-url', onOpen)
 
 app.on('ready', function () {
-  mainWindow = createMainWindow()
+  createMainWindow()
 
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
@@ -31,7 +31,7 @@ app.on('activate', function () {
   if (mainWindow) {
     mainWindow.show()
   } else {
-    mainWindow = createMainWindow()
+    createMainWindow()
   }
 })
 
@@ -67,7 +67,7 @@ electron.ipcMain.on('setProgress', function (e, progress) {
 })
 
 function createMainWindow () {
-  var win = new electron.BrowserWindow({
+  mainWindow = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true,
     minWidth: 375,
@@ -78,23 +78,24 @@ function createMainWindow () {
     width: 450,
     height: 300
   })
-  win.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
-  win.webContents.on('did-finish-load', function () {
+  mainWindow.loadURL('file://' + path.join(__dirname, 'main', 'index.html'))
+  mainWindow.webContents.on('did-finish-load', function () {
     setTimeout(function () {
       debug('startup time: %sms', Date.now() - startTime)
-      win.show()
+      mainWindow.show()
     }, 50)
   })
-  win.on('close', function (e) {
+  mainWindow.on('enter-full-screen', onToggleFullScreen)
+  mainWindow.on('leave-full-screen', onToggleFullScreen)
+  mainWindow.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
       e.preventDefault()
-      win.hide()
+      mainWindow.hide()
     }
   })
-  win.once('closed', function () {
+  mainWindow.once('closed', function () {
     mainWindow = null
   })
-  return win
 }
 
 function onOpen (e, torrentId) {
@@ -144,8 +145,12 @@ function toggleFullScreen () {
   debug('toggleFullScreen')
   if (mainWindow) {
     mainWindow.setFullScreen(!mainWindow.isFullScreen())
-    getMenuItem('Full Screen').checked = mainWindow.isFullScreen()
+    onToggleFullScreen()
   }
+}
+
+function onToggleFullScreen () {
+  getMenuItem('Full Screen').checked = mainWindow.isFullScreen()
 }
 
 // Sets whether the window should always show on top of other windows
