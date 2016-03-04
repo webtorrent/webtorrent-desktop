@@ -7,6 +7,8 @@
 
 #### WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.
 
+![screenshot](./screenshot.png)
+
 ## Dev
 
 ```
