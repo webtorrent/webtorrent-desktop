@@ -4,11 +4,7 @@ var h = require('virtual-dom/h')
 var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
-  var torrents = state.view.client
-    ? state.view.client.torrents
-    : []
-
-  var list = torrents.map(function (torrent) {
+  var list = state.view.client.torrents.map(function (torrent) {
     var style = {}
     if (torrent.posterURL) {
       style['background-image'] = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%), url("' + torrent.posterURL + '")'
