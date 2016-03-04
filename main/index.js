@@ -255,13 +255,7 @@ function openPlayer (torrent) {
 }
 
 function deleteTorrent (torrent) {
-  console.log('Deleting %o', torrent)
-  torrent.isDeleting = true
-  update()
-  state.view.client.remove(torrent.infoHash, function () {
-    console.log('Deleted torrent ' + torrent.infoHash)
-    update()
-  })
+  torrent.destroy(update)
 }
 
 function openChromecast (torrent) {
