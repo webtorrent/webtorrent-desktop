@@ -258,9 +258,15 @@ function setDimensions (dimensions) {
 
   // Limit window size to screen size
   var workAreaSize = electron.remote.screen.getPrimaryDisplay().workAreaSize
-  var width = Math.min(dimensions.width, workAreaSize.width)
-  var height = Math.min(dimensions.height, workAreaSize.height)
-  var aspectRatio = width / height
+  var aspectRatio = dimensions.width / dimensions.height
+
+  var scaleFactor = Math.min(
+    Math.min(workAreaSize.width / dimensions.width, 1),
+    Math.min(workAreaSize.height / dimensions.height, 1)
+  )
+
+  var width = Math.floor(dimensions.width * scaleFactor)
+  var height = Math.floor(dimensions.height * scaleFactor)
 
   height += HEADER_HEIGHT
 
