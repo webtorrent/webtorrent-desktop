@@ -4,7 +4,11 @@ var h = require('virtual-dom/h')
 
 function Header (state, dispatch) {
   return h('.header', [
-    h('.title', state.view.title),
+    (function () {
+      if (process.platform === 'darwin') {
+        return h('.title', state.view.title)
+      }
+    })(),
     h('.nav.left', [
       h('i.icon.back', {
         onclick: onBack
