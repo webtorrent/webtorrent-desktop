@@ -154,7 +154,6 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   width: 100%;
   height: calc(100% - 38px);
   overflow: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 body.drag::before {
