@@ -1,0 +1,260 @@
+var electron = require('electron')
+var debug = require('debug')('webtorrent-app:menu')
+var windows = require('./windows')
+var config = require('./config')
+
+function toggleFullScreen () {
+  debug('toggleFullScreen')
+  if (windows.main) {
+    windows.main.setFullScreen(!windows.main.isFullScreen())
+    onToggleFullScreen()
+  }
+}
+
+function onToggleFullScreen () {
+  getMenuItem('Full Screen').checked = windows.main.isFullScreen()
+}
+
+// Sets whether the window should always show on top of other windows
+function toggleAlwaysOnTop () {
+  debug('toggleAlwaysOnTop %s')
+  if (windows.main) {
+    windows.main.setAlwaysOnTop(!windows.main.isAlwaysOnTop())
+    getMenuItem('Float on Top').checked = windows.main.isAlwaysOnTop()
+  }
+}
+
+function toggleDevTools () {
+  debug('toggleDevTools')
+  if (windows.main) {
+    windows.main.toggleDevTools()
+  }
+}
+
+function reloadWindow () {
+  debug('reloadWindow')
+  if (windows.main) {
+    config.startTime = Date.now()
+    windows.main.webContents.reloadIgnoringCache()
+  }
+}
+
+function getMenuItem (label) {
+  for (var i = 0; i < appMenu.items.length; i++) {
+    var menuItem = appMenu.items[i].submenu.items.find(function (item) {
+      return item.label === label
+    })
+    if (menuItem) return menuItem
+  }
+}
+
+function getMenuTemplate () {
+  var template = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Create New Torrent...',
+          accelerator: 'CmdOrCtrl+N',
+          click: function () {
+            electron.dialog.showOpenDialog({
+              title: 'Select a file or folder for the torrent file.',
+              properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
+            }, function (filenames) {
+              if (!Array.isArray(filenames)) return
+              windows.main.send('seed', filenames)
+            })
+          }
+        },
+        {
+          label: 'Open Torrent File...',
+          accelerator: 'CmdOrCtrl+O',
+          click: function () {
+            electron.dialog.showOpenDialog(windows.main, {
+              title: 'Select a .torrent file to open.',
+              properties: [ 'openFile', 'multiSelections' ]
+            }, function (filenames) {
+              if (!Array.isArray(filenames)) return
+              filenames.forEach(function (filename) {
+                windows.main.send('addTorrent', filename)
+              })
+            })
+          }
+        },
+        {
+          label: 'Open Torrent Address...',
+          accelerator: 'CmdOrCtrl+U',
+          click: function () { electron.dialog.showMessageBox({ message: 'TODO', buttons: ['OK'] }) }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Close Window',
+          accelerator: 'CmdOrCtrl+W',
+          role: 'close'
+        }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Cut',
+          accelerator: 'CmdOrCtrl+X',
+          role: 'cut'
+        },
+        {
+          label: 'Copy',
+          accelerator: 'CmdOrCtrl+C',
+          role: 'copy'
+        },
+        {
+          label: 'Paste Torrent Address',
+          accelerator: 'CmdOrCtrl+V',
+          role: 'paste'
+        },
+        {
+          label: 'Select All',
+          accelerator: 'CmdOrCtrl+A',
+          role: 'selectall'
+        }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Full Screen',
+          type: 'checkbox',
+          accelerator: (function () {
+            if (process.platform === 'darwin') return 'Ctrl+Command+F'
+            else return 'F11'
+          })(),
+          click: toggleFullScreen
+        },
+        {
+          label: 'Float on Top',
+          type: 'checkbox',
+          click: toggleAlwaysOnTop
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click: reloadWindow
+        },
+        {
+          label: 'Developer Tools',
+          accelerator: (function () {
+            if (process.platform === 'darwin') return 'Alt+Command+I'
+            else return 'Ctrl+Shift+I'
+          })(),
+          click: toggleDevTools
+        }
+      ]
+    },
+    {
+      label: 'Window',
+      role: 'window',
+      submenu: [
+        {
+          label: 'Minimize',
+          accelerator: 'CmdOrCtrl+M',
+          role: 'minimize'
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      role: 'help',
+      submenu: [
+        {
+          label: 'Learn more about WebTorrent',
+          click: function () { electron.shell.openExternal('https://webtorrent.io') }
+        },
+        {
+          label: 'Contribute on GitHub',
+          click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app') }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Report an Issue...',
+          click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues') }
+        }
+      ]
+    }
+  ]
+
+  if (process.platform === 'darwin') {
+    var name = electron.app.getName()
+    template.unshift({
+      label: name,
+      submenu: [
+        {
+          label: 'About ' + name,
+          role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Services',
+          role: 'services',
+          submenu: []
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Hide ' + name,
+          accelerator: 'Command+H',
+          role: 'hide'
+        },
+        {
+          label: 'Hide Others',
+          accelerator: 'Command+Alt+H',
+          role: 'hideothers'
+        },
+        {
+          label: 'Show All',
+          role: 'unhide'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Quit',
+          accelerator: 'Command+Q',
+          click: function () { electron.app.quit() }
+        }
+      ]
+    })
+
+    // Window menu
+    template[4].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Bring All to Front',
+        role: 'front'
+      }
+    )
+  }
+
+  return template
+}
+
+var appMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
+
+var menu = {
+  appMenu: appMenu,
+  onToggleFullScreen: onToggleFullScreen
+}
+
+module.exports = menu
