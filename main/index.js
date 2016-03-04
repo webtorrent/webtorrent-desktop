@@ -41,6 +41,7 @@ var state = global.state = {
       chromecast: null /* chromecast client. finds and manages Chromecasts */
     },
     client: null, /* the WebTorrent client */
+    torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
     // history: [], /* track how we got to the current view. enables Back button */
     // historyIndex: 0,
     isFocused: true,
@@ -48,7 +49,9 @@ var state = global.state = {
     title: 'WebTorrent' /* current window title */
   },
   video: {
-    isPaused: false
+    isPaused: false,
+    currentTime: 0, /* seconds */
+    duration: 1 /* seconds */
   }
 }
 
@@ -156,6 +159,10 @@ function dispatch (action, ...args) {
     state.video.isPaused = !state.video.isPaused
     update()
   }
+  if (action === 'playbackJump') {
+    state.video.jumpToTime = args[0] /* seconds */
+    update()
+  }
 }
 
 electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
@@ -224,9 +231,10 @@ function torrentReady (torrent) {
 
 function startServer (torrent, cb) {
   // use largest file
-  var index = torrent.files.indexOf(torrent.files.reduce(function (a, b) {
+  state.view.torrentPlaying = torrent.files.reduce(function (a, b) {
     return a.length > b.length ? a : b
-  }))
+  })
+  var index = torrent.files.indexOf(state.view.torrentPlaying)
 
   var server = torrent.createServer()
   server.listen(0, function () {
@@ -297,8 +305,8 @@ function setDimensions (dimensions) {
   var x = Math.floor((workAreaSize.width - width) / 2)
   var y = Math.floor((workAreaSize.height - height) / 2)
 
-  electron.ipcRenderer.send('setAspectRatio', aspectRatio, { width: 0, height: HEADER_HEIGHT })
-  electron.ipcRenderer.send('setBounds', { x, y, width, height })
+  electron.ipcRenderer.send('setAspectRatio', aspectRatio, {width: 0, height: HEADER_HEIGHT})
+  electron.ipcRenderer.send('setBounds', {x, y, width, height})
 }
 
 function restoreBounds () {
