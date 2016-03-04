@@ -224,7 +224,6 @@ body.drag::before {
 
 .torrent .delete {
   opacity: 0.5;
-  color: #bbb;
 }
 
 .torrent:hover .btn, .torrent:hover .delete {
