@@ -21,7 +21,7 @@
     "throttleit": "^1.0.0",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
-    "webtorrent": "^0.82.0"
+    "webtorrent": "^0.82.1"
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
