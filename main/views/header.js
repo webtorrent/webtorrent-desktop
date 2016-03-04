@@ -14,7 +14,7 @@ function Header (state, dispatch) {
       }, 'chevron_right')
     ]),
     (function () {
-      if (state.player !== 'local') {
+      if (state.url !== '/player') {
         return h('.nav.right', [
           h('i.icon.add', {
             onclick: onAddTorrent

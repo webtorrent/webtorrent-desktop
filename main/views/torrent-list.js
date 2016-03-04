@@ -42,7 +42,7 @@ function TorrentList (state, dispatch) {
           }
         })(),
         (function () {
-          if (state.view.airplay) {
+          if (state.view.devices.airplay) {
             return h('i.btn.icon.airplay', {
               className: !torrent.ready ? 'disabled' : '',
               onclick: openAirplay

@@ -30,23 +30,22 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
 
 var state = global.state = {
   server: null,
-  player: null,
-  currentPage: {
-    type: 'list'
-  },
   view: {
-    title: 'WebTorrent',
+    url: '/',
     dock: {
       badge: 0,
       progress: 0
     },
+    devices: {
+      airplay: null,
+      chromecast: null
+    },
+    client: null, // TODO: remove this
+    // history: [],
+    // historyIndex: 0,
     isFocused: true,
-    client: null, // TODO: remove this from the view
-    savedWindowBounds: null,
-    history: [],
-    historyIndex: 0,
-    chromecast: null,
-    airplay: null
+    mainWindowBounds: null,
+    title: 'WebTorrent'
   }
 }
 
@@ -72,7 +71,7 @@ function init () {
   })
 
   airplay.createBrowser().on('deviceOn', function (player) {
-    state.view.airplay = player
+    state.view.devices.airplay = player
   }).start()
 
   document.addEventListener('paste', function () {
@@ -130,9 +129,6 @@ function dispatch (action, ...args) {
   if (action === 'openPlayer') {
     openPlayer(args[0] /* torrent */)
   }
-  // if (action === 'closePlayer') {
-  //   closePlayer()
-  // }
   if (action === 'openChromecast') {
     openChromecast(args[0] /* torrent */)
   }
@@ -143,10 +139,12 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
-    if (state.player === 'local') {
+    if (state.view.url === '/player') {
       restoreBounds()
-      closePlayer()
+      closeServer()
     }
+    state.view.url = '/'
+    update()
   }
 }
 
@@ -240,15 +238,9 @@ function closeServer () {
 
 function openPlayer (torrent) {
   startServer(torrent, function () {
-    state.player = 'local'
+    state.view.url = '/player'
     update()
   })
-}
-
-function closePlayer () {
-  closeServer()
-  state.player = null
-  update()
 }
 
 function openChromecast (torrent) {
@@ -258,22 +250,20 @@ function openChromecast (torrent) {
       err.message = 'Chromecast: ' + err.message
       onError(err)
     })
-    state.player = 'chromecast'
     update()
   })
 }
 
 function openAirplay (torrent) {
   startServer(torrent, function () {
-    state.view.airplay.play(state.server.networkURL, 0, function () {})
+    state.view.devices.airplay.play(state.server.networkURL, 0, function () {})
     // TODO: handle airplay errors
-    state.player = 'airplay'
     update()
   })
 }
 
 function setDimensions (dimensions) {
-  state.view.savedWindowBounds = electron.remote.getCurrentWindow().getBounds()
+  state.view.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
 
   // Limit window size to screen size
   var workAreaSize = electron.remote.screen.getPrimaryDisplay().workAreaSize
@@ -299,7 +289,7 @@ function setDimensions (dimensions) {
 
 function restoreBounds () {
   electron.ipcRenderer.send('setAspectRatio', 0)
-  electron.ipcRenderer.send('setBounds', state.view.savedWindowBounds, true)
+  electron.ipcRenderer.send('setBounds', state.view.mainWindowBounds, true)
 }
 
 function onError (err) {

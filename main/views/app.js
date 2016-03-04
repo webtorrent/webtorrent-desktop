@@ -11,10 +11,10 @@ function App (state, dispatch) {
     Header(state, dispatch),
     h('.content', [
       (function () {
-        if (state.player === 'local') {
-          return Player(state, dispatch)
-        } else {
+        if (state.view.url === '/') {
           return TorrentList(state, dispatch)
+        } else if (state.view.url === '/player') {
+          return Player(state, dispatch)
         }
       })()
     ])
