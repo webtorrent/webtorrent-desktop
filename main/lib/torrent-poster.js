@@ -1,12 +1,19 @@
 module.exports = torrentPoster
 
 var captureVideoFrame = require('./capture-video-frame')
+var path = require('path')
 
 function torrentPoster (torrent, cb) {
   // use largest file
-  var index = torrent.files.indexOf(torrent.files.reduce(function (a, b) {
-    return a.length > b.length ? a : b
-  }))
+  var file = torrent.files
+    .filter(function (file) {
+      var extname = path.extname(file.name)
+      return ['.mp4', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
+    })
+    .reduce(function (a, b) {
+      return a.length > b.length ? a : b
+    })
+  var index = torrent.files.indexOf(file)
 
   var server = torrent.createServer(0)
   server.listen(0, onListening)

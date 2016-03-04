@@ -216,7 +216,7 @@ function addTorrentEvents (torrent) {
 
 function torrentReady (torrent) {
   torrentPoster(torrent, function (err, buf) {
-    if (err) return onError(err)
+    if (err) return onWarning(err)
     torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
     update()
   })
