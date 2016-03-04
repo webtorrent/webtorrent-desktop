@@ -30,7 +30,6 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
 
 var state = global.state = {
   server: null, /* local WebTorrent-to-HTTP server */
-  player: null, /* 'local', 'airplay', or 'chromecast'. persists across videos */
   view: {
     url: '/',
     dock: {
