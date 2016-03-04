@@ -7,7 +7,7 @@ var electron = require('electron')
 var path = require('path')
 
 var app = electron.app
-var mainWindow
+var mainWindow, menu
 
 // report crashes
 // require('crash-reporter').start({
@@ -23,7 +23,7 @@ app.on('open-url', onOpen)
 app.on('ready', function () {
   mainWindow = createMainWindow()
 
-  var menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
 })
 
@@ -129,9 +129,7 @@ function setAspectRatio (aspectRatio, extraSize) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   debug('setBadge %s', text)
-  if (mainWindow) {
-    app.dock.setBadge(String(text))
-  }
+  app.dock.setBadge(String(text))
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
@@ -142,22 +140,35 @@ function setProgress (progress) {
   }
 }
 
-function toggleDevTools (win) {
-  debug('toggleDevTools')
-  win = win || electron.BrowserWindow.getFocusedWindow()
-
-  if (win) {
-    win.toggleDevTools()
+function toggleFullScreen () {
+  debug('toggleFullScreen')
+  if (mainWindow) {
+    mainWindow.setFullScreen(!mainWindow.isFullScreen())
+    getMenuItem('Full Screen').checked = mainWindow.isFullScreen()
   }
 }
 
-function reloadWindow (win) {
-  debug('reloadWindow')
-  win = win || electron.BrowserWindow.getFocusedWindow()
+// Sets whether the window should always show on top of other windows
+function toggleAlwaysOnTop () {
+  debug('toggleAlwaysOnTop %s')
+  if (mainWindow) {
+    mainWindow.setAlwaysOnTop(!mainWindow.isAlwaysOnTop())
+    getMenuItem('Float on Top').checked = mainWindow.isAlwaysOnTop()
+  }
+}
 
-  if (win) {
+function toggleDevTools () {
+  debug('toggleDevTools')
+  if (mainWindow) {
+    mainWindow.toggleDevTools()
+  }
+}
+
+function reloadWindow () {
+  debug('reloadWindow')
+  if (mainWindow) {
     startTime = Date.now()
-    win.webContents.reloadIgnoringCache()
+    mainWindow.webContents.reloadIgnoringCache()
   }
 }
 
@@ -238,14 +249,18 @@ function getMenuTemplate () {
       label: 'View',
       submenu: [
         {
-          label: 'Toggle Full Screen',
+          label: 'Full Screen',
+          type: 'checkbox',
           accelerator: (function () {
             if (process.platform === 'darwin') return 'Ctrl+Command+F'
             else return 'F11'
           })(),
-          click: function (item, focusedWindow) {
-            if (focusedWindow) focusedWindow.setFullScreen(!focusedWindow.isFullScreen())
-          }
+          click: toggleFullScreen
+        },
+        {
+          label: 'Float on Top',
+          type: 'checkbox',
+          click: toggleAlwaysOnTop
         },
         {
           type: 'separator'
@@ -253,19 +268,15 @@ function getMenuTemplate () {
         {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
-          click: function (item, focusedWindow) {
-            reloadWindow(focusedWindow)
-          }
+          click: reloadWindow
         },
         {
-          label: 'Toggle Developer Tools',
+          label: 'Developer Tools',
           accelerator: (function () {
             if (process.platform === 'darwin') return 'Alt+Command+I'
             else return 'Ctrl+Shift+I'
           })(),
-          click: function (item, focusedWindow) {
-            toggleDevTools(focusedWindow)
-          }
+          click: toggleDevTools
         }
       ]
     },
@@ -361,4 +372,13 @@ function getMenuTemplate () {
   }
 
   return template
+}
+
+function getMenuItem (label) {
+  for (var i = 0; i < menu.items.length; i++) {
+    var menuItem = menu.items[i].submenu.items.find(function (item) {
+      return item.label === label
+    })
+    if (menuItem) return menuItem
+  }
 }
