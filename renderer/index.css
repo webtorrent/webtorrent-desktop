@@ -306,13 +306,15 @@ body.drag::before {
 .player-controls .playback-cursor {
   position: absolute;
   top: 2px;
-  margin-top: 7px;
-  margin-left: 7px;
   background-color: #FFF;
   width: 0;
   height: 0;
   border-radius: 0;
-  transition: all 0.1s ease-out;
+  margin-top: 7px;
+  margin-left: 7px;
+  transition-property: width, height, border-radius, margin-top, margin-left;
+  transition-duration: 0.1s;
+  transition-timing-function: ease-out;
 }
 
 .player-controls .play-pause {
@@ -330,7 +332,7 @@ body.drag::before {
 .player .scrub-bar:hover .playback-cursor {
   width: 14px;
   height: 14px;
+  border-radius: 7px;
   margin-top: 0;
   margin-left: 0;
-  border-radius: 7px;
 }
