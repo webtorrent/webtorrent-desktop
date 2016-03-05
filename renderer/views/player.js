@@ -31,7 +31,7 @@ function Player (state, dispatch) {
         <video
           src="${state.server.localURL}"
           onloadedmetadata=${onLoadedMetadata}
-          autoplay="true">
+          autoplay="autoplay">
         </video>
       </div>
       ${renderPlayerControls(state, dispatch)}
