@@ -1,11 +1,18 @@
 module.exports = captureVideoFrame
 
 function captureVideoFrame (video, format) {
-  if (typeof video === 'string') video = document.querySelector(video)
-  if (!video || video.nodeName !== 'VIDEO') {
+  if (typeof video === 'string') {
+    video = document.querySelector(video)
+  }
+
+  if (video == null || video.nodeName !== 'VIDEO') {
     throw new Error('First argument must be a <video> element or selector')
   }
-  if (format == null) format = 'png'
+
+  if (format == null) {
+    format = 'png'
+  }
+
   if (format !== 'png' && format !== 'jpg' && format !== 'webp') {
     throw new Error('Second argument must be one of "png", "jpg", or "webp"')
   }

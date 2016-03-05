@@ -13,6 +13,7 @@ function torrentPoster (torrent, cb) {
     .reduce(function (a, b) {
       return a.length > b.length ? a : b
     })
+
   var index = torrent.files.indexOf(file)
 
   var server = torrent.createServer(0)
