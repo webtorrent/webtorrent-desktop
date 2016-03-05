@@ -18,9 +18,9 @@ function App (state, dispatch) {
   }
 
   return hx`
-    <div.app>
+    <div class="app">
       ${Header(state, dispatch)}
-      <div.content>${getView()}</div>
+      <div class="content">${getView()}</div>
     </div>
   `
 }
