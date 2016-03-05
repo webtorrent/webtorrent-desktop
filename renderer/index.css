@@ -91,7 +91,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   height: 40px;
   border-radius: 20px;
   font-size: 22px;
-  transition: all 0.05s ease-out;
+  transition: all 0.1s ease-out;
   text-align: center;
 }
 
@@ -192,7 +192,7 @@ body.drag::before {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  transition: all 0.05s ease-out;
+  transition: all 0.1s ease-out;
   position: relative;
 }
 
@@ -259,20 +259,21 @@ body.drag::before {
   content: ' — ';
 }
 
-
 /*
- * VIDEO CONTROLS
+ * PLAYER CONTROLS
  */
-.player-controls .bottom-bar {
+
+.player-controls {
   position: fixed;
+  background: rgb(40, 40, 40);
   width: 100%;
   height: 38px;
   bottom: 0;
   opacity: 0;
-  background-color: rgba(0, 0, 0, 0.25);
+  transition: all 0.1s ease-out;
 }
 
-.player:hover .bottom-bar {
+.player:hover .player-controls {
  opacity: 1;
 }
 
@@ -283,30 +284,35 @@ body.drag::before {
   height: 23px; /* 3px .loading-bar plus 10px above and below */
   top: -10px;
   left: 0;
-  cursor: pointer;
 }
 
 .player-controls .loading-bar {
   position: relative;
   width: 100%;
   height: 3px;
+  margin-top: 7px;
   background-color: rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease-out;
+  position: absolute;
 }
 
 .player-controls .loading-bar-part {
   position: absolute;
+  background-color: #dd0000;
   top: 0;
   height: 100%;
-  background-color: #dd0000;
 }
 
 .player-controls .playback-cursor {
   position: absolute;
-  top: -2px;
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  border: 3px solid #bbbbbb;
+  top: 2px;
+  margin-top: 7px;
+  margin-left: 7px;
+  background-color: #FFF;
+  width: 0;
+  height: 0;
+  border-radius: 0;
+  transition: all 0.1s ease-out;
 }
 
 .player-controls .play-pause {
@@ -314,5 +320,17 @@ body.drag::before {
   width: 20px;
   height: 20px;
   margin: 5px auto;
-  cursor: pointer;
+}
+
+.player .scrub-bar:hover .loading-bar {
+  height: 5px;
+  margin-top: 6px;
+}
+
+.player .scrub-bar:hover .playback-cursor {
+  width: 14px;
+  height: 14px;
+  margin-top: 0;
+  margin-left: 0;
+  border-radius: 7px;
 }

@@ -49,26 +49,26 @@ function Player (state, dispatch) {
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
   return h('.player-controls', [
-    h('.bottom-bar', [
+    h('.scrub-bar', {
+      onclick: handleScrub,
+      ondrag: handleScrub
+    }, [
       h('.loading-bar', renderLoadingBar(state)),
-      h('.scrub-bar', {
-        draggable: true,
-        onclick: handleScrub,
-        ondrag: handleScrub
-      }),
       h('.playback-cursor', {
         style: {
           left: 'calc(' + positionPercent + '% - 4px)'
         }
-      }),
-      h('i.icon.play-pause', {
-        onclick: () => dispatch('playPause')
-      }, state.video.isPaused ? 'play_arrow' : 'pause')
-    ])
+      })
+    ]),
+    h('i.icon.play-pause', {
+      onclick: () => dispatch('playPause')
+    }, state.video.isPaused ? 'play_arrow' : 'pause')
   ])
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
+    // TODO: don't use remote -- it does IPC with the main process which is overkill
+    // just to get the width
     var windowWidth = electron.remote.getCurrentWindow().getBounds().width
     var fraction = e.clientX / windowWidth
     var position = fraction * state.video.duration /* seconds */
