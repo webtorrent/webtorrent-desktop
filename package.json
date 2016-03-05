@@ -30,11 +30,6 @@
     "standard": "^6.0.5"
   },
   "electronVersion": "0.36.0",
-  "files": [
-    "index.js",
-    "index.html",
-    "index.css"
-  ],
   "homepage": "https://webtorrent.io",
   "keywords": [
     "electron",
