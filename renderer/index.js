@@ -85,7 +85,6 @@ function init () {
   })
 
   document.addEventListener('keydown', function (e) {
-    console.log('keydown ' + e.which)
     if (e.which === 27) { /* ESC means either exit fullscreen or go back */
       if (state.view.isFullScreen) {
         dispatch('toggleFullScreen')
