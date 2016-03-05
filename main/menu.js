@@ -13,6 +13,7 @@ function toggleFullScreen () {
 
 function onToggleFullScreen () {
   getMenuItem('Full Screen').checked = windows.main.isFullScreen()
+  windows.main.send('fullscreenChanged', windows.main.isFullScreen())
 }
 
 // Sets whether the window should always show on top of other windows

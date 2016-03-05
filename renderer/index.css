@@ -117,7 +117,6 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 
 .header .nav {
   font-weight: bold;
-  margin-left: 78px;
   margin-right: 7px;
 }
 
@@ -174,6 +173,11 @@ body.drag::before {
 .player {
   height: 100%;
   background-color: #000;
+}
+
+.player .letterbox {
+  height: 100%;
+  display: flex;
 }
 
 .player video {
@@ -326,11 +330,6 @@ body.drag::before {
 }
 
 .player-controls .chromecast,
-.player-controls .airplay {
-  font-size: 22px; /* make the cast icons less huge */
-}
-
-.player-controls .chromecast,
 .player-controls .airplay,
 .player-controls .fullscreen {
   display: block;
@@ -338,6 +337,12 @@ body.drag::before {
   height: 20px;
   margin: 5px;
   float: right;
+}
+
+.player-controls .chromecast,
+.player-controls .airplay {
+  font-size: 18px; /* make the cast icons less huge */
+  margin-top: 8px !important;
 }
 
 .player .playback-bar:hover .loading-bar {

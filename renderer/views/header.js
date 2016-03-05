@@ -5,10 +5,13 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 function Header (state, dispatch) {
+  var navLeftStyle = process.platform === 'darwin'
+    ? {marginLeft: '78px'} /* OSX needs room on the left for min/max/close buttons */
+    : null /* On Windows and Linux, the header is separate & underneath the title bar */
   return hx`
     <div class="header">
       ${getTitle()}
-      <div class="nav left">
+      <div class="nav left" style=${navLeftStyle}>
         <i class="icon back" onclick=${onBack}>chevron_left</i>
         <i class="icon forward" onclick=${onForward}>chevron_right</i>
       </div>

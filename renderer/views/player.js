@@ -27,11 +27,13 @@ function Player (state, dispatch) {
   // Show the video as large as will fit in the window, play immediately
   return hx`
     <div class="player">
-      <video
-        src="${state.server.localURL}"
-        onloadedmetadata="${onLoadedMetadata}"
-        autoplay="true">
-      </video>
+      <div class="letterbox">
+        <video
+          src="${state.server.localURL}"
+          onloadedmetadata="${onLoadedMetadata}"
+          autoplay="true">
+        </video>
+      </div>
       ${renderPlayerControls(state, dispatch)}
     </div>
   `

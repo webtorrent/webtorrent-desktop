@@ -17,9 +17,11 @@ function App (state, dispatch) {
     }
   }
 
+  var header = state.view.isFullScreen ? null : Header(state, dispatch)
+
   return hx`
     <div class="app">
-      ${Header(state, dispatch)}
+      ${header}
       <div class="content">${getView()}</div>
     </div>
   `

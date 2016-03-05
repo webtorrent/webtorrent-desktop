@@ -176,6 +176,11 @@ electron.ipcRenderer.on('seed', function (e, files) {
   seed(files)
 })
 
+electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
+  state.view.isFullScreen = isFullScreen
+  update()
+})
+
 function onFiles (files) {
   // .torrent file = start downloading the torrent
   files.filter(isTorrentFile).forEach(function (torrentFile) {
