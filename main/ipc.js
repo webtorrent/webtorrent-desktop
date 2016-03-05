@@ -35,21 +35,21 @@ function addTorrentFromPaste () {
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
-    windows.mainWindow.send('addTorrent', torrentId)
+    windows.main.send('addTorrent', torrentId)
   })
 }
 
 function setBounds (bounds) {
   debug('setBounds %o', bounds)
-  if (windows.mainWindow) {
-    windows.mainWindow.setBounds(bounds, true)
+  if (windows.main) {
+    windows.main.setBounds(bounds, true)
   }
 }
 
 function setAspectRatio (aspectRatio, extraSize) {
   debug('setAspectRatio %o %o', aspectRatio, extraSize)
-  if (windows.mainWindow) {
-    windows.mainWindow.setAspectRatio(aspectRatio, extraSize)
+  if (windows.main) {
+    windows.main.setAspectRatio(aspectRatio, extraSize)
   }
 }
 
@@ -62,7 +62,7 @@ function setBadge (text) {
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
 function setProgress (progress) {
   debug('setProgress %s', progress)
-  if (windows.mainWindow) {
-    windows.mainWindow.setProgressBar(progress)
+  if (windows.main) {
+    windows.main.setProgressBar(progress)
   }
 }
