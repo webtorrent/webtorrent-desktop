@@ -72,7 +72,7 @@ function init () {
   dragDrop('body', onFiles)
 
   chromecasts.on('update', function (player) {
-    state.view.chromecast = player
+    state.view.devices.chromecast = player
     update()
   })
 
@@ -285,8 +285,8 @@ function deleteTorrent (torrent) {
 
 function openChromecast (torrent) {
   startServer(torrent, function () {
-    state.view.chromecast.play(state.server.networkURL, { title: 'WebTorrent — ' + torrent.name })
-    state.view.chromecast.on('error', function (err) {
+    state.view.devices.chromecast.play(state.server.networkURL, { title: 'WebTorrent — ' + torrent.name })
+    state.view.devices.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
       onError(err)
     })
