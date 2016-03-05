@@ -6,13 +6,13 @@ var hx = hyperx(h)
 
 function Header (state, dispatch) {
   return hx`
-    <div.header>
+    <div class="header">
       ${getTitle()}
-      <div.nav.left>
-        <i.icon.back onclick=${onBack}>chevron_left</i>
-        <i.icon.forward onclick=${onForward}>chevron_right</i>
+      <div class="nav left">
+        <i class="icon back" onclick=${onBack}>chevron_left</i>
+        <i class="icon forward" onclick=${onForward}>chevron_right</i>
       </div>
-      <div.nav.right>
+      <div class="nav right">
         ${plusButton()}
       </div>
     </div>
@@ -20,13 +20,13 @@ function Header (state, dispatch) {
 
   function getTitle () {
     if (process.platform === 'darwin') {
-      return hx`<div.title>${state.view.title}</div>`
+      return hx`<div class="title">${state.view.title}</div>`
     }
   }
 
   function plusButton () {
     if (state.view.url !== '/player') {
-      return hx`<i.icon.add onclick=${onAddTorrent}>add</i>`
+      return hx`<i class="icon add" onclick=${onAddTorrent}>add</i>`
     }
   }
 

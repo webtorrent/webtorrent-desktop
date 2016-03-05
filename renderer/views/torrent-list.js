@@ -11,7 +11,7 @@ function TorrentList (state, dispatch) {
     : []
 
   var list = torrents.map((torrent) => renderTorrent(state, dispatch, torrent))
-  return hx`<div.torrent-list>${list}</div>`
+  return hx`<div class="torrent-list">${list}</div>`
 }
 
 // Renders a torrent in the torrent list
@@ -29,14 +29,15 @@ function renderTorrent (state, dispatch, torrent) {
   var elements = [
     renderTorrentMetadata(torrent),
     hx`
-      <i.icon.delete
+      <i
+        class="icon delete"
         onclick=${() => dispatch('deleteTorrent', torrent)}>
         close
       </i>
     `,
     hx`
       <i.btn.icon.play
-        className="${!torrent.ready ? 'disabled' : ''}"
+        class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openPlayer', torrent)}>
         play_arrow
       </i>
@@ -46,7 +47,7 @@ function renderTorrent (state, dispatch, torrent) {
   if (state.view.chromecast) {
     elements.push(hx`
       <i.btn.icon.chromecast
-        className="${!torrent.ready ? 'disabled' : ''}"
+        class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openChromecast', torrent)}>
         cast
       </i>
@@ -56,23 +57,23 @@ function renderTorrent (state, dispatch, torrent) {
   if (state.view.devices.airplay) {
     elements.push(hx`
       <i.btn.icon.airplay
-        className="${!torrent.ready ? 'disabled' : ''}"
+        class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openAirplay', torrent)}>
         airplay
       </i>
     `)
   }
 
-  return hx`<div.torrent style=${style}>${elements}</div>`
+  return hx`<div class="torrent" style=${style}>${elements}</div>`
 }
 
 // Renders the torrent name and download progress
 function renderTorrentMetadata (torrent) {
   return hx`
-    <div.metadata>
-      <div.name.ellipsis>${torrent.name || 'Loading torrent...'}</div>
-      <div.status>
-        <span.progress>${Math.floor(100 * torrent.progress)}%</span>
+    <div class="metadata">
+      <div class="name ellipsis">${torrent.name || 'Loading torrent...'}</div>
+      <div class="status">
+        <span class="progress">${Math.floor(100 * torrent.progress)}%</span>
       </div>
       ${getFilesLength()}
       <span>${getPeers()}</span>
@@ -88,7 +89,7 @@ function renderTorrentMetadata (torrent) {
 
   function getFilesLength () {
     if (torrent.ready && torrent.files.length > 1) {
-      return hx`<span.files>${torrent.files.length} files</span>`
+      return hx`<span class="files">${torrent.files.length} files</span>`
     }
   }
 }
