@@ -15,7 +15,7 @@ app.on('before-quit', function () {
 })
 
 function createMainWindow (menu) {
-  windows.main = new electron.BrowserWindow({
+  var win = windows.main = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true,
     minWidth: 375,
@@ -26,23 +26,28 @@ function createMainWindow (menu) {
     width: 450,
     height: 300
   })
-  windows.main.loadURL(config.INDEX)
-  windows.main.webContents.on('did-finish-load', function () {
+  win.loadURL(config.INDEX)
+
+  win.webContents.on('dom-ready', function () {
+    menu.onToggleFullScreen()
+  })
+
+  win.webContents.on('did-finish-load', function () {
     setTimeout(function () {
       debug('startup time: %sms', Date.now() - app.startTime)
-      windows.main.show()
+      win.show()
     }, 50)
   })
-  windows.main.on('enter-full-screen', menu.onToggleFullScreen)
-  windows.main.on('leave-full-screen', menu.onToggleFullScreen)
-  windows.main.on('close', function (e) {
+  win.on('enter-full-screen', menu.onToggleFullScreen)
+  win.on('leave-full-screen', menu.onToggleFullScreen)
+  win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
       e.preventDefault()
-      windows.main.hide()
+      win.hide()
     }
   })
-  windows.main.once('closed', function () {
-    windows.main = null
+  win.once('closed', function () {
+    win = null
   })
 }
 

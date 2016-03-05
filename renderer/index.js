@@ -46,6 +46,7 @@ var state = global.state = {
     // history: [], /* track how we got to the current view. enables Back button */
     // historyIndex: 0,
     isFocused: true,
+    isFullScreen: false,
     mainWindowBounds: null, /* x y width height */
     title: 'WebTorrent' /* current window title */
   },
