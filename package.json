@@ -17,6 +17,7 @@
     "debug": "^2.2.0",
     "drag-drop": "^2.3.1",
     "hyperx": "^2.0.0",
+    "main-loop": "^3.2.0",
     "network-address": "^1.1.0",
     "pretty-bytes": "^3.0.0",
     "throttleit": "^1.0.0",

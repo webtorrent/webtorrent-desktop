@@ -6,6 +6,7 @@ var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
+var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
 var throttle = require('throttleit')
@@ -56,7 +57,7 @@ var state = global.state = {
   }
 }
 
-var client, currentVDom, rootElement, updateThrottled
+var client, vdomLoop, updateThrottled
 
 function init () {
   client = global.client = new WebTorrent()
@@ -64,9 +65,12 @@ function init () {
   client.on('error', onError)
   state.view.client = client
 
-  currentVDom = App(state, dispatch)
-  rootElement = createElement(currentVDom)
-  document.body.appendChild(rootElement)
+  vdomLoop = mainLoop(state, render, {
+    create: createElement,
+    diff: diff,
+    patch: patch
+  })
+  document.body.appendChild(vdomLoop.target)
 
   updateThrottled = throttle(update, 1000)
 
@@ -107,12 +111,12 @@ function init () {
 }
 init()
 
-function update () {
-  var newVDom = App(state, dispatch)
-  var patches = diff(currentVDom, newVDom)
-  rootElement = patch(rootElement, patches)
-  currentVDom = newVDom
+function render (state) {
+  return App(state, dispatch)
+}
 
+function update () {
+  vdomLoop.update(state)
   updateDockIcon()
 }
 
