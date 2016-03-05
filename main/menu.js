@@ -49,6 +49,10 @@ function getMenuItem (label) {
   }
 }
 
+function addFakeDevice (device) {
+  windows.main.send('addFakeDevice', device)
+}
+
 function getMenuTemplate () {
   var template = [
     {
@@ -143,17 +147,33 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click: reloadWindow
-        },
-        {
-          label: 'Developer Tools',
-          accelerator: (function () {
-            if (process.platform === 'darwin') return 'Alt+Command+I'
-            else return 'Ctrl+Shift+I'
-          })(),
-          click: toggleDevTools
+          label: 'Developer',
+          submenu: [
+            {
+              label: 'Reload',
+              accelerator: 'CmdOrCtrl+R',
+              click: reloadWindow
+            },
+            {
+              label: 'Developer Tools',
+              accelerator: (function () {
+                if (process.platform === 'darwin') return 'Alt+Command+I'
+                else return 'Ctrl+Shift+I'
+              })(),
+              click: toggleDevTools
+            },
+            {
+              type: 'separator'
+            },
+            {
+              label: 'Add Fake Airplay',
+              click: () => addFakeDevice('airplay')
+            },
+            {
+              label: 'Add Fake Chromecast',
+              click: () => addFakeDevice('chromecast')
+            }
+          ]
         }
       ]
     },

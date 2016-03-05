@@ -5,6 +5,7 @@ var chromecasts = require('chromecasts')()
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
+var EventEmitter = require('events')
 var networkAddress = require('network-address')
 var path = require('path')
 var throttle = require('throttleit')
@@ -191,6 +192,13 @@ electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
   update()
 })
 
+electron.ipcRenderer.on('addFakeDevice', function (e, device) {
+  var player = new EventEmitter()
+  player.play = (networkURL) => console.log(networkURL)
+  state.view.devices[device] = player
+  update()
+})
+
 function onFiles (files) {
   // .torrent file = start downloading the torrent
   files.filter(isTorrentFile).forEach(function (torrentFile) {
@@ -248,6 +256,8 @@ function torrentReady (torrent) {
 }
 
 function startServer (torrent, cb) {
+  if (state.server) return cb()
+
   // use largest file
   state.view.torrentPlaying = torrent.files.reduce(function (a, b) {
     return a.length > b.length ? a : b
