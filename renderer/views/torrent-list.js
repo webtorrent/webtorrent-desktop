@@ -29,15 +29,14 @@ function renderTorrent (state, dispatch, torrent) {
   var elements = [
     renderTorrentMetadata(torrent),
     hx`
-      <i
-        className="icon delete"
+      <i.icon.delete
         onclick=${() => dispatch('deleteTorrent', torrent)}>
         close
       </i>
     `,
     hx`
-      <i
-        className="${!torrent.ready ? 'disabled btn icon play' : 'btn icon play'}"
+      <i.btn.icon.play
+        className="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openPlayer', torrent)}>
         play_arrow
       </i>
@@ -46,8 +45,8 @@ function renderTorrent (state, dispatch, torrent) {
 
   if (state.view.chromecast) {
     elements.push(hx`
-      <i
-        className="${!torrent.ready ? 'disabled btn icon chromecast' : 'btn icon chromecast'}"
+      <i.btn.icon.chromecast
+        className="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openChromecast', torrent)}>
         cast
       </i>
@@ -56,8 +55,8 @@ function renderTorrent (state, dispatch, torrent) {
 
   if (state.view.devices.airplay) {
     elements.push(hx`
-      <i
-        className="${!torrent.ready ? 'disabled btn icon airplay' : 'btn icon airplay'}"
+      <i.btn.icon.airplay
+        className="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openAirplay', torrent)}>
         airplay
       </i>
