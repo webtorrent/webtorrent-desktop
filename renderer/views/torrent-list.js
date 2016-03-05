@@ -11,7 +11,7 @@ function TorrentList (state, dispatch) {
     : []
 
   var list = torrents.map((torrent) => renderTorrent(state, dispatch, torrent))
-  return hx`<div className="torrent-list">${list}</div>`
+  return hx`<div.torrent-list>${list}</div>`
 }
 
 // Renders a torrent in the torrent list
@@ -63,16 +63,16 @@ function renderTorrent (state, dispatch, torrent) {
     `)
   }
 
-  return hx`<div className='torrent' style=${style}>${elements}</div>`
+  return hx`<div.torrent style=${style}>${elements}</div>`
 }
 
 // Renders the torrent name and download progress
 function renderTorrentMetadata (torrent) {
   return hx`
-    <div className="metadata">
-      <div className="name ellipsis">${torrent.name || 'Loading torrent...'}</div>
-      <div className="status">
-        <span className="progress">${Math.floor(100 * torrent.progress)}%</span>
+    <div.metadata>
+      <div.name.ellipsis>${torrent.name || 'Loading torrent...'}</div>
+      <div.status>
+        <span.progress>${Math.floor(100 * torrent.progress)}%</span>
       </div>
       ${getFilesLength()}
       <span>${getPeers()}</span>
@@ -88,7 +88,7 @@ function renderTorrentMetadata (torrent) {
 
   function getFilesLength () {
     if (torrent.ready && torrent.files.length > 1) {
-      return hx`<span className="files">${torrent.files.length} files</span>`
+      return hx`<span.files>${torrent.files.length} files</span>`
     }
   }
 }

@@ -26,7 +26,7 @@ function Player (state, dispatch) {
 
   // Show the video as large as will fit in the window, play immediately
   return hx`
-    <div className="player">
+    <div.player>
       <video
         src="${state.server.localURL}"
         onloadedmetadata="${onLoadedMetadata}"
@@ -55,15 +55,15 @@ function renderPlayerControls (state, dispatch) {
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 4px)' }
 
   return hx`
-    <div className="player-controls">
-      <div className="scrub-bar"
+    <div.player-controls>
+      <div.scrub-bar
         draggable="true"
         onclick=${handleScrub},
         ondrag=${handleScrub}>
         ${renderLoadingBar(state)}
-        <div className="playback-cursor" style=${playbackCursorStyle}></div>
+        <div.playback-cursor style=${playbackCursorStyle}></div>
       </div>
-      <i className="icon play-pause" onclick=${() => dispatch('playPause')}>
+      <i.icon.play-pause onclick=${() => dispatch('playPause')}>
         ${state.video.isPaused ? 'play_arrow' : 'pause'}
       </i>
     </div>
@@ -104,14 +104,14 @@ function renderLoadingBar (state) {
 
   // Output an list of rectangles to show loading progress
   return hx`
-    <div className="loading-bar">
+    <div.loading-bar>
       ${parts.map(function (part) {
         var style = {
           left: (100 * part.start / numParts) + '%',
           width: (100 * part.count / numParts) + '%'
         }
 
-        return hx`<div className="loading-bar-part" style=${style}></div>`
+        return hx`<div.loading-bar-part style=${style}></div>`
       })}
     </div>
   `
