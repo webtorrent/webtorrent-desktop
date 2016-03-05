@@ -283,7 +283,6 @@ body.drag::before {
   height: 23px; /* 3px .loading-bar plus 10px above and below */
   top: -10px;
   left: 0;
-  cursor: pointer;
 }
 
 .player-controls .loading-bar {
@@ -314,5 +313,4 @@ body.drag::before {
   width: 20px;
   height: 20px;
   margin: 5px auto;
-  cursor: pointer;
 }
