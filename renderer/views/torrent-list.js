@@ -49,16 +49,28 @@ function renderTorrent (state, dispatch, torrent) {
 
 // Renders the torrent name and download progress
 function renderTorrentMetadata (torrent) {
+  var progressPercent = 0
+  var progressBytes = 0
+
+  if (torrent.progress) {
+    progressPercent = Math.floor(100 * torrent.progress)
+  }
+
+  if (torrent.length && torrent.progress) {
+    progressBytes = torrent.length * torrent.progress
+  }
+
   return hx`
     <div class="metadata">
       <div class="name ellipsis">${torrent.name || 'Loading torrent...'}</div>
       <div class="status">
-        <span class="progress">${Math.floor(100 * torrent.progress)}%</span>
+        <span class="progress">${progressPercent}%</span>
+        <span>${prettyBytes(progressBytes)} / ${prettyBytes(torrent.length || 0)}</span>
       </div>
       ${getFilesLength()}
       <span>${getPeers()}</span>
-      <span>${prettyBytes(torrent.downloadSpeed)}/s</span>
-      <span>${prettyBytes(torrent.uploadSpeed)}/s</span>
+      <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
+      <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
     </div>
   `
 

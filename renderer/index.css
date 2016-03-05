@@ -266,7 +266,7 @@ body.drag::before {
   bottom: 20px;
 }
 
-.torrent .status :not(:last-child)::after {
+.torrent span:not(:last-child)::after {
   content: ' — ';
 }
 
