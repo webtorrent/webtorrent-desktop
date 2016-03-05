@@ -52,18 +52,25 @@ function Player (state, dispatch) {
 // TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
-  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 4px)' }
+  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 6px)' }
   var torrent = state.view.torrentPlaying._torrent
 
   var elements = [
     hx`
-      <div class="scrub-bar"
-        draggable="true"
-        onclick=${handleScrub},
-        ondrag=${handleScrub}>
+      <div class="playback-bar">
         ${renderLoadingBar(state)}
         <div class="playback-cursor" style=${playbackCursorStyle}></div>
+        <div class="scrub-bar"
+          draggable="true"
+          onclick=${handleScrub},
+          ondrag=${handleScrub}></div>
       </div>
+    `,
+    hx`
+      <i class="icon fullscreen"
+        onclick=${() => dispatch('toggleFullScreen')}>
+        fullscreen
+      </i>
     `
   ]
   if (state.view.devices.chromecast) {
@@ -84,12 +91,6 @@ function renderPlayerControls (state, dispatch) {
       </i>
     `)
   }
-  elements.push(hx`
-    <i class="icon fullscreen"
-      onclick=${() => dispatch('toggleFullScreen')}>
-      fullscreen
-    </i>
-  `)
   elements.push(hx`
     <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
       ${state.video.isPaused ? 'play_arrow' : 'pause'}

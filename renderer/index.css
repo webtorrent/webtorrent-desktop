@@ -290,8 +290,8 @@ body.drag::before {
 .player-controls .loading-bar {
   position: relative;
   width: 100%;
+  top: -3px;
   height: 3px;
-  margin-top: 7px;
   background-color: rgba(0, 0, 0, 0.3);
   transition: all 0.1s ease-out;
   position: absolute;
@@ -306,7 +306,7 @@ body.drag::before {
 
 .player-controls .playback-cursor {
   position: absolute;
-  top: 2px;
+  top: -8px;
   background-color: #FFF;
   width: 0;
   height: 0;
@@ -326,6 +326,11 @@ body.drag::before {
 }
 
 .player-controls .chromecast,
+.player-controls .airplay {
+  font-size: 22px; /* make the cast icons less huge */
+}
+
+.player-controls .chromecast,
 .player-controls .airplay,
 .player-controls .fullscreen {
   display: block;
@@ -335,12 +340,11 @@ body.drag::before {
   float: right;
 }
 
-.player .scrub-bar:hover .loading-bar {
+.player .playback-bar:hover .loading-bar {
   height: 5px;
-  margin-top: 6px;
 }
 
-.player .scrub-bar:hover .playback-cursor {
+.player .playback-bar:hover .playback-cursor {
   width: 14px;
   height: 14px;
   border-radius: 7px;
