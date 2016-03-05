@@ -325,6 +325,16 @@ body.drag::before {
   margin: 5px auto;
 }
 
+.player-controls .chromecast,
+.player-controls .airplay,
+.player-controls .fullscreen {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+  float: right;
+}
+
 .player .scrub-bar:hover .loading-bar {
   height: 5px;
   margin-top: 6px;

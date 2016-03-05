@@ -163,6 +163,9 @@ function dispatch (action, ...args) {
     state.video.jumpToTime = args[0] /* seconds */
     update()
   }
+  if (action === 'toggleFullScreen') {
+    electron.ipcRenderer.send('toggleFullScreen')
+  }
 }
 
 electron.ipcRenderer.on('addTorrent', function (e, torrentId) {

@@ -44,26 +44,6 @@ function renderTorrent (state, dispatch, torrent) {
     `
   ]
 
-  if (state.view.chromecast) {
-    elements.push(hx`
-      <i.btn.icon.chromecast
-        class="${!torrent.ready ? 'disabled' : ''}"
-        onclick=${() => dispatch('openChromecast', torrent)}>
-        cast
-      </i>
-    `)
-  }
-
-  if (state.view.devices.airplay) {
-    elements.push(hx`
-      <i.btn.icon.airplay
-        class="${!torrent.ready ? 'disabled' : ''}"
-        onclick=${() => dispatch('openAirplay', torrent)}>
-        airplay
-      </i>
-    `)
-  }
-
   return hx`<div class="torrent" style=${style}>${elements}</div>`
 }
 

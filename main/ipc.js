@@ -27,6 +27,10 @@ function init () {
   ipcMain.on('setProgress', function (e, progress) {
     setProgress(progress)
   })
+
+  ipcMain.on('toggleFullScreen', function (e) {
+    windows.main.setFullScreen(!windows.main.isFullScreen())
+  })
 }
 
 function addTorrentFromPaste () {
