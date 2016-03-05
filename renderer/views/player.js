@@ -30,7 +30,7 @@ function Player (state, dispatch) {
       <div class="letterbox">
         <video
           src="${state.server.localURL}"
-          onloadedmetadata="${onLoadedMetadata}"
+          onloadedmetadata=${onLoadedMetadata}
           autoplay="true">
         </video>
       </div>
@@ -79,7 +79,6 @@ function renderPlayerControls (state, dispatch) {
   if (state.view.devices.chromecast) {
     elements.push(hx`
       <i.icon.chromecast
-        class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openChromecast', torrent)}>
         cast
       </i>
@@ -88,7 +87,6 @@ function renderPlayerControls (state, dispatch) {
   if (state.view.devices.airplay) {
     elements.push(hx`
       <i.icon.airplay
-        class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openAirplay', torrent)}>
         airplay
       </i>
@@ -96,7 +94,7 @@ function renderPlayerControls (state, dispatch) {
   }
   // On OSX, the back button is in the title bar of the window; see app.js
   // On other platforms, we render one over the video on mouseover
-  if(process.platform !== 'darwin') {
+  if (process.platform !== 'darwin') {
     elements.push(hx`
       <i.icon.back
         onclick=${() => dispatch('back')}>
