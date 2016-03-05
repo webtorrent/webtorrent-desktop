@@ -10,9 +10,9 @@ var TorrentList = require('./torrent-list')
 
 function App (state, dispatch) {
   function getView () {
-    if (state.temp.url === '/') {
+    if (state.url === '/') {
       return TorrentList(state, dispatch)
-    } else if (state.temp.url === '/player') {
+    } else if (state.url === '/player') {
       return Player(state, dispatch)
     }
   }
@@ -20,8 +20,8 @@ function App (state, dispatch) {
   // Show the header only when we're outside of fullscreen
   // Also don't show it in the video player except in OSX
   var isOSX = process.platform === 'darwin'
-  var isVideo = state.temp.url === '/player'
-  var isFullScreen = state.temp.isFullScreen
+  var isVideo = state.url === '/player'
+  var isFullScreen = state.isFullScreen
   var header = !isFullScreen && (!isVideo || isOSX) ? Header(state, dispatch) : null
 
   return hx`

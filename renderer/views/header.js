@@ -23,12 +23,12 @@ function Header (state, dispatch) {
 
   function getTitle () {
     if (process.platform === 'darwin') {
-      return hx`<div class="title">${state.temp.title}</div>`
+      return hx`<div class="title">${state.title}</div>`
     }
   }
 
   function plusButton () {
-    if (state.temp.url !== '/player') {
+    if (state.url !== '/player') {
       return hx`<i class="icon add" onclick=${onAddTorrent}>add</i>`
     }
   }

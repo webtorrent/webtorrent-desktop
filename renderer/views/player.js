@@ -9,18 +9,18 @@ function Player (state, dispatch) {
   // Instead, grab the DOM node and play/pause it if necessary
   var videoElement = document.querySelector('video')
   if (videoElement !== null) {
-    if (state.temp.video.isPaused && !videoElement.paused) {
+    if (state.video.isPaused && !videoElement.paused) {
       videoElement.pause()
-    } else if (!state.temp.video.isPaused && videoElement.paused) {
+    } else if (!state.video.isPaused && videoElement.paused) {
       videoElement.play()
     }
     // When the user clicks or drags on the progress bar, jump to that position
-    if (state.temp.video.jumpToTime) {
-      videoElement.currentTime = state.temp.video.jumpToTime
-      state.temp.video.jumpToTime = null
+    if (state.video.jumpToTime) {
+      videoElement.currentTime = state.video.jumpToTime
+      state.video.jumpToTime = null
     }
-    state.temp.video.currentTime = videoElement.currentTime
-    state.temp.video.duration = videoElement.duration
+    state.video.currentTime = videoElement.currentTime
+    state.video.duration = videoElement.duration
   }
 
   // Show the video as large as will fit in the window, play immediately
@@ -28,7 +28,7 @@ function Player (state, dispatch) {
     <div class="player">
       <div class="letterbox">
         <video
-          src="${state.temp.server.localURL}"
+          src="${state.server.localURL}"
           onloadedmetadata=${onLoadedMetadata}
           autoplay="autoplay">
         </video>
@@ -52,9 +52,9 @@ function Player (state, dispatch) {
 // Renders all video controls: play/pause, scrub, loading bar
 // TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
-  var positionPercent = 100 * state.temp.video.currentTime / state.temp.video.duration
+  var positionPercent = 100 * state.video.currentTime / state.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
-  var torrent = state.temp.torrentPlaying._torrent
+  var torrent = state.torrentPlaying._torrent
 
   var elements = [
     hx`
@@ -75,7 +75,7 @@ function renderPlayerControls (state, dispatch) {
     `
   ]
   // If we've detected a Chromecast or AppleTV, the user can play video there
-  if (state.temp.devices.chromecast) {
+  if (state.devices.chromecast) {
     elements.push(hx`
       <i.icon.chromecast
         onclick=${() => dispatch('openChromecast', torrent)}>
@@ -83,7 +83,7 @@ function renderPlayerControls (state, dispatch) {
       </i>
     `)
   }
-  if (state.temp.devices.airplay) {
+  if (state.devices.airplay) {
     elements.push(hx`
       <i.icon.airplay
         onclick=${() => dispatch('openAirplay', torrent)}>
@@ -103,7 +103,7 @@ function renderPlayerControls (state, dispatch) {
   }
   elements.push(hx`
     <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
-      ${state.temp.video.isPaused ? 'play_arrow' : 'pause'}
+      ${state.video.isPaused ? 'play_arrow' : 'pause'}
     </i>
   `)
 
@@ -113,7 +113,7 @@ function renderPlayerControls (state, dispatch) {
   function handleScrub (e) {
     var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
-    var position = fraction * state.temp.video.duration /* seconds */
+    var position = fraction * state.video.duration /* seconds */
     dispatch('playbackJump', position)
   }
 }
@@ -121,7 +121,7 @@ function renderPlayerControls (state, dispatch) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrent = state.temp.torrentPlaying._torrent
+  var torrent = state.torrentPlaying._torrent
   if (torrent === null) {
     return []
   }

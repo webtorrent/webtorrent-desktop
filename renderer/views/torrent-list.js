@@ -6,8 +6,8 @@ var hx = hyperx(h)
 var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
-  var torrents = state.temp.client
-    ? state.temp.client.torrents
+  var torrents = state.client
+    ? state.client.torrents
     : []
 
   var list = torrents.map((torrent) => renderTorrent(torrent, dispatch))

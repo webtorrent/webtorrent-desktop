@@ -34,31 +34,30 @@ var state = global.state = {
   /* Temporary state disappears once the program exits.
    * It can contain complex objects like open connections, etc.
    */
-  temp: {
-    url: '/',
-    client: null, /* the WebTorrent client */
-    server: null, /* local WebTorrent-to-HTTP server */
-    dock: {
-      badge: 0,
-      progress: 0
-    },
-    devices: {
-      airplay: null, /* airplay client. finds and manages AppleTVs */
-      chromecast: null /* chromecast client. finds and manages Chromecasts */
-    },
-    torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
-    // history: [], /* track how we got to the current view. enables Back button */
-    // historyIndex: 0,
-    isFocused: true,
-    isFullScreen: false,
-    mainWindowBounds: null, /* x y width height */
-    title: 'WebTorrent', /* current window title */
-    video: {
-      isPaused: false,
-      currentTime: 0, /* seconds */
-      duration: 1 /* seconds */
-    }
+  url: '/',
+  client: null, /* the WebTorrent client */
+  server: null, /* local WebTorrent-to-HTTP server */
+  dock: {
+    badge: 0,
+    progress: 0
   },
+  devices: {
+    airplay: null, /* airplay client. finds and manages AppleTVs */
+    chromecast: null /* chromecast client. finds and manages Chromecasts */
+  },
+  torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
+  // history: [], /* track how we got to the current view. enables Back button */
+  // historyIndex: 0,
+  isFocused: true,
+  isFullScreen: false,
+  mainWindowBounds: null, /* x y width height */
+  title: 'WebTorrent', /* current window title */
+  video: {
+    isPaused: false,
+    currentTime: 0, /* seconds */
+    duration: 1 /* seconds */
+  },
+
   /* Saved state is read from and written to ~/.webtorrent/state.json
    * It should be simple and minimal and must be JSONifiable
    */
@@ -90,7 +89,7 @@ function init () {
   client = global.client = new WebTorrent()
   client.on('warning', onWarning)
   client.on('error', onError)
-  state.temp.client = client
+  state.client = client
 
   vdomLoop = mainLoop(state, render, {
     create: createElement,
@@ -104,12 +103,12 @@ function init () {
   dragDrop('body', onFiles)
 
   chromecasts.on('update', function (player) {
-    state.temp.devices.chromecast = player
+    state.devices.chromecast = player
     update()
   })
 
   airplay.createBrowser().on('deviceOn', function (player) {
-    state.temp.devices.airplay = player
+    state.devices.airplay = player
   }).start()
 
   document.addEventListener('paste', function () {
@@ -118,7 +117,7 @@ function init () {
 
   document.addEventListener('keydown', function (e) {
     if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-      if (state.temp.isFullScreen) {
+      if (state.isFullScreen) {
         dispatch('toggleFullScreen')
       } else {
         dispatch('back')
@@ -127,13 +126,13 @@ function init () {
   })
 
   window.addEventListener('focus', function () {
-    state.temp.isFocused = true
-    if (state.temp.dock.badge > 0) electron.ipcRenderer.send('setBadge', '')
-    state.temp.dock.badge = 0
+    state.isFocused = true
+    if (state.dock.badge > 0) electron.ipcRenderer.send('setBadge', '')
+    state.dock.badge = 0
   })
 
   window.addEventListener('blur', function () {
-    state.temp.isFocused = false
+    state.isFocused = false
   })
 }
 init()
@@ -152,16 +151,16 @@ setInterval(function () {
 }, 1000)
 
 function updateDockIcon () {
-  var progress = state.temp.client.progress
-  var activeTorrentsExist = state.temp.client.torrents.some(function (torrent) {
+  var progress = state.client.progress
+  var activeTorrentsExist = state.client.torrents.some(function (torrent) {
     return torrent.progress !== 1
   })
   // Hide progress bar when client has no torrents, or progress is 100%
   if (!activeTorrentsExist || progress === 1) {
     progress = -1
   }
-  if (progress !== state.temp.dock.progress) {
-    state.temp.dock.progress = progress
+  if (progress !== state.dock.progress) {
+    state.dock.progress = progress
     electron.ipcRenderer.send('setProgress', progress)
   }
 }
@@ -190,19 +189,19 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
-    if (state.temp.url === '/player') {
+    if (state.url === '/player') {
       restoreBounds()
       closeServer()
     }
-    state.temp.url = '/'
+    state.url = '/'
     update()
   }
   if (action === 'playPause') {
-    state.temp.video.isPaused = !state.temp.video.isPaused
+    state.video.isPaused = !state.video.isPaused
     update()
   }
   if (action === 'playbackJump') {
-    state.temp.video.jumpToTime = args[0] /* seconds */
+    state.video.jumpToTime = args[0] /* seconds */
     update()
   }
   if (action === 'toggleFullScreen') {
@@ -219,14 +218,14 @@ electron.ipcRenderer.on('seed', function (e, files) {
 })
 
 electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
-  state.temp.isFullScreen = isFullScreen
+  state.isFullScreen = isFullScreen
   update()
 })
 
 electron.ipcRenderer.on('addFakeDevice', function (e, device) {
   var player = new EventEmitter()
   player.play = (networkURL) => console.log(networkURL)
-  state.temp.devices[device] = player
+  state.devices[device] = player
   update()
 })
 
@@ -263,9 +262,9 @@ function seed (files) {
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
   torrent.on('done', function () {
-    if (!state.temp.isFocused) {
-      state.temp.dock.badge += 1
-      electron.ipcRenderer.send('setBadge', state.temp.dock.badge)
+    if (!state.isFocused) {
+      state.dock.badge += 1
+      electron.ipcRenderer.send('setBadge', state.dock.badge)
     }
     update()
   })
@@ -287,19 +286,19 @@ function torrentReady (torrent) {
 }
 
 function startServer (torrent, cb) {
-  if (state.temp.server) return cb()
+  if (state.server) return cb()
 
   // use largest file
-  state.temp.torrentPlaying = torrent.files.reduce(function (a, b) {
+  state.torrentPlaying = torrent.files.reduce(function (a, b) {
     return a.length > b.length ? a : b
   })
-  var index = torrent.files.indexOf(state.temp.torrentPlaying)
+  var index = torrent.files.indexOf(state.torrentPlaying)
 
   var server = torrent.createServer()
   server.listen(0, function () {
     var port = server.address().port
     var urlSuffix = ':' + port + '/' + index
-    state.temp.server = {
+    state.server = {
       server: server,
       localURL: 'http://localhost' + urlSuffix,
       networkURL: 'http://' + networkAddress() + urlSuffix
@@ -309,13 +308,13 @@ function startServer (torrent, cb) {
 }
 
 function closeServer () {
-  state.temp.server.server.destroy()
-  state.temp.server = null
+  state.server.server.destroy()
+  state.server = null
 }
 
 function openPlayer (torrent) {
   startServer(torrent, function () {
-    state.temp.url = '/player'
+    state.url = '/player'
     update()
   })
 }
@@ -326,10 +325,10 @@ function deleteTorrent (torrent) {
 
 function openChromecast (torrent) {
   startServer(torrent, function () {
-    state.temp.devices.chromecast.play(state.temp.server.networkURL, {
+    state.devices.chromecast.play(state.server.networkURL, {
       title: 'WebTorrent — ' + torrent.name
     })
-    state.temp.devices.chromecast.on('error', function (err) {
+    state.devices.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
       onError(err)
     })
@@ -339,7 +338,7 @@ function openChromecast (torrent) {
 
 function openAirplay (torrent) {
   startServer(torrent, function () {
-    state.temp.devices.airplay.play(state.temp.server.networkURL, 0, function () {
+    state.devices.airplay.play(state.server.networkURL, 0, function () {
       // TODO: handle airplay errors
     })
     update()
@@ -347,7 +346,7 @@ function openAirplay (torrent) {
 }
 
 function setDimensions (dimensions) {
-  state.temp.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
+  state.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
 
   // Limit window size to screen size
   var workAreaSize = electron.remote.screen.getPrimaryDisplay().workAreaSize
@@ -373,8 +372,8 @@ function setDimensions (dimensions) {
 
 function restoreBounds () {
   electron.ipcRenderer.send('setAspectRatio', 0)
-  if (state.temp.mainWindowBounds) {
-    electron.ipcRenderer.send('setBounds', state.temp.mainWindowBounds, true)
+  if (state.mainWindowBounds) {
+    electron.ipcRenderer.send('setBounds', state.mainWindowBounds, true)
   }
 }
 
