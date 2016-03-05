@@ -1,8 +1,13 @@
+var startTime = Date.now()
+
 var electron = require('electron')
+var ipc = require('./ipc')
 var menu = require('./menu')
 var windows = require('./windows')
-var ipc = require('./ipc')
+
 var app = electron.app
+
+app.startTime = startTime
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
