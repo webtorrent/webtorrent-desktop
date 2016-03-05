@@ -259,10 +259,10 @@ body.drag::before {
   content: ' — ';
 }
 
-
 /*
  * VIDEO CONTROLS
  */
+
 .player-controls .bottom-bar {
   position: fixed;
   width: 100%;
@@ -270,6 +270,7 @@ body.drag::before {
   bottom: 0;
   opacity: 0;
   background-color: rgba(0, 0, 0, 0.25);
+  transition: all 0.1s ease-out;
 }
 
 .player:hover .bottom-bar {
