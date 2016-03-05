@@ -3,25 +3,24 @@ module.exports = Player
 var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
-var electron = require('electron')
 
 function Player (state, dispatch) {
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
   var videoElement = document.querySelector('video')
   if (videoElement !== null) {
-    if (state.video.isPaused && !videoElement.paused) {
+    if (state.temp.video.isPaused && !videoElement.paused) {
       videoElement.pause()
-    } else if (!state.video.isPaused && videoElement.paused) {
+    } else if (!state.temp.video.isPaused && videoElement.paused) {
       videoElement.play()
     }
     // When the user clicks or drags on the progress bar, jump to that position
-    if (state.video.jumpToTime) {
-      videoElement.currentTime = state.video.jumpToTime
-      state.video.jumpToTime = null
+    if (state.temp.video.jumpToTime) {
+      videoElement.currentTime = state.temp.video.jumpToTime
+      state.temp.video.jumpToTime = null
     }
-    state.video.currentTime = videoElement.currentTime
-    state.video.duration = videoElement.duration
+    state.temp.video.currentTime = videoElement.currentTime
+    state.temp.video.duration = videoElement.duration
   }
 
   // Show the video as large as will fit in the window, play immediately
@@ -29,7 +28,7 @@ function Player (state, dispatch) {
     <div class="player">
       <div class="letterbox">
         <video
-          src="${state.server.localURL}"
+          src="${state.temp.server.localURL}"
           onloadedmetadata=${onLoadedMetadata}
           autoplay="autoplay">
         </video>
@@ -53,9 +52,9 @@ function Player (state, dispatch) {
 // Renders all video controls: play/pause, scrub, loading bar
 // TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
-  var positionPercent = 100 * state.video.currentTime / state.video.duration
+  var positionPercent = 100 * state.temp.video.currentTime / state.temp.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
-  var torrent = state.view.torrentPlaying._torrent
+  var torrent = state.temp.torrentPlaying._torrent
 
   var elements = [
     hx`
@@ -76,7 +75,7 @@ function renderPlayerControls (state, dispatch) {
     `
   ]
   // If we've detected a Chromecast or AppleTV, the user can play video there
-  if (state.view.devices.chromecast) {
+  if (state.temp.devices.chromecast) {
     elements.push(hx`
       <i.icon.chromecast
         onclick=${() => dispatch('openChromecast', torrent)}>
@@ -84,7 +83,7 @@ function renderPlayerControls (state, dispatch) {
       </i>
     `)
   }
-  if (state.view.devices.airplay) {
+  if (state.temp.devices.airplay) {
     elements.push(hx`
       <i.icon.airplay
         onclick=${() => dispatch('openAirplay', torrent)}>
@@ -104,7 +103,7 @@ function renderPlayerControls (state, dispatch) {
   }
   elements.push(hx`
     <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
-      ${state.video.isPaused ? 'play_arrow' : 'pause'}
+      ${state.temp.video.isPaused ? 'play_arrow' : 'pause'}
     </i>
   `)
 
@@ -112,11 +111,9 @@ function renderPlayerControls (state, dispatch) {
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
-    // TODO: don't use remote -- it does IPC with the main process which is overkill
-    // just to get the width
-    var windowWidth = electron.remote.getCurrentWindow().getBounds().width
+    var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
-    var position = fraction * state.video.duration /* seconds */
+    var position = fraction * state.temp.video.duration /* seconds */
     dispatch('playbackJump', position)
   }
 }
@@ -124,7 +121,7 @@ function renderPlayerControls (state, dispatch) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrent = state.view.torrentPlaying._torrent
+  var torrent = state.temp.torrentPlaying._torrent
   if (torrent === null) {
     return []
   }

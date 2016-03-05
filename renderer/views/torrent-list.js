@@ -6,18 +6,18 @@ var hx = hyperx(h)
 var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
-  var torrents = state.view.client
-    ? state.view.client.torrents
+  var torrents = state.temp.client
+    ? state.temp.client.torrents
     : []
 
-  var list = torrents.map((torrent) => renderTorrent(state, dispatch, torrent))
+  var list = torrents.map((torrent) => renderTorrent(torrent, dispatch))
   return hx`<div class="torrent-list">${list}</div>`
 }
 
 // Renders a torrent in the torrent list
 // Includes name, download status, play button, background image
 // May be expanded for additional info, including the list of files inside
-function renderTorrent (state, dispatch, torrent) {
+function renderTorrent (torrent, dispatch) {
   // Background image: show some nice visuals, like a frame from the movie, if possible
   var style = {}
   if (torrent.posterURL) {
