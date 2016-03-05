@@ -2,13 +2,15 @@ var electron = require('electron')
 var debug = require('debug')('webtorrent-app:windows')
 var config = require('./config')
 
+var app = electron.app
+
 var windows = {
   main: null,
   createMainWindow: createMainWindow
 }
 var isQuitting = false
 
-electron.app.on('before-quit', function () {
+app.on('before-quit', function () {
   isQuitting = true
 })
 
@@ -27,7 +29,7 @@ function createMainWindow (menu) {
   windows.main.loadURL(config.INDEX)
   windows.main.webContents.on('did-finish-load', function () {
     setTimeout(function () {
-      debug('startup time: %sms', Date.now() - config.startTime)
+      debug('startup time: %sms', Date.now() - app.startTime)
       windows.main.show()
     }, 50)
   })

@@ -1,7 +1,8 @@
 var electron = require('electron')
 var debug = require('debug')('webtorrent-app:menu')
 var windows = require('./windows')
-var config = require('./config')
+
+var app = electron.app
 
 function toggleFullScreen () {
   debug('toggleFullScreen')
@@ -34,7 +35,7 @@ function toggleDevTools () {
 function reloadWindow () {
   debug('reloadWindow')
   if (windows.main) {
-    config.startTime = Date.now()
+    app.startTime = Date.now()
     windows.main.webContents.reloadIgnoringCache()
   }
 }
@@ -191,7 +192,7 @@ function getMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    var name = electron.app.getName()
+    var name = app.getName()
     template.unshift({
       label: name,
       submenu: [
@@ -230,7 +231,7 @@ function getMenuTemplate () {
         {
           label: 'Quit',
           accelerator: 'Command+Q',
-          click: function () { electron.app.quit() }
+          click: function () { app.quit() }
         }
       ]
     })
