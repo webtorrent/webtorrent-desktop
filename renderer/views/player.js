@@ -1,6 +1,8 @@
 module.exports = Player
 
 var h = require('virtual-dom/h')
+var hyperx = require('hyperx')
+var hx = hyperx(h)
 var electron = require('electron')
 
 function Player (state, dispatch) {
@@ -23,14 +25,16 @@ function Player (state, dispatch) {
   }
 
   // Show the video as large as will fit in the window, play immediately
-  return h('.player', [
-    h('video', {
-      src: state.server.localURL,
-      autoplay: true,
-      onloadedmetadata: onLoadedMetadata
-    }),
-    renderPlayerControls(state, dispatch)
-  ])
+  return hx`
+    <div className="player">
+      <video
+        src="${state.server.localURL}"
+        onloadedmetadata="${onLoadedMetadata}"
+        autoplay="true">
+      </video>
+      ${renderPlayerControls(state, dispatch)}
+    </div>
+  `
 
   // As soon as the video loads far enough to know the dimensions, resize the
   // window to match the video resolution
@@ -48,22 +52,22 @@ function Player (state, dispatch) {
 // TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
-  return h('.player-controls', [
-    h('.scrub-bar', {
-      onclick: handleScrub,
-      ondrag: handleScrub
-    }, [
-      h('.loading-bar', renderLoadingBar(state)),
-      h('.playback-cursor', {
-        style: {
-          left: 'calc(' + positionPercent + '% - 4px)'
-        }
-      })
-    ]),
-    h('i.icon.play-pause', {
-      onclick: () => dispatch('playPause')
-    }, state.video.isPaused ? 'play_arrow' : 'pause')
-  ])
+  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 4px)' }
+
+  return hx`
+    <div className="player-controls">
+      <div className="scrub-bar"
+        draggable="true"
+        onclick=${handleScrub},
+        ondrag=${handleScrub}>
+        ${renderLoadingBar(state)}
+        <div className="playback-cursor" style=${playbackCursorStyle}></div>
+      </div>
+      <i className="icon play-pause" onclick=${() => dispatch('playPause')}>
+        ${state.video.isPaused ? 'play_arrow' : 'pause'}
+      </i>
+    </div>
+  `
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
@@ -99,12 +103,16 @@ function renderLoadingBar (state) {
   }
 
   // Output an list of rectangles to show loading progress
-  return parts.map(function (part) {
-    return h('.loading-bar-part', {
-      style: {
-        left: (100 * part.start / numParts) + '%',
-        width: (100 * part.count / numParts) + '%'
-      }
-    })
-  })
+  return hx`
+    <div className="loading-bar">
+      ${parts.map(function (part) {
+        var style = {
+          left: (100 * part.start / numParts) + '%',
+          width: (100 * part.count / numParts) + '%'
+        }
+
+        return hx`<div className="loading-bar-part" style=${style}></div>`
+      })}
+    </div>
+  `
 }
