@@ -53,9 +53,10 @@ function Player (state, dispatch) {
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 4px)' }
+  var torrent = state.view.torrentPlaying._torrent
 
-  return hx`
-    <div class="player-controls">
+  var elements = [
+    hx`
       <div class="scrub-bar"
         draggable="true"
         onclick=${handleScrub},
@@ -63,11 +64,39 @@ function renderPlayerControls (state, dispatch) {
         ${renderLoadingBar(state)}
         <div class="playback-cursor" style=${playbackCursorStyle}></div>
       </div>
-      <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
-        ${state.video.isPaused ? 'play_arrow' : 'pause'}
+    `
+  ]
+  if (state.view.devices.chromecast) {
+    elements.push(hx`
+      <i.icon.chromecast
+        class="${!torrent.ready ? 'disabled' : ''}"
+        onclick=${() => dispatch('openChromecast', torrent)}>
+        cast
       </i>
-    </div>
-  `
+    `)
+  }
+  if (state.view.devices.airplay) {
+    elements.push(hx`
+      <i.icon.airplay
+        class="${!torrent.ready ? 'disabled' : ''}"
+        onclick=${() => dispatch('openAirplay', torrent)}>
+        airplay
+      </i>
+    `)
+  }
+  elements.push(hx`
+    <i class="icon fullscreen"
+      onclick=${() => dispatch('toggleFullScreen')}>
+      fullscreen
+    </i>
+  `)
+  elements.push(hx`
+    <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
+      ${state.video.isPaused ? 'play_arrow' : 'pause'}
+    </i>
+  `)
+
+  return hx`<div class="player-controls">${elements}</div>`
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
