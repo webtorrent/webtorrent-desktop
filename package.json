@@ -26,15 +26,9 @@
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.36.0",
+    "electron-prebuilt": "0.36.9",
     "standard": "^6.0.5"
   },
-  "electronVersion": "0.36.0",
-  "files": [
-    "index.js",
-    "index.html",
-    "index.css"
-  ],
   "homepage": "https://webtorrent.io",
   "keywords": [
     "electron",
@@ -48,7 +42,7 @@
     "url": "git://github.com/feross/webtorrent-app.git"
   },
   "scripts": {
-    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion",
+    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_devDependencies_electron_prebuilt",
     "debug": "DEBUG=* electron .",
     "start": "electron .",
     "test": "standard"
