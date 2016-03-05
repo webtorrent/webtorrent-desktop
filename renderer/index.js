@@ -84,6 +84,17 @@ function init () {
     electron.ipcRenderer.send('addTorrentFromPaste')
   })
 
+  document.addEventListener('keydown', function (e) {
+    console.log('keydown ' + e.which)
+    if (e.which === 27) { /* ESC means either exit fullscreen or go back */
+      if (state.view.isFullScreen) {
+        dispatch('toggleFullScreen')
+      } else {
+        dispatch('back')
+      }
+    }
+  })
+
   window.addEventListener('focus', function () {
     state.view.isFocused = true
     if (state.view.dock.badge > 0) electron.ipcRenderer.send('setBadge', '')

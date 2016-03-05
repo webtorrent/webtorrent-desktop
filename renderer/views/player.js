@@ -54,7 +54,7 @@ function Player (state, dispatch) {
 // TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
-  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 6px)' }
+  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
   var torrent = state.view.torrentPlaying._torrent
 
   var elements = [
@@ -75,6 +75,7 @@ function renderPlayerControls (state, dispatch) {
       </i>
     `
   ]
+  // If we've detected a Chromecast or AppleTV, the user can play video there
   if (state.view.devices.chromecast) {
     elements.push(hx`
       <i.icon.chromecast
@@ -90,6 +91,16 @@ function renderPlayerControls (state, dispatch) {
         class="${!torrent.ready ? 'disabled' : ''}"
         onclick=${() => dispatch('openAirplay', torrent)}>
         airplay
+      </i>
+    `)
+  }
+  // On OSX, the back button is in the title bar of the window; see app.js
+  // On other platforms, we render one over the video on mouseover
+  if(process.platform !== 'darwin') {
+    elements.push(hx`
+      <i.icon.back
+        onclick=${() => dispatch('back')}>
+        chevron_left
       </i>
     `)
   }

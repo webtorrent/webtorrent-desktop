@@ -17,7 +17,12 @@ function App (state, dispatch) {
     }
   }
 
-  var header = state.view.isFullScreen ? null : Header(state, dispatch)
+  // Show the header only when we're outside of fullscreen
+  // Also don't show it in the video player except in OSX
+  var isOSX = process.platform === 'darwin'
+  var isVideo = state.view.url === '/player'
+  var isFullScreen = state.view.isFullScreen
+  var header = !isFullScreen && (!isVideo || isOSX) ? Header(state, dispatch) : null
 
   return hx`
     <div class="app">

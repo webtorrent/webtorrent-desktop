@@ -27,6 +27,8 @@ body {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   height: 100%;
+  display: flex;
+  flex-flow: column;
 }
 
 /*
@@ -104,6 +106,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   height: 37px;
   padding-top: 6px;
   overflow: hidden;
+  flex: 0 1 auto;
 }
 
 .header .title {
@@ -150,9 +153,10 @@ a:not(.disabled):hover, i:not(.disabled):hover {
  */
 
 .content {
+  position: relative;
   width: 100%;
-  height: calc(100% - 38px);
   overflow: auto;
+  flex: 1 1 auto;
 }
 
 body.drag::before {
@@ -171,11 +175,14 @@ body.drag::before {
  */
 
 .player {
+  position: absolute;
+  width: 100%;
   height: 100%;
   background-color: #000;
 }
 
 .player .letterbox {
+  width: 100%;
   height: 100%;
   display: flex;
 }
@@ -269,7 +276,7 @@ body.drag::before {
 
 .player-controls {
   position: fixed;
-  background: rgb(40, 40, 40);
+  background: rgba(40, 40, 40, 0.8);
   width: 100%;
   height: 38px;
   bottom: 0;
@@ -331,11 +338,21 @@ body.drag::before {
 
 .player-controls .chromecast,
 .player-controls .airplay,
-.player-controls .fullscreen {
+.player-controls .fullscreen,
+.player-controls .back {
   display: block;
   width: 20px;
   height: 20px;
   margin: 5px;
+}
+
+.player-controls .back {
+  float: left;
+}
+
+.player-controls .chromecast,
+.player-controls .airplay,
+.player-controls .fullscreen {
   float: right;
 }
 
