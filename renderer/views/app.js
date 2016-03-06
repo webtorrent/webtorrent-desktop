@@ -11,10 +11,11 @@ var TorrentList = require('./torrent-list')
 var isOSX = process.platform === 'darwin'
 
 function App (state, dispatch) {
-  var cls = []
-  if (state.url === '/player') {
-    cls.push('player')
-  }
+  var cls = [
+    process.platform,
+    state.isFullScreen ? 'fullscreen' : 'not-fullscreen',
+    state.url === '/player' ? 'view-player' : ''
+  ]
 
   return hx`
     <div class='app ${cls.join(' ')}'>

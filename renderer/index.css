@@ -114,14 +114,14 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   top: 0;
   right: 0;
   z-index: 1000;
-  transition: opacity 0.2s ease-out;
+  transition: opacity 0.15s ease-out;
 }
 
-.app.player .header {
+.view-player .header {
   opacity: 0;
 }
 
-.app.player:hover .header:not(.hide) {
+.view-player:hover .header:not(.hide) {
   opacity: 0.8;
   cursor: default;
 }
@@ -142,6 +142,10 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 
 .header .nav.left {
   float: left;
+}
+
+.darwin.not-fullscreen .header .nav.left {
+  margin-left: 78px;
 }
 
 .header .nav.right {
@@ -302,7 +306,7 @@ body.drag::before {
   height: 38px;
   bottom: 0;
   opacity: 0;
-  transition: all 0.2s ease-out;
+  transition: all 0.15s ease-out;
 }
 
 .player:hover .player-controls {

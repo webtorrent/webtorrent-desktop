@@ -8,14 +8,11 @@ function Header (state, dispatch) {
   var hideControls = state.url === '/player' &&
     state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000
-  var navLeftStyle = (process.platform === 'darwin' && !state.isFullScreen)
-    ? { marginLeft: '78px' } /* OSX needs room on the left for min/max/close buttons */
-    : {} /* On Windows and Linux, the header is separate & underneath the title bar */
 
   return hx`
     <div class='header ${hideControls ? 'hide' : ''}'>
       ${getTitle()}
-      <div class='nav left' style=${navLeftStyle}>
+      <div class='nav left'>
         <i
           class='icon back'
           title='back'
