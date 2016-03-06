@@ -315,7 +315,9 @@ function openPlayer (torrent) {
 }
 
 function deleteTorrent (torrent) {
-  torrent.destroy(update)
+  torrent.destroy(function() {
+    saveTorrents() // updates after writing to config
+  })
 }
 
 function openChromecast (torrent) {
