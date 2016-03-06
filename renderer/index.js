@@ -207,9 +207,11 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleFullScreen') {
     electron.ipcRenderer.send('toggleFullScreen')
+    update()
   }
   if (action === 'videoMouseMoved') {
     state.video.mouseStationarySince = new Date().getTime()
+    update()
   }
 }
 
