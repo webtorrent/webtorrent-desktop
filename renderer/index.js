@@ -350,8 +350,6 @@ function openAirplay (torrent) {
 }
 
 function setDimensions (dimensions) {
-  if (state.isFullScreen) return
-
   state.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
 
   // Limit window size to screen size
