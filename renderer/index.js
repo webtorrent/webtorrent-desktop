@@ -217,28 +217,30 @@ function seed (files) {
 
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
-  torrent.on('done', function () {
+  torrent.on('download', updateThrottled)
+  torrent.on('upload', updateThrottled)
+
+  torrent.on('ready', torrentReady)
+  torrent.on('done', torrentDone)
+
+  update()
+
+  function torrentReady () {
+    torrentPoster(torrent, function (err, buf) {
+      if (err) return onWarning(err)
+      torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
+      update()
+    })
+    update()
+  }
+
+  function torrentDone () {
     if (!state.isFocused) {
       state.dock.badge += 1
       electron.ipcRenderer.send('setBadge', state.dock.badge)
     }
     update()
-  })
-  torrent.on('download', updateThrottled)
-  torrent.on('upload', updateThrottled)
-  torrent.on('ready', function () {
-    torrentReady(torrent)
-  })
-  update()
-}
-
-function torrentReady (torrent) {
-  torrentPoster(torrent, function (err, buf) {
-    if (err) return onWarning(err)
-    torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
-    update()
-  })
-  update()
+  }
 }
 
 function startServer (torrent, cb) {
