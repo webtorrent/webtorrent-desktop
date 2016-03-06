@@ -2,7 +2,6 @@ module.exports = {
   init: init
 }
 
-var electron = require('electron')
 var localShortcut = require('electron-localshortcut')
 
 function init (menu) {
