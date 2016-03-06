@@ -143,12 +143,18 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
+    // TODO
+    // window.history.back()
     if (state.url === '/player') {
       restoreBounds()
       closeServer()
     }
     state.url = '/'
     update()
+  }
+  if (action === 'forward') {
+    // TODO
+    // window.history.forward()
   }
   if (action === 'playPause') {
     state.video.isPaused = !state.video.isPaused

@@ -102,11 +102,24 @@ a:not(.disabled):hover, i:not(.disabled):hover {
  */
 
 .header {
+  background: rgb(40, 40, 40);
   border-bottom: 1px solid rgb(20, 20, 20);
-  height: 37px;
+  height: 38px;
   padding-top: 6px;
   overflow: hidden;
   flex: 0 1 auto;
+  opacity: 1;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  transition: opacity 0.1s ease-out;
+}
+
+.header.hide {
+  opacity: 0;
+  cursor: none;
 }
 
 .header .title {
@@ -195,6 +208,10 @@ body.drag::before {
 /*
  * TORRENT LIST
  */
+
+.torrent-list {
+  margin-top: 38px;
+}
 
 .torrent {
   height: 120px;
