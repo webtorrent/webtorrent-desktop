@@ -48,7 +48,7 @@ function renderTorrent (torrent, dispatch) {
 function renderTorrentMetadata (torrent) {
   var progress = Math.floor(100 * torrent.progress)
   var downloaded = prettyBytes(torrent.downloaded)
-  var total = prettyBytes(torrent.ready ? torrent.length : 0)
+  var total = prettyBytes(torrent.length || 0)
 
   if (downloaded !== total) downloaded += ` / ${total}`
 
