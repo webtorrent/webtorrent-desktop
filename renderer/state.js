@@ -35,19 +35,19 @@ module.exports = {
       {
         name: 'Sintel',
         torrentFile: 'resources/sintel.torrent'
-      },
-      {
-        name: 'Elephants Dream',
-        torrentFile: 'resources/ElephantsDream_archive.torrent'
-      },
-      {
-        name: 'Big Buck Bunny',
-        torrentFile: 'resources/BigBuckBunny_archive.torrent'
-      },
-      {
-        name: 'Tears of Steel',
-        torrentFile: 'resources/TearsOfSteel_archive.torrent'
       }
+      // {
+      //   name: 'Elephants Dream',
+      //   torrentFile: 'resources/ElephantsDream_archive.torrent'
+      // },
+      // {
+      //   name: 'Big Buck Bunny',
+      //   torrentFile: 'resources/BigBuckBunny_archive.torrent'
+      // },
+      // {
+      //   name: 'Tears of Steel',
+      //   torrentFile: 'resources/TearsOfSteel_archive.torrent'
+      // }
     ]
   }
 }
