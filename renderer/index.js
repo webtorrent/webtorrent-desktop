@@ -20,8 +20,6 @@ var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
 
-var HEADER_HEIGHT = 38
-
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   .map(function (arr) {
@@ -329,16 +327,11 @@ function setDimensions (dimensions) {
   var width = Math.floor(dimensions.width * scaleFactor)
   var height = Math.floor(dimensions.height * scaleFactor)
 
-  // Video player header only shows in OSX where it's part of the title bar. See app.js
-  if (process.platform === 'darwin') {
-    height += HEADER_HEIGHT
-  }
-
   // Center window on screen
   var x = Math.floor((workAreaSize.width - width) / 2)
   var y = Math.floor((workAreaSize.height - height) / 2)
 
-  electron.ipcRenderer.send('setAspectRatio', aspectRatio, {width: 0, height: HEADER_HEIGHT})
+  electron.ipcRenderer.send('setAspectRatio', aspectRatio)
   electron.ipcRenderer.send('setBounds', {x, y, width, height})
 }
 
