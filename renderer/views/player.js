@@ -24,14 +24,17 @@ function Player (state, dispatch) {
   }
 
   // When in fullscreen, hide player controls if the mouse stays still for a while
-  var hideControls = state.isFullScreen &&
-    state.video.mouseStationarySince !== 0 &&
+  var hideControls = state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000
 
   // Show the video as large as will fit in the window, play immediately
   return hx`
-    <div class='player ${hideControls ? 'hide' : ''}' onmousemove=${onMouseMove}>
-      <div class='letterbox' onmousemove=${onMouseMove}>
+    <div
+      class='player ${hideControls ? 'hide' : ''}'
+      onmousemove=${() => dispatch('videoMouseMoved')}>
+      <div
+        class='letterbox'
+        onmousemove=${() => dispatch('videoMouseMoved')}>
         <video
           src='${state.server.localURL}'
           onloadedmetadata=${onLoadedMetadata}
@@ -41,10 +44,6 @@ function Player (state, dispatch) {
       ${renderPlayerControls(state, dispatch)}
     </div>
   `
-
-  function onMouseMove () {
-    if (state.isFullScreen) dispatch('fullscreenVideoMouseMoved')
-  }
 
   // As soon as the video loads enough to know the video dimensions, resize the window
   function onLoadedMetadata (e) {
