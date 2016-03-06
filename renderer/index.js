@@ -38,6 +38,10 @@ function init () {
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
 
+  state.saved.torrents.forEach(function (torrent) {
+    state.client.add(torrent.torrentFile)
+  })
+
   // For easy debugging in Developer Tools
   global.state = state
 
