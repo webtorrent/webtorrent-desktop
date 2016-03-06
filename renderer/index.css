@@ -114,12 +114,16 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   top: 0;
   right: 0;
   z-index: 1000;
-  transition: opacity 0.1s ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
-.header.hide {
+.app.player .header {
   opacity: 0;
-  cursor: none;
+}
+
+.app.player:hover .header:not(.hide) {
+  opacity: 0.8;
+  cursor: default;
 }
 
 .header .title {
@@ -298,7 +302,7 @@ body.drag::before {
   height: 38px;
   bottom: 0;
   opacity: 0;
-  transition: all 0.1s ease-out;
+  transition: all 0.2s ease-out;
 }
 
 .player:hover .player-controls {

@@ -11,8 +11,13 @@ var TorrentList = require('./torrent-list')
 var isOSX = process.platform === 'darwin'
 
 function App (state, dispatch) {
+  var cls = []
+  if (state.url === '/player') {
+    cls.push('player')
+  }
+
   return hx`
-    <div class='app'>
+    <div class='app ${cls.join(' ')}'>
       ${getHeader()}
       <div class='content'>${getView()}</div>
     </div>
