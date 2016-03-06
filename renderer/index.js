@@ -31,16 +31,14 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
     return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
   })
 
-var client, vdomLoop, updateThrottled
+var vdomLoop, updateThrottled
 
 function init () {
-  client = new WebTorrent()
-  client.on('warning', onWarning)
-  client.on('error', onError)
-  state.client = client
+  state.client = new WebTorrent()
+  state.client.on('warning', onWarning)
+  state.client.on('error', onError)
 
   // For easy debugging in Developer Tools
-  global.client = client
   global.state = state
 
   vdomLoop = mainLoop(state, render, {
@@ -207,13 +205,13 @@ function isNotTorrentFile (file) {
 
 function addTorrent (torrentId) {
   if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
-  var torrent = client.add(torrentId)
+  var torrent = state.client.add(torrentId)
   addTorrentEvents(torrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
-  var torrent = client.seed(files)
+  var torrent = state.client.seed(files)
   addTorrentEvents(torrent)
 }
 
