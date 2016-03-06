@@ -9,6 +9,7 @@ var EventEmitter = require('events')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
+var state = require('./state')
 var throttle = require('throttleit')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
@@ -30,67 +31,15 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
     return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
   })
 
-var state = global.state = {
-  /* Temporary state disappears once the program exits.
-   * It can contain complex objects like open connections, etc.
-   */
-  url: '/',
-  client: null, /* the WebTorrent client */
-  server: null, /* local WebTorrent-to-HTTP server */
-  dock: {
-    badge: 0,
-    progress: 0
-  },
-  devices: {
-    airplay: null, /* airplay client. finds and manages AppleTVs */
-    chromecast: null /* chromecast client. finds and manages Chromecasts */
-  },
-  torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
-  // history: [], /* track how we got to the current view. enables Back button */
-  // historyIndex: 0,
-  isFocused: true,
-  isFullScreen: false,
-  mainWindowBounds: null, /* x y width height */
-  title: 'WebTorrent', /* current window title */
-  video: {
-    isPaused: false,
-    currentTime: 0, /* seconds */
-    duration: 1, /* seconds */
-    mouseStationarySince: 0 /* Unix time in ms */
-  },
-
-  /* Saved state is read from and written to ~/.webtorrent/state.json
-   * It should be simple and minimal and must be JSONifiable
-   */
-  saved: {
-    torrents: [
-      {
-        name: 'Elephants Dream',
-        torrentFile: 'resources/ElephantsDream_archive.torrent'
-      },
-      {
-        name: 'Big Buck Bunny',
-        torrentFile: 'resources/BigBuckBunny_archive.torrent'
-      },
-      {
-        name: 'Sintel',
-        torrentFile: 'resources/Sintel_archive.torrent'
-      },
-      {
-        name: 'Tears of Steel',
-        torrentFile: 'resources/TearsOfSteel_archive.torrent'
-      }
-    ]
-  }
-}
-
-var client, vdomLoop, updateThrottled
+var vdomLoop, updateThrottled
 
 function init () {
-  client = global.client = new WebTorrent()
-  client.on('warning', onWarning)
-  client.on('error', onError)
-  state.client = client
+  state.client = new WebTorrent()
+  state.client.on('warning', onWarning)
+  state.client.on('error', onError)
+
+  // For easy debugging in Developer Tools
+  global.state = state
 
   vdomLoop = mainLoop(state, render, {
     create: createElement,
@@ -216,11 +165,11 @@ function dispatch (action, ...args) {
 }
 
 electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
-  addTorrent(torrentId)
+  dispatch('addTorrent', torrentId)
 })
 
 electron.ipcRenderer.on('seed', function (e, files) {
-  seed(files)
+  dispatch('seed', files)
 })
 
 electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
@@ -256,40 +205,42 @@ function isNotTorrentFile (file) {
 
 function addTorrent (torrentId) {
   if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
-  var torrent = client.add(torrentId)
+  var torrent = state.client.add(torrentId)
   addTorrentEvents(torrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
-  var torrent = client.seed(files)
+  var torrent = state.client.seed(files)
   addTorrentEvents(torrent)
 }
 
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
-  torrent.on('done', function () {
+  torrent.on('download', updateThrottled)
+  torrent.on('upload', updateThrottled)
+
+  torrent.on('ready', torrentReady)
+  torrent.on('done', torrentDone)
+
+  update()
+
+  function torrentReady () {
+    torrentPoster(torrent, function (err, buf) {
+      if (err) return onWarning(err)
+      torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
+      update()
+    })
+    update()
+  }
+
+  function torrentDone () {
     if (!state.isFocused) {
       state.dock.badge += 1
       electron.ipcRenderer.send('setBadge', state.dock.badge)
     }
     update()
-  })
-  torrent.on('download', updateThrottled)
-  torrent.on('upload', updateThrottled)
-  torrent.on('ready', function () {
-    torrentReady(torrent)
-  })
-  update()
-}
-
-function torrentReady (torrent) {
-  torrentPoster(torrent, function (err, buf) {
-    if (err) return onWarning(err)
-    torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
-    update()
-  })
-  update()
+  }
 }
 
 function startServer (torrent, cb) {
@@ -353,6 +304,7 @@ function openAirplay (torrent) {
 }
 
 function setDimensions (dimensions) {
+  // TODO: eliminate blocking remote call
   state.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
 
   // Limit window size to screen size

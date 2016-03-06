@@ -1,5 +1,5 @@
-var electron = require('electron')
 var debug = require('debug')('webtorrent-app:menu')
+var electron = require('electron')
 var windows = require('./windows')
 
 var app = electron.app
@@ -285,12 +285,10 @@ function getMenuTemplate () {
 
 var appMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
 
-var menu = {
+module.exports = {
   appMenu: appMenu,
   onToggleFullScreen: onToggleFullScreen,
   onWindowHide: onWindowHide,
   onWindowShow: onWindowShow,
   toggleFullScreen: toggleFullScreen
 }
-
-module.exports = menu
