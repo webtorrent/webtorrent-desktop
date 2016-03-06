@@ -27,27 +27,20 @@ module.exports = {
     mouseStationarySince: 0 /* Unix time in ms */
   },
 
-  /* Saved state is read from and written to ~/.webtorrent/state.json
-   * It should be simple and minimal and must be JSONifiable
+  /* Saved state is read from and written to application config.
+   * It should be simple and minimal and must be JSON stringifiable.
+   *
+   * Config path:
+   *
+   * OS XDG               ~/Library/Application Support/WebTorrent/config.json
+   * Linux (XDG)          $XDG_CONFIG_HOME/WebTorrent/config.json
+   * Linux (Legacy)       ~/.config/WebTorrent/config.json
+   * Windows (> Vista)    %LOCALAPPDATA%/WebTorrent/config.json
+   * Windows (XP, 2000)   %USERPROFILE%/Local Settings/Application Data/WebTorrent/config.json
+   *
+   * Also accessible via `require('application-config')('WebTorrent').filePath`
    */
   saved: {
-    torrents: [
-      {
-        name: 'Sintel',
-        torrentFile: 'resources/sintel.torrent'
-      }
-      // {
-      //   name: 'Elephants Dream',
-      //   torrentFile: 'resources/ElephantsDream_archive.torrent'
-      // },
-      // {
-      //   name: 'Big Buck Bunny',
-      //   torrentFile: 'resources/BigBuckBunny_archive.torrent'
-      // },
-      // {
-      //   name: 'Tears of Steel',
-      //   torrentFile: 'resources/TearsOfSteel_archive.torrent'
-      // }
-    ]
+    torrents: []
   }
 }

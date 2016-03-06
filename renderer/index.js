@@ -13,6 +13,7 @@ var state = require('./state')
 var throttle = require('throttleit')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
+var cfg = require('application-config')('WebTorrent')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -35,10 +36,7 @@ function init () {
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
-
-  state.saved.torrents.forEach(function (torrent) {
-    state.client.add(torrent.torrentFile)
-  })
+  state.client.on('torrent', saveTorrents)
 
   // For easy debugging in Developer Tools
   global.state = state
@@ -53,6 +51,8 @@ function init () {
   updateThrottled = throttle(update, 1000)
 
   dragDrop('body', onFiles)
+
+  restoreSession()
 
   chromecasts.on('update', function (player) {
     state.devices.chromecast = player
@@ -249,6 +249,35 @@ function addTorrentEvents (torrent) {
     }
     update()
   }
+}
+
+function restoreSession () {
+  cfg.read(function (err, data) {
+    if (err) console.error(err)
+    state.saved = data
+    if (!state.saved.torrents) state.saved.torrents = []
+    state.saved.torrents.forEach(function (torrent) {
+      dispatch('addTorrent', torrent.magnetURI)
+    })
+    update()
+  })
+}
+
+function saveTorrents () {
+  state.saved.torrents = state.client.torrents.map(function (torrent) {
+    return {
+      name: torrent.name,
+      magnetURI: torrent.magnetURI,
+      path: torrent.path
+    }
+  })
+
+  cfg.write({
+    torrents: state.saved.torrents
+  }, function (err) {
+    if (err) console.error(err)
+    update()
+  })
 }
 
 function startServer (torrent, cb) {
