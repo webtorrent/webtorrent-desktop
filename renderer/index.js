@@ -167,11 +167,11 @@ function dispatch (action, ...args) {
 }
 
 electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
-  addTorrent(torrentId)
+  dispatch('addTorrent', torrentId)
 })
 
 electron.ipcRenderer.on('seed', function (e, files) {
-  seed(files)
+  dispatch('seed', files)
 })
 
 electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
