@@ -4,6 +4,18 @@ var windows = require('./windows')
 
 var app = electron.app
 
+function onWindowShow () {
+  debug('onWindowShow')
+  getMenuItem('Full Screen').enabled = true
+  getMenuItem('Float on Top').enabled = true
+}
+
+function onWindowHide () {
+  debug('onWindowHide')
+  getMenuItem('Full Screen').enabled = false
+  getMenuItem('Float on Top').enabled = false
+}
+
 function toggleFullScreen () {
   debug('toggleFullScreen')
   if (windows.main) {
@@ -275,7 +287,9 @@ var appMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
 
 var menu = {
   appMenu: appMenu,
-  onToggleFullScreen: onToggleFullScreen
+  onToggleFullScreen: onToggleFullScreen,
+  onWindowHide: onWindowHide,
+  onWindowShow: onWindowShow
 }
 
 module.exports = menu

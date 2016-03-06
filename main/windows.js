@@ -38,8 +38,13 @@ function createMainWindow (menu) {
       win.show()
     }, 50)
   })
+
+  win.on('blur', menu.onWindowHide)
+  win.on('focus', menu.onWindowShow)
+
   win.on('enter-full-screen', menu.onToggleFullScreen)
   win.on('leave-full-screen', menu.onToggleFullScreen)
+
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
       e.preventDefault()
