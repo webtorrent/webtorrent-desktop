@@ -4,18 +4,6 @@ var windows = require('./windows')
 
 var app = electron.app
 
-function onWindowShow () {
-  debug('onWindowShow')
-  getMenuItem('Full Screen').enabled = true
-  getMenuItem('Float on Top').enabled = true
-}
-
-function onWindowHide () {
-  debug('onWindowHide')
-  getMenuItem('Full Screen').enabled = false
-  getMenuItem('Float on Top').enabled = false
-}
-
 function toggleFullScreen () {
   debug('toggleFullScreen')
   if (windows.main && windows.main.isVisible()) {
@@ -23,14 +11,9 @@ function toggleFullScreen () {
   }
 }
 
-function onToggleFullScreen () {
-  getMenuItem('Full Screen').checked = windows.main.isFullScreen()
-  windows.main.send('fullscreenChanged', windows.main.isFullScreen())
-}
-
 // Sets whether the window should always show on top of other windows
-function toggleAlwaysOnTop () {
-  debug('toggleAlwaysOnTop %s')
+function toggleFloatOnTop () {
+  debug('toggleFloatOnTop %s')
   if (windows.main) {
     windows.main.setAlwaysOnTop(!windows.main.isAlwaysOnTop())
     getMenuItem('Float on Top').checked = windows.main.isAlwaysOnTop()
@@ -52,6 +35,27 @@ function reloadWindow () {
   }
 }
 
+function addFakeDevice (device) {
+  windows.main.send('addFakeDevice', device)
+}
+
+function onWindowShow () {
+  debug('onWindowShow')
+  getMenuItem('Full Screen').enabled = true
+  getMenuItem('Float on Top').enabled = true
+}
+
+function onWindowHide () {
+  debug('onWindowHide')
+  getMenuItem('Full Screen').enabled = false
+  getMenuItem('Float on Top').enabled = false
+}
+
+function onToggleFullScreen () {
+  getMenuItem('Full Screen').checked = windows.main.isFullScreen()
+  windows.main.send('fullscreenChanged', windows.main.isFullScreen())
+}
+
 function getMenuItem (label) {
   for (var i = 0; i < appMenu.items.length; i++) {
     var menuItem = appMenu.items[i].submenu.items.find(function (item) {
@@ -59,10 +63,6 @@ function getMenuItem (label) {
     })
     if (menuItem) return menuItem
   }
-}
-
-function addFakeDevice (device) {
-  windows.main.send('addFakeDevice', device)
 }
 
 function getMenuTemplate () {
@@ -153,7 +153,7 @@ function getMenuTemplate () {
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: toggleAlwaysOnTop
+          click: toggleFloatOnTop
         },
         {
           type: 'separator'
