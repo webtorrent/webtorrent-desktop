@@ -247,22 +247,28 @@ body.drag::before {
 }
 
 .torrent:hover .metadata {
-  width: calc(100% - 170px);
+  width: calc(100% - 90px);
 }
 
-.torrent .btn, .torrent .delete {
+.torrent .buttons {
   float: right;
   margin-top: 20px;
-  margin-left: 15px;
-  padding-top: 10px;
   display: none;
+}
+
+.torrent .buttons * {
+  padding-top: 10px;
+}
+
+.torrent .buttons :not(:first-child) {
+  margin-left: 10px;
 }
 
 .torrent .delete {
   opacity: 0.5;
 }
 
-.torrent:hover .btn, .torrent:hover .delete {
+.torrent:hover .buttons {
   display: block;
 }
 
@@ -284,11 +290,9 @@ body.drag::before {
   line-height: 1.5em;
 }
 
-.torrent .status {
+.torrent .status, .torrent .status2 {
   font-size: 1em;
   line-height: 1.5em;
-  position: absolute;
-  bottom: 20px;
 }
 
 .torrent span:not(:last-child)::after {
