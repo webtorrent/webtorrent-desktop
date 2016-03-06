@@ -302,6 +302,7 @@ function openAirplay (torrent) {
 }
 
 function setDimensions (dimensions) {
+  // TODO: eliminate blocking remote call
   state.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
 
   // Limit window size to screen size
