@@ -315,7 +315,7 @@ function openPlayer (torrent) {
 }
 
 function deleteTorrent (torrent) {
-  torrent.destroy(function() {
+  torrent.destroy(function () {
     saveTorrents() // updates after writing to config
   })
 }
