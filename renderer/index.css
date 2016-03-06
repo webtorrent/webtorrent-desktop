@@ -285,7 +285,15 @@ body.drag::before {
 }
 
 .player:hover .player-controls {
- opacity: 1;
+  opacity: 1;
+}
+
+.player.hide:hover .player-controls {
+  opacity: 0;
+}
+
+.player.hide {
+  cursor: none;
 }
 
 /* invisible click target for scrubbing */

@@ -55,7 +55,8 @@ var state = global.state = {
   video: {
     isPaused: false,
     currentTime: 0, /* seconds */
-    duration: 1 /* seconds */
+    duration: 1, /* seconds */
+    mouseStationarySince: 0 /* Unix time in ms */
   },
 
   /* Saved state is read from and written to ~/.webtorrent/state.json
@@ -206,6 +207,9 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleFullScreen') {
     electron.ipcRenderer.send('toggleFullScreen')
+  }
+  if (action === 'fullscreenVideoMouseMoved') {
+    state.video.mouseStationarySince = new Date().getTime()
   }
 }
 
@@ -360,7 +364,10 @@ function setDimensions (dimensions) {
   var width = Math.floor(dimensions.width * scaleFactor)
   var height = Math.floor(dimensions.height * scaleFactor)
 
-  height += HEADER_HEIGHT
+  // Video player header only shows in OSX where it's part of the title bar. See app.js
+  if (process.platform === 'darwin') {
+    height += HEADER_HEIGHT
+  }
 
   // Center window on screen
   var x = Math.floor((workAreaSize.width - width) / 2)
