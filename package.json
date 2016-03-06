@@ -16,6 +16,7 @@
     "create-torrent": "^3.22.1",
     "debug": "^2.2.0",
     "drag-drop": "^2.3.1",
+    "electron-localshortcut": "^0.6.0",
     "hyperx": "^2.0.0",
     "main-loop": "^3.2.0",
     "network-address": "^1.1.0",
