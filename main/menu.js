@@ -18,7 +18,7 @@ function onWindowHide () {
 
 function toggleFullScreen () {
   debug('toggleFullScreen')
-  if (windows.main) {
+  if (windows.main && windows.main.isVisible()) {
     windows.main.setFullScreen(!windows.main.isFullScreen())
   }
 }
@@ -289,7 +289,8 @@ var menu = {
   appMenu: appMenu,
   onToggleFullScreen: onToggleFullScreen,
   onWindowHide: onWindowHide,
-  onWindowShow: onWindowShow
+  onWindowShow: onWindowShow,
+  toggleFullScreen: toggleFullScreen
 }
 
 module.exports = menu

@@ -1,11 +1,11 @@
+module.exports = {
+  init: init
+}
+
 var electron = require('electron')
 var debug = require('debug')('webtorrent-app:ipcMain')
 var ipcMain = electron.ipcMain
 var windows = require('./windows')
-
-module.exports = {
-  init: init
-}
 
 function init () {
   ipcMain.on('addTorrentFromPaste', function (e) {

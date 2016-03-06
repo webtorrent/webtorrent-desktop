@@ -4,6 +4,7 @@ var electron = require('electron')
 var ipc = require('./ipc')
 var menu = require('./menu')
 var windows = require('./windows')
+var shortcuts = require('./shortcuts')
 
 var app = electron.app
 
@@ -15,6 +16,7 @@ app.on('open-url', onOpen)
 app.on('ready', function () {
   electron.Menu.setApplicationMenu(menu.appMenu)
   windows.createMainWindow(menu)
+  shortcuts.init(menu)
 })
 
 app.on('activate', function () {
