@@ -30,12 +30,12 @@ function Player (state, dispatch) {
 
   // Show the video as large as will fit in the window, play immediately
   return hx`
-    <div class="player ${hideControls ? 'hide' : ''}" onmousemove=${onMouseMove}>
-      <div class="letterbox" onmousemove=${onMouseMove}>
+    <div class='player ${hideControls ? 'hide' : ''}' onmousemove=${onMouseMove}>
+      <div class='letterbox' onmousemove=${onMouseMove}>
         <video
-          src="${state.server.localURL}"
+          src='${state.server.localURL}'
           onloadedmetadata=${onLoadedMetadata}
-          autoplay="autoplay">
+          autoplay>
         </video>
       </div>
       ${renderPlayerControls(state, dispatch)}
@@ -46,8 +46,7 @@ function Player (state, dispatch) {
     if (state.isFullScreen) dispatch('fullscreenVideoMouseMoved')
   }
 
-  // As soon as the video loads far enough to know the dimensions, resize the
-  // window to match the video resolution
+  // As soon as the video loads enough to know the video dimensions, resize the window
   function onLoadedMetadata (e) {
     var video = e.target
     var dimensions = {
@@ -58,8 +57,6 @@ function Player (state, dispatch) {
   }
 }
 
-// Renders all video controls: play/pause, scrub, loading bar
-// TODO: cast buttons
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
@@ -67,17 +64,17 @@ function renderPlayerControls (state, dispatch) {
 
   var elements = [
     hx`
-      <div class="playback-bar">
+      <div class='playback-bar'>
         ${renderLoadingBar(state)}
-        <div class="playback-cursor" style=${playbackCursorStyle}></div>
-        <div class="scrub-bar"
-          draggable="true"
+        <div class='playback-cursor' style=${playbackCursorStyle}></div>
+        <div class='scrub-bar'
+          draggable='true'
           onclick=${handleScrub},
           ondrag=${handleScrub}></div>
       </div>
     `,
     hx`
-      <i class="icon fullscreen"
+      <i class='icon fullscreen'
         onclick=${() => dispatch('toggleFullScreen')}>
         fullscreen
       </i>
@@ -111,12 +108,12 @@ function renderPlayerControls (state, dispatch) {
     `)
   }
   elements.push(hx`
-    <i class="icon play-pause" onclick=${() => dispatch('playPause')}>
+    <i class='icon play-pause' onclick=${() => dispatch('playPause')}>
       ${state.video.isPaused ? 'play_arrow' : 'pause'}
     </i>
   `)
 
-  return hx`<div class="player-controls">${elements}</div>`
+  return hx`<div class='player-controls'>${elements}</div>`
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
@@ -151,14 +148,14 @@ function renderLoadingBar (state) {
 
   // Output an list of rectangles to show loading progress
   return hx`
-    <div class="loading-bar">
+    <div class='loading-bar'>
       ${parts.map(function (part) {
         var style = {
           left: (100 * part.start / numParts) + '%',
           width: (100 * part.count / numParts) + '%'
         }
 
-        return hx`<div class="loading-bar-part" style=${style}></div>`
+        return hx`<div class='loading-bar-part' style=${style}></div>`
       })}
     </div>
   `
