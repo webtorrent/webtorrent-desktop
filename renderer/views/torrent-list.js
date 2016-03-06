@@ -3,11 +3,12 @@ module.exports = TorrentList
 var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
+
 var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
   var list = state.client.torrents.map((torrent) => renderTorrent(torrent, dispatch))
-  return hx`<div class="torrent-list">${list}</div>`
+  return hx`<div class='torrent-list'>${list}</div>`
 }
 
 // Renders a torrent in the torrent list
@@ -26,21 +27,21 @@ function renderTorrent (torrent, dispatch) {
     renderTorrentMetadata(torrent),
     hx`
       <i
-        class="icon delete"
+        class='icon delete'
         onclick=${() => dispatch('deleteTorrent', torrent)}>
         close
       </i>
     `,
     hx`
       <i.btn.icon.play
-        class="${!torrent.ready ? 'disabled' : ''}"
+        class='${!torrent.ready ? 'disabled' : ''}'
         onclick=${() => dispatch('openPlayer', torrent)}>
         play_arrow
       </i>
     `
   ]
 
-  return hx`<div class="torrent" style=${style}>${elements}</div>`
+  return hx`<div class='torrent' style=${style}>${elements}</div>`
 }
 
 // Renders the torrent name and download progress
@@ -52,10 +53,10 @@ function renderTorrentMetadata (torrent) {
   if (downloaded !== total) downloaded += ` / ${total}`
 
   return hx`
-    <div class="metadata">
-      <div class="name ellipsis">${torrent.name || 'Loading torrent...'}</div>
-      <div class="status">
-        <span class="progress">${progress}%</span>
+    <div class='metadata'>
+      <div class='name ellipsis'>${torrent.name || 'Loading torrent...'}</div>
+      <div class='status'>
+        <span class='progress'>${progress}%</span>
         <span>${downloaded}</span>
       </div>
       ${getFilesLength()}
@@ -72,7 +73,7 @@ function renderTorrentMetadata (torrent) {
 
   function getFilesLength () {
     if (torrent.ready && torrent.files.length > 1) {
-      return hx`<span class="files">${torrent.files.length} files</span>`
+      return hx`<span class='files'>${torrent.files.length} files</span>`
     }
   }
 }

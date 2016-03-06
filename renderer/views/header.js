@@ -8,41 +8,43 @@ function Header (state, dispatch) {
   var navLeftStyle = process.platform === 'darwin'
     ? {marginLeft: '78px'} /* OSX needs room on the left for min/max/close buttons */
     : null /* On Windows and Linux, the header is separate & underneath the title bar */
+
   return hx`
-    <div class="header">
+    <div class='header'>
       ${getTitle()}
-      <div class="nav left" style=${navLeftStyle}>
-        <i class="icon back" onclick=${onBack}>chevron_left</i>
-        <i class="icon forward" onclick=${onForward}>chevron_right</i>
+      <div class='nav left' style=${navLeftStyle}>
+        <i
+          class='icon back'
+          onclick=${() => dispatch('back')}>
+          chevron_left
+        </i>
+        <i
+          class='icon forward'
+          onclick=${() => dispatch('forward')}>
+          chevron_right
+        </i>
       </div>
-      <div class="nav right">
-        ${plusButton()}
+      <div class='nav right'>
+        ${getAddButton()}
       </div>
     </div>
   `
 
   function getTitle () {
     if (process.platform === 'darwin') {
-      return hx`<div class="title">${state.title}</div>`
+      return hx`<div class='title'>${state.title}</div>`
     }
   }
 
-  function plusButton () {
+  function getAddButton () {
     if (state.url !== '/player') {
-      return hx`<i class="icon add" onclick=${onAddTorrent}>add</i>`
+      return hx`
+        <i
+          class='icon add'
+          onclick=${() => dispatch('addTorrent')}>
+          add
+        </i>
+      `
     }
-  }
-
-  function onBack (e) {
-    dispatch('back')
-  }
-
-  function onForward (e) {
-    dispatch('forward')
-  }
-
-  function onAddTorrent (e) {
-    var torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
-    dispatch('addTorrent', torrentId)
   }
 }

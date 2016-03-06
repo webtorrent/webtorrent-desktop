@@ -253,6 +253,7 @@ function isNotTorrentFile (file) {
 }
 
 function addTorrent (torrentId) {
+  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
   var torrent = client.add(torrentId)
   addTorrentEvents(torrent)
 }
