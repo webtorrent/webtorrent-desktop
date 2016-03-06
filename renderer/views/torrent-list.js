@@ -46,9 +46,9 @@ function renderTorrent (torrent, dispatch) {
 
 // Renders the torrent name and download progress
 function renderTorrentMetadata (torrent) {
-  var progress = Math.floor(100 * (torrent.progress || 0))
-  var downloaded = prettyBytes(torrent.downloaded || 0)
-  var total = prettyBytes(torrent.length || 0)
+  var progress = Math.floor(100 * torrent.progress)
+  var downloaded = prettyBytes(torrent.downloaded)
+  var total = prettyBytes(torrent.ready ? torrent.length : 0)
 
   if (downloaded !== total) downloaded += ` / ${total}`
 
