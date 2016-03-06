@@ -51,8 +51,9 @@ function createMainWindow (menu) {
       win.hide()
     }
   })
+
   win.once('closed', function () {
-    win = null
+    windows.main = null
   })
 }
 
