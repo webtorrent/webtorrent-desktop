@@ -8,7 +8,17 @@ var prettyBytes = require('pretty-bytes')
 
 function TorrentList (state, dispatch) {
   var list = state.client.torrents.map((torrent) => renderTorrent(torrent, dispatch))
+  if (list.length === 0) list = emptyList()
   return hx`<div class='torrent-list'>${list}</div>`
+}
+
+function emptyList () {
+  return hx`
+    <div class="get-started">
+      <p>No torrents here yet.</p>
+      <p>Drop a file or paste an address to get started!</p>
+    </div>
+  `
 }
 
 // Renders a torrent in the torrent list
