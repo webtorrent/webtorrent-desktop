@@ -38,13 +38,24 @@ body {
   font-size: 42px;
   display: block;
   text-align: center;
-  animation: spin 2s infinite linear;
+  animation: spin-ccw 2s infinite linear;
 }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
+
+@keyframes spin-ccw {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 
 .app {
   -webkit-user-select: none;
@@ -52,6 +63,7 @@ body {
   height: 100%;
   display: flex;
   flex-flow: column;
+  animation: fadein 1s;
 }
 
 /*
@@ -252,6 +264,7 @@ body.drag::before {
   background-position: 0 50%;
   transition: all 0.1s ease-out;
   position: relative;
+  animation: fadein .4s;
 }
 
 .torrent:not(:last-child) {
