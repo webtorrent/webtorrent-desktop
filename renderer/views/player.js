@@ -37,6 +37,7 @@ function Player (state, dispatch) {
         onmousemove=${() => dispatch('videoMouseMoved')}>
         <video
           src='${state.server.localURL}'
+          ondblclick=${() => dispatch('toggleFullScreen')}
           onloadedmetadata=${onLoadedMetadata}
           autoplay>
         </video>
