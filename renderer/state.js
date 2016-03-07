@@ -1,3 +1,5 @@
+var config = require('../config')
+
 module.exports = {
   /* Temporary state disappears once the program exits.
    * It can contain complex objects like open connections, etc.
@@ -19,7 +21,7 @@ module.exports = {
   isFocused: true,
   isFullScreen: false,
   mainWindowBounds: null, /* x y width height */
-  title: 'WebTorrent', /* current window title */
+  title: config.APP_NAME, /* current window title */
   video: {
     isPaused: false,
     currentTime: 0, /* seconds */
