@@ -6,7 +6,7 @@ Contributions welcome!
 
 Please search issues and pull requests before adding something new to avoid duplicating efforts and conversations.
 
-In addition to improving the project by refactoring code and implementing relevant features, this project welcomes the following types of contributions:
+This project welcomes non-code contributions, too! The following types of contributions are welcome:
 
 - **Ideas**: participate in an issue thread or start your own to have your voice heard.
 - **Writing**: contribute your expertise in an area by helping expand the included content.
@@ -17,18 +17,14 @@ In addition to improving the project by refactoring code and implementing releva
 
 [![standard][standard-image]][standard-url]
 
-This repository uses [`standard`][standard-url] to maintain code style and consistency, and to avoid style arguments. `npm test` runs `standard` so you don't have to!
+This repository uses [`standard`][standard-url] to maintain code style and consistency, and to avoid style arguments. `npm test` runs `standard` automatically, so you don't have to!
 
 [standard-image]: https://cdn.rawgit.com/feross/standard/master/badge.svg
 [standard-url]: https://github.com/feross/standard
 
----
-
-# Collaborating Guidelines
+# Project Governance
 
 **This is an [OPEN Open Source Project](http://openopensource.org/).**
-
-## What?
 
 Individuals making significant and valuable contributions are given commit-access to the project to contribute as they see fit. This project is more like an open wiki than a standard guarded open source project.
 
