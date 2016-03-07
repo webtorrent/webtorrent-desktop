@@ -223,7 +223,7 @@ body.drag::before {
 
 .torrent {
   height: 120px;
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
