@@ -205,7 +205,7 @@ function loadState () {
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
     state.saved = data
     if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
+    state.saved.torrents.forEach((x) => startTorrenting(x.magnetURI))
   })
 }
 
