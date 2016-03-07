@@ -9,7 +9,6 @@ var EventEmitter = require('events')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
-var state = require('./state')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 var cfg = require('application-config')('WebTorrent')
@@ -19,6 +18,9 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
+
+// For easy debugging in Developer Tools
+var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
@@ -30,6 +32,10 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var vdomLoop
+
+// All state lives in state.js. `state.saved` is read from and written to a file.
+// All other state is ephemeral. First we load state.saved then initialize the app.
+loadState(init)
 
 /**
  * Called once when the application loads. (Not once per window.)
@@ -59,13 +65,12 @@ function init () {
   // (eg % downloaded) and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
 
-  // All state lives in state.js. `state.saved` is read from and written to a
-  // file. All other state is ephemeral. Here we'll load state.saved:
-  loadState()
+  // Resume all saved torrents now that state is loaded and vdom is ready
+  resumeAllTorrents()
   document.addEventListener('unload', saveState)
 
-  // For easy debugging in Developer Tools
-  global.state = state
+  // listen for messages from the main process
+  setupIpc()
 
   // OS integrations:
   // ...Chromecast and Airplay
@@ -108,7 +113,6 @@ function init () {
     state.isFocused = false
   })
 }
-init()
 
 // This is the (mostly) pure funtion from state -> UI. Returns a virtual DOM
 // tree. Any events, such as button clicks, will turn into calls to dispatch()
@@ -178,35 +182,41 @@ function dispatch (action, ...args) {
   }
 }
 
-electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
-  dispatch('addTorrent', torrentId)
-})
+function setupIpc () {
+  electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
+    dispatch('addTorrent', torrentId)
+  })
 
-electron.ipcRenderer.on('seed', function (e, files) {
-  dispatch('seed', files)
-})
+  electron.ipcRenderer.on('seed', function (e, files) {
+    dispatch('seed', files)
+  })
 
-electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
-  state.isFullScreen = isFullScreen
-  update()
-})
+  electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
+    state.isFullScreen = isFullScreen
+    update()
+  })
 
-electron.ipcRenderer.on('addFakeDevice', function (e, device) {
-  var player = new EventEmitter()
-  player.play = (networkURL) => console.log(networkURL)
-  state.devices[device] = player
-  update()
-})
+  electron.ipcRenderer.on('addFakeDevice', function (e, device) {
+    var player = new EventEmitter()
+    player.play = (networkURL) => console.log(networkURL)
+    state.devices[device] = player
+    update()
+  })
+}
 
 // Load state.saved from the JSON state file
-function loadState () {
+function loadState (callback) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
     state.saved = data
     if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
+    if (callback) callback()
   })
+}
+
+function resumeAllTorrents () {
+  state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
 }
 
 // Write state.saved to the JSON state file
