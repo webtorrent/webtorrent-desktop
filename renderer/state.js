@@ -27,8 +27,8 @@ module.exports = {
     mouseStationarySince: 0 /* Unix time in ms */
   },
 
-  /* Saved state is read from and written to application config.
-   * It should be simple and minimal and must be JSON stringifiable.
+  /* Saved state is read from and written to a file every time the app runs.
+   * It should be simple and minimal and must be JSON.
    *
    * Config path:
    *
