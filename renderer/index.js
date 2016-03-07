@@ -205,7 +205,7 @@ electron.ipcRenderer.on('addFakeDevice', function (e, device) {
 function loadState () {
   cfg.read(function (err, data) {
     if (err) console.error(err)
-    console.log('loaded state: ' + JSON.stringify(data, null, 4)) /* pretty print */
+    electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
     state.saved = data
     if (!state.saved.torrents) state.saved.torrents = []
     state.saved.torrents.forEach(function (torrent) {
@@ -216,6 +216,7 @@ function loadState () {
 
 // Write state.saved to the JSON state file
 function saveState () {
+  electron.ipcRenderer.send('log', 'saving state to ' + cfg.filePath)
   cfg.write(state.saved, function (err) {
     if (err) console.error(err)
     update()
@@ -261,6 +262,9 @@ function isNotTorrentFile (file) {
 function addTorrent (torrentId) {
   if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
   var torrent = startTorrenting(torrentId)
+  if (state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)) {
+    return // torrent is already in state.saved
+  }
   state.saved.torrents.push({
     name: torrent.name,
     magnetURI: torrent.magnetURI,

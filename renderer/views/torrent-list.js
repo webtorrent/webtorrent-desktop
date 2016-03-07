@@ -68,6 +68,11 @@ function renderTorrent (torrent, dispatch) {
   function renderTorrentButtons () {
     return hx`
       <div class="buttons">
+        <i.btn.icon.download
+          class='${torrent.state}'
+          onclick=${() => dispatch('toggleTorrent', torrent)}>
+          file_download
+        </i>
         <i.btn.icon.play
           class='${!torrent.ready ? 'disabled' : ''}'
           onclick=${() => dispatch('openPlayer', torrent)}>
