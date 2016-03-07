@@ -37,6 +37,7 @@ function Player (state, dispatch) {
         onmousemove=${() => dispatch('videoMouseMoved')}>
         <video
           src='${state.server.localURL}'
+          ondblclick=${() => dispatch('toggleFullScreen')}
           onloadedmetadata=${onLoadedMetadata}
           autoplay>
         </video>
@@ -116,6 +117,7 @@ function renderPlayerControls (state, dispatch) {
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
+    dispatch('videoMouseMoved')
     var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
     var position = fraction * state.video.duration /* seconds */
