@@ -168,6 +168,7 @@ function dispatch (action, ...args) {
       closeServer()
     }
     state.url = '/'
+    state.title = config.APP_NAME
     update()
   }
   if (action === 'forward') {
@@ -398,6 +399,7 @@ function closeServer () {
 function openPlayer (torrent) {
   startServer(torrent, function () {
     state.url = '/player'
+    state.title = torrent.name
     update()
   })
 }
