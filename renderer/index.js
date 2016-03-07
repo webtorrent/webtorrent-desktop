@@ -43,7 +43,6 @@ function init () {
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
-  state.client.on('torrent', saveState)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -66,6 +65,7 @@ function init () {
   // All state lives in state.js. `state.saved` is read from and written to a
   // file. All other state is ephemeral. Here we'll load state.saved:
   loadState()
+  document.addEventListener('unload', saveState)
 
   // For easy debugging in Developer Tools
   global.state = state
@@ -256,20 +256,26 @@ function isNotTorrentFile (file) {
   return !isTorrentFile(file)
 }
 
-// Adds a torrent to the list, starts downloading/seeding
-function addTorrent (torrentOrMagnetURI) {
-  if (!torrentOrMagnetURI) torrentOrMagnetURI = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
-  var torrent = startTorrenting(torrentOrMagnetURI)
+// Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
+// magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
+function addTorrent (torrentId) {
+  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
+  var torrent = startTorrenting(torrentId)
   state.saved.torrents.push({
     name: torrent.name,
     magnetURI: torrent.magnetURI,
-    path: torrent.path
+    infoHash: torrent.infoHash,
+    path: torrent.path,
+    xt: torrent.xt,
+    dn: torrent.dn,
+    announce: torrent.announce
   })
+  saveState()
 }
 
 // Starts downloading and/or seeding a given torrent file or magnet URI
-function startTorrenting (torrentOrMagnetURI) {
-  var torrent = state.client.add(torrentOrMagnetURI)
+function startTorrenting (torrentId) {
+  var torrent = state.client.add(torrentId)
   addTorrentEvents(torrent)
   return torrent
 }
@@ -344,6 +350,8 @@ function openPlayer (torrent) {
 }
 
 function deleteTorrent (torrent) {
+  var ix = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
+  if (ix > -1) state.saved.torrents.splice(ix, 1)
   torrent.destroy(saveState)
 }
 
