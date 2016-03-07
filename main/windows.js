@@ -25,7 +25,7 @@ function createMainWindow (menu) {
     title: config.APP_NAME,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     width: 450,
-    height: 300
+    height: 450
   })
   win.loadURL(config.INDEX)
 

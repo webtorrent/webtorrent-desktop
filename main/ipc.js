@@ -64,7 +64,7 @@ function setAspectRatio (aspectRatio, extraSize) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   debug('setBadge %s', text)
-  electron.app.dock.setBadge(String(text))
+  if (electron.app.dock) electron.app.dock.setBadge(String(text))
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.

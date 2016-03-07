@@ -288,6 +288,7 @@ body.drag::before {
   position: absolute;
   top: 20px;
   left: 20px;
+  width: calc(100% - 100px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
@@ -315,6 +316,22 @@ body.drag::before {
   border-radius: 14px;
   font-size: 18px;
   padding-top: 6px;
+}
+
+.torrent .buttons .download.downloading {
+  animation-name: greenpulse;
+  animation-duration: 0.8s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+}
+
+@keyframes greenpulse {
+  0% { color: #ffffff }
+  100% { color: #44dd44 }
+}
+
+.torrent .buttons .download.seeding {
+  color: #44dd44;
 }
 
 .torrent .buttons .play {

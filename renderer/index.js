@@ -1,18 +1,16 @@
-/* global URL, Blob */
-
 console.time('init')
 var airplay = require('airplay-js')
 var cfg = require('application-config')('WebTorrent')
+var cfgDirectory = require('application-config-path')('WebTorrent')
 var chromecasts = require('chromecasts')()
 var config = require('../config')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
-var extend = require('xtend')
+var fs = require('fs')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
-var os = require('os')
 var path = require('path')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
@@ -22,8 +20,6 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-
-var HOME = os.homedir()
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
@@ -38,10 +34,6 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var vdomLoop
-var defaultSaved = {
-  torrents: [],
-  downloadPath: path.join(HOME, 'Downloads')
-}
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
@@ -53,14 +45,12 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
-  document.querySelector('.loading').remove()
-
   // Connect to the WebTorrent and BitTorrent networks
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
-  state.client.on('torrent', saveTorrentData)
+  resumeTorrents() /* restart everything we were torrenting last time the app ran */
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -78,8 +68,8 @@ function init () {
   // (eg % downloaded) and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
 
-  // Resume all saved torrents now that state is loaded and vdom is ready
-  resumeAllTorrents()
+  // All state lives in state.js. `state.saved` is read from and written to a
+  // file. All other state is ephemeral. Here we'll load state.saved:
   window.addEventListener('beforeunload', saveState)
 
   // listen for messages from the main process
@@ -121,6 +111,8 @@ function init () {
     state.isFocused = false
   })
 
+  // Done! Ideally we want to get here <100ms after the user clicks the app
+  document.querySelector('.loading').remove() /* TODO: no spinner once fast enough */
   console.timeEnd('init')
 }
 
@@ -138,24 +130,29 @@ function update () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  console.log('dispatch: %s %o', action, args)
+  if (['videoMouseMoved', 'playbackJump'].indexOf(action) < 0) {
+    console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
+  }
   if (action === 'addTorrent') {
-    addTorrent(args[0] /* torrentId */)
+    addTorrent(args[0] /* torrent */)
   }
   if (action === 'seed') {
     seed(args[0] /* files */)
   }
   if (action === 'openPlayer') {
-    openPlayer(args[0] /* torrent */)
+    openPlayer(args[0] /* infoHash */)
+  }
+  if (action === 'toggleTorrent') {
+    toggleTorrent(args[0] /* infoHash */)
   }
   if (action === 'deleteTorrent') {
-    deleteTorrent(args[0] /* torrent */)
+    deleteTorrent(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
-    openChromecast(args[0] /* torrent */)
+    openChromecast(args[0] /* infoHash */)
   }
   if (action === 'openAirplay') {
-    openAirplay(args[0] /* torrent */)
+    openAirplay(args[0] /* infoHash */)
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
@@ -226,14 +223,17 @@ function loadState (callback) {
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
 
     // populate defaults if they're not there
-    state.saved = extend(defaultSaved, data)
+    state.saved = Object.assign({}, state.defaultSavedState, data)
 
     if (callback) callback()
   })
 }
 
-function resumeAllTorrents () {
-  state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
+// Starts all torrents that aren't paused on program startup
+function resumeTorrents () {
+  state.saved.torrents
+    .filter((x) => x.status !== 'paused')
+    .forEach((x) => startTorrenting(x.infoHash))
 }
 
 // Write state.saved to the JSON state file
@@ -279,55 +279,58 @@ function isNotTorrentFile (file) {
   return !isTorrentFile(file)
 }
 
+// Gets a torrent summary {name, infoHash, status} from state.saved.torrents
+// Returns undefined if we don't know that infoHash
+function getTorrentSummary (infoHash) {
+  return state.saved.torrents.find((x) => x.infoHash === infoHash)
+}
+
+// Get an active torrent from state.client.torrents
+// Returns undefined if we are not currently torrenting that infoHash
+function getTorrent (infoHash) {
+  return state.client.torrents.find((x) => x.infoHash === infoHash)
+}
+
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
 function addTorrent (torrentId) {
-  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
+  // Charlie Chaplin: 'magnet:?xt=urn:btih:cddf0459a718523480f7499da5ed1a504cffecb8&dn=charlie%5Fchaplin%5Ffilm%5Ffestival'
+  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5&dn=CosmosLaundromatFirstCycle'
+
   var torrent = startTorrenting(torrentId)
 
-  // check if torrent is duplicate
-  var exists = state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)
-  if (exists) return window.alert('That torrent is already downloading.')
+  // If torrentId is a torrent file, wait for WebTorrent to finish reading it
+  if (!torrent.infoHash) torrent.on('infoHash', addTorrentToList)
+  else addTorrentToList()
 
-  // save only if infoHash is available
-  if (torrent.infoHash) {
+  function addTorrentToList () {
+    if (getTorrentSummary(torrent.infoHash)) {
+      return // Skip, torrent is already in state.saved
+    }
     state.saved.torrents.push({
+      status: 'new',
+      name: torrent.name,
+      magnetURI: torrent.magnetURI,
       infoHash: torrent.infoHash
     })
-  } else {
-    torrent.on('infoHash', () => saveTorrentData(torrent))
+    saveState()
   }
-
-  saveState()
 }
 
-// add torrent metadata to state once it's available
-function saveTorrentData (torrent) {
-  var ix = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
-  var data = {
-    name: torrent.name,
-    magnetURI: torrent.magnetURI,
-    infoHash: torrent.infoHash,
-    path: torrent.path,
-    xt: torrent.xt,
-    dn: torrent.dn,
-    announce: torrent.announce
-  }
-
-  if (ix === -1) state.saved.torrents.push(data)
-  else state.saved.torrents[ix] = data
-
-  saveState()
-}
-
-// Starts downloading and/or seeding a given torrent file or magnet URI
-function startTorrenting (torrentId) {
-  var torrent = state.client.add(torrentId, {
-    // use downloads folder
+// Starts downloading and/or seeding a given torrent, torrentSummary or magnet URI
+function startTorrenting (infoHash) {
+  var torrent = state.client.add(infoHash, {
+    // Use downloads folder
     path: state.saved.downloadPath
   })
   addTorrentEvents(torrent)
   return torrent
+}
+
+// Stops downloading and/or seeding. See startTorrenting
+function stopTorrenting (infoHash) {
+  var torrent = getTorrent(infoHash)
+  if (torrent) torrent.destroy()
 }
 
 // Creates a torrent for a local file and starts seeding it
@@ -339,33 +342,60 @@ function seed (files) {
 
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
-
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
 
-  update()
-
   function torrentReady () {
-    torrentPoster(torrent, function (err, buf) {
-      if (err) return onWarning(err)
-      torrent.posterURL = URL.createObjectURL(new Blob([ buf ], { type: 'image/png' }))
-      update()
-    })
+    var torrentSummary = getTorrentSummary(torrent.infoHash)
+    torrentSummary.status = 'downloading'
+    torrentSummary.ready = true
+    torrentSummary.name = torrent.name
+    torrentSummary.infoHash = torrent.infoHash
+
+    if (!torrentSummary.posterURL) {
+      generateTorrentPoster(torrent, torrentSummary)
+    }
+
     update()
   }
 
   function torrentDone () {
+    var torrentSummary = getTorrentSummary(torrent.infoHash)
+    torrentSummary.status = 'seeding'
+
     if (!state.isFocused) {
       state.dock.badge += 1
       electron.ipcRenderer.send('setBadge', state.dock.badge)
     }
+
     update()
   }
 }
 
-function startServer (torrent, cb) {
+function generateTorrentPoster (torrent, torrentSummary) {
+  torrentPoster(torrent, function (err, buf) {
+    if (err) return onWarning(err)
+    // save it for next time
+    var posterFilePath = path.join(cfgDirectory, torrent.infoHash + '.jpg')
+    fs.writeFile(posterFilePath, buf, function (err) {
+      if (err) return onWarning(err)
+      // show the poster
+      torrentSummary.posterURL = 'file:///' + posterFilePath
+      update()
+    })
+  })
+}
+
+function startServer (infoHash, cb) {
   if (state.server) return cb()
 
+  var torrent = getTorrent(infoHash)
+  if (!torrent) torrent = startTorrenting(infoHash)
+  if (torrent.ready) startServerFromReadyTorrent(torrent, cb)
+  else torrent.on('ready', () => startServerFromReadyTorrent(torrent, cb))
+}
+
+function startServerFromReadyTorrent (torrent, cb) {
   // use largest file
   state.torrentPlaying = torrent.files.reduce(function (a, b) {
     return a.length > b.length ? a : b
@@ -385,15 +415,15 @@ function startServer (torrent, cb) {
   })
 }
 
-function closeServer () {
+function stopServer () {
   state.server.server.destroy()
   state.server = null
 }
 
-function openPlayer (torrent) {
-  startServer(torrent, function () {
+function openPlayer (infoHash) {
+  startServer(infoHash, function () {
     state.url = '/player'
-    state.title = torrent.name
+    /* TODO: set state.title to the clean name of the torrent */
     update()
   })
 }
@@ -405,20 +435,36 @@ function closePlayer () {
     electron.ipcRenderer.send('toggleFullScreen')
   }
   restoreBounds()
-  closeServer()
+  stopServer()
   update()
 }
 
-function deleteTorrent (torrent) {
-  var ix = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
-  if (ix > -1) state.saved.torrents.splice(ix, 1)
-  torrent.destroy(saveState)
+function toggleTorrent (infoHash) {
+  var torrentSummary = getTorrentSummary(infoHash)
+  if (!torrentSummary) return
+  if (torrentSummary.status === 'paused') {
+    torrentSummary.status = 'new'
+    startTorrenting(torrentSummary.infoHash)
+  } else {
+    torrentSummary.status = 'paused'
+    stopTorrenting(torrentSummary.infoHash)
+  }
 }
 
-function openChromecast (torrent) {
-  startServer(torrent, function () {
+function deleteTorrent (infoHash) {
+  var torrent = getTorrent(infoHash)
+  torrent.destroy()
+
+  var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
+  if (index > -1) state.saved.torrents.splice(index, 1)
+  saveState()
+}
+
+function openChromecast (infoHash) {
+  var torrentSummary = getTorrentSummary(infoHash)
+  startServer(infoHash, function () {
     state.devices.chromecast.play(state.server.networkURL, {
-      title: config.APP_NAME + ' — ' + torrent.name
+      title: config.APP_NAME + ' — ' + torrentSummary.name
     })
     state.devices.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
@@ -428,8 +474,8 @@ function openChromecast (torrent) {
   })
 }
 
-function openAirplay (torrent) {
-  startServer(torrent, function () {
+function openAirplay (infoHash) {
+  startServer(infoHash, function () {
     state.devices.airplay.play(state.server.networkURL, 0, function () {
       // TODO: handle airplay errors
     })
