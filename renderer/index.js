@@ -208,7 +208,9 @@ function loadState () {
     console.log('loaded state: ' + JSON.stringify(data, null, 4)) /* pretty print */
     state.saved = data
     if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach(startTorrenting)
+    state.saved.torrents.forEach(function (torrent) {
+      startTorrenting(torrent.magnetURI)
+    })
   })
 }
 
@@ -258,7 +260,7 @@ function isNotTorrentFile (file) {
 function addTorrent (torrentOrMagnetURI) {
   if (!torrentOrMagnetURI) torrentOrMagnetURI = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
   var torrent = startTorrenting(torrentOrMagnetURI)
-  state.saved.torrents.add({
+  state.saved.torrents.push({
     name: torrent.name,
     magnetURI: torrent.magnetURI,
     path: torrent.path
