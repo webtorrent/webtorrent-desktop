@@ -1,24 +1,27 @@
 /* global URL, Blob */
 
 var airplay = require('airplay-js')
+var cfg = require('application-config')('WebTorrent')
 var chromecasts = require('chromecasts')()
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
+var extend = require('xtend')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
+var os = require('os')
 var path = require('path')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
-var cfg = require('application-config')('WebTorrent')
-var extend = require('xtend')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
+
+var HOME = os.homedir()
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
@@ -33,10 +36,9 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var vdomLoop
-var HOME = process.env.HOME || process.env.USERPROFILE
 var defaultSaved = {
   torrents: [],
-  downloads: path.join(HOME, 'Downloads')
+  downloadPath: path.join(HOME, 'Downloads')
 }
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
@@ -318,7 +320,7 @@ function saveTorrentData (torrent) {
 function startTorrenting (torrentId) {
   var torrent = state.client.add(torrentId, {
     // use downloads folder
-    path: state.saved.downloads
+    path: state.saved.downloadPath
   })
   addTorrentEvents(torrent)
   return torrent
