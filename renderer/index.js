@@ -10,7 +10,6 @@ var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
 var state = require('./state')
-var throttle = require('throttleit')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 var cfg = require('application-config')('WebTorrent')
@@ -30,7 +29,7 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
     return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
   })
 
-var vdomLoop, updateThrottled
+var vdomLoop
 
 /**
  * Called once when the application loads. (Not once per window.)
@@ -56,11 +55,9 @@ function init () {
   document.body.appendChild(vdomLoop.target)
 
   // Calling update() updates the UI given the current state
-  // For performance, we don't want to do this too often. Hence, events that
-  // affect the UI can be v frequent--like torrent progress updates--call
-  // updateThrottled() instead, which calls update() at most once a second.
-  updateThrottled = throttle(update, 1000)
-  setInterval(updateThrottled, 1000)
+  // Do this at least once a second to show latest state for each torrent
+  // (eg % downloaded) and to keep the cursor in sync when playing a video
+  setInterval(update, 1000)
 
   // All state lives in state.js. `state.saved` is read from and written to a
   // file. All other state is ephemeral. Here we'll load state.saved:
@@ -208,9 +205,7 @@ function loadState () {
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
     state.saved = data
     if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach(function (torrent) {
-      startTorrenting(torrent.magnetURI)
-    })
+    state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
   })
 }
 
@@ -293,8 +288,6 @@ function seed (files) {
 
 function addTorrentEvents (torrent) {
   torrent.on('infoHash', update)
-  torrent.on('download', updateThrottled)
-  torrent.on('upload', updateThrottled)
 
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
