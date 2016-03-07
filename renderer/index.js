@@ -94,6 +94,8 @@ function init () {
       } else {
         dispatch('back')
       }
+    } else if (e.which === 32) {
+      dispatch('playPause')
     }
   })
 
