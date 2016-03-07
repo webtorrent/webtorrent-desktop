@@ -1,5 +1,6 @@
 /* global URL, Blob */
 
+console.time('init')
 var airplay = require('airplay-js')
 var chromecasts = require('chromecasts')()
 var createTorrent = require('create-torrent')
@@ -49,6 +50,8 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  document.querySelector('.loading').remove()
+
   // Connect to the WebTorrent and BitTorrent networks
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
@@ -81,14 +84,7 @@ function init () {
 
   // OS integrations:
   // ...Chromecast and Airplay
-  chromecasts.on('update', function (player) {
-    state.devices.chromecast = player
-    update()
-  })
-
-  airplay.createBrowser().on('deviceOn', function (player) {
-    state.devices.airplay = player
-  }).start()
+  detectDevices()
 
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', onFiles)
@@ -121,6 +117,8 @@ function init () {
   window.addEventListener('blur', function () {
     state.isFocused = false
   })
+
+  console.timeEnd('init')
 }
 
 // This is the (mostly) pure funtion from state -> UI. Returns a virtual DOM
@@ -211,6 +209,16 @@ function setupIpc () {
     state.devices[device] = player
     update()
   })
+}
+
+function detectDevices () {
+  chromecasts.on('update', function (player) {
+    state.devices.chromecast = player
+  })
+
+  airplay.createBrowser().on('deviceOn', function (player) {
+    state.devices.airplay = player
+  }).start()
 }
 
 // Load state.saved from the JSON state file

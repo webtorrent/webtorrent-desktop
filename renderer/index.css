@@ -23,12 +23,47 @@ body {
   overflow: hidden;
 }
 
+.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.loading .icon {
+  font-size: 42px;
+  display: block;
+  text-align: center;
+  animation: spin-ccw 2s infinite linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spin-ccw {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
 .app {
   -webkit-user-select: none;
   -webkit-app-region: drag;
   height: 100%;
   display: flex;
   flex-flow: column;
+  animation: fadein 1s;
 }
 
 /*
@@ -229,6 +264,7 @@ body.drag::before {
   background-position: 0 50%;
   transition: all 0.1s ease-out;
   position: relative;
+  animation: fadein .4s;
 }
 
 .torrent:not(:last-child) {
