@@ -32,15 +32,23 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
 
 var vdomLoop, updateThrottled
 
+/**
+ * Called once when the application loads. (Not once per window.)
+ * Connects to the torrent networks, sets up the UI and OS integrations like
+ * the dock icon and drag+drop.
+ */
 function init () {
+  // Connect to the WebTorrent and BitTorrent networks
+  // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
-  state.client.on('torrent', saveTorrents)
+  state.client.on('torrent', saveState)
 
-  // For easy debugging in Developer Tools
-  global.state = state
-
+  // The UI is built with virtual-dom, a minimalist library extracted from React
+  // The concepts--one way data flow, a pure function that renders state to a
+  // virtual DOM tree, and a diff that applies changes in the vdom to the real
+  // DOM, are all the same. Learn more: https://facebook.github.io/react/
   vdomLoop = mainLoop(state, render, {
     create: createElement,
     diff: diff,
@@ -48,12 +56,22 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
+  // Calling update() updates the UI given the current state
+  // For performance, we don't want to do this too often. Hence, events that
+  // affect the UI can be v frequent--like torrent progress updates--call
+  // updateThrottled() instead, which calls update() at most once a second.
   updateThrottled = throttle(update, 1000)
+  setInterval(updateThrottled, 1000)
 
-  dragDrop('body', onFiles)
+  // All state lives in state.js. `state.saved` is read from and written to a
+  // file. All other state is ephemeral. Here we'll load state.saved:
+  loadState()
 
-  restoreSession()
+  // For easy debugging in Developer Tools
+  global.state = state
 
+  // OS integrations:
+  // ...Chromecast and Airplay
   chromecasts.on('update', function (player) {
     state.devices.chromecast = player
     update()
@@ -63,10 +81,15 @@ function init () {
     state.devices.airplay = player
   }).start()
 
+  // ...drag and drop a torrent or video file to play or seed
+  dragDrop('body', onFiles)
+
+  // ...same thing if you paste a torrent
   document.addEventListener('paste', function () {
     electron.ipcRenderer.send('addTorrentFromPaste')
   })
 
+  // ...keyboard shortcuts
   document.addEventListener('keydown', function (e) {
     if (e.which === 27) { /* ESC means either exit fullscreen or go back */
       if (state.isFullScreen) {
@@ -77,6 +100,7 @@ function init () {
     }
   })
 
+  // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', function () {
     state.isFocused = true
     if (state.dock.badge > 0) electron.ipcRenderer.send('setBadge', '')
@@ -89,34 +113,19 @@ function init () {
 }
 init()
 
+// This is the (mostly) pure funtion from state -> UI. Returns a virtual DOM
+// tree. Any events, such as button clicks, will turn into calls to dispatch()
 function render (state) {
   return App(state, dispatch)
 }
 
+// Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
   vdomLoop.update(state)
   updateDockIcon()
 }
 
-setInterval(function () {
-  updateThrottled()
-}, 1000)
-
-function updateDockIcon () {
-  var progress = state.client.progress
-  var activeTorrentsExist = state.client.torrents.some(function (torrent) {
-    return torrent.progress !== 1
-  })
-  // Hide progress bar when client has no torrents, or progress is 100%
-  if (!activeTorrentsExist || progress === 1) {
-    progress = -1
-  }
-  if (progress !== state.dock.progress) {
-    state.dock.progress = progress
-    electron.ipcRenderer.send('setProgress', progress)
-  }
-}
-
+// Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
   console.log('dispatch: %s %o', action, args)
   if (action === 'addTorrent') {
@@ -192,6 +201,40 @@ electron.ipcRenderer.on('addFakeDevice', function (e, device) {
   update()
 })
 
+// Load state.saved from the JSON state file
+function loadState () {
+  cfg.read(function (err, data) {
+    if (err) console.error(err)
+    console.log('loaded state: ' + JSON.stringify(data, null, 4)) /* pretty print */
+    state.saved = data
+    if (!state.saved.torrents) state.saved.torrents = []
+    state.saved.torrents.forEach(startTorrenting)
+  })
+}
+
+// Write state.saved to the JSON state file
+function saveState () {
+  cfg.write(state.saved, function (err) {
+    if (err) console.error(err)
+    update()
+  })
+}
+
+function updateDockIcon () {
+  var progress = state.client.progress
+  var activeTorrentsExist = state.client.torrents.some(function (torrent) {
+    return torrent.progress !== 1
+  })
+  // Hide progress bar when client has no torrents, or progress is 100%
+  if (!activeTorrentsExist || progress === 1) {
+    progress = -1
+  }
+  if (progress !== state.dock.progress) {
+    state.dock.progress = progress
+    electron.ipcRenderer.send('setProgress', progress)
+  }
+}
+
 function onFiles (files) {
   // .torrent file = start downloading the torrent
   files.filter(isTorrentFile).forEach(function (torrentFile) {
@@ -211,12 +254,25 @@ function isNotTorrentFile (file) {
   return !isTorrentFile(file)
 }
 
-function addTorrent (torrentId) {
-  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
-  var torrent = state.client.add(torrentId)
-  addTorrentEvents(torrent)
+// Adds a torrent to the list, starts downloading/seeding
+function addTorrent (torrentOrMagnetURI) {
+  if (!torrentOrMagnetURI) torrentOrMagnetURI = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
+  var torrent = startTorrenting(torrentOrMagnetURI)
+  state.saved.torrents.add({
+    name: torrent.name,
+    magnetURI: torrent.magnetURI,
+    path: torrent.path
+  })
 }
 
+// Starts downloading and/or seeding a given torrent file or magnet URI
+function startTorrenting (torrentOrMagnetURI) {
+  var torrent = state.client.add(torrentOrMagnetURI)
+  addTorrentEvents(torrent)
+  return torrent
+}
+
+// Creates a torrent for a local file and starts seeding it
 function seed (files) {
   if (files.length === 0) return
   var torrent = state.client.seed(files)
@@ -249,35 +305,6 @@ function addTorrentEvents (torrent) {
     }
     update()
   }
-}
-
-function restoreSession () {
-  cfg.read(function (err, data) {
-    if (err) console.error(err)
-    state.saved = data
-    if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach(function (torrent) {
-      dispatch('addTorrent', torrent.magnetURI)
-    })
-    update()
-  })
-}
-
-function saveTorrents () {
-  state.saved.torrents = state.client.torrents.map(function (torrent) {
-    return {
-      name: torrent.name,
-      magnetURI: torrent.magnetURI,
-      path: torrent.path
-    }
-  })
-
-  cfg.write({
-    torrents: state.saved.torrents
-  }, function (err) {
-    if (err) console.error(err)
-    update()
-  })
 }
 
 function startServer (torrent, cb) {
@@ -315,9 +342,7 @@ function openPlayer (torrent) {
 }
 
 function deleteTorrent (torrent) {
-  torrent.destroy(function () {
-    saveTorrents() // updates after writing to config
-  })
+  torrent.destroy(saveState)
 }
 
 function openChromecast (torrent) {
@@ -342,25 +367,29 @@ function openAirplay (torrent) {
   })
 }
 
+// Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
-  // TODO: eliminate blocking remote call
-  state.mainWindowBounds = electron.remote.getCurrentWindow().getBounds()
+  state.mainWindowBounds = {
+    x: window.screenX,
+    y: window.screenY,
+    width: window.outerWidth,
+    height: window.outerHeight
+  }
 
   // Limit window size to screen size
-  var workAreaSize = electron.remote.screen.getPrimaryDisplay().workAreaSize
+  var screenWidth = window.screen.width
+  var screenHeight = window.screen.height
   var aspectRatio = dimensions.width / dimensions.height
-
   var scaleFactor = Math.min(
-    Math.min(workAreaSize.width / dimensions.width, 1),
-    Math.min(workAreaSize.height / dimensions.height, 1)
+    Math.min(screenWidth / dimensions.width, 1),
+    Math.min(screenHeight / dimensions.height, 1)
   )
-
   var width = Math.floor(dimensions.width * scaleFactor)
   var height = Math.floor(dimensions.height * scaleFactor)
 
   // Center window on screen
-  var x = Math.floor((workAreaSize.width - width) / 2)
-  var y = Math.floor((workAreaSize.height - height) / 2)
+  var x = Math.floor((screenWidth - width) / 2)
+  var y = Math.floor((screenHeight - height) / 2)
 
   electron.ipcRenderer.send('setAspectRatio', aspectRatio)
   electron.ipcRenderer.send('setBounds', {x, y, width, height})
