@@ -12,6 +12,7 @@ var path = require('path')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 var cfg = require('application-config')('WebTorrent')
+var extend = require('xtend')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -32,6 +33,11 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var vdomLoop
+var HOME = process.env.HOME || process.env.USERPROFILE
+var defaultSaved = {
+  torrents: [],
+  downloads: path.join(HOME, 'Downloads')
+}
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
@@ -48,6 +54,7 @@ function init () {
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
+  state.client.on('torrent', updateTorrentData)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -209,8 +216,10 @@ function loadState (callback) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
-    state.saved = data
-    if (!state.saved.torrents) state.saved.torrents = []
+
+    // populate defaults if they're not there
+    state.saved = extend(defaultSaved, data)
+
     if (callback) callback()
   })
 }
@@ -267,10 +276,26 @@ function isNotTorrentFile (file) {
 function addTorrent (torrentId) {
   if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
   var torrent = startTorrenting(torrentId)
-  if (state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)) {
-    return // torrent is already in state.saved
-  }
+
+  // check if torrent is duplicate
+  var exists = state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)
+  if (exists) return window.alert('That torrent is already downloading.')
+
+  // only infoHash is available until torrent is ready
   state.saved.torrents.push({
+    infoHash: torrent.infoHash
+  })
+  saveState()
+}
+
+// add torrent metadata to state once it's available
+function updateTorrentData (torrent) {
+  // get torrent index
+  var i = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
+  if (i === -1) return
+
+  // add the goods
+  state.saved.torrents[i] = {
     name: torrent.name,
     magnetURI: torrent.magnetURI,
     infoHash: torrent.infoHash,
@@ -278,13 +303,17 @@ function addTorrent (torrentId) {
     xt: torrent.xt,
     dn: torrent.dn,
     announce: torrent.announce
-  })
+  }
+
   saveState()
 }
 
 // Starts downloading and/or seeding a given torrent file or magnet URI
 function startTorrenting (torrentId) {
-  var torrent = state.client.add(torrentId)
+  var torrent = state.client.add(torrentId, {
+    // use downloads folder
+    path: state.saved.downloads
+  })
   addTorrentEvents(torrent)
   return torrent
 }
