@@ -104,7 +104,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 .header {
   background: rgb(40, 40, 40);
   border-bottom: 1px solid rgb(20, 20, 20);
-  height: 38px;
+  height: 37px; /* vertically center OS menu buttons (OS X) */
   padding-top: 6px;
   overflow: hidden;
   flex: 0 1 auto;
@@ -218,7 +218,7 @@ body.drag::before {
  */
 
 .torrent-list {
-  margin-top: 38px;
+  margin-top: 37px;
 }
 
 .torrent {
