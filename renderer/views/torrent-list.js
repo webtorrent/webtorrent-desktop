@@ -23,57 +23,67 @@ function renderTorrent (torrent, dispatch) {
 
   // Foreground: name of the torrent, basic info like size, play button,
   // cast buttons if available, and delete
-  var elements = [
-    renderTorrentMetadata(torrent),
-    hx`
-      <i
-        class='icon delete'
-        onclick=${() => dispatch('deleteTorrent', torrent)}>
-        close
-      </i>
-    `,
-    hx`
-      <i.btn.icon.play
-        class='${!torrent.ready ? 'disabled' : ''}'
-        onclick=${() => dispatch('openPlayer', torrent)}>
-        play_arrow
-      </i>
-    `
-  ]
-
-  return hx`<div class='torrent' style=${style}>${elements}</div>`
-}
-
-// Renders the torrent name and download progress
-function renderTorrentMetadata (torrent) {
-  var progress = Math.floor(100 * torrent.progress)
-  var downloaded = prettyBytes(torrent.downloaded)
-  var total = prettyBytes(torrent.length || 0)
-
-  if (downloaded !== total) downloaded += ` / ${total}`
-
   return hx`
-    <div class='metadata'>
-      <div class='name ellipsis'>${torrent.name || 'Loading torrent...'}</div>
-      <div class='status'>
-        <span class='progress'>${progress}%</span>
-        <span>${downloaded}</span>
-      </div>
-      ${getFilesLength()}
-      <span>${getPeers()}</span>
-      <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
-      <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+    <div class='torrent' style=${style}>
+      ${renderTorrentMetadata(torrent)}
+      ${renderTorrentButtons(torrent)}
     </div>
   `
 
-  function getPeers () {
-    var count = torrent.numPeers === 1 ? 'peer' : 'peers'
-    return `${torrent.numPeers} ${count}`
+  function renderTorrentMetadata () {
+    var progress = Math.floor(100 * torrent.progress)
+    var downloaded = prettyBytes(torrent.downloaded)
+    var total = prettyBytes(torrent.length || 0)
+
+    if (downloaded !== total) downloaded += ` / ${total}`
+
+    return hx`
+      <div class='metadata'>
+        <div class='name ellipsis'>${torrent.name || 'Loading torrent...'}</div>
+        <div class='status ellipsis'>
+          ${getFilesLength()}
+          <span>${getPeers()}</span>
+          <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
+          <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+        </div>
+        <div class='status2 ellipsis'>
+          <span class='progress'>${progress}%</span>
+          <span>${downloaded}</span>
+        </div>
+      </div>
+    `
+
+    function getPeers () {
+      var count = torrent.numPeers === 1 ? 'peer' : 'peers'
+      return `${torrent.numPeers} ${count}`
+    }
+
+    function getFilesLength () {
+      if (torrent.ready && torrent.files.length > 1) {
+        return hx`<span class='files'>${torrent.files.length} files</span>`
+      }
+    }
   }
 
-  function getFilesLength () {
-    if (torrent.ready && torrent.files.length > 1) {
-      return hx`<span class='files'>${torrent.files.length} files</span>`
-    }
+  function renderTorrentButtons () {
+    return hx`
+      <div class="buttons">
+        <i.btn.icon.download
+          class='${torrent.state}'
+          onclick=${() => dispatch('toggleTorrent', torrent)}>
+          file_download
+        </i>
+        <i.btn.icon.play
+          class='${!torrent.ready ? 'disabled' : ''}'
+          onclick=${() => dispatch('openPlayer', torrent)}>
+          play_arrow
+        </i>
+        <i
+          class='icon delete'
+          onclick=${() => dispatch('deleteTorrent', torrent)}>
+          close
+        </i>
+      </div>
+    `
   }
 }

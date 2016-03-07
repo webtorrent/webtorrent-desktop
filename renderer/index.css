@@ -223,8 +223,7 @@ body.drag::before {
 
 .torrent {
   height: 120px;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
@@ -241,41 +240,45 @@ body.drag::before {
 }
 
 .torrent .metadata {
-  float: left;
-  width: 100%;
+  position: absolute;
+  top: 20px;
+  left: 20px;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
-.torrent:hover .metadata {
-  width: calc(100% - 170px);
-}
-
-.torrent .btn, .torrent .delete {
-  float: right;
-  margin-top: 20px;
-  margin-left: 15px;
-  padding-top: 10px;
+.torrent .buttons {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  align-items: center; /* flexbox: center buttons vertically */
   display: none;
 }
 
-.torrent .delete {
-  opacity: 0.5;
+.torrent:hover .buttons {
+  display: flex;
 }
 
-.torrent:hover .btn, .torrent:hover .delete {
-  display: block;
+.torrent .buttons > :not(:first-child) {
+  margin-left: 10px; /* space buttons by 10px */
 }
 
-.torrent .play {
+.torrent .buttons .download {
+  background-color: #2233BB;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  font-size: 18px;
+  padding-top: 6px;
+}
+
+.torrent .buttons .play {
+  padding-top: 10px;
   background-color: #F44336;
 }
 
-.torrent .chromecast {
-  background-color: #2196F3;
-}
-
-.torrent .airplay {
-  background-color: #212121;
+.torrent .buttons .delete {
+  opacity: 0.5;
 }
 
 .torrent .name {
@@ -284,11 +287,9 @@ body.drag::before {
   line-height: 1.5em;
 }
 
-.torrent .status {
+.torrent .status, .torrent .status2 {
   font-size: 1em;
   line-height: 1.5em;
-  position: absolute;
-  bottom: 20px;
 }
 
 .torrent span:not(:last-child)::after {

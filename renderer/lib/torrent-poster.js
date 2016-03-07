@@ -4,15 +4,18 @@ var captureVideoFrame = require('./capture-video-frame')
 var path = require('path')
 
 function torrentPoster (torrent, cb) {
+  // filter out file formats that the <video> tag definitely can't play
+  var files = torrent.files.filter(function (file) {
+    var extname = path.extname(file.name)
+    return ['.mp4', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
+  })
+
+  if (files.length === 0) return cb(new Error('cannot make screenshot for any files in torrent'))
+
   // use largest file
-  var file = torrent.files
-    .filter(function (file) {
-      var extname = path.extname(file.name)
-      return ['.mp4', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
-    })
-    .reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
+  var file = files.reduce(function (a, b) {
+    return a.length > b.length ? a : b
+  })
 
   var index = torrent.files.indexOf(file)
 

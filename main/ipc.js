@@ -31,6 +31,10 @@ function init () {
   ipcMain.on('toggleFullScreen', function (e) {
     windows.main.setFullScreen(!windows.main.isFullScreen())
   })
+
+  ipcMain.on('log', function (e, message) {
+    console.log(message)
+  })
 }
 
 function addTorrentFromPaste () {
