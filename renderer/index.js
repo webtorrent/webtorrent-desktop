@@ -9,16 +9,19 @@ var EventEmitter = require('events')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
-var state = require('./state')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 var cfg = require('application-config')('WebTorrent')
+var extend = require('xtend')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
+
+// For easy debugging in Developer Tools
+var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
@@ -30,6 +33,15 @@ global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
   })
 
 var vdomLoop
+var HOME = process.env.HOME || process.env.USERPROFILE
+var defaultSaved = {
+  torrents: [],
+  downloads: path.join(HOME, 'Downloads')
+}
+
+// All state lives in state.js. `state.saved` is read from and written to a file.
+// All other state is ephemeral. First we load state.saved then initialize the app.
+loadState(init)
 
 /**
  * Called once when the application loads. (Not once per window.)
@@ -42,6 +54,7 @@ function init () {
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
+  state.client.on('torrent', saveTorrentData)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -59,13 +72,12 @@ function init () {
   // (eg % downloaded) and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
 
-  // All state lives in state.js. `state.saved` is read from and written to a
-  // file. All other state is ephemeral. Here we'll load state.saved:
-  loadState()
-  document.addEventListener('unload', saveState)
+  // Resume all saved torrents now that state is loaded and vdom is ready
+  resumeAllTorrents()
+  window.addEventListener('beforeunload', saveState)
 
-  // For easy debugging in Developer Tools
-  global.state = state
+  // listen for messages from the main process
+  setupIpc()
 
   // OS integrations:
   // ...Chromecast and Airplay
@@ -110,7 +122,6 @@ function init () {
     state.isFocused = false
   })
 }
-init()
 
 // This is the (mostly) pure funtion from state -> UI. Returns a virtual DOM
 // tree. Any events, such as button clicks, will turn into calls to dispatch()
@@ -180,35 +191,43 @@ function dispatch (action, ...args) {
   }
 }
 
-electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
-  dispatch('addTorrent', torrentId)
-})
+function setupIpc () {
+  electron.ipcRenderer.on('addTorrent', function (e, torrentId) {
+    dispatch('addTorrent', torrentId)
+  })
 
-electron.ipcRenderer.on('seed', function (e, files) {
-  dispatch('seed', files)
-})
+  electron.ipcRenderer.on('seed', function (e, files) {
+    dispatch('seed', files)
+  })
 
-electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
-  state.isFullScreen = isFullScreen
-  update()
-})
+  electron.ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
+    state.isFullScreen = isFullScreen
+    update()
+  })
 
-electron.ipcRenderer.on('addFakeDevice', function (e, device) {
-  var player = new EventEmitter()
-  player.play = (networkURL) => console.log(networkURL)
-  state.devices[device] = player
-  update()
-})
+  electron.ipcRenderer.on('addFakeDevice', function (e, device) {
+    var player = new EventEmitter()
+    player.play = (networkURL) => console.log(networkURL)
+    state.devices[device] = player
+    update()
+  })
+}
 
 // Load state.saved from the JSON state file
-function loadState () {
+function loadState (callback) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     electron.ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
-    state.saved = data
-    if (!state.saved.torrents) state.saved.torrents = []
-    state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
+
+    // populate defaults if they're not there
+    state.saved = extend(defaultSaved, data)
+
+    if (callback) callback()
   })
+}
+
+function resumeAllTorrents () {
+  state.saved.torrents.forEach((x) => startTorrenting(x.infoHash))
 }
 
 // Write state.saved to the JSON state file
@@ -259,10 +278,27 @@ function isNotTorrentFile (file) {
 function addTorrent (torrentId) {
   if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4'
   var torrent = startTorrenting(torrentId)
-  if (state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)) {
-    return // torrent is already in state.saved
+
+  // check if torrent is duplicate
+  var exists = state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)
+  if (exists) return window.alert('That torrent is already downloading.')
+
+  // save only if infoHash is available
+  if (torrent.infoHash) {
+    state.saved.torrents.push({
+      infoHash: torrent.infoHash
+    })
+  } else {
+    torrent.on('infoHash', () => saveTorrentData(torrent))
   }
-  state.saved.torrents.push({
+
+  saveState()
+}
+
+// add torrent metadata to state once it's available
+function saveTorrentData (torrent) {
+  var ix = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
+  var data = {
     name: torrent.name,
     magnetURI: torrent.magnetURI,
     infoHash: torrent.infoHash,
@@ -270,13 +306,20 @@ function addTorrent (torrentId) {
     xt: torrent.xt,
     dn: torrent.dn,
     announce: torrent.announce
-  })
+  }
+
+  if (ix === -1) state.saved.torrents.push(data)
+  else state.saved.torrents[ix] = data
+
   saveState()
 }
 
 // Starts downloading and/or seeding a given torrent file or magnet URI
 function startTorrenting (torrentId) {
-  var torrent = state.client.add(torrentId)
+  var torrent = state.client.add(torrentId, {
+    // use downloads folder
+    path: state.saved.downloads
+  })
   addTorrentEvents(torrent)
   return torrent
 }
