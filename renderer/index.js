@@ -54,7 +54,7 @@ function init () {
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', onError)
-  state.client.on('torrent', updateTorrentData)
+  state.client.on('torrent', saveTorrentData)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -74,7 +74,7 @@ function init () {
 
   // Resume all saved torrents now that state is loaded and vdom is ready
   resumeAllTorrents()
-  document.addEventListener('unload', saveState)
+  window.addEventListener('beforeunload', saveState)
 
   // listen for messages from the main process
   setupIpc()
@@ -281,21 +281,22 @@ function addTorrent (torrentId) {
   var exists = state.saved.torrents.find((x) => x.infoHash === torrent.infoHash)
   if (exists) return window.alert('That torrent is already downloading.')
 
-  // only infoHash is available until torrent is ready
-  state.saved.torrents.push({
-    infoHash: torrent.infoHash
-  })
+  // save only if infoHash is available
+  if (torrent.infoHash) {
+    state.saved.torrents.push({
+      infoHash: torrent.infoHash
+    })
+  } else {
+    torrent.on('infoHash', () => saveTorrentData(torrent))
+  }
+
   saveState()
 }
 
 // add torrent metadata to state once it's available
-function updateTorrentData (torrent) {
-  // get torrent index
-  var i = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
-  if (i === -1) return
-
-  // add the goods
-  state.saved.torrents[i] = {
+function saveTorrentData (torrent) {
+  var ix = state.saved.torrents.findIndex((x) => x.infoHash === torrent.infoHash)
+  var data = {
     name: torrent.name,
     magnetURI: torrent.magnetURI,
     infoHash: torrent.infoHash,
@@ -304,6 +305,9 @@ function updateTorrentData (torrent) {
     dn: torrent.dn,
     announce: torrent.announce
   }
+
+  if (ix === -1) state.saved.torrents.push(data)
+  else state.saved.torrents[ix] = data
 
   saveState()
 }
