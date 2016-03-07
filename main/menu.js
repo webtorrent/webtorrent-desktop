@@ -1,3 +1,4 @@
+var config = require('../config')
 var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
 var windows = require('./windows')
@@ -205,7 +206,7 @@ function getMenuTemplate () {
       role: 'help',
       submenu: [
         {
-          label: 'Learn more about WebTorrent',
+          label: 'Learn more about ' + config.APP_NAME,
           click: function () { electron.shell.openExternal('https://webtorrent.io') }
         },
         {

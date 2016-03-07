@@ -1,6 +1,6 @@
-var electron = require('electron')
+var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
-var config = require('./config')
+var electron = require('electron')
 
 var app = electron.app
 

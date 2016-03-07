@@ -4,6 +4,7 @@ console.time('init')
 var airplay = require('airplay-js')
 var cfg = require('application-config')('WebTorrent')
 var chromecasts = require('chromecasts')()
+var config = require('../config')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -167,6 +168,7 @@ function dispatch (action, ...args) {
       closeServer()
     }
     state.url = '/'
+    state.title = config.APP_NAME
     update()
   }
   if (action === 'forward') {
@@ -397,6 +399,7 @@ function closeServer () {
 function openPlayer (torrent) {
   startServer(torrent, function () {
     state.url = '/player'
+    state.title = torrent.name
     update()
   })
 }
@@ -410,7 +413,7 @@ function deleteTorrent (torrent) {
 function openChromecast (torrent) {
   startServer(torrent, function () {
     state.devices.chromecast.play(state.server.networkURL, {
-      title: 'WebTorrent — ' + torrent.name
+      title: config.APP_NAME + ' — ' + torrent.name
     })
     state.devices.chromecast.on('error', function (err) {
       err.message = 'Chromecast: ' + err.message
