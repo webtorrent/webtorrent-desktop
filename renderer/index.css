@@ -265,10 +265,6 @@ body.drag::before {
   flex: 1 1 auto;
 }
 
-.lead {
-  font-size: 150%;
-}
-
 .torrent {
   height: 120px;
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
