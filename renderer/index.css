@@ -253,7 +253,20 @@ body.drag::before {
  */
 
 .torrent-list {
-  margin-top: 37px;
+  padding-top: 37px;
+}
+
+.get-started {
+  opacity: .5;
+  padding: 24px;
+  margin: 6px;
+  text-align: center;
+  border: 5px #444 dashed;
+  flex: 1 1 auto;
+}
+
+.lead {
+  font-size: 150%;
 }
 
 .torrent {
