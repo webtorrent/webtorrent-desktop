@@ -113,7 +113,10 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Close Window',
+          label: (function () {
+            if (process.platform === 'darwin') return 'Close Window'
+            else return 'Close'
+          })(),
           accelerator: 'CmdOrCtrl+W',
           role: 'close'
         }
