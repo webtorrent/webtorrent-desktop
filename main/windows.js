@@ -21,7 +21,7 @@ function createMainWindow (menu) {
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3 only)
     minWidth: 375,
-    minHeight: 158,
+    minHeight: 38 + (120 * 2), // header height + two torrents
     show: false, // Hide window until DOM finishes loading
     title: config.APP_NAME,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
