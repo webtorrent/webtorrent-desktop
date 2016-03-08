@@ -3,8 +3,16 @@ module.exports = TorrentList
 var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
+var pb = require('pretty-bytes')
 
-var prettyBytes = require('pretty-bytes')
+function prettyBytes (b) {
+  var pretty = pb(b)
+
+  var ps = pretty.split(/\.| /)
+  // if there is more than one digit to the left of the decimal, chop off the fractional part.
+  if (ps.length > 2 && ps[0].replace('-', '').length > 1) return ps[0] + ' ' + ps[2]
+  return pretty
+}
 
 function TorrentList (state, dispatch) {
   var list = state.client.torrents.map((torrent) => renderTorrent(torrent, dispatch))
