@@ -100,7 +100,7 @@ function init () {
       } else {
         dispatch('back')
       }
-    } else if (e.which === 32) {
+    } else if (e.which === 32) { /* spacebar pauses or plays the video */
       dispatch('playPause')
     }
   })
@@ -434,10 +434,21 @@ function stopServer () {
   state.server = null
 }
 
-function openPlayer (infoHash) {
-  startServer(infoHash, function () {
+function openPlayer (torrentSummary) {
+  torrentSummary.playStatus = 'requested'
+  var timeout = setTimeout(function () {
+    torrentSummary.playStatus = 'timeout' /* no seeders available? */
+  }, 10000) /* give it a few seconds */
+  startServer(torrentSummary.infoHash, function () {
+    // if we timed out (user clicked play a long time ago), don't autoplay
+    clearTimeout(timeout)
+    var timedOut = torrentSummary.playStatus === 'timeout'
+    delete torrentSummary.playStatus
+    if (timedOut) return
+
+    // otherwise, play the video
     state.url = '/player'
-    /* TODO: set state.title to the clean name of the torrent */
+    state.title = torrentSummary.name
     update()
   })
 }
@@ -455,9 +466,7 @@ function closePlayer () {
   update()
 }
 
-function toggleTorrent (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  if (!torrentSummary) return
+function toggleTorrent (torrentSummary) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrenting(torrentSummary.infoHash)
@@ -467,7 +476,8 @@ function toggleTorrent (infoHash) {
   }
 }
 
-function deleteTorrent (infoHash) {
+function deleteTorrent (torrentSummary) {
+  var infoHash = torrentSummary.infoHash
   var torrent = getTorrent(infoHash)
   torrent.destroy()
 

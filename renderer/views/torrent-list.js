@@ -17,17 +17,13 @@ function prettyBytes (b) {
 function TorrentList (state, dispatch) {
   var list = state.saved.torrents.map(
     (torrentSummary) => renderTorrent(torrentSummary, state, dispatch))
-  if (list.length === 0) list = emptyList()
-  return hx`<div class='torrent-list'>${list}</div>`
-}
-
-function emptyList () {
   return hx`
-    <div class="get-started">
-      <p>No torrents here yet.</p>
-      <p>Drop a file or paste an address to get started!</p>
-    </div>
-  `
+    <div class='torrent-list'>
+      ${list}
+      <div class='drop-target'>
+        <p>Drop a torrent file here or paste a magnet link</p>
+      </div>
+    </div>`
 }
 
 // Renders a torrent in the torrent list
@@ -48,7 +44,7 @@ function renderTorrent (torrentSummary, state, dispatch) {
   // Foreground: name of the torrent, basic info like size, play button,
   // cast buttons if available, and delete
   return hx`
-    <div class='torrent' style=${style}>
+    <div class='torrent ${torrentSummary.playStatus || ''}' style=${style}>
       ${renderTorrentMetadata(torrent, torrentSummary)}
       ${renderTorrentButtons(torrentSummary, dispatch)}
     </div>
@@ -103,21 +99,20 @@ function renderTorrentMetadata (torrent, torrentSummary) {
 // Download button toggles between torrenting (DL/seed) and paused
 // Play button starts streaming the torrent immediately, unpausing if needed
 function renderTorrentButtons (torrentSummary, dispatch) {
-  var infoHash = torrentSummary.infoHash
   return hx`
     <div class="buttons">
       <i.btn.icon.download
         class='${torrentSummary.status}'
-        onclick=${() => dispatch('toggleTorrent', infoHash)}>
-        file_download
+        onclick=${() => dispatch('toggleTorrent', torrentSummary)}>
+        ${torrentSummary.status === 'seeding' ? 'file_upload' : 'file_download'}
       </i>
       <i.btn.icon.play
-        onclick=${() => dispatch('openPlayer', infoHash)}>
-        play_arrow
+        onclick=${() => dispatch('openPlayer', torrentSummary)}>
+        ${torrentSummary.playStatus === 'timeout' ? 'warning' : 'play_arrow'}
       </i>
       <i
         class='icon delete'
-        onclick=${() => dispatch('deleteTorrent', infoHash)}>
+        onclick=${() => dispatch('deleteTorrent', torrentSummary)}>
         close
       </i>
     </div>
