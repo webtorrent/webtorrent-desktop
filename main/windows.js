@@ -1,13 +1,14 @@
+var windows = module.exports = {
+  main: null,
+  createMainWindow: createMainWindow
+}
+
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
 
 var app = electron.app
 
-var windows = {
-  main: null,
-  createMainWindow: createMainWindow
-}
 var isQuitting = false
 
 app.on('before-quit', function () {
@@ -41,8 +42,8 @@ function createMainWindow (menu) {
   win.on('blur', menu.onWindowHide)
   win.on('focus', menu.onWindowShow)
 
-  win.on('enter-full-screen', menu.onToggleFullScreen)
-  win.on('leave-full-screen', menu.onToggleFullScreen)
+  win.on('enter-full-screen', () => menu.onToggleFullScreen(true))
+  win.on('leave-full-screen', () => menu.onToggleFullScreen(false))
 
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
@@ -55,5 +56,3 @@ function createMainWindow (menu) {
     windows.main = null
   })
 }
-
-module.exports = windows

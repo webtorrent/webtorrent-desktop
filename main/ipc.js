@@ -2,9 +2,10 @@ module.exports = {
   init: init
 }
 
-var electron = require('electron')
 var debug = require('debug')('webtorrent-app:ipcMain')
+var electron = require('electron')
 var ipcMain = electron.ipcMain
+var menu = require('./menu')
 var windows = require('./windows')
 
 function init () {
@@ -28,8 +29,12 @@ function init () {
     setProgress(progress)
   })
 
-  ipcMain.on('toggleFullScreen', function (e) {
-    windows.main.setFullScreen(!windows.main.isFullScreen())
+  ipcMain.on('toggleFullScreen', function (e, flag) {
+    menu.toggleFullScreen(flag)
+  })
+
+  ipcMain.on('setTitle', function (e, title) {
+    windows.main.setTitle(title)
   })
 
   ipcMain.on('log', function (e, message) {

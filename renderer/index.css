@@ -63,7 +63,7 @@ body {
   height: 100%;
   display: flex;
   flex-flow: column;
-  animation: fadein 1s;
+  animation: fadein 0.3s;
 }
 
 /*
