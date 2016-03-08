@@ -18,12 +18,12 @@ function createMainWindow (menu) {
   var win = windows.main = new electron.BrowserWindow({
     autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
-    darkTheme: true,
+    darkTheme: true, // Forces dark theme (GTK+3 only)
     minWidth: 375,
     minHeight: 158,
-    show: false,
+    show: false, // Hide window until DOM finishes loading
     title: config.APP_NAME,
-    titleBarStyle: 'hidden-inset',
+    titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     width: 450,
     height: 300
   })
