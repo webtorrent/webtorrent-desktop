@@ -250,6 +250,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   margin: 10px;
   text-align: center;
   border: 5px #444 dashed;
+  border-radius: 5px;
   color: #666;
   font-size: 16px;
   flex: 1 1 auto;
