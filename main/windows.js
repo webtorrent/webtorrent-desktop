@@ -33,10 +33,8 @@ function createMainWindow (menu) {
   })
 
   win.webContents.on('did-finish-load', function () {
-    setTimeout(function () {
-      debug('startup time: %sms', Date.now() - app.startTime)
-      win.show()
-    }, 50)
+    debug('startup time: %sms', Date.now() - app.startTime)
+    win.show()
   })
 
   win.on('blur', menu.onWindowHide)
