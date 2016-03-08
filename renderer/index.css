@@ -276,7 +276,7 @@ body.drag .drop-target {
   height: 120px;
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 700px) {
   .torrent, .drop-target {
     height: 150px;
   }
