@@ -32,6 +32,10 @@ function init () {
     windows.main.setFullScreen(!windows.main.isFullScreen())
   })
 
+  ipcMain.on('setTitle', function (e, title) {
+    windows.main.setTitle(title)
+  })
+
   ipcMain.on('log', function (e, message) {
     console.log(message)
   })

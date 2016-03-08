@@ -68,7 +68,10 @@ function init () {
   // Calling update() updates the UI given the current state
   // Do this at least once a second to show latest state for each torrent
   // (eg % downloaded) and to keep the cursor in sync when playing a video
-  setInterval(update, 1000)
+  setInterval(function () {
+    update()
+    updateClientProgress()
+  }, 1000)
 
   // All state lives in state.js. `state.saved` is read from and written to a
   // file. All other state is ephemeral. Here we'll load state.saved:
@@ -105,7 +108,6 @@ function init () {
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', function () {
     state.isFocused = true
-    if (state.dock.badge > 0) ipcRenderer.send('setBadge', '')
     state.dock.badge = 0
   })
 
@@ -127,7 +129,21 @@ function render (state) {
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
   vdomLoop.update(state)
-  updateDockIcon()
+  updateElectron()
+}
+
+function updateElectron () {
+  if (state.title !== state.prev.title) {
+    state.prev.title = state.title
+    ipcRenderer.send('setTitle', state.title)
+  }
+  if (state.dock.progress !== state.prev.progress) {
+    state.prev.progress = state.dock.progress
+    ipcRenderer.send('setProgress', state.dock.progress)
+  }
+  if (state.dock.badge !== state.prev.badge) {
+    ipcRenderer.send('setBadge', state.dock.badge || '')
+  }
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -247,7 +263,7 @@ function saveState () {
   })
 }
 
-function updateDockIcon () {
+function updateClientProgress () {
   var progress = state.client.progress
   var activeTorrentsExist = state.client.torrents.some(function (torrent) {
     return torrent.progress !== 1
@@ -256,10 +272,7 @@ function updateDockIcon () {
   if (!activeTorrentsExist || progress === 1) {
     progress = -1
   }
-  if (progress !== state.dock.progress) {
-    state.dock.progress = progress
-    ipcRenderer.send('setProgress', progress)
-  }
+  state.dock.progress = progress
 }
 
 function onFiles (files) {
@@ -367,7 +380,6 @@ function addTorrentEvents (torrent) {
 
     if (!state.isFocused) {
       state.dock.badge += 1
-      ipcRenderer.send('setBadge', state.dock.badge)
     }
 
     update()
@@ -433,6 +445,8 @@ function openPlayer (infoHash) {
 function closePlayer () {
   state.url = '/'
   state.title = config.APP_NAME
+  update()
+
   if (state.isFullScreen) {
     ipcRenderer.send('toggleFullScreen')
   }
