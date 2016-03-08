@@ -246,13 +246,15 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 }
 
 .drop-target {
-  padding: 20px;
   margin: 10px;
-  text-align: center;
   border: 5px #444 dashed;
+  border-radius: 5px;
   color: #666;
   font-size: 16px;
   flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 body.drag .drop-target {
@@ -261,7 +263,6 @@ body.drag .drop-target {
 }
 
 .torrent {
-  height: 120px;
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
   background-size: cover;
@@ -269,6 +270,22 @@ body.drag .drop-target {
   transition: all 0.1s ease-out;
   position: relative;
   animation: fadein .4s;
+}
+
+.torrent, .drop-target {
+  height: 120px;
+}
+
+@media only screen and (min-width: 600px) {
+  .torrent, .drop-target {
+    height: 150px;
+  }
+}
+
+@media only screen and (min-width: 900px) {
+  .torrent, .drop-target {
+    height: 180px;
+  }
 }
 
 .torrent:not(:last-child) {
