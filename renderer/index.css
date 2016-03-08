@@ -267,7 +267,7 @@ body.drag .drop-target {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  transition: all 0.1s ease-out;
+  transition: -webkit-filter 0.1s ease-out;
   position: relative;
   animation: fadein .4s;
 }
