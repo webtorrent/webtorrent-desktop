@@ -53,6 +53,7 @@ function onWindowHide () {
 }
 
 function onToggleFullScreen () {
+  windows.main.setMenuBarVisibility(!windows.main.isFullScreen())
   getMenuItem('Full Screen').checked = windows.main.isFullScreen()
   windows.main.send('fullscreenChanged', windows.main.isFullScreen())
 }
