@@ -16,6 +16,7 @@ app.on('before-quit', function () {
 
 function createMainWindow (menu) {
   var win = windows.main = new electron.BrowserWindow({
+    autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
     darkTheme: true,
     minWidth: 375,
