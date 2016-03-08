@@ -48,6 +48,7 @@
     "build": "electron-packager . $npm_package_productName --overwrite --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_devDependencies_electron_prebuilt",
     "debug": "DEBUG=* electron .",
     "start": "electron .",
+    "update-authors": "./bin/update-authors.sh",
     "test": "standard"
   }
 }
