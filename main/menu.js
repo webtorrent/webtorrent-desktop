@@ -55,7 +55,6 @@ function onWindowHide () {
   getMenuItem('Float on Top').enabled = false
 }
 
-function onToggleFullScreen () {
 function onToggleFullScreen (isFullScreen) {
   isFullScreen = isFullScreen != null ? isFullScreen : windows.main.isFullScreen()
   windows.main.setMenuBarVisibility(!isFullScreen)
