@@ -1,13 +1,14 @@
+var windows = module.exports = {
+  main: null,
+  createMainWindow: createMainWindow
+}
+
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
 
 var app = electron.app
 
-var windows = {
-  main: null,
-  createMainWindow: createMainWindow
-}
 var isQuitting = false
 
 app.on('before-quit', function () {
@@ -55,5 +56,3 @@ function createMainWindow (menu) {
     windows.main = null
   })
 }
-
-module.exports = windows

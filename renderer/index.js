@@ -10,18 +10,18 @@ var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
 var fs = require('fs')
-var ipcRenderer = electron.ipcRenderer
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
 var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 
+var App = require('./views/app')
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
-var App = require('./views/app')
+var ipcRenderer = electron.ipcRenderer
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
