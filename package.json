@@ -21,7 +21,7 @@
     "hyperx": "^2.0.2",
     "main-loop": "^3.2.0",
     "network-address": "^1.1.0",
-    "pretty-bytes": "^3.0.0",
+    "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
     "webtorrent": "^0.82.1",
