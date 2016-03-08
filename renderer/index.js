@@ -163,13 +163,7 @@ function dispatch (action, ...args) {
   if (action === 'back') {
     // TODO
     // window.history.back()
-    if (state.url === '/player') {
-      restoreBounds()
-      closeServer()
-    }
-    state.url = '/'
-    state.title = config.APP_NAME
-    update()
+    closePlayer()
   }
   if (action === 'forward') {
     // TODO
@@ -402,6 +396,17 @@ function openPlayer (torrent) {
     state.title = torrent.name
     update()
   })
+}
+
+function closePlayer () {
+  state.url = '/'
+  state.title = config.APP_NAME
+  if (state.isFullScreen) {
+    electron.ipcRenderer.send('toggleFullScreen')
+  }
+  restoreBounds()
+  closeServer()
+  update()
 }
 
 function deleteTorrent (torrent) {

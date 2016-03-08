@@ -49,7 +49,7 @@ function addTorrentFromPaste () {
 
 function setBounds (bounds) {
   debug('setBounds %o', bounds)
-  if (windows.main && !windows.main.isFullScreen()) {
+  if (windows.main && !windows.main.isFullScreen() && !windows.main.isMaximized()) {
     windows.main.setBounds(bounds, true)
   }
 }
