@@ -193,7 +193,7 @@ function dispatch (action, ...args) {
     update()
   }
   if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen')
+    ipcRenderer.send('toggleFullScreen', args[0])
     update()
   }
   if (action === 'videoMouseMoved') {
@@ -448,7 +448,7 @@ function closePlayer () {
   update()
 
   if (state.isFullScreen) {
-    ipcRenderer.send('toggleFullScreen')
+    dispatch('toggleFullScreen', false)
   }
   restoreBounds()
   stopServer()

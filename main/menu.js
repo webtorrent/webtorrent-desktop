@@ -5,19 +5,21 @@ var windows = require('./windows')
 
 var app = electron.app
 
-function toggleFullScreen () {
-  debug('toggleFullScreen')
+function toggleFullScreen (flag) {
+  debug('toggleFullScreen %s', flag)
   if (windows.main && windows.main.isVisible()) {
-    windows.main.setFullScreen(!windows.main.isFullScreen())
+    flag = flag != null ? flag : !windows.main.isFullScreen()
+    windows.main.setFullScreen(flag)
   }
 }
 
 // Sets whether the window should always show on top of other windows
-function toggleFloatOnTop () {
-  debug('toggleFloatOnTop %s')
+function toggleFloatOnTop (flag) {
+  debug('toggleFloatOnTop %s', flag)
   if (windows.main) {
-    windows.main.setAlwaysOnTop(!windows.main.isAlwaysOnTop())
-    getMenuItem('Float on Top').checked = windows.main.isAlwaysOnTop()
+    flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
+    windows.main.setAlwaysOnTop(flag)
+    getMenuItem('Float on Top').checked = flag
   }
 }
 
@@ -37,6 +39,7 @@ function reloadWindow () {
 }
 
 function addFakeDevice (device) {
+  debug('addFakeDevice %s', device)
   windows.main.send('addFakeDevice', device)
 }
 
@@ -53,9 +56,11 @@ function onWindowHide () {
 }
 
 function onToggleFullScreen () {
-  windows.main.setMenuBarVisibility(!windows.main.isFullScreen())
-  getMenuItem('Full Screen').checked = windows.main.isFullScreen()
-  windows.main.send('fullscreenChanged', windows.main.isFullScreen())
+function onToggleFullScreen (isFullScreen) {
+  isFullScreen = isFullScreen != null ? isFullScreen : windows.main.isFullScreen()
+  windows.main.setMenuBarVisibility(!isFullScreen)
+  getMenuItem('Full Screen').checked = isFullScreen
+  windows.main.send('fullscreenChanged', isFullScreen)
 }
 
 function getMenuItem (label) {
@@ -150,12 +155,12 @@ function getMenuTemplate () {
             if (process.platform === 'darwin') return 'Ctrl+Command+F'
             else return 'F11'
           })(),
-          click: toggleFullScreen
+          click: () => toggleFullScreen()
         },
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: toggleFloatOnTop
+          click: () => toggleFloatOnTop()
         },
         {
           type: 'separator'
