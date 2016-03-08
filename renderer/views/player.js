@@ -23,14 +23,10 @@ function Player (state, dispatch) {
     state.video.duration = videoElement.duration
   }
 
-  // When in fullscreen, hide player controls if the mouse stays still for a while
-  var hideControls = state.video.mouseStationarySince !== 0 &&
-    new Date().getTime() - state.video.mouseStationarySince > 2000
-
   // Show the video as large as will fit in the window, play immediately
   return hx`
     <div
-      class='player ${hideControls ? 'hide' : ''}'
+      class='player'
       onmousemove=${() => dispatch('videoMouseMoved')}>
       <div
         class='letterbox'

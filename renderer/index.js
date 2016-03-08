@@ -74,7 +74,7 @@ function init () {
   }, 1000)
 
   // All state lives in state.js. `state.saved` is read from and written to a
-  // file. All other state is ephemeral. Here we'll load state.saved:
+  // file. All other state is ephemeral.
   window.addEventListener('beforeunload', saveState)
 
   // listen for messages from the main process

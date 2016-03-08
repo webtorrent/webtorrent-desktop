@@ -5,12 +5,8 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 function Header (state, dispatch) {
-  var hideControls = state.url === '/player' &&
-    state.video.mouseStationarySince !== 0 &&
-    new Date().getTime() - state.video.mouseStationarySince > 2000
-
   return hx`
-    <div class='header ${hideControls ? 'hide' : ''}'>
+    <div class='header'>
       ${getTitle()}
       <div class='nav left'>
         <i

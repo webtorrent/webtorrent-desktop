@@ -11,10 +11,21 @@ var TorrentList = require('./torrent-list')
 var isOSX = process.platform === 'darwin'
 
 function App (state, dispatch) {
+  // Hide player controls while playing video, if the mouse stays still for a while
+  // Never hide the controls when:
+  // * The mouse is over the controls or we're scrubbing (see CSS)
+  // * The video is paused
+  var isVideoPlayer = state.url === '/player'
+  var hideControls = isVideoPlayer &&
+    state.video.mouseStationarySince !== 0 &&
+    new Date().getTime() - state.video.mouseStationarySince > 2000 &&
+    !state.video.isPaused
+
   var cls = [
-    process.platform,
+    process.platform, /* 'windows', 'linux', or 'darwin' for OSX */
     state.isFullScreen ? 'fullscreen' : 'not-fullscreen',
-    state.url === '/player' ? 'view-player' : ''
+    isVideoPlayer ? 'view-player' : '',
+    hideControls ? 'hide-video-controls' : ''
   ]
 
   return hx`

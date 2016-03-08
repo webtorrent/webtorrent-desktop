@@ -153,12 +153,12 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 }
 
 .view-player .header {
-  opacity: 0;
+  opacity: 0.8;
 }
 
-.view-player:hover .header:not(.hide) {
+.app.hide-video-controls .view-player .header {
   opacity: 0.8;
-  cursor: default;
+  cursor: none;
 }
 
 .header .title {
@@ -368,20 +368,20 @@ body.drag::before {
   width: 100%;
   height: 38px;
   bottom: 0;
-  opacity: 0;
   transition: all 0.15s ease-out;
 }
 
-.player:hover .player-controls {
-  opacity: 1;
-}
-
-.player.hide:hover .player-controls {
+.app.hide-video-controls .player-controls {
   opacity: 0;
 }
 
-.player.hide {
+.app.hide-video-controls .player {
   cursor: none;
+}
+
+.app.hide-video-controls .player .player-controls:hover {
+  opacity: 1;
+  cursor: default;
 }
 
 /* invisible click target for scrubbing */
