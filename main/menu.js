@@ -157,12 +157,12 @@ function getMenuTemplate () {
             if (process.platform === 'darwin') return 'Ctrl+Command+F'
             else return 'F11'
           })(),
-          click: () => toggleFullScreen()
+          click: toggleFullScreen
         },
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: () => toggleFloatOnTop()
+          click: toggleFloatOnTop
         },
         {
           type: 'separator'
