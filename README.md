@@ -10,9 +10,9 @@
 
 #### WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.
 
-<div style="text-align: center">
-  <img src="./resources/screenshot.png" width="562" height="630" alt="screenshot">
-</div>
+<p align="center">
+  <img src="./resources/screenshot.png" width="562" height="630" alt="screenshot" align="center">
+</p>
 
 ## Dev
 
