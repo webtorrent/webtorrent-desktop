@@ -431,13 +431,22 @@ function startServer (infoHash, cb) {
 }
 
 function startServerFromReadyTorrent (torrent, cb) {
+  // filter out file formats that the <video> tag definitely can't play
+  var files = torrent.files.filter(function (file) {
+    var extname = path.extname(file.name)
+    return ['.mp4', '.m4v', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
+  })
+
+  if (files.length === 0) return cb(new Error('cannot play any files in torrent'))
+
   // use largest file
-  state.torrentPlaying = torrent.files.reduce(function (a, b) {
+  state.torrentPlaying = files.reduce(function (a, b) {
     return a.length > b.length ? a : b
   })
-  var index = torrent.files.indexOf(state.torrentPlaying)
 
+  var index = torrent.files.indexOf(state.torrentPlaying)
   var server = torrent.createServer()
+
   server.listen(0, function () {
     var port = server.address().port
     var urlSuffix = ':' + port + '/' + index
@@ -467,7 +476,9 @@ function openPlayer (torrentSummary) {
     update()
   }, 10000) /* give it a few seconds */
 
-  startServer(torrentSummary.infoHash, function () {
+  startServer(torrentSummary.infoHash, function (err) {
+    if (err) return onError(err)
+
     // if we timed out (user clicked play a long time ago), don't autoplay
     clearTimeout(timeout)
     var timedOut = torrentSummary.playStatus === 'timeout'
@@ -519,25 +530,21 @@ function deleteTorrent (torrentSummary) {
 
 function openChromecast (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  startServer(infoHash, function () {
-    state.devices.chromecast.play(state.server.networkURL, {
-      title: config.APP_NAME + ' — ' + torrentSummary.name
-    })
-    state.devices.chromecast.on('error', function (err) {
-      err.message = 'Chromecast: ' + err.message
-      onError(err)
-    })
-    update()
+  state.devices.chromecast.play(state.server.networkURL, {
+    title: config.APP_NAME + ' — ' + torrentSummary.name
   })
+  state.devices.chromecast.on('error', function (err) {
+    err.message = 'Chromecast: ' + err.message
+    onError(err)
+  })
+  update()
 }
 
 function openAirplay (infoHash) {
-  startServer(infoHash, function () {
-    state.devices.airplay.play(state.server.networkURL, 0, function () {
-      // TODO: handle airplay errors
-    })
-    update()
+  state.devices.airplay.play(state.server.networkURL, 0, function () {
+    // TODO: handle airplay errors
   })
+  update()
 }
 
 // Set window dimensions to match video dimensions or fill the screen
