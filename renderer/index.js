@@ -315,14 +315,20 @@ function addTorrent (torrentId) {
 
   var torrent = startTorrenting(torrentId)
 
-  // If torrentId is a torrent file, wait for WebTorrent to finish reading it
-  if (!torrent.infoHash) torrent.on('infoHash', addTorrentToList)
-  else addTorrentToList()
+  addTorrentToList(torrent)
+}
 
-  function addTorrentToList () {
-    if (getTorrentSummary(torrent.infoHash)) {
-      return // Skip, torrent is already in state.saved
-    }
+function addTorrentToList (torrent) {
+  if (getTorrentSummary(torrent.infoHash)) {
+    return // Skip, torrent is already in state.saved
+  }
+
+  // If torrentId is a remote torrent (filesystem path, http url, etc.), wait for
+  // WebTorrent to finish reading it
+  if (torrent.infoHash) onInfoHash()
+  else torrent.on('infoHash', onInfoHash)
+
+  function onInfoHash () {
     state.saved.torrents.push({
       status: 'new',
       name: torrent.name,
@@ -353,6 +359,7 @@ function stopTorrenting (infoHash) {
 function seed (files) {
   if (files.length === 0) return
   var torrent = state.client.seed(files)
+  addTorrentToList(torrent)
   addTorrentEvents(torrent)
 }
 
