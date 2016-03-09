@@ -185,7 +185,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   background: rgb(50, 50, 50);
 }
 
-.view-player .header {
+.app.view-player .header {
   opacity: 0.8;
 }
 
@@ -246,6 +246,11 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   width: 100%;
   overflow: auto;
   flex: 1 1 auto;
+  margin-top: 37px;
+}
+
+.app.view-player .content {
+  margin-top: 0;
 }
 
 /*
@@ -273,10 +278,6 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 /*
  * TORRENT LIST
  */
-
-.torrent-list {
-  padding-top: 37px;
-}
 
 .torrent-placeholder {
   padding: 10px;
@@ -430,7 +431,7 @@ body.drag .torrent-placeholder span {
   width: 100%;
   height: 38px;
   bottom: 0;
-  transition: all 0.15s ease-out;
+  transition: opacity 0.15s ease-out;
 }
 
 .app.hide-video-controls .player-controls {
