@@ -37,5 +37,5 @@ ipc.init()
 
 function onOpen (e, torrentId) {
   e.preventDefault()
-  windows.main.send('addTorrent', torrentId)
+  windows.main.send('dispatch', 'addTorrent', torrentId)
 }

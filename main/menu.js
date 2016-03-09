@@ -85,7 +85,7 @@ function getMenuTemplate () {
               properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
             }, function (filenames) {
               if (!Array.isArray(filenames)) return
-              windows.main.send('seed', filenames)
+              windows.main.send('dispatch', 'seed', filenames)
             })
           }
         },
@@ -99,7 +99,7 @@ function getMenuTemplate () {
             }, function (filenames) {
               if (!Array.isArray(filenames)) return
               filenames.forEach(function (filename) {
-                windows.main.send('addTorrent', filename)
+                windows.main.send('dispatch', 'addTorrent', filename)
               })
             })
           }

@@ -210,12 +210,8 @@ function dispatch (action, ...args) {
 }
 
 function setupIpc () {
-  ipcRenderer.on('addTorrent', function (e, torrentId) {
-    dispatch('addTorrent', torrentId)
-  })
-
-  ipcRenderer.on('seed', function (e, files) {
-    dispatch('seed', files)
+  ipcRenderer.on('dispatch', function (e, action, ...args) {
+    dispatch(action, ...args)
   })
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
