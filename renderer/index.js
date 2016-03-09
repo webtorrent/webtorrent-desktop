@@ -21,6 +21,7 @@ var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
+var clipboard = electron.clipboard
 var ipcRenderer = electron.ipcRenderer
 
 // For easy debugging in Developer Tools
@@ -88,9 +89,7 @@ function init () {
   dragDrop('body', onFiles)
 
   // ...same thing if you paste a torrent
-  document.addEventListener('paste', function () {
-    ipcRenderer.send('addTorrentFromPaste')
-  })
+  document.addEventListener('paste', onPaste)
 
   // ...keyboard shortcuts
   document.addEventListener('keydown', function (e) {
@@ -286,6 +285,15 @@ function onFiles (files) {
 
   // everything else = seed these files
   dispatch('seed', files.filter(isNotTorrentFile))
+}
+
+function onPaste () {
+  var torrentIds = clipboard.readText().split('\n')
+  torrentIds.forEach(function (torrentId) {
+    torrentId = torrentId.trim()
+    if (torrentId.length === 0) return
+    dispatch('addTorrent', torrentId)
+  })
 }
 
 function isTorrentFile (file) {

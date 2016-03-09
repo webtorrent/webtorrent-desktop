@@ -9,10 +9,6 @@ var menu = require('./menu')
 var windows = require('./windows')
 
 function init () {
-  ipcMain.on('addTorrentFromPaste', function (e) {
-    addTorrentFromPaste()
-  })
-
   ipcMain.on('setBounds', function (e, bounds) {
     setBounds(bounds)
   })
@@ -39,16 +35,6 @@ function init () {
 
   ipcMain.on('log', function (e, message) {
     console.log(message)
-  })
-}
-
-function addTorrentFromPaste () {
-  debug('addTorrentFromPaste')
-  var torrentIds = electron.clipboard.readText().split('\n')
-  torrentIds.forEach(function (torrentId) {
-    torrentId = torrentId.trim()
-    if (torrentId.length === 0) return
-    windows.main.send('addTorrent', torrentId)
   })
 }
 
