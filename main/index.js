@@ -8,15 +8,20 @@ var shortcuts = require('./shortcuts')
 
 var app = electron.app
 
+app.isQuitting = false
 app.startTime = startTime
+
+app.on('ready', function () {
+  menu.init()
+  windows.createMainWindow(menu)
+  shortcuts.init(menu, windows)
+})
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
 
-app.on('ready', function () {
-  electron.Menu.setApplicationMenu(menu.appMenu)
-  windows.createMainWindow(menu)
-  shortcuts.init(menu, windows)
+app.on('before-quit', function () {
+  app.isQuitting = true
 })
 
 app.on('activate', function () {

@@ -1,9 +1,23 @@
+module.exports = {
+  init: init,
+  onToggleFullScreen: onToggleFullScreen,
+  onWindowHide: onWindowHide,
+  onWindowShow: onWindowShow,
+  showOpenTorrentFile: showOpenTorrentFile,
+  toggleFullScreen: toggleFullScreen
+}
+
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
 var windows = require('./windows')
 
 var app = electron.app
+var appMenu
+function init () {
+  appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
+  electron.Menu.setApplicationMenu(appMenu)
+}
 
 function toggleFullScreen (flag) {
   debug('toggleFullScreen %s', flag)
@@ -100,7 +114,7 @@ function showOpenTorrentAddress () {
   windows.main.send('showOpenTorrentAddress')
 }
 
-function getMenuTemplate () {
+function getAppMenuTemplate () {
   var template = [
     {
       label: 'File',
@@ -300,13 +314,4 @@ function getMenuTemplate () {
   return template
 }
 
-var appMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
-
-module.exports = {
-  appMenu: appMenu,
-  onToggleFullScreen: onToggleFullScreen,
-  onWindowHide: onWindowHide,
-  onWindowShow: onWindowShow,
-  toggleFullScreen: toggleFullScreen,
-  showOpenTorrentFile: showOpenTorrentFile
 }
