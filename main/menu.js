@@ -13,10 +13,14 @@ var electron = require('electron')
 var windows = require('./windows')
 
 var app = electron.app
-var appMenu
+var appMenu, dockMenu
+
 function init () {
   appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
   electron.Menu.setApplicationMenu(appMenu)
+
+  dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
+  if (app.dock) app.dock.setMenu(dockMenu)
 }
 
 function toggleFullScreen (flag) {
@@ -314,4 +318,22 @@ function getAppMenuTemplate () {
   return template
 }
 
+function getDockMenuTemplate () {
+  return [
+    {
+      label: 'Create New Torrent...',
+      accelerator: 'CmdOrCtrl+N',
+      click: showCreateTorrent
+    },
+    {
+      label: 'Open Torrent File...',
+      accelerator: 'CmdOrCtrl+O',
+      click: showOpenTorrentFile
+    },
+    {
+      label: 'Open Torrent Address...',
+      accelerator: 'CmdOrCtrl+U',
+      click: showOpenTorrentAddress
+    }
+  ]
 }
