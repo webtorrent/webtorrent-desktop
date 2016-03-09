@@ -400,6 +400,7 @@ function addTorrentEvents (torrent) {
       state.dock.badge += 1
     }
 
+    showDoneNotification(torrent)
     update()
   }
 }
@@ -570,4 +571,17 @@ function onError (err) {
 
 function onWarning (err) {
   console.log('warning: %s', err.message)
+}
+
+function showDoneNotification (torrent) {
+  console.log(state.window.isFocused)
+  if (state.window.isFocused) return
+
+  var notif = new window.Notification('Download Complete', {
+    body: torrent.name
+  })
+
+  notif.onclick = function () {
+    window.focus()
+  }
 }
