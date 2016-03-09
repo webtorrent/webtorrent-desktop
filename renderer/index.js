@@ -118,6 +118,7 @@ function init () {
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
   document.querySelector('.loading').remove() /* TODO: no spinner once fast enough */
+  playInterfaceSound(config.SOUND_STARTUP)
   console.timeEnd('init')
 }
 
@@ -346,6 +347,7 @@ function addTorrentToList (torrent) {
       infoHash: torrent.infoHash
     })
     saveState()
+    playInterfaceSound(config.SOUND_ADD)
   }
 }
 
@@ -400,6 +402,7 @@ function addTorrentEvents (torrent) {
       state.dock.badge += 1
     }
 
+    showDoneNotification(torrent)
     update()
   }
 }
@@ -453,10 +456,17 @@ function stopServer () {
 }
 
 function openPlayer (torrentSummary) {
+  var torrent = state.client.get(torrentSummary.infoHash)
+  if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
   torrentSummary.playStatus = 'requested'
+  update()
+
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
+    playInterfaceSound(config.SOUND_ERROR)
+    update()
   }, 10000) /* give it a few seconds */
+
   startServer(torrentSummary.infoHash, function () {
     // if we timed out (user clicked play a long time ago), don't autoplay
     clearTimeout(timeout)
@@ -488,9 +498,11 @@ function toggleTorrent (torrentSummary) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrenting(torrentSummary.infoHash)
+    playInterfaceSound(config.SOUND_ENABLE)
   } else {
     torrentSummary.status = 'paused'
     stopTorrenting(torrentSummary.infoHash)
+    playInterfaceSound(config.SOUND_DISABLE)
   }
 }
 
@@ -502,6 +514,7 @@ function deleteTorrent (torrentSummary) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
+  playInterfaceSound(config.SOUND_DELETE)
 }
 
 function openChromecast (infoHash) {
@@ -565,9 +578,33 @@ function restoreBounds () {
 function onError (err) {
   console.error(err.stack)
   window.alert(err.message || err)
+  playInterfaceSound(config.SOUND_ERROR)
   update()
 }
 
 function onWarning (err) {
   console.log('warning: %s', err.message)
+}
+
+function showDoneNotification (torrent) {
+  console.log(state.window.isFocused)
+  if (state.window.isFocused) return
+
+  var notif = new window.Notification('Download Complete', {
+    body: torrent.name,
+    silent: true
+  })
+
+  notif.onclick = function () {
+    window.focus()
+  }
+
+  playInterfaceSound(config.SOUND_DONE)
+}
+
+function playInterfaceSound (url) {
+  var audio = new window.Audio()
+  audio.volume = 0.3
+  audio.src = url
+  audio.play()
 }
