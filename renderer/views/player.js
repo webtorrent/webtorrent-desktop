@@ -35,6 +35,7 @@ function Player (state, dispatch) {
           src='${state.server.localURL}'
           ondblclick=${() => dispatch('toggleFullScreen')}
           onloadedmetadata=${onLoadedMetadata}
+          onended=${onEnded}
           autoplay>
         </video>
       </div>
@@ -50,6 +51,11 @@ function Player (state, dispatch) {
       height: video.videoHeight
     }
     dispatch('setDimensions', dimensions)
+  }
+
+  // When the video completes, pause the video instead of looping
+  function onEnded (e) {
+    state.video.isPaused = true
   }
 }
 
