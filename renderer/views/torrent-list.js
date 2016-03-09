@@ -11,8 +11,8 @@ function TorrentList (state, dispatch) {
   return hx`
     <div class='torrent-list'>
       ${list}
-      <div class='drop-target'>
-        <p>Drop a torrent file here or paste a magnet link</p>
+      <div class='torrent-placeholder'>
+        <span class='ellipsis'>Drop a torrent file here or paste a magnet link</span>
       </div>
     </div>`
 }

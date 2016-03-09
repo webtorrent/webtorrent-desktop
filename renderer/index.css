@@ -11,16 +11,19 @@
 html,
 body {
   background: rgb(40, 40, 40);
-  color: #FFF;
   cursor: default;
   height: 100%;
-  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
-  font-size: 14px;
-  line-height: 1.5em;
   margin: 0;
   padding: 0;
   width: 100%;
   overflow: hidden;
+}
+
+body {
+  color: #FFF;
+  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5em;
 }
 
 .loading {
@@ -150,6 +153,8 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   right: 0;
   z-index: 1000;
   transition: opacity 0.15s ease-out;
+  font-size: 14px;
+  line-height: 1.5em;
 }
 
 .view-player .header {
@@ -245,19 +250,22 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   padding-top: 37px;
 }
 
-.drop-target {
-  margin: 10px;
+.torrent-placeholder {
+  padding: 10px;
+  color: #666;
+  font-size: 1.1em;
+}
+
+.torrent-placeholder span {
   border: 5px #444 dashed;
   border-radius: 5px;
-  color: #666;
-  font-size: 16px;
-  flex: 1 1 auto;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-body.drag .drop-target {
+body.drag .torrent-placeholder {
   border-color: #def;
   color: #def;
 }
@@ -267,25 +275,13 @@ body.drag .drop-target {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 0 50%;
-  transition: all 0.1s ease-out;
+  transition: -webkit-filter 0.1s ease-out;
   position: relative;
   animation: fadein .4s;
 }
 
-.torrent, .drop-target {
+.torrent, .torrent-placeholder {
   height: 120px;
-}
-
-@media only screen and (min-width: 600px) {
-  .torrent, .drop-target {
-    height: 150px;
-  }
-}
-
-@media only screen and (min-width: 900px) {
-  .torrent, .drop-target {
-    height: 180px;
-  }
 }
 
 .torrent:not(:last-child) {
@@ -506,4 +502,28 @@ body.drag .drop-target {
   border-radius: 7px;
   margin-top: 0;
   margin-left: 0;
+}
+
+/*
+ * MEDIA QUERIES
+ */
+
+@media only screen and (min-width: 700px) {
+  body {
+    font-size: 16px;
+    line-height: 1.5em;
+  }
+  .torrent, .torrent-placeholder {
+    height: 150px;
+  }
+}
+
+@media only screen and (min-width: 900px) {
+  body {
+    font-size: 18px;
+    line-height: 1.5em;
+  }
+  .torrent, .torrent-placeholder {
+    height: 180px;
+  }
 }
