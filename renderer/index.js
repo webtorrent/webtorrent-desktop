@@ -187,6 +187,10 @@ function dispatch (action, ...args) {
     // TODO
     // window.history.forward()
   }
+  if (action === 'pause') {
+    state.video.isPaused = true
+    update()
+  }
   if (action === 'playPause') {
     state.video.isPaused = !state.video.isPaused
     update()
