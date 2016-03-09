@@ -3,8 +3,8 @@ var startTime = Date.now()
 var electron = require('electron')
 var ipc = require('./ipc')
 var menu = require('./menu')
-var windows = require('./windows')
 var shortcuts = require('./shortcuts')
+var windows = require('./windows')
 
 var app = electron.app
 
@@ -13,8 +13,8 @@ app.startTime = startTime
 
 app.on('ready', function () {
   menu.init()
-  windows.createMainWindow(menu)
-  shortcuts.init(menu, windows)
+  windows.createMainWindow()
+  shortcuts.init()
 })
 
 app.on('open-file', onOpen)

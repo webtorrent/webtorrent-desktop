@@ -4,10 +4,12 @@ module.exports = {
 
 var electron = require('electron')
 var localShortcut = require('electron-localshortcut')
+var menu = require('./menu')
+var windows = require('./windows')
 
 var globalShortcut = electron.globalShortcut
 
-function init (menu, windows) {
+function init () {
   // Special "media key" for play/pause, available on some keyboards
   globalShortcut.register('MediaPlayPause', () => windows.main.send('dispatch', 'playPause'))
 

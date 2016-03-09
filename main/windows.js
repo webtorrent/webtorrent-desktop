@@ -6,10 +6,11 @@ var windows = module.exports = {
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
+var menu = require('./menu')
 
 var app = electron.app
 
-function createMainWindow (menu) {
+function createMainWindow () {
   var win = windows.main = new electron.BrowserWindow({
     autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
