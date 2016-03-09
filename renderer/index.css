@@ -252,20 +252,20 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 
 .torrent-placeholder {
   padding: 10px;
-  color: #666;
   font-size: 1.1em;
 }
 
 .torrent-placeholder span {
   border: 5px #444 dashed;
   border-radius: 5px;
+  color: #666;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-body.drag .torrent-placeholder {
+body.drag .torrent-placeholder span {
   border-color: #def;
   color: #def;
 }
