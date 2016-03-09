@@ -26,6 +26,25 @@ body {
   line-height: 1.5em;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: rgb(40, 40, 40);
+}
+
+::-webkit-scrollbar-corner {
+  background-color: rgb(40, 40, 40);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 1px solid rgb(40, 40, 40);
+  border-radius: 10px;
+  background: linear-gradient(to right, rgb(90, 90, 90), rgb(80, 80, 80))
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(40, 40, 40);
+}
+
 .loading {
   display: flex;
   flex-direction: column;
