@@ -14,19 +14,21 @@
   <img src="./resources/screenshot.png" width="562" height="630" alt="screenshot" align="center">
 </p>
 
-## Dev
+## How to Contribute
+
+### Install dependencies
 
 ```
 $ npm install
 ```
 
-### Run
+### Run app
 
 ```
 $ npm start
 ```
 
-### Build
+### Build binaries
 
 ```
 $ npm run build
