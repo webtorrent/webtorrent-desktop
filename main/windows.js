@@ -48,7 +48,9 @@ function createMainWindow (menu) {
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
       e.preventDefault()
-      win.hide()
+      win.webContents.executeJavaScript('dispatch("pause")', function () {
+        win.hide()
+      })
     }
   })
 
