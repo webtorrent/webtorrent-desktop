@@ -13,7 +13,7 @@ module.exports = {
   torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
   // history: [], /* track how we got to the current view. enables Back button */
   // historyIndex: 0,
-  url: '/',
+  url: 'home',
   devices: {
     airplay: null, /* airplay client. finds and manages AppleTVs */
     chromecast: null /* chromecast client. finds and manages Chromecasts */

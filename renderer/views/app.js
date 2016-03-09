@@ -15,19 +15,19 @@ function App (state, dispatch) {
   // Never hide the controls when:
   // * The mouse is over the controls or we're scrubbing (see CSS)
   // * The video is paused
-  var isVideoPlayer = state.url === '/player'
-  var hideControls = isVideoPlayer &&
+  var hideControls = state.url === 'player' &&
     state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000 &&
     !state.video.isPaused
 
   var cls = [
-    'is-' + process.platform, /* 'is-darwin' (OS X), 'is-win32' (Windows), 'is-linux' */
-    state.window.isFullScreen ? 'is-fullscreen' : '',
-    state.window.isFocused ? 'is-focused' : '',
-    isVideoPlayer ? 'view-player' : '',
-    hideControls ? 'hide-video-controls' : ''
+    'view-' + state.url, /* e.g. view-home, view-player */
+    'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
   ]
+
+  if (state.window.isFullScreen) cls.push('is-fullscreen')
+  if (state.window.isFocused) cls.push('is-focused')
+  if (hideControls) cls.push('hide-video-controls')
 
   return hx`
     <div class='app ${cls.join(' ')}'>
@@ -38,15 +38,15 @@ function App (state, dispatch) {
 
   function getHeader () {
     // Hide the header on Windows/Linux when in the player
-    if (isOSX || state.url !== '/player') {
+    if (isOSX || state.url !== 'player') {
       return Header(state, dispatch)
     }
   }
 
   function getView () {
-    if (state.url === '/') {
+    if (state.url === 'home') {
       return TorrentList(state, dispatch)
-    } else if (state.url === '/player') {
+    } else if (state.url === 'player') {
       return Player(state, dispatch)
     }
   }

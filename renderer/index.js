@@ -457,14 +457,14 @@ function openPlayer (torrentSummary) {
     if (timedOut) return
 
     // otherwise, play the video
-    state.url = '/player'
+    state.url = 'player'
     state.window.title = torrentSummary.name
     update()
   })
 }
 
 function closePlayer () {
-  state.url = '/'
+  state.url = 'home'
   state.window.title = config.APP_NAME
   update()
 
