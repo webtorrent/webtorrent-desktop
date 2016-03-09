@@ -161,8 +161,8 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   opacity: 0.8;
 }
 
-.app.hide-video-controls .view-player .header {
-  opacity: 0.8;
+.app.hide-video-controls.view-player .header {
+  opacity: 0;
   cursor: none;
 }
 
