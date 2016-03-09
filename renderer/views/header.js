@@ -30,7 +30,7 @@ function Header (state, dispatch) {
 
   function getTitle () {
     if (process.platform === 'darwin') {
-      return hx`<div class='title'>${state.title}</div>`
+      return hx`<div class='title'>${state.window.title}</div>`
     }
   }
 

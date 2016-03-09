@@ -95,7 +95,7 @@ function init () {
   // ...keyboard shortcuts
   document.addEventListener('keydown', function (e) {
     if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-      if (state.isFullScreen) {
+      if (state.window.isFullScreen) {
         dispatch('toggleFullScreen')
       } else {
         dispatch('back')
@@ -107,12 +107,14 @@ function init () {
 
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', function () {
-    state.isFocused = true
+    state.window.isFocused = true
     state.dock.badge = 0
+    update()
   })
 
   window.addEventListener('blur', function () {
-    state.isFocused = false
+    state.window.isFocused = false
+    update()
   })
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
@@ -133,9 +135,9 @@ function update () {
 }
 
 function updateElectron () {
-  if (state.title !== state.prev.title) {
-    state.prev.title = state.title
-    ipcRenderer.send('setTitle', state.title)
+  if (state.window.title !== state.prev.title) {
+    state.prev.title = state.window.title
+    ipcRenderer.send('setTitle', state.window.title)
   }
   if (state.dock.progress !== state.prev.progress) {
     state.prev.progress = state.dock.progress
@@ -213,7 +215,7 @@ function setupIpc () {
   })
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
-    state.isFullScreen = isFullScreen
+    state.window.isFullScreen = isFullScreen
     update()
   })
 
@@ -386,7 +388,7 @@ function addTorrentEvents (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
 
-    if (!state.isFocused) {
+    if (!state.window.isFocused) {
       state.dock.badge += 1
     }
 
@@ -456,17 +458,17 @@ function openPlayer (torrentSummary) {
 
     // otherwise, play the video
     state.url = '/player'
-    state.title = torrentSummary.name
+    state.window.title = torrentSummary.name
     update()
   })
 }
 
 function closePlayer () {
   state.url = '/'
-  state.title = config.APP_NAME
+  state.window.title = config.APP_NAME
   update()
 
-  if (state.isFullScreen) {
+  if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
   restoreBounds()
@@ -519,7 +521,7 @@ function openAirplay (infoHash) {
 
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
-  state.mainWindowBounds = {
+  state.window.bounds = {
     x: window.screenX,
     y: window.screenY,
     width: window.outerWidth,
@@ -547,8 +549,8 @@ function setDimensions (dimensions) {
 
 function restoreBounds () {
   ipcRenderer.send('setAspectRatio', 0)
-  if (state.mainWindowBounds) {
-    ipcRenderer.send('setBounds', state.mainWindowBounds, true)
+  if (state.window.bounds) {
+    ipcRenderer.send('setBounds', state.window.bounds, true)
   }
 }
 
