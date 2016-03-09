@@ -530,25 +530,21 @@ function deleteTorrent (torrentSummary) {
 
 function openChromecast (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  startServer(infoHash, function () {
-    state.devices.chromecast.play(state.server.networkURL, {
-      title: config.APP_NAME + ' — ' + torrentSummary.name
-    })
-    state.devices.chromecast.on('error', function (err) {
-      err.message = 'Chromecast: ' + err.message
-      onError(err)
-    })
-    update()
+  state.devices.chromecast.play(state.server.networkURL, {
+    title: config.APP_NAME + ' — ' + torrentSummary.name
   })
+  state.devices.chromecast.on('error', function (err) {
+    err.message = 'Chromecast: ' + err.message
+    onError(err)
+  })
+  update()
 }
 
 function openAirplay (infoHash) {
-  startServer(infoHash, function () {
-    state.devices.airplay.play(state.server.networkURL, 0, function () {
-      // TODO: handle airplay errors
-    })
-    update()
+  state.devices.airplay.play(state.server.networkURL, 0, function () {
+    // TODO: handle airplay errors
   })
+  update()
 }
 
 // Set window dimensions to match video dimensions or fill the screen
