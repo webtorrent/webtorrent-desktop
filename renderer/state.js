@@ -7,31 +7,33 @@ module.exports = {
   /* Temporary state disappears once the program exits.
    * It can contain complex objects like open connections, etc.
    */
-  url: '/',
   client: null, /* the WebTorrent client */
+  prev: {}, /* used for state diffing in updateElectron() */
   server: null, /* local WebTorrent-to-HTTP server */
-  dock: {
-    badge: 0,
-    progress: 0
-  },
+  torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
+  // history: [], /* track how we got to the current view. enables Back button */
+  // historyIndex: 0,
+  url: '/',
   devices: {
     airplay: null, /* airplay client. finds and manages AppleTVs */
     chromecast: null /* chromecast client. finds and manages Chromecasts */
   },
-  torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
-  // history: [], /* track how we got to the current view. enables Back button */
-  // historyIndex: 0,
-  isFocused: true,
-  isFullScreen: false,
-  mainWindowBounds: null, /* x y width height */
-  title: config.APP_NAME, /* current window title */
+  dock: {
+    badge: 0,
+    progress: 0
+  },
+  window: {
+    bounds: null, /* x y width height */
+    isFocused: true,
+    isFullScreen: false,
+    title: config.APP_NAME /* current window title */
+  },
   video: {
-    isPaused: false,
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
+    isPaused: false,
     mouseStationarySince: 0 /* Unix time in ms */
   },
-  prev: {}, /* used for state diffing in updateElectron() */
 
   /* Saved state is read from and written to a file every time the app runs.
    * It should be simple and minimal and must be JSON.

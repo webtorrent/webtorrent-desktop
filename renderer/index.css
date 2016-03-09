@@ -67,6 +67,11 @@ body {
   display: flex;
   flex-flow: column;
   animation: fadein 0.3s;
+  background: rgb(40, 40, 40);
+}
+
+.app:not(.is-focused) {
+  background: rgb(50, 50, 50);
 }
 
 /*
@@ -157,6 +162,10 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   line-height: 1.5em;
 }
 
+.app:not(.is-focused) .header {
+  background: rgb(50, 50, 50);
+}
+
 .view-player .header {
   opacity: 0.8;
 }
@@ -184,7 +193,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   float: left;
 }
 
-.darwin.not-fullscreen .header .nav.left {
+.app.is-darwin:not(.is-fullscreen) .header .nav.left {
   margin-left: 78px;
 }
 

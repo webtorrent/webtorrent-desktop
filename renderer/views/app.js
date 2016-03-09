@@ -22,8 +22,9 @@ function App (state, dispatch) {
     !state.video.isPaused
 
   var cls = [
-    process.platform, /* 'windows', 'linux', or 'darwin' for OSX */
-    state.isFullScreen ? 'fullscreen' : 'not-fullscreen',
+    'is-' + process.platform, /* 'is-darwin' (OS X), 'is-win32' (Windows), 'is-linux' */
+    state.window.isFullScreen ? 'is-fullscreen' : '',
+    state.window.isFocused ? 'is-focused' : '',
     isVideoPlayer ? 'view-player' : '',
     hideControls ? 'hide-video-controls' : ''
   ]
