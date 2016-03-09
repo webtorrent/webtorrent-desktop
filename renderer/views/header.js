@@ -40,7 +40,7 @@ function Header (state, dispatch) {
         <i
           class='icon add'
           title='add torrent'
-          onclick=${() => dispatch('addTorrent')}>
+          onclick=${() => dispatch('showOpenTorrentFile')}>
           add
         </i>
       `

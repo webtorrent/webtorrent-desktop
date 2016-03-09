@@ -9,6 +9,10 @@ var menu = require('./menu')
 var windows = require('./windows')
 
 function init () {
+  ipcMain.on('showOpenTorrentFile', function (e) {
+    menu.showOpenTorrentFile()
+  })
+
   ipcMain.on('setBounds', function (e, bounds) {
     setBounds(bounds)
   })

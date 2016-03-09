@@ -7,8 +7,9 @@ var hx = hyperx(h)
 var Header = require('./header')
 var Player = require('./player')
 var TorrentList = require('./torrent-list')
-
-var isOSX = process.platform === 'darwin'
+var Modals = {
+  'open-torrent-address-modal': require('./open-torrent-address-modal')
+}
 
 function App (state, dispatch) {
   // Hide player controls while playing video, if the mouse stays still for a while
@@ -28,18 +29,33 @@ function App (state, dispatch) {
   if (state.window.isFullScreen) cls.push('is-fullscreen')
   if (state.window.isFocused) cls.push('is-focused')
   if (hideControls) cls.push('hide-video-controls')
-
   return hx`
     <div class='app ${cls.join(' ')}'>
       ${getHeader()}
       <div class='content'>${getView()}</div>
+      ${getModal()}
     </div>
   `
 
   function getHeader () {
+    var isOSX = process.platform === 'darwin'
     // Hide the header on Windows/Linux when in the player
     if (isOSX || state.url !== 'player') {
       return Header(state, dispatch)
+    }
+  }
+
+  function getModal () {
+    if (state.modal) {
+      var contents = Modals[state.modal](state, dispatch)
+      return hx`
+        <div class='modal'>
+          <div class='modal-background'></div>
+          <div class='modal-content add-file-modal'>
+            ${contents}
+          </div>
+        </div>
+      `
     }
   }
 

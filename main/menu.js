@@ -71,6 +71,35 @@ function getMenuItem (label) {
   }
 }
 
+// Prompts the user for a file or folder, then makes a torrent out of the data
+function showCreateTorrent () {
+  electron.dialog.showOpenDialog({
+    title: 'Select a file or folder for the torrent file.',
+    properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
+  }, function (filenames) {
+    if (!Array.isArray(filenames)) return
+    windows.main.send('dispatch', 'seed', filenames)
+  })
+}
+
+// Prompts the user to choose a torrent file, then adds it to the app
+function showOpenTorrentFile () {
+  electron.dialog.showOpenDialog(windows.main, {
+    title: 'Select a .torrent file to open.',
+    properties: [ 'openFile', 'multiSelections' ]
+  }, function (filenames) {
+    if (!Array.isArray(filenames)) return
+    filenames.forEach(function (filename) {
+      windows.main.send('dispatch', 'addTorrent', filename)
+    })
+  })
+}
+
+// Prompts the user for the URL of a torrent file, then downloads and adds it
+function showOpenTorrentAddress () {
+  windows.main.send('showOpenTorrentAddress')
+}
+
 function getMenuTemplate () {
   var template = [
     {
@@ -79,44 +108,25 @@ function getMenuTemplate () {
         {
           label: 'Create New Torrent...',
           accelerator: 'CmdOrCtrl+N',
-          click: function () {
-            electron.dialog.showOpenDialog({
-              title: 'Select a file or folder for the torrent file.',
-              properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
-            }, function (filenames) {
-              if (!Array.isArray(filenames)) return
-              windows.main.send('dispatch', 'seed', filenames)
-            })
-          }
+          click: showCreateTorrent
         },
         {
           label: 'Open Torrent File...',
           accelerator: 'CmdOrCtrl+O',
-          click: function () {
-            electron.dialog.showOpenDialog(windows.main, {
-              title: 'Select a .torrent file to open.',
-              properties: [ 'openFile', 'multiSelections' ]
-            }, function (filenames) {
-              if (!Array.isArray(filenames)) return
-              filenames.forEach(function (filename) {
-                windows.main.send('dispatch', 'addTorrent', filename)
-              })
-            })
-          }
+          click: showOpenTorrentFile
         },
         {
           label: 'Open Torrent Address...',
           accelerator: 'CmdOrCtrl+U',
-          click: function () { electron.dialog.showMessageBox({ message: 'TODO', buttons: ['OK'] }) }
+          click: showOpenTorrentAddress
         },
         {
           type: 'separator'
         },
         {
-          label: (function () {
-            if (process.platform === 'darwin') return 'Close Window'
-            else return 'Close'
-          })(),
+          label: process.platform === 'darwin'
+            ? 'Close Window'
+            : 'Close',
           accelerator: 'CmdOrCtrl+W',
           role: 'close'
         }
@@ -153,10 +163,9 @@ function getMenuTemplate () {
         {
           label: 'Full Screen',
           type: 'checkbox',
-          accelerator: (function () {
-            if (process.platform === 'darwin') return 'Ctrl+Command+F'
-            else return 'F11'
-          })(),
+          accelerator: process.platform === 'darwin'
+            ? 'Ctrl+Command+F'
+            : 'F11',
           click: toggleFullScreen
         },
         {
@@ -177,10 +186,9 @@ function getMenuTemplate () {
             },
             {
               label: 'Developer Tools',
-              accelerator: (function () {
-                if (process.platform === 'darwin') return 'Alt+Command+I'
-                else return 'Ctrl+Shift+I'
-              })(),
+              accelerator: process.platform === 'darwin'
+                ? 'Alt+Command+I'
+                : 'Ctrl+Shift+I',
               click: toggleDevTools
             },
             {
@@ -215,18 +223,18 @@ function getMenuTemplate () {
       submenu: [
         {
           label: 'Learn more about ' + config.APP_NAME,
-          click: function () { electron.shell.openExternal('https://webtorrent.io') }
+          click: () => electron.shell.openExternal('https://webtorrent.io')
         },
         {
           label: 'Contribute on GitHub',
-          click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app') }
+          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-app')
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: function () { electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues') }
+          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues')
         }
       ]
     }
@@ -299,5 +307,6 @@ module.exports = {
   onToggleFullScreen: onToggleFullScreen,
   onWindowHide: onWindowHide,
   onWindowShow: onWindowShow,
-  toggleFullScreen: toggleFullScreen
+  toggleFullScreen: toggleFullScreen,
+  showOpenTorrentFile: showOpenTorrentFile
 }

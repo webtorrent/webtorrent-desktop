@@ -4,7 +4,6 @@ var airplay = require('airplay-js')
 var cfg = require('application-config')('WebTorrent')
 var cfgDirectory = require('application-config-path')('WebTorrent')
 var chromecasts = require('chromecasts')()
-var config = require('../config')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -13,16 +12,21 @@ var fs = require('fs')
 var mainLoop = require('main-loop')
 var networkAddress = require('network-address')
 var path = require('path')
-var torrentPoster = require('./lib/torrent-poster')
 var WebTorrent = require('webtorrent')
 
-var App = require('./views/app')
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
-var clipboard = electron.clipboard
+var App = require('./views/app')
+var config = require('../config')
+var torrentPoster = require('./lib/torrent-poster')
+
+// Electron apps have two processes: a main process (node) runs first and starts
+// a renderer process (essentially a Chrome window). We're in the renderer process,
+// and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
+var clipboard = electron.clipboard
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
@@ -94,7 +98,9 @@ function init () {
   // ...keyboard shortcuts
   document.addEventListener('keydown', function (e) {
     if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-      if (state.window.isFullScreen) {
+      if (state.modal) {
+        dispatch('exitModal')
+      } else if (state.window.isFullScreen) {
         dispatch('toggleFullScreen')
       } else {
         dispatch('back')
@@ -157,6 +163,9 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
+  if (action === 'showOpenTorrentFile') {
+    ipcRenderer.send('showOpenTorrentFile')
+  }
   if (action === 'seed') {
     seed(args[0] /* files */)
   }
@@ -207,11 +216,20 @@ function dispatch (action, ...args) {
     state.video.mouseStationarySince = new Date().getTime()
     update()
   }
+  if (action === 'exitModal') {
+    state.modal = null
+    update()
+  }
 }
 
 function setupIpc () {
   ipcRenderer.on('dispatch', function (e, action, ...args) {
     dispatch(action, ...args)
+  })
+
+  ipcRenderer.on('showOpenTorrentAddress', function (e) {
+    state.modal = 'open-torrent-address-modal'
+    update()
   })
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
@@ -288,7 +306,9 @@ function onFiles (files) {
   dispatch('seed', files.filter(isNotTorrentFile))
 }
 
-function onPaste () {
+function onPaste (e) {
+  if (e.target.tagName.toLowerCase() === 'input') return
+
   var torrentIds = clipboard.readText().split('\n')
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
@@ -460,6 +480,7 @@ function startServerFromReadyTorrent (torrent, cb) {
 }
 
 function stopServer () {
+  if (!state.server) return
   state.server.server.destroy()
   state.server = null
 }
@@ -520,7 +541,7 @@ function toggleTorrent (torrentSummary) {
 function deleteTorrent (torrentSummary) {
   var infoHash = torrentSummary.infoHash
   var torrent = getTorrent(infoHash)
-  torrent.destroy()
+  if (torrent) torrent.destroy()
 
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
