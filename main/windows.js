@@ -48,9 +48,10 @@ function createMainWindow (menu) {
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !isQuitting) {
       e.preventDefault()
-      win.webContents.executeJavaScript('dispatch("pause")', function () {
-        win.hide()
-      })
+      // sendSync() ensures that video will pause before window is hidden, at which point
+      // the update() loop (which uses requestAnimationFrame) ceases to run
+      win.sendSync('dispatch', 'pause')
+      win.hide()
     }
   })
 
