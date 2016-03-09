@@ -16,7 +16,7 @@ app.on('open-url', onOpen)
 app.on('ready', function () {
   electron.Menu.setApplicationMenu(menu.appMenu)
   windows.createMainWindow(menu)
-  shortcuts.init(menu)
+  shortcuts.init(menu, windows)
 })
 
 app.on('activate', function () {
