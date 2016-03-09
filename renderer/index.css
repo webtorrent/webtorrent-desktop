@@ -198,6 +198,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   opacity: 0.6;
   position: absolute;
   margin-top: 1px;
+  padding: 0 150px 0 150px;
   width: 100%;
   text-align: center;
   pointer-events: none;
