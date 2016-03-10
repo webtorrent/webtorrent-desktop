@@ -45,8 +45,8 @@
     "url": "git://github.com/feross/webtorrent-app.git"
   },
   "scripts": {
-    "build": "node ./bin/build.js",
     "debug": "DEBUG=* electron .",
+    "package": "node ./bin/package.js",
     "start": "electron .",
     "test": "standard",
     "update-authors": "./bin/update-authors.sh"

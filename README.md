@@ -28,13 +28,13 @@ $ npm install
 $ npm start
 ```
 
-### Build binaries
+### Package app
+
+Builds app binaries for OS X, Linux, and Windows.
 
 ```
-$ npm run build
+$ npm run package
 ```
-
-Builds the app for OS X, Linux, and Windows, using [electron-packager](https://github.com/maxogden/electron-packager).
 
 
 ## License
