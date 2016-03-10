@@ -45,7 +45,7 @@
     "url": "git://github.com/feross/webtorrent-app.git"
   },
   "scripts": {
-    "build": "electron-packager . $npm_package_productName --overwrite --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_devDependencies_electron_prebuilt",
+    "build": "node ./bin/build.js",
     "debug": "DEBUG=* electron .",
     "start": "electron .",
     "test": "standard",
