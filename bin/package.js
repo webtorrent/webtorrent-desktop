@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+/**
+ * Builds app binaries for OS X, Linux, and Windows.
+ */
+
+var config = require('../config')
 var cp = require('child_process')
 var electronPackager = require('electron-packager')
 var fs = require('fs')
@@ -29,6 +34,9 @@ var all = {
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
   ignore: /^\/(dist|static\/screenshot.png)$/,
+
+  // The application name.
+  name: config.APP_NAME,
 
   // The base directory where the finished package(s) are created.
   out: path.join(__dirname, '..', 'dist'),
@@ -68,7 +76,7 @@ var win32 = {
   'version-string': {
 
     // Company that produced the file.
-    CompanyName: 'WebTorrent',
+    CompanyName: config.APP_NAME,
 
     // Copyright notices that apply to the file. This should include the full text of all
     // notices, legal symbols, copyright dates, and so on.
@@ -83,12 +91,12 @@ var win32 = {
     OriginalFilename: 'WebTorrent.exe',
 
     // Name of the product with which the file is distributed.
-    ProductName: 'WebTorrent',
+    ProductName: config.APP_NAME,
 
     // Internal name of the file, if one exists, for example, a module name if the file
     // is a dynamic-link library. If the file has no internal name, this string should be
     // the original filename, without extension. This string is required.
-    InternalName: 'WebTorrent'
+    InternalName: config.APP_NAME
   },
 
   // Application icon.
