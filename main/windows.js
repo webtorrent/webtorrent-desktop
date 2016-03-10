@@ -15,6 +15,7 @@ function createMainWindow () {
     autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3 only)
+    icon: config.APP_ICON,
     minWidth: 375,
     minHeight: 38 + (120 * 2), // header height + 2 torrents
     show: false, // Hide window until DOM finishes loading

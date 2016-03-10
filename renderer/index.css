@@ -103,7 +103,7 @@ body {
   font-weight: 400;
   src: local('Material Icons'),
        local('MaterialIcons-Regular'),
-       url(../vendor/MaterialIcons-Regular.woff2) format('woff2');
+       url(../static/MaterialIcons-Regular.woff2) format('woff2');
 }
 
 .icon {
