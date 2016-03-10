@@ -56,6 +56,9 @@ var darwin = {
 
   // The bundle identifier to use in the application helper's plist (OS X only).
   'helper-bundle-id': 'io.webtorrent.app.helper',
+
+  // Application icon.
+  icon: path.join(__dirname, '..', 'WebTorrent.icns')
 }
 
 var win32 = {
@@ -87,10 +90,15 @@ var win32 = {
     // the original filename, without extension. This string is required.
     InternalName: 'WebTorrent'
   },
+
+  // Application icon.
+  icon: path.join(__dirname, '..', 'WebTorrent.ico')
 }
 
 var linux = {
   platform: 'linux'
+
+  // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
 electronPackager(Object.assign({}, all, darwin), done)
