@@ -28,7 +28,7 @@ var all = {
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
-  ignore: /^\/(dist|resources\/screenshot.png)$/,
+  ignore: /^\/(dist|static\/screenshot.png)$/,
 
   // The base directory where the finished package(s) are created.
   out: path.join(__dirname, '..', 'dist'),

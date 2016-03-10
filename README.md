@@ -1,4 +1,4 @@
-# WebTorrent.app
+# <img src="WebTorrent.png" width="35">&nbsp; WebTorrent.app
 
 [![Gitter][webtorrent-gitter-image]][webtorrent-gitter-url]
 [![Travis Build][webtorrent-app-travis-image]][webtorrent-app-travis-url]
@@ -11,7 +11,7 @@
 #### WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.
 
 <p align="center">
-  <img src="./resources/screenshot.png" width="562" height="630" alt="screenshot" align="center">
+  <img src="./static/screenshot.png" width="562" height="630" alt="screenshot" align="center">
 </p>
 
 ## How to Contribute
