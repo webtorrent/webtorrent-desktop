@@ -30,6 +30,8 @@
   "devDependencies": {
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.36.10",
+    "path-exists": "^2.1.0",
+    "rimraf": "^2.5.2",
     "standard": "^6.0.5"
   },
   "homepage": "https://webtorrent.io",
@@ -45,6 +47,7 @@
     "url": "git://github.com/feross/webtorrent-app.git"
   },
   "scripts": {
+    "cleanup": "node ./bin/cleanup.js",
     "debug": "DEBUG=* electron .",
     "package": "node ./bin/package.js",
     "start": "electron .",

@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # Update AUTHORS.md based on git history.
 
 git log --reverse --format='%aN <%aE>' | perl -we '
