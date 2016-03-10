@@ -6,16 +6,11 @@ var windows = module.exports = {
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
+var menu = require('./menu')
 
 var app = electron.app
 
-var isQuitting = false
-
-app.on('before-quit', function () {
-  isQuitting = true
-})
-
-function createMainWindow (menu) {
+function createMainWindow () {
   var win = windows.main = new electron.BrowserWindow({
     autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
@@ -46,7 +41,7 @@ function createMainWindow (menu) {
   win.on('leave-full-screen', () => menu.onToggleFullScreen(false))
 
   win.on('close', function (e) {
-    if (process.platform === 'darwin' && !isQuitting) {
+    if (process.platform === 'darwin' && !app.isQuitting) {
       e.preventDefault()
       // sendSync() ensures that video will pause before window is hidden, at which point
       // the update() loop (which uses requestAnimationFrame) ceases to run

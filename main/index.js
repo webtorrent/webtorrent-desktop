@@ -3,20 +3,25 @@ var startTime = Date.now()
 var electron = require('electron')
 var ipc = require('./ipc')
 var menu = require('./menu')
-var windows = require('./windows')
 var shortcuts = require('./shortcuts')
+var windows = require('./windows')
 
 var app = electron.app
 
+app.isQuitting = false
 app.startTime = startTime
+
+app.on('ready', function () {
+  menu.init()
+  windows.createMainWindow()
+  shortcuts.init()
+})
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
 
-app.on('ready', function () {
-  electron.Menu.setApplicationMenu(menu.appMenu)
-  windows.createMainWindow(menu)
-  shortcuts.init(menu, windows)
+app.on('before-quit', function () {
+  app.isQuitting = true
 })
 
 app.on('activate', function () {

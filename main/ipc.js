@@ -4,9 +4,11 @@ module.exports = {
 
 var debug = require('debug')('webtorrent-app:ipcMain')
 var electron = require('electron')
-var ipcMain = electron.ipcMain
 var menu = require('./menu')
 var windows = require('./windows')
+
+var app = electron.app
+var ipcMain = electron.ipcMain
 
 function init () {
   ipcMain.on('showOpenTorrentFile', function (e) {
@@ -59,7 +61,7 @@ function setAspectRatio (aspectRatio, extraSize) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   debug('setBadge %s', text)
-  if (electron.app.dock) electron.app.dock.setBadge(String(text))
+  if (app.dock) app.dock.setBadge(String(text))
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.

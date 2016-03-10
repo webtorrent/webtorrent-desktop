@@ -1,9 +1,27 @@
+module.exports = {
+  init: init,
+  onToggleFullScreen: onToggleFullScreen,
+  onWindowHide: onWindowHide,
+  onWindowShow: onWindowShow,
+  showOpenTorrentFile: showOpenTorrentFile,
+  toggleFullScreen: toggleFullScreen
+}
+
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
 var windows = require('./windows')
 
 var app = electron.app
+var appMenu, dockMenu
+
+function init () {
+  appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
+  electron.Menu.setApplicationMenu(appMenu)
+
+  dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
+  if (app.dock) app.dock.setMenu(dockMenu)
+}
 
 function toggleFullScreen (flag) {
   debug('toggleFullScreen %s', flag)
@@ -100,7 +118,7 @@ function showOpenTorrentAddress () {
   windows.main.send('showOpenTorrentAddress')
 }
 
-function getMenuTemplate () {
+function getAppMenuTemplate () {
   var template = [
     {
       label: 'File',
@@ -300,13 +318,22 @@ function getMenuTemplate () {
   return template
 }
 
-var appMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
-
-module.exports = {
-  appMenu: appMenu,
-  onToggleFullScreen: onToggleFullScreen,
-  onWindowHide: onWindowHide,
-  onWindowShow: onWindowShow,
-  toggleFullScreen: toggleFullScreen,
-  showOpenTorrentFile: showOpenTorrentFile
+function getDockMenuTemplate () {
+  return [
+    {
+      label: 'Create New Torrent...',
+      accelerator: 'CmdOrCtrl+N',
+      click: showCreateTorrent
+    },
+    {
+      label: 'Open Torrent File...',
+      accelerator: 'CmdOrCtrl+O',
+      click: showOpenTorrentFile
+    },
+    {
+      label: 'Open Torrent Address...',
+      accelerator: 'CmdOrCtrl+U',
+      click: showOpenTorrentAddress
+    }
+  ]
 }
