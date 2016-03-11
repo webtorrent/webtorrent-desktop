@@ -112,7 +112,7 @@ var linux = {
 var platform = process.argv[2]
 
 if (platform === '--darwin') {
-  buildDarwin()
+  buildDarwin(postDarwinism)
 } else if (platform === '--win32') {
   buildWin32()
 } else if (platform === '--linux') {
@@ -132,6 +132,37 @@ function buildWin32 (cb) {
 
 function buildLinux (cb) {
   electronPackager(Object.assign({}, all, linux), done.bind(null, cb))
+}
+
+function postDarwinism () {
+  var plist = require('plist')
+  var contentsPath = path.join.apply(null, [
+    __dirname,
+    '..',
+    'dist',
+    `${config.APP_NAME}-darwin-x64`,
+    `${config.APP_NAME}.app`,
+    'Contents'
+  ])
+  var resourcesPath = path.join(contentsPath, 'Resources')
+  var infoPlistPath = path.join(contentsPath, 'Info.plist')
+  var webTorrentFileIconPath = path.join.apply(null, [
+    __dirname,
+    '..',
+    'static',
+    'WebTorrentFile.icns'
+  ])
+  var infoPlist = plist.parse(fs.readFileSync(infoPlistPath).toString())
+
+  infoPlist['CFBundleDocumentTypes'] = [{
+    CFBundleTypeExtensions: [ 'torrent' ],
+    CFBundleTypeName: 'BitTorrent Document',
+    CFBundleTypeRole: 'Editor',
+    CFBundleTypeIconFile: 'WebTorrentFile.icns'
+  }]
+
+  fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
+  cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
 }
 
 function done (cb, err, appPath) {
