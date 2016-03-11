@@ -184,12 +184,12 @@ function getAppMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'Ctrl+Command+F'
             : 'F11',
-          click: toggleFullScreen
+          click: () => toggleFullScreen()
         },
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: toggleFloatOnTop
+          click: () => toggleFloatOnTop()
         },
         {
           type: 'separator'
