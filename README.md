@@ -1,20 +1,28 @@
-# WebTorrent.app
+<h1 align="center">
+  <br>
+  <img src="https://webtorrent.io/img/WebTorrent.png" alt="WebTorrent" width="200">
+  <br>
+  WebTorrent.app
+  <br>
+  <br>
+</h1>
 
-[![Gitter][webtorrent-gitter-image]][webtorrent-gitter-url]
-[![Travis Build][webtorrent-app-travis-image]][webtorrent-app-travis-url]
+<h4 align="center">The streaming torrent client. For OS X, Windows, and Linux.</h4>
 
-[webtorrent-gitter-image]: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg
-[webtorrent-gitter-url]: https://gitter.im/feross/webtorrent
-[webtorrent-app-travis-image]: https://img.shields.io/travis/feross/webtorrent-app/master.svg
-[webtorrent-app-travis-url]: https://travis-ci.org/feross/webtorrent-app
-
-#### WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.
-
-<img src="https://webtorrent.io/img/WebTorrent.png" alt="WebTorrent" width="100">
+<p align="center">
+    <a href="https://gitter.im/feross/webtorrent">
+        <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg"
+             alt="Gitter">
+    </a>
+    <a href="https://travis-ci.org/feross/webtorrent-app">
+        <img src="https://img.shields.io/travis/feross/webtorrent-app/master.svg"
+             alt="Travis Build">
+    </a>
+</p>
 
 ## Install
 
-WebTorrent.app is still under very active development. Expect a release very soon!
+**WebTorrent.app** is still under very active development. Expect a release very soon!
 
 ## Screenshot
 
