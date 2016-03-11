@@ -26,6 +26,10 @@ body {
   line-height: 1.5em;
 }
 
+table {
+  table-layout: fixed;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   background-color: rgb(40, 40, 40);
@@ -245,7 +249,8 @@ a:not(.disabled):hover, i:not(.disabled):hover {
 .content {
   position: relative;
   width: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   flex: 1 1 auto;
   margin-top: 37px;
 }
@@ -508,7 +513,37 @@ body.drag .torrent-placeholder span {
  * TORRENT LIST: EXPANDED TORRENT DETAILS
  */
 .torrent.selected {
-  height: 240px;
+  height: auto;
+}
+
+.torrent-details {
+  padding: 8em 20px 20px 20px;
+}
+
+.torrent-details table {
+  width: 100%;
+  max-width: 1000px;
+  white-space: nowrap;
+}
+
+.torrent-details td {
+  overflow: hidden;
+  padding: 0;
+}
+
+.torrent-details td.col-name {
+  width: auto;
+  text-overflow: ellipsis;
+}
+
+.torrent-details td.col-progress {
+  width: 4em;
+  text-align: right;
+}
+
+.torrent-details td.col-size {
+  width: 4em;
+  text-align: right;
 }
 
 /*
