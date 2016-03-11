@@ -6,6 +6,7 @@ var windows = module.exports = {
 var config = require('../config')
 var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
+var ipcMain = electron.ipcMain
 var menu = require('./menu')
 
 var app = electron.app
@@ -44,10 +45,14 @@ function createMainWindow () {
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !app.isQuitting) {
       e.preventDefault()
-      // sendSync() ensures that video will pause before window is hidden, at which point
-      // the update() loop (which uses requestAnimationFrame) ceases to run
-      win.sendSync('dispatch', 'pause')
-      win.hide()
+      // When the window is hidden, the update() loop (which uses
+      // requestAnimationFrame) ceases to run. We need to make sure
+      // the video pauses before hiding or it will continue to play.
+
+      win.send('dispatch', 'pause')
+      ipcMain.once('paused-video', function (e) {
+        win.hide()
+      })
     }
   })
 

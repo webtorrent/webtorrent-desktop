@@ -197,8 +197,14 @@ function dispatch (action, ...args) {
     // window.history.forward()
   }
   if (action === 'pause') {
+    if (state.url !== 'player' || state.video.isPaused) {
+      ipcRenderer.send('paused-video')
+    }
     state.video.isPaused = true
     update()
+  }
+  if (action === 'videoPaused') {
+    ipcRenderer.send('paused-video')
   }
   if (action === 'playPause') {
     state.video.isPaused = !state.video.isPaused
