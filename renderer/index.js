@@ -615,7 +615,6 @@ function onWarning (err) {
 }
 
 function showDoneNotification (torrent) {
-  console.log(state.window.isFocused)
   if (state.window.isFocused) return
 
   var notif = new window.Notification('Download Complete', {
