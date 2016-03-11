@@ -1,4 +1,4 @@
-# <img src="WebTorrent.png" width="35">&nbsp; WebTorrent.app
+# <img src="static/WebTorrent.png" width="35">&nbsp; WebTorrent.app
 
 [![Gitter][webtorrent-gitter-image]][webtorrent-gitter-url]
 [![Travis Build][webtorrent-app-travis-image]][webtorrent-app-travis-url]

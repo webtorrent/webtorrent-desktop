@@ -25,7 +25,7 @@ var all = {
   // Package the application's source code into an archive, using Electron's archive
   // format. Mitigates issues around long path names on Windows and slightly speeds up
   // require().
-  asar: false,
+  asar: true,
 
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
@@ -33,7 +33,7 @@ var all = {
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
-  ignore: /^\/(dist|static\/screenshot.png)$/,
+  ignore: /^\/dist|\/(appveyor.yml|AUTHORS|CONTRIBUTORS|bench|benchmark|benchmark\.js|bin|bower\.json|component\.json|coverage|doc|docs|docs\.mli|dragdrop\.min\.js|example|examples|example\.html|example\.js|externs|ipaddr\.min\.js|Makefile|min|minimist|perf|rusha|simplepeer\.min\.js|simplewebsocket\.min\.js|static\/screenshot\.png|test|tests|test\.js|tests\.js|webtorrent\.min\.js|\.[^\/]*|.*\.md|.*\.markdown)$/,
 
   // The application name.
   name: config.APP_NAME,
@@ -66,7 +66,7 @@ var darwin = {
   'helper-bundle-id': 'io.webtorrent.app.helper',
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'WebTorrent.icns')
+  icon: path.join(__dirname, '..', 'static', 'WebTorrent.icns')
 }
 
 var win32 = {
@@ -100,7 +100,7 @@ var win32 = {
   },
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'WebTorrent.ico')
+  icon: path.join(__dirname, '..', 'static', 'WebTorrent.ico')
 }
 
 var linux = {
@@ -109,11 +109,33 @@ var linux = {
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
-electronPackager(Object.assign({}, all, darwin), done)
-electronPackager(Object.assign({}, all, win32), done)
-electronPackager(Object.assign({}, all, linux), done)
+var platform = process.argv[2]
 
-function done (err, appPath) {
+if (platform === '--darwin') {
+  buildDarwin()
+} else if (platform === '--win32') {
+  buildWin32()
+} else if (platform === '--linux') {
+  buildLinux()
+} else {
+  // Build all
+  buildDarwin(() => buildWin32(() => buildLinux()))
+}
+
+function buildDarwin (cb) {
+  electronPackager(Object.assign({}, all, darwin), done.bind(null, cb))
+}
+
+function buildWin32 (cb) {
+  electronPackager(Object.assign({}, all, win32), done.bind(null, cb))
+}
+
+function buildLinux (cb) {
+  electronPackager(Object.assign({}, all, linux), done.bind(null, cb))
+}
+
+function done (cb, err, appPath) {
   if (err) console.error(err.message || err)
   else console.log('Built ' + appPath)
+  if (cb) cb()
 }
