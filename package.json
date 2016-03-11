@@ -25,7 +25,7 @@
     "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
-    "webtorrent": "^0.84.0"
+    "webtorrent": "^0.84.1"
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
