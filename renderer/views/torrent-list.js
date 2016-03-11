@@ -22,7 +22,8 @@ function TorrentList (state, dispatch) {
 // May be expanded for additional info, including the list of files inside
 function renderTorrent (torrentSummary, state, dispatch) {
   // Get ephemeral data (like progress %) directly from the WebTorrent handle
-  var torrent = state.client.torrents.find((x) => x.infoHash === torrentSummary.infoHash)
+  var infoHash = torrentSummary.infoHash
+  var torrent = state.client.torrents.find((x) => x.infoHash === infoHash)
 
   // Background image: show some nice visuals, like a frame from the movie, if possible
   var style = {}
@@ -34,8 +35,12 @@ function renderTorrent (torrentSummary, state, dispatch) {
 
   // Foreground: name of the torrent, basic info like size, play button,
   // cast buttons if available, and delete
+  var classes = ['torrent']
+  //  playStatus turns the play button into a loading spinner or error icon
+  if (torrent && torrent.playStatus) classes.push(torrent.playStatus)
+  if (state.selectedInfoHash === infoHash) classes.push('selected')
   return hx`
-    <div class='torrent ${torrentSummary.playStatus || ''}' style=${style}>
+    <div class='${classes.join(' ')}' style=${style} onclick=${() => dispatch('toggleSelectTorrent', infoHash)}>
       ${renderTorrentMetadata(torrent, torrentSummary)}
       ${renderTorrentButtons(torrentSummary, dispatch)}
     </div>

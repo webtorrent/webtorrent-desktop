@@ -11,6 +11,7 @@ module.exports = {
   prev: {}, /* used for state diffing in updateElectron() */
   server: null, /* local WebTorrent-to-HTTP server */
   torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
+  selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
   // history: [], /* track how we got to the current view. enables Back button */
   // historyIndex: 0,
   url: 'home',

@@ -355,26 +355,6 @@ input {
  * TORRENT LIST
  */
 
-.torrent-placeholder {
-  padding: 10px;
-  font-size: 1.1em;
-}
-
-.torrent-placeholder span {
-  border: 5px #444 dashed;
-  border-radius: 5px;
-  color: #666;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-body.drag .torrent-placeholder span {
-  border-color: #def;
-  color: #def;
-}
-
 .torrent {
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
@@ -407,15 +387,14 @@ body.drag .torrent-placeholder span {
 
 .torrent .buttons {
   position: absolute;
-  top: 0;
+  top: 25px;
   right: 0;
   height: 100%;
-  align-items: center; /* flexbox: center buttons vertically */
   display: none;
 }
 
 .torrent:hover .buttons {
-  display: flex;
+  display: block;
 }
 
 .torrent .buttons > * {
@@ -499,6 +478,37 @@ body.drag .torrent-placeholder span {
 
 .torrent span:not(:last-child)::after {
   content: ' — ';
+}
+
+/*
+ * TORRENT LIST: DRAG-DROP TARGET
+ */
+
+.torrent-placeholder {
+  padding: 10px;
+  font-size: 1.1em;
+}
+
+.torrent-placeholder span {
+  border: 5px #444 dashed;
+  border-radius: 5px;
+  color: #666;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.drag .torrent-placeholder span {
+  border-color: #def;
+  color: #def;
+}
+
+/*
+ * TORRENT LIST: EXPANDED TORRENT DETAILS
+ */
+.torrent.selected {
+  height: 240px;
 }
 
 /*

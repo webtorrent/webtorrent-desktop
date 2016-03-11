@@ -170,13 +170,16 @@ function dispatch (action, ...args) {
     seed(args[0] /* files */)
   }
   if (action === 'openPlayer') {
-    openPlayer(args[0] /* infoHash */)
+    openPlayer(args[0] /* torrentSummary */)
   }
   if (action === 'toggleTorrent') {
-    toggleTorrent(args[0] /* infoHash */)
+    toggleTorrent(args[0] /* torrentSummary */)
   }
   if (action === 'deleteTorrent') {
-    deleteTorrent(args[0] /* infoHash */)
+    deleteTorrent(args[0] /* torrentSummary */)
+  }
+  if (action === 'toggleSelectTorrent') {
+    toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
     openChromecast(args[0] /* infoHash */)
@@ -553,6 +556,12 @@ function deleteTorrent (torrentSummary) {
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
   playInterfaceSound(config.SOUND_DELETE)
+}
+
+function toggleSelectTorrent (infoHash) {
+  // toggle selection
+  state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
+  update()
 }
 
 function openChromecast (infoHash) {
