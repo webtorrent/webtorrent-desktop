@@ -109,9 +109,31 @@ var linux = {
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
-electronPackager(Object.assign({}, all, darwin), done)
-electronPackager(Object.assign({}, all, win32), done)
-electronPackager(Object.assign({}, all, linux), done)
+var platform = process.argv[2]
+
+if (platform === '--darwin') {
+  buildDarwin()
+} else if (platform === '--win32') {
+  buildWin32()
+} else if (platform === '--linux') {
+  buildLinux()
+} else {
+  buildDarwin()
+  buildWin32()
+  buildLinux()
+}
+
+function buildDarwin () {
+  electronPackager(Object.assign({}, all, darwin), done)
+}
+
+function buildWin32 () {
+  electronPackager(Object.assign({}, all, win32), done)
+}
+
+function buildLinux () {
+  electronPackager(Object.assign({}, all, linux), done)
+}
 
 function done (err, appPath) {
   if (err) console.error(err.message || err)
