@@ -66,7 +66,7 @@ var darwin = {
   'helper-bundle-id': 'io.webtorrent.app.helper',
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'WebTorrent.icns')
+  icon: path.join(__dirname, '..', 'static', 'WebTorrent.icns')
 }
 
 var win32 = {
@@ -100,7 +100,7 @@ var win32 = {
   },
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'WebTorrent.ico')
+  icon: path.join(__dirname, '..', 'static', 'WebTorrent.ico')
 }
 
 var linux = {

@@ -2,7 +2,7 @@ var path = require('path')
 
 module.exports = {
   APP_NAME: 'WebTorrent',
-  APP_ICON: path.join(__dirname, 'WebTorrent.png'),
+  APP_ICON: path.join(__dirname, 'static', 'WebTorrent.png'),
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
