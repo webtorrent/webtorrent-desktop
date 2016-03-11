@@ -118,24 +118,24 @@ if (platform === '--darwin') {
 } else if (platform === '--linux') {
   buildLinux()
 } else {
-  buildDarwin()
-  buildWin32()
-  buildLinux()
+  // Build all
+  buildDarwin(() => buildWin32(() => buildLinux()))
 }
 
-function buildDarwin () {
-  electronPackager(Object.assign({}, all, darwin), done)
+function buildDarwin (cb) {
+  electronPackager(Object.assign({}, all, darwin), done.bind(null, cb))
 }
 
-function buildWin32 () {
-  electronPackager(Object.assign({}, all, win32), done)
+function buildWin32 (cb) {
+  electronPackager(Object.assign({}, all, win32), done.bind(null, cb))
 }
 
-function buildLinux () {
-  electronPackager(Object.assign({}, all, linux), done)
+function buildLinux (cb) {
+  electronPackager(Object.assign({}, all, linux), done.bind(null, cb))
 }
 
-function done (err, appPath) {
+function done (cb, err, appPath) {
   if (err) console.error(err.message || err)
   else console.log('Built ' + appPath)
+  if (cb) cb()
 }
