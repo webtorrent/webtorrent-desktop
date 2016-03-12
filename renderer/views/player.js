@@ -36,6 +36,7 @@ function Player (state, dispatch) {
           ondblclick=${() => dispatch('toggleFullScreen')}
           onloadedmetadata=${onLoadedMetadata}
           onended=${onEnded}
+          onplay=${() => dispatch('videoPlaying')}
           onpause=${() => dispatch('videoPaused')}
           autoplay>
         </video>

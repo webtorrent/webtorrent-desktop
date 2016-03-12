@@ -206,6 +206,9 @@ function dispatch (action, ...args) {
     state.video.isPaused = true
     update()
   }
+  if (action === 'videoPlaying') {
+    ipcRenderer.send('playing-video')
+  }
   if (action === 'videoPaused') {
     ipcRenderer.send('paused-video')
   }
