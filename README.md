@@ -52,6 +52,8 @@ Builds app binaries for OS X, Linux, and Windows.
 $ npm run package
 ```
 
+### Code Style
+
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 ## License
