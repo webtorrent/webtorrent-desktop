@@ -9,6 +9,10 @@ var windows = require('./windows')
 
 var app = electron.app
 var ipcMain = electron.ipcMain
+var powerSaveBlocker = electron.powerSaveBlocker
+
+// has to be a number, not a boolean, and undefined throws an error
+var powerSaveBlocked = 0
 
 function init () {
   ipcMain.on('showOpenTorrentFile', function (e) {
@@ -41,6 +45,16 @@ function init () {
 
   ipcMain.on('log', function (e, message) {
     console.log(message)
+  })
+
+  ipcMain.on('playing-video', function (e) {
+    powerSaveBlocked = powerSaveBlocker.start('prevent-display-sleep')
+  })
+
+  ipcMain.on('paused-video', function (e) {
+    if (powerSaveBlocker.isStarted(powerSaveBlocked)) {
+      powerSaveBlocker.stop(powerSaveBlocked)
+    }
   })
 }
 
