@@ -52,6 +52,14 @@ Builds app binaries for OS X, Linux, and Windows.
 $ npm run package
 ```
 
+To build for one platform:
+
+```
+$ npm run package -- [platform]
+```
+
+Where `[platform]` is `--darwin`, `--linux`, or `--win32`.
+
 ### Code Style
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
