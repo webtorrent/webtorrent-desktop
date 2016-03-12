@@ -103,20 +103,26 @@ function renderTorrentButtons (torrentSummary, dispatch) {
     <div class='buttons'>
       <i.btn.icon.download
         class='${torrentSummary.status}'
-        onclick=${() => dispatch('toggleTorrent', torrentSummary)}>
+        onclick=${(e) => handleButton('toggleTorrent', e)}>
         ${torrentSummary.status === 'seeding' ? 'file_upload' : 'file_download'}
       </i>
       <i.btn.icon.play
-        onclick=${() => dispatch('openPlayer', torrentSummary)}>
+        onclick=${(e) => handleButton('openPlayer', e)}>
         ${torrentSummary.playStatus === 'timeout' ? 'warning' : 'play_arrow'}
       </i>
       <i
         class='icon delete'
-        onclick=${() => dispatch('deleteTorrent', torrentSummary)}>
+        onclick=${(e) => handleButton('deleteTorrent', e)}>
         close
       </i>
     </div>
   `
+
+  function handleButton (action, e) {
+    // Prevent propagation so that we don't select/unselect the torrent
+    e.stopPropagation()
+    dispatch(action, torrentSummary)
+  }
 }
 
 // Show files, per-file download status and play buttons, and so on
