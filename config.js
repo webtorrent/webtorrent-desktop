@@ -4,6 +4,7 @@ module.exports = {
   APP_NAME: 'WebTorrent',
   APP_ICON: path.join(__dirname, 'static', 'WebTorrent.png'),
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
+  PREFERENCES: 'file://' + path.join(__dirname, 'renderer', 'preferences.html'),
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
   SOUND_DISABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),

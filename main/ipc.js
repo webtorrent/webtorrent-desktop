@@ -56,6 +56,10 @@ function init () {
       powerSaveBlocker.stop(powerSaveBlocked)
     }
   })
+
+  ipcMain.on('showSelectDownloadDirectory', function (e) {
+    menu.showSelectDownloadDirectory()
+  })
 }
 
 function setBounds (bounds) {

@@ -163,6 +163,9 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
+  if (action === 'setDefaultDownloadDirectory') {
+    setDefaultDownloadDirectory(args[0] /* directory */)
+  }
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile')
   }
@@ -255,6 +258,10 @@ function setupIpc () {
     state.devices[device] = player
     update()
   })
+}
+
+function setDefaultDownloadDirectory (directory) {
+  state.downloadPath = directory
 }
 
 function detectDevices () {

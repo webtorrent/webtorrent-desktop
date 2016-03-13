@@ -4,6 +4,7 @@ module.exports = {
   onWindowHide: onWindowHide,
   onWindowShow: onWindowShow,
   showOpenTorrentFile: showOpenTorrentFile,
+  showSelectDownloadDirectory: showSelectDownloadDirectory,
   toggleFullScreen: toggleFullScreen
 }
 
@@ -43,8 +44,11 @@ function toggleFloatOnTop (flag) {
 
 function toggleDevTools () {
   debug('toggleDevTools')
-  if (windows.main) {
+  /* A quick hack to show dev tools for the preferences window if it's open */
+  if (!windows.preferences) {
     windows.main.toggleDevTools()
+  } else {
+    windows.preferences.toggleDevTools()
   }
 }
 
@@ -110,6 +114,21 @@ function showOpenTorrentFile () {
     filenames.forEach(function (filename) {
       windows.main.send('dispatch', 'addTorrent', filename)
     })
+  })
+}
+
+// Open the preferences window
+function showPreferencesWindow () {
+  windows.createPreferencesWindow()
+}
+
+function showSelectDownloadDirectory() {
+  electron.dialog.showOpenDialog(windows.preferences, {
+    title: 'Select a directory to save in.',
+    defaultPath: '/',
+    properties: [ 'openDirectory' ]
+  }, function (directoryname) {
+    windows.main.send('dispatch', 'setDefaultDownloadDirectory', directoryname)
   })
 }
 
@@ -266,6 +285,14 @@ function getAppMenuTemplate () {
         {
           label: 'About ' + name,
           role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Preferences',
+          accelerator: 'Cmd+,',
+          click: () => showPreferencesWindow()
         },
         {
           type: 'separator'
