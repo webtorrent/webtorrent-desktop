@@ -12,7 +12,7 @@ var menu = require('./menu')
 var windows = require('./windows')
 
 // has to be a number, not a boolean, and undefined throws an error
-var powerSaveBlocked = 0
+var powerSaveBlockID = 0
 
 function init () {
   ipcMain.on('showOpenTorrentFile', function (e) {
@@ -43,23 +43,11 @@ function init () {
     windows.main.setTitle(title)
   })
 
+  ipcMain.on('blockPowerSave', blockPowerSave)
+  ipcMain.on('unblockPowerSave', unblockPowerSave)
+
   ipcMain.on('log', function (e, message) {
     console.log(message)
-  })
-
-  ipcMain.on('playing-video', function (e) {
-    powerSaveBlocked = powerSaveBlocker.start('prevent-display-sleep')
-  })
-
-  ipcMain.on('paused-video', function (e) {
-    if (powerSaveBlocker.isStarted(powerSaveBlocked)) {
-      powerSaveBlocker.stop(powerSaveBlocked)
-    }
-  })
-
-  ipcMain.on('openItem', function (e, path) {
-    console.log('opening file or folder: ' + path)
-    electron.shell.openItem(path)
   })
 }
 
@@ -88,5 +76,17 @@ function setProgress (progress) {
   debug('setProgress %s', progress)
   if (windows.main) {
     windows.main.setProgressBar(progress)
+  }
+}
+
+function blockPowerSave () {
+  powerSaveBlockID = powerSaveBlocker.start('prevent-display-sleep')
+  debug('blockPowerSave %d', powerSaveBlockID)
+}
+
+function unblockPowerSave () {
+  if (powerSaveBlocker.isStarted(powerSaveBlockID)) {
+    powerSaveBlocker.stop(powerSaveBlockID)
+    debug('unblockPowerSave %d', powerSaveBlockID)
   }
 }
