@@ -1,6 +1,8 @@
 var windows = module.exports = {
   main: null,
-  createMainWindow: createMainWindow
+  preferences: null,
+  createMainWindow: createMainWindow,
+  createPreferencesWindow: createPreferencesWindow
 }
 
 var config = require('../config')
@@ -59,4 +61,29 @@ function createMainWindow () {
   win.once('closed', function () {
     windows.main = null
   })
+}
+
+function createPreferencesWindow () {
+  if (!windows.preferences) {
+    var win = windows.preferences = new electron.BrowserWindow({
+      autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
+      backgroundColor: '#282828',
+      darkTheme: true, // Forces dark theme (GTK+3 only)
+      icon: config.APP_ICON,
+      resizable: false,
+      show: true, // Hide window until DOM finishes loading
+      title: 'Preferences',
+      titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
+      width: 480,
+      height: 38 + (120 * 2)
+    })
+    win.loadURL(config.PREFERENCES)
+
+    win.on('blur', menu.onWindowHide)
+    win.on('focus', menu.onWindowShow)
+
+    win.once('closed', function () {
+      windows.preferences = null
+    })
+  }
 }

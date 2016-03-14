@@ -659,6 +659,28 @@ body.drag .torrent-placeholder span {
 }
 
 /*
+ * PREFERENCES WINDOW
+ */
+.preferences-table {
+  padding: 10px;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+
+.preferences-table .label {
+  flex: 0 0 150px;
+}
+
+.preferences-table .action {
+  flex: 1;
+}
+
+.preferences-table input {
+  width: auto;
+  color: #fff;
+}
+/*
  * MEDIA QUERIES
  */
 
