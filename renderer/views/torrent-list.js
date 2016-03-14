@@ -137,11 +137,12 @@ function renderTorrentDetails (torrent, torrentSummary) {
   } else {
     // We do know the files. List them and show download stats for each one
     var fileRows = torrent.files.map(function (file) {
-      var numPieces = 0
-      for (var piece = file._startPiece; piece < file._endPiece; piece++) {
-        if (torrent.bitfield.get(piece)) numPieces++
+      var numPieces = file._endPiece - file._startPiece + 1
+      var numPiecesPresent = 0
+      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
+        if (torrent.bitfield.get(piece)) numPiecesPresent++
       }
-      var progress = Math.round(100 * numPieces / (file._endPiece - file._startPiece)) + '%'
+      var progress = Math.round(100 * numPiecesPresent / numPieces) + '%'
       return hx`
         <tr>
           <td class='col-name'>${file.name}</td>

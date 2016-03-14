@@ -250,7 +250,7 @@ a:not(.disabled):hover, i:not(.disabled):hover {
   position: relative;
   width: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: overlay;
   flex: 1 1 auto;
   margin-top: 37px;
 }
