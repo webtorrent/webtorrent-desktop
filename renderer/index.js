@@ -79,8 +79,6 @@ function init () {
     updateClientProgress()
   }, 1000)
 
-  // All state lives in state.js. `state.saved` is read from and written to a
-  // file. All other state is ephemeral.
   window.addEventListener('beforeunload', saveState)
 
   // listen for messages from the main process
@@ -201,6 +199,7 @@ function dispatch (action, ...args) {
   if (action === 'back') {
     // TODO
     // window.history.back()
+    ipcRenderer.send('unblockPowerSave')
     closePlayer()
   }
   if (action === 'forward') {
@@ -215,10 +214,11 @@ function dispatch (action, ...args) {
     update()
   }
   if (action === 'videoPlaying') {
-    ipcRenderer.send('playing-video')
+    ipcRenderer.send('blockPowerSave')
   }
   if (action === 'videoPaused') {
     ipcRenderer.send('paused-video')
+    ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'playPause') {
     state.video.isPaused = !state.video.isPaused
@@ -564,6 +564,7 @@ function closePlayer () {
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
+
   restoreBounds()
   stopServer()
   update()
