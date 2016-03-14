@@ -54,7 +54,7 @@ function TorrentList (state, dispatch) {
 
   // Show name, download status, % complete
   function renderTorrentMetadata (torrent, torrentSummary) {
-    var name = torrentSummary.displayName || torrentSummary.name || 'Loading torrent...'
+    var name = torrentSummary.name || 'Loading torrent...'
     var elements = [hx`
       <div class='name ellipsis'>${name}</div>
     `]

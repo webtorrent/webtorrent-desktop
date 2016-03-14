@@ -190,10 +190,10 @@ function dispatch (action, ...args) {
     toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
-    openChromecast(args[0] /* infoHash */)
+    openChromecast()
   }
   if (action === 'openAirplay') {
-    openAirplay(args[0] /* infoHash */)
+    openAirplay()
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
@@ -283,6 +283,9 @@ function loadState (callback) {
 
     // populate defaults if they're not there
     state.saved = Object.assign({}, state.defaultSavedState, data)
+    state.saved.torrents.forEach(function (torrentSummary) {
+      if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
+    })
 
     if (callback) callback()
   })
@@ -424,7 +427,7 @@ function addTorrentEvents (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'downloading'
     torrentSummary.ready = true
-    torrentSummary.name = torrent.name
+    torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
 
     if (!torrentSummary.posterURL) {
@@ -595,8 +598,8 @@ function toggleSelectTorrent (infoHash) {
   update()
 }
 
-function openChromecast (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
+function openChromecast () {
+  var torrentSummary = getTorrentSummary(state.playing.infoHash)
   state.devices.chromecast.play(state.server.networkURL, {
     title: config.APP_NAME + ' — ' + torrentSummary.name
   })
@@ -607,7 +610,7 @@ function openChromecast (infoHash) {
   update()
 }
 
-function openAirplay (infoHash) {
+function openAirplay () {
   state.devices.airplay.play(state.server.networkURL, 0, function () {
     // TODO: handle airplay errors
   })

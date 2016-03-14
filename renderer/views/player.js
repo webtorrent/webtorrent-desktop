@@ -64,7 +64,6 @@ function Player (state, dispatch) {
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
-  var torrent = state.client.get(state.playing.infoHash)
 
   var elements = [
     hx`
@@ -88,7 +87,7 @@ function renderPlayerControls (state, dispatch) {
   if (state.devices.chromecast) {
     elements.push(hx`
       <i.icon.chromecast
-        onclick=${() => dispatch('openChromecast', torrent)}>
+        onclick=${() => dispatch('openChromecast')}>
         cast
       </i>
     `)
@@ -96,7 +95,7 @@ function renderPlayerControls (state, dispatch) {
   if (state.devices.airplay) {
     elements.push(hx`
       <i.icon.airplay
-        onclick=${() => dispatch('openAirplay', torrent)}>
+        onclick=${() => dispatch('openAirplay')}>
         airplay
       </i>
     `)
