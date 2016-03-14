@@ -64,7 +64,7 @@ function Player (state, dispatch) {
 function renderPlayerControls (state, dispatch) {
   var positionPercent = 100 * state.video.currentTime / state.video.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
-  var torrent = state.torrentPlaying._torrent
+  var torrent = state.client.get(state.playing.infoHash)
 
   var elements = [
     hx`
@@ -132,7 +132,7 @@ function renderPlayerControls (state, dispatch) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrent = state.torrentPlaying._torrent
+  var torrent = state.client.get(state.playing.infoHash)
   if (torrent === null) {
     return []
   }

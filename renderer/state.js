@@ -4,14 +4,18 @@ var path = require('path')
 var config = require('../config')
 
 module.exports = {
-  /* Temporary state disappears once the program exits.
+  /*
+   * Temporary state disappears once the program exits.
    * It can contain complex objects like open connections, etc.
    */
   client: null, /* the WebTorrent client */
-  prev: {}, /* used for state diffing in updateElectron() */
   server: null, /* local WebTorrent-to-HTTP server */
-  torrentPlaying: null, /* the torrent we're streaming. see client.torrents */
+  prev: {}, /* used for state diffing in updateElectron() */
   selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
+  playing: {
+    infoHash: null, /* the info hash of the torrent we're playing */
+    fileIndex: null /* the zero-based index within the torrent */
+  },
   // history: [], /* track how we got to the current view. enables Back button */
   // historyIndex: 0,
   url: 'home',
@@ -36,7 +40,8 @@ module.exports = {
     mouseStationarySince: 0 /* Unix time in ms */
   },
 
-  /* Saved state is read from and written to a file every time the app runs.
+  /*
+   * Saved state is read from and written to a file every time the app runs.
    * It should be simple and minimal and must be JSON.
    *
    * Config path:
@@ -49,9 +54,7 @@ module.exports = {
    *
    * Also accessible via `require('application-config')('WebTorrent').filePath`
    */
-  saved: {
-    torrents: []
-  },
+  saved: {},
 
   /* If the saved state file doesn't exist yet, here's what we use instead */
   defaultSavedState: {

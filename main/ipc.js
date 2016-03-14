@@ -4,12 +4,12 @@ module.exports = {
 
 var debug = require('debug')('webtorrent-app:ipcMain')
 var electron = require('electron')
-var menu = require('./menu')
-var windows = require('./windows')
-
 var app = electron.app
 var ipcMain = electron.ipcMain
 var powerSaveBlocker = electron.powerSaveBlocker
+
+var menu = require('./menu')
+var windows = require('./windows')
 
 // has to be a number, not a boolean, and undefined throws an error
 var powerSaveBlocked = 0
@@ -55,6 +55,11 @@ function init () {
     if (powerSaveBlocker.isStarted(powerSaveBlocked)) {
       powerSaveBlocker.stop(powerSaveBlocked)
     }
+  })
+
+  ipcMain.on('openItem', function (e, path) {
+    console.log('opening file or folder: ' + path)
+    electron.shell.openItem(path)
   })
 }
 

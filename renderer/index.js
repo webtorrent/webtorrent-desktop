@@ -21,6 +21,7 @@ var patch = require('virtual-dom/patch')
 var App = require('./views/app')
 var config = require('../config')
 var torrentPoster = require('./lib/torrent-poster')
+var TorrentPlayer = require('./lib/torrent-player')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -169,8 +170,15 @@ function dispatch (action, ...args) {
   if (action === 'seed') {
     seed(args[0] /* files */)
   }
-  if (action === 'openPlayer') {
-    openPlayer(args[0] /* torrentSummary */)
+  if (action === 'play') {
+    // TODO: handle audio. video only for now.
+    openPlayer(args[0] /* torrentSummary */, args[1] /* index */)
+  }
+  if (action === 'openFile') {
+    openFile(args[0] /* torrentSummary */, args[1] /* index */)
+  }
+  if (action === 'openFolder') {
+    openFolder(args[0] /* torrentSummary */)
   }
   if (action === 'toggleTorrent') {
     toggleTorrent(args[0] /* torrentSummary */)
@@ -453,32 +461,33 @@ function generateTorrentPoster (torrent, torrentSummary) {
   })
 }
 
-function startServer (infoHash, cb) {
+function startServer (infoHash, index, cb) {
   if (state.server) return cb()
 
   var torrent = getTorrent(infoHash)
   if (!torrent) torrent = startTorrenting(infoHash)
-  if (torrent.ready) startServerFromReadyTorrent(torrent, cb)
-  else torrent.on('ready', () => startServerFromReadyTorrent(torrent, cb))
+  if (torrent.ready) startServerFromReadyTorrent(torrent, index, cb)
+  else torrent.on('ready', () => startServerFromReadyTorrent(torrent, index, cb))
 }
 
-function startServerFromReadyTorrent (torrent, cb) {
-  // filter out file formats that the <video> tag definitely can't play
-  var files = torrent.files.filter(function (file) {
-    var extname = path.extname(file.name)
-    return ['.mp4', '.m4v', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
-  })
+function startServerFromReadyTorrent (torrent, index, cb) {
+  // automatically choose which file in the torrent to play, if necessary
+  if (!index) {
+    // filter out file formats that the <video> tag definitely can't play
+    var files = torrent.files.filter(TorrentPlayer.isPlayable)
+    if (files.length === 0) return cb(new Error('cannot play any files in torrent'))
+    // use largest file
+    var largestFile = files.reduce(function (a, b) {
+      return a.length > b.length ? a : b
+    })
+    index = torrent.files.indexOf(largestFile)
+  }
 
-  if (files.length === 0) return cb(new Error('cannot play any files in torrent'))
+  // update state
+  state.playing.infoHash = torrent.infoHash
+  state.playing.fileIndex = index
 
-  // use largest file
-  state.torrentPlaying = files.reduce(function (a, b) {
-    return a.length > b.length ? a : b
-  })
-
-  var index = torrent.files.indexOf(state.torrentPlaying)
   var server = torrent.createServer()
-
   server.listen(0, function () {
     var port = server.address().port
     var urlSuffix = ':' + port + '/' + index
@@ -495,9 +504,12 @@ function stopServer () {
   if (!state.server) return
   state.server.server.destroy()
   state.server = null
+  state.playing.infoHash = null
+  state.playing.fileIndex = null
 }
 
-function openPlayer (torrentSummary) {
+// Opens the video player
+function openPlayer (torrentSummary, index) {
   var torrent = state.client.get(torrentSummary.infoHash)
   if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
   torrentSummary.playStatus = 'requested'
@@ -509,7 +521,7 @@ function openPlayer (torrentSummary) {
     update()
   }, 10000) /* give it a few seconds */
 
-  startServer(torrentSummary.infoHash, function (err) {
+  startServer(torrentSummary.infoHash, index, function (err) {
     if (err) return onError(err)
 
     // if we timed out (user clicked play a long time ago), don't autoplay
@@ -523,6 +535,22 @@ function openPlayer (torrentSummary) {
     state.window.title = torrentSummary.name
     update()
   })
+}
+
+function openFile (torrentSummary, index) {
+  var torrent = state.client.get(torrentSummary.infoHash)
+  if (!torrent) return
+
+  var filePath = path.join(torrent.path, torrent.files[index].path)
+  ipcRenderer.send('openItem', filePath)
+}
+
+function openFolder (torrentSummary) {
+  var torrent = state.client.get(torrentSummary.infoHash)
+  if (!torrent) return
+
+  var folderPath = path.join(torrent.path, torrent.name)
+  ipcRenderer.send('openItem', folderPath)
 }
 
 function closePlayer () {
