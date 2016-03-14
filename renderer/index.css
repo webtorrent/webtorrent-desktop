@@ -675,6 +675,11 @@ body.drag .torrent-placeholder span {
 .preferences-table .action {
   flex: 1;
 }
+
+.preferences-table input {
+  width: auto;
+  color: #fff;
+}
 /*
  * MEDIA QUERIES
  */

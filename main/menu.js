@@ -122,9 +122,9 @@ function showPreferencesWindow () {
   windows.createPreferencesWindow()
 }
 
-function showSelectDownloadDirectory() {
+function showSelectDownloadDirectory () {
   electron.dialog.showOpenDialog(windows.preferences, {
-    title: 'Select a directory to save in.',
+    title: 'Choose a folder for your downloads...',
     defaultPath: '/',
     properties: [ 'openDirectory' ]
   }, function (directoryname) {

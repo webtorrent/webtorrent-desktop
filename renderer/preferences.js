@@ -12,36 +12,34 @@ var loop = main({ times: 0 }, render, vdom)
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
 
-
 document.querySelector('body').appendChild(loop.target)
 
 function render (state) {
-  return getContent()
+  return hx`
+  <div class='app'>
+    ${getHeader()}
+    <div class='content'>${getContent()}</div>
+  </div>`
 
-  function getHeader() {
+  function getHeader () {
     return hx`<div class='header'>
       <div class='title'>Preferences</div>
     </div>`
   }
 
-  function getContent() {
-    return hx`<div class='content'>
+  function getContent () {
+    return hx`
       <div class='preferences-table'>
-        <div class='label'>Download folder: </div>
-        <div class='action'
-        onclick=${(e) => dispatch('showSelectDownloadDirectory', e)}>
-        ${'[downloadPath]'}</div>
+        <div class='label'>Download location: </div>
+        <div class='action'>
+        ${'[downloadPath]'}
+        <input type='button'
+        onclick=${(e) => dispatch('showSelectDownloadDirectory', e)}
+        value="Change">
+        </div>
       </div>
-    </div>`
+    `
   }
-
-  function onclick () {
-    loop.update({ times: state.times + 1 })
-  }
-}
-
-function getDefaultDownloadDirectory() {
-  return
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -49,14 +47,4 @@ function dispatch (action, ...args) {
   if (action === 'showSelectDownloadDirectory') {
     ipcRenderer.send('showSelectDownloadDirectory')
   }
-}
-
-function showSelectDownloadDirectory() {
-  electron.dialog.showOpenDialog(windows.preferences, {
-    title: 'Select a directory to save in.',
-    defaultPath: '/Users',
-    properties: [ 'openDirectory' ]
-  }, function (directoryname) {
-    windows.main.send('dispatch', 'setDefaultDownloadDirectory', directoryname)
-  })
 }

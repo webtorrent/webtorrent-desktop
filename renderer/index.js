@@ -262,6 +262,7 @@ function setupIpc () {
 
 function setDefaultDownloadDirectory (directory) {
   state.downloadPath = directory
+  update()
 }
 
 function detectDevices () {

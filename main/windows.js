@@ -63,8 +63,6 @@ function createMainWindow () {
   })
 }
 
-
-
 function createPreferencesWindow () {
   if (!windows.preferences) {
     var win = windows.preferences = new electron.BrowserWindow({
