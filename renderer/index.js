@@ -1,9 +1,7 @@
 console.time('init')
 
-var airplay = require('airplay-js')
 var cfg = require('application-config')('WebTorrent')
 var cfgDirectory = require('application-config-path')('WebTorrent')
-var chromecasts = require('chromecasts')()
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -22,6 +20,7 @@ var App = require('./views/app')
 var config = require('../config')
 var torrentPoster = require('./lib/torrent-poster')
 var TorrentPlayer = require('./lib/torrent-player')
+var Cast = require('./lib/cast')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -86,7 +85,7 @@ function init () {
 
   // OS integrations:
   // ...Chromecast and Airplay
-  detectDevices()
+  Cast.init(update)
 
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', onFiles)
@@ -188,10 +187,13 @@ function dispatch (action, ...args) {
     toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
-    openChromecast()
+    Cast.openChromecast()
   }
   if (action === 'openAirplay') {
-    openAirplay()
+    Cast.openAirplay()
+  }
+  if (action === 'stopCasting') {
+    Cast.stopCasting()
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
@@ -206,12 +208,11 @@ function dispatch (action, ...args) {
     // TODO
     // window.history.forward()
   }
-  if (action === 'pause') {
-    if (state.url !== 'player' || state.video.isPaused) {
-      ipcRenderer.send('paused-video')
-    }
-    state.video.isPaused = true
-    update()
+  if (action === 'playPause') {
+    playPause()
+  }
+  if (action === 'playbackJump') {
+    jumpToTime(args[0] /* seconds */)
   }
   if (action === 'videoPlaying') {
     ipcRenderer.send('blockPowerSave')
@@ -219,14 +220,6 @@ function dispatch (action, ...args) {
   if (action === 'videoPaused') {
     ipcRenderer.send('paused-video')
     ipcRenderer.send('unblockPowerSave')
-  }
-  if (action === 'playPause') {
-    state.video.isPaused = !state.video.isPaused
-    update()
-  }
-  if (action === 'playbackJump') {
-    state.video.jumpToTime = args[0] /* seconds */
-    update()
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0])
@@ -238,6 +231,23 @@ function dispatch (action, ...args) {
   }
   if (action === 'exitModal') {
     state.modal = null
+    update()
+  }
+}
+
+function playPause () {
+  if (Cast.isCasting()) {
+    Cast.playPause()
+  }
+  state.video.isPaused = !state.video.isPaused
+  update()
+}
+
+function jumpToTime (time) {
+  if (Cast.isCasting()) {
+    Cast.seek(time)
+  } else {
+    state.video.jumpToTime = time
     update()
   }
 }
@@ -263,16 +273,6 @@ function setupIpc () {
     state.devices[device] = player
     update()
   })
-}
-
-function detectDevices () {
-  chromecasts.on('update', function (player) {
-    state.devices.chromecast = player
-  })
-
-  airplay.createBrowser().on('deviceOn', function (player) {
-    state.devices.airplay = player
-  }).start()
 }
 
 // Load state.saved from the JSON state file
@@ -596,25 +596,6 @@ function deleteTorrent (torrentSummary) {
 function toggleSelectTorrent (infoHash) {
   // toggle selection
   state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
-  update()
-}
-
-function openChromecast () {
-  var torrentSummary = getTorrentSummary(state.playing.infoHash)
-  state.devices.chromecast.play(state.server.networkURL, {
-    title: config.APP_NAME + ' — ' + torrentSummary.name
-  })
-  state.devices.chromecast.on('error', function (err) {
-    err.message = 'Chromecast: ' + err.message
-    onError(err)
-  })
-  update()
-}
-
-function openAirplay () {
-  state.devices.airplay.play(state.server.networkURL, 0, function () {
-    // TODO: handle airplay errors
-  })
   update()
 }
 

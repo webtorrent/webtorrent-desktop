@@ -643,9 +643,10 @@ body.drag .torrent-placeholder span {
 
 .player-controls .play-pause {
   display: block;
-  width: 20px;
-  height: 20px;
-  margin: 5px auto;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  margin: 0 auto;
 }
 
 .player-controls .chromecast,
@@ -674,6 +675,11 @@ body.drag .torrent-placeholder span {
   margin-top: 8px !important;
 }
 
+.player-controls .chromecast.active,
+.player-controls .airplay.active {
+  color: #9af;
+}
+
 .player .playback-bar:hover .loading-bar {
   height: 5px;
 }
@@ -684,6 +690,33 @@ body.drag .torrent-placeholder span {
   border-radius: 7px;
   margin-top: 0;
   margin-left: 0;
+}
+
+/*
+ * CHROMECAST / AIRPLAY CONTROLS
+ */
+.cast-screen {
+  width: 400px;
+  margin: auto;
+  color: #eee;
+  line-height: normal;
+}
+
+.cast-screen h1 {
+  font-size: 3em;
+}
+
+.cast-screen .cast-status {
+  margin: 40px 0;
+  font-size: 2em;
+}
+
+.cast-screen .stop-casting {
+  cursor: pointer;
+}
+
+.cast-screen .stop-casting:hover {
+  color: #9af;
 }
 
 /*

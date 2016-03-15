@@ -4,7 +4,22 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
+// Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state, dispatch) {
+  // Show the video as large as will fit in the window, play immediately
+  // If the video is on Chromecast or Airplay, show a title screen instead
+  var showVideo = state.playing.location === 'local'
+  return hx`
+    <div
+      class='player'
+      onmousemove=${() => dispatch('videoMouseMoved')}>
+      ${showVideo ? renderVideo(state, dispatch) : renderCastScreen(state, dispatch)}
+      ${renderPlayerControls(state, dispatch)}
+    </div>
+  `
+}
+
+function renderVideo (state, dispatch) {
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
   var videoElement = document.querySelector('video')
@@ -23,25 +38,19 @@ function Player (state, dispatch) {
     state.video.duration = videoElement.duration
   }
 
-  // Show the video as large as will fit in the window, play immediately
   return hx`
     <div
-      class='player'
+      class='letterbox'
       onmousemove=${() => dispatch('videoMouseMoved')}>
-      <div
-        class='letterbox'
-        onmousemove=${() => dispatch('videoMouseMoved')}>
-        <video
-          src='${state.server.localURL}'
-          ondblclick=${() => dispatch('toggleFullScreen')}
-          onloadedmetadata=${onLoadedMetadata}
-          onended=${onEnded}
-          onplay=${() => dispatch('videoPlaying')}
-          onpause=${() => dispatch('videoPaused')}
-          autoplay>
-        </video>
-      </div>
-      ${renderPlayerControls(state, dispatch)}
+      <video
+        src='${state.server.localURL}'
+        ondblclick=${() => dispatch('toggleFullScreen')}
+        onloadedmetadata=${onLoadedMetadata}
+        onended=${onEnded}
+        onplay=${() => dispatch('videoPlaying')}
+        onpause=${() => dispatch('videoPaused')}
+        autoplay>
+      </video>
     </div>
   `
 
@@ -59,6 +68,39 @@ function Player (state, dispatch) {
   function onEnded (e) {
     state.video.isPaused = true
   }
+}
+
+function renderCastScreen (state, dispatch) {
+  var isChromecast = state.playing.location.startsWith('chromecast')
+  var isAirplay = state.playing.location.startsWith('airplay')
+  var isStarting = state.playing.location.endsWith('-pending')
+  if (!isChromecast && !isAirplay) throw new Error('Unimplemented cast type')
+
+  // Finally, show a static title screen and the cast status
+  var header = isChromecast ? 'Chromecast' : 'AirPlay'
+  var content
+  if (isStarting) {
+    content = hx`
+      <div class='cast-status'>Connecting...</div>
+    `
+  } else {
+    content = hx`
+      <div class='cast-status'>
+        <div class='button stop-casting'
+          onclick=${() => dispatch('stopCasting')}>
+          Stop Casting
+        </div>
+      </div>
+    `
+  }
+  return hx`
+    <div class='letterbox'>
+      <div class='cast-screen'>
+        <h1>${header}</h1>
+        ${content}
+      </div>
+    </div>
+  `
 }
 
 function renderPlayerControls (state, dispatch) {
@@ -79,27 +121,50 @@ function renderPlayerControls (state, dispatch) {
     hx`
       <i class='icon fullscreen'
         onclick=${() => dispatch('toggleFullScreen')}>
-        fullscreen
+        ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
       </i>
     `
   ]
+
   // If we've detected a Chromecast or AppleTV, the user can play video there
-  if (state.devices.chromecast) {
+  var isOnChromecast = state.playing.location.startsWith('chromecast')
+  var isOnAirplay = state.playing.location.startsWith('airplay')
+  var chromecastClass, chromecastHandler, airplayClass, airplayHandler
+  if (isOnChromecast) {
+    chromecastClass = 'active'
+    airplayClass = 'disabled'
+    chromecastHandler = () => dispatch('stopCasting')
+    airplayHandler = undefined
+  } else if (isOnAirplay) {
+    chromecastClass = 'disabled'
+    airplayClass = 'active'
+    chromecastHandler = undefined
+    airplayHandler = () => dispatch('stopCasting')
+  } else {
+    chromecastClass = ''
+    airplayClass = ''
+    chromecastHandler = () => dispatch('openChromecast')
+    airplayHandler = () => dispatch('openAirplay')
+  }
+  if (state.devices.chromecast || isOnChromecast) {
     elements.push(hx`
       <i.icon.chromecast
-        onclick=${() => dispatch('openChromecast')}>
+        class=${chromecastClass}
+        onclick=${chromecastHandler}>
         cast
       </i>
     `)
   }
-  if (state.devices.airplay) {
+  if (state.devices.airplay || isOnAirplay) {
     elements.push(hx`
       <i.icon.airplay
-        onclick=${() => dispatch('openAirplay')}>
+        class=${airplayClass}
+        onclick=${airplayHandler}>
         airplay
       </i>
     `)
   }
+
   // On OSX, the back button is in the title bar of the window; see app.js
   // On other platforms, we render one over the video on mouseover
   if (process.platform !== 'darwin') {
@@ -110,6 +175,8 @@ function renderPlayerControls (state, dispatch) {
       </i>
     `)
   }
+
+  // Finally, the big button in the center plays or pauses the video
   elements.push(hx`
     <i class='icon play-pause' onclick=${() => dispatch('playPause')}>
       ${state.video.isPaused ? 'play_arrow' : 'pause'}

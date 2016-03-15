@@ -11,33 +11,32 @@ module.exports = {
   client: null, /* the WebTorrent client */
   server: null, /* local WebTorrent-to-HTTP server */
   prev: {}, /* used for state diffing in updateElectron() */
-  selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
-  playing: {
-    infoHash: null, /* the info hash of the torrent we're playing */
-    fileIndex: null /* the zero-based index within the torrent */
-  },
-  // history: [], /* track how we got to the current view. enables Back button */
-  // historyIndex: 0,
   url: 'home',
-  devices: {
-    airplay: null, /* airplay client. finds and manages AppleTVs */
-    chromecast: null /* chromecast client. finds and manages Chromecasts */
-  },
-  dock: {
-    badge: 0,
-    progress: 0
-  },
   window: {
     bounds: null, /* x y width height */
     isFocused: true,
     isFullScreen: false,
     title: config.APP_NAME /* current window title */
   },
-  video: {
+  selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
+  playing: { /* the torrent and file we're currently streaming */
+    infoHash: null, /* the info hash of the torrent we're playing */
+    fileIndex: null, /* the zero-based index within the torrent */
+    location: 'local' /* 'local', 'chromecast', 'airplay' */
+  },
+  devices: { /* playback devices like Chromecast and AppleTV */
+    airplay: null, /* airplay client. finds and manages AppleTVs */
+    chromecast: null /* chromecast client. finds and manages Chromecasts */
+  },
+  video: { /* state of the video player screen */
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
     isPaused: false,
     mouseStationarySince: 0 /* Unix time in ms */
+  },
+  dock: {
+    badge: 0,
+    progress: 0
   },
 
   /*

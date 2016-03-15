@@ -16,10 +16,12 @@ function App (state, dispatch) {
   // Never hide the controls when:
   // * The mouse is over the controls or we're scrubbing (see CSS)
   // * The video is paused
+  // * The video is playing remotely on Chromecast or Airplay
   var hideControls = state.url === 'player' &&
     state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000 &&
-    !state.video.isPaused
+    !state.video.isPaused &&
+    state.video.location === 'local'
 
   var cls = [
     'view-' + state.url, /* e.g. view-home, view-player */
