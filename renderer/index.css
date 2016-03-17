@@ -402,11 +402,12 @@ input {
   position: absolute;
   top: 25px;
   right: 10px;
+  align-items: center;
   display: none;
 }
 
 .torrent:hover .buttons {
-  display: block;
+  display: flex;
 }
 
 .torrent .buttons > * {
@@ -473,8 +474,6 @@ input {
 }
 
 .torrent .buttons .delete {
-  position: relative;
-  top: 2px;
   opacity: 0.5;
 }
 
