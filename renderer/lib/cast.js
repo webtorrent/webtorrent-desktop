@@ -40,8 +40,8 @@ function init (callback) {
 
 function addChromecastEvents () {
   state.devices.chromecast.on('error', function (err) {
-    err.message = 'Chromecast: ' + err.message
-    onError(err)
+    state.devices.chromecast.errorMessage = err.message
+    update()
   })
   state.devices.chromecast.on('disconnect', function () {
     state.playing.location = 'local'
@@ -53,18 +53,15 @@ function addChromecastEvents () {
 function addAirplayEvents () {}
 
 // Update our state from the remote TV
-function pollCastStatus(state) {
+function pollCastStatus (state) {
   var device
   if (state.playing.location === 'chromecast') device = state.devices.chromecast
   else if (state.playing.location === 'airplay') device = state.devices.airplay
   else return
 
   device.status(function (err, status) {
-    if (err) {
-      return console.log('Error retrieving %s status: %o', state.playing.location, err)
-    }
-    console.log('GOT CAST STATUS: %o', status)
-    handleStatus (status)
+    if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
+    handleStatus(status)
   })
 }
 
@@ -79,7 +76,7 @@ function openChromecast () {
   }
 
   state.playing.location = 'chromecast-pending'
-  var torrentSummary = getTorrentSummary(state.playing.infoHash)
+  var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
   state.devices.chromecast.play(state.server.networkURL, {
     type: 'video/mp4',
     title: config.APP_NAME + ' — ' + torrentSummary.name
@@ -146,6 +143,6 @@ function getActiveDevice () {
   else throw new Error('getActiveDevice() called, but we\'re not casting')
 }
 
-function castCallback (err) {
-  console.log('CAST CALLBACK: %o', arguments)
+function castCallback () {
+  console.log('Cast callback: %o', arguments)
 }
