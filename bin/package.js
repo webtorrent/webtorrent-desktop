@@ -10,6 +10,20 @@ var electronPackager = require('electron-packager')
 var fs = require('fs')
 var path = require('path')
 var pkg = require('../package.json')
+var plist = require('plist')
+
+function build () {
+  var platform = process.argv[2]
+  if (platform === '--darwin') {
+    buildDarwin()
+  } else if (platform === '--win32') {
+    buildWin32()
+  } else if (platform === '--linux') {
+    buildLinux()
+  } else {
+    buildDarwin(() => buildWin32(() => buildLinux())) // Build all
+  }
+}
 
 var all = {
   // Build 64 bit binaries only.
@@ -110,77 +124,60 @@ var linux = {
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
-var platform = process.argv[2]
-
-if (platform === '--darwin') {
-  buildDarwin(postDarwinism)
-} else if (platform === '--win32') {
-  buildWin32()
-} else if (platform === '--linux') {
-  buildLinux()
-} else {
-  // Build all
-  buildDarwin(() => buildWin32(() => buildLinux()))
-}
+build()
 
 function buildDarwin (cb) {
-  electronPackager(Object.assign({}, all, darwin), done.bind(null, cb))
+  electronPackager(Object.assign({}, all, darwin), function (err, appPath) {
+    printDone(err, appPath)
+    if (err) return cb(err)
+
+    var contentsPath = path.join(
+      __dirname,
+      '..',
+      'dist',
+      `${config.APP_NAME}-darwin-x64`,
+      `${config.APP_NAME}.app`,
+      'Contents'
+    )
+    var resourcesPath = path.join(contentsPath, 'Resources')
+    var infoPlistPath = path.join(contentsPath, 'Info.plist')
+    var webTorrentFileIconPath = path.join(
+      __dirname,
+      '..',
+      'static',
+      'WebTorrentFile.icns'
+    )
+    var infoPlist = plist.parse(fs.readFileSync(infoPlistPath).toString())
+
+    infoPlist['CFBundleDocumentTypes'] = [{
+      CFBundleTypeExtensions: [ 'torrent' ],
+      CFBundleTypeName: 'BitTorrent Document',
+      CFBundleTypeRole: 'Editor',
+      CFBundleTypeIconFile: 'WebTorrentFile.icns'
+    }]
+
+    fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
+    cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
+
+    if (cb) cb(null)
+  })
 }
 
 function buildWin32 (cb) {
-  electronPackager(Object.assign({}, all, win32), done.bind(null, cb))
+  electronPackager(Object.assign({}, all, win32), function (err, appPath) {
+    printDone(err, appPath)
+    if (cb) cb(err)
+  })
 }
 
 function buildLinux (cb) {
-  electronPackager(Object.assign({}, all, linux), done.bind(null, cb))
+  electronPackager(Object.assign({}, all, linux), function (err, appPath) {
+    printDone(err, appPath)
+    if (cb) cb(err)
+  })
 }
 
-function postDarwinism () {
-  var plist = require('plist')
-  var contentsPath = path.join.apply(null, [
-    __dirname,
-    '..',
-    'dist',
-    `${config.APP_NAME}-darwin-x64`,
-    `${config.APP_NAME}.app`,
-    'Contents'
-  ])
-  var resourcesPath = path.join(contentsPath, 'Resources')
-  var infoPlistPath = path.join(contentsPath, 'Info.plist')
-  var webTorrentFileIconPath = path.join.apply(null, [
-    __dirname,
-    '..',
-    'static',
-    'WebTorrentFile.icns'
-  ])
-  var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
-
-  infoPlist.CFBundleDocumentTypes = [
-    {
-      CFBundleTypeExtensions: [ 'torrent' ],
-      CFBundleTypeIconFile: 'WebTorrentFile.icns',
-      CFBundleTypeName: 'BitTorrent Document',
-      CFBundleTypeRole: 'Editor',
-      LSHandlerRank: 'Owner',
-      LSItemContentTypes: [ 'org.bittorrent.torrent' ]
-    },
-    {
-      CFBundleTypeName: 'Any',
-      CFBundleTypeOSTypes: [ '****' ],
-      CFBundleTypeRole: 'Editor',
-      LSTypeIsPackage: false,
-      LSHandlerRank: 'Owner'
-    }
-  ]
-
-  infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
-
-  fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
-  cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
-}
-
-function done (cb, err, appPath) {
+function printDone (err, appPath) {
   if (err) console.error(err.message || err)
   else console.log('Built ' + appPath)
-  if (cb) cb()
 }
