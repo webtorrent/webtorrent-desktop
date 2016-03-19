@@ -154,14 +154,23 @@ function postDarwinism () {
   ])
   var infoPlist = plist.parse(fs.readFileSync(infoPlistPath).toString())
 
-  infoPlist['CFBundleDocumentTypes'] = [{
-    CFBundleTypeExtensions: [ 'torrent' ],
-    CFBundleTypeIconFile: 'WebTorrentFile.icns',
-    CFBundleTypeName: 'BitTorrent Document',
-    CFBundleTypeRole: 'Editor',
-    LSHandlerRank: 'Owner',
-    LSItemContentTypes: [ 'org.bittorrent.torrent' ]
-  }]
+  infoPlist.CFBundleDocumentTypes = [
+    {
+      CFBundleTypeExtensions: [ 'torrent' ],
+      CFBundleTypeIconFile: 'WebTorrentFile.icns',
+      CFBundleTypeName: 'BitTorrent Document',
+      CFBundleTypeRole: 'Editor',
+      LSHandlerRank: 'Owner',
+      LSItemContentTypes: [ 'org.bittorrent.torrent' ]
+    },
+    {
+      CFBundleTypeName: 'Any',
+      CFBundleTypeOSTypes: [ '****' ],
+      CFBundleTypeRole: 'Editor',
+      LSTypeIsPackage: false,
+      LSHandlerRank: 'Owner'
+    }
+  ]
 
   fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
   cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
