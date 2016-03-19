@@ -147,14 +147,27 @@ function buildDarwin (cb) {
       'static',
       'WebTorrentFile.icns'
     )
-    var infoPlist = plist.parse(fs.readFileSync(infoPlistPath).toString())
+    var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
-    infoPlist['CFBundleDocumentTypes'] = [{
-      CFBundleTypeExtensions: [ 'torrent' ],
-      CFBundleTypeName: 'BitTorrent Document',
-      CFBundleTypeRole: 'Editor',
-      CFBundleTypeIconFile: 'WebTorrentFile.icns'
-    }]
+    infoPlist.CFBundleDocumentTypes = [
+      {
+        CFBundleTypeExtensions: [ 'torrent' ],
+        CFBundleTypeIconFile: 'WebTorrentFile.icns',
+        CFBundleTypeName: 'BitTorrent Document',
+        CFBundleTypeRole: 'Editor',
+        LSHandlerRank: 'Owner',
+        LSItemContentTypes: [ 'org.bittorrent.torrent' ]
+      },
+      {
+        CFBundleTypeName: 'Any',
+        CFBundleTypeOSTypes: [ '****' ],
+        CFBundleTypeRole: 'Editor',
+        LSHandlerRank: 'Owner',
+        LSTypeIsPackage: false
+      }
+    ]
+
+    infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
     cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
