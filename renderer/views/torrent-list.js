@@ -33,7 +33,10 @@ function TorrentList (state, dispatch) {
       var gradient = isSelected
         ? 'linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%)'
         : 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%)'
-      style['background-image'] = gradient + `, url('${torrentSummary.posterURL}')`
+      // Work around a Chrome bug (reproduced in vanilla Chrome, not just Electron):
+      // Backslashes in URLS in CSS cause bizarre string encoding issues
+      var cleanURL = torrentSummary.posterURL.replace(/\\/g, '/')
+      style.backgroundImage = gradient + `, url('${cleanURL}')`
     }
 
     // Foreground: name of the torrent, basic info like size, play button,

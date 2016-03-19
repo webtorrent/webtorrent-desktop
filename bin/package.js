@@ -29,7 +29,8 @@ var all = {
 
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
-  'build-version': cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
+  // Windows requires the build version to start with a number :/ so we stick on a prefix
+  'build-version': '0-' + cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
@@ -82,8 +83,8 @@ var win32 = {
     // notices, legal symbols, copyright dates, and so on.
     LegalCopyright: fs.readFileSync(path.join(__dirname, '..', 'LICENSE'), 'utf8'),
 
-    // File description to be presented to users.
-    FileDescription: 'Streaming torrent client',
+    // Name of the program, displayed to users
+    FileDescription: config.APP_NAME,
 
     // Original name of the file, not including a path. This information enables an
     // application to determine whether a file has been renamed by a user. The format of
