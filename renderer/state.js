@@ -46,7 +46,7 @@ module.exports = {
    *
    * Config path:
    *
-   * OS XDG               ~/Library/Application Support/WebTorrent/config.json
+   * OS X                 ~/Library/Application Support/WebTorrent/config.json
    * Linux (XDG)          $XDG_CONFIG_HOME/WebTorrent/config.json
    * Linux (Legacy)       ~/.config/WebTorrent/config.json
    * Windows (> Vista)    %LOCALAPPDATA%/WebTorrent/config.json

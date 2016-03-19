@@ -1,9 +1,15 @@
+var applicationConfigPath = require('application-config-path')
 var path = require('path')
 
 module.exports = {
-  APP_NAME: 'WebTorrent',
   APP_ICON: path.join(__dirname, 'static', 'WebTorrent.png'),
+  APP_NAME: 'WebTorrent',
+
+  CONFIG_PATH: applicationConfigPath('WebTorrent'),
+  CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'Posters'),
+
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
+
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
   SOUND_DISABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),

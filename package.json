@@ -48,7 +48,7 @@
     "url": "git://github.com/feross/webtorrent-app.git"
   },
   "scripts": {
-    "cleanup": "node ./bin/cleanup.js",
+    "clean": "node ./bin/clean.js",
     "debug": "DEBUG=* electron .",
     "package": "npm prune && npm dedupe && node ./bin/package.js",
     "size": "npm run package -- --darwin && du -ch dist/WebTorrent-darwin-x64 | grep total",
