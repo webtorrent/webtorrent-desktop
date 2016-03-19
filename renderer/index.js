@@ -1,7 +1,6 @@
 console.time('init')
 
 var cfg = require('application-config')('WebTorrent')
-var cfgDirectory = require('application-config-path')('WebTorrent')
 var createTorrent = require('create-torrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -462,7 +461,7 @@ function generateTorrentPoster (torrent, torrentSummary) {
   torrentPoster(torrent, function (err, buf) {
     if (err) return onWarning(err)
     // save it for next time
-    var posterFilePath = path.join(cfgDirectory, torrent.infoHash + '.jpg')
+    var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
     fs.writeFile(posterFilePath, buf, function (err) {
       if (err) return onWarning(err)
       // show the poster
