@@ -172,6 +172,8 @@ function postDarwinism () {
     }
   ]
 
+  infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
+
   fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
   cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
 }
