@@ -1,3 +1,4 @@
+console.time('init')
 require('./main')
 
 // report crashes

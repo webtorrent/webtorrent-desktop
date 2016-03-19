@@ -3,19 +3,19 @@ var windows = module.exports = {
   createMainWindow: createMainWindow
 }
 
-var config = require('../config')
-var debug = require('debug')('webtorrent-app:windows')
 var electron = require('electron')
-var ipcMain = electron.ipcMain
-var menu = require('./menu')
 
 var app = electron.app
+var ipcMain = electron.ipcMain
+
+var config = require('../config')
+var menu = require('./menu')
 
 function createMainWindow () {
   var win = windows.main = new electron.BrowserWindow({
     autoHideMenuBar: true, // Hide top menu bar unless Alt key is pressed (Windows, Linux)
     backgroundColor: '#282828',
-    darkTheme: true, // Forces dark theme (GTK+3 only)
+    darkTheme: true, // Forces dark theme (GTK+3)
     icon: config.APP_ICON,
     minWidth: 375,
     minHeight: 38 + (120 * 2), // header height + 2 torrents
@@ -32,7 +32,6 @@ function createMainWindow () {
   })
 
   win.webContents.on('did-finish-load', function () {
-    debug('startup time: %sms', Date.now() - app.startTime)
     win.show()
   })
 

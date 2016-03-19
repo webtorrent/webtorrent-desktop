@@ -7,12 +7,14 @@ module.exports = {
   toggleFullScreen: toggleFullScreen
 }
 
-var config = require('../config')
 var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
-var windows = require('./windows')
 
 var app = electron.app
+
+var config = require('../config')
+var windows = require('./windows')
+
 var appMenu, dockMenu
 
 function init () {
@@ -51,7 +53,6 @@ function toggleDevTools () {
 function reloadWindow () {
   debug('reloadWindow')
   if (windows.main) {
-    app.startTime = Date.now()
     windows.main.webContents.reloadIgnoringCache()
   }
 }

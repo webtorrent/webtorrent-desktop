@@ -256,6 +256,8 @@ function jumpToTime (time) {
 }
 
 function setupIpc () {
+  ipcRenderer.send('ipcReady')
+
   ipcRenderer.on('dispatch', function (e, action, ...args) {
     dispatch(action, ...args)
   })

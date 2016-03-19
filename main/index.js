@@ -1,5 +1,3 @@
-var startTime = Date.now()
-
 var electron = require('electron')
 var ipc = require('./ipc')
 var menu = require('./menu')
@@ -8,17 +6,17 @@ var windows = require('./windows')
 
 var app = electron.app
 
+app.on('open-file', onOpen)
+app.on('open-url', onOpen)
+
+app.ipcReady = false // main window has finished loading and IPC is ready
 app.isQuitting = false
-app.startTime = startTime
 
 app.on('ready', function () {
   menu.init()
   windows.createMainWindow()
   shortcuts.init()
 })
-
-app.on('open-file', onOpen)
-app.on('open-url', onOpen)
 
 app.on('before-quit', function () {
   app.isQuitting = true
@@ -42,5 +40,13 @@ ipc.init()
 
 function onOpen (e, torrentId) {
   e.preventDefault()
-  windows.main.send('dispatch', 'openFiles', torrentId)
+  console.log(app.ipcReady)
+  if (app.ipcReady) {
+    openFiles()
+  } else {
+    app.on('ipcReady', openFiles)
+  }
+  function openFiles () {
+    windows.main.send('dispatch', 'openFiles', torrentId)
+  }
 }

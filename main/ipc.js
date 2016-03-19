@@ -4,6 +4,7 @@ module.exports = {
 
 var debug = require('debug')('webtorrent-app:ipcMain')
 var electron = require('electron')
+
 var app = electron.app
 var ipcMain = electron.ipcMain
 var powerSaveBlocker = electron.powerSaveBlocker
@@ -15,6 +16,12 @@ var windows = require('./windows')
 var powerSaveBlockID = 0
 
 function init () {
+  ipcMain.on('ipcReady', function (e) {
+    console.timeEnd('init')
+    app.ipcReady = true
+    app.emit('ipcReady')
+  })
+
   ipcMain.on('showOpenTorrentFile', function (e) {
     menu.showOpenTorrentFile()
   })
