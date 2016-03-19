@@ -246,6 +246,8 @@ function dispatch (action, ...args) {
 }
 
 function setupIpc () {
+  ipcRenderer.send('ipcReady')
+
   ipcRenderer.on('dispatch', function (e, action, ...args) {
     dispatch(action, ...args)
   })
