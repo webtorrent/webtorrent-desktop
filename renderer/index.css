@@ -200,6 +200,10 @@ i:not(.disabled):hover {
   cursor: none;
 }
 
+.app.hide-header .header {
+  display: none;
+}
+
 .header .title {
   opacity: 0.6;
   position: absolute;
@@ -717,6 +721,47 @@ body.drag .torrent-placeholder span {
 
 .cast-screen .stop-casting:hover {
   color: #9af;
+}
+
+/*
+ * ERRORS
+ */
+
+.error-popover {
+  position: fixed;
+  z-index: 1001;
+  top: 36px;
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.app.hide-header .error-popover {
+  top: 0px;
+}
+
+.error-popover.hidden {
+  display: none;
+}
+
+.error-popover .error,
+.error-popover .title {
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid #444;
+}
+
+.error-popover .title {
+  font-weight: bold;
+  color: #c44;
+}
+
+.error-popover .error {
+  color: #bbb;
+}
+
+.error-popover .error:last-child {
+  border-bottom: none;
 }
 
 /*

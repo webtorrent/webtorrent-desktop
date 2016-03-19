@@ -636,8 +636,11 @@ function restoreBounds () {
 
 function onError (err) {
   console.error(err.stack)
-  window.alert(err.message || err)
   playInterfaceSound(config.SOUND_ERROR)
+  state.errors.push({
+    time: new Date().getTime(),
+    message: err.message || err
+  })
   update()
 }
 

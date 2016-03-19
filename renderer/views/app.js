@@ -23,28 +23,41 @@ function App (state, dispatch) {
     !state.video.isPaused &&
     state.video.location === 'local'
 
+  // Hide the header on Windows/Linux when in the player
+  // On OSX, the header appears as part of the title bar
+  var hideHeader = process.platform !== 'darwin' && state.url === 'player'
+
   var cls = [
     'view-' + state.url, /* e.g. view-home, view-player */
     'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
   ]
-
   if (state.window.isFullScreen) cls.push('is-fullscreen')
   if (state.window.isFocused) cls.push('is-focused')
   if (hideControls) cls.push('hide-video-controls')
+  if (hideHeader) cls.push('hide-header')
+
   return hx`
     <div class='app ${cls.join(' ')}'>
-      ${getHeader()}
+      ${Header(state, dispatch)}
+      ${getErrorPopover()}
       <div class='content'>${getView()}</div>
       ${getModal()}
     </div>
   `
 
-  function getHeader () {
-    var isOSX = process.platform === 'darwin'
-    // Hide the header on Windows/Linux when in the player
-    if (isOSX || state.url !== 'player') {
-      return Header(state, dispatch)
-    }
+  function getErrorPopover () {
+    var now = new Date().getTime()
+    var recentErrors = state.errors.filter((x) => now - x.time < 5000)
+
+    var errorElems = recentErrors.map(function (error) {
+      return hx`<div class='error'>${error.message}</div>`
+    })
+    return hx`
+    <div class='error-popover ${recentErrors.length > 0 ? 'visible' : 'hidden'}'>
+        <div class='title'>Error</div>
+        ${errorElems}
+      </div>
+    `
   }
 
   function getModal () {

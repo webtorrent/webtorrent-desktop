@@ -38,6 +38,7 @@ module.exports = {
     badge: 0,
     progress: 0
   },
+  errors: [], /* user-facing errors */
 
   /*
    * Saved state is read from and written to a file every time the app runs.
