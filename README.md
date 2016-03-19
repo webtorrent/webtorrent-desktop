@@ -60,6 +60,9 @@ $ npm run package -- [platform]
 
 Where `[platform]` is `--darwin`, `--linux`, or `--win32`.
 
+To package a Windows app from non-Windows platforms, [Wine](https://www.winehq.org/) needs
+to be installed. On OS X, it is installable via [Homebrew](http://brew.sh/).
+
 ### Code Style
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
