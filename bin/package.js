@@ -152,7 +152,7 @@ function postDarwinism () {
     'static',
     'WebTorrentFile.icns'
   ])
-  var infoPlist = plist.parse(fs.readFileSync(infoPlistPath).toString())
+  var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
   infoPlist.CFBundleDocumentTypes = [
     {
