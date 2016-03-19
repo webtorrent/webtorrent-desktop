@@ -6,7 +6,7 @@ module.exports = {
   APP_NAME: 'WebTorrent',
 
   CONFIG_PATH: applicationConfigPath('WebTorrent'),
-  CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'posters'),
+  CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'Posters'),
 
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
