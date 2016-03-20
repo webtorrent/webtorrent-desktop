@@ -98,7 +98,7 @@ var win32 = {
     CompanyName: config.APP_NAME,
 
     // Copyright notices that apply to the file.
-    LegalCopyright: config.COPYRIGHT,
+    LegalCopyright: config.APP_COPYRIGHT,
 
     // Name of the program, displayed to users
     FileDescription: config.APP_NAME,
@@ -144,12 +144,6 @@ function buildDarwin (cb) {
     )
     var resourcesPath = path.join(contentsPath, 'Resources')
     var infoPlistPath = path.join(contentsPath, 'Info.plist')
-    var webTorrentFileIconPath = path.join(
-      __dirname,
-      '..',
-      'static',
-      'WebTorrentFile.icns'
-    )
     var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
     infoPlist.CFBundleDocumentTypes = [
@@ -179,7 +173,7 @@ function buildDarwin (cb) {
       }
     ]
 
-    infoPlist.NSHumanReadableCopyright = config.COPYRIGHT
+    infoPlist.NSHumanReadableCopyright = config.APP_COPYRIGHT
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)

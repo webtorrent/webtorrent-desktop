@@ -2,6 +2,7 @@ var applicationConfigPath = require('application-config-path')
 var path = require('path')
 
 module.exports = {
+  APP_COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
   APP_FILE_ICON: path.join(pathToStatic(), 'WebTorrentFile'),
   APP_ICON: path.join(pathToStatic(), 'WebTorrent'),
   APP_NAME: 'WebTorrent',
@@ -9,8 +10,6 @@ module.exports = {
   CONFIG_PATH: applicationConfigPath('WebTorrent'),
   CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(applicationConfigPath('WebTorrent'), 'Torrents'),
-
-  COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
 
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
