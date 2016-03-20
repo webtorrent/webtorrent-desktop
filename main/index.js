@@ -40,13 +40,13 @@ ipc.init()
 
 function onOpen (e, torrentId) {
   e.preventDefault()
-  console.log(app.ipcReady)
   if (app.ipcReady) {
-    openFiles()
+    onReadyOpen()
   } else {
-    app.on('ipcReady', openFiles)
+    app.on('ipcReady', onReadyOpen)
   }
-  function openFiles () {
-    windows.main.send('dispatch', 'openFiles', torrentId)
+  function onReadyOpen () {
+    windows.main.send('dispatch', 'onOpen', torrentId)
+    windows.main.focus()
   }
 }
