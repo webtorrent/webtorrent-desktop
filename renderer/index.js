@@ -87,7 +87,7 @@ function init () {
   Cast.init(update)
 
   // ...drag and drop a torrent or video file to play or seed
-  dragDrop('body', (files) => dispatch('openFiles', files))
+  dragDrop('body', (files) => dispatch('onOpen', files))
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
@@ -157,8 +157,8 @@ function dispatch (action, ...args) {
   if (['videoMouseMoved', 'playbackJump'].indexOf(action) < 0) {
     console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
   }
-  if (action === 'openFiles') {
-    openFiles(args[0] /* files */)
+  if (action === 'onOpen') {
+    onOpen(args[0] /* files */)
   }
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
@@ -324,16 +324,16 @@ function updateClientProgress () {
   state.dock.progress = progress
 }
 
-function openFiles (files) {
+function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
   // .torrent file = start downloading the torrent
-  files.filter(isTorrentFile).forEach(function (torrentFile) {
+  files.filter(isTorrent).forEach(function (torrentFile) {
     addTorrent(torrentFile)
   })
 
   // everything else = seed these files
-  seed(files.filter(isNotTorrentFile))
+  seed(files.filter(isNotTorrent))
 }
 
 function onPaste (e) {
@@ -347,14 +347,15 @@ function onPaste (e) {
   })
 }
 
-function isTorrentFile (file) {
+function isTorrent (file) {
   var name = typeof file === 'string' ? file : file.name
-  var extname = path.extname(name).toLowerCase()
-  return extname === '.torrent'
+  var isTorrentFile = path.extname(name).toLowerCase() === '.torrent'
+  var isMagnet = typeof file === 'string' && /^magnet:/.test(file)
+  return isTorrentFile || isMagnet
 }
 
-function isNotTorrentFile (file) {
-  return !isTorrentFile(file)
+function isNotTorrent (file) {
+  return !isTorrent(file)
 }
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents

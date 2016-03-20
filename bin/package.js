@@ -167,6 +167,15 @@ function buildDarwin (cb) {
       }
     ]
 
+    infoPlist.CFBundleURLTypes = [
+      {
+        CFBundleTypeRole: 'Editor',
+        CFBundleURLIconFile: 'WebTorrentFile.icns',
+        CFBundleURLName: 'BitTorrent Magnet URL',
+        CFBundleURLSchemes: [ 'magnet' ]
+      }
+    ]
+
     infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
