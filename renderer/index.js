@@ -32,12 +32,8 @@ var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
-  .map(function (arr) {
-    return arr[0]
-  })
-  .filter(function (url) {
-    return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
-  })
+  .map((arr) => arr[0])
+  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 var vdomLoop
 
