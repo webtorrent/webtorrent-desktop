@@ -69,7 +69,8 @@ function pollCastStatus (state) {
     state.devices.airplay.status(function (status) {
       state.video.isPaused = status.rate === 0
       state.video.currentTime = status.position
-      // TODO: get airplay volume, debug needed. According to docs is in [-30 - 0] (db) range
+      // TODO: get airplay volume, confirmation needed. meanwhile set value in setVolume 
+      // According to docs is in [-30 - 0] (db) range
       // should be converted to [0 - 1] using (val / 30 + 1)
       update()
     })
@@ -164,6 +165,8 @@ function setVolume (volume) {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.volume(volume, castCallback)
   } else if (state.playing.location === 'airplay') {
+    // TODO remove once we can fetch the information in status update
+    state.video.volume = volume
     volume = (volume - 1) * 30
     state.devices.airplay.volume(volume, castCallback)
   }
