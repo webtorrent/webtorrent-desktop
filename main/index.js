@@ -1,10 +1,15 @@
 var electron = require('electron')
+
+var app = electron.app
+
+var config = require('../config')
 var ipc = require('./ipc')
 var menu = require('./menu')
+var registerProtocolHandler = require('./register-protocol-handler')
 var shortcuts = require('./shortcuts')
 var windows = require('./windows')
 
-var app = electron.app
+var argv = process.argv.slice(config.IS_PRODUCTION ? 1 : 2)
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
@@ -16,6 +21,17 @@ app.on('ready', function () {
   menu.init()
   windows.createMainWindow()
   shortcuts.init()
+  registerProtocolHandler()
+})
+
+app.on('ipcReady', function () {
+  windows.main.send('log', 'IS_PRODUCTION:', config.IS_PRODUCTION)
+  if (argv.length) {
+    windows.main.send('log', 'command line args:', process.argv)
+  }
+  argv.forEach(function (torrentId) {
+    windows.main.send('dispatch', 'onOpen', torrentId)
+  })
 })
 
 app.on('before-quit', function () {
@@ -41,12 +57,8 @@ ipc.init()
 function onOpen (e, torrentId) {
   e.preventDefault()
   if (app.ipcReady) {
-    onReadyOpen()
-  } else {
-    app.on('ipcReady', onReadyOpen)
-  }
-  function onReadyOpen () {
     windows.main.send('dispatch', 'onOpen', torrentId)
-    windows.main.focus()
+  } else {
+    argv.push(torrentId)
   }
 }

@@ -10,6 +10,8 @@ module.exports = {
 
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
+  IS_PRODUCTION: isProduction(),
+
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
   SOUND_DISABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),
@@ -18,4 +20,16 @@ module.exports = {
   SOUND_ERROR: 'file://' + path.join(__dirname, 'static', 'sound', 'error.wav'),
   SOUND_PLAY: 'file://' + path.join(__dirname, 'static', 'sound', 'play.wav'),
   SOUND_STARTUP: 'file://' + path.join(__dirname, 'static', 'sound', 'startup.wav')
+}
+
+function isProduction () {
+  if (process.platform === 'darwin') {
+    return !/\/Electron\.app\/Contents\/MacOS\/Electron$/.test(process.execPath)
+  }
+  if (process.platform === 'win32') {
+    return !/\\electron\.exe$/.test(process.execPath)
+  }
+  if (process.platform === 'linux') {
+    // TODO
+  }
 }

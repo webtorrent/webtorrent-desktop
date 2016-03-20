@@ -257,9 +257,9 @@ function jumpToTime (time) {
 function setupIpc () {
   ipcRenderer.send('ipcReady')
 
-  ipcRenderer.on('dispatch', function (e, action, ...args) {
-    dispatch(action, ...args)
-  })
+  ipcRenderer.on('log', (e, ...args) => console.log(...args))
+
+  ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
 
   ipcRenderer.on('showOpenTorrentAddress', function (e) {
     state.modal = 'open-torrent-address-modal'
@@ -283,7 +283,7 @@ function setupIpc () {
 function loadState (callback) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
-    ipcRenderer.send('log', 'loaded state from ' + cfg.filePath)
+    console.log('loaded state from ' + cfg.filePath)
 
     // populate defaults if they're not there
     state.saved = Object.assign({}, state.defaultSavedState, data)
@@ -305,7 +305,7 @@ function resumeTorrents () {
 
 // Write state.saved to the JSON state file
 function saveState () {
-  ipcRenderer.send('log', 'saving state to ' + cfg.filePath)
+  console.log('saving state to ' + cfg.filePath)
   cfg.write(state.saved, function (err) {
     if (err) console.error(err)
     update()
