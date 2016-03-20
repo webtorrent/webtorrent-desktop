@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=$APP_NAME
+Version=1.0
+GenericName=BitTorrent Client
+X-GNOME-FullName=$APP_NAME
+Comment=Download and share files over BitTorrent
+Encoding=UTF-8
+Type=Application
+Icon=webtorrent
+Terminal=false
+Path=$APP_PATH
+Exec=$EXEC_PATH %U
+TryExec=$EXEC_PATH
+StartupNotify=false
+Categories=Network;FileTransfer;P2P;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;

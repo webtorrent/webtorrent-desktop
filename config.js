@@ -15,6 +15,8 @@ module.exports = {
 
   IS_PRODUCTION: isProduction(),
 
+  STATIC_PATH: pathToStatic(),
+
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
   SOUND_DISABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),
@@ -36,7 +38,7 @@ function isProduction () {
     return !/\\electron\.exe$/.test(process.execPath)
   }
   if (process.platform === 'linux') {
-    // TODO
+    return !/\/electron$/.test(process.execPath)
   }
 }
 

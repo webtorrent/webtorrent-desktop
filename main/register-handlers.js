@@ -2,9 +2,28 @@ var config = require('../config')
 
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandler('magnet', 'URL:BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
-    registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
+    registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
+    registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
   }
+  if (process.platform === 'linux') {
+    installDesktopFile()
+  }
+}
+
+function installDesktopFile () {
+  var fs = require('fs')
+  var path = require('path')
+  var os = require('os')
+
+  var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
+  var desktopFile = fs.readFileSync(templatePath, 'utf8')
+
+  desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
+  desktopFile = desktopFile.replace(/\$APP_PATH/g, path.dirname(process.execPath))
+  desktopFile = desktopFile.replace(/\$EXEC_PATH/g, process.execPath)
+
+  var desktopFilePath = path.join(os.homedir(), '.local', 'share', 'applications', 'webtorrent.desktop')
+  fs.writeFileSync(desktopFilePath, desktopFile)
 }
 
 /**
@@ -29,7 +48,7 @@ module.exports = function () {
  * "HKEY_CLASSES_ROOT" anyway, and can be written by unprivileged users.
  */
 
-function registerProtocolHandler (protocol, name, icon, command) {
+function registerProtocolHandlerWin32 (protocol, name, icon, command) {
   var Registry = require('winreg')
 
   var protocolKey = new Registry({
@@ -56,7 +75,7 @@ function registerProtocolHandler (protocol, name, icon, command) {
   }
 }
 
-function registerFileHandler (ext, id, name, icon, command) {
+function registerFileHandlerWin32 (ext, id, name, icon, command) {
   var Registry = require('winreg')
 
   var extKey = new Registry({
