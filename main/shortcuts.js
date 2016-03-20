@@ -18,4 +18,8 @@ function init () {
   // Electron does not support multiple accelerators for a single menu item, so this
   // is registered separately here.
   localShortcut.register('CmdOrCtrl+Shift+F', menu.toggleFullScreen)
+
+  // Control Volume
+  globalShortcut.register('CmdOrCtrl+Up', () => windows.main.send('dispatch', 'changeVolume', true))
+  globalShortcut.register('CmdOrCtrl+Down', () => windows.main.send('dispatch', 'changeVolume', false))
 }

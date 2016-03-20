@@ -220,6 +220,9 @@ function dispatch (action, ...args) {
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
   }
+  if (action === 'changeVolume') {
+    changeVolume(args[0] /* increase */)
+  }
   if (action === 'videoPlaying') {
     ipcRenderer.send('blockPowerSave')
   }
@@ -254,6 +257,17 @@ function jumpToTime (time) {
     Cast.seek(time)
   } else {
     state.video.jumpToTime = time
+    update()
+  }
+}
+
+function changeVolume (increase) {
+  // increase/decrease volume, check if its in [0.0 - 1.0] range
+  var setVolume = Math.max(0, Math.min(1, state.video.volume + (increase ? 0.1 : -0.1)))
+  if (Cast.isCasting()) {
+    Cast.setVolume(setVolume)
+  } else {
+    state.video.setVolume = setVolume
     update()
   }
 }

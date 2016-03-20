@@ -34,8 +34,15 @@ function renderVideo (state, dispatch) {
       videoElement.currentTime = state.video.jumpToTime
       state.video.jumpToTime = null
     }
+    // set volume
+    if (state.video.setVolume !== null && isFinite(state.video.setVolume)) {
+      videoElement.volume = state.video.setVolume
+      state.video.setVolume = null
+    }
+
     state.video.currentTime = videoElement.currentTime
     state.video.duration = videoElement.duration
+    state.video.volume = videoElement.volume
   }
 
   return hx`
