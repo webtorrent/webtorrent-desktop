@@ -462,8 +462,7 @@ function generateTorrentPoster (torrent, torrentSummary) {
   torrentPoster(torrent, function (err, buf) {
     if (err) return onWarning(err)
     // save it for next time
-    fs.mkdir(config.CONFIG_POSTER_PATH, function (err) {
-      if (err) return onWarning(err)
+    fs.mkdir(config.CONFIG_POSTER_PATH, function (_) {
       var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
