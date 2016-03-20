@@ -2,7 +2,7 @@ var config = require('../config')
 
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandler('magnet', 'BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
+    registerProtocolHandler('magnet', 'URL:BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
     registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
   }
 }
@@ -12,13 +12,15 @@ module.exports = function () {
  * registry:
  *
  * HKEY_CLASSES_ROOT
- *    $PROTOCOL
- *       (Default) = "URL:$NAME"
- *       URL Protocol = ""
- *       shell
- *          open
- *             command
- *                (Default) = "$COMMAND" "%1"
+ *   $PROTOCOL
+ *     (Default) = "$NAME"
+ *     URL Protocol = ""
+ *     DefaultIcon
+ *       (Default) = "$ICON"
+ *     shell
+ *       open
+ *         command
+ *           (Default) = "$COMMAND" "%1"
  *
  * Source: https://msdn.microsoft.com/en-us/library/aa767914.aspx
  *
@@ -34,7 +36,7 @@ function registerProtocolHandler (protocol, name, icon, command) {
     hive: Registry.HKCU, // HKEY_CURRENT_USER
     key: '\\Software\\Classes\\' + protocol
   })
-  protocolKey.set('', Registry.REG_SZ, 'URL:' + name, callback)
+  protocolKey.set('', Registry.REG_SZ, name, callback)
   protocolKey.set('URL Protocol', Registry.REG_SZ, '', callback)
 
   var iconKey = new Registry({
