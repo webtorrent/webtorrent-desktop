@@ -8,6 +8,8 @@ var shortcuts = require('./shortcuts')
 var windows = require('./windows')
 var registerProtocolHandler = require('./register-protocol-handler')
 
+var argv = process.argv.slice(2)
+
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
 
@@ -19,6 +21,12 @@ app.on('ready', function () {
   windows.createMainWindow()
   shortcuts.init()
   registerProtocolHandler()
+})
+
+app.on('ipcReady', function () {
+  argv.forEach(function (torrentId) {
+    windows.main.send('dispatch', 'onOpen', torrentId)
+  })
 })
 
 app.on('before-quit', function () {
@@ -44,12 +52,8 @@ ipc.init()
 function onOpen (e, torrentId) {
   e.preventDefault()
   if (app.ipcReady) {
-    onReadyOpen()
-  } else {
-    app.on('ipcReady', onReadyOpen)
-  }
-  function onReadyOpen () {
     windows.main.send('dispatch', 'onOpen', torrentId)
-    windows.main.focus()
+  } else {
+    argv.push(torrentId)
   }
 }
