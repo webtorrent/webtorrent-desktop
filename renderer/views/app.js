@@ -21,7 +21,7 @@ function App (state, dispatch) {
     state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000 &&
     !state.video.isPaused &&
-    state.video.location === 'local'
+    state.playing.location === 'local'
 
   // Hide the header on Windows/Linux when in the player
   // On OSX, the header appears as part of the title bar

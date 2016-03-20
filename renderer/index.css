@@ -633,13 +633,13 @@ body.drag .torrent-placeholder span {
 
 .player-controls .playback-cursor {
   position: absolute;
-  top: -8px;
+  top: -3px;
   background-color: #FFF;
-  width: 0;
-  height: 0;
-  border-radius: 0;
-  margin-top: 7px;
-  margin-left: 7px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  margin-top: 0;
+  margin-left: 0;
   transition-property: width, height, border-radius, margin-top, margin-left;
   transition-duration: 0.1s;
   transition-timing-function: ease-out;
@@ -673,6 +673,10 @@ body.drag .torrent-placeholder span {
   float: right;
 }
 
+.player-controls .fullscreen {
+  margin-right: 15px;
+}
+
 .player-controls .chromecast,
 .player-controls .airplay {
   font-size: 18px; /* make the cast icons less huge */
@@ -689,11 +693,9 @@ body.drag .torrent-placeholder span {
 }
 
 .player .playback-bar:hover .playback-cursor {
+  top: -8px;
   width: 14px;
   height: 14px;
-  border-radius: 7px;
-  margin-top: 0;
-  margin-left: 0;
 }
 
 /*
