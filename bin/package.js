@@ -41,6 +41,10 @@ var all = {
   // require().
   asar: true,
 
+  // A glob expression, that unpacks the files with matching names to the
+  // "app.asar.unpacked" directory.
+  'asar-unpack': 'WebTorrent*',
+
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
   // Windows requires the build version to start with a number :/ so we stick on a prefix
@@ -81,7 +85,7 @@ var darwin = {
   'helper-bundle-id': 'io.webtorrent.app.helper',
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'static', 'WebTorrent.icns')
+  icon: config.APP_ICON + '.icns'
 }
 
 var win32 = {
@@ -93,9 +97,8 @@ var win32 = {
     // Company that produced the file.
     CompanyName: config.APP_NAME,
 
-    // Copyright notices that apply to the file. This should include the full text of all
-    // notices, legal symbols, copyright dates, and so on.
-    LegalCopyright: fs.readFileSync(path.join(__dirname, '..', 'LICENSE'), 'utf8'),
+    // Copyright notices that apply to the file.
+    LegalCopyright: config.APP_COPYRIGHT,
 
     // Name of the program, displayed to users
     FileDescription: config.APP_NAME,
@@ -115,7 +118,7 @@ var win32 = {
   },
 
   // Application icon.
-  icon: path.join(__dirname, '..', 'static', 'WebTorrent.ico')
+  icon: config.APP_ICON + '.ico'
 }
 
 var linux = {
@@ -141,18 +144,12 @@ function buildDarwin (cb) {
     )
     var resourcesPath = path.join(contentsPath, 'Resources')
     var infoPlistPath = path.join(contentsPath, 'Info.plist')
-    var webTorrentFileIconPath = path.join(
-      __dirname,
-      '..',
-      'static',
-      'WebTorrentFile.icns'
-    )
     var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
     infoPlist.CFBundleDocumentTypes = [
       {
         CFBundleTypeExtensions: [ 'torrent' ],
-        CFBundleTypeIconFile: 'WebTorrentFile.icns',
+        CFBundleTypeIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleTypeName: 'BitTorrent Document',
         CFBundleTypeRole: 'Editor',
         LSHandlerRank: 'Owner',
@@ -170,16 +167,16 @@ function buildDarwin (cb) {
     infoPlist.CFBundleURLTypes = [
       {
         CFBundleTypeRole: 'Editor',
-        CFBundleURLIconFile: 'WebTorrentFile.icns',
+        CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
         CFBundleURLSchemes: [ 'magnet' ]
       }
     ]
 
-    infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
+    infoPlist.NSHumanReadableCopyright = config.APP_COPYRIGHT
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
-    cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)
+    cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
     if (cb) cb(null)
   })

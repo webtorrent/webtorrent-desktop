@@ -2,7 +2,9 @@ var applicationConfigPath = require('application-config-path')
 var path = require('path')
 
 module.exports = {
-  APP_ICON: path.join(__dirname, 'static', 'WebTorrent.png'),
+  APP_COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
+  APP_FILE_ICON: path.join(pathToStatic(), 'WebTorrentFile'),
+  APP_ICON: path.join(pathToStatic(), 'WebTorrent'),
   APP_NAME: 'WebTorrent',
 
   CONFIG_PATH: applicationConfigPath('WebTorrent'),
@@ -24,6 +26,9 @@ module.exports = {
 }
 
 function isProduction () {
+  if (!process.versions.electron) {
+    return false
+  }
   if (process.platform === 'darwin') {
     return !/\/Electron\.app\/Contents\/MacOS\/Electron$/.test(process.execPath)
   }
@@ -33,4 +38,10 @@ function isProduction () {
   if (process.platform === 'linux') {
     // TODO
   }
+}
+
+function pathToStatic () {
+  return isProduction()
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'static')
+    : path.join(__dirname, 'static')
 }
