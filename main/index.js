@@ -24,6 +24,9 @@ app.on('ready', function () {
 })
 
 app.on('ipcReady', function () {
+  if (argv.length) {
+    windows.main.send('log', 'command line args:', argv)
+  }
   argv.forEach(function (torrentId) {
     windows.main.send('dispatch', 'onOpen', torrentId)
   })
