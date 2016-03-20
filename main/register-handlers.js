@@ -7,6 +7,7 @@ module.exports = function () {
   }
   if (process.platform === 'linux') {
     installDesktopFile()
+    installDesktopIcon()
   }
 }
 
@@ -25,6 +26,19 @@ function installDesktopFile () {
 
   var desktopFilePath = path.join(os.homedir(), '.local', 'share', 'applications', 'webtorrent.desktop')
   fs.writeFileSync(desktopFilePath, desktopFile)
+}
+
+function installDesktopIcon () {
+  var config = require('../config')
+  var fs = require('fs')
+  var path = require('path')
+  var os = require('os')
+
+  var iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
+  var iconFile = fs.readFileSync(iconStaticPath)
+
+  var iconFilePath = path.join(os.homedir(), '.local', 'share', 'icons', 'webtorrent.png')
+  fs.writeFileSync(iconFilePath, iconFile)
 }
 
 /**
