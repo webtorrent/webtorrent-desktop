@@ -93,9 +93,8 @@ var win32 = {
     // Company that produced the file.
     CompanyName: config.APP_NAME,
 
-    // Copyright notices that apply to the file. This should include the full text of all
-    // notices, legal symbols, copyright dates, and so on.
-    LegalCopyright: fs.readFileSync(path.join(__dirname, '..', 'LICENSE'), 'utf8'),
+    // Copyright notices that apply to the file.
+    LegalCopyright: config.COPYRIGHT,
 
     // Name of the program, displayed to users
     FileDescription: config.APP_NAME,
@@ -176,7 +175,7 @@ function buildDarwin (cb) {
       }
     ]
 
-    infoPlist.NSHumanReadableCopyright = 'Copyright © 2014-2016 The WebTorrent Project'
+    infoPlist.NSHumanReadableCopyright = config.COPYRIGHT
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
     cp.execSync(`cp ${webTorrentFileIconPath} ${resourcesPath}`)

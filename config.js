@@ -9,6 +9,8 @@ module.exports = {
   CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(applicationConfigPath('WebTorrent'), 'Torrents'),
 
+  COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
+
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
   IS_PRODUCTION: isProduction(),
