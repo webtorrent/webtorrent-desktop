@@ -564,7 +564,14 @@ function openFolder (torrentSummary) {
   if (!torrent) return
 
   var folderPath = path.join(torrent.path, torrent.name)
-  ipcRenderer.send('openItem', folderPath)
+  // Multi-file torrents create their own folder, single file torrents just
+  // drop the file directly into the Downloads folder
+  fs.stat(folderPath, function (err, stats) {
+    if (err || !stats.isDirectory()) {
+      folderPath = torrent.path
+    }
+    ipcRenderer.send('openItem', folderPath)
+  })
 }
 
 function closePlayer () {

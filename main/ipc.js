@@ -50,6 +50,11 @@ function init () {
     windows.main.setTitle(title)
   })
 
+  ipcMain.on('openItem', function (e, path) {
+    console.log('opening file or folder: ' + path)
+    electron.shell.openItem(path)
+  })
+
   ipcMain.on('blockPowerSave', blockPowerSave)
   ipcMain.on('unblockPowerSave', unblockPowerSave)
 
