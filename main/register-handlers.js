@@ -1,9 +1,9 @@
-var config = require('../config')
-
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
-    registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
+    var path = require('path')
+    var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
+    registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, process.execPath)
+    registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, process.execPath)
   }
   if (process.platform === 'linux') {
     installDesktopFile()
@@ -11,6 +11,7 @@ module.exports = function () {
 }
 
 function installDesktopFile () {
+  var config = require('../config')
   var fs = require('fs')
   var path = require('path')
   var os = require('os')
