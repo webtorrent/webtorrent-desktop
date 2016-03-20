@@ -1,7 +1,9 @@
+var config = require('../config')
+
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandler('magnet', 'BitTorrent Magnet URL', process.execPath)
-    registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', process.execPath)
+    registerProtocolHandler('magnet', 'BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
+    registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
   }
 }
 
@@ -25,7 +27,7 @@ module.exports = function () {
  * "HKEY_CLASSES_ROOT" anyway, and can be written by unprivileged users.
  */
 
-function registerProtocolHandler (protocol, name, command) {
+function registerProtocolHandler (protocol, name, icon, command) {
   var Registry = require('winreg')
 
   var protocolKey = new Registry({
@@ -34,6 +36,12 @@ function registerProtocolHandler (protocol, name, command) {
   })
   protocolKey.set('', Registry.REG_SZ, 'URL:' + name, callback)
   protocolKey.set('URL Protocol', Registry.REG_SZ, '', callback)
+
+  var iconKey = new Registry({
+    hive: Registry.HKCU,
+    key: '\\Software\\Classes\\' + protocol + '\\DefaultIcon'
+  })
+  iconKey.set('', Registry.REG_SZ, icon, callback)
 
   var commandKey = new Registry({
     hive: Registry.HKCU,
@@ -46,7 +54,7 @@ function registerProtocolHandler (protocol, name, command) {
   }
 }
 
-function registerFileHandler (ext, id, name, command) {
+function registerFileHandler (ext, id, name, icon, command) {
   var Registry = require('winreg')
 
   var extKey = new Registry({
@@ -60,6 +68,12 @@ function registerFileHandler (ext, id, name, command) {
     key: '\\Software\\Classes\\' + id
   })
   idKey.set('', Registry.REG_SZ, name, callback)
+
+  var iconKey = new Registry({
+    hive: Registry.HKCU,
+    key: '\\Software\\Classes\\' + id + '\\DefaultIcon'
+  })
+  iconKey.set('', Registry.REG_SZ, icon, callback)
 
   var commandKey = new Registry({
     hive: Registry.HKCU,
