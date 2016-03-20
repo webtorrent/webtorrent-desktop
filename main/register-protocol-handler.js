@@ -1,6 +1,7 @@
 module.exports = function () {
   if (process.platform === 'win32') {
     registerProtocolHandler('magnet', 'BitTorrent Magnet URL', process.execPath)
+    registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', process.execPath)
   }
 }
 
@@ -37,6 +38,32 @@ function registerProtocolHandler (protocol, name, command) {
   var commandKey = new Registry({
     hive: Registry.HKCU,
     key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+  })
+  commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', callback)
+
+  function callback (err) {
+    if (err) console.error(err.message || err)
+  }
+}
+
+function registerFileHandler (ext, id, name, command) {
+  var Registry = require('winreg')
+
+  var extKey = new Registry({
+    hive: Registry.HKCU, // HKEY_CURRENT_USER
+    key: '\\Software\\Classes\\' + ext
+  })
+  extKey.set('', Registry.REG_SZ, id, callback)
+
+  var idKey = new Registry({
+    hive: Registry.HKCU,
+    key: '\\Software\\Classes\\' + id
+  })
+  idKey.set('', Registry.REG_SZ, name, callback)
+
+  var commandKey = new Registry({
+    hive: Registry.HKCU,
+    key: '\\Software\\Classes\\' + id + '\\shell\\open\\command'
   })
   commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', callback)
 
