@@ -9,7 +9,32 @@ var registerProtocolHandler = require('./register-handlers')
 var shortcuts = require('./shortcuts')
 var windows = require('./windows')
 
-var argv = process.argv.slice(config.IS_PRODUCTION ? 1 : 2)
+// Prevent multiple instances of the app from running at the same time. New instances
+// signal this instance and exit.
+var shouldQuit = app.makeSingleInstance(function (newArgv) {
+  newArgv = sliceArgv(newArgv)
+
+  if (app.ipcReady) {
+    windows.main.send('log', 'Second app instance attempted to open but was prevented')
+
+    newArgv.forEach(function (torrentId) {
+      windows.main.send('dispatch', 'onOpen', torrentId)
+    })
+
+    if (windows.main.isMinimized()) {
+      windows.main.restore()
+    }
+    windows.main.focus()
+  } else {
+    argv.push(...newArgv)
+  }
+})
+
+if (shouldQuit) {
+  app.quit()
+}
+
+var argv = sliceArgv(process.argv)
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
@@ -61,4 +86,8 @@ function onOpen (e, torrentId) {
   } else {
     argv.push(torrentId)
   }
+}
+
+function sliceArgv (argv) {
+  return argv.slice(config.IS_PRODUCTION ? 1 : 2)
 }
