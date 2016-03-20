@@ -5,7 +5,7 @@ var app = electron.app
 var config = require('../config')
 var ipc = require('./ipc')
 var menu = require('./menu')
-var registerProtocolHandler = require('./register-protocol-handler')
+var registerProtocolHandler = require('./register-handlers')
 var shortcuts = require('./shortcuts')
 var windows = require('./windows')
 

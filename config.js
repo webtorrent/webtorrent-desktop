@@ -3,8 +3,8 @@ var path = require('path')
 
 module.exports = {
   APP_COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
-  APP_FILE_ICON: path.join(pathToStatic(), 'WebTorrentFile'),
-  APP_ICON: path.join(pathToStatic(), 'WebTorrent'),
+  APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
+  APP_ICON: path.join(__dirname, 'static', 'WebTorrent'),
   APP_NAME: 'WebTorrent',
 
   CONFIG_PATH: applicationConfigPath('WebTorrent'),
@@ -14,6 +14,8 @@ module.exports = {
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
   IS_PRODUCTION: isProduction(),
+
+  STATIC_PATH: path.join(__dirname, 'static'),
 
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
   SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
@@ -36,12 +38,6 @@ function isProduction () {
     return !/\\electron\.exe$/.test(process.execPath)
   }
   if (process.platform === 'linux') {
-    // TODO
+    return !/\/electron$/.test(process.execPath)
   }
-}
-
-function pathToStatic () {
-  return isProduction()
-    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'static')
-    : path.join(__dirname, 'static')
 }

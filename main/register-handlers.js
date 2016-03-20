@@ -1,10 +1,30 @@
-var config = require('../config')
-
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandler('magnet', 'BitTorrent Magnet URL', config.APP_FILE_ICON + '.ico', process.execPath)
-    registerFileHandler('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', config.APP_FILE_ICON + '.ico', process.execPath)
+    var path = require('path')
+    var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
+    registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, process.execPath)
+    registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, process.execPath)
   }
+  if (process.platform === 'linux') {
+    installDesktopFile()
+  }
+}
+
+function installDesktopFile () {
+  var config = require('../config')
+  var fs = require('fs')
+  var path = require('path')
+  var os = require('os')
+
+  var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
+  var desktopFile = fs.readFileSync(templatePath, 'utf8')
+
+  desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
+  desktopFile = desktopFile.replace(/\$APP_PATH/g, path.dirname(process.execPath))
+  desktopFile = desktopFile.replace(/\$EXEC_PATH/g, process.execPath)
+
+  var desktopFilePath = path.join(os.homedir(), '.local', 'share', 'applications', 'webtorrent.desktop')
+  fs.writeFileSync(desktopFilePath, desktopFile)
 }
 
 /**
@@ -12,13 +32,15 @@ module.exports = function () {
  * registry:
  *
  * HKEY_CLASSES_ROOT
- *    $PROTOCOL
- *       (Default) = "URL:$NAME"
- *       URL Protocol = ""
- *       shell
- *          open
- *             command
- *                (Default) = "$COMMAND" "%1"
+ *   $PROTOCOL
+ *     (Default) = "$NAME"
+ *     URL Protocol = ""
+ *     DefaultIcon
+ *       (Default) = "$ICON"
+ *     shell
+ *       open
+ *         command
+ *           (Default) = "$COMMAND" "%1"
  *
  * Source: https://msdn.microsoft.com/en-us/library/aa767914.aspx
  *
@@ -27,14 +49,14 @@ module.exports = function () {
  * "HKEY_CLASSES_ROOT" anyway, and can be written by unprivileged users.
  */
 
-function registerProtocolHandler (protocol, name, icon, command) {
+function registerProtocolHandlerWin32 (protocol, name, icon, command) {
   var Registry = require('winreg')
 
   var protocolKey = new Registry({
     hive: Registry.HKCU, // HKEY_CURRENT_USER
     key: '\\Software\\Classes\\' + protocol
   })
-  protocolKey.set('', Registry.REG_SZ, 'URL:' + name, callback)
+  protocolKey.set('', Registry.REG_SZ, name, callback)
   protocolKey.set('URL Protocol', Registry.REG_SZ, '', callback)
 
   var iconKey = new Registry({
@@ -54,7 +76,7 @@ function registerProtocolHandler (protocol, name, icon, command) {
   }
 }
 
-function registerFileHandler (ext, id, name, icon, command) {
+function registerFileHandlerWin32 (ext, id, name, icon, command) {
   var Registry = require('winreg')
 
   var extKey = new Registry({
