@@ -1,6 +1,10 @@
+var electron = require('electron')
+
+var app = electron.app
+
 module.exports = function () {
   if (process.platform === 'win32') {
-    registerProtocolHandler('magnet', 'URL:BitTorrent Magnet URL', 'WebTorrent.exe')
+    registerProtocolHandler('magnet', 'URL:BitTorrent Magnet URL', app.getPath('exe'))
   }
 }
 
