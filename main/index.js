@@ -1,10 +1,12 @@
 var electron = require('electron')
+
+var app = electron.app
+
 var ipc = require('./ipc')
 var menu = require('./menu')
 var shortcuts = require('./shortcuts')
 var windows = require('./windows')
-
-var app = electron.app
+var registerProtocolHandler = require('./register-protocol-handler')
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
@@ -16,6 +18,7 @@ app.on('ready', function () {
   menu.init()
   windows.createMainWindow()
   shortcuts.init()
+  registerProtocolHandler()
 })
 
 app.on('before-quit', function () {
