@@ -57,10 +57,6 @@ function init () {
 
   ipcMain.on('blockPowerSave', blockPowerSave)
   ipcMain.on('unblockPowerSave', unblockPowerSave)
-
-  ipcMain.on('log', function (e, message) {
-    console.log(message)
-  })
 }
 
 function setBounds (bounds) {
