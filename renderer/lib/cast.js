@@ -69,7 +69,7 @@ function pollCastStatus (state) {
     state.devices.airplay.status(function (status) {
       state.video.isPaused = status.rate === 0
       state.video.currentTime = status.position
-      // TODO: get airplay volume, confirmation needed. meanwhile set value in setVolume 
+      // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
       // According to docs is in [-30 - 0] (db) range
       // should be converted to [0 - 1] using (val / 30 + 1)
       update()
