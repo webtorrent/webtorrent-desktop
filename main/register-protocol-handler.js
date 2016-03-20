@@ -8,15 +8,15 @@ function registerProtocolHandler (protocol, name, command) {
   var Registry = require('winreg')
 
   var protocolKey = new Registry({
-    hive: Registry.HKCR, // HKEY_CLASSES_ROOT
-    key: '\\' + protocol
+    hive: Registry.HKCU, // HKEY_CURRENT_USER
+    key: '\\Software\\Classes\\' + protocol
   })
   protocolKey.set('', Registry.REG_SZ, name, callback)
   protocolKey.set('URL Protocol', Registry.REG_SZ, '', callback)
 
   var commandKey = new Registry({
-    hive: Registry.HKCR,
-    key: '\\' + protocol + '\\shell\\open\\command'
+    hive: Registry.HKCU,
+    key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
   })
   commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', callback)
 
