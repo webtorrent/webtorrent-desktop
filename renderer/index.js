@@ -55,7 +55,11 @@ function init () {
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
-  state.client.on('error', onError)
+  state.client.on('error', function (err) {
+    // TODO: WebTorrent should have semantic errors
+    if (err.message.startsWith('There is already a swarm')) onError('Couldn\'t add duplicate torrent')
+    else onError(err)
+  })
   resumeTorrents() /* restart everything we were torrenting last time the app ran */
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
@@ -300,7 +304,7 @@ function loadState (callback) {
 function resumeTorrents () {
   state.saved.torrents
     .filter((x) => x.status !== 'paused')
-    .forEach((x) => startTorrenting(x.infoHash))
+    .forEach((x) => startTorrentingSummary(x))
 }
 
 // Write state.saved to the JSON state file
@@ -373,12 +377,10 @@ function getTorrent (infoHash) {
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
 function addTorrent (torrentId) {
-  // Charlie Chaplin: 'magnet:?xt=urn:btih:cddf0459a718523480f7499da5ed1a504cffecb8&dn=charlie%5Fchaplin%5Ffilm%5Ffestival'
-  if (!torrentId) torrentId = 'magnet:?xt=urn:btih:6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5&dn=CosmosLaundromatFirstCycle'
-
-  var torrent = startTorrenting(torrentId)
-
-  addTorrentToList(torrent)
+  var torrent = startTorrentingID(torrentId)
+  torrent.on('infoHash', function () {
+    addTorrentToList(torrent)
+  })
 }
 
 function addTorrentToList (torrent) {
@@ -403,19 +405,25 @@ function addTorrentToList (torrent) {
   }
 }
 
-// Starts downloading and/or seeding a given torrent, torrentSummary or magnet URI
-function startTorrenting (infoHash) {
-  checkIfTorrentFileExists(infoHash, function (torrentPath, exists) {
-    var torrentID = exists ? torrentPath : infoHash
-    var torrent = state.client.add(torrentID, {
-      path: state.saved.downloadPath // Use downloads folder
-    })
-    addTorrentEvents(torrent)
-    return torrent
-  })
+// Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
+function startTorrentingSummary (torrentSummary) {
+  var s = torrentSummary
+  if (s.torrentPath) return startTorrentingID(s.torrentPath)
+  else if (s.magnetURI) return startTorrentingID(s.magnetURI)
+  else return startTorrentingID(s.infoHash)
 }
 
-// Stops downloading and/or seeding. See startTorrenting
+// Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
+// See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
+function startTorrentingID (torrentID) {
+  var torrent = state.client.add(torrentID, {
+    path: state.saved.downloadPath // Use downloads folder
+  })
+  addTorrentEvents(torrent)
+  return torrent
+}
+
+// Stops downloading and/or seeding
 function stopTorrenting (infoHash) {
   var torrent = getTorrent(infoHash)
   if (torrent) torrent.destroy()
@@ -511,11 +519,11 @@ function checkIfTorrentFileExists (infoHash, cb) {
   })
 }
 
-function startServer (infoHash, index, cb) {
+function startServer (torrentSummary, index, cb) {
   if (state.server) return cb()
 
-  var torrent = getTorrent(infoHash)
-  if (!torrent) torrent = startTorrenting(infoHash)
+  var torrent = getTorrent(torrentSummary.infoHash)
+  if (!torrent) torrent = startTorrentingSummary(torrentSummary)
   if (torrent.ready) startServerFromReadyTorrent(torrent, index, cb)
   else torrent.on('ready', () => startServerFromReadyTorrent(torrent, index, cb))
 }
@@ -571,7 +579,7 @@ function openPlayer (torrentSummary, index) {
     update()
   }, 10000) /* give it a few seconds */
 
-  startServer(torrentSummary.infoHash, index, function (err) {
+  startServer(torrentSummary, index, function (err) {
     if (err) return onError(err)
 
     // if we timed out (user clicked play a long time ago), don't autoplay
@@ -627,7 +635,7 @@ function closePlayer () {
 function toggleTorrent (torrentSummary) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
-    startTorrenting(torrentSummary.infoHash)
+    startTorrentingSummary(torrentSummary)
     playInterfaceSound(config.SOUND_ENABLE)
   } else {
     torrentSummary.status = 'paused'
@@ -689,7 +697,7 @@ function restoreBounds () {
 }
 
 function onError (err) {
-  console.error(err.stack)
+  if (err.stack) console.error(err.stack)
   playInterfaceSound(config.SOUND_ERROR)
   state.errors.push({
     time: new Date().getTime(),
