@@ -53,8 +53,11 @@ function init () {
   state.client.on('warning', onWarning)
   state.client.on('error', function (err) {
     // TODO: WebTorrent should have semantic errors
-    if (err.message.startsWith('There is already a swarm')) onError('Couldn\'t add duplicate torrent')
-    else onError(err)
+    if (err.message.startsWith('There is already a swarm')) {
+      onError(new Error('Couldn\'t add duplicate torrent'))
+    } else {
+      onError(err)
+    }
   })
   resumeTorrents() /* restart everything we were torrenting last time the app ran */
 
@@ -693,7 +696,7 @@ function restoreBounds () {
 }
 
 function onError (err) {
-  if (err.stack) console.error(err.stack)
+  console.error(err.stack || err)
   playInterfaceSound(config.SOUND_ERROR)
   state.errors.push({
     time: new Date().getTime(),
