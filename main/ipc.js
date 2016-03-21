@@ -66,10 +66,10 @@ function setBounds (bounds, maximize) {
   // Maximize or minimize, if the second argument is present
   var willBeMaximized
   if (maximize === true) {
-    windows.main.maximize()
+    if (!windows.main.isMaximized) windows.main.maximize()
     willBeMaximized = true
   } else if (maximize === false) {
-    windows.main.unmaximize()
+    if (windows.main.isMaximized) windows.main.unmaximize()
     willBeMaximized = false
   } else {
     willBeMaximized = windows.main.isMaximized()
