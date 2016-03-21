@@ -17,7 +17,7 @@ function App (state, dispatch) {
   // * The mouse is over the controls or we're scrubbing (see CSS)
   // * The video is paused
   // * The video is playing remotely on Chromecast or Airplay
-  var hideControls = state.url === 'player' &&
+  var hideControls = state.location.current().url === 'player' &&
     state.video.mouseStationarySince !== 0 &&
     new Date().getTime() - state.video.mouseStationarySince > 2000 &&
     !state.video.isPaused &&
@@ -25,10 +25,10 @@ function App (state, dispatch) {
 
   // Hide the header on Windows/Linux when in the player
   // On OSX, the header appears as part of the title bar
-  var hideHeader = process.platform !== 'darwin' && state.url === 'player'
+  var hideHeader = process.platform !== 'darwin' && state.location.current().url === 'player'
 
   var cls = [
-    'view-' + state.url, /* e.g. view-home, view-player */
+    'view-' + state.location.current().url, /* e.g. view-home, view-player */
     'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
   ]
   if (state.window.isFullScreen) cls.push('is-fullscreen')
@@ -75,9 +75,9 @@ function App (state, dispatch) {
   }
 
   function getView () {
-    if (state.url === 'home') {
+    if (state.location.current().url === 'home') {
       return TorrentList(state, dispatch)
-    } else if (state.url === 'player') {
+    } else if (state.location.current().url === 'player') {
       return Player(state, dispatch)
     }
   }

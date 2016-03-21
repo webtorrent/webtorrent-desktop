@@ -34,8 +34,6 @@ function init (callback) {
   })
 
   var browser = airplay.createBrowser()
-  var devices = browser.getDevices(true)
-  console.log('TODO GET DEVICES RET %o', devices)
   browser.on('deviceOn', function (player) {
     state.devices.airplay = player
     addAirplayEvents()

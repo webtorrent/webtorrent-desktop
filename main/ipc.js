@@ -26,8 +26,8 @@ function init () {
     menu.showOpenTorrentFile()
   })
 
-  ipcMain.on('setBounds', function (e, bounds) {
-    setBounds(bounds)
+  ipcMain.on('setBounds', function (e, bounds, maximize) {
+    setBounds(bounds, maximize)
   })
 
   ipcMain.on('setAspectRatio', function (e, aspectRatio, extraSize) {
@@ -59,9 +59,24 @@ function init () {
   ipcMain.on('unblockPowerSave', unblockPowerSave)
 }
 
-function setBounds (bounds) {
-  debug('setBounds %o', bounds)
-  if (windows.main && !windows.main.isFullScreen() && !windows.main.isMaximized()) {
+function setBounds (bounds, maximize) {
+  // Do nothing in fullscreen
+  if (!windows.main || windows.main.isFullScreen()) return
+
+  // Maximize or minimize, if the second argument is present
+  var willBeMaximized
+  if (maximize === true) {
+    if (!windows.main.isMaximized()) windows.main.maximize()
+    willBeMaximized = true
+  } else if (maximize === false) {
+    if (windows.main.isMaximized()) windows.main.unmaximize()
+    willBeMaximized = false
+  } else {
+    willBeMaximized = windows.main.isMaximized()
+  }
+
+  // Assuming we're not maximized or maximizing, set the window size
+  if (!willBeMaximized) {
     windows.main.setBounds(bounds, true)
   }
 }
