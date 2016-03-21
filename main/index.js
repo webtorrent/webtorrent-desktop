@@ -17,9 +17,7 @@ var shouldQuit = app.makeSingleInstance(function (newArgv) {
   if (app.ipcReady) {
     windows.main.send('log', 'Second app instance attempted to open but was prevented')
 
-    newArgv.forEach(function (torrentId) {
-      windows.main.send('dispatch', 'onOpen', torrentId)
-    })
+    processArgv(newArgv)
 
     if (windows.main.isMinimized()) {
       windows.main.restore()
@@ -54,9 +52,7 @@ app.on('ipcReady', function () {
   if (argv.length) {
     windows.main.send('log', 'command line args:', process.argv)
   }
-  argv.forEach(function (torrentId) {
-    windows.main.send('dispatch', 'onOpen', torrentId)
-  })
+  processArgv(argv)
 })
 
 app.on('before-quit', function () {
@@ -90,4 +86,22 @@ function onOpen (e, torrentId) {
 
 function sliceArgv (argv) {
   return argv.slice(config.IS_PRODUCTION ? 1 : 2)
+}
+
+function processArgv (argv) {
+  argv.forEach(function (argvi) {
+    switch (argvi) {
+      case '-n':
+        windows.main.send('dispatch', 'showCreateTorrent')
+        break
+      case '-o':
+        windows.main.send('dispatch', 'showOpenTorrentFile')
+        break
+      case '-u':
+        windows.main.send('showOpenTorrentAddress')
+        break
+      default:
+        windows.main.send('dispatch', 'onOpen', argvi)
+    }
+  })
 }

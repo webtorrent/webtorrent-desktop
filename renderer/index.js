@@ -167,6 +167,9 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
+  if (action === 'showCreateTorrent') {
+    ipcRenderer.send('showCreateTorrent')
+  }
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile')
   }
