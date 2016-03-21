@@ -6,7 +6,6 @@ var windows = module.exports = {
 var electron = require('electron')
 
 var app = electron.app
-var ipcMain = electron.ipcMain
 
 var config = require('../config')
 var menu = require('./menu')
@@ -44,14 +43,8 @@ function createMainWindow () {
   win.on('close', function (e) {
     if (process.platform === 'darwin' && !app.isQuitting) {
       e.preventDefault()
-      // When the window is hidden, the update() loop (which uses
-      // requestAnimationFrame) ceases to run. We need to make sure
-      // the video pauses before hiding or it will continue to play.
-
       win.send('dispatch', 'pause')
-      ipcMain.once('paused-video', function (e) {
-        win.hide()
-      })
+      win.hide()
     }
   })
 
