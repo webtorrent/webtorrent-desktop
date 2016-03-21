@@ -446,17 +446,17 @@ function addTorrentToList (torrent) {
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
-  if (s.torrentPath) return startTorrentingID(s.torrentPath)
-  else if (s.magnetURI) return startTorrentingID(s.magnetURI)
-  else return startTorrentingID(s.infoHash)
+  if (s.torrentPath) return startTorrentingID(s.torrentPath, s.path)
+  else if (s.magnetURI) return startTorrentingID(s.magnetURI, s.path)
+  else return startTorrentingID(s.infoHash, s.path)
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrentingID (torrentID) {
+function startTorrentingID (torrentID, path) {
   console.log('Starting torrent ' + torrentID)
   var torrent = state.client.add(torrentID, {
-    path: state.saved.downloadPath // Use downloads folder
+    path: path || state.saved.downloadPath // Use downloads folder
   })
   addTorrentEvents(torrent)
   return torrent
@@ -488,6 +488,7 @@ function addTorrentEvents (torrent) {
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+    torrentSummary.path = torrent.path
 
     // Summarize torrent files
     torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
@@ -503,16 +504,19 @@ function addTorrentEvents (torrent) {
   }
 
   function torrentDone () {
-    // UPdate the torrent summary
+    // Update the torrent summary
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
     updateTorrentProgress()
 
-    // Notify the user that a torrent finished
-    if (!state.window.isFocused) {
-      state.dock.badge += 1
+    // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
+    // Don't notify if we merely finished verifying data files that were already on disk.
+    if (torrent.received > 0) {
+      if (!state.window.isFocused) {
+        state.dock.badge += 1
+      }
+      showDoneNotification(torrent)
     }
-    showDoneNotification(torrent)
 
     update()
   }
