@@ -63,6 +63,7 @@ function init () {
     }
   })
   resumeTorrents() /* restart everything we were torrenting last time the app ran */
+  setInterval(updateTorrentProgress, 1000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -421,6 +422,7 @@ function startTorrentingSummary (torrentSummary) {
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrentingID (torrentID) {
+  console.log('Starting torrent ' + torrentID)
   var torrent = state.client.add(torrentID, {
     path: state.saved.downloadPath // Use downloads folder
   })
@@ -448,33 +450,65 @@ function addTorrentEvents (torrent) {
   torrent.on('done', torrentDone)
 
   function torrentReady () {
+    // Summarize torrent
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'downloading'
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+
+    // Summarize torrent files
     torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
+    updateTorrentProgress()
 
-    saveTorrentFile(torrentSummary, torrent)
+    // Save the .torrent file, if it hasn't been saved already
+    if (!torrentSummary.torrentPath) saveTorrentFile(torrentSummary, torrent)
 
-    if (!torrentSummary.posterURL) {
-      generateTorrentPoster(torrent, torrentSummary)
-    }
+    // Auto-generate a poster image, if it hasn't been generated already
+    if (!torrentSummary.posterURL) generateTorrentPoster(torrent, torrentSummary)
 
     update()
   }
 
   function torrentDone () {
+    // UPdate the torrent summary
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
+    updateTorrentProgress()
 
+    // Notify the user that a torrent finished
     if (!state.window.isFocused) {
       state.dock.badge += 1
     }
-
     showDoneNotification(torrent)
+
     update()
   }
+}
+
+function updateTorrentProgress () {
+  // TODO: ideally this would be tracked by WebTorrent, which could do it
+  // more efficiently than looping over torrent.bitfield
+  var changed = false
+  state.client.torrents.forEach(function (torrent) {
+    var torrentSummary = getTorrentSummary(torrent.infoHash)
+    torrent.files.forEach(function (file, index) {
+      var numPieces = file._endPiece - file._startPiece + 1
+      var numPiecesPresent = 0
+      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
+        if (torrent.bitfield.get(piece)) numPiecesPresent++
+      }
+
+      var fileSummary = torrentSummary.files[index]
+      if (fileSummary.numPiecesPresent !== numPiecesPresent || fileSummary.numPieces !== numPieces) {
+        fileSummary.numPieces = numPieces
+        fileSummary.numPiecesPresent = numPiecesPresent
+        changed = true
+      }
+    })
+  })
+
+  if (changed) update()
 }
 
 function generateTorrentPoster (torrent, torrentSummary) {
@@ -499,7 +533,8 @@ function summarizeFileInTorrent (file) {
   return {
     name: file.name,
     length: file.length,
-    isDownloaded: false
+    numPiecesPresent: 0,
+    numPieces: null
   }
 }
 
