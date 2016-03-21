@@ -63,21 +63,48 @@ module.exports = {
     torrents: [
       {
         status: 'paused',
-        infoHash: 'f84b51f0d2c3455ab5dabb6643b4340234cd036e',
+        infoHash: '88594aaacbde40ef3e2510c47374ec0aa396c08e',
         displayName: 'Big Buck Bunny',
-        posterURL: path.join(__dirname, '..', 'static', 'bigBuckBunny.jpg')
+        posterURL: path.join(__dirname, '..', 'static', 'bigBuckBunny.jpg'),
+        torrentPath: path.join(__dirname, '..', 'static', 'bigBuckBunny.torrent'),
+        files: [
+          {
+            'name': 'bbb_sunflower_1080p_30fps_normal.mp4',
+            'length': 276134947,
+            'numPiecesPresent': 0,
+            'numPieces': 527
+          }
+        ]
       },
       {
         status: 'paused',
         infoHash: '6a9759bffd5c0af65319979fb7832189f4f3c35d',
         displayName: 'Sintel',
-        posterURL: path.join(__dirname, '..', 'static', 'sintel.jpg')
+        posterURL: path.join(__dirname, '..', 'static', 'sintel.jpg'),
+        torrentPath: path.join(__dirname, '..', 'static', 'sintel.torrent'),
+        files: [
+          {
+            'name': 'sintel.mp4',
+            'length': 129241752,
+            'numPiecesPresent': 0,
+            'numPieces': 987
+          }
+        ]
       },
       {
         status: 'paused',
         infoHash: '02767050e0be2fd4db9a2ad6c12416ac806ed6ed',
         displayName: 'Tears of Steel',
-        posterURL: path.join(__dirname, '..', 'static', 'tearsOfSteel.jpg')
+        posterURL: path.join(__dirname, '..', 'static', 'tearsOfSteel.jpg'),
+        torrentPath: path.join(__dirname, '..', 'static', 'tearsOfSteel.torrent'),
+        files: [
+          {
+            'name': 'tears_of_steel_1080p.webm',
+            'length': 571346576,
+            'numPiecesPresent': 0,
+            'numPieces': 2180
+          }
+        ]
       }
     ],
     downloadPath: path.join(os.homedir(), 'Downloads')
