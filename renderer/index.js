@@ -427,17 +427,17 @@ function addTorrentToList (torrent) {
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
-  if (s.torrentPath) return startTorrentingID(s.torrentPath)
-  else if (s.magnetURI) return startTorrentingID(s.magnetURI)
-  else return startTorrentingID(s.infoHash)
+  if (s.torrentPath) return startTorrentingID(s.torrentPath, s.path)
+  else if (s.magnetURI) return startTorrentingID(s.magnetURI, s.path)
+  else return startTorrentingID(s.infoHash, s.path)
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrentingID (torrentID) {
+function startTorrentingID (torrentID, path) {
   console.log('Starting torrent ' + torrentID)
   var torrent = state.client.add(torrentID, {
-    path: state.saved.downloadPath // Use downloads folder
+    path: path || state.saved.downloadPath // Use downloads folder
   })
   addTorrentEvents(torrent)
   return torrent
@@ -469,6 +469,7 @@ function addTorrentEvents (torrent) {
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+    torrentSummary.path = torrent.path
 
     // Summarize torrent files
     torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
