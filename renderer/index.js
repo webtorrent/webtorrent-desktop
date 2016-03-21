@@ -7,6 +7,7 @@ var electron = require('electron')
 var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
+var mkdirp = require('mkdirp')
 var networkAddress = require('network-address')
 var path = require('path')
 var WebTorrent = require('webtorrent')
@@ -283,7 +284,7 @@ function setupIpc () {
 }
 
 // Load state.saved from the JSON state file
-function loadState (callback) {
+function loadState (cb) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     console.log('loaded state from ' + cfg.filePath)
@@ -293,9 +294,8 @@ function loadState (callback) {
     state.saved.torrents.forEach(function (torrentSummary) {
       if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
     })
-    saveState()
 
-    if (callback) callback()
+    if (cb) cb()
   })
 }
 
@@ -474,7 +474,8 @@ function generateTorrentPoster (torrent, torrentSummary) {
   torrentPoster(torrent, function (err, buf) {
     if (err) return onWarning(err)
     // save it for next time
-    fs.mkdir(config.CONFIG_POSTER_PATH, function (_) {
+    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+      if (err) return onWarning(err)
       var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
