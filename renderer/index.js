@@ -229,9 +229,11 @@ function dispatch (action, ...args) {
     jumpToTime(args[0] /* seconds */)
   }
   if (action === 'videoPlaying') {
+    state.video.isPaused = false
     ipcRenderer.send('blockPowerSave')
   }
   if (action === 'videoPaused') {
+    state.video.isPaused = true
     ipcRenderer.send('paused-video')
     ipcRenderer.send('unblockPowerSave')
   }
