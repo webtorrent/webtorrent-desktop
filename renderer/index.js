@@ -261,18 +261,18 @@ function jumpToTime (time) {
   }
 }
 
-function changeVolume (increase) {
-  // change volume in 10% steps
-  setVolume(state.video.volume + (increase ? 0.1 : -0.1))
+function changeVolume (delta) {
+  // change volume with delta value
+  setVolume(state.video.volume + delta)
 }
 
-function setVolume (increase) {
+function setVolume (volume) {
   // check if its in [0.0 - 1.0] range
-  var setVolume = Math.max(0, Math.min(1, volume))
+  volume = Math.max(0, Math.min(1, volume))
   if (Cast.isCasting()) {
-    Cast.setVolume(setVolume)
+    Cast.setVolume(volume)
   } else {
-    state.video.setVolume = setVolume
+    state.video.setVolume = volume
     update()
   }
 }
