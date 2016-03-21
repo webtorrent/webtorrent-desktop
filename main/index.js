@@ -5,6 +5,7 @@ var app = electron.app
 var autoUpdater = require('./auto-updater')
 var config = require('../config')
 var ipc = require('./ipc')
+var log = require('./log')
 var menu = require('./menu')
 var registerProtocolHandler = require('./register-handlers')
 var shortcuts = require('./shortcuts')
@@ -16,7 +17,7 @@ var shouldQuit = app.makeSingleInstance(function (newArgv) {
   newArgv = sliceArgv(newArgv)
 
   if (app.ipcReady) {
-    windows.main.send('log', 'Second app instance attempted to open but was prevented')
+    log('Second app instance attempted to open but was prevented')
 
     newArgv.forEach(function (torrentId) {
       windows.main.send('dispatch', 'onOpen', torrentId)
@@ -55,9 +56,9 @@ app.on('ready', function () {
 })
 
 app.on('ipcReady', function () {
-  windows.main.send('log', 'IS_PRODUCTION:', config.IS_PRODUCTION)
+  log('IS_PRODUCTION:', config.IS_PRODUCTION)
   if (argv.length) {
-    windows.main.send('log', 'command line args:', process.argv)
+    log('command line args:', process.argv)
   }
   argv.forEach(function (torrentId) {
     windows.main.send('dispatch', 'onOpen', torrentId)
