@@ -484,16 +484,19 @@ function addTorrentEvents (torrent) {
   }
 
   function torrentDone () {
-    // UPdate the torrent summary
+    // Update the torrent summary
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
     updateTorrentProgress()
 
-    // Notify the user that a torrent finished
-    if (!state.window.isFocused) {
-      state.dock.badge += 1
+    // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
+    // Don't notify if we merely finished verifying data files that were already on disk.
+    if (torrent.received > 0) {
+      if (!state.window.isFocused) {
+        state.dock.badge += 1
+      }
+      showDoneNotification(torrent)
     }
-    showDoneNotification(torrent)
 
     update()
   }
