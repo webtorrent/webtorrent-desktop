@@ -2,6 +2,7 @@ var electron = require('electron')
 
 var app = electron.app
 
+var autoUpdater = require('./auto-updater')
 var config = require('../config')
 var ipc = require('./ipc')
 var menu = require('./menu')
@@ -38,7 +39,10 @@ var argv = sliceArgv(process.argv)
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
-app.on('will-finish-launching', setupCrashReporter)
+app.on('will-finish-launching', function () {
+  autoUpdater.init()
+  setupCrashReporter()
+})
 
 app.ipcReady = false // main window has finished loading and IPC is ready
 app.isQuitting = false
