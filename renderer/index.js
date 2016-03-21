@@ -17,10 +17,10 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var config = require('../config')
-var torrentPoster = require('./lib/torrent-poster')
-var TorrentPlayer = require('./lib/torrent-player')
 var Cast = require('./lib/cast')
+var config = require('../config')
+var TorrentPlayer = require('./lib/torrent-player')
+var torrentPoster = require('./lib/torrent-poster')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -48,6 +48,8 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  state.location.go({ url: 'home' })
+
   // Connect to the WebTorrent and BitTorrent networks
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
@@ -158,7 +160,7 @@ function updateElectron () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  if (['videoMouseMoved', 'playbackJump'].indexOf(action) < 0) {
+  if (['videoMouseMoved', 'playbackJump'].indexOf(action) === -1) {
     console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
   }
   if (action === 'onOpen') {
@@ -174,8 +176,14 @@ function dispatch (action, ...args) {
     seed(args[0] /* files */)
   }
   if (action === 'play') {
-    // TODO: handle audio. video only for now.
-    openPlayer(args[0] /* torrentSummary */, args[1] /* index */)
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        // TODO: handle audio. video only for now.
+        openPlayer(args[0] /* torrentSummary */, args[1] /* index */, cb)
+      },
+      onbeforeunload: closePlayer
+    })
   }
   if (action === 'openFile') {
     openFile(args[0] /* torrentSummary */, args[1] /* index */)
@@ -205,14 +213,12 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
-    // TODO
-    // window.history.back()
-    ipcRenderer.send('unblockPowerSave')
-    closePlayer()
+    state.location.back()
+    update()
   }
   if (action === 'forward') {
-    // TODO
-    // window.history.forward()
+    state.location.forward()
+    update()
   }
   if (action === 'playPause') {
     playPause()
@@ -567,7 +573,7 @@ function stopServer () {
 }
 
 // Opens the video player
-function openPlayer (torrentSummary, index) {
+function openPlayer (torrentSummary, index, cb) {
   var torrent = state.client.get(torrentSummary.infoHash)
   if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
   torrentSummary.playStatus = 'requested'
@@ -589,9 +595,9 @@ function openPlayer (torrentSummary, index) {
     if (timedOut) return
 
     // otherwise, play the video
-    state.url = 'player'
     state.window.title = torrentSummary.name
     update()
+    cb()
   })
 }
 
@@ -618,18 +624,20 @@ function openFolder (torrentSummary) {
   })
 }
 
-function closePlayer () {
-  state.url = 'home'
+function closePlayer (cb) {
   state.window.title = config.APP_NAME
   update()
 
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
-
   restoreBounds()
   stopServer()
   update()
+
+  ipcRenderer.send('unblockPowerSave')
+
+  cb()
 }
 
 function toggleTorrent (torrentSummary) {
@@ -652,6 +660,7 @@ function deleteTorrent (torrentSummary) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
+  state.location.clearForward() // prevent user from going forward to a deleted torrent
   playInterfaceSound(config.SOUND_DELETE)
 }
 
