@@ -132,7 +132,7 @@ function TorrentList (state, dispatch) {
   // Show files, per-file download status and play buttons, and so on
   function renderTorrentDetails (torrent, torrentSummary) {
     var filesElement
-    if (!torrent || !torrent.files) {
+    if (!torrentSummary.files) {
       // We don't know what files this torrent contains
       var message = torrent
         ? 'Downloading torrent data using magnet link...'
@@ -140,7 +140,8 @@ function TorrentList (state, dispatch) {
       filesElement = hx`<div class='files warning'>${message}</div>`
     } else {
       // We do know the files. List them and show download stats for each one
-      var fileRows = torrent.files.map((file, index) => renderFileRow(torrent, torrentSummary, file, index))
+      var fileRows = torrentSummary.files.map(
+        (file, index) => renderFileRow(torrent, torrentSummary, file, index))
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
@@ -164,32 +165,27 @@ function TorrentList (state, dispatch) {
     }
   }
 
-  // Show a single file in the details view for a single torrent
+  // Show a single torrentSummary file in the details view for a single torrent
   function renderFileRow (torrent, torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var numPieces = file._endPiece - file._startPiece + 1
-    var numPiecesPresent = 0
-    for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
-      if (torrent.bitfield.get(piece)) numPiecesPresent++
-    }
-    var progress = Math.round(100 * numPiecesPresent / numPieces) + '%'
-    var isDone = numPieces === numPiecesPresent
+    var isDone = file.numPiecesPresent === file.numPieces
+    var progress = Math.round(100 * file.numPiecesPresent / (file.numPieces || 0)) + '%'
 
     // Second, render the file as a table row
     var icon
-    var iconClass = ''
-    if (state.playing.infoHash === torrent.infoHash && state.playing.fileIndex === index) {
+    var rowClass = ''
+    if (state.playing.infoHash === torrentSummary.infoHash && state.playing.fileIndex === index) {
       icon = 'pause_arrow' /* playing? add option to pause */
     } else if (TorrentPlayer.isPlayable(file)) {
       icon = 'play_arrow' /* playable? add option to play */
     } else {
       icon = 'description' /* file icon, opens in OS default app */
-      iconClass = isDone ? '' : 'disabled'
+      rowClass = isDone ? '' : 'disabled'
     }
     return hx`
-      <tr onclick=${handleClick}>
+      <tr onclick=${handleClick} class='${rowClass}'>
         <td class='col-icon'>
-          <i class='icon ${iconClass}'>${icon}</i>
+          <i class='icon'>${icon}</i>
         </td>
         <td class='col-name'>${file.name}</td>
         <td class='col-progress'>${progress}</td>

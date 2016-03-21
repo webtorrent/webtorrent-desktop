@@ -396,7 +396,7 @@ input {
   position: absolute;
   top: 20px;
   left: 20px;
-  width: calc(100% - 100px);
+  width: calc(100% - 150px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
@@ -545,6 +545,10 @@ body.drag .torrent-placeholder span {
   border-spacing: 0;
 }
 
+.torrent-details tr {
+  height: 28px;
+}
+
 .torrent-details tr:hover,
 .torrent-details .open-folder:hover {
   background-color: rgba(200, 200, 200, 0.3);
@@ -553,6 +557,7 @@ body.drag .torrent-placeholder span {
 .torrent-details td {
   overflow: hidden;
   padding: 0;
+  vertical-align: bottom;
 }
 
 .torrent-details td.col-icon {
