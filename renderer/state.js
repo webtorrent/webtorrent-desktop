@@ -2,6 +2,7 @@ var os = require('os')
 var path = require('path')
 
 var config = require('../config')
+var LocationHistory = require('./lib/location-history')
 
 module.exports = {
   /*
@@ -11,9 +12,9 @@ module.exports = {
   client: null, /* the WebTorrent client */
   server: null, /* local WebTorrent-to-HTTP server */
   prev: {}, /* used for state diffing in updateElectron() */
-  url: 'home',
+  location: new LocationHistory(),
   window: {
-    bounds: null, /* x y width height */
+    bounds: null, /* {x, y, width, height } */
     isFocused: true,
     isFullScreen: false,
     title: config.APP_NAME /* current window title */
