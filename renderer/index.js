@@ -453,6 +453,7 @@ function addTorrentEvents (torrent) {
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+    torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
 
     saveTorrentFile(torrentSummary, torrent)
 
@@ -491,6 +492,15 @@ function generateTorrentPoster (torrent, torrentSummary) {
       })
     })
   })
+}
+
+// Produces a JSON saveable summary of a file in a torrent
+function summarizeFileInTorrent (file) {
+  return {
+    name: file.name,
+    length: file.length,
+    isDownloaded: false
+  }
 }
 
 // Every time we resolve a magnet URI, save the torrent file so that we never

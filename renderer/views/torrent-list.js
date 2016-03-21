@@ -131,8 +131,11 @@ function TorrentList (state, dispatch) {
 
   // Show files, per-file download status and play buttons, and so on
   function renderTorrentDetails (torrent, torrentSummary) {
+    // If we're currently torrenting, show details directly from WebTorrent, including % downloaded
+    // Otherwise, show a summary of files in the torrent, if available
+    var files = (torrent && torrent.files) || torrentSummary.files
     var filesElement
-    if (!torrent || !torrent.files) {
+    if (!files) {
       // We don't know what files this torrent contains
       var message = torrent
         ? 'Downloading torrent data using magnet link...'
@@ -140,7 +143,7 @@ function TorrentList (state, dispatch) {
       filesElement = hx`<div class='files warning'>${message}</div>`
     } else {
       // We do know the files. List them and show download stats for each one
-      var fileRows = torrent.files.map((file, index) => renderFileRow(torrent, torrentSummary, file, index))
+      var fileRows = files.map((file, index) => renderFileRow(torrent, torrentSummary, file, index))
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
@@ -165,20 +168,27 @@ function TorrentList (state, dispatch) {
   }
 
   // Show a single file in the details view for a single torrent
+  // File can either be a WebTorrent file (if we're currently torrenting it) or an element of torrentSummary.files
   function renderFileRow (torrent, torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var numPieces = file._endPiece - file._startPiece + 1
-    var numPiecesPresent = 0
-    for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
-      if (torrent.bitfield.get(piece)) numPiecesPresent++
+    // (If we're not currently torrenting, just say whether we have the file or not)
+    if (file._startPiece) {
+      var numPieces = file._endPiece - file._startPiece + 1
+      var numPiecesPresent = 0
+      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
+        if (torrent.bitfield.get(piece)) numPiecesPresent++
+      }
+      var progress = Math.round(100 * numPiecesPresent / numPieces) + '%'
+      var isDone = numPieces === numPiecesPresent
+    } else {
+      var isDone = file.isDownloaded
+      var progress = hx`<i.icon>${isDone ? 'check' : 'close'}</i>`
     }
-    var progress = Math.round(100 * numPiecesPresent / numPieces) + '%'
-    var isDone = numPieces === numPiecesPresent
 
     // Second, render the file as a table row
     var icon
     var iconClass = ''
-    if (state.playing.infoHash === torrent.infoHash && state.playing.fileIndex === index) {
+    if (state.playing.infoHash === torrentSummary.infoHash && state.playing.fileIndex === index) {
       icon = 'pause_arrow' /* playing? add option to pause */
     } else if (TorrentPlayer.isPlayable(file)) {
       icon = 'play_arrow' /* playable? add option to play */
