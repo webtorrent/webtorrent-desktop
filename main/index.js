@@ -38,6 +38,7 @@ var argv = sliceArgv(process.argv)
 
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
+app.on('will-finish-launching', setupCrashReporter)
 
 app.ipcReady = false // main window has finished loading and IPC is ready
 app.isQuitting = false
@@ -90,4 +91,13 @@ function onOpen (e, torrentId) {
 
 function sliceArgv (argv) {
   return argv.slice(config.IS_PRODUCTION ? 1 : 2)
+}
+
+function setupCrashReporter () {
+  // require('crash-reporter').start({
+  //   productName: 'WebTorrent',
+  //   companyName: 'WebTorrent',
+  //   submitURL: 'https://webtorrent.io/crash-report',
+  //   autoSubmit: true
+  // })
 }
