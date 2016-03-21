@@ -7,6 +7,7 @@ var electron = require('electron')
 var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
+var mkdirp = require('mkdirp')
 var networkAddress = require('network-address')
 var path = require('path')
 var WebTorrent = require('webtorrent')
@@ -16,10 +17,10 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var config = require('../config')
-var torrentPoster = require('./lib/torrent-poster')
-var TorrentPlayer = require('./lib/torrent-player')
 var Cast = require('./lib/cast')
+var config = require('../config')
+var TorrentPlayer = require('./lib/torrent-player')
+var torrentPoster = require('./lib/torrent-poster')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -32,12 +33,8 @@ var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
-  .map(function (arr) {
-    return arr[0]
-  })
-  .filter(function (url) {
-    return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
-  })
+  .map((arr) => arr[0])
+  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 var vdomLoop
 
@@ -51,14 +48,19 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  state.location.go({ url: 'home' })
+
   // Connect to the WebTorrent and BitTorrent networks
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', function (err) {
     // TODO: WebTorrent should have semantic errors
-    if (err.message.startsWith('There is already a swarm')) onError('Couldn\'t add duplicate torrent')
-    else onError(err)
+    if (err.message.startsWith('There is already a swarm')) {
+      onError(new Error('Couldn\'t add duplicate torrent'))
+    } else {
+      onError(err)
+    }
   })
   resumeTorrents() /* restart everything we were torrenting last time the app ran */
 
@@ -158,7 +160,7 @@ function updateElectron () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  if (['videoMouseMoved', 'playbackJump'].indexOf(action) < 0) {
+  if (['videoMouseMoved', 'playbackJump'].indexOf(action) === -1) {
     console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
   }
   if (action === 'onOpen') {
@@ -174,8 +176,14 @@ function dispatch (action, ...args) {
     seed(args[0] /* files */)
   }
   if (action === 'play') {
-    // TODO: handle audio. video only for now.
-    openPlayer(args[0] /* torrentSummary */, args[1] /* index */)
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        // TODO: handle audio. video only for now.
+        openPlayer(args[0] /* torrentSummary */, args[1] /* index */, cb)
+      },
+      onbeforeunload: closePlayer
+    })
   }
   if (action === 'openFile') {
     openFile(args[0] /* torrentSummary */, args[1] /* index */)
@@ -205,14 +213,12 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
-    // TODO
-    // window.history.back()
-    ipcRenderer.send('unblockPowerSave')
-    closePlayer()
+    state.location.back()
+    update()
   }
   if (action === 'forward') {
-    // TODO
-    // window.history.forward()
+    state.location.forward()
+    update()
   }
   if (action === 'playPause') {
     playPause()
@@ -284,7 +290,7 @@ function setupIpc () {
 }
 
 // Load state.saved from the JSON state file
-function loadState (callback) {
+function loadState (cb) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     console.log('loaded state from ' + cfg.filePath)
@@ -294,9 +300,8 @@ function loadState (callback) {
     state.saved.torrents.forEach(function (torrentSummary) {
       if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
     })
-    saveState()
 
-    if (callback) callback()
+    if (cb) cb()
   })
 }
 
@@ -475,7 +480,8 @@ function generateTorrentPoster (torrent, torrentSummary) {
   torrentPoster(torrent, function (err, buf) {
     if (err) return onWarning(err)
     // save it for next time
-    fs.mkdir(config.CONFIG_POSTER_PATH, function (_) {
+    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+      if (err) return onWarning(err)
       var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
@@ -567,7 +573,7 @@ function stopServer () {
 }
 
 // Opens the video player
-function openPlayer (torrentSummary, index) {
+function openPlayer (torrentSummary, index, cb) {
   var torrent = state.client.get(torrentSummary.infoHash)
   if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
   torrentSummary.playStatus = 'requested'
@@ -589,9 +595,9 @@ function openPlayer (torrentSummary, index) {
     if (timedOut) return
 
     // otherwise, play the video
-    state.url = 'player'
     state.window.title = torrentSummary.name
     update()
+    cb()
   })
 }
 
@@ -618,18 +624,20 @@ function openFolder (torrentSummary) {
   })
 }
 
-function closePlayer () {
-  state.url = 'home'
+function closePlayer (cb) {
   state.window.title = config.APP_NAME
   update()
 
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
-
   restoreBounds()
   stopServer()
   update()
+
+  ipcRenderer.send('unblockPowerSave')
+
+  cb()
 }
 
 function toggleTorrent (torrentSummary) {
@@ -652,6 +660,7 @@ function deleteTorrent (torrentSummary) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
+  state.location.clearForward() // prevent user from going forward to a deleted torrent
   playInterfaceSound(config.SOUND_DELETE)
 }
 
@@ -697,7 +706,7 @@ function restoreBounds () {
 }
 
 function onError (err) {
-  if (err.stack) console.error(err.stack)
+  console.error(err.stack || err)
   playInterfaceSound(config.SOUND_ERROR)
   state.errors.push({
     time: new Date().getTime(),
