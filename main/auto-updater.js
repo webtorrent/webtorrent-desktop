@@ -5,13 +5,13 @@ module.exports = {
 var electron = require('electron')
 
 var config = require('../config')
+var log = require('./log')
 
-// var app = electron.app
 var autoUpdater = electron.autoUpdater
 
 function init () {
   autoUpdater.on('error', function (err) {
-    console.error('error downloading app update', err.message || err)
+    log.error('Auto update error', err.message || err)
   })
 
   autoUpdater.setFeedURL(config.AUTO_UPDATE_URL)
@@ -32,10 +32,10 @@ function init () {
    */
   setInterval(() => autoUpdater.checkForUpdates(), config.AUTO_UPDATE_CHECK_INTERVAL)
 
-  autoUpdater.on('checking-for-update', () => console.log('checking for app update'))
-  autoUpdater.on('update-available', () => console.log('app update available'))
-  autoUpdater.on('update-not-available', () => console.log('app update not available'))
+  autoUpdater.on('checking-for-update', () => log('Checking for app update'))
+  autoUpdater.on('update-available', () => log('App update available'))
+  autoUpdater.on('update-not-available', () => log('App update not available'))
   autoUpdater.on('update-downloaded', function (e) {
-    console.log('app update downloaded', e)
+    log('App update downloaded', e)
   })
 }
