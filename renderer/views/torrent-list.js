@@ -103,19 +103,47 @@ function TorrentList (state, dispatch) {
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   function renderTorrentButtons (torrentSummary) {
+    var playIcon, playTooltip
+    if (torrentSummary.playStatus === 'unplayable') {
+      playIcon = 'warning'
+      playTooltip = 'Sorry, WebTorrent can\'t play any of the files in this torrent. ' +
+        'View details and click on individual files to open them in another program.'
+    } else if (torrentSummary.playStatus === 'timeout') {
+      playIcon = 'warning'
+      playTooltip = 'Playback timed out. No seeds? No internet? Click to try again.'
+    } else {
+      playIcon = 'play_arrow'
+      playTooltip = 'Start streaming'
+    }
+
+    var downloadIcon, downloadTooltip
+    if (torrentSummary.status === 'seeding') {
+      downloadIcon = 'file_upload'
+      downloadTooltip = 'Seeding. Click to stop.'
+    } else if (torrentSummary.status === 'downloading') {
+      downloadIcon = 'file_download'
+      downloadTooltip = 'Torrenting. Click to stop.'
+    } else {
+      downloadIcon = 'file_download'
+      downloadTooltip = 'Click to start torrenting.'
+    }
+
     return hx`
       <div class='buttons'>
         <i.btn.icon.play
+          title='${playTooltip}'
           onclick=${(e) => handleButton('play', e)}>
-          ${torrentSummary.playStatus === 'timeout' ? 'warning' : 'play_arrow'}
+          ${playIcon}
         </i>
         <i.btn.icon.download
           class='${torrentSummary.status}'
+          title='${downloadTooltip}'
           onclick=${(e) => handleButton('toggleTorrent', e)}>
-          ${torrentSummary.status === 'seeding' ? 'file_upload' : 'file_download'}
+          ${downloadIcon}
         </i>
         <i
           class='icon delete'
+          title='Remove torrent'
           onclick=${(e) => handleButton('deleteTorrent', e)}>
           close
         </i>

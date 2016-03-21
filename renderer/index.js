@@ -19,6 +19,7 @@ var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
 var Cast = require('./lib/cast')
+var errors = require('./lib/errors')
 var config = require('../config')
 var TorrentPlayer = require('./lib/torrent-player')
 var torrentPoster = require('./lib/torrent-poster')
@@ -601,7 +602,7 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   if (!index) {
     // filter out file formats that the <video> tag definitely can't play
     var files = torrent.files.filter(TorrentPlayer.isPlayable)
-    if (files.length === 0) return cb(new Error('Can\'t play any files in torrent'))
+    if (files.length === 0) return cb(new errors.UnplayableError())
     // use largest file
     var largestFile = files.reduce(function (a, b) {
       return a.length > b.length ? a : b
@@ -648,13 +649,18 @@ function openPlayer (torrentSummary, index, cb) {
   }, 10000) /* give it a few seconds */
 
   startServer(torrentSummary, index, function (err) {
-    if (err) return onError(err)
+    clearTimeout(timeout)
+    if (err) {
+      torrentSummary.playStatus = 'unplayable'
+      playInterfaceSound(config.SOUND_ERROR)
+      update()
+      return onError(err)
+    }
 
     // if we timed out (user clicked play a long time ago), don't autoplay
-    clearTimeout(timeout)
     var timedOut = torrentSummary.playStatus === 'timeout'
     delete torrentSummary.playStatus
-    if (timedOut) return
+    if (timedOut) return update()
 
     // otherwise, play the video
     state.window.title = torrentSummary.name

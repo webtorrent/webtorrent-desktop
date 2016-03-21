@@ -11,13 +11,13 @@ function Header (state, dispatch) {
       <div class='nav left'>
         <i.icon.back
           class=${state.location.hasBack() ? '' : 'disabled'}
-          title='back'
+          title='Back'
           onclick=${() => dispatch('back')}>
           chevron_left
         </i>
         <i.icon.forward
           class=${state.location.hasForward() ? '' : 'disabled'}
-          title='forward'
+          title='Forward'
           onclick=${() => dispatch('forward')}>
           chevron_right
         </i>
@@ -39,7 +39,7 @@ function Header (state, dispatch) {
       return hx`
         <i
           class='icon add'
-          title='add torrent'
+          title='Add torrent'
           onclick=${() => dispatch('showOpenTorrentFile')}>
           add
         </i>
