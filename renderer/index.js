@@ -10,6 +10,7 @@ var mainLoop = require('main-loop')
 var mkdirp = require('mkdirp')
 var networkAddress = require('network-address')
 var path = require('path')
+var remote = require('remote')
 var WebTorrent = require('webtorrent')
 
 var createElement = require('virtual-dom/create-element')
@@ -717,12 +718,20 @@ function toggleSelectTorrent (infoHash) {
 
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
+  // Don't modify the window size if it's already maximized
+  if (remote.getCurrentWindow().isMaximized()) {
+    state.window.bounds = null
+    return
+  }
+
+  // Save the bounds of the window for later. See restoreBounds()
   state.window.bounds = {
     x: window.screenX,
     y: window.screenY,
     width: window.outerWidth,
     height: window.outerHeight
   }
+  state.window.wasMaximized = remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   var screenWidth = window.screen.width
@@ -746,7 +755,7 @@ function setDimensions (dimensions) {
 function restoreBounds () {
   ipcRenderer.send('setAspectRatio', 0)
   if (state.window.bounds) {
-    ipcRenderer.send('setBounds', state.window.bounds, true)
+    ipcRenderer.send('setBounds', state.window.bounds, false)
   }
 }
 
