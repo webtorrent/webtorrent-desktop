@@ -165,7 +165,7 @@ function setVolume (volume) {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.volume(volume, castCallback)
   } else if (state.playing.location === 'airplay') {
-    // TODO remove once we can fetch the information in status update
+    // TODO remove line below once we can fetch the information in status update
     state.video.volume = volume
     volume = (volume - 1) * 30
     state.devices.airplay.volume(volume, castCallback)
