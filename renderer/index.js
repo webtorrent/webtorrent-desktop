@@ -262,8 +262,13 @@ function jumpToTime (time) {
 }
 
 function changeVolume (increase) {
-  // increase/decrease volume, check if its in [0.0 - 1.0] range
-  var setVolume = Math.max(0, Math.min(1, state.video.volume + (increase ? 0.1 : -0.1)))
+  // change volume in 10% steps
+  setVolume(state.video.volume + (increase ? 0.1 : -0.1))
+}
+
+function setVolume (increase) {
+  // check if its in [0.0 - 1.0] range
+  var setVolume = Math.max(0, Math.min(1, volume))
   if (Cast.isCasting()) {
     Cast.setVolume(setVolume)
   } else {
