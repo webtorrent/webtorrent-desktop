@@ -225,6 +225,12 @@ function dispatch (action, ...args) {
   if (action === 'playPause') {
     playPause()
   }
+  if (action === 'play') {
+    playPause(false)
+  }
+  if (action === 'pause') {
+    playPause(true)
+  }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
   }
@@ -234,7 +240,6 @@ function dispatch (action, ...args) {
   }
   if (action === 'videoPaused') {
     state.video.isPaused = true
-    ipcRenderer.send('paused-video')
     ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'toggleFullScreen') {
@@ -251,7 +256,12 @@ function dispatch (action, ...args) {
   }
 }
 
-function playPause () {
+// Plays or pauses the video. If isPaused is undefined, acts as a toggle
+function playPause (isPaused) {
+  if (isPaused === state.video.isPaused) {
+    return // Nothing to do
+  }
+  // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
   if (Cast.isCasting()) {
     Cast.playPause()
   }

@@ -32,7 +32,7 @@ module.exports = {
   video: { /* state of the video player screen */
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
-    isPaused: false,
+    isPaused: true,
     mouseStationarySince: 0 /* Unix time in ms */
   },
   dock: {
