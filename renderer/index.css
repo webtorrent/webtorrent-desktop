@@ -181,7 +181,6 @@ i:not(.disabled):hover {
   left: 0;
   top: 0;
   right: 0;
-  z-index: 1000;
   transition: opacity 0.15s ease-out;
   font-size: 14px;
   line-height: 1.5em;
@@ -456,8 +455,7 @@ input {
   background-color: #F44336;
 }
 
-.torrent.timeout .play,
-.torrent.unplayable .play {
+.torrent.timeout .play {
   padding-top: 8px;
 }
 
@@ -738,7 +736,6 @@ body.drag .torrent-placeholder span {
 
 .error-popover {
   position: fixed;
-  z-index: 1001;
   top: 36px;
   margin: 0;
   width: 100%;

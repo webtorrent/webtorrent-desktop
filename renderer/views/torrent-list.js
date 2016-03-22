@@ -103,9 +103,10 @@ function TorrentList (state, dispatch) {
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   function renderTorrentButtons (torrentSummary) {
-    var playIcon, playTooltip
+    var playIcon, playTooltip, playClass
     if (torrentSummary.playStatus === 'unplayable') {
-      playIcon = 'warning'
+      playIcon = 'play_arrow'
+      playClass = 'disabled'
       playTooltip = 'Sorry, WebTorrent can\'t play any of the files in this torrent. ' +
         'View details and click on individual files to open them in another program.'
     } else if (torrentSummary.playStatus === 'timeout') {
@@ -131,13 +132,14 @@ function TorrentList (state, dispatch) {
     return hx`
       <div class='buttons'>
         <i.btn.icon.play
-          title='${playTooltip}'
+          title=${playTooltip}
+          class=${playClass}
           onclick=${(e) => handleButton('play', e)}>
           ${playIcon}
         </i>
         <i.btn.icon.download
-          class='${torrentSummary.status}'
-          title='${downloadTooltip}'
+          class=${torrentSummary.status}
+          title=${downloadTooltip}
           onclick=${(e) => handleButton('toggleTorrent', e)}>
           ${downloadIcon}
         </i>
@@ -153,6 +155,7 @@ function TorrentList (state, dispatch) {
     function handleButton (action, e) {
       // Prevent propagation so that we don't select/unselect the torrent
       e.stopPropagation()
+      if (e.target.classList.contains('disabled')) return
       dispatch(action, torrentSummary)
     }
   }
