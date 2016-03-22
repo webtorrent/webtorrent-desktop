@@ -1,5 +1,9 @@
 # WebTorrent.app Version History
 
+## v0.0.1
+
+- Wait 10 seconds (instead of 60 seconds) after app launch before checking for updates.
+
 ## v0.0.0
 
 The first official release of WebTorrent.app, the streaming torrent client for OS X,
