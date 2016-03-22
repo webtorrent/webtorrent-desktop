@@ -208,13 +208,13 @@ function buildDarwin (cb) {
         if (err) return cb(err)
 
         // Create .zip file (used by the auto-updater)
-        var zipPath = path.join(buildPath[0], BUILD_NAME + '.zip')
+        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
         cp.execSync(`pushd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'} && popd`)
 
         // Create a .dmg (OS X disk image) file, for easy user installation.
         var dmgOpts = {
           basepath: config.ROOT_PATH,
-          target: path.join(buildPath[0], BUILD_NAME + '.dmg'),
+          target: path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg'),
           specification: {
             title: config.APP_NAME,
             icon: config.APP_ICON + '.icns',
