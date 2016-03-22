@@ -20,6 +20,7 @@ module.exports = {
 
   IS_PRODUCTION: isProduction(),
 
+  ROOT_PATH: __dirname,
   STATIC_PATH: path.join(__dirname, 'static'),
 
   SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
