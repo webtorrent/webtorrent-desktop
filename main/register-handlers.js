@@ -23,8 +23,14 @@ function installDesktopFile () {
   var desktopFile = fs.readFileSync(templatePath, 'utf8')
 
   desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
-  desktopFile = desktopFile.replace(/\$APP_PATH/g, path.dirname(process.execPath))
-  desktopFile = desktopFile.replace(/\$EXEC_PATH/g, process.execPath)
+
+  var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
+  desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
+
+  var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
+  desktopFile = desktopFile.replace(/\$EXEC_PATH/g, execPath)
+
+  desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
 
   var desktopFilePath = path.join(os.homedir(), '.local', 'share', 'applications', 'webtorrent.desktop')
   fs.writeFileSync(desktopFilePath, desktopFile)

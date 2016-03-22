@@ -4,6 +4,7 @@ module.exports = {
   onWindowHide: onWindowHide,
   onWindowShow: onWindowShow,
   showOpenTorrentFile: showOpenTorrentFile,
+  showCreateTorrent: showCreateTorrent,
   toggleFullScreen: toggleFullScreen
 }
 
