@@ -22,6 +22,7 @@
     "hyperx": "^2.0.2",
     "main-loop": "^3.2.0",
     "mkdirp": "^0.5.1",
+    "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
     "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
@@ -30,7 +31,6 @@
     "winreg": "^1.0.1"
   },
   "devDependencies": {
-    "appdmg": "^0.3.6",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.37.2",
@@ -39,6 +39,9 @@
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",
     "standard": "^6.0.5"
+  },
+  "optionalDependencies": {
+    "appdmg": "^0.3.6"
   },
   "homepage": "https://webtorrent.io",
   "keywords": [
