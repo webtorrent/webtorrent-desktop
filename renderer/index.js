@@ -7,8 +7,10 @@ var electron = require('electron')
 var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
+var mkdirp = require('mkdirp')
 var networkAddress = require('network-address')
 var path = require('path')
+var remote = require('remote')
 var WebTorrent = require('webtorrent')
 
 var createElement = require('virtual-dom/create-element')
@@ -16,10 +18,11 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var config = require('../config')
-var torrentPoster = require('./lib/torrent-poster')
-var TorrentPlayer = require('./lib/torrent-player')
 var Cast = require('./lib/cast')
+var errors = require('./lib/errors')
+var config = require('../config')
+var TorrentPlayer = require('./lib/torrent-player')
+var torrentPoster = require('./lib/torrent-poster')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -32,12 +35,8 @@ var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
-  .map(function (arr) {
-    return arr[0]
-  })
-  .filter(function (url) {
-    return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
-  })
+  .map((arr) => arr[0])
+  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 var vdomLoop
 
@@ -51,16 +50,22 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  state.location.go({ url: 'home' })
+
   // Connect to the WebTorrent and BitTorrent networks
   // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', function (err) {
     // TODO: WebTorrent should have semantic errors
-    if (err.message.startsWith('There is already a swarm')) onError('Couldn\'t add duplicate torrent')
-    else onError(err)
+    if (err.message.startsWith('There is already a swarm')) {
+      onError(new Error('Couldn\'t add duplicate torrent'))
+    } else {
+      onError(err)
+    }
   })
   resumeTorrents() /* restart everything we were torrenting last time the app ran */
+  setInterval(updateTorrentProgress, 1000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -158,7 +163,7 @@ function updateElectron () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  if (['videoMouseMoved', 'playbackJump'].indexOf(action) < 0) {
+  if (['mediaMouseMoved', 'playbackJump'].indexOf(action) === -1) {
     console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
   }
   if (action === 'onOpen') {
@@ -174,8 +179,14 @@ function dispatch (action, ...args) {
     seed(args[0] /* files */)
   }
   if (action === 'play') {
-    // TODO: handle audio. video only for now.
-    openPlayer(args[0] /* torrentSummary */, args[1] /* index */)
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        // TODO: handle audio. video only for now.
+        openPlayer(args[0] /* torrentSummary */, args[1] /* index */, cb)
+      },
+      onbeforeunload: closePlayer
+    })
   }
   if (action === 'openFile') {
     openFile(args[0] /* torrentSummary */, args[1] /* index */)
@@ -205,17 +216,21 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'back') {
-    // TODO
-    // window.history.back()
-    ipcRenderer.send('unblockPowerSave')
-    closePlayer()
+    state.location.back()
+    update()
   }
   if (action === 'forward') {
-    // TODO
-    // window.history.forward()
+    state.location.forward()
+    update()
   }
   if (action === 'playPause') {
     playPause()
+  }
+  if (action === 'play') {
+    playPause(false)
+  }
+  if (action === 'pause') {
+    playPause(true)
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -223,19 +238,20 @@ function dispatch (action, ...args) {
   if (action === 'changeVolume') {
     changeVolume(args[0] /* increase */)
   }
-  if (action === 'videoPlaying') {
+  if (action === 'mediaPlaying') {
+    state.playing.isPaused = false
     ipcRenderer.send('blockPowerSave')
   }
-  if (action === 'videoPaused') {
-    ipcRenderer.send('paused-video')
+  if (action === 'mediaPaused') {
+    state.playing.isPaused = true
     ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0])
     update()
   }
-  if (action === 'videoMouseMoved') {
-    state.video.mouseStationarySince = new Date().getTime()
+  if (action === 'mediaMouseMoved') {
+    state.playing.mouseStationarySince = new Date().getTime()
     update()
   }
   if (action === 'exitModal') {
@@ -244,11 +260,16 @@ function dispatch (action, ...args) {
   }
 }
 
-function playPause () {
+// Plays or pauses the video. If isPaused is undefined, acts as a toggle
+function playPause (isPaused) {
+  if (isPaused === state.playing.isPaused) {
+    return // Nothing to do
+  }
+  // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
   if (Cast.isCasting()) {
     Cast.playPause()
   }
-  state.video.isPaused = !state.video.isPaused
+  state.playing.isPaused = !state.playing.isPaused
   update()
 }
 
@@ -256,14 +277,14 @@ function jumpToTime (time) {
   if (Cast.isCasting()) {
     Cast.seek(time)
   } else {
-    state.video.jumpToTime = time
+    state.playing.jumpToTime = time
     update()
   }
 }
 
 function changeVolume (delta) {
   // change volume with delta value
-  setVolume(state.video.volume + delta)
+  setVolume(state.playing.volume + delta)
 }
 
 function setVolume (volume) {
@@ -272,7 +293,7 @@ function setVolume (volume) {
   if (Cast.isCasting()) {
     Cast.setVolume(volume)
   } else {
-    state.video.setVolume = volume
+    state.playing.setVolume = volume
     update()
   }
 }
@@ -281,6 +302,7 @@ function setupIpc () {
   ipcRenderer.send('ipcReady')
 
   ipcRenderer.on('log', (e, ...args) => console.log(...args))
+  ipcRenderer.on('error', (e, ...args) => console.error(...args))
 
   ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
 
@@ -303,7 +325,7 @@ function setupIpc () {
 }
 
 // Load state.saved from the JSON state file
-function loadState (callback) {
+function loadState (cb) {
   cfg.read(function (err, data) {
     if (err) console.error(err)
     console.log('loaded state from ' + cfg.filePath)
@@ -313,9 +335,8 @@ function loadState (callback) {
     state.saved.torrents.forEach(function (torrentSummary) {
       if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
     })
-    saveState()
 
-    if (callback) callback()
+    if (cb) cb()
   })
 }
 
@@ -427,16 +448,17 @@ function addTorrentToList (torrent) {
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
-  if (s.torrentPath) return startTorrentingID(s.torrentPath)
-  else if (s.magnetURI) return startTorrentingID(s.magnetURI)
-  else return startTorrentingID(s.infoHash)
+  if (s.torrentPath) return startTorrentingID(s.torrentPath, s.path)
+  else if (s.magnetURI) return startTorrentingID(s.magnetURI, s.path)
+  else return startTorrentingID(s.infoHash, s.path)
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrentingID (torrentID) {
+function startTorrentingID (torrentID, path) {
+  console.log('Starting torrent ' + torrentID)
   var torrent = state.client.add(torrentID, {
-    path: state.saved.downloadPath // Use downloads folder
+    path: path || state.saved.downloadPath // Use downloads folder
   })
   addTorrentEvents(torrent)
   return torrent
@@ -462,40 +484,79 @@ function addTorrentEvents (torrent) {
   torrent.on('done', torrentDone)
 
   function torrentReady () {
+    // Summarize torrent
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'downloading'
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
     torrentSummary.infoHash = torrent.infoHash
+    torrentSummary.path = torrent.path
 
-    saveTorrentFile(torrentSummary, torrent)
+    // Summarize torrent files
+    torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
+    updateTorrentProgress()
 
-    if (!torrentSummary.posterURL) {
-      generateTorrentPoster(torrent, torrentSummary)
-    }
+    // Save the .torrent file, if it hasn't been saved already
+    if (!torrentSummary.torrentPath) saveTorrentFile(torrentSummary, torrent)
+
+    // Auto-generate a poster image, if it hasn't been generated already
+    if (!torrentSummary.posterURL) generateTorrentPoster(torrent, torrentSummary)
 
     update()
   }
 
   function torrentDone () {
+    // Update the torrent summary
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
+    updateTorrentProgress()
 
-    if (!state.window.isFocused) {
-      state.dock.badge += 1
+    // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
+    // Don't notify if we merely finished verifying data files that were already on disk.
+    if (torrent.received > 0) {
+      if (!state.window.isFocused) {
+        state.dock.badge += 1
+      }
+      showDoneNotification(torrent)
     }
 
-    showDoneNotification(torrent)
     update()
   }
 }
 
+function updateTorrentProgress () {
+  // TODO: ideally this would be tracked by WebTorrent, which could do it
+  // more efficiently than looping over torrent.bitfield
+  var changed = false
+  state.client.torrents.forEach(function (torrent) {
+    var torrentSummary = getTorrentSummary(torrent.infoHash)
+    if (!torrentSummary) return
+    torrent.files.forEach(function (file, index) {
+      var numPieces = file._endPiece - file._startPiece + 1
+      var numPiecesPresent = 0
+      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
+        if (torrent.bitfield.get(piece)) numPiecesPresent++
+      }
+
+      var fileSummary = torrentSummary.files[index]
+      if (fileSummary.numPiecesPresent !== numPiecesPresent || fileSummary.numPieces !== numPieces) {
+        fileSummary.numPieces = numPieces
+        fileSummary.numPiecesPresent = numPiecesPresent
+        changed = true
+      }
+    })
+  })
+
+  if (changed) update()
+}
+
 function generateTorrentPoster (torrent, torrentSummary) {
-  torrentPoster(torrent, function (err, buf) {
+  torrentPoster(torrent, function (err, buf, extension) {
     if (err) return onWarning(err)
     // save it for next time
-    fs.mkdir(config.CONFIG_POSTER_PATH, function (_) {
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
+    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+      if (err) return onWarning(err)
+      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + extension)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
         // show the poster
@@ -504,6 +565,16 @@ function generateTorrentPoster (torrent, torrentSummary) {
       })
     })
   })
+}
+
+// Produces a JSON saveable summary of a file in a torrent
+function summarizeFileInTorrent (file) {
+  return {
+    name: file.name,
+    length: file.length,
+    numPiecesPresent: 0,
+    numPieces: null
+  }
 }
 
 // Every time we resolve a magnet URI, save the torrent file so that we never
@@ -549,20 +620,14 @@ function startServer (torrentSummary, index, cb) {
 
 function startServerFromReadyTorrent (torrent, index, cb) {
   // automatically choose which file in the torrent to play, if necessary
-  if (!index) {
-    // filter out file formats that the <video> tag definitely can't play
-    var files = torrent.files.filter(TorrentPlayer.isPlayable)
-    if (files.length === 0) return cb(new Error('Can\'t play any files in torrent'))
-    // use largest file
-    var largestFile = files.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    index = torrent.files.indexOf(largestFile)
-  }
+  if (index === undefined) index = pickFileToPlay(torrent.files)
+  if (index === undefined) return cb(new errors.UnplayableError())
+  var file = torrent.files[index]
 
   // update state
   state.playing.infoHash = torrent.infoHash
   state.playing.fileIndex = index
+  state.playing.type = TorrentPlayer.isVideo(file) ? 'video' : 'audio'
 
   var server = torrent.createServer()
   server.listen(0, function () {
@@ -577,6 +642,28 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   })
 }
 
+// Picks the default file to play from a list of torrent or torrentSummary files
+// Returns an index or undefined, if no files are playable
+function pickFileToPlay (files) {
+  // first, try to find the biggest video file
+  var videoFiles = files.filter(TorrentPlayer.isVideo)
+  if (videoFiles.length > 0) {
+    var largestVideoFile = videoFiles.reduce(function (a, b) {
+      return a.length > b.length ? a : b
+    })
+    return files.indexOf(largestVideoFile)
+  }
+
+  // if there are no videos, play the first audio file
+  var audioFiles = files.filter(TorrentPlayer.isAudio)
+  if (audioFiles.length > 0) {
+    return files.indexOf(audioFiles[0])
+  }
+
+  // no video or audio means nothing is playable
+  return undefined
+}
+
 function stopServer () {
   if (!state.server) return
   state.server.server.destroy()
@@ -586,7 +673,7 @@ function stopServer () {
 }
 
 // Opens the video player
-function openPlayer (torrentSummary, index) {
+function openPlayer (torrentSummary, index, cb) {
   var torrent = state.client.get(torrentSummary.infoHash)
   if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
   torrentSummary.playStatus = 'requested'
@@ -599,18 +686,23 @@ function openPlayer (torrentSummary, index) {
   }, 10000) /* give it a few seconds */
 
   startServer(torrentSummary, index, function (err) {
-    if (err) return onError(err)
+    clearTimeout(timeout)
+    if (err) {
+      torrentSummary.playStatus = 'unplayable'
+      playInterfaceSound(config.SOUND_ERROR)
+      update()
+      return onError(err)
+    }
 
     // if we timed out (user clicked play a long time ago), don't autoplay
-    clearTimeout(timeout)
     var timedOut = torrentSummary.playStatus === 'timeout'
     delete torrentSummary.playStatus
-    if (timedOut) return
+    if (timedOut) return update()
 
     // otherwise, play the video
-    state.url = 'player'
     state.window.title = torrentSummary.name
     update()
+    cb()
   })
 }
 
@@ -637,18 +729,20 @@ function openFolder (torrentSummary) {
   })
 }
 
-function closePlayer () {
-  state.url = 'home'
+function closePlayer (cb) {
   state.window.title = config.APP_NAME
   update()
 
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
-
   restoreBounds()
   stopServer()
   update()
+
+  ipcRenderer.send('unblockPowerSave')
+
+  cb()
 }
 
 function toggleTorrent (torrentSummary) {
@@ -671,6 +765,7 @@ function deleteTorrent (torrentSummary) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
+  state.location.clearForward() // prevent user from going forward to a deleted torrent
   playInterfaceSound(config.SOUND_DELETE)
 }
 
@@ -682,12 +777,20 @@ function toggleSelectTorrent (infoHash) {
 
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
+  // Don't modify the window size if it's already maximized
+  if (remote.getCurrentWindow().isMaximized()) {
+    state.window.bounds = null
+    return
+  }
+
+  // Save the bounds of the window for later. See restoreBounds()
   state.window.bounds = {
     x: window.screenX,
     y: window.screenY,
     width: window.outerWidth,
     height: window.outerHeight
   }
+  state.window.wasMaximized = remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   var screenWidth = window.screen.width
@@ -711,12 +814,12 @@ function setDimensions (dimensions) {
 function restoreBounds () {
   ipcRenderer.send('setAspectRatio', 0)
   if (state.window.bounds) {
-    ipcRenderer.send('setBounds', state.window.bounds, true)
+    ipcRenderer.send('setBounds', state.window.bounds, false)
   }
 }
 
 function onError (err) {
-  if (err.stack) console.error(err.stack)
+  console.error(err.stack || err)
   playInterfaceSound(config.SOUND_ERROR)
   state.errors.push({
     time: new Date().getTime(),

@@ -2,6 +2,7 @@ var os = require('os')
 var path = require('path')
 
 var config = require('../config')
+var LocationHistory = require('./lib/location-history')
 
 module.exports = {
   /*
@@ -11,28 +12,27 @@ module.exports = {
   client: null, /* the WebTorrent client */
   server: null, /* local WebTorrent-to-HTTP server */
   prev: {}, /* used for state diffing in updateElectron() */
-  url: 'home',
+  location: new LocationHistory(),
   window: {
-    bounds: null, /* x y width height */
+    bounds: null, /* {x, y, width, height } */
     isFocused: true,
     isFullScreen: false,
     title: config.APP_NAME /* current window title */
   },
   selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
-  playing: { /* the torrent and file we're currently streaming */
+  playing: { /* the media (audio or video) that we're currently playing */
     infoHash: null, /* the info hash of the torrent we're playing */
     fileIndex: null, /* the zero-based index within the torrent */
-    location: 'local' /* 'local', 'chromecast', 'airplay' */
+    location: 'local', /* 'local', 'chromecast', 'airplay' */
+    type: null, /* 'audio' or 'video' */
+    currentTime: 0, /* seconds */
+    duration: 1, /* seconds */
+    isPaused: true,
+    mouseStationarySince: 0 /* Unix time in ms */
   },
   devices: { /* playback devices like Chromecast and AppleTV */
     airplay: null, /* airplay client. finds and manages AppleTVs */
     chromecast: null /* chromecast client. finds and manages Chromecasts */
-  },
-  video: { /* state of the video player screen */
-    currentTime: 0, /* seconds */
-    duration: 1, /* seconds */
-    isPaused: false,
-    mouseStationarySince: 0 /* Unix time in ms */
   },
   dock: {
     badge: 0,
@@ -62,21 +62,48 @@ module.exports = {
     torrents: [
       {
         status: 'paused',
-        infoHash: 'f84b51f0d2c3455ab5dabb6643b4340234cd036e',
+        infoHash: '88594aaacbde40ef3e2510c47374ec0aa396c08e',
         displayName: 'Big Buck Bunny',
-        posterURL: path.join(__dirname, '..', 'static', 'bigBuckBunny.jpg')
+        posterURL: path.join(config.ROOT_PATH, 'static', 'bigBuckBunny.jpg'),
+        torrentPath: path.join(config.ROOT_PATH, 'static', 'bigBuckBunny.torrent'),
+        files: [
+          {
+            'name': 'bbb_sunflower_1080p_30fps_normal.mp4',
+            'length': 276134947,
+            'numPiecesPresent': 0,
+            'numPieces': 527
+          }
+        ]
       },
       {
         status: 'paused',
         infoHash: '6a9759bffd5c0af65319979fb7832189f4f3c35d',
         displayName: 'Sintel',
-        posterURL: path.join(__dirname, '..', 'static', 'sintel.jpg')
+        posterURL: path.join(config.ROOT_PATH, 'static', 'sintel.jpg'),
+        torrentPath: path.join(config.ROOT_PATH, 'static', 'sintel.torrent'),
+        files: [
+          {
+            'name': 'sintel.mp4',
+            'length': 129241752,
+            'numPiecesPresent': 0,
+            'numPieces': 987
+          }
+        ]
       },
       {
         status: 'paused',
         infoHash: '02767050e0be2fd4db9a2ad6c12416ac806ed6ed',
         displayName: 'Tears of Steel',
-        posterURL: path.join(__dirname, '..', 'static', 'tearsOfSteel.jpg')
+        posterURL: path.join(config.ROOT_PATH, 'static', 'tearsOfSteel.jpg'),
+        torrentPath: path.join(config.ROOT_PATH, 'static', 'tearsOfSteel.torrent'),
+        files: [
+          {
+            'name': 'tears_of_steel_1080p.webm',
+            'length': 571346576,
+            'numPiecesPresent': 0,
+            'numPieces': 2180
+          }
+        ]
       }
     ],
     downloadPath: path.join(os.homedir(), 'Downloads')

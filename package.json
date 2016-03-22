@@ -1,7 +1,7 @@
 {
   "name": "webtorrent-app",
   "description": "WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": {
     "name": "Feross Aboukhadijeh",
     "email": "feross@feross.org",
@@ -21,6 +21,7 @@
     "electron-localshortcut": "^0.6.0",
     "hyperx": "^2.0.2",
     "main-loop": "^3.2.0",
+    "mkdirp": "^0.5.1",
     "network-address": "^1.1.0",
     "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
@@ -29,8 +30,11 @@
     "winreg": "^1.0.1"
   },
   "devDependencies": {
+    "appdmg": "^0.3.6",
+    "electron-osx-sign": "^0.3.0",
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.37.2",
+    "gh-release": "^2.0.2",
     "path-exists": "^2.1.0",
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",

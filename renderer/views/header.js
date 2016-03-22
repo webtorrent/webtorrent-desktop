@@ -9,15 +9,15 @@ function Header (state, dispatch) {
     <div class='header'>
       ${getTitle()}
       <div class='nav left'>
-        <i
-          class='icon back'
-          title='back'
+        <i.icon.back
+          class=${state.location.hasBack() ? '' : 'disabled'}
+          title='Back'
           onclick=${() => dispatch('back')}>
           chevron_left
         </i>
-        <i
-          class='icon forward'
-          title='forward'
+        <i.icon.forward
+          class=${state.location.hasForward() ? '' : 'disabled'}
+          title='Forward'
           onclick=${() => dispatch('forward')}>
           chevron_right
         </i>
@@ -35,11 +35,11 @@ function Header (state, dispatch) {
   }
 
   function getAddButton () {
-    if (state.url !== 'player') {
+    if (state.location.current().url !== 'player') {
       return hx`
         <i
           class='icon add'
-          title='add torrent'
+          title='Add torrent'
           onclick=${() => dispatch('showOpenTorrentFile')}>
           add
         </i>

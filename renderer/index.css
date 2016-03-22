@@ -181,7 +181,6 @@ i:not(.disabled):hover {
   left: 0;
   top: 0;
   right: 0;
-  z-index: 1000;
   transition: opacity 0.15s ease-out;
   font-size: 14px;
   line-height: 1.5em;
@@ -396,7 +395,7 @@ input {
   position: absolute;
   top: 20px;
   left: 20px;
-  width: calc(100% - 100px);
+  width: calc(100% - 150px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
@@ -545,6 +544,10 @@ body.drag .torrent-placeholder span {
   border-spacing: 0;
 }
 
+.torrent-details tr {
+  height: 28px;
+}
+
 .torrent-details tr:hover,
 .torrent-details .open-folder:hover {
   background-color: rgba(200, 200, 200, 0.3);
@@ -553,6 +556,7 @@ body.drag .torrent-placeholder span {
 .torrent-details td {
   overflow: hidden;
   padding: 0;
+  vertical-align: bottom;
 }
 
 .torrent-details td.col-icon {
@@ -732,7 +736,6 @@ body.drag .torrent-placeholder span {
 
 .error-popover {
   position: fixed;
-  z-index: 1001;
   top: 36px;
   margin: 0;
   width: 100%;

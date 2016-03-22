@@ -34,8 +34,6 @@ function init (callback) {
   })
 
   var browser = airplay.createBrowser()
-  var devices = browser.getDevices(true)
-  console.log('TODO GET DEVICES RET %o', devices)
   browser.on('deviceOn', function (player) {
     state.devices.airplay = player
     addAirplayEvents()
@@ -60,15 +58,15 @@ function pollCastStatus (state) {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.status(function (err, status) {
       if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
-      state.video.isPaused = status.playerState === 'PAUSED'
-      state.video.currentTime = status.currentTime
-      state.video.volume = status.volume.muted ? 0 : status.volume.level
+      state.playing.isPaused = status.playerState === 'PAUSED'
+      state.playing.currentTime = status.currentTime
+      state.playing.volume = status.volume.muted ? 0 : status.volume.level
       update()
     })
   } else if (state.playing.location === 'airplay') {
     state.devices.airplay.status(function (status) {
-      state.video.isPaused = status.rate === 0
-      state.video.currentTime = status.position
+      state.playing.isPaused = status.rate === 0
+      state.playing.currentTime = status.position
       // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
       // According to docs is in [-30 - 0] (db) range
       // should be converted to [0 - 1] using (val / 30 + 1)
@@ -129,7 +127,7 @@ function stopCasting () {
 
 function stoppedCasting () {
   state.playing.location = 'local'
-  state.video.jumpToTime = state.video.currentTime
+  state.playing.jumpToTime = state.playing.currentTime
   update()
 }
 
@@ -144,11 +142,11 @@ function playPause () {
   var device
   if (state.playing.location === 'chromecast') {
     device = state.devices.chromecast
-    if (!state.video.isPaused) device.pause(castCallback)
+    if (!state.playing.isPaused) device.pause(castCallback)
     else device.play(null, null, castCallback)
   } else if (state.playing.location === 'airplay') {
     device = state.devices.airplay
-    if (!state.video.isPaused) device.rate(0, castCallback)
+    if (!state.playing.isPaused) device.rate(0, castCallback)
     else device.rate(1, castCallback)
   }
 }
@@ -166,7 +164,7 @@ function setVolume (volume) {
     state.devices.chromecast.volume(volume, castCallback)
   } else if (state.playing.location === 'airplay') {
     // TODO remove line below once we can fetch the information in status update
-    state.video.volume = volume
+    state.playing.volume = volume
     volume = (volume - 1) * 30
     state.devices.airplay.volume(volume, castCallback)
   }

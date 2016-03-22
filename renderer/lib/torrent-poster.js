@@ -4,19 +4,32 @@ var captureVideoFrame = require('./capture-video-frame')
 var path = require('path')
 
 function torrentPoster (torrent, cb) {
-  // filter out file formats that the <video> tag definitely can't play
+  // First, try to use the largest video file
+  // Filter out file formats that the <video> tag definitely can't play
+  var videoFile = getLargestFileByExtension(torrent, ['.mp4', '.m4v', '.webm', '.mov', '.mkv'])
+  if (videoFile) return torrentPosterFromVideo(videoFile, torrent, cb)
+
+  // Second, try to use the largest image file
+  var imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.png'])
+  if (imgFile) return torrentPosterFromImage(imgFile, torrent, cb)
+
+  // TODO: generate a waveform from the largest sound file
+  // Finally, admit defeat
+  return cb(new Error('Cannot generate a poster from any files in the torrent'))
+}
+
+function getLargestFileByExtension (torrent, extensions) {
   var files = torrent.files.filter(function (file) {
     var extname = path.extname(file.name)
-    return ['.mp4', '.m4v', '.webm', '.mov', '.mkv'].indexOf(extname) !== -1
+    return extensions.indexOf(extname) !== -1
   })
-
-  if (files.length === 0) return cb(new Error('cannot make screenshot for any files in torrent'))
-
-  // use largest file
-  var file = files.reduce(function (a, b) {
+  if (files.length === 0) return undefined
+  return files.reduce(function (a, b) {
     return a.length > b.length ? a : b
   })
+}
 
+function torrentPosterFromVideo (file, torrent, cb) {
   var index = torrent.files.indexOf(file)
 
   var server = torrent.createServer(0)
@@ -51,7 +64,12 @@ function torrentPoster (torrent, cb) {
 
       server.destroy()
 
-      cb(null, buf)
+      cb(null, buf, '.jpg')
     }
   }
+}
+
+function torrentPosterFromImage (file, torrent, cb) {
+  var extname = path.extname(file.name)
+  file.getBuffer((err, buf) => cb(err, buf, extname))
 }
