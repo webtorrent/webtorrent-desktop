@@ -1,6 +1,6 @@
 # WebTorrent.app Version History
 
-# v0.0.0
+## v0.0.0
 
 The first official release of WebTorrent.app, the streaming torrent client for OS X,
 Windows, and Linux. For now, we're only releasing binaries for OS X.
@@ -9,7 +9,7 @@ WebTorrent.app is in ALPHA and under very active development – expect lots mo
 the coming weeks! If you know JavaScript and want to help us out, there's
 [lots to do](https://github.com/feross/webtorrent-app/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
-##  Features
+### Features
 
 - **Lightweight, fast torrent client**
 - **Beautiful user experience**
