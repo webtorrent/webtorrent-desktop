@@ -8,6 +8,7 @@ var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
 var mkdirp = require('mkdirp')
+var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
 var remote = require('remote')
@@ -609,7 +610,17 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   state.playing.infoHash = torrent.infoHash
   state.playing.fileIndex = index
   state.playing.type = TorrentPlayer.isVideo(file) ? 'video' : 'audio'
+  state.playing.audioInfo = null
 
+  // if it's audio, parse out the metadata (artist, title, etc)
+  musicmetadata(file.createReadStream(), function (err, info) {
+    if (err) return
+    console.log('Got audio metadata for %s: %v', file.name, info)
+    state.playing.audioInfo = info
+    update()
+  })
+
+  // either way, start a streaming torrent-to-http server
   var server = torrent.createServer()
   server.listen(0, function () {
     var port = server.address().port

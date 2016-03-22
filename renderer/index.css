@@ -731,6 +731,34 @@ body.drag .torrent-placeholder span {
 }
 
 /*
+ * AUDIO DETAILS
+ */
+
+.audio-metadata {
+  width: 500px;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  align-self: center;
+  margin: 0 auto;
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 2;
+}
+
+.audio-metadata .audio-title {
+  font-size: 32px;
+}
+
+.audio-metadata label {
+  display:inline-block;
+  width: 100px;
+  text-align: right;
+  font-weight: normal;
+  margin-right: 25px;
+}
+
+/*
  * ERRORS
  */
 

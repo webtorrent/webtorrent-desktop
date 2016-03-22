@@ -21,6 +21,8 @@ function Player (state, dispatch) {
 }
 
 function renderMedia (state, dispatch) {
+  if (!state.server) return
+
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
   var mediaType = state.playing.type /* 'audio' or 'video' */
@@ -57,8 +59,9 @@ function renderMedia (state, dispatch) {
   // Show the media.
   // Video fills the window, centered with black bars if necessary
   // Audio gets a static poster image and a summary of the file metadata.
+  var isAudio = mediaType === 'audio'
   var style = {
-    backgroundImage: mediaType === 'audio' ? cssBackgroundImagePoster(state) : ''
+    backgroundImage: isAudio ? cssBackgroundImagePoster(state) : ''
   }
   return hx`
     <div
@@ -66,6 +69,7 @@ function renderMedia (state, dispatch) {
       style=${style}
       onmousemove=${() => dispatch('mediaMouseMoved')}>
       ${mediaTag}
+      ${renderAudioMetadata(state)}
     </div>
   `
 
@@ -84,6 +88,34 @@ function renderMedia (state, dispatch) {
   function onEnded (e) {
     state.playing.isPaused = true
   }
+}
+
+function renderAudioMetadata (state) {
+  if (!state.playing.audioInfo) return
+  var info = state.playing.audioInfo
+
+  // Get audio track info
+  var title = info.title
+  if (!title) {
+    var torrentSummary = getPlayingTorrentSummary(state)
+    title = torrentSummary.files[state.playing.fileIndex].name
+  }
+  var artist = info.artist && info.artist[0]
+  var album = info.album
+  if (album && info.year && !album.includes(info.year)) {
+    album += ' (' + info.year + ')'
+  }
+  var track
+  if (info.track && info.track.no && info.track.of) {
+    track = info.track.no + ' of ' + info.track.of
+  }
+
+  // Show a small info box in the middle of the screen
+  var elems = [hx`<div class='audio-title'><label></label>${title}</div>`]
+  if (artist) elems.push(hx`<div class='audio-artist'><label>Artist</label>${artist}</div>`)
+  if (album) elems.push(hx`<div class='audio-album'><label>Album</label>${album}</div>`)
+  if (track) elems.push(hx`<div class='audio-track'><label>Track</label>${track}</div>`)
+  return hx`<div class='audio-metadata'>${elems}</div>`
 }
 
 function renderCastScreen (state, dispatch) {
@@ -112,13 +144,17 @@ function renderCastScreen (state, dispatch) {
 
 // Returns the CSS background-image string for a poster image + dark vignette
 function cssBackgroundImagePoster (state) {
-  var infoHash = state.playing.infoHash
-  var torrentSummary = state.saved.torrents.find((x) => x.infoHash === infoHash)
+  var torrentSummary = getPlayingTorrentSummary(state)
   if (!torrentSummary || !torrentSummary.posterURL) return ''
   var cleanURL = torrentSummary.posterURL.replace(/\\/g, '/')
   return 'radial-gradient(circle at center, ' +
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)' +
     `, url(${cleanURL})`
+}
+
+function getPlayingTorrentSummary (state) {
+  var infoHash = state.playing.infoHash
+  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 function renderPlayerControls (state, dispatch) {
