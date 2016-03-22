@@ -10,6 +10,7 @@ while (<>) {
   next if $seen{$_};
   next if /<support\@greenkeeper.io>/;
   next if /<ungoldman\@gmail.com>/;
+  next if /<grunjol\@users.noreply.github.com>/;
   $seen{$_} = push @authors, "- ", $_;
 }
 END {
