@@ -24,7 +24,7 @@ function installDesktopFile () {
 
   desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
 
-  var appPath = path.dirname(config.IS_PRODUCTION ? process.execPath : __dirname)
+  var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
   desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
 
   var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
