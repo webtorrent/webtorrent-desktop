@@ -163,7 +163,7 @@ function updateElectron () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  if (['videoMouseMoved', 'playbackJump'].indexOf(action) === -1) {
+  if (['mediaMouseMoved', 'playbackJump'].indexOf(action) === -1) {
     console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
   }
   if (action === 'onOpen') {
@@ -235,20 +235,20 @@ function dispatch (action, ...args) {
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
   }
-  if (action === 'videoPlaying') {
-    state.video.isPaused = false
+  if (action === 'mediaPlaying') {
+    state.playing.isPaused = false
     ipcRenderer.send('blockPowerSave')
   }
-  if (action === 'videoPaused') {
-    state.video.isPaused = true
+  if (action === 'mediaPaused') {
+    state.playing.isPaused = true
     ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0])
     update()
   }
-  if (action === 'videoMouseMoved') {
-    state.video.mouseStationarySince = new Date().getTime()
+  if (action === 'mediaMouseMoved') {
+    state.playing.mouseStationarySince = new Date().getTime()
     update()
   }
   if (action === 'exitModal') {
@@ -259,14 +259,14 @@ function dispatch (action, ...args) {
 
 // Plays or pauses the video. If isPaused is undefined, acts as a toggle
 function playPause (isPaused) {
-  if (isPaused === state.video.isPaused) {
+  if (isPaused === state.playing.isPaused) {
     return // Nothing to do
   }
   // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
   if (Cast.isCasting()) {
     Cast.playPause()
   }
-  state.video.isPaused = !state.video.isPaused
+  state.playing.isPaused = !state.playing.isPaused
   update()
 }
 
@@ -274,7 +274,7 @@ function jumpToTime (time) {
   if (Cast.isCasting()) {
     Cast.seek(time)
   } else {
-    state.video.jumpToTime = time
+    state.playing.jumpToTime = time
     update()
   }
 }
@@ -601,20 +601,14 @@ function startServer (torrentSummary, index, cb) {
 
 function startServerFromReadyTorrent (torrent, index, cb) {
   // automatically choose which file in the torrent to play, if necessary
-  if (!index) {
-    // filter out file formats that the <video> tag definitely can't play
-    var files = torrent.files.filter(TorrentPlayer.isPlayable)
-    if (files.length === 0) return cb(new errors.UnplayableError())
-    // use largest file
-    var largestFile = files.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    index = torrent.files.indexOf(largestFile)
-  }
+  if (index === undefined) index = pickFileToPlay(torrent.files)
+  if (index === undefined) return cb(new errors.UnplayableError())
+  var file = torrent.files[index]
 
   // update state
   state.playing.infoHash = torrent.infoHash
   state.playing.fileIndex = index
+  state.playing.type = TorrentPlayer.isVideo(file) ? 'video' : 'audio'
 
   var server = torrent.createServer()
   server.listen(0, function () {
@@ -627,6 +621,28 @@ function startServerFromReadyTorrent (torrent, index, cb) {
     }
     cb()
   })
+}
+
+// Picks the default file to play from a list of torrent or torrentSummary files
+// Returns an index or undefined, if no files are playable
+function pickFileToPlay (files) {
+  // first, try to find the biggest video file
+  var videoFiles = files.filter(TorrentPlayer.isVideo)
+  if (videoFiles.length > 0) {
+    var largestVideoFile = videoFiles.reduce(function (a, b) {
+      return a.length > b.length ? a : b
+    })
+    return files.indexOf(largestVideoFile)
+  }
+
+  // if there are no videos, play the first audio file
+  var audioFiles = files.filter(TorrentPlayer.isAudio)
+  if (audioFiles.length > 0) {
+    return files.indexOf(audioFiles[0])
+  }
+
+  // no video or audio means nothing is playable
+  return undefined
 }
 
 function stopServer () {

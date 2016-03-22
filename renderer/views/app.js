@@ -18,9 +18,9 @@ function App (state, dispatch) {
   // * The video is paused
   // * The video is playing remotely on Chromecast or Airplay
   var hideControls = state.location.current().url === 'player' &&
-    state.video.mouseStationarySince !== 0 &&
-    new Date().getTime() - state.video.mouseStationarySince > 2000 &&
-    !state.video.isPaused &&
+    state.playing.mouseStationarySince !== 0 &&
+    new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
+    !state.playing.isPaused &&
     state.playing.location === 'local'
 
   // Hide the header on Windows/Linux when in the player

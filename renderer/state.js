@@ -20,20 +20,19 @@ module.exports = {
     title: config.APP_NAME /* current window title */
   },
   selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
-  playing: { /* the torrent and file we're currently streaming */
+  playing: { /* the media (audio or video) that we're currently playing */
     infoHash: null, /* the info hash of the torrent we're playing */
     fileIndex: null, /* the zero-based index within the torrent */
-    location: 'local' /* 'local', 'chromecast', 'airplay' */
-  },
-  devices: { /* playback devices like Chromecast and AppleTV */
-    airplay: null, /* airplay client. finds and manages AppleTVs */
-    chromecast: null /* chromecast client. finds and manages Chromecasts */
-  },
-  video: { /* state of the video player screen */
+    location: 'local', /* 'local', 'chromecast', 'airplay' */
+    type: null, /* 'audio' or 'video' */
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
     isPaused: true,
     mouseStationarySince: 0 /* Unix time in ms */
+  },
+  devices: { /* playback devices like Chromecast and AppleTV */
+    airplay: null, /* airplay client. finds and manages AppleTVs */
+    chromecast: null /* chromecast client. finds and manages Chromecasts */
   },
   dock: {
     badge: 0,

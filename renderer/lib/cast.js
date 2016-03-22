@@ -57,14 +57,14 @@ function pollCastStatus (state) {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.status(function (err, status) {
       if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
-      state.video.isPaused = status.playerState === 'PAUSED'
-      state.video.currentTime = status.currentTime
+      state.playing.isPaused = status.playerState === 'PAUSED'
+      state.playing.currentTime = status.currentTime
       update()
     })
   } else if (state.playing.location === 'airplay') {
     state.devices.airplay.status(function (status) {
-      state.video.isPaused = status.rate === 0
-      state.video.currentTime = status.position
+      state.playing.isPaused = status.rate === 0
+      state.playing.currentTime = status.position
       update()
     })
   }
@@ -122,7 +122,7 @@ function stopCasting () {
 
 function stoppedCasting () {
   state.playing.location = 'local'
-  state.video.jumpToTime = state.video.currentTime
+  state.playing.jumpToTime = state.playing.currentTime
   update()
 }
 
@@ -137,11 +137,11 @@ function playPause () {
   var device
   if (state.playing.location === 'chromecast') {
     device = state.devices.chromecast
-    if (!state.video.isPaused) device.pause(castCallback)
+    if (!state.playing.isPaused) device.pause(castCallback)
     else device.play(null, null, castCallback)
   } else if (state.playing.location === 'airplay') {
     device = state.devices.airplay
-    if (!state.video.isPaused) device.rate(0, castCallback)
+    if (!state.playing.isPaused) device.rate(0, castCallback)
     else device.rate(1, castCallback)
   }
 }
