@@ -9,8 +9,9 @@ module.exports = {
   APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
   APP_ICON: path.join(__dirname, 'static', 'WebTorrent'),
   APP_NAME: APP_NAME,
+  APP_VERSION: APP_VERSION,
 
-  AUTO_UPDATE_URL: 'https://webtorrent.io/app/updates?version=' + APP_VERSION,
+  AUTO_UPDATE_URL: 'https://webtorrent.io/app/update?version=' + APP_VERSION,
   AUTO_UPDATE_CHECK_STARTUP_DELAY: 60 * 1000 /* 1 minute */,
 
   CONFIG_PATH: applicationConfigPath(APP_NAME),

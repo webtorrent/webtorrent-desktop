@@ -30,6 +30,8 @@
     "winreg": "^1.0.1"
   },
   "devDependencies": {
+    "appdmg": "^0.3.6",
+    "electron-osx-sign": "^0.3.0",
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.37.2",
     "path-exists": "^2.1.0",

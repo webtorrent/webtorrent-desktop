@@ -10,18 +10,25 @@ var electronPackager = require('electron-packager')
 var fs = require('fs')
 var path = require('path')
 var pkg = require('../package.json')
-var plist = require('plist')
+
+var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
   var platform = process.argv[2]
   if (platform === '--darwin') {
-    buildDarwin()
+    buildDarwin(printDone)
   } else if (platform === '--win32') {
-    buildWin32()
+    buildWin32(printDone)
   } else if (platform === '--linux') {
-    buildLinux()
+    buildLinux(printDone)
   } else {
-    buildDarwin(() => buildWin32(() => buildLinux())) // Build all
+    buildDarwin(function (err, buildPath) {
+      printDone(err, buildPath)
+      buildWin32(function (err, buildPath) {
+        printDone(err, buildPath)
+        buildLinux(printDone)
+      })
+    })
   }
 }
 
@@ -30,7 +37,7 @@ var all = {
   arch: 'x64',
 
   // The application source directory.
-  dir: path.join(__dirname, '..'),
+  dir: config.ROOT_PATH,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
   // property on Windows, and `CFBundleShortVersionString` on OS X.
@@ -58,7 +65,7 @@ var all = {
   name: config.APP_NAME,
 
   // The base directory where the finished package(s) are created.
-  out: path.join(__dirname, '..', 'dist'),
+  out: path.join(config.ROOT_PATH, 'dist'),
 
   // Replace an already existing output directory.
   overwrite: true,
@@ -130,18 +137,15 @@ var linux = {
 build()
 
 function buildDarwin (cb) {
-  electronPackager(Object.assign({}, all, darwin), function (err, appPath) {
-    printDone(err, appPath)
+  var appDmg = require('appdmg')
+  var plist = require('plist')
+  var sign = require('electron-osx-sign')
+
+  electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
 
-    var contentsPath = path.join(
-      __dirname,
-      '..',
-      'dist',
-      `${config.APP_NAME}-darwin-x64`,
-      `${config.APP_NAME}.app`,
-      'Contents'
-    )
+    var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
+    var contentsPath = path.join(appPath, 'Contents')
     var resourcesPath = path.join(contentsPath, 'Resources')
     var infoPlistPath = path.join(contentsPath, 'Info.plist')
     var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
@@ -178,25 +182,70 @@ function buildDarwin (cb) {
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
-    if (cb) cb(null)
+    var zipPath = path.join(buildPath[0], BUILD_NAME + '.zip')
+    cp.execSync(`zip -r -y ${zipPath} ${appPath}`)
+
+    /*
+     * Signing OS X apps for distribution outside the App Store requires:
+     *
+     *   - Xcode
+     *   - Xcode Command Line Tools (xcode-select --install)
+     *   - Membership in the Apple Developer Program
+     */
+    if (process.platform === 'darwin') {
+      var signOpts = {
+        app: appPath,
+        platform: 'darwin',
+        verbose: true
+      }
+
+      var dmgPath = path.join(buildPath[0], BUILD_NAME + '.dmg')
+      var dmgOpts = {
+        basepath: config.ROOT_PATH,
+        target: dmgPath,
+        specification: {
+          title: config.APP_NAME,
+          icon: config.APP_ICON + '.icns',
+          background: path.join(config.STATIC_PATH, 'appdmg.png'),
+          'icon-size': 128,
+          contents: [
+            { x: 122, y: 240, type: 'file', path: appPath },
+            { x: 380, y: 240, type: 'link', path: '/Applications' },
+            // Hide hidden icons out of view, for users who have hidden files shown.
+            // https://github.com/LinusU/node-appdmg/issues/45#issuecomment-153924954
+            { x: 50, y: 500, type: 'position', path: '.background' },
+            { x: 100, y: 500, type: 'position', path: '.DS_Store' },
+            { x: 150, y: 500, type: 'position', path: '.Trashes' },
+            { x: 200, y: 500, type: 'position', path: '.VolumeIcon.icns' }
+          ]
+        }
+      }
+
+      sign(signOpts, function (err) {
+        if (err) return cb(err)
+
+        var dmg = appDmg(dmgOpts)
+        dmg.on('error', cb)
+        dmg.on('progress', function (info) {
+          if (info.type === 'step-begin') console.log(info.title + '...')
+        })
+        dmg.on('finish', function (info) {
+          cb(null, buildPath)
+        })
+      })
+    }
   })
 }
 
 function buildWin32 (cb) {
-  electronPackager(Object.assign({}, all, win32), function (err, appPath) {
-    printDone(err, appPath)
-    if (cb) cb(err)
-  })
+  electronPackager(Object.assign({}, all, win32), cb)
 }
 
 function buildLinux (cb) {
-  electronPackager(Object.assign({}, all, linux), function (err, appPath) {
-    printDone(err, appPath)
-    if (cb) cb(err)
-  })
+  electronPackager(Object.assign({}, all, linux), cb)
 }
 
-function printDone (err, appPath) {
+function printDone (err, buildPath) {
   if (err) console.error(err.message || err)
-  else console.log('Built ' + appPath)
+  else console.log('Built ' + buildPath[0])
 }
