@@ -14,6 +14,7 @@ module.exports = {
   stopCasting,
   playPause,
   seek,
+  setVolume,
   isCasting
 }
 
@@ -59,12 +60,16 @@ function pollCastStatus (state) {
       if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
+      state.playing.volume = status.volume.muted ? 0 : status.volume.level
       update()
     })
   } else if (state.playing.location === 'airplay') {
     state.devices.airplay.status(function (status) {
       state.playing.isPaused = status.rate === 0
       state.playing.currentTime = status.position
+      // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
+      // According to docs is in [-30 - 0] (db) range
+      // should be converted to [0 - 1] using (val / 30 + 1)
       update()
     })
   }
@@ -151,6 +156,17 @@ function seek (time) {
     state.devices.chromecast.seek(time, castCallback)
   } else if (state.playing.location === 'airplay') {
     state.devices.airplay.scrub(time, castCallback)
+  }
+}
+
+function setVolume (volume) {
+  if (state.playing.location === 'chromecast') {
+    state.devices.chromecast.volume(volume, castCallback)
+  } else if (state.playing.location === 'airplay') {
+    // TODO remove line below once we can fetch the information in status update
+    state.playing.volume = volume
+    volume = (volume - 1) * 30
+    state.devices.airplay.volume(volume, castCallback)
   }
 }
 
