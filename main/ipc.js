@@ -27,6 +27,10 @@ function init () {
     menu.showOpenTorrentFile()
   })
 
+  ipcMain.on('showCreateTorrent', function (e) {
+    menu.showCreateTorrent()
+  })
+
   ipcMain.on('setBounds', function (e, bounds, maximize) {
     setBounds(bounds, maximize)
   })
