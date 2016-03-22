@@ -1,20 +1,21 @@
 var applicationConfigPath = require('application-config-path')
 var path = require('path')
 
+var APP_NAME = 'WebTorrent'
 var APP_VERSION = require('./package.json').version
 
 module.exports = {
   APP_COPYRIGHT: 'Copyright © 2014-2016 The WebTorrent Project',
   APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
   APP_ICON: path.join(__dirname, 'static', 'WebTorrent'),
-  APP_NAME: 'WebTorrent',
+  APP_NAME: APP_NAME,
 
   AUTO_UPDATE_URL: 'https://webtorrent.io/app/updates?version=' + APP_VERSION,
   AUTO_UPDATE_CHECK_STARTUP_DELAY: 60 * 1000 /* 1 minute */,
 
-  CONFIG_PATH: applicationConfigPath('WebTorrent'),
-  CONFIG_POSTER_PATH: path.join(applicationConfigPath('WebTorrent'), 'Posters'),
-  CONFIG_TORRENT_PATH: path.join(applicationConfigPath('WebTorrent'), 'Torrents'),
+  CONFIG_PATH: applicationConfigPath(APP_NAME),
+  CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
+  CONFIG_TORRENT_PATH: path.join(applicationConfigPath(APP_NAME), 'Torrents'),
 
   INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
 
