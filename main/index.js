@@ -4,12 +4,43 @@ var app = electron.app
 
 var autoUpdater = require('./auto-updater')
 var config = require('../config')
+var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
 var menu = require('./menu')
-var registerProtocolHandler = require('./register-handlers')
 var shortcuts = require('./shortcuts')
 var windows = require('./windows')
+
+var argv = sliceArgv(process.argv)
+
+if (process.platform === 'win32') {
+  var squirrelCmd = argv[0]
+  if (squirrelCmd === '--squirrel-install' || squirrelCmd === '--squirrel-updated') {
+    handlers.init()
+
+    // TODO:
+    // - Install desktop and start menu shortcuts
+    // - Add explorer context menus
+
+    // Always quit when done
+    app.quit()
+  }
+  if (squirrelCmd === '--squirrel-uninstall') {
+    // Undo anything we did in the --squirrel-install and --squirrel-updated handlers
+
+    // TODO: implement this
+
+    // Always quit when done
+    app.quit()
+  }
+  if (squirrelCmd === '--squirrel-obsolete') {
+    // This is called on the outgoing version of your app before we update to the new
+    // version - it's the opposite of --squirrel-updated
+
+    // Always quit when done
+    app.quit()
+  }
+}
 
 // Prevent multiple instances of the app from running at the same time. New instances
 // signal this instance and exit.
@@ -32,8 +63,6 @@ if (shouldQuit) {
   app.quit()
 }
 
-var argv = sliceArgv(process.argv)
-
 app.on('open-file', onOpen)
 app.on('open-url', onOpen)
 app.on('will-finish-launching', function () {
@@ -48,7 +77,7 @@ app.on('ready', function () {
   menu.init()
   windows.createMainWindow()
   shortcuts.init()
-  registerProtocolHandler()
+  if (process.platform !== 'win32') handlers.init()
 })
 
 app.on('ipcReady', function () {
