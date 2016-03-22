@@ -1,3 +1,5 @@
+var log = require('./log')
+
 module.exports = function () {
   if (process.platform === 'win32') {
     var path = require('path')
@@ -92,7 +94,7 @@ function registerProtocolHandlerWin32 (protocol, name, icon, command) {
   commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', callback)
 
   function callback (err) {
-    if (err) console.error(err.message || err)
+    if (err) log.error(err.message || err)
   }
 }
 
@@ -124,6 +126,6 @@ function registerFileHandlerWin32 (ext, id, name, icon, command) {
   commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', callback)
 
   function callback (err) {
-    if (err) console.error(err.message || err)
+    if (err) log.error(err.message || err)
   }
 }

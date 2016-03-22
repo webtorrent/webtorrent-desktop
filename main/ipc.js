@@ -9,6 +9,7 @@ var app = electron.app
 var ipcMain = electron.ipcMain
 var powerSaveBlocker = electron.powerSaveBlocker
 
+var log = require('./log')
 var menu = require('./menu')
 var windows = require('./windows')
 
@@ -55,7 +56,7 @@ function init () {
   })
 
   ipcMain.on('openItem', function (e, path) {
-    console.log('opening file or folder: ' + path)
+    log('opening file or folder: ' + path)
     electron.shell.openItem(path)
   })
 
