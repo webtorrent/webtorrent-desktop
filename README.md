@@ -22,7 +22,7 @@
 
 ## Install
 
-**WebTorrent.app** is still under very active development. Expect a release very soon!
+**WebTorrent.app** is still under very active development. An [alpha release](https://github.com/feross/webtorrent-app/releases) is currently available for OS X.
 
 ## Screenshot
 
