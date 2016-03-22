@@ -210,6 +210,7 @@ function buildDarwin (cb) {
         // Create .zip file (used by the auto-updater)
         var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
         cp.execSync(`pushd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'} && popd`)
+        console.log('Created OS X .zip file.')
 
         // Create a .dmg (OS X disk image) file, for easy user installation.
         var dmgOpts = {
@@ -239,6 +240,7 @@ function buildDarwin (cb) {
           if (info.type === 'step-begin') console.log(info.title + '...')
         })
         dmg.on('finish', function (info) {
+          console.log('Created OS X disk image (.dmg) file.')
           cb(null, buildPath)
         })
       })
@@ -247,7 +249,32 @@ function buildDarwin (cb) {
 }
 
 function buildWin32 (cb) {
-  electronPackager(Object.assign({}, all, win32), cb)
+  var installer = require('electron-winstaller')
+
+  electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
+    if (err) return cb(err)
+
+    installer.createWindowsInstaller({
+      name: config.APP_NAME,
+      productName: config.APP_NAME,
+      title: config.APP_NAME,
+      exe: config.APP_NAME + '.exe',
+
+      appDirectory: buildPath[0],
+      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+      version: pkg.version,
+      description: config.APP_NAME,
+      authors: config.APP_TEAM
+      // iconUrl: config.APP_ICON + '.ico',
+      // setupIcon: config.APP_ICON + '.ico',
+      // certificateFile: '',
+      // usePackageJson: false
+      // loadingGif: '',
+    }).then(function () {
+      console.log('Created Windows installer.')
+      cb(null, buildPath)
+    }).catch(cb)
+  })
 }
 
 function buildLinux (cb) {
