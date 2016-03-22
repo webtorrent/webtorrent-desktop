@@ -12,7 +12,7 @@ module.exports = {
   APP_VERSION: APP_VERSION,
 
   AUTO_UPDATE_URL: 'https://webtorrent.io/app/update?version=' + APP_VERSION,
-  AUTO_UPDATE_CHECK_STARTUP_DELAY: 60 * 1000 /* 1 minute */,
+  AUTO_UPDATE_CHECK_STARTUP_DELAY: 10 * 1000 /* 10 seconds */,
 
   CONFIG_PATH: applicationConfigPath(APP_NAME),
   CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
