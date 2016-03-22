@@ -456,7 +456,8 @@ input {
   background-color: #F44336;
 }
 
-.torrent.timeout .play {
+.torrent.timeout .play,
+.torrent.unplayable .play {
   padding-top: 8px;
 }
 
