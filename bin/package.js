@@ -180,49 +180,58 @@ function buildDarwin (cb) {
     infoPlist.NSHumanReadableCopyright = config.APP_COPYRIGHT
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
+
+    // Copy torrent file icon into app bundle
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
-    var zipPath = path.join(buildPath[0], BUILD_NAME + '.zip')
-    cp.execSync(`zip -r -y ${zipPath} ${appPath}`)
-
-    /*
-     * Signing OS X apps for distribution outside the App Store requires:
-     *
-     *   - Xcode
-     *   - Xcode Command Line Tools (xcode-select --install)
-     *   - Membership in the Apple Developer Program
-     */
     if (process.platform === 'darwin') {
+      /*
+       * Sign the app with Apple Developer ID certificate. We sign the app for 2 reasons:
+       *   - So the auto-updater (Squirrrel.Mac) can check that app updates are signed by
+       *     the same author as the current version.
+       *   - So users will not a see a warning about the app coming from an "Unidentified
+       *     Developer" when they open it for the first time (OS X Gatekeeper).
+       *
+       * To sign an OS X app for distribution outside the App Store, the following are
+       * required:
+       *   - Xcode
+       *   - Xcode Command Line Tools (xcode-select --install)
+       *   - Membership in the Apple Developer Program
+       */
       var signOpts = {
         app: appPath,
         platform: 'darwin',
         verbose: true
       }
 
-      var dmgPath = path.join(buildPath[0], BUILD_NAME + '.dmg')
-      var dmgOpts = {
-        basepath: config.ROOT_PATH,
-        target: dmgPath,
-        specification: {
-          title: config.APP_NAME,
-          icon: config.APP_ICON + '.icns',
-          background: path.join(config.STATIC_PATH, 'appdmg.png'),
-          'icon-size': 128,
-          contents: [
-            { x: 122, y: 240, type: 'file', path: appPath },
-            { x: 380, y: 240, type: 'link', path: '/Applications' },
-            // Hide hidden icons out of view, for users who have hidden files shown.
-            // https://github.com/LinusU/node-appdmg/issues/45#issuecomment-153924954
-            { x: 50, y: 500, type: 'position', path: '.background' },
-            { x: 100, y: 500, type: 'position', path: '.DS_Store' },
-            { x: 150, y: 500, type: 'position', path: '.Trashes' },
-            { x: 200, y: 500, type: 'position', path: '.VolumeIcon.icns' }
-          ]
-        }
-      }
-
       sign(signOpts, function (err) {
         if (err) return cb(err)
+
+        // Create .zip file (used by the auto-updater)
+        var zipPath = path.join(buildPath[0], BUILD_NAME + '.zip')
+        cp.execSync(`zip -r -y ${zipPath} ${appPath}`)
+
+        // Create a .dmg (OS X disk image) file, for easy user installation.
+        var dmgOpts = {
+          basepath: config.ROOT_PATH,
+          target: path.join(buildPath[0], BUILD_NAME + '.dmg'),
+          specification: {
+            title: config.APP_NAME,
+            icon: config.APP_ICON + '.icns',
+            background: path.join(config.STATIC_PATH, 'appdmg.png'),
+            'icon-size': 128,
+            contents: [
+              { x: 122, y: 240, type: 'file', path: appPath },
+              { x: 380, y: 240, type: 'link', path: '/Applications' },
+              // Hide hidden icons out of view, for users who have hidden files shown.
+              // https://github.com/LinusU/node-appdmg/issues/45#issuecomment-153924954
+              { x: 50, y: 500, type: 'position', path: '.background' },
+              { x: 100, y: 500, type: 'position', path: '.DS_Store' },
+              { x: 150, y: 500, type: 'position', path: '.Trashes' },
+              { x: 200, y: 500, type: 'position', path: '.VolumeIcon.icns' }
+            ]
+          }
+        }
 
         var dmg = appDmg(dmgOpts)
         dmg.on('error', cb)
