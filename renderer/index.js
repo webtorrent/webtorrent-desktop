@@ -510,6 +510,7 @@ function updateTorrentProgress () {
   var changed = false
   state.client.torrents.forEach(function (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
+    if (!torrentSummary) return
     torrent.files.forEach(function (file, index) {
       var numPieces = file._endPiece - file._startPiece + 1
       var numPiecesPresent = 0
@@ -530,12 +531,12 @@ function updateTorrentProgress () {
 }
 
 function generateTorrentPoster (torrent, torrentSummary) {
-  torrentPoster(torrent, function (err, buf) {
+  torrentPoster(torrent, function (err, buf, extension) {
     if (err) return onWarning(err)
     // save it for next time
     mkdirp(config.CONFIG_POSTER_PATH, function (err) {
       if (err) return onWarning(err)
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + '.jpg')
+      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + extension)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
         // show the poster
