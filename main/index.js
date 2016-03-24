@@ -18,15 +18,11 @@ var shouldQuit = app.makeSingleInstance(function (newArgv) {
 
   if (app.ipcReady) {
     log('Second app instance attempted to open but was prevented')
+    windows.focusMainWindow()
 
     newArgv.forEach(function (torrentId) {
       windows.main.send('dispatch', 'onOpen', torrentId)
     })
-
-    if (windows.main.isMinimized()) {
-      windows.main.restore()
-    }
-    windows.main.focus()
   } else {
     argv.push(...newArgv)
   }
@@ -89,6 +85,12 @@ function onOpen (e, torrentId) {
   e.preventDefault()
   if (app.ipcReady) {
     windows.main.send('dispatch', 'onOpen', torrentId)
+    setTimeout(function () {
+      // Required for magnet links opened from Chrome otherwise the confirmation dialog
+      // that Chrome shows causes Chrome to steal back the focus.
+      // Electron issue: https://github.com/atom/electron/issues/4338
+      windows.focusMainWindow()
+    }, 100)
   } else {
     argv.push(torrentId)
   }
