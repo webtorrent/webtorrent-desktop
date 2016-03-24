@@ -512,7 +512,7 @@ function updateTorrentProgress () {
   var changed = false
   state.client.torrents.forEach(function (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
-    if (!torrentSummary || !torrent.files) return
+    if (!torrentSummary || !torrent.ready) return
     torrent.files.forEach(function (file, index) {
       var numPieces = file._endPiece - file._startPiece + 1
       var numPiecesPresent = 0
