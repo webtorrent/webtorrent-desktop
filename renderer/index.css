@@ -184,6 +184,7 @@ i:not(.disabled):hover {
   transition: opacity 0.15s ease-out;
   font-size: 14px;
   line-height: 1.5em;
+  z-index: 1;
 }
 
 .app:not(.is-focused) .header {
