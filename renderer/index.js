@@ -131,7 +131,7 @@ function init () {
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
   document.querySelector('.loading').remove() /* TODO: no spinner once fast enough */
-  playInterfaceSound(config.SOUND_STARTUP)
+  playInterfaceSound('STARTUP')
   console.timeEnd('init')
 }
 
@@ -423,7 +423,7 @@ function addTorrentToList (torrent) {
       infoHash: torrent.infoHash
     })
     saveState()
-    playInterfaceSound(config.SOUND_ADD)
+    playInterfaceSound('ADD')
   }
 }
 
@@ -667,13 +667,13 @@ function stopServer () {
 // Opens the video player
 function openPlayer (torrentSummary, index, cb) {
   var torrent = state.client.get(torrentSummary.infoHash)
-  if (!torrent || !torrent.done) playInterfaceSound(config.SOUND_PLAY)
+  if (!torrent || !torrent.done) playInterfaceSound('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    playInterfaceSound(config.SOUND_ERROR)
+    playInterfaceSound('ERROR')
     update()
   }, 10000) /* give it a few seconds */
 
@@ -681,7 +681,7 @@ function openPlayer (torrentSummary, index, cb) {
     clearTimeout(timeout)
     if (err) {
       torrentSummary.playStatus = 'unplayable'
-      playInterfaceSound(config.SOUND_ERROR)
+      playInterfaceSound('ERROR')
       update()
       return onError(err)
     }
@@ -741,11 +741,11 @@ function toggleTorrent (torrentSummary) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrentingSummary(torrentSummary)
-    playInterfaceSound(config.SOUND_ENABLE)
+    playInterfaceSound('ENABLE')
   } else {
     torrentSummary.status = 'paused'
     stopTorrenting(torrentSummary.infoHash)
-    playInterfaceSound(config.SOUND_DISABLE)
+    playInterfaceSound('DISABLE')
   }
 }
 
@@ -758,7 +758,7 @@ function deleteTorrent (torrentSummary) {
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveState()
   state.location.clearForward() // prevent user from going forward to a deleted torrent
-  playInterfaceSound(config.SOUND_DELETE)
+  playInterfaceSound('DELETE')
 }
 
 function toggleSelectTorrent (infoHash) {
@@ -812,7 +812,7 @@ function restoreBounds () {
 
 function onError (err) {
   console.error(err.stack || err)
-  playInterfaceSound(config.SOUND_ERROR)
+  playInterfaceSound('ERROR')
   state.errors.push({
     time: new Date().getTime(),
     message: err.message || err
@@ -836,12 +836,15 @@ function showDoneNotification (torrent) {
     window.focus()
   }
 
-  playInterfaceSound(config.SOUND_DONE)
+  playInterfaceSound('DONE')
 }
 
-function playInterfaceSound (url) {
+function playInterfaceSound (name) {
+  var sound = config[`SOUND_${name}`]
+  if (!sound) throw new Error('Invalid sound name')
+
   var audio = new window.Audio()
-  audio.volume = 0.3
-  audio.src = url
+  audio.volume = sound.volume
+  audio.src = sound.url
   audio.play()
 }

@@ -25,14 +25,38 @@ module.exports = {
   ROOT_PATH: __dirname,
   STATIC_PATH: path.join(__dirname, 'static'),
 
-  SOUND_ADD: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
-  SOUND_DELETE: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
-  SOUND_DISABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),
-  SOUND_DONE: 'file://' + path.join(__dirname, 'static', 'sound', 'done.wav'),
-  SOUND_ENABLE: 'file://' + path.join(__dirname, 'static', 'sound', 'enable.wav'),
-  SOUND_ERROR: 'file://' + path.join(__dirname, 'static', 'sound', 'error.wav'),
-  SOUND_PLAY: 'file://' + path.join(__dirname, 'static', 'sound', 'play.wav'),
-  SOUND_STARTUP: 'file://' + path.join(__dirname, 'static', 'sound', 'startup.wav')
+  SOUND_ADD: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'add.wav'),
+    volume: 0.2
+  },
+  SOUND_DELETE: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'delete.wav'),
+    volume: 0.1
+  },
+  SOUND_DISABLE: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'disable.wav'),
+    volume: 0.2
+  },
+  SOUND_DONE: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'done.wav'),
+    volume: 0.2
+  },
+  SOUND_ENABLE: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'enable.wav'),
+    volume: 0.2
+  },
+  SOUND_ERROR: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'error.wav'),
+    volume: 0.2
+  },
+  SOUND_PLAY: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'play.wav'),
+    volume: 0.2
+  },
+  SOUND_STARTUP: {
+    url: 'file://' + path.join(__dirname, 'static', 'sound', 'startup.wav'),
+    volume: 0.4
+  }
 }
 
 function isProduction () {
