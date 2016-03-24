@@ -1,6 +1,7 @@
 var windows = module.exports = {
   main: null,
-  createMainWindow: createMainWindow
+  createMainWindow: createMainWindow,
+  focusMainWindow: focusMainWindow
 }
 
 var electron = require('electron')
@@ -51,4 +52,11 @@ function createMainWindow () {
   win.once('closed', function () {
     windows.main = null
   })
+}
+
+function focusMainWindow () {
+  if (windows.main.isMinimized()) {
+    windows.main.restore()
+  }
+  windows.main.show() // shows and gives focus
 }
