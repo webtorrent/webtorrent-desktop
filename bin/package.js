@@ -82,14 +82,14 @@ var darwin = {
   platform: 'darwin',
 
   // The bundle identifier to use in the application's plist (OS X only).
-  'app-bundle-id': 'io.webtorrent.app',
+  'app-bundle-id': 'io.webtorrent.webtorrent',
 
   // The application category type, as shown in the Finder via "View" -> "Arrange by
   // Application Category" when viewing the Applications directory (OS X only).
   'app-category-type': 'public.app-category.utilities',
 
   // The bundle identifier to use in the application helper's plist (OS X only).
-  'helper-bundle-id': 'io.webtorrent.app.helper',
+  'helper-bundle-id': 'io.webtorrent.webtorrent-helper',
 
   // Application icon.
   icon: config.APP_ICON + '.icns'
