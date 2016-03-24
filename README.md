@@ -60,8 +60,18 @@ $ npm run package -- [platform]
 
 Where `[platform]` is `--darwin`, `--linux`, or `--win32`.
 
-To package a Windows app from non-Windows platforms, [Wine](https://www.winehq.org/) needs
-to be installed. On OS X, it is installable via [Homebrew](http://brew.sh/).
+#### Windows build notes
+
+To package the Windows app from non-Windows platforms, [Wine](https://www.winehq.org/) needs
+to be installed.
+
+On OS X, first install [XQuartz](http://www.xquartz.org/), then run:
+
+```
+brew install wine
+```
+
+(Requires the [Homebrew](http://brew.sh/) package manager.)
 
 ### Code Style
 
