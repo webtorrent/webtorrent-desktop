@@ -16,10 +16,9 @@ var shouldQuit = false
 var argv = sliceArgv(process.argv)
 
 if (process.platform === 'win32') {
-  shouldQuit = squirrelWin32.handleArgv(argv[0])
-
-  // Remove any --squirrel-xxxx arguments
-  argv.shift()
+  shouldQuit = squirrelWin32.handleEvent(argv[0])
+  argv.shift() // Remove any --squirrel-xxxx arguments
+  // app.setAppUserModelId('com.squirrel.WebTorrent.WebTorrent')
 }
 
 if (!shouldQuit) {
