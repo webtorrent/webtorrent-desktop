@@ -36,8 +36,7 @@
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.37.2",
     "electron-winstaller": "^2.0.5",
-    "gh-release": "^2.0.2",
-    "path-exists": "^2.1.0",
+    "gh-release": "^2.0.3",
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",
     "standard": "^6.0.5"
