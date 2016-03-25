@@ -1,5 +1,5 @@
 {
-  "name": "webtorrent-app",
+  "name": "WebTorrent",
   "description": "WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.",
   "version": "0.0.1",
   "author": {
@@ -24,6 +24,7 @@
     "mkdirp": "^0.5.1",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
+    "path-exists": "^2.1.0",
     "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
@@ -34,6 +35,7 @@
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "0.37.2",
+    "electron-winstaller": "^2.0.5",
     "gh-release": "^2.0.2",
     "path-exists": "^2.1.0",
     "plist": "^1.2.0",
@@ -58,7 +60,7 @@
   "scripts": {
     "clean": "node ./bin/clean.js",
     "debug": "DEBUG=* electron .",
-    "package": "npm prune && npm dedupe && node ./bin/package.js",
+    "package": "npm install && npm prune && npm dedupe && node ./bin/package.js",
     "size": "npm run package -- --darwin && du -ch dist/WebTorrent-darwin-x64 | grep total",
     "start": "electron .",
     "test": "standard",

@@ -15,11 +15,11 @@ var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
   var platform = process.argv[2]
-  if (platform === '--darwin') {
+  if (platform === 'darwin') {
     buildDarwin(printDone)
-  } else if (platform === '--win32') {
+  } else if (platform === 'win32') {
     buildWin32(printDone)
-  } else if (platform === '--linux') {
+  } else if (platform === 'linux') {
     buildLinux(printDone)
   } else {
     buildDarwin(function (err, buildPath) {
@@ -137,9 +137,7 @@ var linux = {
 build()
 
 function buildDarwin (cb) {
-  var appDmg = require('appdmg')
   var plist = require('plist')
-  var sign = require('electron-osx-sign')
 
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
@@ -185,6 +183,9 @@ function buildDarwin (cb) {
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
     if (process.platform === 'darwin') {
+      var appDmg = require('appdmg')
+      var sign = require('electron-osx-sign')
+
       /*
        * Sign the app with Apple Developer ID certificate. We sign the app for 2 reasons:
        *   - So the auto-updater (Squirrrel.Mac) can check that app updates are signed by
@@ -208,13 +209,14 @@ function buildDarwin (cb) {
         if (err) return cb(err)
 
         // Create .zip file (used by the auto-updater)
-        var zipPath = path.join(buildPath[0], BUILD_NAME + '.zip')
+        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
         cp.execSync(`pushd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'} && popd`)
+        console.log('Created OS X .zip file.')
 
         // Create a .dmg (OS X disk image) file, for easy user installation.
         var dmgOpts = {
           basepath: config.ROOT_PATH,
-          target: path.join(buildPath[0], BUILD_NAME + '.dmg'),
+          target: path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg'),
           specification: {
             title: config.APP_NAME,
             icon: config.APP_ICON + '.icns',
@@ -239,6 +241,7 @@ function buildDarwin (cb) {
           if (info.type === 'step-begin') console.log(info.title + '...')
         })
         dmg.on('finish', function (info) {
+          console.log('Created OS X disk image (.dmg) file.')
           cb(null, buildPath)
         })
       })
@@ -247,7 +250,33 @@ function buildDarwin (cb) {
 }
 
 function buildWin32 (cb) {
-  electronPackager(Object.assign({}, all, win32), cb)
+  var installer = require('electron-winstaller')
+
+  electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
+    if (err) return cb(err)
+
+    console.log('Creating Windows installer...')
+    installer.createWindowsInstaller({
+      name: config.APP_NAME,
+      productName: config.APP_NAME,
+      title: config.APP_NAME,
+      exe: config.APP_NAME + '.exe',
+
+      appDirectory: buildPath[0],
+      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+      version: pkg.version,
+      description: config.APP_NAME,
+      authors: config.APP_TEAM,
+      iconUrl: config.APP_ICON + '.ico',
+      setupIcon: config.APP_ICON + '.ico',
+      // certificateFile: '', // TODO
+      // usePackageJson: false
+      loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
+    }).then(function () {
+      console.log('Created Windows installer.')
+      cb(null, buildPath)
+    }).catch(cb)
+  })
 }
 
 function buildLinux (cb) {
