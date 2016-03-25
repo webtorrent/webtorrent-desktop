@@ -137,9 +137,7 @@ var linux = {
 build()
 
 function buildDarwin (cb) {
-  var appDmg = require('appdmg')
   var plist = require('plist')
-  var sign = require('electron-osx-sign')
 
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
@@ -185,6 +183,9 @@ function buildDarwin (cb) {
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
     if (process.platform === 'darwin') {
+      var appDmg = require('appdmg')
+      var sign = require('electron-osx-sign')
+
       /*
        * Sign the app with Apple Developer ID certificate. We sign the app for 2 reasons:
        *   - So the auto-updater (Squirrrel.Mac) can check that app updates are signed by
