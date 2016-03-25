@@ -15,11 +15,11 @@ var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
   var platform = process.argv[2]
-  if (platform === '--darwin') {
+  if (platform === 'darwin') {
     buildDarwin(printDone)
-  } else if (platform === '--win32') {
+  } else if (platform === 'win32') {
     buildWin32(printDone)
-  } else if (platform === '--linux') {
+  } else if (platform === 'linux') {
     buildLinux(printDone)
   } else {
     buildDarwin(function (err, buildPath) {
