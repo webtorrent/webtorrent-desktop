@@ -255,6 +255,7 @@ function buildWin32 (cb) {
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
 
+    console.log('Creating Windows installer...')
     installer.createWindowsInstaller({
       name: config.APP_NAME,
       productName: config.APP_NAME,
@@ -265,12 +266,12 @@ function buildWin32 (cb) {
       outputDirectory: path.join(config.ROOT_PATH, 'dist'),
       version: pkg.version,
       description: config.APP_NAME,
-      authors: config.APP_TEAM
-      // iconUrl: config.APP_ICON + '.ico',
-      // setupIcon: config.APP_ICON + '.ico',
-      // certificateFile: '',
+      authors: config.APP_TEAM,
+      iconUrl: config.APP_ICON + '.ico',
+      setupIcon: config.APP_ICON + '.ico',
+      // certificateFile: '', // TODO
       // usePackageJson: false
-      // loadingGif: '',
+      loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
     }).then(function () {
       console.log('Created Windows installer.')
       cb(null, buildPath)
