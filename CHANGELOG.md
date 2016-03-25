@@ -1,5 +1,21 @@
 # WebTorrent.app Version History
 
+## v0.1.0
+
+- **Windows support!**
+  - See `WebTorrentSetup.exe` in the downloads below!
+  - Auto-updater included, just like the OS X version.
+  - Automatically installs desktop/start menu shortcuts
+  - Windows top menu is no longer automatically hidden.
+- **Audio file support!**
+  - Supports playback of .mp3, .aac, .ogg, .wav
+  - Audio file metadata gets shown in the UI
+- Focus the WebTorrent window after opening magnet link in third-party app
+- Subtler app sounds
+- Fix for some magnet links failing to open
+
+Thanks to @dcposch, @ngoldman, and @feross for contributing to this release.
+
 ## v0.0.1
 
 - Wait 10 seconds (instead of 60 seconds) after app launch before checking for updates.
