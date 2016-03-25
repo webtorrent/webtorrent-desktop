@@ -744,7 +744,7 @@ function openFolder (torrentSummary) {
 }
 
 function closePlayer (cb) {
-  state.window.title = config.APP_NAME
+  state.window.title = config.APP_WINDOW_TITLE
   update()
 
   if (state.window.isFullScreen) {

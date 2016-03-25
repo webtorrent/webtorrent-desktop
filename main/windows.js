@@ -19,7 +19,7 @@ function createMainWindow () {
     minWidth: 375,
     minHeight: 38 + (120 * 2), // header height + 2 torrents
     show: false, // Hide window until DOM finishes loading
-    title: config.APP_NAME,
+    title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
     width: 450,
