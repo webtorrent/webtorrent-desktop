@@ -3,16 +3,17 @@
 ## v0.1.0
 
 - **Windows support!**
-  - See `WebTorrentSetup.exe` in the downloads below!
-  - Auto-updater included, just like the OS X version.
-  - Automatically installs desktop/start menu shortcuts
-  - Windows top menu is no longer automatically hidden.
+  - Includes auto-updater, just like the OS X version.
+  - Installs desktop and start menu shortcuts.
 - **Audio file support!**
   - Supports playback of .mp3, .aac, .ogg, .wav
   - Audio file metadata gets shown in the UI
-- Focus the WebTorrent window after opening magnet link in third-party app
-- Subtler app sounds
-- Fix for some magnet links failing to open
+- Windows top menu is no longer automatically hidden.
+- When magnet links are opened from third-party apps, the WebTorrent window now gets focus.
+- Subtler app sounds.
+- Fix for an issue that caused some magnet links to fail to open.
+
+**NOTE:** OS X users must install v0.1.0 manually because the app bundle ID was changed in this release, and the auto-updater cannot handle this condition.
 
 Thanks to @dcposch, @ngoldman, and @feross for contributing to this release.
 
