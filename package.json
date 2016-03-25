@@ -24,6 +24,7 @@
     "mkdirp": "^0.5.1",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
+    "path-exists": "^2.1.0",
     "prettier-bytes": "^1.0.1",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",

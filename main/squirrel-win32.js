@@ -4,44 +4,54 @@ module.exports = {
 
 var cp = require('child_process')
 var electron = require('electron')
+var fs = require('fs')
+var os = require('os')
 var path = require('path')
+var pathExists = require('path-exists')
 
 var app = electron.app
 
-var config = require('../config')
 var handlers = require('./handlers')
 
+var exeName = path.basename(process.execPath)
+var updateDotExe = path.join(process.execPath, '..', '..', 'Update.exe')
+
 function handleEvent (cmd) {
-  if (cmd === '--squirrel-install' || cmd === '--squirrel-updated') {
-    // App was installed/updated. (Called on new version of app.)
+  if (cmd === '--squirrel-install') {
+    // App was installed.
 
     // Install protocol/file handlers, desktop/start menu shortcuts.
     handlers.init()
-    createShortcuts()
 
-    // Ensure user sees install splash screen so they realize that Setup.exe actually
-    // installed an application and isn't the application itself.
-    if (cmd === '--squirrel-install') {
+    createShortcuts(function () {
+      // Ensure user sees install splash screen so they realize that Setup.exe actually
+      // installed an application and isn't the application itself.
       setTimeout(function () {
         app.quit()
       }, 5000)
-    } else {
+    })
+    return true
+  }
+
+  if (cmd === '--squirrel-updated') {
+    // App was updated. (Called on new version of app)
+    updateShortcuts(function () {
       app.quit()
-    }
+    })
     return true
   }
 
   if (cmd === '--squirrel-uninstall') {
     // App was just uninstalled. Undo anything we did in the --squirrel-install and
     // --squirrel-updated handlers
-
-    // TODO: implement this
-    app.quit()
+    removeShortcuts(function () {
+      app.quit()
+    })
     return true
   }
 
   if (cmd === '--squirrel-obsolete') {
-    // App will be updated. (Called on outgoing version of app.)
+    // App will be updated. (Called on outgoing version of app)
     app.quit()
     return true
   }
@@ -54,12 +64,71 @@ function handleEvent (cmd) {
   return false
 }
 
-function createShortcuts () {
-  var updateExe = path.join(process.execPath, '..', 'Update.exe')
-  var args = [
-    '--createShortcut="' + config.APP_NAME + '.exe"',
-    '--shortcut-locations="Desktop,StartMenu,Startup"',
-    '--process-start-args="--autostart"'
-  ]
-  cp.execSync(updateExe + args.join(' '))
+// Spawn a command and invoke the callback when it completes with an error and the output
+// from standard out.
+function spawn (command, args, cb) {
+  var stdout = ''
+
+  var child
+  try {
+    child = cp.spawn(command, args)
+  } catch (err) {
+    // Spawn can throw an error
+    process.nextTick(function () {
+      cb(error, stdout)
+    })
+    return
+  }
+
+  child.stdout.on('data', function (data) {
+    stdout += data
+  })
+
+  var error = null
+  child.on('error', function (processError) {
+    error = processError
+  })
+  child.on('close', function (code, signal) {
+    if (code !== 0 && !error) error = new Error('Command failed: #{signal || code}')
+    if (error) error.stdout = stdout
+    cb(error, stdout)
+  })
+}
+
+// Spawn Squirrel's Update.exe with the given arguments and invoke the callback when the
+// command completes.
+function spawnUpdate (args, cb) {
+  spawn(updateDotExe, args, cb)
+}
+
+// Create desktop/start menu shortcuts using the Squirrel Update.exe command line API
+function createShortcuts (cb) {
+  spawnUpdate(['--createShortcut', exeName], cb)
+}
+
+// Update desktop/start menu shortcuts using the Squirrel Update.exe command line API
+function updateShortcuts (cb) {
+  var homeDir = os.homedir()
+  if (homeDir) {
+    var desktopShortcutPath = path.join(homeDir, 'Desktop', 'WebTorrent.lnk')
+    // Check if the desktop shortcut has been previously deleted and and keep it deleted
+    // if it was
+    pathExists(desktopShortcutPath).then(function (desktopShortcutExists) {
+      createShortcuts(function () {
+        if (desktopShortcutExists) {
+          cb()
+        } else {
+          // Remove the unwanted desktop shortcut that was recreated
+          fs.unlink(desktopShortcutPath, cb)
+        }
+      })
+    })
+  } else {
+    createShortcuts(cb)
+  }
+}
+
+// Remove desktop/start menu shortcuts using the Squirrel Update.exe command line API
+function removeShortcuts (cb) {
+  spawnUpdate(['--removeShortcut', exeName], cb)
 }
