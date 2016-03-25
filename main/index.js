@@ -40,6 +40,9 @@ if (process.platform === 'win32') {
     // Always quit when done
     app.quit()
   }
+  if (squirrelCmd === '--squirrel-firstrun') {
+    argv.shift()
+  }
 }
 
 // Prevent multiple instances of the app from running at the same time. New instances
