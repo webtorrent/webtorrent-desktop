@@ -1,6 +1,10 @@
+module.exports = {
+  init
+}
+
 var log = require('./log')
 
-module.exports = function () {
+function init () {
   if (process.platform === 'win32') {
     var path = require('path')
     var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')

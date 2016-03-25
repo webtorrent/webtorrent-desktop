@@ -58,7 +58,7 @@ To build for one platform:
 $ npm run package -- [platform]
 ```
 
-Where `[platform]` is `--darwin`, `--linux`, or `--win32`.
+Where `[platform]` is `darwin`, `linux`, or `win32`.
 
 #### Windows build notes
 
