@@ -18,7 +18,6 @@ var argv = sliceArgv(process.argv)
 if (process.platform === 'win32') {
   shouldQuit = squirrelWin32.handleEvent(argv[0])
   argv = argv.filter((arg) => arg.indexOf('--squirrel') === -1)
-  // app.setAppUserModelId('com.squirrel.WebTorrent.WebTorrent')
 }
 
 if (!shouldQuit) {
