@@ -270,7 +270,7 @@ function buildWin32 (cb) {
       iconUrl: config.APP_ICON + '.ico',
       setupIcon: config.APP_ICON + '.ico',
       // certificateFile: '', // TODO
-      // usePackageJson: false
+      usePackageJson: false,
       loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
     }).then(function () {
       console.log('Created Windows installer.')
