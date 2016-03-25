@@ -60,7 +60,7 @@
   "scripts": {
     "clean": "node ./bin/clean.js",
     "debug": "DEBUG=* electron .",
-    "package": "npm prune && npm dedupe && node ./bin/package.js",
+    "package": "npm install && npm prune && npm dedupe && node ./bin/package.js",
     "size": "npm run package -- --darwin && du -ch dist/WebTorrent-darwin-x64 | grep total",
     "start": "electron .",
     "test": "standard",
