@@ -10,6 +10,7 @@ var electronPackager = require('electron-packager')
 var fs = require('fs')
 var path = require('path')
 var pkg = require('../package.json')
+var rimraf = require('rimraf')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
@@ -213,10 +214,13 @@ function buildDarwin (cb) {
         cp.execSync(`pushd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'} && popd`)
         console.log('Created OS X .zip file.')
 
+        var targetPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg')
+        rimraf.sync(targetPath)
+
         // Create a .dmg (OS X disk image) file, for easy user installation.
         var dmgOpts = {
           basepath: config.ROOT_PATH,
-          target: path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg'),
+          target: targetPath,
           specification: {
             title: config.APP_NAME,
             icon: config.APP_ICON + '.icns',
