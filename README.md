@@ -18,11 +18,15 @@
         <img src="https://img.shields.io/travis/feross/webtorrent-app/master.svg"
              alt="Travis Build">
     </a>
+    <a href="https://github.com/feross/webtorrent-app/releases">
+        <img src="https://img.shields.io/github/release/feross/webtorrent-app.svg"
+             alt="Latest Release Version">
+    </a>
 </p>
 
 ## Install
 
-**WebTorrent.app** is still under very active development. An [alpha release](https://github.com/feross/webtorrent-app/releases) is currently available for OS X.
+**WebTorrent.app** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-app/releases) page.
 
 ## Screenshot
 
