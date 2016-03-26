@@ -21,6 +21,7 @@ function createMainWindow () {
     show: false, // Hide window until DOM finishes loading
     title: config.APP_NAME,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
+    useContentSize: true, // Specify web page size without OS chrome
     width: 450,
     height: 38 + (120 * 4) // header height + 4 torrents
   })
