@@ -1,11 +1,11 @@
 module.exports = {
-  init: init,
-  onToggleFullScreen: onToggleFullScreen,
-  onWindowHide: onWindowHide,
-  onWindowShow: onWindowShow,
-  showOpenTorrentFile: showOpenTorrentFile,
-  showCreateTorrent: showCreateTorrent,
-  toggleFullScreen: toggleFullScreen
+  init,
+  onToggleFullScreen,
+  onWindowHide,
+  onWindowShow,
+  showCreateTorrent,
+  showOpenTorrentFile,
+  toggleFullScreen
 }
 
 var debug = require('debug')('webtorrent-app:menu')
