@@ -38,8 +38,15 @@ function renderMedia (state, dispatch) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
     }
+    // set volume
+    if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
+      mediaElement.volume = state.playing.setVolume
+      state.playing.setVolume = null
+    }
+
     state.playing.currentTime = mediaElement.currentTime
     state.playing.duration = mediaElement.duration
+    state.playing.volume = mediaElement.volume
   }
 
   // Create the <audio> or <video> tag
