@@ -50,7 +50,20 @@ function installDesktopIcon () {
   var iconFile = fs.readFileSync(iconStaticPath)
 
   var iconFilePath = path.join(os.homedir(), '.local', 'share', 'icons', 'webtorrent.png')
+  ensureDirectory(iconFilePath)
   fs.writeFileSync(iconFilePath, iconFile)
+}
+
+function ensureDirectory (filePath) {
+  var fs = require('fs')
+  var path = require('path')
+
+  var dirname = path.dirname(filePath)
+  try {
+    if (fs.statSync(dirname).isDirectory()) return
+  } catch (err) {}
+  ensureDirectory(dirname)
+  fs.mkdirSync(dirname)
 }
 
 /**
