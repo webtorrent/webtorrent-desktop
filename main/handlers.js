@@ -2,6 +2,8 @@ module.exports = {
   init
 }
 
+var mkdirp = require('mkdirp')
+
 var log = require('./log')
 
 function init () {
@@ -26,17 +28,23 @@ function installDesktopFile () {
   var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
   var desktopFile = fs.readFileSync(templatePath, 'utf8')
 
-  desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
-
   var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
-  desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
-
   var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
+  var tryExecPath = process.execPath
+
+  desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
+  desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
   desktopFile = desktopFile.replace(/\$EXEC_PATH/g, execPath)
+  desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, tryExecPath)
 
-  desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
-
-  var desktopFilePath = path.join(os.homedir(), '.local', 'share', 'applications', 'webtorrent.desktop')
+  var desktopFilePath = path.join(
+    os.homedir(),
+    '.local',
+    'share',
+    'applications',
+    'webtorrent.desktop'
+  )
+  mkdirp(path.dirname(desktopFilePath))
   fs.writeFileSync(desktopFilePath, desktopFile)
 }
 
@@ -49,7 +57,14 @@ function installDesktopIcon () {
   var iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
   var iconFile = fs.readFileSync(iconStaticPath)
 
-  var iconFilePath = path.join(os.homedir(), '.local', 'share', 'icons', 'webtorrent.png')
+  var iconFilePath = path.join(
+    os.homedir(),
+    '.local',
+    'share',
+    'icons',
+    'webtorrent.png'
+  )
+  mkdirp(path.dirname(iconFilePath))
   fs.writeFileSync(iconFilePath, iconFile)
 }
 
