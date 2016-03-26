@@ -2,70 +2,85 @@ module.exports = {
   init
 }
 
-var mkdirp = require('mkdirp')
+var path = require('path')
 
 var log = require('./log')
 
 function init () {
   if (process.platform === 'win32') {
-    var path = require('path')
-    var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
-    registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, process.execPath)
-    registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, process.execPath)
+    initWindows()
   }
   if (process.platform === 'linux') {
-    installDesktopFile()
-    installDesktopIcon()
+    initLinux()
   }
 }
 
-function installDesktopFile () {
-  var config = require('../config')
-  var fs = require('fs')
-  var path = require('path')
-  var os = require('os')
-
-  var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
-  var desktopFile = fs.readFileSync(templatePath, 'utf8')
-
-  var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
-  var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
-  var tryExecPath = process.execPath
-
-  desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
-  desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
-  desktopFile = desktopFile.replace(/\$EXEC_PATH/g, execPath)
-  desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, tryExecPath)
-
-  var desktopFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'applications',
-    'webtorrent.desktop'
-  )
-  mkdirp(path.dirname(desktopFilePath))
-  fs.writeFileSync(desktopFilePath, desktopFile)
+function initWindows () {
+  var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
+  registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, process.execPath)
+  registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, process.execPath)
 }
 
-function installDesktopIcon () {
+function initLinux () {
   var config = require('../config')
   var fs = require('fs')
-  var path = require('path')
+  var mkdirp = require('mkdirp')
   var os = require('os')
+  var path = require('path')
 
-  var iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
-  var iconFile = fs.readFileSync(iconStaticPath)
+  installDesktopFile()
+  installIconFile()
 
-  var iconFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'icons',
-    'webtorrent.png'
-  )
-  mkdirp(path.dirname(iconFilePath))
-  fs.writeFileSync(iconFilePath, iconFile)
+  function installDesktopFile () {
+    var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
+    fs.readFile(templatePath, 'utf8', writeDesktopFile)
+  }
+
+  function writeDesktopFile (err, desktopFile) {
+    if (err) return console.error(err.message)
+
+    var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
+    var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
+    var tryExecPath = process.execPath
+
+    desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
+    desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
+    desktopFile = desktopFile.replace(/\$EXEC_PATH/g, execPath)
+    desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, tryExecPath)
+
+    var desktopFilePath = path.join(
+      os.homedir(),
+      '.local',
+      'share',
+      'applications',
+      'webtorrent.desktop'
+    )
+    mkdirp(path.dirname(desktopFilePath))
+    fs.writeFile(desktopFilePath, desktopFile, function (err) {
+      if (err) return console.error(err.message)
+    })
+  }
+
+  function installIconFile () {
+    var iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
+    fs.readFile(iconStaticPath, writeIconFile)
+  }
+
+  function writeIconFile (err, iconFile) {
+    if (err) return console.error(err.message)
+
+    var iconFilePath = path.join(
+      os.homedir(),
+      '.local',
+      'share',
+      'icons',
+      'webtorrent.png'
+    )
+    mkdirp(path.dirname(iconFilePath))
+    fs.writeFile(iconFilePath, iconFile, function (err) {
+      if (err) return console.error(err.message)
+    })
+  }
 }
 
 /**
