@@ -57,9 +57,7 @@ function init () {
 
   app.on('ipcReady', function () {
     log('Command line args:', argv)
-    argv.forEach(function (torrentId) {
-      windows.main.send('dispatch', 'onOpen', torrentId)
-    })
+    processArgv(argv)
   })
 
   app.on('before-quit', function () {
@@ -104,9 +102,7 @@ function onAppOpen (newArgv) {
     log('Second app instance opened, but was prevented:', newArgv)
     windows.focusMainWindow()
 
-    newArgv.forEach(function (torrentId) {
-      windows.main.send('dispatch', 'onOpen', torrentId)
-    })
+    processArgv(newArgv)
   } else {
     argv.push(...newArgv)
   }
@@ -114,6 +110,24 @@ function onAppOpen (newArgv) {
 
 function sliceArgv (argv) {
   return argv.slice(config.IS_PRODUCTION ? 1 : 2)
+}
+
+function processArgv (argv) {
+  argv.forEach(function (argvi) {
+    switch (argvi) {
+      case '-n':
+        windows.main.send('dispatch', 'showCreateTorrent')
+        break
+      case '-o':
+        windows.main.send('dispatch', 'showOpenTorrentFile')
+        break
+      case '-u':
+        windows.main.send('showOpenTorrentAddress')
+        break
+      default:
+        windows.main.send('dispatch', 'onOpen', argvi)
+    }
+  })
 }
 
 function setupCrashReporter () {
