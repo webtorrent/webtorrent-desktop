@@ -64,8 +64,8 @@ module.exports = {
         status: 'paused',
         infoHash: '88594aaacbde40ef3e2510c47374ec0aa396c08e',
         displayName: 'Big Buck Bunny',
-        posterURL: path.join(config.ROOT_PATH, 'static', 'bigBuckBunny.jpg'),
-        torrentPath: path.join(config.ROOT_PATH, 'static', 'bigBuckBunny.torrent'),
+        posterURL: '../static/bigBuckBunny.jpg',
+        torrentPath: '../static/bigBuckBunny.torrent',
         files: [
           {
             'name': 'bbb_sunflower_1080p_30fps_normal.mp4',
@@ -79,8 +79,8 @@ module.exports = {
         status: 'paused',
         infoHash: '6a9759bffd5c0af65319979fb7832189f4f3c35d',
         displayName: 'Sintel',
-        posterURL: path.join(config.ROOT_PATH, 'static', 'sintel.jpg'),
-        torrentPath: path.join(config.ROOT_PATH, 'static', 'sintel.torrent'),
+        posterURL: '../static/sintel.jpg',
+        torrentPath: '../static/sintel.torrent',
         files: [
           {
             'name': 'sintel.mp4',
@@ -94,8 +94,8 @@ module.exports = {
         status: 'paused',
         infoHash: '02767050e0be2fd4db9a2ad6c12416ac806ed6ed',
         displayName: 'Tears of Steel',
-        posterURL: path.join(config.ROOT_PATH, 'static', 'tearsOfSteel.jpg'),
-        torrentPath: path.join(config.ROOT_PATH, 'static', 'tearsOfSteel.torrent'),
+        posterURL: '../static/tearsOfSteel.jpg',
+        torrentPath: '../static/tearsOfSteel.torrent',
         files: [
           {
             'name': 'tears_of_steel_1080p.webm',
