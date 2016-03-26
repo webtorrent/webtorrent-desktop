@@ -1,5 +1,5 @@
 module.exports = {
-  init: init
+  init
 }
 
 var debug = require('debug')('webtorrent-app:ipcMain')

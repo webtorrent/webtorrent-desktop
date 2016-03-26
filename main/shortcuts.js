@@ -1,5 +1,5 @@
 module.exports = {
-  init: init
+  init
 }
 
 var electron = require('electron')
