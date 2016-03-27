@@ -466,8 +466,8 @@ function addTorrentToList (torrent) {
     state.saved.torrents.push({
       status: 'new',
       name: torrent.name,
-      magnetURI: torrent.magnetURI,
-      infoHash: torrent.infoHash
+      infoHash: torrent.infoHash,
+      magnetURI: torrent.magnetURI
     })
     saveState()
     playInterfaceSound('ADD')
@@ -528,7 +528,6 @@ function addTorrentEvents (torrent) {
     torrentSummary.status = 'downloading'
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
-    torrentSummary.infoHash = torrent.infoHash
     torrentSummary.path = torrent.path
 
     // Summarize torrent files
@@ -869,16 +868,18 @@ function saveTorrentFileAs (torrentSummary) {
   var opts = {
     title: 'Save Torrent File',
     defaultPath: path.join(state.saved.downloadPath, newFileName),
-    filters: [{ name: 'Torrents', extensions: ['torrent'] }]
+    filters: [
+      { name: 'Torrent Files', extensions: ['torrent'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
-    var torrentFile = fs.createReadStream(torrentSummary.torrentPath)
-    var savedTorrentFile = fs.createWriteStream(savePath)
-    torrentFile.on('error', (err) => console.error('Error reading torrent file', err))
-    savedTorrentFile.on('error', (err) => console.error('Error saving torrent file', err))
-    savedTorrentFile.on('close', () => console.log('Torrent saved', savePath))
-
-    torrentFile.pipe(savedTorrentFile)
+    fs.readFile(torrentSummary.torrentPath, function (err, torrentFile) {
+      if (err) return onError(err)
+      fs.writeFile(savePath, torrentFile, function (err) {
+        if (err) return onError(err)
+      })
+    })
   })
 }
 
