@@ -466,8 +466,8 @@ function addTorrentToList (torrent) {
     state.saved.torrents.push({
       status: 'new',
       name: torrent.name,
-      magnetURI: torrent.magnetURI,
-      infoHash: torrent.infoHash
+      infoHash: torrent.infoHash,
+      magnetURI: torrent.magnetURI
     })
     saveState()
     playInterfaceSound('ADD')
@@ -528,7 +528,6 @@ function addTorrentEvents (torrent) {
     torrentSummary.status = 'downloading'
     torrentSummary.ready = true
     torrentSummary.name = torrentSummary.displayName || torrent.name
-    torrentSummary.infoHash = torrent.infoHash
     torrentSummary.path = torrent.path
 
     // Summarize torrent files
