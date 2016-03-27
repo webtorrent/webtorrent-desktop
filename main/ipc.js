@@ -18,9 +18,12 @@ var powerSaveBlockID = 0
 
 function init () {
   ipcMain.on('ipcReady', function (e) {
-    console.timeEnd('init')
     app.ipcReady = true
     app.emit('ipcReady')
+    setTimeout(function () {
+      windows.main.show()
+      console.timeEnd('init')
+    }, 50)
   })
 
   ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)

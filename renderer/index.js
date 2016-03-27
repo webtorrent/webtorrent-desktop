@@ -60,7 +60,7 @@ function init () {
   window.setTimeout(function () {
     lazyLoadClient()
     lazyLoadCast()
-  }, 100)
+  }, 750)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -75,9 +75,6 @@ function init () {
 
   // Save state on exit
   window.addEventListener('beforeunload', saveState)
-
-  // Listen for messages from the main process
-  setupIpc()
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
@@ -113,8 +110,12 @@ function init () {
     update()
   })
 
+  // Listen for messages from the main process
+  setupIpc()
+
   // Done! Ideally we want to get here <100ms after the user clicks the app
   playInterfaceSound('STARTUP')
+
   console.timeEnd('init')
 }
 
