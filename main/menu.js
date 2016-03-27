@@ -3,6 +3,8 @@ module.exports = {
   onToggleFullScreen,
   onWindowHide,
   onWindowShow,
+  onPlayerOpen,
+  onPlayerClose,
   showCreateTorrent,
   showOpenTorrentFile,
   toggleFullScreen
@@ -44,6 +46,18 @@ function toggleFloatOnTop (flag) {
   }
 }
 
+function increaseVolume () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'changeVolume', 0.1)
+  }
+}
+
+function decreaseVolume () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'changeVolume', -0.1)
+  }
+}
+
 function toggleDevTools () {
   debug('toggleDevTools')
   if (windows.main) {
@@ -73,6 +87,16 @@ function onWindowHide () {
   debug('onWindowHide')
   getMenuItem('Full Screen').enabled = false
   getMenuItem('Float on Top').enabled = false
+}
+
+function onPlayerOpen () {
+  getMenuItem('Increase Volume').enabled = true
+  getMenuItem('Decrease Volume').enabled = true
+}
+
+function onPlayerClose () {
+  getMenuItem('Increase Volume').enabled = false
+  getMenuItem('Decrease Volume').enabled = false
 }
 
 function onToggleFullScreen (isFullScreen) {
@@ -192,6 +216,21 @@ function getAppMenuTemplate () {
           label: 'Float on Top',
           type: 'checkbox',
           click: () => toggleFloatOnTop()
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Increase Volume',
+          accelerator: 'CmdOrCtrl+Up',
+          click: increaseVolume,
+          enabled: false
+        },
+        {
+          label: 'Decrease Volume',
+          accelerator: 'CmdOrCtrl+Down',
+          click: decreaseVolume,
+          enabled: false
         },
         {
           type: 'separator'
