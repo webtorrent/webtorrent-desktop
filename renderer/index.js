@@ -716,8 +716,28 @@ function openPlayer (torrentSummary, index, cb) {
     // otherwise, play the video
     state.window.title = torrentSummary.name
     update()
+
+    ipcRenderer.send('onPlayerOpen')
+
     cb()
   })
+}
+
+function closePlayer (cb) {
+  state.window.title = config.APP_WINDOW_TITLE
+  update()
+
+  if (state.window.isFullScreen) {
+    dispatch('toggleFullScreen', false)
+  }
+  restoreBounds()
+  stopServer()
+  update()
+
+  ipcRenderer.send('unblockPowerSave')
+  ipcRenderer.send('onPlayerClose')
+
+  cb()
 }
 
 function openFile (torrentSummary, index) {
@@ -741,22 +761,6 @@ function openFolder (torrentSummary) {
     }
     ipcRenderer.send('openItem', folderPath)
   })
-}
-
-function closePlayer (cb) {
-  state.window.title = config.APP_WINDOW_TITLE
-  update()
-
-  if (state.window.isFullScreen) {
-    dispatch('toggleFullScreen', false)
-  }
-  restoreBounds()
-  stopServer()
-  update()
-
-  ipcRenderer.send('unblockPowerSave')
-
-  cb()
 }
 
 function toggleTorrent (torrentSummary) {

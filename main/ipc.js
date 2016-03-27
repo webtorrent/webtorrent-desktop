@@ -1,5 +1,5 @@
 module.exports = {
-  init: init
+  init
 }
 
 var debug = require('debug')('webtorrent-app:ipcMain')
@@ -23,13 +23,8 @@ function init () {
     app.emit('ipcReady')
   })
 
-  ipcMain.on('showOpenTorrentFile', function (e) {
-    menu.showOpenTorrentFile()
-  })
-
-  ipcMain.on('showCreateTorrent', function (e) {
-    menu.showCreateTorrent()
-  })
+  ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
+  ipcMain.on('showCreateTorrent', menu.showCreateTorrent)
 
   ipcMain.on('setBounds', function (e, bounds, maximize) {
     setBounds(bounds, maximize)
@@ -62,6 +57,9 @@ function init () {
 
   ipcMain.on('blockPowerSave', blockPowerSave)
   ipcMain.on('unblockPowerSave', unblockPowerSave)
+
+  ipcMain.on('onPlayerOpen', menu.onPlayerOpen)
+  ipcMain.on('onPlayerClose', menu.onPlayerClose)
 }
 
 function setBounds (bounds, maximize) {
