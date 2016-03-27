@@ -5,23 +5,24 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 var util = require('../util')
+var {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
-function Player (state, dispatch) {
+function Player (state) {
   // Show the video as large as will fit in the window, play immediately
   // If the video is on Chromecast or Airplay, show a title screen instead
   var showVideo = state.playing.location === 'local'
   return hx`
     <div
       class='player'
-      onmousemove=${() => dispatch('mediaMouseMoved')}>
-      ${showVideo ? renderMedia(state, dispatch) : renderCastScreen(state, dispatch)}
-      ${renderPlayerControls(state, dispatch)}
+      onmousemove=${dispatcher('mediaMouseMoved')}>
+      ${showVideo ? renderMedia(state) : renderCastScreen(state)}
+      ${renderPlayerControls(state)}
     </div>
   `
 }
 
-function renderMedia (state, dispatch) {
+function renderMedia (state) {
   if (!state.server) return
 
   // Unfortunately, play/pause can't be done just by modifying HTML.
@@ -54,11 +55,11 @@ function renderMedia (state, dispatch) {
   var mediaTag = hx`
     <div
       src='${state.server.localURL}'
-      ondblclick=${() => dispatch('toggleFullScreen')}
+      ondblclick=${dispatcher('toggleFullScreen')}
       onloadedmetadata=${onLoadedMetadata}
       onended=${onEnded}
-      onplay=${() => dispatch('mediaPlaying')}
-      onpause=${() => dispatch('mediaPaused')}
+      onplay=${dispatcher('mediaPlaying')}
+      onpause=${dispatcher('mediaPaused')}
       autoplay>
     </div>
   `
@@ -75,7 +76,7 @@ function renderMedia (state, dispatch) {
     <div
       class='letterbox'
       style=${style}
-      onmousemove=${() => dispatch('mediaMouseMoved')}>
+      onmousemove=${dispatcher('mediaMouseMoved')}>
       ${mediaTag}
       ${renderAudioMetadata(state)}
     </div>
@@ -126,7 +127,7 @@ function renderAudioMetadata (state) {
   return hx`<div class='audio-metadata'>${elems}</div>`
 }
 
-function renderCastScreen (state, dispatch) {
+function renderCastScreen (state) {
   var isChromecast = state.playing.location.startsWith('chromecast')
   var isAirplay = state.playing.location.startsWith('airplay')
   var isStarting = state.playing.location.endsWith('-pending')
@@ -166,7 +167,7 @@ function getPlayingTorrentSummary (state) {
   return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
-function renderPlayerControls (state, dispatch) {
+function renderPlayerControls (state) {
   var positionPercent = 100 * state.playing.currentTime / state.playing.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
 
@@ -183,7 +184,7 @@ function renderPlayerControls (state, dispatch) {
     `,
     hx`
       <i class='icon fullscreen'
-        onclick=${() => dispatch('toggleFullScreen')}>
+        onclick=${dispatcher('toggleFullScreen')}>
         ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
       </i>
     `
@@ -196,18 +197,18 @@ function renderPlayerControls (state, dispatch) {
   if (isOnChromecast) {
     chromecastClass = 'active'
     airplayClass = 'disabled'
-    chromecastHandler = () => dispatch('stopCasting')
+    chromecastHandler = dispatcher('stopCasting')
     airplayHandler = undefined
   } else if (isOnAirplay) {
     chromecastClass = 'disabled'
     airplayClass = 'active'
     chromecastHandler = undefined
-    airplayHandler = () => dispatch('stopCasting')
+    airplayHandler = dispatcher('stopCasting')
   } else {
     chromecastClass = ''
     airplayClass = ''
-    chromecastHandler = () => dispatch('openChromecast')
-    airplayHandler = () => dispatch('openAirplay')
+    chromecastHandler = dispatcher('openChromecast')
+    airplayHandler = dispatcher('openAirplay')
   }
   if (state.devices.chromecast || isOnChromecast) {
     elements.push(hx`
@@ -233,7 +234,7 @@ function renderPlayerControls (state, dispatch) {
   if (process.platform !== 'darwin') {
     elements.push(hx`
       <i.icon.back
-        onclick=${() => dispatch('back')}>
+        onclick=${dispatcher('back')}>
         chevron_left
       </i>
     `)
@@ -241,7 +242,7 @@ function renderPlayerControls (state, dispatch) {
 
   // Finally, the big button in the center plays or pauses the video
   elements.push(hx`
-    <i class='icon play-pause' onclick=${() => dispatch('playPause')}>
+    <i class='icon play-pause' onclick=${dispatcher('playPause')}>
       ${state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>
   `)

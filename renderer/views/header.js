@@ -4,7 +4,9 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
-function Header (state, dispatch) {
+var {dispatcher} = require('../lib/dispatcher')
+
+function Header (state) {
   return hx`
     <div class='header'>
       ${getTitle()}
@@ -12,13 +14,13 @@ function Header (state, dispatch) {
         <i.icon.back
           class=${state.location.hasBack() ? '' : 'disabled'}
           title='Back'
-          onclick=${() => dispatch('back')}>
+          onclick=${dispatcher('back')}>
           chevron_left
         </i>
         <i.icon.forward
           class=${state.location.hasForward() ? '' : 'disabled'}
           title='Forward'
-          onclick=${() => dispatch('forward')}>
+          onclick=${dispatcher('forward')}>
           chevron_right
         </i>
       </div>
@@ -40,7 +42,7 @@ function Header (state, dispatch) {
         <i
           class='icon add'
           title='Add torrent'
-          onclick=${() => dispatch('showOpenTorrentFile')}>
+          onclick=${dispatcher('showOpenTorrentFile')}>
           add
         </i>
       `
