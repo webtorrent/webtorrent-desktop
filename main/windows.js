@@ -1,7 +1,9 @@
 var windows = module.exports = {
+  about: null,
   main: null,
+  createAboutWindow: createAboutWindow,
   createMainWindow: createMainWindow,
-  focusMainWindow: focusMainWindow
+  focusWindow: focusWindow
 }
 
 var electron = require('electron')
@@ -11,7 +13,42 @@ var app = electron.app
 var config = require('../config')
 var menu = require('./menu')
 
+function createAboutWindow () {
+  if (windows.about) {
+    return focusWindow(windows.about)
+  }
+  var win = windows.about = new electron.BrowserWindow({
+    backgroundColor: '#ECECEC',
+    show: false,
+    center: true,
+    resizable: false,
+    icon: config.APP_ICON + '.png',
+    title: process.platform !== 'darwin'
+      ? 'About ' + config.APP_WINDOW_TITLE
+      : '',
+    useContentSize: true, // Specify web page size without OS chrome
+    width: 290,
+    height: 160,
+    minimizable: false,
+    maximizable: false,
+    fullscreen: false,
+    skipTaskbar: true
+  })
+  win.loadURL(config.WINDOW_ABOUT)
+
+  win.webContents.on('did-finish-load', function () {
+    win.show()
+  })
+
+  win.once('closed', function () {
+    windows.about = null
+  })
+}
+
 function createMainWindow () {
+  if (windows.main) {
+    return focusWindow(windows.main)
+  }
   var win = windows.main = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
@@ -25,7 +62,7 @@ function createMainWindow () {
     width: 450,
     height: 38 + (120 * 4) // header height + 4 torrents
   })
-  win.loadURL(config.INDEX)
+  win.loadURL(config.WINDOW_MAIN)
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen()
@@ -54,9 +91,9 @@ function createMainWindow () {
   })
 }
 
-function focusMainWindow () {
-  if (windows.main.isMinimized()) {
-    windows.main.restore()
+function focusWindow (win) {
+  if (win.isMinimized()) {
+    win.restore()
   }
-  windows.main.show() // shows and gives focus
+  win.show() // shows and gives focus
 }
