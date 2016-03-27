@@ -4,6 +4,7 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
+var util = require('../util')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state, dispatch) {
@@ -153,7 +154,8 @@ function renderCastScreen (state, dispatch) {
 function cssBackgroundImagePoster (state) {
   var torrentSummary = getPlayingTorrentSummary(state)
   if (!torrentSummary || !torrentSummary.posterURL) return ''
-  var cleanURL = torrentSummary.posterURL.replace(/\\/g, '/')
+  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
+  var cleanURL = posterURL.replace(/\\/g, '/')
   return 'radial-gradient(circle at center, ' +
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)' +
     `, url(${cleanURL})`
