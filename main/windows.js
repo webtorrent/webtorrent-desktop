@@ -36,6 +36,9 @@ function createAboutWindow () {
   })
   win.loadURL(config.WINDOW_ABOUT)
 
+  // No window menu
+  win.setMenu(null)
+
   win.webContents.on('did-finish-load', function () {
     win.show()
   })
