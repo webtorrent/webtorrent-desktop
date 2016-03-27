@@ -868,7 +868,10 @@ function saveTorrentFileAs (torrentSummary) {
   var opts = {
     title: 'Save Torrent File',
     defaultPath: path.join(state.saved.downloadPath, newFileName),
-    filters: [{ name: 'Torrents', extensions: ['torrent'] }]
+    filters: [
+      { name: 'Torrent Files', extensions: ['torrent'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
     fs.readFile(torrentSummary.torrentPath, function (err, torrentFile) {
