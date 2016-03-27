@@ -741,6 +741,7 @@ body.drag .torrent-placeholder span {
   margin: 0;
   width: 100%;
   overflow: hidden;
+  z-index: 1;
 }
 
 .app.hide-header .error-popover {

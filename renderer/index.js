@@ -767,7 +767,7 @@ function openPlayer (infoHash, index, cb) {
     if (timedOut) return update()
 
     // otherwise, play the video
-    state.window.title = torrentSummary.name
+    state.window.title = torrentSummary.files[state.playing.fileIndex].name
     update()
 
     ipcRenderer.send('onPlayerOpen')

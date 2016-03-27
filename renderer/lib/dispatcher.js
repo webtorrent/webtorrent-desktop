@@ -4,9 +4,9 @@ module.exports = {
   dispatcher
 }
 
-// _memoize most of our event handlers, which are functions in the form
+// Memoize most of our event handlers, which are functions in the form
 // () => dispatch(<args>)
-// ... this prevents virtual-dom from updating tons of listeners on every update()
+// ... this prevents virtual-dom from updating every listener on every update()
 var _dispatchers = {}
 var _dispatch = () => {}
 
