@@ -33,6 +33,7 @@ var Cast = null
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
 var clipboard = electron.clipboard
+var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
@@ -237,6 +238,9 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleSelectTorrent') {
     toggleSelectTorrent(args[0] /* infoHash */)
+  }
+  if (action === 'openTorrentContextMenu') {
+    openTorrentContextMenu(args[0] /* torrentSummary */)
   }
   if (action === 'openChromecast') {
     lazyLoadCast().openChromecast()
@@ -838,6 +842,44 @@ function toggleSelectTorrent (infoHash) {
   // toggle selection
   state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
   update()
+}
+
+function openTorrentContextMenu (torrentSummary) {
+  var menu = new remote.Menu()
+  menu.append(new remote.MenuItem({
+    label: 'Save Torrent File As...',
+    click: () => saveTorrentFileAs(torrentSummary)
+  }))
+
+  menu.append(new remote.MenuItem({
+    label: 'Copy Instant.io Link to Clipboard',
+    click: () => clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
+  }))
+
+  menu.append(new remote.MenuItem({
+    label: 'Copy Magnet Link to Clipboard',
+    click: () => clipboard.writeText(torrentSummary.magnetURI)
+  }))
+
+  menu.popup(remote.getCurrentWindow())
+}
+
+function saveTorrentFileAs (torrentSummary) {
+  var newFileName = `${path.parse(torrentSummary.name).name}.torrent`
+  var opts = {
+    title: 'Save Torrent File',
+    defaultPath: path.join(state.saved.downloadPath, newFileName),
+    filters: [{ name: 'Torrents', extensions: ['torrent'] }]
+  }
+  dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
+    var torrentFile = fs.createReadStream(torrentSummary.torrentPath)
+    var savedTorrentFile = fs.createWriteStream(savePath)
+    torrentFile.on('error', (err) => console.error('Error reading torrent file', err))
+    savedTorrentFile.on('error', (err) => console.error('Error saving torrent file', err))
+    savedTorrentFile.on('close', () => console.log('Torrent saved', savePath))
+
+    torrentFile.pipe(savedTorrentFile)
+  })
 }
 
 // Set window dimensions to match video dimensions or fill the screen
