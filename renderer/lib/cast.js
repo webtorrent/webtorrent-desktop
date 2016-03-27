@@ -57,7 +57,7 @@ function addAirplayEvents () {}
 function pollCastStatus (state) {
   if (state.playing.location === 'chromecast') {
     state.devices.chromecast.status(function (err, status) {
-      if (err) return console.log('Error getting %s status: %o', state.playing.location, err)
+      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
       state.playing.volume = status.volume.muted ? 0 : status.volume.level
