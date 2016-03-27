@@ -871,13 +871,12 @@ function saveTorrentFileAs (torrentSummary) {
     filters: [{ name: 'Torrents', extensions: ['torrent'] }]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
-    var torrentFile = fs.createReadStream(torrentSummary.torrentPath)
-    var savedTorrentFile = fs.createWriteStream(savePath)
-    torrentFile.on('error', (err) => console.error('Error reading torrent file', err))
-    savedTorrentFile.on('error', (err) => console.error('Error saving torrent file', err))
-    savedTorrentFile.on('close', () => console.log('Torrent saved', savePath))
-
-    torrentFile.pipe(savedTorrentFile)
+    fs.readFile(torrentSummary.torrentPath, function (err, torrentFile) {
+      if (err) return onError(err)
+      fs.writeFile(savePath, torrentFile, function (err) {
+        if (err) return onError(err)
+      })
+    })
   })
 }
 
