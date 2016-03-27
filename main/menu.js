@@ -300,12 +300,12 @@ function getAppMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    var name = app.getName()
+    // WebTorrent menu (OS X)
     template.unshift({
-      label: name,
+      label: config.APP_NAME,
       submenu: [
         {
-          label: 'About ' + name,
+          label: 'About ' + config.APP_NAME,
           role: 'about'
         },
         {
@@ -320,7 +320,7 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Hide ' + name,
+          label: 'Hide ' + config.APP_NAME,
           accelerator: 'Command+H',
           role: 'hide'
         },
@@ -339,12 +339,12 @@ function getAppMenuTemplate () {
         {
           label: 'Quit',
           accelerator: 'Command+Q',
-          click: function () { app.quit() }
+          click: () => app.quit()
         }
       ]
     })
 
-    // Window menu
+    // Window menu (OS X)
     template[4].submenu.push(
       {
         type: 'separator'
@@ -352,6 +352,17 @@ function getAppMenuTemplate () {
       {
         label: 'Bring All to Front',
         role: 'front'
+      }
+    )
+  } else {
+    // Help menu (Windows, Linux)
+    template[4].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'About ' + config.APP_NAME,
+        click: windows.createAboutWindow
       }
     )
   }
