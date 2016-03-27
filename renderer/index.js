@@ -22,6 +22,7 @@ var errors = require('./lib/errors')
 var config = require('../config')
 var TorrentPlayer = require('./lib/torrent-player')
 var torrentPoster = require('./lib/torrent-poster')
+var util = require('./util')
 
 // These two dependencies are the slowest-loading, so we lazy load them
 // This cuts time from icon click to rendered window from ~550ms to ~150ms on my laptop
@@ -478,7 +479,8 @@ function addTorrentToList (torrent) {
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
   if (s.torrentPath) {
-    var ret = startTorrentingID(s.torrentPath, s.path)
+    var torrentPath = util.getAbsoluteStaticPath(s.torrentPath)
+    var ret = startTorrentingID(torrentPath, s.path)
     if (s.infoHash) state.pendingTorrents[s.infoHash] = ret
     return ret
   } else if (s.magnetURI) {
@@ -614,7 +616,7 @@ function generateTorrentPoster (torrent, torrentSummary) {
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return onWarning(err)
         // show the poster
-        torrentSummary.posterURL = 'file:///' + posterFilePath
+        torrentSummary.posterURL = posterFilePath
         update()
       })
     })
@@ -874,7 +876,8 @@ function saveTorrentFileAs (torrentSummary) {
     ]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
-    fs.readFile(torrentSummary.torrentPath, function (err, torrentFile) {
+    var torrentPath = util.getAbsoluteStaticPath(torrentSummary.torrentPath)
+    fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
       fs.writeFile(savePath, torrentFile, function (err) {
         if (err) return onError(err)
