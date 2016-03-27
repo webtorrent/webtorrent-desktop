@@ -27,8 +27,8 @@ function createAboutWindow () {
       ? 'About ' + config.APP_WINDOW_TITLE
       : '',
     useContentSize: true, // Specify web page size without OS chrome
-    width: 290,
-    height: 160,
+    width: 300,
+    height: 170,
     minimizable: false,
     maximizable: false,
     fullscreen: false,
