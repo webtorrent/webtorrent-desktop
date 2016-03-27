@@ -71,10 +71,6 @@ function createMainWindow () {
     menu.onToggleFullScreen()
   })
 
-  win.webContents.on('did-finish-load', function () {
-    win.show()
-  })
-
   win.on('blur', menu.onWindowHide)
   win.on('focus', menu.onWindowShow)
 
