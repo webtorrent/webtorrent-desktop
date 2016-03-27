@@ -47,7 +47,9 @@ function TorrentList (state, dispatch) {
     if (isSelected) classes.push('selected')
     classes = classes.join(' ')
     return hx`
-      <div style=${style} class=${classes} onclick=${() => dispatch('toggleSelectTorrent', infoHash)}>
+      <div style=${style} class=${classes}
+        oncontextmenu=${() => dispatch('openTorrentContextMenu', torrentSummary)}
+        onclick=${() => dispatch('toggleSelectTorrent', infoHash)}>
         ${renderTorrentMetadata(torrent, torrentSummary)}
         ${renderTorrentButtons(torrentSummary)}
         ${isSelected ? renderTorrentDetails(torrent, torrentSummary) : ''}
