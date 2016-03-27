@@ -12,18 +12,21 @@ var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
 var remote = require('remote')
-var WebTorrent = require('webtorrent')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var Cast = require('./lib/cast')
 var errors = require('./lib/errors')
 var config = require('../config')
 var TorrentPlayer = require('./lib/torrent-player')
 var torrentPoster = require('./lib/torrent-poster')
+
+// These two dependencies are the slowest-loading, so we lazy load them
+// This cuts time from icon click to rendered window from ~550ms to ~150ms on my laptop
+var WebTorrent = null
+var Cast = null
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -53,20 +56,11 @@ loadState(init)
 function init () {
   state.location.go({ url: 'home' })
 
-  // Connect to the WebTorrent and BitTorrent networks
-  // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
-  state.client = new WebTorrent()
-  state.client.on('warning', onWarning)
-  state.client.on('error', function (err) {
-    // TODO: WebTorrent should have semantic errors
-    if (err.message.startsWith('There is already a swarm')) {
-      onError(new Error('Couldn\'t add duplicate torrent'))
-    } else {
-      onError(err)
-    }
-  })
-  resumeTorrents() /* restart everything we were torrenting last time the app ran */
-  setInterval(updateTorrentProgress, 1000)
+  // Lazily load the WebTorrent, Chromecast, and Airplay modules
+  window.setTimeout(function () {
+    lazyLoadClient()
+    lazyLoadCast()
+  }, 100)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -79,23 +73,13 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
-  // Calling update() updates the UI given the current state
-  // Do this at least once a second to show latest state for each torrent
-  // (eg % downloaded) and to keep the cursor in sync when playing a video
-  setInterval(function () {
-    update()
-    updateClientProgress()
-  }, 1000)
-
+  // Save state on exit
   window.addEventListener('beforeunload', saveState)
 
-  // listen for messages from the main process
+  // Listen for messages from the main process
   setupIpc()
 
   // OS integrations:
-  // ...Chromecast and Airplay
-  Cast.init(update)
-
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', (files) => dispatch('onOpen', files))
 
@@ -130,9 +114,54 @@ function init () {
   })
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
-  document.querySelector('.loading').remove() /* TODO: no spinner once fast enough */
   playInterfaceSound('STARTUP')
   console.timeEnd('init')
+}
+
+// Lazily loads the WebTorrent module and creates the WebTorrent client
+function lazyLoadClient () {
+  if (!WebTorrent) initWebtorrent()
+  return state.client
+}
+
+// Lazily loads Chromecast and Airplay support
+function lazyLoadCast () {
+  if (!Cast) {
+    Cast = require('./lib/cast')
+    Cast.init(update) // Search the local network for Chromecast and Airplays
+  }
+  return Cast
+}
+
+// Load the WebTorrent module, connect to both the WebTorrent and BitTorrent
+// networks, resume torrents, start monitoring torrent progress
+function initWebtorrent () {
+  WebTorrent = require('webtorrent')
+
+  // Connect to the WebTorrent and BitTorrent networks
+  // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
+  state.client = new WebTorrent()
+  state.client.on('warning', onWarning)
+  state.client.on('error', function (err) {
+    // TODO: WebTorrent should have semantic errors
+    if (err.message.startsWith('There is already a swarm')) {
+      onError(new Error('Couldn\'t add duplicate torrent'))
+    } else {
+      onError(err)
+    }
+  })
+
+  // Restart everything we were torrenting last time the app ran
+  resumeTorrents()
+
+  // Calling update() updates the UI given the current state
+  // Do this at least once a second to give  every file in every torrentSummary
+  // a progress bar and to keep the cursor in sync when playing a video
+  setInterval(function () {
+    if (!updateTorrentProgress()) {
+      update() // If we didn't just update(), do so now, for the video cursor
+    }
+  }, 1000)
 }
 
 // This is the (mostly) pure function from state -> UI. Returns a virtual DOM
@@ -188,7 +217,6 @@ function dispatch (action, ...args) {
     state.location.go({
       url: 'player',
       onbeforeload: function (cb) {
-        // TODO: handle audio. video only for now.
         openPlayer(args[0] /* torrentSummary */, args[1] /* index */, cb)
       },
       onbeforeunload: closePlayer
@@ -210,13 +238,13 @@ function dispatch (action, ...args) {
     toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
-    Cast.openChromecast()
+    lazyLoadCast().openChromecast()
   }
   if (action === 'openAirplay') {
-    Cast.openAirplay()
+    lazyLoadCast().openAirplay()
   }
   if (action === 'stopCasting') {
-    Cast.stopCasting()
+    lazyLoadCast().stopCasting()
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
@@ -272,7 +300,7 @@ function playPause (isPaused) {
     return // Nothing to do
   }
   // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
-  if (Cast.isCasting()) {
+  if (lazyLoadCast().isCasting()) {
     Cast.playPause()
   }
   state.playing.isPaused = !state.playing.isPaused
@@ -280,7 +308,7 @@ function playPause (isPaused) {
 }
 
 function jumpToTime (time) {
-  if (Cast.isCasting()) {
+  if (lazyLoadCast().isCasting()) {
     Cast.seek(time)
   } else {
     state.playing.jumpToTime = time
@@ -296,7 +324,7 @@ function changeVolume (delta) {
 function setVolume (volume) {
   // check if its in [0.0 - 1.0] range
   volume = Math.max(0, Math.min(1, volume))
-  if (Cast.isCasting()) {
+  if (lazyLoadCast().isCasting()) {
     Cast.setVolume(volume)
   } else {
     state.playing.setVolume = volume
@@ -362,18 +390,6 @@ function saveState () {
   })
 }
 
-function updateClientProgress () {
-  var progress = state.client.progress
-  var activeTorrentsExist = state.client.torrents.some(function (torrent) {
-    return torrent.progress !== 1
-  })
-  // Hide progress bar when client has no torrents, or progress is 100%
-  if (!activeTorrentsExist || progress === 1) {
-    progress = -1
-  }
-  state.dock.progress = progress
-}
-
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
@@ -417,7 +433,9 @@ function getTorrentSummary (infoHash) {
 // Get an active torrent from state.client.torrents
 // Returns undefined if we are not currently torrenting that infoHash
 function getTorrent (infoHash) {
-  return state.client.torrents.find((x) => x.infoHash === infoHash)
+  var pending = state.pendingTorrents[infoHash]
+  if (pending) return pending
+  return lazyLoadClient().torrents.find((x) => x.infoHash === infoHash)
 }
 
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
@@ -454,16 +472,22 @@ function addTorrentToList (torrent) {
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
-  if (s.torrentPath) return startTorrentingID(s.torrentPath, s.path)
-  else if (s.magnetURI) return startTorrentingID(s.magnetURI, s.path)
-  else return startTorrentingID(s.infoHash, s.path)
+  if (s.torrentPath) {
+    var ret = startTorrentingID(s.torrentPath, s.path)
+    if (s.infoHash) state.pendingTorrents[s.infoHash] = ret
+    return ret
+  } else if (s.magnetURI) {
+    return startTorrentingID(s.magnetURI, s.path)
+  } else {
+    return startTorrentingID(s.infoHash, s.path)
+  }
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrentingID (torrentID, path) {
-  console.log('Starting torrent ' + torrentID)
-  var torrent = state.client.add(torrentID, {
+  console.log('starting torrent ' + torrentID)
+  var torrent = lazyLoadClient().add(torrentID, {
     path: path || state.saved.downloadPath // Use downloads folder
   })
   addTorrentEvents(torrent)
@@ -479,13 +503,17 @@ function stopTorrenting (infoHash) {
 // Creates a torrent for a local file and starts seeding it
 function seed (files) {
   if (files.length === 0) return
-  var torrent = state.client.seed(files)
+  var torrent = lazyLoadClient().seed(files)
   addTorrentToList(torrent)
   addTorrentEvents(torrent)
 }
 
 function addTorrentEvents (torrent) {
-  torrent.on('infoHash', update)
+  torrent.on('infoHash', function () {
+    var infoHash = torrent.infoHash
+    if (state.pendingTorrents[infoHash]) delete state.pendingTorrents[infoHash]
+    update()
+  })
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
 
@@ -531,10 +559,25 @@ function addTorrentEvents (torrent) {
 }
 
 function updateTorrentProgress () {
+  var changed = false
+
+  // First, track overall progress
+  var progress = lazyLoadClient().progress
+  var activeTorrentsExist = lazyLoadClient().torrents.some(function (torrent) {
+    return torrent.progress !== 1
+  })
+  // Hide progress bar when client has no torrents, or progress is 100%
+  if (!activeTorrentsExist || progress === 1) {
+    progress = -1
+  }
+  // Show progress bar under the WebTorrent taskbar icon, on OSX
+  if (state.dock.progress !== progress) changed = true
+  state.dock.progress = progress
+
+  // Track progress for every file in each torrentSummary
   // TODO: ideally this would be tracked by WebTorrent, which could do it
   // more efficiently than looping over torrent.bitfield
-  var changed = false
-  state.client.torrents.forEach(function (torrent) {
+  lazyLoadClient().torrents.forEach(function (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     if (!torrentSummary || !torrent.ready) return
     torrent.files.forEach(function (file, index) {
@@ -554,6 +597,7 @@ function updateTorrentProgress () {
   })
 
   if (changed) update()
+  return changed
 }
 
 function generateTorrentPoster (torrent, torrentSummary) {
@@ -597,8 +641,8 @@ function saveTorrentFile (torrentSummary, torrent) {
     // Otherwise, save the .torrent file, under the app config folder
     fs.mkdir(config.CONFIG_TORRENT_PATH, function (_) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
-        if (err) return console.log('Error saving torrent file %s: %o', torrentPath, err)
-        console.log('Saved torrent file %s', torrentPath)
+        if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
+        console.log('saved torrent file %s', torrentPath)
         torrentSummary.torrentPath = torrentPath
         saveState()
       })
@@ -639,7 +683,7 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   // if it's audio, parse out the metadata (artist, title, etc)
   musicmetadata(file.createReadStream(), function (err, info) {
     if (err) return
-    console.log('Got audio metadata for %s: %v', file.name, info)
+    console.log('got audio metadata for %s: %v', file.name, info)
     state.playing.audioInfo = info
     update()
   })
@@ -690,7 +734,7 @@ function stopServer () {
 
 // Opens the video player
 function openPlayer (torrentSummary, index, cb) {
-  var torrent = state.client.get(torrentSummary.infoHash)
+  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
   if (!torrent || !torrent.done) playInterfaceSound('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
@@ -743,7 +787,7 @@ function closePlayer (cb) {
 }
 
 function openFile (torrentSummary, index) {
-  var torrent = state.client.get(torrentSummary.infoHash)
+  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
   if (!torrent) return
 
   var filePath = path.join(torrent.path, torrent.files[index].path)
@@ -751,7 +795,7 @@ function openFile (torrentSummary, index) {
 }
 
 function openFolder (torrentSummary) {
-  var torrent = state.client.get(torrentSummary.infoHash)
+  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
   if (!torrent) return
 
   var folderPath = path.join(torrent.path, torrent.name)

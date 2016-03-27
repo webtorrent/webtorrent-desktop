@@ -30,6 +30,7 @@ module.exports = {
     isPaused: true,
     mouseStationarySince: 0 /* Unix time in ms */
   },
+  pendingTorrents: {}, /* infohash to WebTorrent handle */
   devices: { /* playback devices like Chromecast and AppleTV */
     airplay: null, /* airplay client. finds and manages AppleTVs */
     chromecast: null /* chromecast client. finds and manages Chromecasts */

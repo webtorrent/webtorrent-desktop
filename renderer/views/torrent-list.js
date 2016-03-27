@@ -24,7 +24,9 @@ function TorrentList (state, dispatch) {
   function renderTorrent (torrentSummary) {
     // Get ephemeral data (like progress %) directly from the WebTorrent handle
     var infoHash = torrentSummary.infoHash
-    var torrent = state.client.torrents.find((x) => x.infoHash === infoHash)
+    var torrent = state.client
+      ? state.client.torrents.find((x) => x.infoHash === infoHash)
+      : null
     var isSelected = state.selectedInfoHash === infoHash
 
     // Background image: show some nice visuals, like a frame from the movie, if possible
