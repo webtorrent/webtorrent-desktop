@@ -1,5 +1,23 @@
 # WebTorrent.app Version History
 
+## Unreleased
+
+- Performance improvements
+  - Improve app startup time by over 100%
+  - Reduce the number of DOM updates substantially
+  - Update UI immediately anytime state is changed, instead on 1 second interval
+- Added right-click menu
+  - Save .torrent File
+  - Copy Instant.io Link to Clipboard
+  - Copy Magnet Link to Clipbaord
+- Added keyboard shortcut for volume up (⌘/Ctrl + ↑) and volume down (⌘/Ctrl + ↓)
+- Add desktop launcher shortcuts, like OS X has, for KDE and GNOME (Linux)
+- Add "About" window (Windows, Linux)
+- Better default window size that fits all the default torrents
+- Fixed
+  - Crash when ".local/share/{applications,icons}" path did not exist (Linux)
+  - WebTorrent executable can be moved without breaking torrents in the client
+
 ## v0.1.0
 
 - **Windows support!**
@@ -8,7 +26,7 @@
 - **Audio file support!**
   - Supports playback of .mp3, .aac, .ogg, .wav
   - Audio file metadata gets shown in the UI
-- Windows top menu is no longer automatically hidden.
+- Top menu is no longer automatically hidden (Windows)
 - When magnet links are opened from third-party apps, the WebTorrent window now gets focus.
 - Subtler app sounds.
 - Fix for an issue that caused some magnet links to fail to open.
