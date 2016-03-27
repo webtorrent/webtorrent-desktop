@@ -4,13 +4,14 @@ var airplay = require('airplay-js')
 var config = require('../../config')
 var state = require('../state')
 
+var debug = require('debug')('webtorrent-app:cast')
+
 // The Cast module talks to Airplay and Chromecast
 // * Modifies state when things change
 // * Starts and stops casting, provides remote video controls
 module.exports = {
   init,
-  openChromecast,
-  openAirplay,
+  open,
   stopCasting,
   playPause,
   seek,
@@ -21,50 +22,102 @@ module.exports = {
 // Callback to notify module users when state has changed
 var update
 
-function init (callback) {
-  update = callback
+// chromecast player implementation
+function chromecastPlayer (player) {
+  function addEvents () {
+    player.on('error', function (err) {
+      player.errorMessage = err.message
+      update()
+    })
+    player.on('disconnect', function () {
+      state.playing.location = 'local'
+      update()
+    })
+  }
 
-  // Start polling Chromecast or Airplay, whenever we're connected
-  setInterval(() => pollCastStatus(state), 1000)
+  function open () {
+    var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
+    player.play(state.server.networkURL, {
+      type: 'video/mp4',
+      title: config.APP_NAME + ' — ' + torrentSummary.name
+    }, function (err) {
+      if (err) {
+        state.playing.location = 'local'
+      } else {
+        state.playing.location = 'chromecast'
+      }
+      update()
+    })
+  }
 
-  // Listen for devices: Chromecast and Airplay
-  chromecasts.on('update', function (player) {
-    state.devices.chromecast = player
-    addChromecastEvents()
-  })
+  function playPause (callback) {
+    if (!state.playing.isPaused) player.pause(callback)
+    else player.play(null, null, callback)
+  }
 
-  var browser = airplay.createBrowser()
-  browser.on('deviceOn', function (player) {
-    state.devices.airplay = player
-    addAirplayEvents()
-  }).start()
-}
+  function stop (callback) {
+    player.stop(callback)
+  }
 
-function addChromecastEvents () {
-  state.devices.chromecast.on('error', function (err) {
-    state.devices.chromecast.errorMessage = err.message
-    update()
-  })
-  state.devices.chromecast.on('disconnect', function () {
-    state.playing.location = 'local'
-    update()
-  })
-}
-
-function addAirplayEvents () {}
-
-// Update our state from the remote TV
-function pollCastStatus (state) {
-  if (state.playing.location === 'chromecast') {
-    state.devices.chromecast.status(function (err, status) {
-      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
+  function status (state) {
+    player.status(function (err, status) {
+      if (err) return debug('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
       state.playing.volume = status.volume.muted ? 0 : status.volume.level
       update()
     })
-  } else if (state.playing.location === 'airplay') {
-    state.devices.airplay.status(function (status) {
+  }
+
+  function seek (time, callback) {
+    player.seek(time, callback)
+  }
+
+  function volume (volume, callback) {
+    player.volume(volume, callback)
+  }
+
+  addEvents()
+
+  return {
+    player: player,
+    open: open,
+    playPause: playPause,
+    stop: stop,
+    status: status,
+    seek: seek,
+    volume: volume
+  }
+}
+
+// airplay player implementation
+function airplayPlayer (player) {
+  function open () {
+    player.play(state.server.networkURL, 0, function (res) {
+      if (res.statusCode !== 200) {
+        state.playing.location = 'local'
+        state.errors.push({
+          time: new Date().getTime(),
+          message: 'Couldn\'t connect to Airplay'
+        })
+      } else {
+        state.playing.location = 'airplay'
+      }
+      update()
+    })
+  }
+
+  function playPause (callback) {
+    if (!state.playing.isPaused) player.rate(0, callback)
+    else player.rate(1, callback)
+  }
+
+  function stop (callback) {
+    player.stop(callback)
+  }
+
+  function status (state) {
+    player.status(function (status) {
       state.playing.isPaused = status.rate === 0
       state.playing.currentTime = status.position
       // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
@@ -73,54 +126,77 @@ function pollCastStatus (state) {
       update()
     })
   }
-}
 
-function openChromecast () {
-  if (state.playing.location !== 'local') {
-    throw new Error('You can\'t connect to Chromecast when already connected to another device')
+  function seek (time, callback) {
+    player.scrub(time, callback)
   }
 
-  state.playing.location = 'chromecast-pending'
-  var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-  state.devices.chromecast.play(state.server.networkURL, {
-    type: 'video/mp4',
-    title: config.APP_NAME + ' — ' + torrentSummary.name
-  }, function (err) {
-    state.playing.location = err ? 'local' : 'chromecast'
-    update()
-  })
-  update()
-}
-
-function openAirplay () {
-  if (state.playing.location !== 'local') {
-    throw new Error('You can\'t connect to Airplay when already connected to another device')
+  function volume (volume, callback) {
+    // TODO remove line below once we can fetch the information in status update
+    state.playing.volume = volume
+    volume = (volume - 1) * 30
+    player.volume(volume, callback)
   }
 
-  state.playing.location = 'airplay-pending'
-  state.devices.airplay.play(state.server.networkURL, 0, function (res) {
-    if (res.statusCode !== 200) {
-      state.playing.location = 'local'
-      state.errors.push({
-        time: new Date().getTime(),
-        message: 'Couldn\'t connect to Airplay'
-      })
-    } else {
-      state.playing.location = 'airplay'
-    }
-    update()
+  return {
+    player: player,
+    open: open,
+    playPause: playPause,
+    stop: stop,
+    status: status,
+    seek: seek,
+    volume: volume
+  }
+}
+
+// start export functions
+function init (callback) {
+  update = callback
+
+
+  // Start polling Chromecast or Airplay, whenever we're connected
+  setInterval(() => pollCastStatus(state), 1000)
+
+  // Listen for devices: Chromecast and Airplay
+  chromecasts.on('update', function (player) {
+    state.devices.chromecast = chromecastPlayer(player)
   })
+
+  var browser = airplay.createBrowser()
+  browser.on('deviceOn', function (player) {
+    debug('airplay found')
+    state.devices.airplay = airplayPlayer(player)
+  }).start()
+}
+
+// Update our state from the remote TV
+function pollCastStatus (state) {
+  var device = getDevice()
+  if (device) {
+    device.status(state)
+  }
+}
+
+function open (location) {
+  if (state.playing.location !== 'local') {
+    throw new Error('You can\'t connect to ' + location + ' when already connected to another device')
+  }
+
+  state.playing.location = location + '-pending'
+  var device = getDevice(location)
+  if (device) {
+    getDevice(location).open()
+  }
+
   update()
 }
 
 // Stops Chromecast or Airplay, move video back to local screen
 function stopCasting () {
-  if (state.playing.location === 'chromecast') {
-    state.devices.chromecast.stop(stoppedCasting)
-  } else if (state.playing.location === 'airplay') {
-    state.devices.airplay.stop(stoppedCasting)
-  } else if (state.playing.location.endsWith('-pending')) {
-    // Connecting to Chromecast took too long or errored out. Let the user cancel
+  var device = getDevice()
+  if (device) {
+    device.stop(stoppedCasting)
+  } else {
     stoppedCasting()
   }
 }
@@ -138,38 +214,37 @@ function isCasting () {
   return state.playing.location === 'chromecast' || state.playing.location === 'airplay'
 }
 
-function playPause () {
-  var device
-  if (state.playing.location === 'chromecast') {
-    device = state.devices.chromecast
-    if (!state.playing.isPaused) device.pause(castCallback)
-    else device.play(null, null, castCallback)
+function getDevice (location) {
+  if (location && state.devices[location]) {
+    return state.devices[location]
+  } else if (state.playing.location === 'chromecast') {
+    return state.devices.chromecast
   } else if (state.playing.location === 'airplay') {
-    device = state.devices.airplay
-    if (!state.playing.isPaused) device.rate(0, castCallback)
-    else device.rate(1, castCallback)
+    return state.devices.airplay
+  }
+}
+
+function playPause () {
+  var device = getDevice()
+  if (device) {
+    device.playPause(castCallback)
   }
 }
 
 function seek (time) {
-  if (state.playing.location === 'chromecast') {
-    state.devices.chromecast.seek(time, castCallback)
-  } else if (state.playing.location === 'airplay') {
-    state.devices.airplay.scrub(time, castCallback)
+  var device = getDevice()
+  if (device) {
+    device.seek(time, castCallback)
   }
 }
 
 function setVolume (volume) {
-  if (state.playing.location === 'chromecast') {
-    state.devices.chromecast.volume(volume, castCallback)
-  } else if (state.playing.location === 'airplay') {
-    // TODO remove line below once we can fetch the information in status update
-    state.playing.volume = volume
-    volume = (volume - 1) * 30
-    state.devices.airplay.volume(volume, castCallback)
+  var device = getDevice()
+  if (device) {
+    device.volume(volume, castCallback)
   }
 }
 
 function castCallback () {
-  console.log(state.playing.location + ' callback: %o', arguments)
+  debug('%s callback: %o', state.playing.location, arguments)
 }
