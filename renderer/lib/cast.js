@@ -153,7 +153,6 @@ function airplayPlayer (player) {
 function init (callback) {
   update = callback
 
-
   // Start polling Chromecast or Airplay, whenever we're connected
   setInterval(() => pollCastStatus(state), 1000)
 
