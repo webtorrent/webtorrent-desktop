@@ -65,11 +65,7 @@ function init () {
   })
 
   app.on('activate', function () {
-    if (windows.main) {
-      windows.main.show()
-    } else {
-      windows.createMainWindow()
-    }
+    windows.createMainWindow()
   })
 
   app.on('window-all-closed', function () {
@@ -88,7 +84,7 @@ function onOpen (e, torrentId) {
     // confirmation dialog Chrome shows causes Chrome to steal back the focus.
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(function () {
-      windows.focusMainWindow()
+      windows.focusWindow(windows.main)
     }, 100)
   } else {
     argv.push(torrentId)
@@ -100,7 +96,7 @@ function onAppOpen (newArgv) {
 
   if (app.ipcReady) {
     log('Second app instance opened, but was prevented:', newArgv)
-    windows.focusMainWindow()
+    windows.focusWindow(windows.main)
 
     processArgv(newArgv)
   } else {

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        background-color: #ECECEC;
+        font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
+        text-align: center;
+        overflow: hidden;
+      }
+      img {
+        width: 65px;
+        height: 65px;
+      }
+      h1 {
+        font-size: 14px;
+      }
+      p {
+        font-size: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="../static/WebTorrent.png">
+    <h1>WebTorrent</h1>
+    <p>Version <script>document.write(require('../package.json').version)</script></p>
+    <p><script>document.write(require('../config').APP_COPYRIGHT)</script></p>
+  </body>
+</html>

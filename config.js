@@ -21,8 +21,6 @@ module.exports = {
   CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(applicationConfigPath(APP_NAME), 'Torrents'),
 
-  INDEX: 'file://' + path.join(__dirname, 'renderer', 'index.html'),
-
   IS_PRODUCTION: isProduction(),
 
   ROOT_PATH: __dirname,
@@ -59,7 +57,10 @@ module.exports = {
   SOUND_STARTUP: {
     url: 'file://' + path.join(__dirname, 'static', 'sound', 'startup.wav'),
     volume: 0.4
-  }
+  },
+
+  WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
+  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html')
 }
 
 function isProduction () {
