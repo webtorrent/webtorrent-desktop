@@ -64,6 +64,7 @@ module.exports = {
       {
         status: 'paused',
         infoHash: '88594aaacbde40ef3e2510c47374ec0aa396c08e',
+        magnetURI: 'magnet:?xt=urn:btih:88594aaacbde40ef3e2510c47374ec0aa396c08e&dn=bbb_sunflower_1080p_30fps_normal.mp4&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=http%3A%2F%2Fdistribution.bbb3d.renderfarming.net%2Fvideo%2Fmp4%2Fbbb_sunflower_1080p_30fps_normal.mp4',
         displayName: 'Big Buck Bunny',
         posterURL: path.join('..', 'static', 'bigBuckBunny.jpg'),
         torrentPath: path.join('.', 'static', 'bigBuckBunny.torrent'),
@@ -79,6 +80,7 @@ module.exports = {
       {
         status: 'paused',
         infoHash: '6a9759bffd5c0af65319979fb7832189f4f3c35d',
+        magnetURI: 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel-1024-surround.mp4',
         displayName: 'Sintel',
         posterURL: path.join('..', 'static', 'sintel.jpg'),
         torrentPath: path.join('.', 'static', 'sintel.torrent'),
@@ -94,6 +96,7 @@ module.exports = {
       {
         status: 'paused',
         infoHash: '02767050e0be2fd4db9a2ad6c12416ac806ed6ed',
+        magnetURI: 'magnet:?xt=urn:btih:02767050e0be2fd4db9a2ad6c12416ac806ed6ed&dn=tears_of_steel_1080p.webm&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io',
         displayName: 'Tears of Steel',
         posterURL: path.join('..', 'static', 'tearsOfSteel.jpg'),
         torrentPath: path.join('.', 'static', 'tearsOfSteel.torrent'),
