@@ -4,7 +4,9 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
-function OpenTorrentAddressModal (state, dispatch) {
+var {dispatch} = require('../lib/dispatcher')
+
+function OpenTorrentAddressModal (state) {
   return hx`
     <div class='open-torrent-address-modal'>
       <p><strong>Enter torrent address or magnet link</strong></p>
@@ -15,17 +17,17 @@ function OpenTorrentAddressModal (state, dispatch) {
       </p>
     </div>
   `
+}
 
-  function handleKeyPress (e) {
-    if (e.which === 13) handleOK() /* hit Enter to submit */
-  }
+function handleKeyPress (e) {
+  if (e.which === 13) handleOK() /* hit Enter to submit */
+}
 
-  function handleOK () {
-    dispatch('exitModal')
-    dispatch('addTorrent', document.querySelector('#add-torrent-url').value)
-  }
+function handleOK () {
+  dispatch('exitModal')
+  dispatch('addTorrent', document.querySelector('#add-torrent-url').value)
+}
 
-  function handleCancel () {
-    dispatch('exitModal')
-  }
+function handleCancel () {
+  dispatch('exitModal')
 }

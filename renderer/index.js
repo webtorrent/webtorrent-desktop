@@ -23,6 +23,8 @@ var config = require('../config')
 var TorrentPlayer = require('./lib/torrent-player')
 var torrentPoster = require('./lib/torrent-poster')
 var util = require('./util')
+var {setDispatch} = require('./lib/dispatcher')
+setDispatch(dispatch)
 
 // These two dependencies are the slowest-loading, so we lazy load them
 // This cuts time from icon click to rendered window from ~550ms to ~150ms on my laptop
@@ -170,7 +172,7 @@ function initWebtorrent () {
 // This is the (mostly) pure function from state -> UI. Returns a virtual DOM
 // tree. Any events, such as button clicks, will turn into calls to dispatch()
 function render (state) {
-  return App(state, dispatch)
+  return App(state)
 }
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
@@ -216,32 +218,23 @@ function dispatch (action, ...args) {
   if (action === 'seed') {
     seed(args[0] /* files */)
   }
-  if (action === 'play') {
-    state.location.go({
-      url: 'player',
-      onbeforeload: function (cb) {
-        openPlayer(args[0] /* torrentSummary */, args[1] /* index */, cb)
-      },
-      onbeforeunload: closePlayer
-    })
-  }
   if (action === 'openFile') {
-    openFile(args[0] /* torrentSummary */, args[1] /* index */)
+    openFile(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'openFolder') {
-    openFolder(args[0] /* torrentSummary */)
+    openFolder(args[0] /* infoHash */)
   }
   if (action === 'toggleTorrent') {
-    toggleTorrent(args[0] /* torrentSummary */)
+    toggleTorrent(args[0] /* infoHash */)
   }
   if (action === 'deleteTorrent') {
-    deleteTorrent(args[0] /* torrentSummary */)
+    deleteTorrent(args[0] /* infoHash */)
   }
   if (action === 'toggleSelectTorrent') {
     toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openTorrentContextMenu') {
-    openTorrentContextMenu(args[0] /* torrentSummary */)
+    openTorrentContextMenu(args[0] /* infoHash */)
   }
   if (action === 'openChromecast') {
     lazyLoadCast().openChromecast()
@@ -265,6 +258,13 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'play') {
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        openPlayer(args[0] /* infoHash */, args[1] /* index */, cb)
+      },
+      onbeforeunload: closePlayer
+    })
     playPause(false)
   }
   if (action === 'pause') {
@@ -285,7 +285,7 @@ function dispatch (action, ...args) {
     ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen', args[0])
+    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
   }
   if (action === 'mediaMouseMoved') {
     state.playing.mouseStationarySince = new Date().getTime()
@@ -739,8 +739,9 @@ function stopServer () {
 }
 
 // Opens the video player
-function openPlayer (torrentSummary, index, cb) {
-  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
+function openPlayer (infoHash, index, cb) {
+  var torrentSummary = getTorrentSummary(infoHash)
+  var torrent = lazyLoadClient().get(infoHash)
   if (!torrent || !torrent.done) playInterfaceSound('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
@@ -792,16 +793,16 @@ function closePlayer (cb) {
   cb()
 }
 
-function openFile (torrentSummary, index) {
-  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
+function openFile (infoHash, index) {
+  var torrent = lazyLoadClient().get(infoHash)
   if (!torrent) return
 
   var filePath = path.join(torrent.path, torrent.files[index].path)
   ipcRenderer.send('openItem', filePath)
 }
 
-function openFolder (torrentSummary) {
-  var torrent = lazyLoadClient().get(torrentSummary.infoHash)
+function openFolder (infoHash) {
+  var torrent = lazyLoadClient().get(infoHash)
   if (!torrent) return
 
   var folderPath = path.join(torrent.path, torrent.name)
@@ -815,7 +816,8 @@ function openFolder (torrentSummary) {
   })
 }
 
-function toggleTorrent (torrentSummary) {
+function toggleTorrent (infoHash) {
+  var torrentSummary = getTorrentSummary(infoHash)
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrentingSummary(torrentSummary)
@@ -827,8 +829,7 @@ function toggleTorrent (torrentSummary) {
   }
 }
 
-function deleteTorrent (torrentSummary) {
-  var infoHash = torrentSummary.infoHash
+function deleteTorrent (infoHash) {
   var torrent = getTorrent(infoHash)
   if (torrent) torrent.destroy()
 
@@ -845,7 +846,8 @@ function toggleSelectTorrent (infoHash) {
   update()
 }
 
-function openTorrentContextMenu (torrentSummary) {
+function openTorrentContextMenu (infoHash) {
+  var torrentSummary = getTorrentSummary(infoHash)
   var menu = new remote.Menu()
   menu.append(new remote.MenuItem({
     label: 'Save Torrent File As...',

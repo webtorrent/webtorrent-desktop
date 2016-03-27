@@ -8,8 +8,9 @@ var prettyBytes = require('prettier-bytes')
 var util = require('../util')
 
 var TorrentPlayer = require('../lib/torrent-player')
+var {dispatcher} = require('../lib/dispatcher')
 
-function TorrentList (state, dispatch) {
+function TorrentList (state) {
   var torrentRows = state.saved.torrents.map(
     (torrentSummary) => renderTorrent(torrentSummary))
   return hx`
@@ -53,8 +54,8 @@ function TorrentList (state, dispatch) {
     classes = classes.join(' ')
     return hx`
       <div style=${style} class=${classes}
-        oncontextmenu=${() => dispatch('openTorrentContextMenu', torrentSummary)}
-        onclick=${() => dispatch('toggleSelectTorrent', infoHash)}>
+        oncontextmenu=${dispatcher('openTorrentContextMenu', infoHash)}
+        onclick=${dispatcher('toggleSelectTorrent', infoHash)}>
         ${renderTorrentMetadata(torrent, torrentSummary)}
         ${renderTorrentButtons(torrentSummary)}
         ${isSelected ? renderTorrentDetails(torrent, torrentSummary) : ''}
@@ -110,6 +111,8 @@ function TorrentList (state, dispatch) {
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   function renderTorrentButtons (torrentSummary) {
+    var infoHash = torrentSummary.infoHash
+
     var playIcon, playTooltip, playClass
     if (torrentSummary.playStatus === 'unplayable') {
       playIcon = 'play_arrow'
@@ -141,34 +144,28 @@ function TorrentList (state, dispatch) {
         <i.btn.icon.play
           title=${playTooltip}
           class=${playClass}
-          onclick=${(e) => handleButton('play', e)}>
+          onclick=${dispatcher('play', infoHash)}>
           ${playIcon}
         </i>
         <i.btn.icon.download
           class=${torrentSummary.status}
           title=${downloadTooltip}
-          onclick=${(e) => handleButton('toggleTorrent', e)}>
+          onclick=${dispatcher('toggleTorrent', infoHash)}>
           ${downloadIcon}
         </i>
         <i
           class='icon delete'
           title='Remove torrent'
-          onclick=${(e) => handleButton('deleteTorrent', e)}>
+          onclick=${dispatcher('deleteTorrent', infoHash)}>
           close
         </i>
       </div>
     `
-
-    function handleButton (action, e) {
-      // Prevent propagation so that we don't select/unselect the torrent
-      e.stopPropagation()
-      if (e.target.classList.contains('disabled')) return
-      dispatch(action, torrentSummary)
-    }
   }
 
   // Show files, per-file download status and play buttons, and so on
   function renderTorrentDetails (torrent, torrentSummary) {
+    var infoHash = torrentSummary.infoHash
     var filesElement
     if (!torrentSummary.files) {
       // We don't know what files this torrent contains
@@ -183,7 +180,10 @@ function TorrentList (state, dispatch) {
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
-          <span class='open-folder' onclick=${handleOpenFolder}>Open folder</span>
+          <span class='open-folder'
+            onclick=${dispatcher('openFolder', infoHash)}>
+            Open folder
+          </span>
           <table>
             ${fileRows}
           </table>
@@ -196,11 +196,6 @@ function TorrentList (state, dispatch) {
         ${filesElement}
       </div>
     `
-
-    function handleOpenFolder (e) {
-      e.stopPropagation()
-      dispatch('openFolder', torrentSummary)
-    }
   }
 
   // Show a single torrentSummary file in the details view for a single torrent
@@ -210,15 +205,20 @@ function TorrentList (state, dispatch) {
     var progress = Math.round(100 * file.numPiecesPresent / (file.numPieces || 0)) + '%'
 
     // Second, render the file as a table row
+    var infoHash = torrentSummary.infoHash
     var icon
     var rowClass = ''
-    if (state.playing.infoHash === torrentSummary.infoHash && state.playing.fileIndex === index) {
+    var handleClick
+    if (state.playing.infoHash === infoHash && state.playing.fileIndex === index) {
       icon = 'pause_arrow' /* playing? add option to pause */
+      handleClick = undefined // TODO: pause audio
     } else if (TorrentPlayer.isPlayable(file)) {
       icon = 'play_arrow' /* playable? add option to play */
+      handleClick = dispatcher('play', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
       rowClass = isDone ? '' : 'disabled'
+      handleClick = dispatcher('openFile', infoHash, index)
     }
     return hx`
       <tr onclick=${handleClick} class='${rowClass}'>
@@ -230,17 +230,5 @@ function TorrentList (state, dispatch) {
         <td class='col-size'>${prettyBytes(file.length)}</td>
       </tr>
     `
-
-    // Finally, let the user click on the row to play media or open files
-    function handleClick (e) {
-      e.stopPropagation()
-      if (icon === 'pause_arrow') {
-        throw new Error('Unimplemented') // TODO: pause audio
-      } else if (icon === 'play_arrow') {
-        dispatch('play', torrentSummary, index)
-      } else if (isDone) {
-        dispatch('openFile', torrentSummary, index)
-      }
-    }
   }
 }
