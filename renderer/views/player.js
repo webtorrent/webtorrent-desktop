@@ -266,15 +266,16 @@ function renderLoadingBar (state) {
   if (torrent === null) {
     return []
   }
+  var file = torrent.files[state.playing.fileIndex]
 
   // Find all contiguous parts of the torrent which are loaded
   var parts = []
   var lastPartPresent = false
-  var numParts = torrent.pieces.length
-  for (var i = 0; i < numParts; i++) {
+  var numParts = file._endPiece - file._startPiece + 1
+  for (var i = file._startPiece; i <= file._endPiece; i++) {
     var partPresent = torrent.bitfield.get(i)
     if (partPresent && !lastPartPresent) {
-      parts.push({start: i, count: 1})
+      parts.push({start: i - file._startPiece, count: 1})
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }
