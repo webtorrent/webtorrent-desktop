@@ -164,9 +164,11 @@ function updateElectron () {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  if (['mediaMouseMoved', 'playbackJump'].indexOf(action) === -1) {
-    console.log('dispatch: %s %o', action, args) /* log user interactions, but don't spam */
+  // Log dispatch calls, for debugging
+  if (action !== 'mediaMouseMoved') {
+    console.log('dispatch: %s %o', action, args)
   }
+
   if (action === 'onOpen') {
     onOpen(args[0] /* files */)
   }
@@ -221,11 +223,9 @@ function dispatch (action, ...args) {
   }
   if (action === 'back') {
     state.location.back()
-    update()
   }
   if (action === 'forward') {
     state.location.forward()
-    update()
   }
   if (action === 'playPause') {
     playPause()
@@ -252,14 +252,16 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0])
-    update()
   }
   if (action === 'mediaMouseMoved') {
     state.playing.mouseStationarySince = new Date().getTime()
-    update()
   }
   if (action === 'exitModal') {
     state.modal = null
+  }
+
+  // Update the virtual-dom, unless it's just a mouse move event
+  if (action !== 'mediaMouseMoved') {
     update()
   }
 }
