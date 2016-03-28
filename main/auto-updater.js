@@ -45,8 +45,6 @@ function checkForUpdates () {
     if (res.statusCode !== 200) return
 
     var obj = JSON.parse(data)
-    // TODO: version should be included in the response object, we shouldn'v have to parse obj.name
-    var version = obj.name.slice(obj.name.lastIndexOf('v') + 1)
-    windows.main.send('dispatch', 'updateAvailable', version)
+    windows.main.send('dispatch', 'updateAvailable', obj.version)
   })
 }
