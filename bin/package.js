@@ -284,7 +284,16 @@ function buildWin32 (cb) {
 }
 
 function buildLinux (cb) {
-  electronPackager(Object.assign({}, all, linux), cb)
+  electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
+    if (err) return cb(err)
+
+    // Create .zip file for Linux
+    var distPath = path.join(config.ROOT_PATH, 'dist')
+    var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
+    var appFolderName = path.basename(buildPath[0])
+    cp.execSync(`pushd ${distPath} && zip -r -y ${zipPath} ${appFolderName} && popd`)
+    console.log('Created Linux .zip file.')
+  })
 }
 
 function printDone (err, buildPath) {
