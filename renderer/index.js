@@ -309,7 +309,7 @@ function dispatch (action, ...args) {
 }
 
 // Shows a modal saying that we have an update
-function updateAvailable(version) {
+function updateAvailable (version) {
   if (state.saved.skippedVersions && state.saved.skippedVersions.includes(version)) {
     console.log('new version skipped by user: v' + version)
     return
