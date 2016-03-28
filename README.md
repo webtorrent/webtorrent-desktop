@@ -2,7 +2,7 @@
   <br>
   <a href="https://webtorrent.io"><img src="https://webtorrent.io/img/WebTorrent.png" alt="WebTorrent" width="200"></a>
   <br>
-  WebTorrent.app
+  WebTorrent Desktop
   <br>
   <br>
 </h1>
@@ -26,7 +26,7 @@
 
 ## Install
 
-**WebTorrent.app** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-app/releases) page.
+**WebTorrent Desktop** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-app/releases) page.
 
 ## Screenshot
 
