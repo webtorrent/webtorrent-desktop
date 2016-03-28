@@ -40,6 +40,7 @@ module.exports = {
     badge: 0,
     progress: 0
   },
+  modal: null, /* modal popover */
   errors: [], /* user-facing errors */
 
   /*
