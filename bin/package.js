@@ -76,7 +76,7 @@ var all = {
   prune: true,
 
   // The Electron version with which the app is built (without the leading 'v')
-  version: pkg.devDependencies['electron-prebuilt']
+  version: pkg.dependencies['electron-prebuilt']
 }
 
 var darwin = {
