@@ -17,6 +17,8 @@
 - Fixed
   - Crash when ".local/share/{applications,icons}" path did not exist (Linux)
   - WebTorrent executable can be moved without breaking torrents in the client
+  - Video progress bar shows progress for current file, not full torrent
+  - Video player window shows file title instead of torrent title
 
 ## v0.1.0
 
