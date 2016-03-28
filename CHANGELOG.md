@@ -1,6 +1,6 @@
 # WebTorrent.app Version History
 
-## Unreleased
+## v0.1.1
 
 - Performance improvements
   - Improve app startup time by over 100%
