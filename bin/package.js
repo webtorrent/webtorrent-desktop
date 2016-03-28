@@ -37,8 +37,8 @@ var all = {
   // Build 64 bit binaries only.
   arch: 'x64',
 
-  // The application source directory.
-  dir: config.ROOT_PATH,
+  // The human-readable copyright line for the app.
+  'app-copyright': config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
   // property on Windows, and `CFBundleShortVersionString` on OS X.
@@ -57,6 +57,9 @@ var all = {
   // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
   // Windows requires the build version to start with a number :/ so we stick on a prefix
   'build-version': '0-' + cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
+
+  // The application source directory.
+  dir: config.ROOT_PATH,
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
@@ -105,9 +108,6 @@ var win32 = {
     // Company that produced the file.
     CompanyName: config.APP_NAME,
 
-    // Copyright notices that apply to the file.
-    LegalCopyright: config.APP_COPYRIGHT,
-
     // Name of the program, displayed to users
     FileDescription: config.APP_NAME,
 
@@ -149,6 +149,8 @@ function buildDarwin (cb) {
     var infoPlistPath = path.join(contentsPath, 'Info.plist')
     var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
+    // TODO: Use new `extend-info` and `extra-resource` opts to electron-packager,
+    // available as of v6.
     infoPlist.CFBundleDocumentTypes = [
       {
         CFBundleTypeExtensions: [ 'torrent' ],
@@ -175,8 +177,6 @@ function buildDarwin (cb) {
         CFBundleURLSchemes: [ 'magnet' ]
       }
     ]
-
-    infoPlist.NSHumanReadableCopyright = config.APP_COPYRIGHT
 
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
 
@@ -206,6 +206,8 @@ function buildDarwin (cb) {
         verbose: true
       }
 
+      // TODO: Use the built-in `sign` opt to electron-packager that takes an options
+      // object as of v6.
       sign(signOpts, function (err) {
         if (err) return cb(err)
 
