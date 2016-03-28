@@ -242,6 +242,10 @@ i:not(.disabled):hover {
  * MODAL POPOVERS
  */
 
+.modal {
+  z-index: 2;
+}
+
 .modal .modal-background {
   content: ' ';
   position: fixed;

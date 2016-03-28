@@ -293,11 +293,28 @@ function dispatch (action, ...args) {
   if (action === 'exitModal') {
     state.modal = null
   }
+  if (action === 'updateAvailable') {
+    updateAvailable(args[0] /* version */)
+  }
+  if (action === 'skipVersion') {
+    if (!state.saved.skippedVersions) state.saved.skippedVersions = []
+    state.saved.skippedVersions.push(args[0] /* version */)
+    saveState()
+  }
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved') {
     update()
   }
+}
+
+// Shows a modal saying that we have an update
+function updateAvailable(version) {
+  if (state.saved.skippedVersions && state.saved.skippedVersions.includes(version)) {
+    console.log('new version skipped by user: v' + version)
+    return
+  }
+  state.modal = { id: 'update-available-modal', version: version }
 }
 
 // Plays or pauses the video. If isPaused is undefined, acts as a toggle
@@ -347,7 +364,7 @@ function setupIpc () {
   ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
 
   ipcRenderer.on('showOpenTorrentAddress', function (e) {
-    state.modal = 'open-torrent-address-modal'
+    state.modal = { id: 'open-torrent-address-modal' }
     update()
   })
 
