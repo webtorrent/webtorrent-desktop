@@ -11,6 +11,7 @@ var menu = require('./menu')
 var shortcuts = require('./shortcuts')
 var squirrelWin32 = require('./squirrel-win32')
 var windows = require('./windows')
+var tray = require('./tray')
 
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
@@ -52,6 +53,7 @@ function init () {
     menu.init()
     windows.createMainWindow()
     shortcuts.init()
+    tray.init()
     if (process.platform !== 'win32') handlers.init()
   })
 
@@ -66,12 +68,6 @@ function init () {
 
   app.on('activate', function () {
     windows.createMainWindow()
-  })
-
-  app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
   })
 }
 

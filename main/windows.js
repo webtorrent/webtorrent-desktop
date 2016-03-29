@@ -8,8 +8,6 @@ var windows = module.exports = {
 
 var electron = require('electron')
 
-var app = electron.app
-
 var config = require('../config')
 var menu = require('./menu')
 
@@ -78,7 +76,7 @@ function createMainWindow () {
   win.on('leave-full-screen', () => menu.onToggleFullScreen(false))
 
   win.on('close', function (e) {
-    if (process.platform === 'darwin' && !app.isQuitting) {
+    if (!electron.app.isQuitting) {
       e.preventDefault()
       win.send('dispatch', 'pause')
       win.hide()
