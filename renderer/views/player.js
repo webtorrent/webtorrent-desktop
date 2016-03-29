@@ -135,11 +135,16 @@ function renderAudioMetadata (state) {
     track = info.track.no + ' of ' + info.track.of
   }
 
-  // Show a small info box in the middle of the screen
-  var elems = [hx`<div class='audio-title'><label></label>${title}</div>`]
+  // Show a small info box in the middle of the screen with title/album/artist/etc
+  var elems = []
   if (artist) elems.push(hx`<div class='audio-artist'><label>Artist</label>${artist}</div>`)
   if (album) elems.push(hx`<div class='audio-album'><label>Album</label>${album}</div>`)
   if (track) elems.push(hx`<div class='audio-track'><label>Track</label>${track}</div>`)
+
+  // Align the title with the artist/etc info, if available. Otherwise, center the title
+  var emptyLabel = hx`<label></label>`
+  elems.unshift(hx`<div class='audio-title'>${elems.length ? emptyLabel : undefined}${title}</div>`)
+
   return hx`<div class='audio-metadata'>${elems}</div>`
 }
 
@@ -157,7 +162,7 @@ function renderLoadingSpinner (state) {
   return hx`
     <div class='media-stalled'>
       <div class='loading-spinner'>&nbsp;</div>
-      <div class='status ellipsis'>
+      <div class='loading-status ellipsis'>
         <span class='progress'>${progress}%</span> downloaded,
         <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
         <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>

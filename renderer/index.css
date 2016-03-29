@@ -713,8 +713,7 @@ body.drag .torrent-placeholder span {
  */
 
 .media-overlay {
-  width: 500px;
-  max-width: 100%;
+  max-width: calc(100% - 80px);
   white-space: nowrap;
   text-overflow: ellipsis;
   align-self: center;
@@ -728,6 +727,17 @@ body.drag .torrent-placeholder span {
   width: 40px;
   height: 40px;
   margin: 40px auto;
+}
+
+.media-stalled .loading-status {
+  font-size: 18px;
+  font-weight: normal;
+  text-align: center;
+}
+
+.audio-metadata div {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .audio-metadata .audio-title {
