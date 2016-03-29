@@ -70,16 +70,9 @@ function renderMedia (state) {
   mediaTag.tagName = mediaType
 
   // Show the media.
-  // Video fills the window, centered with black bars if necessary
-  // Audio gets a static poster image and a summary of the file metadata.
-  var isAudio = mediaType === 'audio'
-  var style = {
-    backgroundImage: isAudio ? cssBackgroundImagePoster(state) : ''
-  }
   return hx`
     <div
       class='letterbox'
-      style=${style}
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${mediaTag}
       ${renderOverlay(state)}
@@ -104,15 +97,28 @@ function renderMedia (state) {
 }
 
 function renderOverlay (state) {
+  var elems = []
   var audioMetadataElem = renderAudioMetadata(state)
   var spinnerElem = renderLoadingSpinner(state)
-
-  var elems = []
   if (audioMetadataElem) elems.push(audioMetadataElem)
   if (spinnerElem) elems.push(spinnerElem)
-  if (elems.length === 0) return
 
-  return hx`<div class='media-overlay'>${elems}</div>`
+  // Video fills the window, centered with black bars if necessary
+  // Audio gets a static poster image and a summary of the file metadata.
+  var style
+  if (state.playing.type === 'audio') {
+    style = { backgroundImage: cssBackgroundImagePoster(state) }
+  } else if (elems.length !== 0) {
+    style = { backgroundImage: cssBackgroundImageDarkGradient() }
+  } else {
+    return /* Video, not audio, and it isn't stalled, so no spinner. No overlay needed. */
+  }
+
+  return hx`
+    <div class='media-overlay-background' style=${style}>
+      <div class='media-overlay'>${elems}</div>
+    </div>
+  `
 }
 
 function renderAudioMetadata (state) {
@@ -201,9 +207,12 @@ function cssBackgroundImagePoster (state) {
   if (!torrentSummary || !torrentSummary.posterURL) return ''
   var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
   var cleanURL = posterURL.replace(/\\/g, '/')
+  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
+}
+
+function cssBackgroundImageDarkGradient () {
   return 'radial-gradient(circle at center, ' +
-    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)' +
-    `, url(${cleanURL})`
+    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
 function getPlayingTorrentSummary (state) {
