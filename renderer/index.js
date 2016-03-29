@@ -286,12 +286,10 @@ function dispatch (action, ...args) {
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
-    update()
   }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
     state.playing.isStalled = false
-    update()
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
@@ -336,7 +334,6 @@ function playPause (isPaused) {
     Cast.playPause()
   }
   state.playing.isPaused = !state.playing.isPaused
-  update()
 }
 
 function jumpToTime (time) {
@@ -344,7 +341,6 @@ function jumpToTime (time) {
     Cast.seek(time)
   } else {
     state.playing.jumpToTime = time
-    update()
   }
 }
 
@@ -360,7 +356,6 @@ function setVolume (volume) {
     Cast.setVolume(volume)
   } else {
     state.playing.setVolume = volume
-    update()
   }
 }
 
