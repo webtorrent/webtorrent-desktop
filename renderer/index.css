@@ -142,7 +142,6 @@ i:not(.disabled):hover {
  */
 
 .header {
-  background: rgb(40, 40, 40);
   border-bottom: 1px solid rgb(20, 20, 20);
   height: 37px; /* vertically center OS menu buttons (OS X) */
   padding-top: 6px;
@@ -157,10 +156,6 @@ i:not(.disabled):hover {
   font-size: 14px;
   line-height: 1.5em;
   z-index: 1;
-}
-
-.app:not(.is-focused) .header {
-  background: rgb(50, 50, 50);
 }
 
 .app.view-player .header {
@@ -474,6 +469,17 @@ input {
 body.drag .torrent-placeholder span {
   border-color: #def;
   color: #def;
+}
+
+body.drag .app::after {
+  content: ' ';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 3;
 }
 
 /*
