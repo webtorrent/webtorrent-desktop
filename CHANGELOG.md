@@ -8,7 +8,7 @@ Added
 - Highlight window on drag-and-drop
 - Show notification to update to new app version (Linux)
   - We have an auto-updater for Windows and Mac. We don't have one for Linux yet, so
-    Linux users need to download the new version manually.
+    Linux users need to download new versions manually.
 
 Changed
 - Renamed WebTorrent.app to WebTorrent Desktop
