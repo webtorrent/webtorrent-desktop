@@ -12,6 +12,7 @@ var powerSaveBlocker = electron.powerSaveBlocker
 var log = require('./log')
 var menu = require('./menu')
 var windows = require('./windows')
+var shortcuts = require('./shortcuts')
 
 // has to be a number, not a boolean, and undefined throws an error
 var powerSaveBlockID = 0
@@ -61,8 +62,14 @@ function init () {
   ipcMain.on('blockPowerSave', blockPowerSave)
   ipcMain.on('unblockPowerSave', unblockPowerSave)
 
-  ipcMain.on('onPlayerOpen', menu.onPlayerOpen)
-  ipcMain.on('onPlayerClose', menu.onPlayerClose)
+  ipcMain.on('onPlayerOpen', function () {
+    menu.onPlayerOpen()
+    shortcuts.registerPlayerShortcuts()
+  })
+  ipcMain.on('onPlayerClose', function () {
+    menu.onPlayerClose()
+    shortcuts.unregisterPlayerShortcuts()
+  })
 }
 
 function setBounds (bounds, maximize) {
