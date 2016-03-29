@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Remove all traces of WebTorrent.app from the system (config and temp files).
+ * Remove all traces of WebTorrent Desktop from the system (config and temp files).
  * Useful for developers.
  */
 

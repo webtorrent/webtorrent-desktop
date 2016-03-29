@@ -143,8 +143,8 @@ function lazyLoadCast () {
 function initWebtorrent () {
   WebTorrent = require('webtorrent')
 
-  // Connect to the WebTorrent and BitTorrent networks
-  // WebTorrent.app is a hybrid client, as explained here: https://webtorrent.io/faq
+  // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
+  // client, as explained here: https://webtorrent.io/faq
   state.client = new WebTorrent()
   state.client.on('warning', onWarning)
   state.client.on('error', function (err) {

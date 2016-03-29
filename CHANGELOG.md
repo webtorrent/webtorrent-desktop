@@ -1,6 +1,27 @@
-# WebTorrent.app Version History
+# WebTorrent Desktop Version History
 
-## v0.1.1
+## UNRELEASED v0.1.2 - 2016-03-29
+
+Added
+- Minimise to tray (Windows, Linux)
+- Show notification to update to new app version (Linux)
+- Show spinner and download speed when player is stalled waiting for data
+- Highlight window on drag-and-drop
+
+Changed
+- Renamed WebTorrent.app to WebTorrent Desktop
+- Add Cosmos Laundromat as a default torrent
+
+Fixed
+- Only capture media keys when player is active
+- Update WebTorrent to 0.88.1 for performance improvements
+  - When seeding, do not proactively connect to new peers
+  - When seeding, do not accept new peers from peer exchange (ut_pex)
+  - Fixed leaks, and other improvements that result in less garbage collection
+
+Thanks to @dcposch, @ungoldman, and @feross for contributing to this release.
+
+## v0.1.1 - 2016-03-28
 
 - Performance improvements
   - Improve app startup time by over 100%
@@ -20,7 +41,10 @@
   - Video progress bar shows progress for current file, not full torrent
   - Video player window shows file title instead of torrent title
 
-## v0.1.0
+Thanks to @dcposch, @ungoldman, @rom1504, @grunjol, @Flet, and @feross for contributing to
+this release.
+
+## v0.1.0 - 2016-03-25
 
 - **Windows support!**
   - Includes auto-updater, just like the OS X version.
@@ -35,18 +59,18 @@
 
 **NOTE:** OS X users must install v0.1.0 manually because the app bundle ID was changed in this release, and the auto-updater cannot handle this condition.
 
-Thanks to @dcposch, @ngoldman, and @feross for contributing to this release.
+Thanks to @dcposch, @ungoldman, and @feross for contributing to this release.
 
-## v0.0.1
+## v0.0.1 - 2016-03-21
 
 - Wait 10 seconds (instead of 60 seconds) after app launch before checking for updates.
 
-## v0.0.0
+## v0.0.0 - 2016-03-21
 
-The first official release of WebTorrent.app, the streaming torrent client for OS X,
+The first official release of WebTorrent Desktop, the streaming torrent client for OS X,
 Windows, and Linux. For now, we're only releasing binaries for OS X.
 
-WebTorrent.app is in ALPHA and under very active development – expect lots more polish in
+WebTorrent Desktop is in ALPHA and under very active development – expect lots more polish in
 the coming weeks! If you know JavaScript and want to help us out, there's
 [lots to do](https://github.com/feross/webtorrent-app/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
