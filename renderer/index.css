@@ -318,30 +318,6 @@ input {
 }
 
 /*
- * PLAYER
- */
-
-.player {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #000;
-}
-
-.player .letterbox {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  background-size: cover;
-  background-position: center center;
-}
-
-.player video {
-  display: block;
-  width: 100%;
-}
-
-/*
  * TORRENT LIST
  */
 
@@ -563,6 +539,28 @@ body.drag .torrent-placeholder span {
 }
 
 /*
+ * PLAYER
+ */
+
+.player {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+}
+
+.player .letterbox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.player video {
+  display: block;
+  width: 100%;
+}
+
+/*
  * PLAYER CONTROLS
  */
 
@@ -711,6 +709,17 @@ body.drag .torrent-placeholder span {
 /*
  * MEDIA OVERLAY / AUDIO DETAILS
  */
+
+.media-overlay-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-size: cover;
+  background-position: center center;
+}
 
 .media-overlay {
   max-width: calc(100% - 80px);

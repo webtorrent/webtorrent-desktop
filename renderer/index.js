@@ -258,6 +258,7 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'play') {
+    if (state.location.pending()) return
     state.location.go({
       url: 'player',
       onbeforeload: function (cb) {
