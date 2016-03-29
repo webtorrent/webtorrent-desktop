@@ -213,7 +213,7 @@ function buildDarwin (cb) {
 
         // Create .zip file (used by the auto-updater)
         var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
-        cp.execSync(`pushd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'} && popd`)
+        cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
         console.log('Created OS X .zip file.')
 
         var targetPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg')
@@ -293,7 +293,7 @@ function buildLinux (cb) {
     var distPath = path.join(config.ROOT_PATH, 'dist')
     var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
     var appFolderName = path.basename(buildPath[0])
-    cp.execSync(`pushd ${distPath} && zip -r -y ${zipPath} ${appFolderName} && popd`)
+    cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
     console.log('Created Linux .zip file.')
   })
 }
