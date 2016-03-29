@@ -270,6 +270,13 @@ function dispatch (action, ...args) {
   }
   if (action === 'pause') {
     playPause(true)
+
+    // Work around virtual-dom issue: it doesn't expose its redraw function,
+    // and only redraws on requestAnimationFrame(). That means when the user
+    // closes the window (hide window / minimize to tray) and we want to pause
+    // the video, we update the vdom but it keeps playing until you reopen!
+    var videoTag = document.querySelector('video')
+    if (videoTag) videoTag.pause()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
