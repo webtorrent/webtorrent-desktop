@@ -1,12 +1,14 @@
 # WebTorrent Desktop Version History
 
-## UNRELEASED v0.1.2 - 2016-03-29
+## v0.2.0 - 2016-03-29
 
 Added
 - Minimise to tray (Windows, Linux)
-- Show notification to update to new app version (Linux)
 - Show spinner and download speed when player is stalled waiting for data
 - Highlight window on drag-and-drop
+- Show notification to update to new app version (Linux)
+  - We have an auto-updater for Windows and Mac. We don't have one for Linux yet, so
+    Linux users need to download the new version manually.
 
 Changed
 - Renamed WebTorrent.app to WebTorrent Desktop
