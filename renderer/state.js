@@ -112,6 +112,70 @@ module.exports = {
             'numPieces': 2180
           }
         ]
+      },
+      {
+        status: 'paused',
+        infoHash: '6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5',
+        magnetURI: 'magnet:?xt=urn:btih:6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5&dn=CosmosLaundromatFirstCycle&tr=http%3A%2F%2Fbt1.archive.org%3A6969%2Fannounce&tr=http%3A%2F%2Fbt2.archive.org%3A6969%2Fannounce&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=http%3A%2F%2Fia601508.us.archive.org%2F14%2Fitems%2F&ws=http%3A%2F%2Fia801508.us.archive.org%2F14%2Fitems%2F&ws=https%3A%2F%2Farchive.org%2Fdownload%2F',
+        displayName: 'Cosmos Laundromat (Preview)',
+        posterURL: 'cosmosLaundromat.jpg',
+        torrentPath: 'cosmosLaundromat.torrent',
+        files: [
+          {
+            'name': 'Cosmos Laundromat - First Cycle (1080p).gif',
+            'length': 223580,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'Cosmos Laundromat - First Cycle (1080p).mp4',
+            'length': 220087570,
+            'numPiecesPresent': 0,
+            'numPieces': 421
+          },
+          {
+            'name': 'Cosmos Laundromat - First Cycle (1080p).ogv',
+            'length': 56832560,
+            'numPiecesPresent': 0,
+            'numPieces': 109
+          },
+          {
+            'name': 'CosmosLaundromat-FirstCycle1080p.en.srt',
+            'length': 3949,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'CosmosLaundromat-FirstCycle1080p.es.srt',
+            'length': 3907,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'CosmosLaundromat-FirstCycle1080p.fr.srt',
+            'length': 4119,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'CosmosLaundromat-FirstCycle1080p.it.srt',
+            'length': 3941,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'CosmosLaundromatFirstCycle_meta.sqlite',
+            'length': 11264,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          },
+          {
+            'name': 'CosmosLaundromatFirstCycle_meta.xml',
+            'length': 1204,
+            'numPiecesPresent': 0,
+            'numPieces': 1
+          }
+        ]
       }
     ],
     downloadPath: path.join(os.homedir(), 'Downloads')
