@@ -40,7 +40,7 @@ function renderMedia (state) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
     }
-    // set volume
+    // Set volume
     if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
       mediaElement.volume = state.playing.setVolume
       state.playing.setVolume = null
@@ -60,6 +60,8 @@ function renderMedia (state) {
       onended=${onEnded}
       onplay=${dispatcher('mediaPlaying')}
       onpause=${dispatcher('mediaPaused')}
+      onstalling=${dispatcher('mediaStalled')}
+      ontimeupdate=${dispatcher('mediaTimeUpdate')}
       autoplay>
     </div>
   `
@@ -78,7 +80,7 @@ function renderMedia (state) {
       style=${style}
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${mediaTag}
-      ${renderAudioMetadata(state)}
+      ${renderOverlay(state)}
     </div>
   `
 
@@ -97,6 +99,18 @@ function renderMedia (state) {
   function onEnded (e) {
     state.playing.isPaused = true
   }
+}
+
+function renderOverlay (state) {
+  var audioMetadataElem = renderAudioMetadata(state)
+  var spinnerElem = renderLoadingSpinner(state)
+
+  var elems = []
+  if (audioMetadataElem) elems.push(audioMetadataElem)
+  if (spinnerElem) elems.push(spinnerElem)
+  if (elems.length === 0) return
+
+  return hx`<div class='media-overlay'>${elems}</div>`
 }
 
 function renderAudioMetadata (state) {
@@ -125,6 +139,20 @@ function renderAudioMetadata (state) {
   if (album) elems.push(hx`<div class='audio-album'><label>Album</label>${album}</div>`)
   if (track) elems.push(hx`<div class='audio-track'><label>Track</label>${track}</div>`)
   return hx`<div class='audio-metadata'>${elems}</div>`
+}
+
+function renderLoadingSpinner (state) {
+  if (state.playing.isPaused) return
+  var isProbablyStalled = state.playing.isStalled ||
+    (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
+  console.log("STALLED? " + isProbablyStalled)
+  if (!isProbablyStalled) return
+
+  return hx`
+    <div class='media-stalled'>
+      <div class='loading-spinner'>&nbsp;</div>
+    </div>
+  `
 }
 
 function renderCastScreen (state) {
@@ -282,7 +310,7 @@ function renderLoadingBar (state) {
     lastPartPresent = partPresent
   }
 
-  // Output an list of rectangles to show loading progress
+  // Output some bars to show which parts of the file are loaded
   return hx`
     <div class='loading-bar'>
       ${parts.map(function (part) {

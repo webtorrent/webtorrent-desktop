@@ -284,6 +284,15 @@ function dispatch (action, ...args) {
     state.playing.isPaused = true
     ipcRenderer.send('unblockPowerSave')
   }
+  if (action === 'mediaStalled') {
+    state.playing.isStalled = true
+    update()
+  }
+  if (action === 'mediaTimeUpdate') {
+    state.playing.lastTimeUpdate = new Date().getTime()
+    state.playing.isStalled = false
+    update()
+  }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
   }
