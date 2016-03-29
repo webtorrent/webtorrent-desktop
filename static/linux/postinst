@@ -1,0 +1,3 @@
+#!/bin/sh
+chmod +x /opt/webtorrent-desktop/WebTorrent
+ln -s /opt/webtorrent-desktop/WebTorrent /usr/bin/webtorrent-desktop

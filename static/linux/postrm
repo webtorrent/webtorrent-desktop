@@ -1,0 +1,2 @@
+#!/bin/sh
+rm /usr/bin/webtorrent-desktop
