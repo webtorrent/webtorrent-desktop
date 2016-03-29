@@ -4,6 +4,8 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
+var prettyBytes = require('prettier-bytes')
+
 var util = require('../util')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 
@@ -145,12 +147,21 @@ function renderLoadingSpinner (state) {
   if (state.playing.isPaused) return
   var isProbablyStalled = state.playing.isStalled ||
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
-  console.log("STALLED? " + isProbablyStalled)
   if (!isProbablyStalled) return
+
+  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrent = state.client.get(torrentSummary.infoHash)
+  var file = torrentSummary.files[state.playing.fileIndex]
+  var progress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
 
   return hx`
     <div class='media-stalled'>
       <div class='loading-spinner'>&nbsp;</div>
+      <div class='status ellipsis'>
+        <span class='progress'>${progress}%</span> downloaded,
+        <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
+        <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+      </div>
     </div>
   `
 }
