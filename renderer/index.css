@@ -436,7 +436,8 @@ input {
   padding-top: 8px;
 }
 
-.torrent.requested .play {
+.torrent.requested .play,
+.loading-spinner {
   border-top: 6px solid rgba(255, 255, 255, 0.2);
   border-right: 6px solid rgba(255, 255, 255, 0.2);
   border-bottom: 6px solid rgba(255, 255, 255, 0.2);
@@ -708,10 +709,10 @@ body.drag .torrent-placeholder span {
 }
 
 /*
- * AUDIO DETAILS
+ * MEDIA OVERLAY / AUDIO DETAILS
  */
 
-.audio-metadata {
+.media-overlay {
   width: 500px;
   max-width: 100%;
   white-space: nowrap;
@@ -721,6 +722,12 @@ body.drag .torrent-placeholder span {
   font-weight: bold;
   font-size: 24px;
   line-height: 2;
+}
+
+.media-stalled .loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
 }
 
 .audio-metadata .audio-title {

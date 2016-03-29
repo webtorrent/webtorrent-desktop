@@ -28,6 +28,8 @@ module.exports = {
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
     isPaused: true,
+    isStalled: false,
+    lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0 /* Unix time in ms */
   },
   audioInfo: null, /* set whenever an audio file is playing */
