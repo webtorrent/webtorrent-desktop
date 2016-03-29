@@ -50,10 +50,12 @@ $ npm run package
 To build for one platform:
 
 ```
-$ npm run package -- [platform]
+$ npm run package -- [platform] [package-type]
 ```
 
-Where `[platform]` is `darwin`, `linux`, or `win32`.
+Where `[platform]` is `darwin`, `linux`, or `win32`
+
+and `[package-type]` is `all` (default), `deb` or `zip` (`linux` platform only)
 
 #### Windows build notes
 
@@ -75,4 +77,3 @@ brew install wine
 ## License
 
 MIT. Copyright (c) [Feross Aboukhadijeh](http://feross.org).
-
