@@ -77,9 +77,6 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
-  // Save state on exit
-  window.addEventListener('beforeunload', saveState)
-
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', (files) => dispatch('onOpen', files))
@@ -316,6 +313,9 @@ function dispatch (action, ...args) {
     state.saved.skippedVersions.push(args[0] /* version */)
     saveState()
   }
+  if (action === 'saveState') {
+    saveState()
+  }
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved') {
@@ -431,6 +431,7 @@ function saveState () {
 
   cfg.write(copy, function (err) {
     if (err) console.error(err)
+    ipcRenderer.send('savedState')
     update()
   })
 }
