@@ -30,7 +30,7 @@ function TorrentList (state) {
     var torrent = state.client
       ? state.client.torrents.find((x) => x.infoHash === infoHash)
       : null
-    var isSelected = state.selectedInfoHash === infoHash
+    var isSelected = infoHash && state.selectedInfoHash === infoHash
 
     // Background image: show some nice visuals, like a frame from the movie, if possible
     var style = {}
@@ -51,13 +51,14 @@ function TorrentList (state) {
     //  playStatus turns the play button into a loading spinner or error icon
     if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
+    if (!infoHash) classes.push('disabled')
     classes = classes.join(' ')
     return hx`
       <div style=${style} class=${classes}
-        oncontextmenu=${dispatcher('openTorrentContextMenu', infoHash)}
-        onclick=${dispatcher('toggleSelectTorrent', infoHash)}>
+        oncontextmenu=${infoHash && dispatcher('openTorrentContextMenu', infoHash)}
+        onclick=${infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
         ${renderTorrentMetadata(torrent, torrentSummary)}
-        ${renderTorrentButtons(torrentSummary)}
+        ${infoHash ? renderTorrentButtons(torrentSummary) : ''}
         ${isSelected ? renderTorrentDetails(torrent, torrentSummary) : ''}
       </div>
     `
