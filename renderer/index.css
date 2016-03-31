@@ -645,6 +645,13 @@ body.drag .app::after {
   padding: 5px;
   margin: 0 auto;
 }
+.player-controls .rate {
+  display: inline;
+  height: 30px;
+  padding: 5px;
+  margin-left: 20px;
+  float: left;
+}
 
 .player-controls .chromecast,
 .player-controls .airplay,

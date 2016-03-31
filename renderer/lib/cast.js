@@ -15,7 +15,8 @@ module.exports = {
   playPause,
   seek,
   setVolume,
-  isCasting
+  isCasting,
+  setRate
 }
 
 // Callback to notify module users when state has changed
@@ -148,6 +149,17 @@ function playPause () {
     device = state.devices.airplay
     if (!state.playing.isPaused) device.rate(0, castCallback)
     else device.rate(1, castCallback)
+  }
+}
+
+function setRate(rate){
+  var device
+  if (state.playing.location === 'chromecast') {
+    //TODO find how to control playback rate on chromecast
+    castCallback();
+  } else if (state.playing.location === 'airplay') {
+    device = state.devices.airplay
+    device.rate(rate, castCallback)
   }
 }
 

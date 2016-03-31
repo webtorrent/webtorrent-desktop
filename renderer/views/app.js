@@ -22,7 +22,8 @@ function App (state, dispatch) {
     state.playing.mouseStationarySince !== 0 &&
     new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
     !state.playing.isPaused &&
-    state.playing.location === 'local'
+    state.playing.location === 'local' &&
+      state.playing.playbackRate === 0
 
   // Hide the header on Windows/Linux when in the player
   // On OSX, the header appears as part of the title bar

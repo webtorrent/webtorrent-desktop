@@ -99,6 +99,14 @@ function init () {
       }
     } else if (e.which === 32) { /* spacebar pauses or plays the video */
       dispatch('playPause')
+    } else if((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39){
+      dispatch('playbackJump', state.playing.currentTime + 10)
+    } else if((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37){
+      dispatch('playbackJump', state.playing.currentTime - 10)
+    } else if((e.ctrlKey || e.metaKey) && (e.which === 107 || e.which === 171)){ /* CMD || CTRL + DOM_VK_ADD || DOM_VK_PLUS  */
+      dispatch('setPlaybackRate', state.playing.playbackRate + 10)
+    } else if((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 173)){ /* CMD || CTRL + DOM_VK_SUBTRACT || DOM_VK_HYPHEN_MINUS  */
+      dispatch('setPlaybackRate', state.playing.playbackRate - 10)
     }
   })
 
@@ -281,6 +289,9 @@ function dispatch (action, ...args) {
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
   }
+  if (action === 'setPlaybackRate') {
+    setPlaybackRate(args[0] /* seconds */)
+  }
   if (action === 'changeVolume') {
     changeVolume(args[0] /* increase */)
   }
@@ -351,7 +362,13 @@ function jumpToTime (time) {
     state.playing.jumpToTime = time
   }
 }
-
+function setPlaybackRate(rate){
+  if (rate < -100 || rate > 100 ) return;
+  state.playing.playbackRate = rate
+  if (lazyLoadCast().isCasting()) {
+    Cast.setRate((100 + state.playing.playbackRate)/100)
+  }
+}
 function changeVolume (delta) {
   // change volume with delta value
   setVolume(state.playing.volume + delta)
