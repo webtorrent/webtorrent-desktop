@@ -419,7 +419,17 @@ function resumeTorrents () {
 // Write state.saved to the JSON state file
 function saveState () {
   console.log('saving state to ' + cfg.filePath)
-  cfg.write(state.saved, function (err) {
+
+  // Clean up, so that we're not saving any pending state
+  var copy = JSON.parse(JSON.stringify(state.saved))
+  // Remove torrents pending addition to the list, where we haven't finished
+  // reading the torrent file or file(s) to seed & don't have an infohash
+  copy.torrents = copy.torrents.filter((x) => x.infoHash)
+  copy.torrents.forEach(function (x) {
+    if (x.playStatus !== 'unplayable') delete x.playStatus
+  })
+
+  cfg.write(copy, function (err) {
     if (err) console.error(err)
     update()
   })
@@ -462,12 +472,14 @@ function isNotTorrent (file) {
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (infoHash) {
+  if (!infoHash) return undefined
   return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 // Get an active torrent from state.client.torrents
 // Returns undefined if we are not currently torrenting that infoHash
 function getTorrent (infoHash) {
+  if (!infoHash) return undefined
   var pending = state.pendingTorrents[infoHash]
   if (pending) return pending
   return lazyLoadClient().torrents.find((x) => x.infoHash === infoHash)
@@ -487,20 +499,23 @@ function addTorrentToList (torrent) {
     return // Skip, torrent is already in state.saved
   }
 
+  var torrentSummary = {
+    status: 'new',
+    name: torrent.name
+  }
+  state.saved.torrents.push(torrentSummary)
+  playInterfaceSound('ADD')
+
   // If torrentId is a remote torrent (filesystem path, http url, etc.), wait for
   // WebTorrent to finish reading it
   if (torrent.infoHash) onInfoHash()
   else torrent.on('infoHash', onInfoHash)
 
   function onInfoHash () {
-    state.saved.torrents.push({
-      status: 'new',
-      name: torrent.name,
-      infoHash: torrent.infoHash,
-      magnetURI: torrent.magnetURI
-    })
+    torrentSummary.infoHash = torrent.infoHash
+    torrentSummary.magnetURI = torrent.magnetURI
     saveState()
-    playInterfaceSound('ADD')
+    update()
   }
 }
 
