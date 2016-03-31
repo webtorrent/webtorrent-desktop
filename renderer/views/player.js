@@ -41,11 +41,10 @@ function renderMedia (state) {
     if (state.playing.jumpToTime) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
-    }    
-    
-    var newRate = ((100 + state.playing.playbackRate)/100);
+    }
+    var newRate = (100 + state.playing.playbackRate) / 100
     if (newRate !== mediaElement.playbackRate) {
-      mediaElement.playbackRate = newRate;
+      mediaElement.playbackRate = newRate
     }
     // Set volume
     if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
@@ -299,9 +298,9 @@ function renderPlayerControls (state) {
     `)
   }
 
-  if(state.playing.playbackRate !== 0){
+  if (state.playing.playbackRate !== 0) {
     elements.push(hx`
-     <span class="rate">speed: ${state.playing.playbackRate > 0 ? "+" : ""}${state.playing.playbackRate}%</span>
+     <span class="rate">speed: ${state.playing.playbackRate > 0 ? '+' : ''}${state.playing.playbackRate}%</span>
     `)
   }
 

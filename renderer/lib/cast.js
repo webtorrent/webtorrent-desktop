@@ -152,11 +152,11 @@ function playPause () {
   }
 }
 
-function setRate(rate){
+function setRate (rate) {
   var device
   if (state.playing.location === 'chromecast') {
-    //TODO find how to control playback rate on chromecast
-    castCallback();
+    // TODO find how to control playback rate on chromecast
+    castCallback()
   } else if (state.playing.location === 'airplay') {
     device = state.devices.airplay
     device.rate(rate, castCallback)
