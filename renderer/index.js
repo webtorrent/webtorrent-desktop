@@ -199,7 +199,7 @@ function updateElectron () {
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
   // Log dispatch calls, for debugging
-  if (action !== 'mediaMouseMoved') {
+  if (!['mediaMouseMoved', 'mediaTimeUpdate'].includes(action)) {
     console.log('dispatch: %s %o', action, args)
   }
 
