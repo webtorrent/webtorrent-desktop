@@ -712,16 +712,21 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   // update state
   state.playing.infoHash = torrent.infoHash
   state.playing.fileIndex = index
-  state.playing.type = TorrentPlayer.isVideo(file) ? 'video' : 'audio'
-  state.playing.audioInfo = null
+  state.playing.type = TorrentPlayer.isVideo(file) ? 'video'
+    : TorrentPlayer.isAudio(file) ? 'audio'
+    : 'other'
 
   // if it's audio, parse out the metadata (artist, title, etc)
-  musicmetadata(file.createReadStream(), function (err, info) {
-    if (err) return
-    console.log('got audio metadata for %s: %v', file.name, info)
-    state.playing.audioInfo = info
-    update()
-  })
+  var torrentSummary = getTorrentSummary(torrent.infoHash)
+  var fileSummary = torrentSummary.files[index]
+  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+    musicmetadata(file.createReadStream(), function (err, info) {
+      if (err) return
+      console.log('got audio metadata for %s: %o', file.name, info)
+      fileSummary.audioInfo = info
+      update()
+    })
+  }
 
   // either way, start a streaming torrent-to-http server
   var server = torrent.createServer()
@@ -777,6 +782,7 @@ function openPlayer (infoHash, index, cb) {
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
+    state.navigation.clearPending()
     playInterfaceSound('ERROR')
     update()
   }, 10000) /* give it a few seconds */

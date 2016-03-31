@@ -19,6 +19,7 @@ LocationHistory.prototype._go = function (page) {
     this._pending = page
     page.onbeforeload((err) => {
       if (err) return
+      if (this._pending !== page) return /* navigation was cancelled */
       this._pending = null
       this._history.push(page)
     })
@@ -66,4 +67,8 @@ LocationHistory.prototype.hasForward = function () {
 
 LocationHistory.prototype.pending = function () {
   return this._pending
+}
+
+LocationHistory.prototype.clearPending = function () {
+  this._pending = null
 }

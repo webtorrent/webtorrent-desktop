@@ -24,7 +24,7 @@ module.exports = {
     infoHash: null, /* the info hash of the torrent we're playing */
     fileIndex: null, /* the zero-based index within the torrent */
     location: 'local', /* 'local', 'chromecast', 'airplay' */
-    type: null, /* 'audio' or 'video' */
+    type: null, /* 'audio' or 'video', could be 'other' if ever support eg streaming to VLC */
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
     isPaused: true,
@@ -32,7 +32,6 @@ module.exports = {
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0 /* Unix time in ms */
   },
-  audioInfo: null, /* set whenever an audio file is playing */
   pendingTorrents: {}, /* infohash to WebTorrent handle */
   devices: { /* playback devices like Chromecast and AppleTV */
     airplay: null, /* airplay client. finds and manages AppleTVs */

@@ -122,14 +122,15 @@ function renderOverlay (state) {
 }
 
 function renderAudioMetadata (state) {
-  if (!state.playing.audioInfo) return
-  var info = state.playing.audioInfo
+  var torrentSummary = getPlayingTorrentSummary(state)
+  var fileSummary = torrentSummary.files[state.playing.fileIndex]
+  if (!fileSummary.audioInfo) return
+  var info = fileSummary.audioInfo
 
   // Get audio track info
   var title = info.title
   if (!title) {
-    var torrentSummary = getPlayingTorrentSummary(state)
-    title = torrentSummary.files[state.playing.fileIndex].name
+    title = fileSummary.name
   }
   var artist = info.artist && info.artist[0]
   var album = info.album
