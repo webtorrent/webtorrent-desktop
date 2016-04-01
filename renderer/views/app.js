@@ -9,7 +9,8 @@ var Player = require('./player')
 var TorrentList = require('./torrent-list')
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
-  'update-available-modal': require('./update-available-modal')
+  'update-available-modal': require('./update-available-modal'),
+  'create-torrent-modal': require('./create-torrent-modal')
 }
 
 function App (state, dispatch) {
@@ -67,7 +68,7 @@ function App (state, dispatch) {
       return hx`
         <div class='modal'>
           <div class='modal-background'></div>
-          <div class='modal-content add-file-modal'>
+          <div class='modal-content'>
             ${contents}
           </div>
         </div>
