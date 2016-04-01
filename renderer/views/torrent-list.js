@@ -171,8 +171,8 @@ function TorrentList (state) {
     if (!torrentSummary.files) {
       // We don't know what files this torrent contains
       var message = torrent
-        ? 'Downloading torrent data using magnet link...'
-        : 'Failed to download torrent data from magnet link. Click the download button to try again...'
+        ? 'Downloading torrent info...'
+        : 'Failed to load torrent info. Click the download button to try again...'
       filesElement = hx`<div class='files warning'>${message}</div>`
     } else {
       // We do know the files. List them and show download stats for each one
