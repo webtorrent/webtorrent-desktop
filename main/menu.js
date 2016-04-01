@@ -10,12 +10,12 @@ module.exports = {
   toggleFullScreen
 }
 
-var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
 
 var app = electron.app
 
 var config = require('../config')
+var log = require('./log')
 var windows = require('./windows')
 
 var appMenu, dockMenu
@@ -29,7 +29,7 @@ function init () {
 }
 
 function toggleFullScreen (flag) {
-  debug('toggleFullScreen %s', flag)
+  log('toggleFullScreen %s', flag)
   if (windows.main && windows.main.isVisible()) {
     flag = flag != null ? flag : !windows.main.isFullScreen()
     windows.main.setFullScreen(flag)
@@ -38,7 +38,7 @@ function toggleFullScreen (flag) {
 
 // Sets whether the window should always show on top of other windows
 function toggleFloatOnTop (flag) {
-  debug('toggleFloatOnTop %s', flag)
+  log('toggleFloatOnTop %s', flag)
   if (windows.main) {
     flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
     windows.main.setAlwaysOnTop(flag)
@@ -59,32 +59,32 @@ function decreaseVolume () {
 }
 
 function toggleDevTools () {
-  debug('toggleDevTools')
+  log('toggleDevTools')
   if (windows.main) {
     windows.main.toggleDevTools()
   }
 }
 
 function reloadWindow () {
-  debug('reloadWindow')
+  log('reloadWindow')
   if (windows.main) {
     windows.main.webContents.reloadIgnoringCache()
   }
 }
 
 function addFakeDevice (device) {
-  debug('addFakeDevice %s', device)
+  log('addFakeDevice %s', device)
   windows.main.send('addFakeDevice', device)
 }
 
 function onWindowShow () {
-  debug('onWindowShow')
+  log('onWindowShow')
   getMenuItem('Full Screen').enabled = true
   getMenuItem('Float on Top').enabled = true
 }
 
 function onWindowHide () {
-  debug('onWindowHide')
+  log('onWindowHide')
   getMenuItem('Full Screen').enabled = false
   getMenuItem('Float on Top').enabled = false
 }
