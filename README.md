@@ -10,18 +10,9 @@
 <h4 align="center">The streaming torrent client. For OS X, Windows, and Linux.</h4>
 
 <p align="center">
-    <a href="https://gitter.im/feross/webtorrent">
-        <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg"
-             alt="Gitter">
-    </a>
-    <a href="https://travis-ci.org/feross/webtorrent-desktop">
-        <img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg"
-             alt="Travis Build">
-    </a>
-    <a href="https://github.com/feross/webtorrent-desktop/releases">
-        <img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg"
-             alt="Latest Release Version">
-    </a>
+  <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter"></a>
+  <a href="https://travis-ci.org/feross/webtorrent-desktop"><img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg" alt="Travis"></a>
+  <a href="https://github.com/feross/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="Release"></a>
 </p>
 
 ## Install
