@@ -271,9 +271,31 @@ i:not(.disabled):hover {
   padding: 20px;
 }
 
+.create-torrent-modal input,
 .open-torrent-address-modal input {
   width: calc(100% - 100px)
 }
+
+.create-torrent-modal .torrent-attribute {
+  white-space: nowrap;
+}
+
+.create-torrent-modal .torrent-attribute>* {
+  display: inline-block;
+}
+
+.create-torrent-modal .torrent-attribute label {
+  width: 60px;
+  margin-right: 10px;
+  vertical-align: top;
+}
+
+.create-torrent-modal .torrent-attribute div {
+  font-family: Consolas, monospace;
+  white-space: nowrap;
+}
+
+
 
 /*
  * BUTTONS

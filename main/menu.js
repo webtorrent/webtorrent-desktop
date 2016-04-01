@@ -117,12 +117,14 @@ function getMenuItem (label) {
 
 // Prompts the user for a file or folder, then makes a torrent out of the data
 function showCreateTorrent () {
+  // Allow only a single selection
+  // To create a multi-file torrent, the user must select a folder
   electron.dialog.showOpenDialog({
     title: 'Select a file or folder for the torrent file.',
-    properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
+    properties: [ 'openFile', 'openDirectory' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    windows.main.send('dispatch', 'seed', filenames)
+    windows.main.send('dispatch', 'seed', filenames[0])
   })
 }
 

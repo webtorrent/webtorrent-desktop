@@ -1,7 +1,7 @@
 console.time('init')
 
 var cfg = require('application-config')('WebTorrent')
-var createTorrent = require('create-torrent')
+var defaultAnnounceList = require('create-torrent').announceList
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
@@ -42,7 +42,7 @@ var dialog = remote.require('dialog')
 var state = global.state = require('./state')
 
 // Force use of webtorrent trackers on all torrents
-global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
+global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
   .map((arr) => arr[0])
   .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
@@ -207,13 +207,21 @@ function dispatch (action, ...args) {
     addTorrent(args[0] /* torrent */)
   }
   if (action === 'showCreateTorrent') {
-    ipcRenderer.send('showCreateTorrent')
+    ipcRenderer.send('showCreateTorrent') /* open file or folder to seed */
   }
   if (action === 'showOpenTorrentFile') {
-    ipcRenderer.send('showOpenTorrentFile')
+    ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
   }
   if (action === 'seed') {
-    seed(args[0] /* files */)
+    // TODO: right now, creating a torrent thru File > Create New Torrent
+    // creates and starts seeding a new torrent directly, while dragging files
+    // or folders onto the app opens the create-torrent-modal
+    //
+    // That's because the former gets a single string and the latter gets a list
+    // of W3C File objects. We should fix this inconsitency, ideally without
+    // duping this code in the drag-drop module:
+    // https://github.com/feross/drag-drop/blob/master/index.js
+    createTorrent({files: args[0]} /* file or folder path */)
   }
   if (action === 'openFile') {
     openFile(args[0] /* infoHash */, args[1] /* index */)
@@ -315,6 +323,9 @@ function dispatch (action, ...args) {
   }
   if (action === 'saveState') {
     saveState()
+  }
+  if (action === 'createTorrent') {
+    createTorrent(args[0] /* options */)
   }
 
   // Update the virtual-dom, unless it's just a mouse move event
@@ -445,7 +456,7 @@ function onOpen (files) {
   })
 
   // everything else = seed these files
-  seed(files.filter(isNotTorrent))
+  showCreateTorrentModal(files.filter(isNotTorrent))
 }
 
 function onPaste (e) {
@@ -553,10 +564,18 @@ function stopTorrenting (infoHash) {
   if (torrent) torrent.destroy()
 }
 
-// Creates a torrent for a local file and starts seeding it
-function seed (files) {
+// Prompts the user to create a torrent for a local file or folder
+function showCreateTorrentModal (files) {
   if (files.length === 0) return
-  var torrent = lazyLoadClient().seed(files)
+  state.modal = {
+    id: 'create-torrent-modal',
+    files: files
+  }
+}
+
+// Creates a new torrent and start seeeding
+function createTorrent (options) {
+  var torrent = state.client.seed(options.files, options)
   addTorrentToList(torrent)
   addTorrentEvents(torrent)
 }
