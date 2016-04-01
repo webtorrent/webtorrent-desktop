@@ -14,19 +14,19 @@
         <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg"
              alt="Gitter">
     </a>
-    <a href="https://travis-ci.org/feross/webtorrent-app">
-        <img src="https://img.shields.io/travis/feross/webtorrent-app/master.svg"
+    <a href="https://travis-ci.org/feross/webtorrent-desktop">
+        <img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg"
              alt="Travis Build">
     </a>
-    <a href="https://github.com/feross/webtorrent-app/releases">
-        <img src="https://img.shields.io/github/release/feross/webtorrent-app.svg"
+    <a href="https://github.com/feross/webtorrent-desktop/releases">
+        <img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg"
              alt="Latest Release Version">
     </a>
 </p>
 
 ## Install
 
-**WebTorrent Desktop** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-app/releases) page.
+**WebTorrent Desktop** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-desktop/releases) page.
 
 ## Screenshot
 
