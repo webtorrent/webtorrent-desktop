@@ -31,7 +31,7 @@ module.exports = {
     isStalled: false,
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0 /* Unix time in ms */,
-    playbackRate: 0
+    playbackRate: 1
   },
   pendingTorrents: {}, /* infohash to WebTorrent handle */
   devices: { /* playback devices like Chromecast and AppleTV */

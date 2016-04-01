@@ -103,10 +103,10 @@ function init () {
       dispatch('playbackJump', state.playing.currentTime + 10)
     } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) {
       dispatch('playbackJump', state.playing.currentTime - 10)
-    } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || e.which === 171)) { /* CMD || CTRL + DOM_VK_ADD || DOM_VK_PLUS  */
-      dispatch('setPlaybackRate', state.playing.playbackRate + 10)
-    } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 173)) { /* CMD || CTRL + DOM_VK_SUBTRACT || DOM_VK_HYPHEN_MINUS  */
-      dispatch('setPlaybackRate', state.playing.playbackRate - 10)
+    } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+"   */
+      dispatch('setPlaybackRate', 1)
+    } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-"   */
+      dispatch('setPlaybackRate', -1)
     }
   })
 
@@ -362,11 +362,18 @@ function jumpToTime (time) {
     state.playing.jumpToTime = time
   }
 }
-function setPlaybackRate (rate) {
-  if (rate < -100 || rate > 100) return
+function setPlaybackRate (direction) {
+  var rate = state.playing.playbackRate
+  if ((direction > 0 && rate >= 1 && rate < 16) || (direction < 0 && rate > -16 && rate <= -1)) {
+    rate *= 2
+  } else if ((direction < 0 && rate > 1 && rate <= 16) || (direction > 0 && rate >= -16 && rate < -1)) {
+    rate /= 2
+  } else if (rate === -1 || rate === 1) {
+    rate *= -1
+  }
   state.playing.playbackRate = rate
   if (lazyLoadCast().isCasting()) {
-    Cast.setRate((100 + state.playing.playbackRate) / 100)
+    Cast.setRate(rate)
   }
 }
 function changeVolume (delta) {
