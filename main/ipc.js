@@ -2,7 +2,6 @@ module.exports = {
   init
 }
 
-var debug = require('debug')('webtorrent-app:ipcMain')
 var electron = require('electron')
 
 var app = electron.app
@@ -95,7 +94,7 @@ function setBounds (bounds, maximize) {
 }
 
 function setAspectRatio (aspectRatio, extraSize) {
-  debug('setAspectRatio %o %o', aspectRatio, extraSize)
+  log('setAspectRatio %o %o', aspectRatio, extraSize)
   if (windows.main) {
     windows.main.setAspectRatio(aspectRatio, extraSize)
   }
@@ -103,13 +102,13 @@ function setAspectRatio (aspectRatio, extraSize) {
 
 // Display string in dock badging area (OS X)
 function setBadge (text) {
-  debug('setBadge %s', text)
+  log('setBadge %s', text)
   if (app.dock) app.dock.setBadge(String(text))
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
 function setProgress (progress) {
-  debug('setProgress %s', progress)
+  log('setProgress %s', progress)
   if (windows.main) {
     windows.main.setProgressBar(progress)
   }
@@ -117,12 +116,12 @@ function setProgress (progress) {
 
 function blockPowerSave () {
   powerSaveBlockID = powerSaveBlocker.start('prevent-display-sleep')
-  debug('blockPowerSave %d', powerSaveBlockID)
+  log('blockPowerSave %d', powerSaveBlockID)
 }
 
 function unblockPowerSave () {
   if (powerSaveBlocker.isStarted(powerSaveBlockID)) {
     powerSaveBlocker.stop(powerSaveBlockID)
-    debug('unblockPowerSave %d', powerSaveBlockID)
+    log('unblockPowerSave %d', powerSaveBlockID)
   }
 }
