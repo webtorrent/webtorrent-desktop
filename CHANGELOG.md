@@ -74,7 +74,7 @@ Windows, and Linux. For now, we're only releasing binaries for OS X.
 
 WebTorrent Desktop is in ALPHA and under very active development – expect lots more polish in
 the coming weeks! If you know JavaScript and want to help us out, there's
-[lots to do](https://github.com/feross/webtorrent-app/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
+[lots to do](https://github.com/feross/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
 ### Features
 
