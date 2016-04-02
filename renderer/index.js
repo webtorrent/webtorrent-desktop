@@ -40,6 +40,7 @@ var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
+global.debugLog = require('debug')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
@@ -525,22 +526,23 @@ function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
   if (s.torrentPath) {
     var torrentPath = util.getAbsoluteStaticPath(s.torrentPath)
-    var ret = startTorrentingID(torrentPath, s.path)
+    var ret = startTorrentingID(torrentPath, s.path, s.fileModtimes)
     if (s.infoHash) state.pendingTorrents[s.infoHash] = ret
     return ret
   } else if (s.magnetURI) {
-    return startTorrentingID(s.magnetURI, s.path)
+    return startTorrentingID(s.magnetURI, s.path, s.fileModtimes)
   } else {
-    return startTorrentingID(s.infoHash, s.path)
+    return startTorrentingID(s.infoHash, s.path, s.fileModtimes)
   }
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrentingID (torrentID, path) {
+function startTorrentingID (torrentID, path, fileModtimes) {
   console.log('starting torrent ' + torrentID)
   var torrent = lazyLoadClient().add(torrentID, {
-    path: path || state.saved.downloadPath // Use downloads folder
+    path: path || state.saved.downloadPath, // Use downloads folder
+    fileModtimes: fileModtimes
   })
   addTorrentEvents(torrent)
   return torrent
@@ -595,6 +597,10 @@ function addTorrentEvents (torrent) {
     var torrentSummary = getTorrentSummary(torrent.infoHash)
     torrentSummary.status = 'seeding'
     updateTorrentProgress()
+    torrent.getFileModtimes(function (err, fileModtimes) {
+      if (err) return onError(err)
+      torrentSummary.fileModtimes = fileModtimes
+    })
 
     // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
     // Don't notify if we merely finished verifying data files that were already on disk.
@@ -798,7 +804,7 @@ function openPlayer (infoHash, index, cb) {
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    state.navigation.clearPending()
+    state.location.clearPending()
     playInterfaceSound('ERROR')
     update()
   }, 10000) /* give it a few seconds */
