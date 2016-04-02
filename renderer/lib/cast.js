@@ -4,8 +4,6 @@ var airplay = require('airplay-js')
 var config = require('../../config')
 var state = require('../state')
 
-var debug = require('debug')('webtorrent-app:cast')
-
 // The Cast module talks to Airplay and Chromecast
 // * Modifies state when things change
 // * Starts and stops casting, provides remote video controls
@@ -61,7 +59,7 @@ function chromecastPlayer (player) {
 
   function status (state) {
     player.status(function (err, status) {
-      if (err) return debug('error getting %s status: %o', state.playing.location, err)
+      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
       state.playing.volume = status.volume.muted ? 0 : status.volume.level
@@ -163,7 +161,6 @@ function init (callback) {
 
   var browser = airplay.createBrowser()
   browser.on('deviceOn', function (player) {
-    debug('airplay found')
     state.devices.airplay = airplayPlayer(player)
   }).start()
 }
@@ -245,5 +242,5 @@ function setVolume (volume) {
 }
 
 function castCallback () {
-  debug('%s callback: %o', state.playing.location, arguments)
+  console.log('%s callback: %o', state.playing.location, arguments)
 }
