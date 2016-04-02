@@ -40,7 +40,6 @@ var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
-global.debugLog = require('debug')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = createTorrent.announceList
@@ -600,6 +599,7 @@ function addTorrentEvents (torrent) {
     torrent.getFileModtimes(function (err, fileModtimes) {
       if (err) return onError(err)
       torrentSummary.fileModtimes = fileModtimes
+      saveState()
     })
 
     // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
