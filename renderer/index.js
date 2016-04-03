@@ -588,6 +588,18 @@ function addTorrentEvents (torrent) {
   })
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
+  torrent.on('warning', onWarning)
+  torrent.on('error', torrentError)
+
+  function torrentError (err) {
+    console.log('error, stopping torrent %s (%s):\n\t%o',
+      torrent.name, torrent.infoHash, err.message)
+    // TODO: update torrentSummary, even if it doesn't have an infohash yet
+    if (torrent.infoHash) {
+      getTorrentSummary(torrent.infoHash).status = 'paused'
+      update()
+    }
+  }
 
   function torrentReady () {
     // Summarize torrent
