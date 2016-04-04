@@ -1,6 +1,7 @@
 var electron = require('electron')
 
 var app = electron.app
+var ipcMain = electron.ipcMain
 
 var autoUpdater = require('./auto-updater')
 var config = require('../config')
@@ -62,8 +63,14 @@ function init () {
     processArgv(argv)
   })
 
-  app.on('before-quit', function () {
+  app.on('before-quit', function (e) {
+    if (app.isQuitting) return
+
     app.isQuitting = true
+    e.preventDefault()
+    windows.main.send('dispatch', 'saveState') /* try to save state on exit */
+    ipcMain.once('savedState', () => app.quit())
+    setTimeout(() => app.quit(), 2000) /* quit after 2 secs, at most */
   })
 
   app.on('activate', function () {
