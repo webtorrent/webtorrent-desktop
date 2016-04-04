@@ -207,8 +207,6 @@ function buildDarwin (cb) {
         verbose: true
       }
 
-      // TODO: Use the built-in `sign` opt to electron-packager that takes an options
-      // object as of v6.
       sign(signOpts, function (err) {
         if (err) return cb(err)
 
@@ -303,6 +301,7 @@ function buildLinux (packageType, cb) {
         info: {
           arch: 'amd64',
           targetDir: distPath,
+          targetName: BUILD_NAME + '.deb',
           scripts: {
             postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
             postrm: path.join(config.STATIC_PATH, 'linux', 'postrm')
@@ -314,7 +313,8 @@ function buildLinux (packageType, cb) {
         expand: true,
         cwd: filesPath
       }], function (err, done) {
-        console.log(err || 'Created Linux .deb file.')
+        if (err) return console.error(err.message || err)
+        console.log('Created Linux .deb file.')
       })
     }
 
