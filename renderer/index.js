@@ -1,15 +1,11 @@
 console.time('init')
 
 var cfg = require('application-config')('WebTorrent')
-var defaultAnnounceList = require('create-torrent').announceList
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
-var mkdirp = require('mkdirp')
-var musicmetadata = require('musicmetadata')
-var networkAddress = require('network-address')
 var path = require('path')
 var remote = require('remote')
 
@@ -21,14 +17,11 @@ var App = require('./views/app')
 var errors = require('./lib/errors')
 var config = require('../config')
 var TorrentPlayer = require('./lib/torrent-player')
-var torrentPoster = require('./lib/torrent-poster')
 var util = require('./util')
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
 
-// These two dependencies are the slowest-loading, so we lazy load them
-// This cuts time from icon click to rendered window from ~550ms to ~150ms on my laptop
-var WebTorrent = null
+// This dependency is the slowest-loading, so we lazy load it
 var Cast = null
 
 // Electron apps have two processes: a main process (node) runs first and starts
@@ -42,11 +35,6 @@ var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
 var state = global.state = require('./state')
-
-// Force use of webtorrent trackers on all torrents
-global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
-  .map((arr) => arr[0])
-  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 var vdomLoop
 
@@ -66,10 +54,8 @@ function init () {
   state.location.go({ url: 'home' })
 
   // Lazily load the WebTorrent, Chromecast, and Airplay modules
-  window.setTimeout(function () {
-    lazyLoadClient()
-    lazyLoadCast()
-  }, 750)
+  initWebtorrent()
+  window.setTimeout(lazyLoadCast, 750)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -125,12 +111,6 @@ function init () {
   console.timeEnd('init')
 }
 
-// Lazily loads the WebTorrent module and creates the WebTorrent client
-function lazyLoadClient () {
-  if (!WebTorrent) initWebtorrent()
-  return state.client
-}
-
 // Lazily loads Chromecast and Airplay support
 function lazyLoadCast () {
   if (!Cast) {
@@ -140,41 +120,25 @@ function lazyLoadCast () {
   return Cast
 }
 
-// Load the WebTorrent module, connect to both the WebTorrent and BitTorrent
-// networks, resume torrents, start monitoring torrent progress
+// Talk to WebTorrent process, resume torrents, start monitoring torrent progress
 function initWebtorrent () {
-  WebTorrent = require('webtorrent')
-
-  // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
-  // client, as explained here: https://webtorrent.io/faq
-  state.client = new WebTorrent()
-  state.client.on('warning', onWarning)
-  state.client.on('error', function (err) {
-    // TODO: WebTorrent should have semantic errors
-    if (err.message.startsWith('There is already a swarm')) {
-      onError(new Error('Couldn\'t add duplicate torrent'))
-    } else {
-      onError(err)
-    }
-  })
-
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give  every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
-  setInterval(function () {
-    if (!updateTorrentProgress()) {
-      update() // If we didn't just update(), do so now, for the video cursor
-    }
-  }, 1000)
+  setInterval(update, 1000)
 }
 
 // This is the (mostly) pure function from state -> UI. Returns a virtual DOM
 // tree. Any events, such as button clicks, will turn into calls to dispatch()
 function render (state) {
-  return App(state)
+  try {
+    return App(state)
+  } catch (e) {
+    console.log('rendering error: %s\n\t%s', e.message, e.stack)
+  }
 }
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
@@ -217,16 +181,8 @@ function dispatch (action, ...args) {
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
   }
-  if (action === 'seed') {
-    // TODO: right now, creating a torrent thru File > Create New Torrent
-    // creates and starts seeding a new torrent directly, while dragging files
-    // or folders onto the app opens the create-torrent-modal
-    //
-    // That's because the former gets a single string and the latter gets a list
-    // of W3C File objects. We should fix this inconsitency, ideally without
-    // duping this code in the drag-drop module:
-    // https://github.com/feross/drag-drop/blob/master/index.js
-    createTorrent({files: args[0]} /* file or folder path */)
+  if (action === 'createTorrent') {
+    createTorrent(args[0] /* options */)
   }
   if (action === 'openFile') {
     openFile(args[0] /* infoHash */, args[1] /* index */)
@@ -321,13 +277,10 @@ function dispatch (action, ...args) {
   if (action === 'skipVersion') {
     if (!state.saved.skippedVersions) state.saved.skippedVersions = []
     state.saved.skippedVersions.push(args[0] /* version */)
-    saveState()
+    saveStateThrottled()
   }
   if (action === 'saveState') {
     saveState()
-  }
-  if (action === 'createTorrent') {
-    createTorrent(args[0] /* options */)
   }
 
   // Update the virtual-dom, unless it's just a mouse move event
@@ -404,6 +357,19 @@ function setupIpc () {
     state.devices[device] = player
     update()
   })
+
+  ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
+  ipcRenderer.on('wt-ready', (e, ...args) => torrentReady(...args))
+  ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
+  ipcRenderer.on('wt-warning', (e, ...args) => torrentWarning(...args))
+  ipcRenderer.on('wt-error', (e, ...args) => torrentError(...args))
+
+  ipcRenderer.on('wt-progress', (e, ...args) => torrentProgress(...args))
+  ipcRenderer.on('wt-file-modtimes', (e, ...args) => torrentFileModtimes(...args))
+  ipcRenderer.on('wt-file-saved', (e, ...args) => torrentFileSaved(...args))
+  ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
+  ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
+  ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
 }
 
 // Load state.saved from the JSON state file
@@ -429,24 +395,46 @@ function resumeTorrents () {
     .forEach((x) => startTorrentingSummary(x))
 }
 
+// Don't write state.saved to file more than once a second
+function saveStateThrottled () {
+  if (state.saveStateTimeout) return
+  state.saveStateTimeout = setTimeout(function () {
+    delete state.saveStateTimeout
+    saveState()
+  }, 1000)
+}
+
 // Write state.saved to the JSON state file
 function saveState () {
   console.log('saving state to ' + cfg.filePath)
 
   // Clean up, so that we're not saving any pending state
-  var copy = JSON.parse(JSON.stringify(state.saved))
+  var copy = Object.assign({}, state.saved)
   // Remove torrents pending addition to the list, where we haven't finished
   // reading the torrent file or file(s) to seed & don't have an infohash
-  copy.torrents = copy.torrents.filter((x) => x.infoHash)
-  copy.torrents.forEach(function (x) {
-    if (x.playStatus !== 'unplayable') delete x.playStatus
-  })
+  copy.torrents = copy.torrents
+    .filter((x) => x.infoHash)
+    .map(function (x) {
+      var torrent = {}
+      for (var key in x) {
+        if (key === 'progress' || key === 'torrentKey') {
+          continue // Don't save progress info or key for the webtorrent process
+        }
+        if (key === 'playStatus' && x.playStatus !== 'unplayable') {
+          continue // Don't save whether a torrent is playing / pending
+        }
+        torrent[key] = x[key]
+      }
+      return torrent
+    })
 
   cfg.write(copy, function (err) {
     if (err) console.error(err)
     ipcRenderer.send('savedState')
-    update()
   })
+
+  // Update right away, don't wait for the state to save
+  update()
 }
 
 function onOpen (files) {
@@ -454,11 +442,11 @@ function onOpen (files) {
 
   // .torrent file = start downloading the torrent
   files.filter(isTorrent).forEach(function (torrentFile) {
-    addTorrent(torrentFile)
+    addTorrent(torrentFile.path)
   })
 
   // everything else = seed these files
-  showCreateTorrentModal(files.filter(isNotTorrent))
+  createTorrentFromFileObjects(files)
 }
 
 function onPaste (e) {
@@ -485,316 +473,233 @@ function isNotTorrent (file) {
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
-function getTorrentSummary (infoHash) {
-  if (!infoHash) return undefined
-  return state.saved.torrents.find((x) => x.infoHash === infoHash)
-}
-
-// Get an active torrent from state.client.torrents
-// Returns undefined if we are not currently torrenting that infoHash
-function getTorrent (infoHash) {
-  if (!infoHash) return undefined
-  var pending = state.pendingTorrents[infoHash]
-  if (pending) return pending
-  return lazyLoadClient().torrents.find((x) => x.infoHash === infoHash)
+function getTorrentSummary (torrentKey) {
+  if (!torrentKey) return undefined
+  return state.saved.torrents.find((x) =>
+    x.torrentKey === torrentKey || x.infoHash === torrentKey)
 }
 
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
 function addTorrent (torrentId) {
-  var torrent = startTorrentingID(torrentId)
-  torrent.on('infoHash', function () {
-    addTorrentToList(torrent)
-  })
-}
-
-function addTorrentToList (torrent) {
-  if (getTorrentSummary(torrent.infoHash)) {
-    return // Skip, torrent is already in state.saved
-  }
-
-  var torrentSummary = {
-    status: 'new',
-    name: torrent.name
-  }
-  state.saved.torrents.push(torrentSummary)
-  playInterfaceSound('ADD')
-
-  // If torrentId is a remote torrent (filesystem path, http url, etc.), wait for
-  // WebTorrent to finish reading it
-  if (torrent.infoHash) onInfoHash()
-  else torrent.on('infoHash', onInfoHash)
-
-  function onInfoHash () {
-    torrentSummary.infoHash = torrent.infoHash
-    torrentSummary.magnetURI = torrent.magnetURI
-    saveState()
-    update()
-  }
+  var torrentKey = state.nextTorrentKey++
+  var path = state.saved.downloadPath
+  ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
 function startTorrentingSummary (torrentSummary) {
   var s = torrentSummary
-  if (s.torrentPath) {
-    var torrentPath = util.getAbsoluteStaticPath(s.torrentPath)
-    var ret = startTorrentingID(torrentPath, s.path, s.fileModtimes)
-    if (s.infoHash) state.pendingTorrents[s.infoHash] = ret
-    return ret
-  } else if (s.magnetURI) {
-    return startTorrentingID(s.magnetURI, s.path, s.fileModtimes)
-  } else {
-    return startTorrentingID(s.infoHash, s.path, s.fileModtimes)
+
+  // Backward compatibility for config files save before we had torrentKey
+  if (!s.torrentKey) s.torrentKey = state.nextTorrentKey++
+
+  // Use Downloads folder by default
+  var path = s.path || state.saved.downloadPath
+
+  var torrentID
+  if (s.torrentPath) { // Load torrent file from disk
+    torrentID = util.getAbsoluteStaticPath(s.torrentPath)
+  } else { // Load torrent from DHT
+    torrentID = s.magnetURI || s.infoHash
   }
+
+  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
 }
 
-// Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
-// See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrentingID (torrentID, path, fileModtimes) {
-  console.log('starting torrent ' + torrentID)
-  var torrent = lazyLoadClient().add(torrentID, {
-    path: path || state.saved.downloadPath, // Use downloads folder
-    fileModtimes: fileModtimes
-  })
-  addTorrentEvents(torrent)
-  return torrent
-}
+// TODO: maybe have a "create torrent" modal in the future, with options like
+// custom trackers, private flag, and so on?
+//
+// Right now create-torrent-modal is v basic, only user input is OK / Cancel
+//
+// Also, if you uncomment below below, creating a torrent thru
+// File > Create New Torrent will still create a new torrent directly, while
+// dragging files or folders onto the app opens the create-torrent-modal
+//
+// That's because the former gets a single string and the latter gets a list
+// of W3C File objects. We should fix this inconsistency, ideally without
+// duping this code in the drag-drop module:
+// https://github.com/feross/drag-drop/blob/master/index.js
+//
+// function showCreateTorrentModal (files) {
+//   if (files.length === 0) return
+//   state.modal = {
+//     id: 'create-torrent-modal',
+//     files: files
+//   }
+// }
 
-// Stops downloading and/or seeding
-function stopTorrenting (infoHash) {
-  var torrent = getTorrent(infoHash)
-  if (torrent) torrent.destroy()
-}
+//
+// TORRENT MANAGEMENT
+// Send commands to the WebTorrent process, handle events
+//
 
-// Prompts the user to create a torrent for a local file or folder
-function showCreateTorrentModal (files) {
-  if (files.length === 0) return
-  state.modal = {
-    id: 'create-torrent-modal',
-    files: files
+// Creates a new torrent from a drag-dropped file or folder
+function createTorrentFromFileObjects (files) {
+  var filePaths = (files
+    .filter(isNotTorrent)
+    .map((x) => x.path))
+
+  // Single-file torrents are easy. Multi-file torrents require special handling
+  // make sure WebTorrent seeds all files in place, without copying to /tmp
+  if (filePaths.length === 1) {
+    return createTorrent({files: filePaths[0]})
   }
+
+  // First, extract the base folder that the files are all in
+  var pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
+  if (files.length > 0 && !pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
+    pathPrefix = path.dirname(pathPrefix)
+  }
+
+  // Then, use the name of the base folder (or sole file, for a single file torrent)
+  // as the default name. Show all files relative to the base folder.
+  var defaultName = path.basename(pathPrefix)
+  var basePath = path.dirname(pathPrefix)
+  var options = {
+    // TODO: we can't let the user choose their own name if we want WebTorrent
+    // to use the files in place rather than creating a new folder.
+    name: defaultName,
+    path: basePath,
+    files: filePaths
+  }
+
+  createTorrent(options)
 }
 
 // Creates a new torrent and start seeeding
 function createTorrent (options) {
-  var torrent = lazyLoadClient().seed(options.files, options)
-  addTorrentToList(torrent)
-  addTorrentEvents(torrent)
+  var torrentKey = state.nextTorrentKey++
+  ipcRenderer.send('wt-create-torrent', torrentKey, options)
 }
 
-function addTorrentEvents (torrent) {
-  torrent.on('infoHash', function () {
-    var infoHash = torrent.infoHash
-    if (state.pendingTorrents[infoHash]) delete state.pendingTorrents[infoHash]
-    update()
-  })
-  torrent.on('ready', torrentReady)
-  torrent.on('done', torrentDone)
-  torrent.on('warning', onWarning)
-  torrent.on('error', torrentError)
+function torrentInfoHash (torrentKey, infoHash) {
+  var torrentSummary = getTorrentSummary(torrentKey)
+  console.log('got infohash for %s torrent %s',
+    torrentSummary ? 'existing' : 'new', torrentKey)
 
-  function torrentError (err) {
+  if (!torrentSummary) {
+    torrentSummary = {
+      torrentKey: torrentKey,
+      status: 'new'
+    }
+    state.saved.torrents.push(torrentSummary)
+    playInterfaceSound('ADD')
+  }
+
+  torrentSummary.infoHash = infoHash
+  update()
+}
+
+function torrentWarning (torrentKey, message) {
+  onWarning(message)
+}
+
+function torrentError (torrentKey, message) {
+  var torrentSummary = getTorrentSummary(torrentKey)
+
+  // TODO: WebTorrent should have semantic errors
+  if (message.startsWith('There is already a swarm')) {
+    onError(new Error('Couldn\'t add duplicate torrent'))
+  } else if (!torrentSummary) {
+    onError(message)
+  } else {
     console.log('error, stopping torrent %s (%s):\n\t%o',
-      torrent.name, torrent.infoHash, err.message)
-    // TODO: update torrentSummary, even if it doesn't have an infohash yet
-    if (torrent.infoHash) {
-      getTorrentSummary(torrent.infoHash).status = 'paused'
-      update()
-    }
-  }
-
-  function torrentReady () {
-    // Summarize torrent
-    var torrentSummary = getTorrentSummary(torrent.infoHash)
-    torrentSummary.status = 'downloading'
-    torrentSummary.ready = true
-    torrentSummary.name = torrentSummary.displayName || torrent.name
-    torrentSummary.path = torrent.path
-
-    // Summarize torrent files
-    torrentSummary.files = torrent.files.map(summarizeFileInTorrent)
-    updateTorrentProgress()
-
-    // Save the .torrent file, if it hasn't been saved already
-    if (!torrentSummary.torrentPath) saveTorrentFile(torrentSummary, torrent)
-
-    // Auto-generate a poster image, if it hasn't been generated already
-    if (!torrentSummary.posterURL) generateTorrentPoster(torrent, torrentSummary)
-
-    update()
-  }
-
-  function torrentDone () {
-    // Update the torrent summary
-    var torrentSummary = getTorrentSummary(torrent.infoHash)
-    torrentSummary.status = 'seeding'
-    updateTorrentProgress()
-    torrent.getFileModtimes(function (err, fileModtimes) {
-      if (err) return onError(err)
-      torrentSummary.fileModtimes = fileModtimes
-      saveState()
-    })
-
-    // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
-    // Don't notify if we merely finished verifying data files that were already on disk.
-    if (torrent.received > 0) {
-      if (!state.window.isFocused) {
-        state.dock.badge += 1
-      }
-      showDoneNotification(torrent)
-    }
-
+      torrentSummary.name, torrentSummary.infoHash, message)
+    torrentSummary.status = 'paused'
     update()
   }
 }
 
-function updateTorrentProgress () {
-  var changed = false
+function torrentReady (torrentKey, torrentInfo) {
+  // Summarize torrent
+  var torrentSummary = getTorrentSummary(torrentKey)
+  torrentSummary.status = 'downloading'
+  torrentSummary.ready = true
+  torrentSummary.name = torrentSummary.displayName || torrentInfo.name
+  torrentSummary.path = torrentInfo.path
+  torrentSummary.files = torrentInfo.files
+  update()
 
-  // First, track overall progress
-  var progress = lazyLoadClient().progress
-  var activeTorrentsExist = lazyLoadClient().torrents.some(function (torrent) {
-    return torrent.progress !== 1
-  })
+  // Save the .torrent file, if it hasn't been saved already
+  if (!torrentSummary.torrentPath) ipcRenderer.send('wt-save-torrent-file', torrentKey)
+
+  // Auto-generate a poster image, if it hasn't been generated already
+  if (!torrentSummary.posterURL) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
+}
+
+function torrentDone (torrentKey, torrentInfo) {
+  // Update the torrent summary
+  var torrentSummary = getTorrentSummary(torrentKey)
+  torrentSummary.status = 'seeding'
+
+  // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
+  // Don't notify if we merely finished verifying data files that were already on disk.
+  if (torrentInfo.bytesReceived > 0) {
+    if (!state.window.isFocused) {
+      state.dock.badge += 1
+    }
+    showDoneNotification(torrentKey)
+  }
+
+  update()
+}
+
+function torrentProgress (progressInfo) {
+  // Overall progress across all active torrents, 0 to 1
+  var progress = progressInfo.progress
+  var hasActiveTorrents = progressInfo.hasActiveTorrents
+
   // Hide progress bar when client has no torrents, or progress is 100%
-  if (!activeTorrentsExist || progress === 1) {
+  // TODO: isn't this equivalent to: if (progress === 1) ?
+  if (!hasActiveTorrents || progress === 1) {
     progress = -1
   }
+
   // Show progress bar under the WebTorrent taskbar icon, on OSX
-  if (state.dock.progress !== progress) changed = true
   state.dock.progress = progress
 
-  // Track progress for every file in each torrentSummary
-  // TODO: ideally this would be tracked by WebTorrent, which could do it
-  // more efficiently than looping over torrent.bitfield
-  lazyLoadClient().torrents.forEach(function (torrent) {
-    var torrentSummary = getTorrentSummary(torrent.infoHash)
-    if (!torrentSummary || !torrent.ready) return
-    torrent.files.forEach(function (file, index) {
-      var numPieces = file._endPiece - file._startPiece + 1
-      var numPiecesPresent = 0
-      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
-        if (torrent.bitfield.get(piece)) numPiecesPresent++
-      }
-
-      var fileSummary = torrentSummary.files[index]
-      if (fileSummary.numPiecesPresent !== numPiecesPresent || fileSummary.numPieces !== numPieces) {
-        fileSummary.numPieces = numPieces
-        fileSummary.numPiecesPresent = numPiecesPresent
-        changed = true
-      }
-    })
-  })
-
-  if (changed) update()
-  return changed
-}
-
-function generateTorrentPoster (torrent, torrentSummary) {
-  torrentPoster(torrent, function (err, buf, extension) {
-    if (err) return onWarning(err)
-    // save it for next time
-    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
-      if (err) return onWarning(err)
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + extension)
-      fs.writeFile(posterFilePath, buf, function (err) {
-        if (err) return onWarning(err)
-        // show the poster
-        torrentSummary.posterURL = posterFilePath
-        update()
-      })
-    })
-  })
-}
-
-// Produces a JSON saveable summary of a file in a torrent
-function summarizeFileInTorrent (file) {
-  return {
-    name: file.name,
-    length: file.length,
-    numPiecesPresent: 0,
-    numPieces: null
-  }
-}
-
-// Every time we resolve a magnet URI, save the torrent file so that we never
-// have to download it again. Never ask the DHT the same question twice.
-function saveTorrentFile (torrentSummary, torrent) {
-  checkIfTorrentFileExists(torrentSummary.infoHash, function (torrentPath, exists) {
-    if (exists) {
-      // We've already saved the file
-      torrentSummary.torrentPath = torrentPath
-      saveState()
+  // Update progress for each individual torrent
+  progressInfo.torrents.forEach(function (p) {
+    var torrentSummary = getTorrentSummary(p.torrentKey)
+    if (!torrentSummary) {
+      console.log('warning: got progress for missing torrent %s', p.torrentKey)
       return
     }
-
-    // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.CONFIG_TORRENT_PATH, function (_) {
-      fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
-        if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
-        console.log('saved torrent file %s', torrentPath)
-        torrentSummary.torrentPath = torrentPath
-        saveState()
-      })
-    })
+    torrentSummary.progress = p
   })
+
+  update()
 }
 
-// Checks whether we've already resolved a given infohash to a torrent file
-// Calls back with (torrentPath, exists). Logs, does not call back on error
-function checkIfTorrentFileExists (infoHash, cb) {
-  var torrentPath = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
-  fs.exists(torrentPath, function (exists) {
-    cb(torrentPath, exists)
-  })
+function torrentFileModtimes (torrentKey, fileModtimes) {
+  var torrentSummary = getTorrentSummary(torrentKey)
+  torrentSummary.fileModtimes = fileModtimes
+  saveStateThrottled()
 }
 
-function startServer (torrentSummary, index, cb) {
-  if (state.server) return cb()
-
-  var torrent = getTorrent(torrentSummary.infoHash)
-  if (!torrent) torrent = startTorrentingSummary(torrentSummary)
-  if (torrent.ready) startServerFromReadyTorrent(torrent, index, cb)
-  else torrent.on('ready', () => startServerFromReadyTorrent(torrent, index, cb))
+function torrentFileSaved (torrentKey, torrentPath) {
+  console.log('torrent file saved %s: %s', torrentKey, torrentPath)
+  var torrentSummary = getTorrentSummary(torrentKey)
+  torrentSummary.torrentPath = torrentPath
+  saveStateThrottled()
 }
 
-function startServerFromReadyTorrent (torrent, index, cb) {
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = pickFileToPlay(torrent.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
-  var file = torrent.files[index]
+function torrentPosterSaved (torrentKey, posterPath) {
+  var torrentSummary = getTorrentSummary(torrentKey)
+  torrentSummary.posterURL = posterPath
+  saveStateThrottled()
+}
 
-  // update state
-  state.playing.infoHash = torrent.infoHash
-  state.playing.fileIndex = index
-  state.playing.type = TorrentPlayer.isVideo(file) ? 'video'
-    : TorrentPlayer.isAudio(file) ? 'audio'
-    : 'other'
-
-  // if it's audio, parse out the metadata (artist, title, etc)
-  var torrentSummary = getTorrentSummary(torrent.infoHash)
+function torrentAudioMetadata (infoHash, index, info) {
+  var torrentSummary = getTorrentSummary(infoHash)
   var fileSummary = torrentSummary.files[index]
-  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-    musicmetadata(file.createReadStream(), function (err, info) {
-      if (err) return
-      console.log('got audio metadata for %s: %o', file.name, info)
-      fileSummary.audioInfo = info
-      update()
-    })
-  }
+  fileSummary.audioInfo = info
+  update()
+}
 
-  // either way, start a streaming torrent-to-http server
-  var server = torrent.createServer()
-  server.listen(0, function () {
-    var port = server.address().port
-    var urlSuffix = ':' + port + '/' + index
-    state.server = {
-      server: server,
-      localURL: 'http://localhost' + urlSuffix,
-      networkURL: 'http://' + networkAddress() + urlSuffix
-    }
-    cb()
-  })
+function torrentServerRunning (serverInfo) {
+  state.server = serverInfo
 }
 
 // Picks the default file to play from a list of torrent or torrentSummary files
@@ -820,18 +725,22 @@ function pickFileToPlay (files) {
 }
 
 function stopServer () {
-  if (!state.server) return
-  state.server.server.destroy()
-  state.server = null
+  ipcRenderer.send('wt-stop-server')
   state.playing.infoHash = null
   state.playing.fileIndex = null
+  state.server = null
 }
 
 // Opens the video player
 function openPlayer (infoHash, index, cb) {
   var torrentSummary = getTorrentSummary(infoHash)
-  var torrent = lazyLoadClient().get(infoHash)
-  if (!torrent || !torrent.done) playInterfaceSound('PLAY')
+
+  // automatically choose which file in the torrent to play, if necessary
+  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
+  if (index === undefined) return cb(new errors.UnplayableError())
+
+  // update UI to show pending playback
+  if (torrentSummary.progress !== 1) playInterfaceSound('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
 
@@ -842,14 +751,43 @@ function openPlayer (infoHash, index, cb) {
     update()
   }, 10000) /* give it a few seconds */
 
-  startServer(torrentSummary, index, function (err) {
+  if (['downloading', 'seeding'].includes(torrentSummary.status)) {
+    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
+  } else {
+    startTorrentingSummary(torrentSummary)
+    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
+      () => openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
+  }
+}
+
+function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
+  var fileSummary = torrentSummary.files[index]
+
+  // update state
+  state.playing.infoHash = torrentSummary.infoHash
+  state.playing.fileIndex = index
+  state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
+    : TorrentPlayer.isAudio(fileSummary) ? 'audio'
+    : 'other'
+
+  // if it's audio, parse out the metadata (artist, title, etc)
+  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+    ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
+  }
+
+  ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
+  ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
     clearTimeout(timeout)
+
+    /**
+     TODO: where do we know if it's unplayable?
     if (err) {
       torrentSummary.playStatus = 'unplayable'
       playInterfaceSound('ERROR')
       update()
       return onError(err)
     }
+    */
 
     // if we timed out (user clicked play a long time ago), don't autoplay
     var timedOut = torrentSummary.playStatus === 'timeout'
@@ -884,28 +822,25 @@ function closePlayer (cb) {
 }
 
 function openFile (infoHash, index) {
-  var torrent = lazyLoadClient().get(infoHash)
-  if (!torrent) return
-
-  var filePath = path.join(torrent.path, torrent.files[index].path)
+  var torrentSummary = getTorrentSummary(infoHash)
+  var filePath = path.join(
+    torrentSummary.path,
+    torrentSummary.files[index].path)
   ipcRenderer.send('openItem', filePath)
 }
 
 function openFolder (infoHash) {
-  var torrent = lazyLoadClient().get(infoHash)
-  if (!torrent) return
+  var torrentSummary = getTorrentSummary(infoHash)
 
-  var folderPath = path.join(torrent.path, torrent.name)
-  // Multi-file torrents create their own folder, single file torrents just
-  // drop the file directly into the Downloads folder
-  fs.stat(folderPath, function (err, stats) {
-    if (err || !stats.isDirectory()) {
-      folderPath = torrent.path
-    }
-    ipcRenderer.send('openItem', folderPath)
-  })
+  var firstFilePath = path.join(
+    torrentSummary.path,
+    torrentSummary.files[0].path)
+  var folderPath = path.dirname(firstFilePath)
+
+  ipcRenderer.send('openItem', folderPath)
 }
 
+// TODO: use torrentKey, not infoHash
 function toggleTorrent (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
   if (torrentSummary.status === 'paused') {
@@ -914,18 +849,18 @@ function toggleTorrent (infoHash) {
     playInterfaceSound('ENABLE')
   } else {
     torrentSummary.status = 'paused'
-    stopTorrenting(torrentSummary.infoHash)
+    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
     playInterfaceSound('DISABLE')
   }
 }
 
+// TODO: use torrentKey, not infoHash
 function deleteTorrent (infoHash) {
-  var torrent = getTorrent(infoHash)
-  if (torrent) torrent.destroy()
+  ipcRenderer.send('wt-stop-torrenting', infoHash)
 
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
-  saveState()
+  saveStateThrottled()
   state.location.clearForward() // prevent user from going forward to a deleted torrent
   playInterfaceSound('DELETE')
 }
@@ -1032,7 +967,7 @@ function onError (err) {
 }
 
 function onWarning (err) {
-  console.log('warning: %s', err.message)
+  console.log('warning: %s', err.message || err)
 }
 
 function showDoneNotification (torrent) {
@@ -1066,4 +1001,14 @@ function setupCrashReporter () {
     productName: config.APP_NAME,
     submitURL: config.CRASH_REPORT_URL
   })
+}
+
+// Finds the longest common prefix
+function findCommonPrefix (a, b) {
+  for (var i = 0; i < a.length && i < b.length; i++) {
+    if (a.charCodeAt(i) !== b.charCodeAt(i)) break
+  }
+  if (i === a.length) return a
+  if (i === b.length) return b
+  return a.substring(0, i)
 }

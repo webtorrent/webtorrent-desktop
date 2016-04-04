@@ -65,6 +65,7 @@ module.exports = {
   },
 
   WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
+  WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, 'renderer', 'webtorrent.html'),
   WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html')
 }
 

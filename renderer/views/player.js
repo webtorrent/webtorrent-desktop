@@ -5,6 +5,7 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 var prettyBytes = require('prettier-bytes')
+var Bitfield = require('bitfield')
 
 var util = require('../util')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
@@ -20,7 +21,7 @@ function Player (state) {
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${showVideo ? renderMedia(state) : renderCastScreen(state)}
       ${renderPlayerControls(state)}
-    </div>
+      </div>
   `
 }
 
@@ -161,18 +162,20 @@ function renderLoadingSpinner (state) {
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
-  var torrentSummary = getPlayingTorrentSummary(state)
-  var torrent = state.client.get(torrentSummary.infoHash)
-  var file = torrentSummary.files[state.playing.fileIndex]
-  var progress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
+  var prog = getPlayingTorrentSummary(state).progress || {}
+  var fileProgress = 0
+  if (prog.files) {
+    var file = prog.files[state.playing.fileIndex]
+    fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
+  }
 
   return hx`
     <div class='media-stalled'>
       <div class='loading-spinner'>&nbsp;</div>
       <div class='loading-status ellipsis'>
-        <span class='progress'>${progress}%</span> downloaded,
-        <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
-        <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+        <span class='progress'>${fileProgress}%</span> downloaded,
+        <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
+        <span>↑ ${prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
     </div>
   `
@@ -201,25 +204,6 @@ function renderCastScreen (state) {
       </div>
     </div>
   `
-}
-
-// Returns the CSS background-image string for a poster image + dark vignette
-function cssBackgroundImagePoster (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
-  if (!torrentSummary || !torrentSummary.posterURL) return ''
-  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
-  var cleanURL = posterURL.replace(/\\/g, '/')
-  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
-}
-
-function cssBackgroundImageDarkGradient () {
-  return 'radial-gradient(circle at center, ' +
-    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
-}
-
-function getPlayingTorrentSummary (state) {
-  var infoHash = state.playing.infoHash
-  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 function renderPlayerControls (state) {
@@ -340,24 +324,24 @@ function renderPlayerControls (state) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrent = state.client.get(state.playing.infoHash)
-  if (torrent === null) {
+  var torrentSummary = getPlayingTorrentSummary(state)
+  if (!torrentSummary.progress) {
     return []
   }
-  var file = torrent.files[state.playing.fileIndex]
 
   // Find all contiguous parts of the torrent which are loaded
+  var prog = torrentSummary.progress
+  var fileProg = prog.files[state.playing.fileIndex]
   var parts = []
-  var lastPartPresent = false
-  var numParts = file._endPiece - file._startPiece + 1
-  for (var i = file._startPiece; i <= file._endPiece; i++) {
-    var partPresent = torrent.bitfield.get(i)
-    if (partPresent && !lastPartPresent) {
-      parts.push({start: i - file._startPiece, count: 1})
+  var lastPiecePresent = false
+  for (var i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
+    var partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+    if (partPresent && !lastPiecePresent) {
+      parts.push({start: i - fileProg.startPiece, count: 1})
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }
-    lastPartPresent = partPresent
+    lastPiecePresent = partPresent
   }
 
   // Output some bars to show which parts of the file are loaded
@@ -365,12 +349,31 @@ function renderLoadingBar (state) {
     <div class='loading-bar'>
       ${parts.map(function (part) {
         var style = {
-          left: (100 * part.start / numParts) + '%',
-          width: (100 * part.count / numParts) + '%'
+          left: (100 * part.start / fileProg.numPieces) + '%',
+          width: (100 * part.count / fileProg.numPieces) + '%'
         }
 
         return hx`<div class='loading-bar-part' style=${style}></div>`
       })}
     </div>
   `
+}
+
+// Returns the CSS background-image string for a poster image + dark vignette
+function cssBackgroundImagePoster (state) {
+  var torrentSummary = getPlayingTorrentSummary(state)
+  if (!torrentSummary || !torrentSummary.posterURL) return ''
+  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
+  var cleanURL = posterURL.replace(/\\/g, '/')
+  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
+}
+
+function cssBackgroundImageDarkGradient () {
+  return 'radial-gradient(circle at center, ' +
+    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
+}
+
+function getPlayingTorrentSummary (state) {
+  var infoHash = state.playing.infoHash
+  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }

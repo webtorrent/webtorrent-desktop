@@ -69,6 +69,28 @@ function init () {
     menu.onPlayerClose()
     shortcuts.unregisterPlayerShortcuts()
   })
+
+  // Capture all events
+  var oldEmit = ipcMain.emit
+  ipcMain.emit = function (name, e, ...args) {
+    // Relay messages between the main window and the WebTorrent hidden window
+    if (name.startsWith('wt-')) {
+      var recipient, recipientStr
+      if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
+        recipient = windows.main
+        recipientStr = 'main'
+      } else {
+        recipient = windows.webtorrent
+        recipientStr = 'webtorrent'
+      }
+      console.log('sending %s to %s', name, recipientStr)
+      recipient.send(name, ...args)
+      return
+    }
+
+    // Emit all other events normally
+    oldEmit.call(ipcMain, name, e, ...args)
+  }
 }
 
 function setBounds (bounds, maximize) {
