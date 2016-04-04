@@ -54,7 +54,7 @@ function init () {
     windows.createMainWindow()
     shortcuts.init()
     tray.init()
-    if (process.platform !== 'win32') handlers.init()
+    handlers.init()
   })
 
   app.on('ipcReady', function () {

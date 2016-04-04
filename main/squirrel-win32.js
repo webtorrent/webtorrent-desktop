@@ -11,8 +11,6 @@ var pathExists = require('path-exists')
 
 var app = electron.app
 
-var handlers = require('./handlers')
-
 var exeName = path.basename(process.execPath)
 var updateDotExe = path.join(process.execPath, '..', '..', 'Update.exe')
 
@@ -20,9 +18,7 @@ function handleEvent (cmd) {
   if (cmd === '--squirrel-install') {
     // App was installed.
 
-    // Install protocol/file handlers, desktop/start menu shortcuts.
-    handlers.init()
-
+    // Install desktop/start menu shortcuts.
     createShortcuts(function () {
       // Ensure user sees install splash screen so they realize that Setup.exe actually
       // installed an application and isn't the application itself.
