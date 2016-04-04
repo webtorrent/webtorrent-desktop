@@ -575,7 +575,7 @@ function showCreateTorrentModal (files) {
 
 // Creates a new torrent and start seeeding
 function createTorrent (options) {
-  var torrent = state.client.seed(options.files, options)
+  var torrent = lazyLoadClient().seed(options.files, options)
   addTorrentToList(torrent)
   addTorrentEvents(torrent)
 }
