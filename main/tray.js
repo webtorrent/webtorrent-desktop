@@ -4,20 +4,20 @@ module.exports = {
 
 var path = require('path')
 var electron = require('electron')
+
+var app = electron.app
+var Menu = electron.Menu
+var Tray = electron.Tray
+
 var windows = require('./windows')
 
 var trayIcon
 
 function init () {
-  if (process.platform === 'darwin') {
-    // Instead of relying on the tray icon quit button, listen for Cmd+Q
-    electron.app.once('before-quit', quitApp)
+  // OS X has no tray icon
+  if (process.platform === 'darwin') return
 
-    // OS X has no tray icon
-    return
-  }
-
-  trayIcon = new electron.Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
+  trayIcon = new Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
 
   // On Windows, left click to open the app, right click for context menu
   // On Linux, any click (right or left) opens the context menu
@@ -36,9 +36,9 @@ function updateTrayMenu () {
   } else {
     showHideMenuItem = { label: 'Show', click: showApp }
   }
-  var contextMenu = electron.Menu.buildFromTemplate([
+  var contextMenu = Menu.buildFromTemplate([
     showHideMenuItem,
-    { label: 'Quit', click: quitApp }
+    { label: 'Quit', click: () => app.quit() }
   ])
   trayIcon.setContextMenu(contextMenu)
 }
@@ -49,11 +49,4 @@ function showApp () {
 
 function hideApp () {
   windows.main.hide()
-}
-
-function quitApp (e) {
-  e.preventDefault()
-  windows.main.send('dispatch', 'saveState') /* try to save state on exit */
-  electron.ipcMain.once('savedState', () => electron.app.quit())
-  setTimeout(() => electron.app.quit(), 2000) /* exit after at most 2 secs */
 }
