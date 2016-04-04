@@ -37,7 +37,7 @@
     "electron-packager": "^6.0.0",
     "electron-winstaller": "^2.0.5",
     "gh-release": "^2.0.3",
-    "nobin-debian-installer": "^0.0.5",
+    "nobin-debian-installer": "feross/nobin-debian-installer",
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",
     "standard": "^6.0.5"
