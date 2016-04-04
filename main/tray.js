@@ -9,10 +9,12 @@ var windows = require('./windows')
 var trayIcon
 
 function init () {
-  // No tray icon on OSX
   if (process.platform === 'darwin') {
     // Instead of relying on the tray icon quit button, listen for Cmd+Q
     electron.app.once('before-quit', quitApp)
+
+    // OS X has no tray icon
+    return
   }
 
   trayIcon = new electron.Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
