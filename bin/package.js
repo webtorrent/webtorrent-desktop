@@ -301,7 +301,6 @@ function buildLinux (packageType, cb) {
         info: {
           arch: 'amd64',
           targetDir: distPath,
-          targetName: BUILD_NAME + '.deb',
           scripts: {
             postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
             postrm: path.join(config.STATIC_PATH, 'linux', 'postrm')
