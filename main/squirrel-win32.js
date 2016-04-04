@@ -16,15 +16,13 @@ var updateDotExe = path.join(process.execPath, '..', '..', 'Update.exe')
 
 function handleEvent (cmd) {
   if (cmd === '--squirrel-install') {
-    // App was installed.
-
-    // Install desktop/start menu shortcuts.
+    // App was installed. Install desktop/start menu shortcuts.
     createShortcuts(function () {
       // Ensure user sees install splash screen so they realize that Setup.exe actually
       // installed an application and isn't the application itself.
       setTimeout(function () {
         app.quit()
-      }, 5000)
+      }, 3000)
     })
     return true
   }
