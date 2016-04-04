@@ -1,5 +1,6 @@
 var chromecasts = require('chromecasts')()
 var airplay = require('airplay-js')
+var dlnacasts = require('dlnacasts')()
 
 var config = require('../../config')
 var state = require('../state')
@@ -37,7 +38,7 @@ function chromecastPlayer (player) {
     var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
     player.play(state.server.networkURL, {
       type: 'video/mp4',
-      title: config.APP_NAME + ' — ' + torrentSummary.name
+      title: config.APP_NAME + ' - ' + torrentSummary.name
     }, function (err) {
       if (err) {
         state.playing.location = 'local'
@@ -147,6 +148,79 @@ function airplayPlayer (player) {
   }
 }
 
+// DLNA player implementation
+function dlnaPlayer (player) {
+  function addEvents () {
+    player.on('error', function (err) {
+      player.errorMessage = err.message
+      update()
+    })
+    player.on('disconnect', function () {
+      state.playing.location = 'local'
+      update()
+    })
+  }
+
+  function open () {
+    var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
+    player.play(state.server.networkURL, {
+      type: 'video/mp4',
+      title: config.APP_NAME + ' - ' + torrentSummary.name,
+      seek: state.playing.currentTime | 0
+    }, function (err) {
+      if (err) {
+        state.playing.location = 'local'
+      } else {
+        state.playing.location = 'dlna'
+      }
+      update()
+    })
+  }
+
+  function playPause (callback) {
+    if (!state.playing.isPaused) player.pause(callback)
+    else player.play(null, null, callback)
+  }
+
+  function stop (callback) {
+    player.stop(callback)
+  }
+
+  function status (state) {
+    player.status(function (err, status) {
+      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
+      state.playing.isPaused = status.playerState === 'PAUSED'
+      state.playing.currentTime = status.currentTime
+      state.playing.volume = status.volume.level
+      update()
+    })
+  }
+
+  function seek (time, callback) {
+    player.seek(time, callback)
+  }
+
+  function volume (volume, callback) {
+    player.volume(volume, function (err) {
+      // quick volume update
+      state.playing.volume = volume
+      callback(err)
+    })
+  }
+
+  addEvents()
+
+  return {
+    player: player,
+    open: open,
+    playPause: playPause,
+    stop: stop,
+    status: status,
+    seek: seek,
+    volume: volume
+  }
+}
+
 // start export functions
 function init (callback) {
   update = callback
@@ -154,9 +228,13 @@ function init (callback) {
   // Start polling Chromecast or Airplay, whenever we're connected
   setInterval(() => pollCastStatus(state), 1000)
 
-  // Listen for devices: Chromecast and Airplay
+  // Listen for devices: Chromecast, DLNA and Airplay
   chromecasts.on('update', function (player) {
     state.devices.chromecast = chromecastPlayer(player)
+  })
+
+  dlnacasts.on('update', function (player) {
+    state.devices.dlna = dlnaPlayer(player)
   })
 
   var browser = airplay.createBrowser()
@@ -207,7 +285,7 @@ function stoppedCasting () {
 // Returns false if we not casting (state.playing.location === 'local')
 // or if we're trying to connect but haven't yet ('chromecast-pending', etc)
 function isCasting () {
-  return state.playing.location === 'chromecast' || state.playing.location === 'airplay'
+  return state.playing.location === 'chromecast' || state.playing.location === 'airplay' || state.playing.location === 'dlna'
 }
 
 function getDevice (location) {
@@ -217,6 +295,8 @@ function getDevice (location) {
     return state.devices.chromecast
   } else if (state.playing.location === 'airplay') {
     return state.devices.airplay
+  } else if (state.playing.location === 'dlna') {
+    return state.devices.dlna
   }
 }
 
