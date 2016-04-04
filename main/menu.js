@@ -124,7 +124,10 @@ function showCreateTorrent () {
     properties: [ 'openFile', 'openDirectory' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    windows.main.send('dispatch', 'seed', filenames[0])
+    var options = {
+      files: filenames[0]
+    }
+    windows.main.send('dispatch', 'createTorrent', options)
   })
 }
 

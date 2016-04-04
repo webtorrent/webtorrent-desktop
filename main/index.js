@@ -54,6 +54,7 @@ function init () {
   app.on('ready', function () {
     menu.init()
     windows.createMainWindow()
+    windows.createWebTorrentHiddenWindow()
     shortcuts.init()
     tray.init()
     handlers.install()

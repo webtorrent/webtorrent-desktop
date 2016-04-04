@@ -32,7 +32,6 @@ module.exports = {
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0 /* Unix time in ms */
   },
-  pendingTorrents: {}, /* infohash to WebTorrent handle */
   devices: { /* playback devices like Chromecast and AppleTV */
     airplay: null, /* airplay client. finds and manages AppleTVs */
     chromecast: null /* chromecast client. finds and manages Chromecasts */
@@ -43,6 +42,7 @@ module.exports = {
   },
   modal: null, /* modal popover */
   errors: [], /* user-facing errors */
+  nextTorrentKey: 1, /* identify torrents for IPC between the main and webtorrent windows */
 
   /*
    * Saved state is read from and written to a file every time the app runs.
