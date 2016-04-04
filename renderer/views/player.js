@@ -190,7 +190,7 @@ function renderCastScreen (state) {
     backgroundImage: cssBackgroundImagePoster(state)
   }
 
-  // Show whether we're connected to Chromecast / Airplay /DLNA
+  // Show whether we're connected to Chromecast / Airplay / DLNA
   var castStatus = isStarting ? 'Connecting...' : 'Connected'
   return hx`
     <div class='letterbox' style=${style}>
@@ -275,9 +275,9 @@ function renderPlayerControls (state) {
     chromecastClass = ''
     airplayClass = ''
     dlnaClass = ''
-    chromecastHandler = dispatcher('open', 'chromecast')
-    airplayHandler = dispatcher('open', 'airplay')
-    dlnaHandler = dispatcher('open', 'dlna')
+    chromecastHandler = dispatcher('openDevice', 'chromecast')
+    airplayHandler = dispatcher('openDevice', 'airplay')
+    dlnaHandler = dispatcher('openDevice', 'dlna')
   }
   if (state.devices.chromecast || isOnChromecast) {
     elements.push(hx`
@@ -302,7 +302,7 @@ function renderPlayerControls (state) {
       <i.icon.device
         class=${dlnaClass}
         onclick=${dlnaHandler}>
-        cast
+        tv
       </i>
     `)
   }
