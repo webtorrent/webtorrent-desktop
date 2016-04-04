@@ -16,18 +16,19 @@ var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
   var platform = process.argv[2]
+  var packageType = process.argv.length > 3 ? process.argv[3] : 'all'
   if (platform === 'darwin') {
     buildDarwin(printDone)
   } else if (platform === 'win32') {
     buildWin32(printDone)
   } else if (platform === 'linux') {
-    buildLinux(printDone)
+    buildLinux(packageType, printDone)
   } else {
     buildDarwin(function (err, buildPath) {
       printDone(err, buildPath)
       buildWin32(function (err, buildPath) {
         printDone(err, buildPath)
-        buildLinux(printDone)
+        buildLinux(packageType, printDone)
       })
     })
   }
@@ -285,16 +286,45 @@ function buildWin32 (cb) {
   })
 }
 
-function buildLinux (cb) {
+function buildLinux (packageType, cb) {
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
 
-    // Create .zip file for Linux
     var distPath = path.join(config.ROOT_PATH, 'dist')
-    var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
-    var appFolderName = path.basename(buildPath[0])
-    cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
-    console.log('Created Linux .zip file.')
+    var filesPath = buildPath[0]
+
+    if (packageType === 'deb' || packageType === 'all') {
+      // Create .deb file for debian based platforms
+      var deb = require('nobin-debian-installer')()
+      var destPath = path.join('/opt', pkg.name)
+
+      deb.pack({
+        package: pkg,
+        info: {
+          arch: 'amd64',
+          targetDir: distPath,
+          scripts: {
+            postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
+            postrm: path.join(config.STATIC_PATH, 'linux', 'postrm')
+          }
+        }
+      }, [{
+        src: ['./**'],
+        dest: destPath,
+        expand: true,
+        cwd: filesPath
+      }], function (err, done) {
+        console.log(err || 'Created Linux .deb file.')
+      })
+    }
+
+    if (packageType === 'zip' || packageType === 'all') {
+      // Create .zip file for Linux
+      var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
+      var appFolderName = path.basename(filesPath)
+      cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
+      console.log('Created Linux .zip file.')
+    }
   })
 }
 
