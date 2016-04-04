@@ -174,7 +174,7 @@ function initLinux () {
   installIconFile()
 
   function installDesktopFile () {
-    var templatePath = path.join(config.STATIC_PATH, 'webtorrent.desktop')
+    var templatePath = path.join(config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop')
     fs.readFile(templatePath, 'utf8', writeDesktopFile)
   }
 
@@ -195,7 +195,7 @@ function initLinux () {
       '.local',
       'share',
       'applications',
-      'webtorrent.desktop'
+      'webtorrent-desktop.desktop'
     )
     mkdirp(path.dirname(desktopFilePath))
     fs.writeFile(desktopFilePath, desktopFile, function (err) {
@@ -216,7 +216,7 @@ function initLinux () {
       '.local',
       'share',
       'icons',
-      'webtorrent.png'
+      'webtorrent-desktop.png'
     )
     mkdirp(path.dirname(iconFilePath))
     fs.writeFile(iconFilePath, iconFile, function (err) {
