@@ -76,7 +76,7 @@ function createMainWindow () {
     icon: config.APP_ICON + '.png',
     minWidth: 375,
     minHeight: 38 + (120 * 2), // header height + 2 torrents
-    show: true, // Hide window until DOM finishes loading
+    show: false, // Hide window until DOM finishes loading
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
