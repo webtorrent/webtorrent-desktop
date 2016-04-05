@@ -262,21 +262,21 @@ function buildWin32 (cb) {
 
     console.log('Creating Windows installer...')
     installer.createWindowsInstaller({
-      name: config.APP_NAME,
-      productName: config.APP_NAME,
-      title: config.APP_NAME,
-      exe: config.APP_NAME + '.exe',
-
       appDirectory: buildPath[0],
-      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
-      version: pkg.version,
-      description: config.APP_NAME,
       authors: config.APP_TEAM,
-      iconUrl: config.APP_ICON + '.ico',
-      setupIcon: config.APP_ICON + '.ico',
       // certificateFile: '', // TODO
+      description: config.APP_NAME,
+      exe: config.APP_NAME + '.exe',
+      iconUrl: config.APP_ICON + '.ico',
+      loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+      name: config.APP_NAME,
+      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+      productName: config.APP_NAME,
+      setupExe: BUILD_NAME + '.exe',
+      setupIcon: config.APP_ICON + '.ico',
+      title: config.APP_NAME,
       usePackageJson: false,
-      loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
+      version: pkg.version
     }).then(function () {
       console.log('Created Windows installer.')
       cb(null, buildPath)
