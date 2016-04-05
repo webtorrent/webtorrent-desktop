@@ -115,7 +115,7 @@ var win32 = {
     // Original name of the file, not including a path. This information enables an
     // application to determine whether a file has been renamed by a user. The format of
     // the name depends on the file system for which the file was created.
-    OriginalFilename: 'WebTorrent.exe',
+    OriginalFilename: config.APP_NAME + '.exe',
 
     // Name of the product with which the file is distributed.
     ProductName: config.APP_NAME,
@@ -262,21 +262,23 @@ function buildWin32 (cb) {
 
     console.log('Creating Windows installer...')
     installer.createWindowsInstaller({
-      name: config.APP_NAME,
-      productName: config.APP_NAME,
-      title: config.APP_NAME,
-      exe: config.APP_NAME + '.exe',
-
       appDirectory: buildPath[0],
-      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
-      version: pkg.version,
-      description: config.APP_NAME,
       authors: config.APP_TEAM,
-      iconUrl: config.APP_ICON + '.ico',
-      setupIcon: config.APP_ICON + '.ico',
       // certificateFile: '', // TODO
+      description: config.APP_NAME,
+      exe: config.APP_NAME + '.exe',
+      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_ICON + '.ico',
+      loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+      remoteReleases: config.GITHUB_URL,
+      name: config.APP_NAME,
+      noMsi: true,
+      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+      productName: config.APP_NAME,
+      setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+      setupIcon: config.APP_ICON + '.ico',
+      title: config.APP_NAME,
       usePackageJson: false,
-      loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
+      version: pkg.version
     }).then(function () {
       console.log('Created Windows installer.')
       cb(null, buildPath)

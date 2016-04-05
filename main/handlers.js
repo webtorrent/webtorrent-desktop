@@ -59,12 +59,12 @@ function initWin32 () {
    */
 
   function registerProtocolHandlerWin32 (protocol, name, icon, command) {
-    setProtocol()
-
     var protocolKey = new Registry({
       hive: Registry.HKCU, // HKEY_CURRENT_USER
       key: '\\Software\\Classes\\' + protocol
     })
+
+    setProtocol()
 
     function setProtocol (err) {
       if (err) log.error(err.message)
