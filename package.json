@@ -21,7 +21,7 @@
     "create-torrent": "^3.22.1",
     "drag-drop": "^2.11.0",
     "electron-localshortcut": "^0.6.0",
-    "electron-prebuilt": "0.37.4",
+    "electron-prebuilt": "0.37.3",
     "hyperx": "^2.0.2",
     "main-loop": "^3.2.0",
     "mkdirp": "^0.5.1",
