@@ -115,7 +115,7 @@ var win32 = {
     // Original name of the file, not including a path. This information enables an
     // application to determine whether a file has been renamed by a user. The format of
     // the name depends on the file system for which the file was created.
-    OriginalFilename: 'WebTorrent.exe',
+    OriginalFilename: config.APP_NAME + '.exe',
 
     // Name of the product with which the file is distributed.
     ProductName: config.APP_NAME,
@@ -274,7 +274,7 @@ function buildWin32 (cb) {
       noMsi: true,
       outputDirectory: path.join(config.ROOT_PATH, 'dist'),
       productName: config.APP_NAME,
-      setupExe: BUILD_NAME + '.exe',
+      setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
       setupIcon: config.APP_ICON + '.ico',
       title: config.APP_NAME,
       usePackageJson: false,
