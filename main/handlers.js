@@ -1,24 +1,37 @@
 module.exports = {
-  init
+  install,
+  uninstall
 }
 
 var path = require('path')
 
 var log = require('./log')
 
-function init () {
+function install () {
   if (process.platform === 'darwin') {
-    initDarwin()
+    installDarwin()
   }
   if (process.platform === 'win32') {
-    initWin32()
+    installWin32()
   }
   if (process.platform === 'linux') {
-    initLinux()
+    installLinux()
   }
 }
 
-function initDarwin () {
+function uninstall () {
+  if (process.platform === 'darwin') {
+    uninstallDarwin()
+  }
+  if (process.platform === 'win32') {
+    uninstallWin32()
+  }
+  if (process.platform === 'linux') {
+    uninstallLinux()
+  }
+}
+
+function installDarwin () {
   var electron = require('electron')
   var app = electron.app
 
@@ -29,7 +42,9 @@ function initDarwin () {
   // File handlers are registered in the Info.plist.
 }
 
-function initWin32 () {
+function uninstallDarwin () {}
+
+function installWin32 () {
   var Registry = require('winreg')
 
   var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
@@ -163,7 +178,70 @@ function initWin32 () {
   }
 }
 
-function initLinux () {
+function uninstallWin32 () {
+  var Registry = require('winreg')
+
+  unregisterProtocolHandlerWin32('magnet', process.execPath)
+  unregisterFileHandlerWin32('.torrent', 'io.webtorrent.torrent', process.execPath)
+
+  function unregisterProtocolHandlerWin32 (protocol, command) {
+    getCommand()
+
+    function getCommand () {
+      var commandKey = new Registry({
+        hive: Registry.HKCU, // HKEY_CURRENT_USER
+        key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+      })
+      commandKey.get('', function (err, item) {
+        if (!err && item.value.indexOf(command) >= 0) {
+          eraseProtocol()
+        }
+      })
+    }
+
+    function eraseProtocol () {
+      var protocolKey = new Registry({
+        hive: Registry.HKCU,
+        key: '\\Software\\Classes\\' + protocol
+      })
+      protocolKey.erase(function () {})
+    }
+  }
+
+  function unregisterFileHandlerWin32 (ext, id, command) {
+    eraseId()
+
+    function eraseId () {
+      var idKey = new Registry({
+        hive: Registry.HKCU, // HKEY_CURRENT_USER
+        key: '\\Software\\Classes\\' + id
+      })
+      idKey.erase(getExt)
+    }
+
+    function getExt () {
+      var extKey = new Registry({
+        hive: Registry.HKCU,
+        key: '\\Software\\Classes\\' + ext
+      })
+      extKey.get('', function (err, item) {
+        if (!err && item.value === id) {
+          eraseExt()
+        }
+      })
+    }
+
+    function eraseExt () {
+      var extKey = new Registry({
+        hive: Registry.HKCU, // HKEY_CURRENT_USER
+        key: '\\Software\\Classes\\' + ext
+      })
+      extKey.erase(function () {})
+    }
+  }
+}
+
+function installLinux () {
   var config = require('../config')
   var fs = require('fs')
   var mkdirp = require('mkdirp')
@@ -223,4 +301,28 @@ function initLinux () {
       if (err) return log.error(err.message)
     })
   }
+}
+
+function uninstallLinux () {
+  var os = require('os')
+  var path = require('path')
+  var rimraf = require('rimraf')
+
+  var desktopFilePath = path.join(
+    os.homedir(),
+    '.local',
+    'share',
+    'applications',
+    'webtorrent-desktop.desktop'
+  )
+  rimraf.sync(desktopFilePath)
+
+  var iconFilePath = path.join(
+    os.homedir(),
+    '.local',
+    'share',
+    'icons',
+    'webtorrent-desktop.png'
+  )
+  rimraf.sync(iconFilePath)
 }

@@ -11,6 +11,8 @@ var pathExists = require('path-exists')
 
 var app = electron.app
 
+var handlers = require('./handlers')
+
 var exeName = path.basename(process.execPath)
 var updateDotExe = path.join(process.execPath, '..', '..', 'Update.exe')
 
@@ -41,6 +43,10 @@ function handleEvent (cmd) {
     removeShortcuts(function () {
       app.quit()
     })
+
+    // Uninstall .torrent file and magnet link handlers
+    handlers.uninstall()
+
     return true
   }
 
