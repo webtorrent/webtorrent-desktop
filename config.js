@@ -14,7 +14,7 @@ module.exports = {
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
 
-  AUTO_UPDATE_URL: 'https://webtorrent.io/app/update?version=' + APP_VERSION,
+  AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update?version=' + APP_VERSION,
   AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
 
   CONFIG_PATH: applicationConfigPath(APP_NAME),
