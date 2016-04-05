@@ -19,6 +19,7 @@
     "application-config-path": "^0.1.0",
     "chromecasts": "^1.8.0",
     "create-torrent": "^3.22.1",
+    "dlnacasts": "^0.0.2",
     "drag-drop": "^2.11.0",
     "electron-localshortcut": "^0.6.0",
     "electron-prebuilt": "0.37.3",

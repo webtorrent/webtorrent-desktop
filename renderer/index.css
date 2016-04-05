@@ -668,8 +668,7 @@ body.drag .app::after {
   margin: 0 auto;
 }
 
-.player-controls .chromecast,
-.player-controls .airplay,
+.player-controls .device,
 .player-controls .fullscreen,
 .player-controls .back {
   display: block;
@@ -682,8 +681,7 @@ body.drag .app::after {
   float: left;
 }
 
-.player-controls .chromecast,
-.player-controls .airplay,
+.player-controls .device,
 .player-controls .fullscreen {
   float: right;
 }
@@ -692,14 +690,12 @@ body.drag .app::after {
   margin-right: 15px;
 }
 
-.player-controls .chromecast,
-.player-controls .airplay {
+.player-controls .device {
   font-size: 18px; /* make the cast icons less huge */
   margin-top: 8px !important;
 }
 
-.player-controls .chromecast.active,
-.player-controls .airplay.active {
+.player-controls .device.active {
   color: #9af;
 }
 
