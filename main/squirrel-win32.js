@@ -40,12 +40,17 @@ function handleEvent (cmd) {
   if (cmd === '--squirrel-uninstall') {
     // App was just uninstalled. Undo anything we did in the --squirrel-install and
     // --squirrel-updated handlers
-    removeShortcuts(function () {
-      app.quit()
-    })
 
     // Uninstall .torrent file and magnet link handlers
     handlers.uninstall()
+
+    // Remove desktop/start menu shortcuts.
+    // HACK: add a callback to handlers.uninstall() so we can remove this setTimeout
+    setTimeout(function () {
+      removeShortcuts(function () {
+        app.quit()
+      })
+    }, 1000)
 
     return true
   }

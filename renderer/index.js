@@ -35,7 +35,9 @@ var Cast = null
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
+
 var clipboard = electron.clipboard
+var crashReporter = electron.crashReporter
 var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
@@ -58,6 +60,9 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  setupCrashReporter()
+
+  // Push the first page into the location history
   state.location.go({ url: 'home' })
 
   // Lazily load the WebTorrent, Chromecast, and Airplay modules
@@ -1056,4 +1061,12 @@ function playInterfaceSound (name) {
   audio.volume = sound.volume
   audio.src = sound.url
   audio.play()
+}
+
+function setupCrashReporter () {
+  crashReporter.start({
+    companyName: config.APP_NAME,
+    productName: config.APP_NAME,
+    submitURL: config.CRASH_REPORT_URL
+  })
 }
