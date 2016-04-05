@@ -7,6 +7,9 @@
     "email": "feross@feross.org",
     "url": "http://feross.org"
   },
+  "bin": {
+    "webtorrent-desktop": "./bin/cmd.js"
+  },
   "bugs": {
     "url": "https://github.com/feross/webtorrent-desktop/issues"
   },
@@ -42,9 +45,6 @@
     "rimraf": "^2.5.2",
     "standard": "^6.0.5"
   },
-  "optionalDependencies": {
-    "appdmg": "^0.3.6"
-  },
   "homepage": "https://webtorrent.io",
   "keywords": [
     "desktop",
@@ -54,6 +54,9 @@
   ],
   "license": "MIT",
   "main": "index.js",
+  "optionalDependencies": {
+    "appdmg": "^0.3.6"
+  },
   "productName": "WebTorrent",
   "repository": {
     "type": "git",
@@ -66,8 +69,5 @@
     "start": "electron .",
     "test": "standard",
     "update-authors": "./bin/update-authors.sh"
-  },
-  "bin": {
-    "webtorrent-desktop": "./bin/cmd.js"
   }
 }
