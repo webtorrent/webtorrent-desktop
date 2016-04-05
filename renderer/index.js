@@ -53,9 +53,10 @@ function init () {
   // Push the first page into the location history
   state.location.go({ url: 'home' })
 
-  // Lazily load the WebTorrent, Chromecast, and Airplay modules
-  initWebtorrent()
-  window.setTimeout(lazyLoadCast, 750)
+  initWebTorrent()
+
+  // Lazily load the Chromecast/Airplay/DLNA modules
+  window.setTimeout(lazyLoadCast, 5000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -121,12 +122,12 @@ function lazyLoadCast () {
 }
 
 // Talk to WebTorrent process, resume torrents, start monitoring torrent progress
-function initWebtorrent () {
+function initWebTorrent () {
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
   // Calling update() updates the UI given the current state
-  // Do this at least once a second to give  every file in every torrentSummary
+  // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
 }
@@ -442,11 +443,11 @@ function onOpen (files) {
 
   // .torrent file = start downloading the torrent
   files.filter(isTorrent).forEach(function (torrentFile) {
-    addTorrent(torrentFile.path)
+    addTorrent(torrentFile)
   })
 
   // everything else = seed these files
-  createTorrentFromFileObjects(files)
+  createTorrentFromFileObjects(files.filter(isNotTorrent))
 }
 
 function onPaste (e) {
@@ -484,6 +485,10 @@ function getTorrentSummary (torrentKey) {
 function addTorrent (torrentId) {
   var torrentKey = state.nextTorrentKey++
   var path = state.saved.downloadPath
+  if (torrentId.path) {
+    // Use path string instead of W3C File object
+    torrentId = torrentId.path
+  }
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
 
@@ -536,9 +541,7 @@ function startTorrentingSummary (torrentSummary) {
 
 // Creates a new torrent from a drag-dropped file or folder
 function createTorrentFromFileObjects (files) {
-  var filePaths = (files
-    .filter(isNotTorrent)
-    .map((x) => x.path))
+  var filePaths = files.map((x) => x.path)
 
   // Single-file torrents are easy. Multi-file torrents require special handling
   // make sure WebTorrent seeds all files in place, without copying to /tmp
