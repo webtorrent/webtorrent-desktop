@@ -269,6 +269,7 @@ function buildWin32 (cb) {
       exe: config.APP_NAME + '.exe',
       iconUrl: config.APP_ICON + '.ico',
       loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+      remoteReleases: config.AUTO_UPDATE_URL,
       name: config.APP_NAME,
       noMsi: true,
       outputDirectory: path.join(config.ROOT_PATH, 'dist'),
