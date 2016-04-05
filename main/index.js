@@ -134,6 +134,6 @@ function setupCrashReporter () {
   crashReporter.start({
     companyName: config.APP_NAME,
     productName: config.APP_NAME,
-    submitURL: 'https://webtorrent.io/desktop/crash-report'
+    submitURL: config.CRASH_REPORT_URL
   })
 }
