@@ -5,8 +5,6 @@ module.exports = {
 
 var path = require('path')
 
-var log = require('./log')
-
 function install () {
   if (process.platform === 'darwin') {
     installDarwin()
@@ -46,6 +44,8 @@ function uninstallDarwin () {}
 
 function installWin32 () {
   var Registry = require('winreg')
+
+  var log = require('./log')
 
   var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
 
@@ -242,11 +242,13 @@ function uninstallWin32 () {
 }
 
 function installLinux () {
-  var config = require('../config')
   var fs = require('fs')
   var mkdirp = require('mkdirp')
   var os = require('os')
   var path = require('path')
+
+  var config = require('../config')
+  var log = require('./log')
 
   installDesktopFile()
   installIconFile()
