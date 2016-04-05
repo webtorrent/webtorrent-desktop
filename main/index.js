@@ -1,6 +1,7 @@
 var electron = require('electron')
 
 var app = electron.app
+var crashReporter = electron.crashReporter
 var ipcMain = electron.ipcMain
 
 var autoUpdater = require('./auto-updater')
@@ -130,10 +131,9 @@ function processArgv (argv) {
 }
 
 function setupCrashReporter () {
-  // require('crash-reporter').start({
-  //   productName: 'WebTorrent',
-  //   companyName: 'WebTorrent',
-  //   submitURL: 'https://webtorrent.io/crash-report',
-  //   autoSubmit: true
-  // })
+  crashReporter.start({
+    companyName: config.APP_NAME,
+    productName: config.APP_NAME,
+    submitURL: 'https://webtorrent.io/desktop/crash-report'
+  })
 }
