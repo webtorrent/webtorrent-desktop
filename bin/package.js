@@ -267,7 +267,7 @@ function buildWin32 (cb) {
       // certificateFile: '', // TODO
       description: config.APP_NAME,
       exe: config.APP_NAME + '.exe',
-      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_ICON + '.ico',
+      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
       loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
       remoteReleases: config.GITHUB_URL,
       name: config.APP_NAME,
