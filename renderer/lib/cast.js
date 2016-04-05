@@ -166,10 +166,14 @@ function dlnaPlayer (player) {
     player.play(state.server.networkURL, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name,
-      seek: state.playing.currentTime | 0
+      seek: state.playing.currentTime > 10 ? state.playing.currentTime : 0
     }, function (err) {
       if (err) {
         state.playing.location = 'local'
+        state.errors.push({
+          time: new Date().getTime(),
+          message: 'Couldn\'t connect to DLNA. ' + err
+        })
       } else {
         state.playing.location = 'dlna'
       }
