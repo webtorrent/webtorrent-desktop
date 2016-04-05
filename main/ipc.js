@@ -22,7 +22,7 @@ function init () {
     app.emit('ipcReady')
     setTimeout(function () {
       windows.main.show()
-      console.timeEnd('init')
+      try { console.timeEnd('init') } catch (err) {}
     }, 50)
   })
 
