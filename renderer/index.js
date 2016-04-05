@@ -246,11 +246,8 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentContextMenu') {
     openTorrentContextMenu(args[0] /* infoHash */)
   }
-  if (action === 'openChromecast') {
-    lazyLoadCast().open('chromecast')
-  }
-  if (action === 'openAirplay') {
-    lazyLoadCast().open('airplay')
+  if (action === 'openDevice') {
+    lazyLoadCast().open(args[0] /* deviceType */)
   }
   if (action === 'stopCasting') {
     lazyLoadCast().stopCasting()
