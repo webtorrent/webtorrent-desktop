@@ -830,29 +830,3 @@ body.drag .app::after {
 .error-popover .error:last-child {
   border-bottom: none;
 }
-
-/*
- * MEDIA QUERIES
- */
-
-@media only screen and (min-width: 700px) {
-  body {
-    font-size: 16px;
-    line-height: 1.5em;
-  }
-  .torrent,
-  .torrent-placeholder {
-    height: 150px;
-  }
-}
-
-@media only screen and (min-width: 900px) {
-  body {
-    font-size: 18px;
-    line-height: 1.5em;
-  }
-  .torrent,
-  .torrent-placeholder {
-    height: 180px;
-  }
-}
