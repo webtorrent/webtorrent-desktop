@@ -211,7 +211,7 @@ function buildDarwin (cb) {
         if (err) return cb(err)
 
         // Create .zip file (used by the auto-updater)
-        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
+        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-darwin.zip')
         cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
         console.log('Created OS X .zip file.')
 
