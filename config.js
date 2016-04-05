@@ -21,6 +21,8 @@ module.exports = {
   CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(applicationConfigPath(APP_NAME), 'Torrents'),
 
+  GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
+
   IS_PRODUCTION: isProduction(),
 
   ROOT_PATH: __dirname,

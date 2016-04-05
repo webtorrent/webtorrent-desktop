@@ -288,14 +288,14 @@ function getAppMenuTemplate () {
         },
         {
           label: 'Contribute on GitHub',
-          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-desktop')
+          click: () => electron.shell.openExternal(config.GITHUB_URL)
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-desktop/issues')
+          click: () => electron.shell.openExternal(config.GITHUB_URL + '/issues')
         }
       ]
     }
