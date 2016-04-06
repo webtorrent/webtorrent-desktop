@@ -633,6 +633,7 @@ function torrentReady (torrentKey, torrentInfo) {
   torrentSummary.name = torrentSummary.displayName || torrentInfo.name
   torrentSummary.path = torrentInfo.path
   torrentSummary.files = torrentInfo.files
+  torrentSummary.magnetURI = torrentInfo.magnetURI
   update()
 
   // Save the .torrent file, if it hasn't been saved already
