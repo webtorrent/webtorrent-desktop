@@ -24,13 +24,13 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = new WebTorrent()
+var client = window.client = new WebTorrent()
 
 // WebTorrent-to-HTTP streaming sever
-var server = null
+var server = window.server = null
 
 // Used for diffing, so we only send progress updates when necessary
-var prevProgress = null
+var prevProgress = window.prevProgress = null
 
 init()
 
@@ -244,7 +244,6 @@ function getTorrentProgress () {
 }
 
 function startServer (infoHash, index) {
-  if (server) return
   var torrent = client.get(infoHash)
   if (torrent.ready) startServerFromReadyTorrent(torrent, index)
   else torrent.on('ready', () => startServerFromReadyTorrent(torrent, index))
