@@ -761,8 +761,8 @@ function openPlayer (infoHash, index, cb) {
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    state.location.clearPending()
     playInterfaceSound('ERROR')
+    cb(new Error('playback timed out'))
     update()
   }, 10000) /* give it a few seconds */
 
@@ -794,20 +794,13 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
     clearTimeout(timeout)
 
-    /**
-     TODO: where do we know if it's unplayable?
-    if (err) {
-      torrentSummary.playStatus = 'unplayable'
-      playInterfaceSound('ERROR')
-      update()
-      return onError(err)
-    }
-    */
-
     // if we timed out (user clicked play a long time ago), don't autoplay
     var timedOut = torrentSummary.playStatus === 'timeout'
     delete torrentSummary.playStatus
-    if (timedOut) return update()
+    if (timedOut) {
+      ipcRenderer.send('wt-stop-server')
+      return update()
+    }
 
     // otherwise, play the video
     state.window.title = torrentSummary.files[state.playing.fileIndex].name

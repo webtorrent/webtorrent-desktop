@@ -18,9 +18,9 @@ LocationHistory.prototype._go = function (page) {
   if (page.onbeforeload) {
     this._pending = page
     page.onbeforeload((err) => {
-      if (err) return
       if (this._pending !== page) return /* navigation was cancelled */
       this._pending = null
+      if (err) return
       this._history.push(page)
     })
   } else {
