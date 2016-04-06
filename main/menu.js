@@ -155,36 +155,44 @@ function showOpenTorrentAddress () {
 }
 
 function getAppMenuTemplate () {
+  var fileMenu = [
+    {
+      label: 'Create New Torrent...',
+      accelerator: 'CmdOrCtrl+N',
+      click: showCreateTorrent
+    },
+    {
+      label: 'Open Torrent File...',
+      accelerator: 'CmdOrCtrl+O',
+      click: showOpenTorrentFile
+    },
+    {
+      label: 'Open Torrent Address...',
+      accelerator: 'CmdOrCtrl+U',
+      click: showOpenTorrentAddress
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: process.platform === 'windows' ? 'Close' : 'Close Window',
+      accelerator: 'CmdOrCtrl+W',
+      role: 'close'
+    }
+  ]
+
+  // File > Quit for Linux users with distros where the system tray is broken
+  if (process.platform === 'linux') {
+    fileMenu.push({
+      label: 'Quit',
+      click: () => app.quit()
+    })
+  }
+
   var template = [
     {
       label: 'File',
-      submenu: [
-        {
-          label: 'Create New Torrent...',
-          accelerator: 'CmdOrCtrl+N',
-          click: showCreateTorrent
-        },
-        {
-          label: 'Open Torrent File...',
-          accelerator: 'CmdOrCtrl+O',
-          click: showOpenTorrentFile
-        },
-        {
-          label: 'Open Torrent Address...',
-          accelerator: 'CmdOrCtrl+U',
-          click: showOpenTorrentAddress
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: process.platform === 'darwin'
-            ? 'Close Window'
-            : 'Close',
-          accelerator: 'CmdOrCtrl+W',
-          role: 'close'
-        }
-      ]
+      submenu: fileMenu
     },
     {
       label: 'Edit',
