@@ -24,7 +24,11 @@ var update
 function chromecastPlayer (player) {
   function addEvents () {
     player.on('error', function (err) {
-      player.errorMessage = err.message
+      state.playing.location = 'local'
+      state.errors.push({
+        time: new Date().getTime(),
+        message: 'Could not connect to Chromecast. ' + err.message
+      })
       update()
     })
     player.on('disconnect', function () {
@@ -41,6 +45,10 @@ function chromecastPlayer (player) {
     }, function (err) {
       if (err) {
         state.playing.location = 'local'
+        state.errors.push({
+          time: new Date().getTime(),
+          message: 'Could not connect to Chromecast. ' + err.message
+        })
       } else {
         state.playing.location = 'chromecast'
       }
@@ -96,7 +104,7 @@ function airplayPlayer (player) {
         state.playing.location = 'local'
         state.errors.push({
           time: new Date().getTime(),
-          message: 'Couldn\'t connect to Airplay'
+          message: 'Could not connect to AirPlay.'
         })
       } else {
         state.playing.location = 'airplay'
@@ -151,7 +159,11 @@ function airplayPlayer (player) {
 function dlnaPlayer (player) {
   function addEvents () {
     player.on('error', function (err) {
-      player.errorMessage = err.message
+      state.playing.location = 'local'
+      state.errors.push({
+        time: new Date().getTime(),
+        message: 'Could not connect to DLNA. ' + err.message
+      })
       update()
     })
     player.on('disconnect', function () {
@@ -171,7 +183,7 @@ function dlnaPlayer (player) {
         state.playing.location = 'local'
         state.errors.push({
           time: new Date().getTime(),
-          message: 'Couldn\'t connect to DLNA. ' + err
+          message: 'Could not connect to DLNA. ' + err.message
         })
       } else {
         state.playing.location = 'dlna'
