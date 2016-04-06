@@ -982,7 +982,7 @@ function showDoneNotification (torrent) {
   })
 
   notif.onclick = function () {
-    window.focus()
+    ipcRenderer.send('focusWindow', 'main')
   }
 
   playInterfaceSound('DONE')
