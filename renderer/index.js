@@ -16,6 +16,7 @@ var patch = require('virtual-dom/patch')
 var App = require('./views/app')
 var errors = require('./lib/errors')
 var config = require('../config')
+var crashReporter = require('../crash-reporter')
 var TorrentPlayer = require('./lib/torrent-player')
 var util = require('./util')
 var {setDispatch} = require('./lib/dispatcher')
@@ -31,13 +32,16 @@ var Cast = null
 var ipcRenderer = electron.ipcRenderer
 
 var clipboard = electron.clipboard
-var crashReporter = electron.crashReporter
 var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
 var state = global.state = State.getInitialState()
 
 var vdomLoop
+
+// Report crashes back to our server.
+// Not global JS exceptions, not like Rollbar, handles segfaults/core dumps only
+crashReporter.init()
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
@@ -49,8 +53,6 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
-  setupCrashReporter()
-
   // Push the first page into the location history
   state.location.go({ url: 'home' })
 
@@ -1002,14 +1004,6 @@ function playInterfaceSound (name) {
   audio.volume = sound.volume
   audio.src = sound.url
   audio.play()
-}
-
-function setupCrashReporter () {
-  crashReporter.start({
-    companyName: config.APP_NAME,
-    productName: config.APP_NAME,
-    submitURL: config.CRASH_REPORT_URL
-  })
 }
 
 // Finds the longest common prefix

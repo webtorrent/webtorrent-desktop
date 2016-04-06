@@ -1,11 +1,11 @@
 var electron = require('electron')
 
 var app = electron.app
-var crashReporter = electron.crashReporter
 var ipcMain = electron.ipcMain
 
 var autoUpdater = require('./auto-updater')
 var config = require('../config')
+var crashReporter = require('../crash-reporter')
 var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
@@ -47,8 +47,8 @@ function init () {
   ipc.init()
 
   app.on('will-finish-launching', function () {
+    crashReporter.init()
     autoUpdater.init()
-    setupCrashReporter()
   })
 
   app.on('ready', function () {
@@ -127,13 +127,5 @@ function processArgv (argv) {
     } else {
       windows.main.send('dispatch', 'onOpen', arg)
     }
-  })
-}
-
-function setupCrashReporter () {
-  crashReporter.start({
-    companyName: config.APP_NAME,
-    productName: config.APP_NAME,
-    submitURL: config.CRASH_REPORT_URL
   })
 }
