@@ -207,10 +207,11 @@ function TorrentList (state) {
   // Show a single torrentSummary file in the details view for a single torrent
   function renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var isDone = file.numPiecesPresent === file.numPieces
+    var isDone = false
     var progress = ''
     if (torrentSummary.progress && torrentSummary.progress.files) {
       var fileProg = torrentSummary.progress.files[index]
+      isDone = fileProg.numPiecesPresent === fileProg.numPieces
       progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 

@@ -24,7 +24,7 @@ function dispatcher (...args) {
       // Don't click on whatever is below the button
       e.stopPropagation()
       // Don't regisiter clicks on disabled buttons
-      if (e.target.classList.contains('disabled')) return
+      if (e.currentTarget.classList.contains('disabled')) return
       _dispatch.apply(null, args)
     }
   }
