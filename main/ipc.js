@@ -81,10 +81,10 @@ function init () {
     if (name.startsWith('wt-')) {
       if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
         windows.main.send(name, ...args)
-        log('webtorrent ipc: sent %s', name)
+        log('webtorrent: got %s', name)
       } else {
         windows.webtorrent.send(name, ...args)
-        log('webtorrent ipc: receieved %s', name)
+        log('webtorrent: sent %s', name)
       }
       return
     }

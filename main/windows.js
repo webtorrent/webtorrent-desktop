@@ -82,7 +82,7 @@ function createMainWindow () {
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: config.APP_ICON + '.png',
-    minWidth: 375,
+    minWidth: 425,
     minHeight: 38 + (120 * 2), // header height + 2 torrents
     show: false, // Hide window until DOM finishes loading
     title: config.APP_WINDOW_TITLE,

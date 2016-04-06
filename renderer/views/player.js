@@ -245,7 +245,7 @@ function renderPlayerControls (state) {
     chromecastClass = 'active'
     dlnaClass = 'disabled'
     airplayClass = 'disabled'
-    chromecastHandler = dispatcher('stopCasting')
+    chromecastHandler = dispatcher('closeDevice')
     airplayHandler = undefined
     dlnaHandler = undefined
   } else if (isOnAirplay) {
@@ -253,7 +253,7 @@ function renderPlayerControls (state) {
     dlnaClass = 'disabled'
     airplayClass = 'active'
     chromecastHandler = undefined
-    airplayHandler = dispatcher('stopCasting')
+    airplayHandler = dispatcher('closeDevice')
     dlnaHandler = undefined
   } else if (isOnDlna) {
     chromecastClass = 'disabled'
@@ -261,7 +261,7 @@ function renderPlayerControls (state) {
     airplayClass = 'disabled'
     chromecastHandler = undefined
     airplayHandler = undefined
-    dlnaHandler = dispatcher('stopCasting')
+    dlnaHandler = dispatcher('closeDevice')
   } else {
     chromecastClass = ''
     airplayClass = ''

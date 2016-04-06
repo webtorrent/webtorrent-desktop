@@ -207,8 +207,8 @@ function dispatch (action, ...args) {
   if (action === 'openDevice') {
     lazyLoadCast().open(args[0] /* deviceType */)
   }
-  if (action === 'stopCasting') {
-    lazyLoadCast().stopCasting()
+  if (action === 'closeDevice') {
+    lazyLoadCast().close()
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
