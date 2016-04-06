@@ -70,13 +70,6 @@ function showWebTorrentWindow () {
   windows.webtorrent.webContents.openDevTools({ detach: true })
 }
 
-function reloadWindow () {
-  log('reloadWindow')
-  if (windows.main) {
-    windows.main.webContents.reloadIgnoringCache()
-  }
-}
-
 function addFakeDevice (device) {
   log('addFakeDevice %s', device)
   windows.main.send('addFakeDevice', device)
@@ -257,11 +250,6 @@ function getAppMenuTemplate () {
         {
           label: 'Developer',
           submenu: [
-            {
-              label: 'Reload',
-              accelerator: 'CmdOrCtrl+R',
-              click: reloadWindow
-            },
             {
               label: 'Developer Tools',
               accelerator: process.platform === 'darwin'
