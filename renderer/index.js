@@ -20,6 +20,7 @@ var TorrentPlayer = require('./lib/torrent-player')
 var util = require('./util')
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
+var State = require('./state')
 
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
@@ -34,7 +35,7 @@ var crashReporter = electron.crashReporter
 var dialog = remote.require('dialog')
 
 // For easy debugging in Developer Tools
-var state = global.state = require('./state')
+var state = global.state = State.getInitialState()
 
 var vdomLoop
 
@@ -116,7 +117,7 @@ function init () {
 function lazyLoadCast () {
   if (!Cast) {
     Cast = require('./lib/cast')
-    Cast.init(update) // Search the local network for Chromecast and Airplays
+    Cast.init(state, update) // Search the local network for Chromecast and Airplays
   }
   return Cast
 }
@@ -391,7 +392,7 @@ function loadState (cb) {
     console.log('loaded state from ' + cfg.filePath)
 
     // populate defaults if they're not there
-    state.saved = Object.assign({}, state.defaultSavedState, data)
+    state.saved = Object.assign({}, State.getDefaultSavedState(), data)
     state.saved.torrents.forEach(function (torrentSummary) {
       if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
     })
@@ -741,8 +742,7 @@ function pickFileToPlay (files) {
 
 function stopServer () {
   ipcRenderer.send('wt-stop-server')
-  state.playing.infoHash = null
-  state.playing.fileIndex = null
+  state.playing = State.getDefaultPlayState()
   state.server = null
 }
 
@@ -766,12 +766,12 @@ function openPlayer (infoHash, index, cb) {
     update()
   }, 10000) /* give it a few seconds */
 
-  if (['downloading', 'seeding'].includes(torrentSummary.status)) {
-    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
-  } else {
+  if (torrentSummary.status === 'paused') {
     startTorrentingSummary(torrentSummary)
     ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
       () => openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
+  } else {
+    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
   }
 }
 

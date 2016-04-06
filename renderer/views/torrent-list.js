@@ -201,7 +201,7 @@ function TorrentList (state) {
     // First, find out how much of the file we've downloaded
     var isDone = file.numPiecesPresent === file.numPieces
     var progress = ''
-    if (torrentSummary.progress) {
+    if (torrentSummary.progress && torrentSummary.progress.files) {
       var fileProg = torrentSummary.progress.files[index]
       progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
@@ -211,10 +211,7 @@ function TorrentList (state) {
     var icon
     var rowClass = ''
     var handleClick
-    if (state.playing.infoHash === infoHash && state.playing.fileIndex === index) {
-      icon = 'pause_arrow' /* playing? add option to pause */
-      handleClick = undefined // TODO: pause audio
-    } else if (TorrentPlayer.isPlayable(file)) {
+    if (TorrentPlayer.isPlayable(file)) {
       icon = 'play_arrow' /* playable? add option to play */
       handleClick = dispatcher('play', infoHash, index)
     } else {

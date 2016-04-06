@@ -15,12 +15,35 @@ var chromecasts = require('chromecasts')()
 var dlnacasts = require('dlnacasts')()
 
 var config = require('../../config')
-var state = require('../state')
+
+// App state. Cast modifies state.playing and state.errors in response to events
+var state
 
 // Callback to notify module users when state has changed
 var update
 
+// setInterval() for updating cast status
 var statusInterval = null
+
+// Start looking for cast devices on the local network
+function init (appState, callback) {
+  state = appState
+  update = callback
+
+  // Listen for devices: Chromecast, DLNA and Airplay
+  chromecasts.on('update', function (player) {
+    state.devices.chromecast = chromecastPlayer(player)
+  })
+
+  dlnacasts.on('update', function (player) {
+    state.devices.dlna = dlnaPlayer(player)
+  })
+
+  var browser = airplay.createBrowser()
+  browser.on('deviceOn', function (player) {
+    state.devices.airplay = airplayPlayer(player)
+  }).start()
+}
 
 // chromecast player implementation
 function chromecastPlayer (player) {
@@ -236,25 +259,6 @@ function dlnaPlayer (player) {
     seek: seek,
     volume: volume
   }
-}
-
-// start export functions
-function init (callback) {
-  update = callback
-
-  // Listen for devices: Chromecast, DLNA and Airplay
-  chromecasts.on('update', function (player) {
-    state.devices.chromecast = chromecastPlayer(player)
-  })
-
-  dlnacasts.on('update', function (player) {
-    state.devices.dlna = dlnaPlayer(player)
-  })
-
-  var browser = airplay.createBrowser()
-  browser.on('deviceOn', function (player) {
-    state.devices.airplay = airplayPlayer(player)
-  }).start()
 }
 
 // Start polling cast device state, whenever we're connected
