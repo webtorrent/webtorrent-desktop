@@ -642,7 +642,7 @@ function torrentDone (torrentKey, torrentInfo) {
     if (!state.window.isFocused) {
       state.dock.badge += 1
     }
-    showDoneNotification(torrentKey)
+    showDoneNotification(torrentSummary)
   }
 
   update()
@@ -974,15 +974,13 @@ function onWarning (err) {
 }
 
 function showDoneNotification (torrent) {
-  if (state.window.isFocused) return
-
   var notif = new window.Notification('Download Complete', {
     body: torrent.name,
     silent: true
   })
 
   notif.onclick = function () {
-    window.focus()
+    ipcRenderer.send('focusWindow', 'main')
   }
 
   playInterfaceSound('DONE')
