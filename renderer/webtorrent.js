@@ -10,9 +10,14 @@ var fs = require('fs')
 var mkdirp = require('mkdirp')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
+var path = require('path')
+
+var crashReporter = require('../crash-reporter')
 var config = require('../config')
 var torrentPoster = require('./lib/torrent-poster')
-var path = require('path')
+
+// Report when the process crashes
+crashReporter.init()
 
 // Send & receive messages from the main window
 var ipc = electron.ipcRenderer
