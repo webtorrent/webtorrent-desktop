@@ -347,7 +347,7 @@ input {
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: 0 50%;
+  background-position: center;
   transition: -webkit-filter 0.1s ease-out;
   position: relative;
   animation: fadein .4s;
@@ -591,6 +591,8 @@ body.drag .app::after {
   width: 100%;
   height: 100%;
   display: flex;
+  background-size: cover;
+  background-position: center;
 }
 
 .player video {
