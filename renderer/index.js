@@ -144,6 +144,7 @@ function render (state) {
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
+  showOrHidePlayerControls()
   vdomLoop.update(state)
   updateElectron()
 }
@@ -285,7 +286,7 @@ function dispatch (action, ...args) {
   }
 
   // Update the virtual-dom, unless it's just a mouse move event
-  if (action !== 'mediaMouseMoved') {
+  if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
     update()
   }
 }
@@ -1014,4 +1015,23 @@ function findCommonPrefix (a, b) {
   if (i === a.length) return a
   if (i === b.length) return b
   return a.substring(0, i)
+}
+
+// Hide player controls while playing video, if the mouse stays still for a while
+// Never hide the controls when:
+// * The mouse is over the controls or we're scrubbing (see CSS)
+// * The video is paused
+// * The video is playing remotely on Chromecast or Airplay
+function showOrHidePlayerControls () {
+  var hideControls = state.location.current().url === 'player' &&
+    state.playing.mouseStationarySince !== 0 &&
+    new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
+    !state.playing.isPaused &&
+    state.playing.location === 'local'
+
+  if (hideControls !== state.playing.hideControls) {
+    state.playing.hideControls = hideControls
+    return true
+  }
+  return false
 }
