@@ -370,8 +370,13 @@ input {
   position: absolute;
   top: 20px;
   left: 20px;
-  width: calc(100% - 150px);
+  right: 20px;
+  width: calc(100% - 40px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
+}
+
+.torrent:hover .metadata {
+  width: calc(100% - 150px);
 }
 
 .torrent .metadata span:not(:last-child)::after {
