@@ -14,8 +14,7 @@ module.exports = {
   stopCasting,
   playPause,
   seek,
-  setVolume,
-  isCasting
+  setVolume
 }
 
 // Callback to notify module users when state has changed
@@ -283,13 +282,6 @@ function stoppedCasting () {
   state.playing.location = 'local'
   state.playing.jumpToTime = state.playing.currentTime
   update()
-}
-
-// Checks whether we are connected and already casting
-// Returns false if we not casting (state.playing.location === 'local')
-// or if we're trying to connect but haven't yet ('chromecast-pending', etc)
-function isCasting () {
-  return state.playing.location === 'chromecast' || state.playing.location === 'airplay' || state.playing.location === 'dlna'
 }
 
 function getDevice (location) {

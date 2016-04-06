@@ -306,14 +306,14 @@ function playPause (isPaused) {
     return // Nothing to do
   }
   // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.playPause()
   }
   state.playing.isPaused = !state.playing.isPaused
 }
 
 function jumpToTime (time) {
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.seek(time)
   } else {
     state.playing.jumpToTime = time
@@ -325,14 +325,24 @@ function changeVolume (delta) {
   setVolume(state.playing.volume + delta)
 }
 
+// TODO: never called. Either remove or make a volume control that calls it
 function setVolume (volume) {
   // check if its in [0.0 - 1.0] range
   volume = Math.max(0, Math.min(1, volume))
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.setVolume(volume)
   } else {
     state.playing.setVolume = volume
   }
+}
+
+// Checks whether we are connected and already casting
+// Returns false if we not casting (state.playing.location === 'local')
+// or if we're trying to connect but haven't yet ('chromecast-pending', etc)
+function isCasting () {
+  return state.playing.location === 'chromecast' ||
+    state.playing.location === 'airplay' ||
+    state.playing.location === 'dlna'
 }
 
 function setupIpc () {
