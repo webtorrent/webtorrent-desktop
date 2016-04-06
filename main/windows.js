@@ -49,14 +49,17 @@ function createAboutWindow () {
 
 function createWebTorrentHiddenWindow () {
   var win = windows.webtorrent = new electron.BrowserWindow({
-    backgroundColor: '#ECECEC',
+    backgroundColor: '#282828',
     show: false,
     center: true,
     title: 'webtorrent-hidden-window',
-    width: 500,
-    height: 500,
+    useContentSize: true,
+    width: 368,
+    height: 388,
     minimizable: false,
     maximizable: false,
+    resizable: false,
+    fullscreenable: false,
     fullscreen: false,
     skipTaskbar: true
   })
