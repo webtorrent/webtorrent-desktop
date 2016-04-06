@@ -144,6 +144,7 @@ function render (state) {
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
+  showOrHidePlayerControls()
   vdomLoop.update(state)
   updateElectron()
 }
@@ -285,7 +286,7 @@ function dispatch (action, ...args) {
   }
 
   // Update the virtual-dom, unless it's just a mouse move event
-  if (action !== 'mediaMouseMoved') {
+  if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
     update()
   }
 }
@@ -305,14 +306,14 @@ function playPause (isPaused) {
     return // Nothing to do
   }
   // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.playPause()
   }
   state.playing.isPaused = !state.playing.isPaused
 }
 
 function jumpToTime (time) {
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.seek(time)
   } else {
     state.playing.jumpToTime = time
@@ -324,14 +325,24 @@ function changeVolume (delta) {
   setVolume(state.playing.volume + delta)
 }
 
+// TODO: never called. Either remove or make a volume control that calls it
 function setVolume (volume) {
   // check if its in [0.0 - 1.0] range
   volume = Math.max(0, Math.min(1, volume))
-  if (lazyLoadCast().isCasting()) {
+  if (isCasting()) {
     Cast.setVolume(volume)
   } else {
     state.playing.setVolume = volume
   }
+}
+
+// Checks whether we are connected and already casting
+// Returns false if we not casting (state.playing.location === 'local')
+// or if we're trying to connect but haven't yet ('chromecast-pending', etc)
+function isCasting () {
+  return state.playing.location === 'chromecast' ||
+    state.playing.location === 'airplay' ||
+    state.playing.location === 'dlna'
 }
 
 function setupIpc () {
@@ -1012,4 +1023,23 @@ function findCommonPrefix (a, b) {
   if (i === a.length) return a
   if (i === b.length) return b
   return a.substring(0, i)
+}
+
+// Hide player controls while playing video, if the mouse stays still for a while
+// Never hide the controls when:
+// * The mouse is over the controls or we're scrubbing (see CSS)
+// * The video is paused
+// * The video is playing remotely on Chromecast or Airplay
+function showOrHidePlayerControls () {
+  var hideControls = state.location.current().url === 'player' &&
+    state.playing.mouseStationarySince !== 0 &&
+    new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
+    !state.playing.isPaused &&
+    state.playing.location === 'local'
+
+  if (hideControls !== state.playing.hideControls) {
+    state.playing.hideControls = hideControls
+    return true
+  }
+  return false
 }
