@@ -26,6 +26,17 @@ function init () {
     }, 50)
   })
 
+  var messageQueueMainToWebTorrent = []
+  ipcMain.on('ipcReadyWebTorrent', function (e) {
+    app.ipcReadyWebTorrent = true
+    log('sending %d queued messages from the main win to the webtorrent window',
+      messageQueueMainToWebTorrent.length)
+    messageQueueMainToWebTorrent.forEach(function (message) {
+      windows.webtorrent.send(message.name, ...message.args)
+      log('webtorrent: sent queued %s', message.name)
+    })
+  })
+
   ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
   ipcMain.on('showCreateTorrent', menu.showCreateTorrent)
 
@@ -80,11 +91,20 @@ function init () {
     // Relay messages between the main window and the WebTorrent hidden window
     if (name.startsWith('wt-')) {
       if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
+        // Send message to main window
         windows.main.send(name, ...args)
         log('webtorrent: got %s', name)
-      } else {
+      } else if (app.ipcReadyWebTorrent) {
+        // Send message to webtorrent window
         windows.webtorrent.send(name, ...args)
         log('webtorrent: sent %s', name)
+      } else {
+        // Queue message for webtorrent window, it hasn't finished loading yet
+        messageQueueMainToWebTorrent.push({
+          name: name,
+          args: args
+        })
+        log('webtorrent: queueing %s', name)
       }
       return
     }
