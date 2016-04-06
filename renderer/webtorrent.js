@@ -55,6 +55,8 @@ function init () {
   ipc.on('wt-stop-server', (e) =>
     stopServer())
 
+  ipc.send('ipcReadyWebTorrent')
+
   setInterval(updateTorrentProgress, 1000)
 }
 
