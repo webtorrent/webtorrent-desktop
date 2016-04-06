@@ -65,6 +65,11 @@ function toggleDevTools () {
   }
 }
 
+function showWebTorrentWindow () {
+  windows.webtorrent.show()
+  windows.webtorrent.webContents.openDevTools({detach: true})
+}
+
 function reloadWindow () {
   log('reloadWindow')
   if (windows.main) {
@@ -254,6 +259,10 @@ function getAppMenuTemplate () {
                 ? 'Alt+Command+I'
                 : 'Ctrl+Shift+I',
               click: toggleDevTools
+            },
+            {
+              label: 'Show WebTorrent Process',
+              click: showWebTorrentWindow
             },
             {
               type: 'separator'
