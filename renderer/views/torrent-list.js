@@ -137,14 +137,22 @@ function TorrentList (state) {
       downloadTooltip = 'Click to start torrenting.'
     }
 
-    return hx`
-      <div class='buttons'>
+    // Only show the play button for torrents that contain playable media
+    var playButton
+    if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
+      playButton = hx`
         <i.btn.icon.play
           title=${playTooltip}
           class=${playClass}
           onclick=${dispatcher('play', infoHash)}>
           ${playIcon}
         </i>
+      `
+    }
+
+    return hx`
+      <div class='buttons'>
+        ${playButton}
         <i.btn.icon.download
           class=${torrentSummary.status}
           title=${downloadTooltip}
