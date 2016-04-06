@@ -92,13 +92,21 @@ function addTorrentEvents (torrent) {
     ipc.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
     ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+  torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
+
+  function torrentMetadata () {
+    var info = getTorrentInfo(torrent)
+    ipc.send('wt-metadata', torrent.key, info)
+
+    updateTorrentProgress()
+  }
 
   function torrentReady () {
     var info = getTorrentInfo(torrent)
     ipc.send('wt-ready', torrent.key, info)
-    ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info)
+    ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info) // TODO: hack
 
     updateTorrentProgress()
   }
@@ -264,7 +272,7 @@ function startServerFromReadyTorrent (torrent, index, cb) {
     }
 
     ipc.send('wt-server-running', info)
-    ipc.send('wt-server-' + torrent.infoHash, info)
+    ipc.send('wt-server-' + torrent.infoHash, info) // TODO: hack
   })
 }
 

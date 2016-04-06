@@ -372,7 +372,7 @@ function setupIpc () {
   })
 
   ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
-  ipcRenderer.on('wt-ready', (e, ...args) => torrentReady(...args))
+  ipcRenderer.on('wt-metadata', (e, ...args) => torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
   ipcRenderer.on('wt-warning', (e, ...args) => torrentWarning(...args))
   ipcRenderer.on('wt-error', (e, ...args) => torrentError(...args))
@@ -626,11 +626,10 @@ function torrentError (torrentKey, message) {
   }
 }
 
-function torrentReady (torrentKey, torrentInfo) {
+function torrentMetadata (torrentKey, torrentInfo) {
   // Summarize torrent
   var torrentSummary = getTorrentSummary(torrentKey)
   torrentSummary.status = 'downloading'
-  torrentSummary.ready = true
   torrentSummary.name = torrentSummary.displayName || torrentInfo.name
   torrentSummary.path = torrentInfo.path
   torrentSummary.files = torrentInfo.files
