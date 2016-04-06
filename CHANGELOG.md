@@ -1,8 +1,43 @@
 # WebTorrent Desktop Version History
 
+## UNRELEASED v0.3.0 - 2016-04-06
+
+### Added
+
+- **Ubuntu/Debian support!** (.deb installer)
+- **DLNA streaming support**
+- Add "File > Quit" menu item (Linux)
+- App uninstaller (Windows)
+- Crash reporting
+
+### Changed
+
+- On startup, do not re-verify files when timestamps are unchanged
+- Moved torrent engine to an independent process, for better UI performance
+- Removed media queries (UI resizing based on window width)
+- Improved Chromecast icon, when connected
+
+### Fixed
+
+- "Download Complete" notification shows consistently
+- Create new torrents and seed them without copying to temporary folder
+- Clicking the "Download Complete" notification will always activate app
+- Fixed harmless "-psn_###" error on first app startup
+- Hide play buttons on unplayable torrents
+- Better error handling when Chromecast/Airplay cannot connect
+- Show player controls immediately on mouse move
+- When creating a torrent, show it in UI immediately
+- Stop casting to TV when player is closed
+- Torrent engine: Fixed memory leaks in `torrent-discovery` and `bittorrent-tracker`
+- Torrent engine: Fixed sub-optimal tcp/webrtc connection timeouts
+- Torrent engine: Throttle web seed connections to maximum of 4
+
+Thanks to @dcposch, @grunjol, and @feross for contributing to this release.
+
 ## v0.2.0 - 2016-03-29
 
-Added
+### Added
+
 - Minimise to tray (Windows, Linux)
 - Show spinner and download speed when player is stalled waiting for data
 - Highlight window on drag-and-drop
@@ -10,11 +45,13 @@ Added
   - We have an auto-updater for Windows and Mac. We don't have one for Linux yet, so
     Linux users need to download new versions manually.
 
-Changed
+### Changed
+
 - Renamed WebTorrent.app to WebTorrent Desktop
 - Add Cosmos Laundromat as a default torrent
 
-Fixed
+### Fixed
+
 - Only capture media keys when player is active
 - Update WebTorrent to 0.88.1 for performance improvements
   - When seeding, do not proactively connect to new peers
