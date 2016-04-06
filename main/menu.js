@@ -140,6 +140,7 @@ function showCreateTorrent () {
 function showOpenTorrentFile () {
   electron.dialog.showOpenDialog(windows.main, {
     title: 'Select a .torrent file to open.',
+    filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
