@@ -54,8 +54,8 @@ function createWebTorrentHiddenWindow () {
     center: true,
     title: 'webtorrent-hidden-window',
     useContentSize: true,
-    width: 368,
-    height: 388,
+    width: 150,
+    height: 150,
     minimizable: false,
     maximizable: false,
     resizable: false,
@@ -65,8 +65,13 @@ function createWebTorrentHiddenWindow () {
   })
   win.loadURL(config.WINDOW_WEBTORRENT)
 
-  // To debug the WebTorrent process, set `show` to true above and uncomment:
-  // win.webContents.openDevTools({detached: false})
+  // Prevent killing the WebTorrent process
+  win.on('close', function (e) {
+    if (!electron.app.isQuitting) {
+      e.preventDefault()
+      win.hide()
+    }
+  })
 }
 
 function createMainWindow () {
