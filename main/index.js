@@ -114,19 +114,18 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  argv.forEach(function (argvi) {
-    switch (argvi) {
-      case '-n':
-        windows.main.send('dispatch', 'showCreateTorrent')
-        break
-      case '-o':
-        windows.main.send('dispatch', 'showOpenTorrentFile')
-        break
-      case '-u':
-        windows.main.send('showOpenTorrentAddress')
-        break
-      default:
-        windows.main.send('dispatch', 'onOpen', argvi)
+  argv.forEach(function (arg) {
+    if (arg === '-n') {
+      windows.main.send('dispatch', 'showCreateTorrent')
+    } else if (arg === '-o') {
+      windows.main.send('dispatch', 'showOpenTorrentFile')
+    } else if (arg === '-u') {
+      windows.main.send('showOpenTorrentAddress')
+    } else if (arg.startsWith('-psn')) {
+      // Ignore OS X launchd "process serial number" argument
+      // More: https://github.com/feross/webtorrent-desktop/issues/214
+    } else {
+      windows.main.send('dispatch', 'onOpen', arg)
     }
   })
 }
