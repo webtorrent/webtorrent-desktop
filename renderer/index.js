@@ -974,8 +974,6 @@ function onWarning (err) {
 }
 
 function showDoneNotification (torrent) {
-  if (state.window.isFocused) return
-
   var notif = new window.Notification('Download Complete', {
     body: torrent.name,
     silent: true
