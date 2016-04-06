@@ -1,24 +1,26 @@
-var chromecasts = require('chromecasts')()
-var airplay = require('airplay-js')
-var dlnacasts = require('dlnacasts')()
-
-var config = require('../../config')
-var state = require('../state')
-
 // The Cast module talks to Airplay and Chromecast
 // * Modifies state when things change
 // * Starts and stops casting, provides remote video controls
 module.exports = {
   init,
   open,
-  stopCasting,
+  close,
   playPause,
   seek,
   setVolume
 }
 
+var airplay = require('airplay-js')
+var chromecasts = require('chromecasts')()
+var dlnacasts = require('dlnacasts')()
+
+var config = require('../../config')
+var state = require('../state')
+
 // Callback to notify module users when state has changed
 var update
+
+var statusInterval = null
 
 // chromecast player implementation
 function chromecastPlayer (player) {
@@ -65,7 +67,7 @@ function chromecastPlayer (player) {
     player.stop(callback)
   }
 
-  function status (state) {
+  function status () {
     player.status(function (err, status) {
       if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
@@ -122,7 +124,7 @@ function airplayPlayer (player) {
     player.stop(callback)
   }
 
-  function status (state) {
+  function status () {
     player.status(function (status) {
       state.playing.isPaused = status.rate === 0
       state.playing.currentTime = status.position
@@ -201,7 +203,7 @@ function dlnaPlayer (player) {
     player.stop(callback)
   }
 
-  function status (state) {
+  function status () {
     player.status(function (err, status) {
       if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
@@ -240,9 +242,6 @@ function dlnaPlayer (player) {
 function init (callback) {
   update = callback
 
-  // Start polling Chromecast or Airplay, whenever we're connected
-  setInterval(() => pollCastStatus(state), 1000)
-
   // Listen for devices: Chromecast, DLNA and Airplay
   chromecasts.on('update', function (player) {
     state.devices.chromecast = chromecastPlayer(player)
@@ -258,12 +257,14 @@ function init (callback) {
   }).start()
 }
 
-// Update our state from the remote TV
-function pollCastStatus (state) {
-  var device = getDevice()
-  if (device) {
-    device.status(state)
-  }
+// Start polling cast device state, whenever we're connected
+function startStatusInterval () {
+  statusInterval = setInterval(function () {
+    var device = getDevice()
+    if (device) {
+      device.status()
+    }
+  }, 1000)
 }
 
 function open (location) {
@@ -275,16 +276,18 @@ function open (location) {
   var device = getDevice(location)
   if (device) {
     getDevice(location).open()
+    startStatusInterval()
   }
 
   update()
 }
 
-// Stops Chromecast or Airplay, move video back to local screen
-function stopCasting () {
+// Stops casting, move video back to local screen
+function close () {
   var device = getDevice()
   if (device) {
     device.stop(stoppedCasting)
+    clearInterval(statusInterval)
   } else {
     stoppedCasting()
   }
@@ -305,6 +308,8 @@ function getDevice (location) {
     return state.devices.airplay
   } else if (state.playing.location === 'dlna') {
     return state.devices.dlna
+  } else {
+    return null
   }
 }
 
