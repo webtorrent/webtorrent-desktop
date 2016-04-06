@@ -243,8 +243,8 @@ function dispatch (action, ...args) {
     // and only redraws on requestAnimationFrame(). That means when the user
     // closes the window (hide window / minimize to tray) and we want to pause
     // the video, we update the vdom but it keeps playing until you reopen!
-    var videoTag = document.querySelector('video')
-    if (videoTag) videoTag.pause()
+    var mediaTag = document.querySelector('video,audio')
+    if (mediaTag) mediaTag.pause()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
