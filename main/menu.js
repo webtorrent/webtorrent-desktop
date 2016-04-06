@@ -270,7 +270,9 @@ function getAppMenuTemplate () {
             },
             {
               label: 'Show WebTorrent Process',
-              accelerator: 'CmdOrCtrl+Alt+P',
+              accelerator: process.platform === 'darwin'
+                ? 'Alt+Command+P'
+                : 'Ctrl+Shift+P',
               click: showWebTorrentWindow
             },
             {
