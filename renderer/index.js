@@ -814,7 +814,11 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 
 function closePlayer (cb) {
   state.window.title = config.APP_WINDOW_TITLE
-  update()
+  update() /* needed for OSX: toggleFullScreen animation w/ correct title */
+
+  if (isCasting()) {
+    Cast.close()
+  }
 
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
