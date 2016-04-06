@@ -182,24 +182,31 @@ function renderLoadingSpinner (state) {
 }
 
 function renderCastScreen (state) {
-  var isChromecast = state.playing.location.startsWith('chromecast')
-  var isAirplay = state.playing.location.startsWith('airplay')
-  var isDlna = state.playing.location.startsWith('dlna')
+  var castIcon, castType
+  if (state.playing.location.startsWith('chromecast')) {
+    castIcon = 'cast_connected'
+    castType = 'Chromecast'
+  } else if (state.playing.location.startsWith('airplay')) {
+    castIcon = 'airplay'
+    castType = 'AirPlay'
+  } else if (state.playing.location.startsWith('dlna')) {
+    castIcon = 'tv'
+    castType = 'DLNA'
+  }
+
   var isStarting = state.playing.location.endsWith('-pending')
-  if (!isChromecast && !isAirplay && !isDlna) throw new Error('Unimplemented cast type')
+  var castStatus = isStarting ? 'Connecting...' : 'Connected'
 
   // Show a nice title image, if possible
   var style = {
     backgroundImage: cssBackgroundImagePoster(state)
   }
 
-  // Show whether we're connected to Chromecast / Airplay / DLNA
-  var castStatus = isStarting ? 'Connecting...' : 'Connected'
   return hx`
     <div class='letterbox' style=${style}>
       <div class='cast-screen'>
-        <i class='icon'>${isAirplay ? 'airplay' : 'cast'}</i>
-        <div class='cast-type'>${isAirplay ? 'AirPlay' : (isDlna ? 'DLNA' : 'Chromecast')}</div>
+        <i class='icon'>${castIcon}</i>
+        <div class='cast-type'>${castType}</div>
         <div class='cast-status'>${castStatus}</div>
       </div>
     </div>
@@ -264,11 +271,12 @@ function renderPlayerControls (state) {
     dlnaHandler = dispatcher('openDevice', 'dlna')
   }
   if (state.devices.chromecast || isOnChromecast) {
+    var castIcon = isOnChromecast ? 'cast_connected' : 'cast'
     elements.push(hx`
       <i.icon.device
         class=${chromecastClass}
         onclick=${chromecastHandler}>
-        cast
+        ${castIcon}
       </i>
     `)
   }
