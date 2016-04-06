@@ -642,7 +642,7 @@ function torrentDone (torrentKey, torrentInfo) {
     if (!state.window.isFocused) {
       state.dock.badge += 1
     }
-    showDoneNotification(torrentKey)
+    showDoneNotification(torrentSummary)
   }
 
   update()
