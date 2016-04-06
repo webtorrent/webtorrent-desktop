@@ -70,6 +70,10 @@ function init () {
     shortcuts.unregisterPlayerShortcuts()
   })
 
+  ipcMain.on('focusWindow', function (e, windowName) {
+    windows.focusWindow(windows[windowName])
+  })
+
   // Capture all events
   var oldEmit = ipcMain.emit
   ipcMain.emit = function (name, e, ...args) {
