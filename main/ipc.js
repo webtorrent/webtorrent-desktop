@@ -70,21 +70,22 @@ function init () {
     shortcuts.unregisterPlayerShortcuts()
   })
 
+  ipcMain.on('focusWindow', function (e, windowName) {
+    windows.focusWindow(windows[windowName])
+  })
+
   // Capture all events
   var oldEmit = ipcMain.emit
   ipcMain.emit = function (name, e, ...args) {
     // Relay messages between the main window and the WebTorrent hidden window
     if (name.startsWith('wt-')) {
-      var recipient, recipientStr
       if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
-        recipient = windows.main
-        recipientStr = 'main'
+        windows.main.send(name, ...args)
+        log('webtorrent ipc: sent %s', name)
       } else {
-        recipient = windows.webtorrent
-        recipientStr = 'webtorrent'
+        windows.webtorrent.send(name, ...args)
+        log('webtorrent ipc: receieved %s', name)
       }
-      console.log('sending %s to %s', name, recipientStr)
-      recipient.send(name, ...args)
       return
     }
 
