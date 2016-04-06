@@ -96,15 +96,24 @@ function init () {
 
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
-  if (!windows.main || windows.main.isFullScreen()) return
+  if (!windows.main || windows.main.isFullScreen()) {
+    log('setBounds: not setting bounds because we\'re in full screen')
+    return
+  }
 
   // Maximize or minimize, if the second argument is present
   var willBeMaximized
   if (maximize === true) {
-    if (!windows.main.isMaximized()) windows.main.maximize()
+    if (!windows.main.isMaximized()) {
+      log('setBounds: maximizing')
+      windows.main.maximize()
+    }
     willBeMaximized = true
   } else if (maximize === false) {
-    if (windows.main.isMaximized()) windows.main.unmaximize()
+    if (windows.main.isMaximized()) {
+      log('setBounds: unmaximizing')
+      windows.main.unmaximize()
+    }
     willBeMaximized = false
   } else {
     willBeMaximized = windows.main.isMaximized()
@@ -112,7 +121,10 @@ function setBounds (bounds, maximize) {
 
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
+    log('setBounds: setting bounds to ' + JSON.stringify(bounds))
     windows.main.setBounds(bounds, true)
+  } else {
+    log('setBounds: not setting bounds because of window maximization')
   }
 }
 
