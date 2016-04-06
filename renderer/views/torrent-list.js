@@ -70,7 +70,7 @@ function TorrentList (state) {
 
     // If it's downloading/seeding then show progress info
     var prog = torrentSummary.progress
-    if (torrentSummary.state !== 'paused' && prog) {
+    if (torrentSummary.status !== 'paused' && prog) {
       var progress = Math.floor(100 * prog.progress)
       var downloaded = prettyBytes(prog.downloaded)
       var total = prettyBytes(prog.length || 0)
