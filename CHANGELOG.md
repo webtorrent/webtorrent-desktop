@@ -1,6 +1,16 @@
 # WebTorrent Desktop Version History
 
-## UNRELEASED v0.3.0 - 2016-04-06
+## v0.3.1 - 2016-04-06
+
+### Added
+
+- Add crash reporter to torrent engine process
+
+### Fixed
+
+- Fix cast screen background: cover, don't tile
+
+## v0.3.0 - 2016-04-06
 
 ### Added
 
