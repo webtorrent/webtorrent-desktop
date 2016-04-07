@@ -1,5 +1,16 @@
 # WebTorrent Desktop Version History
 
+## UNRELEASED
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Fix installation bugs with .deb file (Linux)
+- Pause audio reliably when closing the window
+
 ## v0.3.1 - 2016-04-06
 
 ### Added
