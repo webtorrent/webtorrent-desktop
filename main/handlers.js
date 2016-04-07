@@ -30,16 +30,14 @@ function uninstall () {
 }
 
 function installDarwin () {
-  // TODO: Uncomment this once we upgrade past Electron 0.37.4.
+  var electron = require('electron')
+  var app = electron.app
 
-  // var electron = require('electron')
-  // var app = electron.app
+  // On OS X, only protocols that are listed in Info.plist can be set as the default
+  // handler at runtime.
+  app.setAsDefaultProtocolClient('magnet')
 
-  // // On OS X, only protocols that are listed in Info.plist can be set as the default
-  // // handler at runtime.
-  // app.setAsDefaultProtocolClient('magnet')
-
-  // // File handlers are registered in the Info.plist.
+  // File handlers are registered in the Info.plist.
 }
 
 function uninstallDarwin () {}
