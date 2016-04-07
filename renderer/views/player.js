@@ -310,6 +310,31 @@ function renderPlayerControls (state) {
     `)
   }
 
+  // render volume
+  var volume = state.playing.volume
+  var volumeIcon = 'volume_' + (volume === 0 ? 'off' : volume < 0.3 ? 'mute' : volume < 0.6 ? 'down' : 'up')
+  var volumeStyle = { background: '-webkit-gradient(linear, left top, right top, ' +
+    'color-stop(' + (volume * 100) + '%, #eee), ' +
+    'color-stop(' + (volume * 100) + '%, #727272))'
+  }
+
+  elements.push(hx`
+    <div.volume
+      onwheel=${handleVolumeWheel}>
+        <i.icon.volume-icon>
+          ${volumeIcon}
+        </i>
+        <input.volume-slider
+          type='range' min='0' max='1' step='0.05' value=${volumeChanging !== false ? volumeChanging : volume}
+          onmousedown=${handleVolumeScrub}
+          onmouseup=${handleVolumeScrub}
+          onmousemove=${handleVolumeScrub}
+          onwheel=${handleVolumeWheel}
+          style=${volumeStyle}
+        />
+    </div>
+  `)
+
   // Finally, the big button in the center plays or pauses the video
   elements.push(hx`
     <i class='icon play-pause' onclick=${dispatcher('playPause')}>
@@ -327,7 +352,34 @@ function renderPlayerControls (state) {
     var position = fraction * state.playing.duration /* seconds */
     dispatch('playbackJump', position)
   }
+
+  // Handles volume change by wheel
+  function handleVolumeWheel (e) {
+    dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
+  }
+
+  // Handles volume slider scrub
+  function handleVolumeScrub (e) {
+    switch (e.type) {
+      case 'mouseup':
+        volumeChanging = false
+        dispatch('setVolume', e.offsetX / 50)
+        break
+      case 'mousedown':
+        volumeChanging = this.value
+        break
+      case 'mousemove':
+        // only change if move was started by click
+        if (volumeChanging !== false) {
+          volumeChanging = this.value
+        }
+        break
+    }
+  }
 }
+
+// lets scrub without sending to volume backend
+var volumeChanging = false
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
