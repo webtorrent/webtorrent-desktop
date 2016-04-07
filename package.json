@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "electron-osx-sign": "^0.3.0",
-    "electron-packager": "^6.0.0",
+    "electron-packager": "electron-userland/electron-packager",
     "electron-winstaller": "feross/windows-installer#build",
     "gh-release": "^2.0.3",
     "nobin-debian-installer": "^0.0.8",
