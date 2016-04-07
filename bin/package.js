@@ -303,9 +303,10 @@ function buildLinux (packageType, cb) {
         info: {
           arch: 'amd64',
           targetDir: distPath,
+          depends: 'libc6 (>= 2.4)',
           scripts: {
             postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
-            postrm: path.join(config.STATIC_PATH, 'linux', 'postrm')
+            prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
           }
         }
       }, [{
