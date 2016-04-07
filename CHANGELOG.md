@@ -4,7 +4,11 @@
 
 ### Added
 
+- Register WebTorrent as default handler for magnet links (OS X)
+
 ### Changed
+
+- Update Electron to 0.37.5
 
 ### Fixed
 
