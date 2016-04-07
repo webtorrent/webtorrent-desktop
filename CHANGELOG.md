@@ -1,6 +1,6 @@
 # WebTorrent Desktop Version History
 
-## UNRELEASED
+## v0.3.2 - 2016-04-07
 
 ### Added
 
@@ -8,7 +8,10 @@
 
 ### Changed
 
+- Faster startup time (50ms)
 - Update Electron to 0.37.5
+  - Remove the white flash when loading pages and resizing the window
+  - Fix crash when sending IPC messages
 
 ### Fixed
 
