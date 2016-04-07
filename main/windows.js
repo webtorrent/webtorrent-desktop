@@ -49,7 +49,7 @@ function createAboutWindow () {
 
 function createWebTorrentHiddenWindow () {
   var win = windows.webtorrent = new electron.BrowserWindow({
-    backgroundColor: '#282828',
+    backgroundColor: '#1E1E1E',
     show: false,
     center: true,
     title: 'webtorrent-hidden-window',
@@ -79,7 +79,7 @@ function createMainWindow () {
     return focusWindow(windows.main)
   }
   var win = windows.main = new electron.BrowserWindow({
-    backgroundColor: '#282828',
+    backgroundColor: '#1E1E1E',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: config.APP_ICON + '.png',
     minWidth: 425,

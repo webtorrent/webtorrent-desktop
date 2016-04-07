@@ -20,10 +20,8 @@ function init () {
   ipcMain.on('ipcReady', function (e) {
     app.ipcReady = true
     app.emit('ipcReady')
-    setTimeout(function () {
-      windows.main.show()
-      try { console.timeEnd('init') } catch (err) {}
-    }, 50)
+    windows.main.show()
+    console.timeEnd('init')
   })
 
   var messageQueueMainToWebTorrent = []
