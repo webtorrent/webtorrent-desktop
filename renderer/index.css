@@ -677,6 +677,7 @@ body.drag .app::after {
 
 .player-controls .device,
 .player-controls .fullscreen,
+.player-controls .volume-icon,
 .player-controls .back {
   display: block;
   width: 20px;
@@ -684,6 +685,7 @@ body.drag .app::after {
   margin: 5px;
 }
 
+.player-controls .volume,
 .player-controls .back {
   float: left;
 }
@@ -697,6 +699,7 @@ body.drag .app::after {
   margin-right: 15px;
 }
 
+.player-controls .volume-icon,
 .player-controls .device {
   font-size: 18px; /* make the cast icons less huge */
   margin-top: 8px !important;
@@ -704,6 +707,39 @@ body.drag .app::after {
 
 .player-controls .device.active {
   color: #9af;
+}
+
+.player-controls .volume {
+  display: block;
+  width: 90px;
+}
+
+.player-controls .volume-icon {
+  float: left;
+  margin-right: 0px;
+}
+
+.player-controls .volume-slider {
+  -webkit-appearance: none;
+  width: 50px;
+  height: 3px;
+  border: none;
+  padding: 0;
+  vertical-align: sub;
+}
+
+.player-controls .volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: #fff;
+  opacity: 1.0;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #303233;
+  border-radius: 50%;
+}
+
+.player-controls .volume-slider:focus {
+  outline: none;
 }
 
 .player .playback-bar:hover .loading-bar {

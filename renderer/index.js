@@ -252,6 +252,9 @@ function dispatch (action, ...args) {
   if (action === 'changeVolume') {
     changeVolume(args[0] /* increase */)
   }
+  if (action === 'setVolume') {
+    setVolume(args[0] /* increase */)
+  }
   if (action === 'mediaPlaying') {
     state.playing.isPaused = false
     ipcRenderer.send('blockPowerSave')
