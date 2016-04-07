@@ -10,6 +10,7 @@
 
 - Fix installation bugs with .deb file (Linux)
 - Pause audio reliably when closing the window
+- Enforce minimimum window size when resizing player (for audio-only .mov files, which are 0x0)
 
 ## v0.3.1 - 2016-04-06
 
