@@ -1,5 +1,11 @@
 # WebTorrent Desktop Version History
 
+## v0.3.3 - 2016-04-07
+
+### Fixed
+
+- App icon was incorrect (OS X)
+
 ## v0.3.2 - 2016-04-07
 
 ### Added
