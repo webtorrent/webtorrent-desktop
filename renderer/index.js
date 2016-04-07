@@ -216,6 +216,16 @@ function dispatch (action, ...args) {
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)
   }
+  if (action === 'backToList') {
+    while (state.location.hasBack()) state.location.back()
+
+    // Work around virtual-dom issue: it doesn't expose its redraw function,
+    // and only redraws on requestAnimationFrame(). That means when the user
+    // closes the window (hide window / minimize to tray) and we want to pause
+    // the video, we update the vdom but it keeps playing until you reopen!
+    var mediaTag = document.querySelector('video,audio')
+    if (mediaTag) mediaTag.pause()
+  }
   if (action === 'back') {
     state.location.back()
   }
@@ -238,13 +248,6 @@ function dispatch (action, ...args) {
   }
   if (action === 'pause') {
     playPause(true)
-
-    // Work around virtual-dom issue: it doesn't expose its redraw function,
-    // and only redraws on requestAnimationFrame(). That means when the user
-    // closes the window (hide window / minimize to tray) and we want to pause
-    // the video, we update the vdom but it keeps playing until you reopen!
-    var mediaTag = document.querySelector('video,audio')
-    if (mediaTag) mediaTag.pause()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
