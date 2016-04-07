@@ -69,7 +69,11 @@ function createWebTorrentHiddenWindow () {
   win.on('close', function (e) {
     if (!electron.app.isQuitting) {
       e.preventDefault()
-      win.hide()
+      if (electron.app.noBackgroundMode) {
+        electron.app.quit()
+      } else {
+        win.hide()
+      }
     }
   })
 }
@@ -106,8 +110,12 @@ function createMainWindow () {
   win.on('close', function (e) {
     if (!electron.app.isQuitting) {
       e.preventDefault()
-      win.send('dispatch', 'pause')
-      win.hide()
+      if (electron.app.noBackgroundMode) {
+        electron.app.quit()
+      } else {
+        win.send('dispatch', 'pause')
+        win.hide()
+      }
     }
   })
 

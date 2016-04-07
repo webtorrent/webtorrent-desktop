@@ -121,6 +121,8 @@ function processArgv (argv) {
       windows.main.send('dispatch', 'showOpenTorrentFile')
     } else if (arg === '-u') {
       windows.main.send('showOpenTorrentAddress')
+    } else if (arg === '-no-background-mode') {
+      app.noBackgroundMode = true
     } else if (arg.startsWith('-psn')) {
       // Ignore OS X launchd "process serial number" argument
       // More: https://github.com/feross/webtorrent-desktop/issues/214

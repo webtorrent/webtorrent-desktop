@@ -15,7 +15,7 @@ StartupNotify=false
 Categories=Network;FileTransfer;P2P;
 MimeType=application/x-bittorrent;x-scheme-handler/magnet;
 
-Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
+Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;NoBackgroundMode;
 
 [Desktop Action CreateNewTorrent]
 Name=Create New Torrent...
@@ -30,4 +30,9 @@ Path=$APP_PATH
 [Desktop Action OpenTorrentAddress]
 Name=Open Torrent Address...
 Exec=$EXEC_PATH -u
+Path=$APP_PATH
+
+[Desktop Action NoBackgroundMode]
+Name=No Background Mode...
+Exec=$EXEC_PATH -no-background-mode
 Path=$APP_PATH
