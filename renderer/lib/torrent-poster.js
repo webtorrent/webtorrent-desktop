@@ -64,6 +64,8 @@ function torrentPosterFromVideo (file, torrent, cb) {
 
       server.destroy()
 
+      if (buf.length === 0) return cb(new Error('Generated poster contains no data'))
+
       cb(null, buf, '.jpg')
     }
   }
