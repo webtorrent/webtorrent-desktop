@@ -954,8 +954,14 @@ function setDimensions (dimensions) {
     Math.min(screenWidth / dimensions.width, 1),
     Math.min(screenHeight / dimensions.height, 1)
   )
-  var width = Math.floor(dimensions.width * scaleFactor)
-  var height = Math.floor(dimensions.height * scaleFactor)
+  var width = Math.max(
+    Math.floor(dimensions.width * scaleFactor),
+    config.WINDOW_MIN_WIDTH
+  )
+  var height = Math.max(
+    Math.floor(dimensions.height * scaleFactor),
+    config.WINDOW_MIN_HEIGHT
+  )
 
   // Center window on screen
   var x = Math.floor((screenWidth - width) / 2)
