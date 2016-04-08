@@ -70,7 +70,7 @@ function getDefaultPlayState () {
     isPaused: true,
     isStalled: false,
     lastTimeUpdate: 0, /* Unix time in ms */
-    mouseStationarySince: 0, /* Unix time in ms */,
+    mouseStationarySince: 0, /* Unix time in ms */
     playbackRate: 1
   }
 }

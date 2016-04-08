@@ -320,7 +320,7 @@ function renderPlayerControls (state) {
     'color-stop(' + (volume * 100) + '%, #eee), ' +
     'color-stop(' + (volume * 100) + '%, #727272))'
   }
-  
+
   elements.push(hx`
     <div.volume
       onwheel=${handleVolumeWheel}>
@@ -337,7 +337,7 @@ function renderPlayerControls (state) {
         />
     </div>
   `)
-  //render playback rate
+  // render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push(hx`
      <span class="rate">speed: ${state.playing.playbackRate}X</span>
