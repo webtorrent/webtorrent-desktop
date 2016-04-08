@@ -321,7 +321,7 @@ function renderPlayerControls (state) {
   elements.push(hx`
     <div.volume
       onwheel=${handleVolumeWheel}>
-        <i.icon.volume-icon>
+        <i.icon.volume-icon onmousedown=${handleVolumeMute}>
           ${volumeIcon}
         </i>
         <input.volume-slider
@@ -356,6 +356,15 @@ function renderPlayerControls (state) {
   // Handles volume change by wheel
   function handleVolumeWheel (e) {
     dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
+  }
+
+  // Handles volume muting and Unmuting
+  function handleVolumeMute (e) {
+    if (state.playing.volume === 0.0) {
+      dispatch('setVolume', 1.0)
+    } else {
+      dispatch('setVolume', 0.0)
+    }
   }
 
   // Handles volume slider scrub
