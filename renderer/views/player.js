@@ -5,6 +5,7 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 var prettyBytes = require('prettier-bytes')
+var Bitfield = require('bitfield')
 
 var util = require('../util')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
@@ -20,7 +21,7 @@ function Player (state) {
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${showVideo ? renderMedia(state) : renderCastScreen(state)}
       ${renderPlayerControls(state)}
-    </div>
+      </div>
   `
 }
 
@@ -164,64 +165,55 @@ function renderLoadingSpinner (state) {
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
-  var torrentSummary = getPlayingTorrentSummary(state)
-  var torrent = state.client.get(torrentSummary.infoHash)
-  var file = torrentSummary.files[state.playing.fileIndex]
-  var progress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
+  var prog = getPlayingTorrentSummary(state).progress || {}
+  var fileProgress = 0
+  if (prog.files) {
+    var file = prog.files[state.playing.fileIndex]
+    fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
+  }
 
   return hx`
     <div class='media-stalled'>
       <div class='loading-spinner'>&nbsp;</div>
       <div class='loading-status ellipsis'>
-        <span class='progress'>${progress}%</span> downloaded,
-        <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
-        <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+        <span class='progress'>${fileProgress}%</span> downloaded,
+        <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
+        <span>↑ ${prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
     </div>
   `
 }
 
 function renderCastScreen (state) {
-  var isChromecast = state.playing.location.startsWith('chromecast')
-  var isAirplay = state.playing.location.startsWith('airplay')
+  var castIcon, castType
+  if (state.playing.location.startsWith('chromecast')) {
+    castIcon = 'cast_connected'
+    castType = 'Chromecast'
+  } else if (state.playing.location.startsWith('airplay')) {
+    castIcon = 'airplay'
+    castType = 'AirPlay'
+  } else if (state.playing.location.startsWith('dlna')) {
+    castIcon = 'tv'
+    castType = 'DLNA'
+  }
+
   var isStarting = state.playing.location.endsWith('-pending')
-  if (!isChromecast && !isAirplay) throw new Error('Unimplemented cast type')
+  var castStatus = isStarting ? 'Connecting...' : 'Connected'
 
   // Show a nice title image, if possible
   var style = {
     backgroundImage: cssBackgroundImagePoster(state)
   }
 
-  // Show whether we're connected to Chromecast / Airplay
-  var castStatus = isStarting ? 'Connecting...' : 'Connected'
   return hx`
     <div class='letterbox' style=${style}>
       <div class='cast-screen'>
-        <i class='icon'>${isAirplay ? 'airplay' : 'cast'}</i>
-        <div class='cast-type'>${isAirplay ? 'AirPlay' : 'Chromecast'}</div>
+        <i class='icon'>${castIcon}</i>
+        <div class='cast-type'>${castType}</div>
         <div class='cast-status'>${castStatus}</div>
       </div>
     </div>
   `
-}
-
-// Returns the CSS background-image string for a poster image + dark vignette
-function cssBackgroundImagePoster (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
-  if (!torrentSummary || !torrentSummary.posterURL) return ''
-  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
-  var cleanURL = posterURL.replace(/\\/g, '/')
-  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
-}
-
-function cssBackgroundImageDarkGradient () {
-  return 'radial-gradient(circle at center, ' +
-    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
-}
-
-function getPlayingTorrentSummary (state) {
-  var infoHash = state.playing.infoHash
-  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 function renderPlayerControls (state) {
@@ -250,38 +242,62 @@ function renderPlayerControls (state) {
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var isOnChromecast = state.playing.location.startsWith('chromecast')
   var isOnAirplay = state.playing.location.startsWith('airplay')
-  var chromecastClass, chromecastHandler, airplayClass, airplayHandler
+  var isOnDlna = state.playing.location.startsWith('dlna')
+  var chromecastClass, chromecastHandler, airplayClass, airplayHandler, dlnaClass, dlnaHandler
   if (isOnChromecast) {
     chromecastClass = 'active'
+    dlnaClass = 'disabled'
     airplayClass = 'disabled'
-    chromecastHandler = dispatcher('stopCasting')
+    chromecastHandler = dispatcher('closeDevice')
     airplayHandler = undefined
+    dlnaHandler = undefined
   } else if (isOnAirplay) {
     chromecastClass = 'disabled'
+    dlnaClass = 'disabled'
     airplayClass = 'active'
     chromecastHandler = undefined
-    airplayHandler = dispatcher('stopCasting')
+    airplayHandler = dispatcher('closeDevice')
+    dlnaHandler = undefined
+  } else if (isOnDlna) {
+    chromecastClass = 'disabled'
+    dlnaClass = 'active'
+    airplayClass = 'disabled'
+    chromecastHandler = undefined
+    airplayHandler = undefined
+    dlnaHandler = dispatcher('closeDevice')
   } else {
     chromecastClass = ''
     airplayClass = ''
-    chromecastHandler = dispatcher('openChromecast')
-    airplayHandler = dispatcher('openAirplay')
+    dlnaClass = ''
+    chromecastHandler = dispatcher('openDevice', 'chromecast')
+    airplayHandler = dispatcher('openDevice', 'airplay')
+    dlnaHandler = dispatcher('openDevice', 'dlna')
   }
   if (state.devices.chromecast || isOnChromecast) {
+    var castIcon = isOnChromecast ? 'cast_connected' : 'cast'
     elements.push(hx`
-      <i.icon.chromecast
+      <i.icon.device
         class=${chromecastClass}
         onclick=${chromecastHandler}>
-        cast
+        ${castIcon}
       </i>
     `)
   }
   if (state.devices.airplay || isOnAirplay) {
     elements.push(hx`
-      <i.icon.airplay
+      <i.icon.device
         class=${airplayClass}
         onclick=${airplayHandler}>
         airplay
+      </i>
+    `)
+  }
+  if (state.devices.dlna || isOnDlna) {
+    elements.push(hx`
+      <i.icon.device
+        class=${dlnaClass}
+        onclick=${dlnaHandler}>
+        tv
       </i>
     `)
   }
@@ -297,12 +313,36 @@ function renderPlayerControls (state) {
     `)
   }
 
+  // render volume
+  var volume = state.playing.volume
+  var volumeIcon = 'volume_' + (volume === 0 ? 'off' : volume < 0.3 ? 'mute' : volume < 0.6 ? 'down' : 'up')
+  var volumeStyle = { background: '-webkit-gradient(linear, left top, right top, ' +
+    'color-stop(' + (volume * 100) + '%, #eee), ' +
+    'color-stop(' + (volume * 100) + '%, #727272))'
+  }
+  
+  elements.push(hx`
+    <div.volume
+      onwheel=${handleVolumeWheel}>
+        <i.icon.volume-icon onmousedown=${handleVolumeMute}>
+          ${volumeIcon}
+        </i>
+        <input.volume-slider
+          type='range' min='0' max='1' step='0.05' value=${volumeChanging !== false ? volumeChanging : volume}
+          onmousedown=${handleVolumeScrub}
+          onmouseup=${handleVolumeScrub}
+          onmousemove=${handleVolumeScrub}
+          onwheel=${handleVolumeWheel}
+          style=${volumeStyle}
+        />
+    </div>
+  `)
+  //render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push(hx`
      <span class="rate">speed: ${state.playing.playbackRate}X</span>
     `)
   }
-
   // Finally, the big button in the center plays or pauses the video
   elements.push(hx`
     <i class='icon play-pause' onclick=${dispatcher('playPause')}>
@@ -320,29 +360,65 @@ function renderPlayerControls (state) {
     var position = fraction * state.playing.duration /* seconds */
     dispatch('playbackJump', position)
   }
+
+  // Handles volume change by wheel
+  function handleVolumeWheel (e) {
+    dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
+  }
+
+  // Handles volume muting and Unmuting
+  function handleVolumeMute (e) {
+    if (state.playing.volume === 0.0) {
+      dispatch('setVolume', 1.0)
+    } else {
+      dispatch('setVolume', 0.0)
+    }
+  }
+
+  // Handles volume slider scrub
+  function handleVolumeScrub (e) {
+    switch (e.type) {
+      case 'mouseup':
+        volumeChanging = false
+        dispatch('setVolume', e.offsetX / 50)
+        break
+      case 'mousedown':
+        volumeChanging = this.value
+        break
+      case 'mousemove':
+        // only change if move was started by click
+        if (volumeChanging !== false) {
+          volumeChanging = this.value
+        }
+        break
+    }
+  }
 }
+
+// lets scrub without sending to volume backend
+var volumeChanging = false
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrent = state.client.get(state.playing.infoHash)
-  if (torrent === null) {
+  var torrentSummary = getPlayingTorrentSummary(state)
+  if (!torrentSummary.progress) {
     return []
   }
-  var file = torrent.files[state.playing.fileIndex]
 
   // Find all contiguous parts of the torrent which are loaded
+  var prog = torrentSummary.progress
+  var fileProg = prog.files[state.playing.fileIndex]
   var parts = []
-  var lastPartPresent = false
-  var numParts = file._endPiece - file._startPiece + 1
-  for (var i = file._startPiece; i <= file._endPiece; i++) {
-    var partPresent = torrent.bitfield.get(i)
-    if (partPresent && !lastPartPresent) {
-      parts.push({start: i - file._startPiece, count: 1})
+  var lastPiecePresent = false
+  for (var i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
+    var partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+    if (partPresent && !lastPiecePresent) {
+      parts.push({start: i - fileProg.startPiece, count: 1})
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }
-    lastPartPresent = partPresent
+    lastPiecePresent = partPresent
   }
 
   // Output some bars to show which parts of the file are loaded
@@ -350,12 +426,31 @@ function renderLoadingBar (state) {
     <div class='loading-bar'>
       ${parts.map(function (part) {
         var style = {
-          left: (100 * part.start / numParts) + '%',
-          width: (100 * part.count / numParts) + '%'
+          left: (100 * part.start / fileProg.numPieces) + '%',
+          width: (100 * part.count / fileProg.numPieces) + '%'
         }
 
         return hx`<div class='loading-bar-part' style=${style}></div>`
       })}
     </div>
   `
+}
+
+// Returns the CSS background-image string for a poster image + dark vignette
+function cssBackgroundImagePoster (state) {
+  var torrentSummary = getPlayingTorrentSummary(state)
+  if (!torrentSummary || !torrentSummary.posterURL) return ''
+  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
+  var cleanURL = posterURL.replace(/\\/g, '/')
+  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
+}
+
+function cssBackgroundImageDarkGradient () {
+  return 'radial-gradient(circle at center, ' +
+    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
+}
+
+function getPlayingTorrentSummary (state) {
+  var infoHash = state.playing.infoHash
+  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }

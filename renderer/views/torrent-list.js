@@ -27,10 +27,7 @@ function TorrentList (state) {
   function renderTorrent (torrentSummary) {
     // Get ephemeral data (like progress %) directly from the WebTorrent handle
     var infoHash = torrentSummary.infoHash
-    var torrent = state.client
-      ? state.client.torrents.find((x) => x.infoHash === infoHash)
-      : null
-    var isSelected = state.selectedInfoHash === infoHash
+    var isSelected = infoHash && state.selectedInfoHash === infoHash
 
     // Background image: show some nice visuals, like a frame from the movie, if possible
     var style = {}
@@ -51,39 +48,40 @@ function TorrentList (state) {
     //  playStatus turns the play button into a loading spinner or error icon
     if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
+    if (!infoHash) classes.push('disabled')
     classes = classes.join(' ')
     return hx`
       <div style=${style} class=${classes}
-        oncontextmenu=${dispatcher('openTorrentContextMenu', infoHash)}
-        onclick=${dispatcher('toggleSelectTorrent', infoHash)}>
-        ${renderTorrentMetadata(torrent, torrentSummary)}
-        ${renderTorrentButtons(torrentSummary)}
-        ${isSelected ? renderTorrentDetails(torrent, torrentSummary) : ''}
+        oncontextmenu=${infoHash && dispatcher('openTorrentContextMenu', infoHash)}
+        onclick=${infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        ${renderTorrentMetadata(torrentSummary)}
+        ${infoHash ? renderTorrentButtons(torrentSummary) : ''}
+        ${isSelected ? renderTorrentDetails(torrentSummary) : ''}
       </div>
     `
   }
 
   // Show name, download status, % complete
-  function renderTorrentMetadata (torrent, torrentSummary) {
+  function renderTorrentMetadata (torrentSummary) {
     var name = torrentSummary.name || 'Loading torrent...'
     var elements = [hx`
       <div class='name ellipsis'>${name}</div>
     `]
 
-    // If a torrent is paused and we only get the torrentSummary
-    // If it's downloading/seeding then we have more information
-    if (torrent) {
-      var progress = Math.floor(100 * torrent.progress)
-      var downloaded = prettyBytes(torrent.downloaded)
-      var total = prettyBytes(torrent.length || 0)
+    // If it's downloading/seeding then show progress info
+    var prog = torrentSummary.progress
+    if (torrentSummary.status !== 'paused' && prog) {
+      var progress = Math.floor(100 * prog.progress)
+      var downloaded = prettyBytes(prog.downloaded)
+      var total = prettyBytes(prog.length || 0)
       if (downloaded !== total) downloaded += ` / ${total}`
 
       elements.push(hx`
         <div class='status ellipsis'>
           ${getFilesLength()}
           <span>${getPeers()}</span>
-          <span>↓ ${prettyBytes(torrent.downloadSpeed || 0)}/s</span>
-          <span>↑ ${prettyBytes(torrent.uploadSpeed || 0)}/s</span>
+          <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
+          <span>↑ ${prettyBytes(prog.uploadSpeed || 0)}/s</span>
         </div>
       `)
       elements.push(hx`
@@ -97,13 +95,13 @@ function TorrentList (state) {
     return hx`<div class='metadata'>${elements}</div>`
 
     function getPeers () {
-      var count = torrent.numPeers === 1 ? 'peer' : 'peers'
-      return `${torrent.numPeers} ${count}`
+      var count = prog.numPeers === 1 ? 'peer' : 'peers'
+      return `${prog.numPeers} ${count}`
     }
 
     function getFilesLength () {
-      if (torrent.ready && torrent.files.length > 1) {
-        return hx`<span class='files'>${torrent.files.length} files</span>`
+      if (torrentSummary.files && torrentSummary.files.length > 1) {
+        return hx`<span class='files'>${torrentSummary.files.length} files</span>`
       }
     }
   }
@@ -139,14 +137,22 @@ function TorrentList (state) {
       downloadTooltip = 'Click to start torrenting.'
     }
 
-    return hx`
-      <div class='buttons'>
+    // Only show the play button for torrents that contain playable media
+    var playButton
+    if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
+      playButton = hx`
         <i.btn.icon.play
           title=${playTooltip}
           class=${playClass}
           onclick=${dispatcher('play', infoHash)}>
           ${playIcon}
         </i>
+      `
+    }
+
+    return hx`
+      <div class='buttons'>
+        ${playButton}
         <i.btn.icon.download
           class=${torrentSummary.status}
           title=${downloadTooltip}
@@ -164,19 +170,19 @@ function TorrentList (state) {
   }
 
   // Show files, per-file download status and play buttons, and so on
-  function renderTorrentDetails (torrent, torrentSummary) {
+  function renderTorrentDetails (torrentSummary) {
     var infoHash = torrentSummary.infoHash
     var filesElement
     if (!torrentSummary.files) {
       // We don't know what files this torrent contains
-      var message = torrent
-        ? 'Downloading torrent data using magnet link...'
-        : 'Failed to download torrent data from magnet link. Click the download button to try again...'
+      var message = torrentSummary.status === 'paused'
+        ? 'Failed to load torrent info. Click the download button to try again...'
+        : 'Downloading torrent info...'
       filesElement = hx`<div class='files warning'>${message}</div>`
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files.map(
-        (file, index) => renderFileRow(torrent, torrentSummary, file, index))
+        (file, index) => renderFileRow(torrentSummary, file, index))
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
@@ -199,20 +205,22 @@ function TorrentList (state) {
   }
 
   // Show a single torrentSummary file in the details view for a single torrent
-  function renderFileRow (torrent, torrentSummary, file, index) {
+  function renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var isDone = file.numPiecesPresent === file.numPieces
-    var progress = Math.round(100 * file.numPiecesPresent / (file.numPieces || 0)) + '%'
+    var isDone = false
+    var progress = ''
+    if (torrentSummary.progress && torrentSummary.progress.files) {
+      var fileProg = torrentSummary.progress.files[index]
+      isDone = fileProg.numPiecesPresent === fileProg.numPieces
+      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+    }
 
     // Second, render the file as a table row
     var infoHash = torrentSummary.infoHash
     var icon
     var rowClass = ''
     var handleClick
-    if (state.playing.infoHash === infoHash && state.playing.fileIndex === index) {
-      icon = 'pause_arrow' /* playing? add option to pause */
-      handleClick = undefined // TODO: pause audio
-    } else if (TorrentPlayer.isPlayable(file)) {
+    if (TorrentPlayer.isPlayable(file)) {
       icon = 'play_arrow' /* playable? add option to play */
       handleClick = dispatcher('play', infoHash, index)
     } else {

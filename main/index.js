@@ -1,9 +1,11 @@
 var electron = require('electron')
 
 var app = electron.app
+var ipcMain = electron.ipcMain
 
 var autoUpdater = require('./auto-updater')
 var config = require('../config')
+var crashReporter = require('../crash-reporter')
 var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
@@ -45,16 +47,17 @@ function init () {
   ipc.init()
 
   app.on('will-finish-launching', function () {
+    crashReporter.init()
     autoUpdater.init()
-    setupCrashReporter()
   })
 
   app.on('ready', function () {
     menu.init()
     windows.createMainWindow()
+    windows.createWebTorrentHiddenWindow()
     shortcuts.init()
     tray.init()
-    if (process.platform !== 'win32') handlers.init()
+    handlers.install()
   })
 
   app.on('ipcReady', function () {
@@ -62,8 +65,14 @@ function init () {
     processArgv(argv)
   })
 
-  app.on('before-quit', function () {
+  app.on('before-quit', function (e) {
+    if (app.isQuitting) return
+
     app.isQuitting = true
+    e.preventDefault()
+    windows.main.send('dispatch', 'saveState') /* try to save state on exit */
+    ipcMain.once('savedState', () => app.quit())
+    setTimeout(() => app.quit(), 2000) /* quit after 2 secs, at most */
   })
 
   app.on('activate', function () {
@@ -105,28 +114,18 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  argv.forEach(function (argvi) {
-    switch (argvi) {
-      case '-n':
-        windows.main.send('dispatch', 'showCreateTorrent')
-        break
-      case '-o':
-        windows.main.send('dispatch', 'showOpenTorrentFile')
-        break
-      case '-u':
-        windows.main.send('showOpenTorrentAddress')
-        break
-      default:
-        windows.main.send('dispatch', 'onOpen', argvi)
+  argv.forEach(function (arg) {
+    if (arg === '-n') {
+      windows.main.send('dispatch', 'showCreateTorrent')
+    } else if (arg === '-o') {
+      windows.main.send('dispatch', 'showOpenTorrentFile')
+    } else if (arg === '-u') {
+      windows.main.send('showOpenTorrentAddress')
+    } else if (arg.startsWith('-psn')) {
+      // Ignore OS X launchd "process serial number" argument
+      // More: https://github.com/feross/webtorrent-desktop/issues/214
+    } else {
+      windows.main.send('dispatch', 'onOpen', arg)
     }
   })
-}
-
-function setupCrashReporter () {
-  // require('crash-reporter').start({
-  //   productName: 'WebTorrent',
-  //   companyName: 'WebTorrent',
-  //   submitURL: 'https://webtorrent.io/crash-report',
-  //   autoSubmit: true
-  // })
 }

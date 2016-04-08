@@ -10,23 +10,14 @@
 <h4 align="center">The streaming torrent client. For OS X, Windows, and Linux.</h4>
 
 <p align="center">
-    <a href="https://gitter.im/feross/webtorrent">
-        <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg"
-             alt="Gitter">
-    </a>
-    <a href="https://travis-ci.org/feross/webtorrent-app">
-        <img src="https://img.shields.io/travis/feross/webtorrent-app/master.svg"
-             alt="Travis Build">
-    </a>
-    <a href="https://github.com/feross/webtorrent-app/releases">
-        <img src="https://img.shields.io/github/release/feross/webtorrent-app.svg"
-             alt="Latest Release Version">
-    </a>
+  <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter"></a>
+  <a href="https://travis-ci.org/feross/webtorrent-desktop"><img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg" alt="Travis"></a>
+  <a href="https://github.com/feross/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="Release"></a>
 </p>
 
 ## Install
 
-**WebTorrent Desktop** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-app/releases) page.
+**WebTorrent Desktop** is still under very active development. You can download the latest version from the [releases](https://github.com/feross/webtorrent-desktop/releases) page.
 
 ## Screenshot
 
@@ -59,10 +50,12 @@ $ npm run package
 To build for one platform:
 
 ```
-$ npm run package -- [platform]
+$ npm run package -- [platform] [package-type]
 ```
 
-Where `[platform]` is `darwin`, `linux`, or `win32`.
+Where `[platform]` is `darwin`, `linux`, or `win32`
+
+and `[package-type]` is `all` (default), `deb` or `zip` (`linux` platform only)
 
 #### Windows build notes
 
@@ -84,4 +77,3 @@ brew install wine
 ## License
 
 MIT. Copyright (c) [Feross Aboukhadijeh](http://feross.org).
-

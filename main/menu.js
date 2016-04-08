@@ -10,12 +10,12 @@ module.exports = {
   toggleFullScreen
 }
 
-var debug = require('debug')('webtorrent-app:menu')
 var electron = require('electron')
 
 var app = electron.app
 
 var config = require('../config')
+var log = require('./log')
 var windows = require('./windows')
 
 var appMenu, dockMenu
@@ -29,7 +29,7 @@ function init () {
 }
 
 function toggleFullScreen (flag) {
-  debug('toggleFullScreen %s', flag)
+  log('toggleFullScreen %s', flag)
   if (windows.main && windows.main.isVisible()) {
     flag = flag != null ? flag : !windows.main.isFullScreen()
     windows.main.setFullScreen(flag)
@@ -38,7 +38,7 @@ function toggleFullScreen (flag) {
 
 // Sets whether the window should always show on top of other windows
 function toggleFloatOnTop (flag) {
-  debug('toggleFloatOnTop %s', flag)
+  log('toggleFloatOnTop %s', flag)
   if (windows.main) {
     flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
     windows.main.setAlwaysOnTop(flag)
@@ -59,32 +59,30 @@ function decreaseVolume () {
 }
 
 function toggleDevTools () {
-  debug('toggleDevTools')
+  log('toggleDevTools')
   if (windows.main) {
     windows.main.toggleDevTools()
   }
 }
 
-function reloadWindow () {
-  debug('reloadWindow')
-  if (windows.main) {
-    windows.main.webContents.reloadIgnoringCache()
-  }
+function showWebTorrentWindow () {
+  windows.webtorrent.show()
+  windows.webtorrent.webContents.openDevTools({ detach: true })
 }
 
 function addFakeDevice (device) {
-  debug('addFakeDevice %s', device)
+  log('addFakeDevice %s', device)
   windows.main.send('addFakeDevice', device)
 }
 
 function onWindowShow () {
-  debug('onWindowShow')
+  log('onWindowShow')
   getMenuItem('Full Screen').enabled = true
   getMenuItem('Float on Top').enabled = true
 }
 
 function onWindowHide () {
-  debug('onWindowHide')
+  log('onWindowHide')
   getMenuItem('Full Screen').enabled = false
   getMenuItem('Float on Top').enabled = false
 }
@@ -117,12 +115,17 @@ function getMenuItem (label) {
 
 // Prompts the user for a file or folder, then makes a torrent out of the data
 function showCreateTorrent () {
+  // Allow only a single selection
+  // To create a multi-file torrent, the user must select a folder
   electron.dialog.showOpenDialog({
     title: 'Select a file or folder for the torrent file.',
-    properties: [ 'openFile', 'openDirectory', 'multiSelections' ]
+    properties: [ 'openFile', 'openDirectory' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    windows.main.send('dispatch', 'seed', filenames)
+    var options = {
+      files: filenames[0]
+    }
+    windows.main.send('dispatch', 'createTorrent', options)
   })
 }
 
@@ -130,6 +133,7 @@ function showCreateTorrent () {
 function showOpenTorrentFile () {
   electron.dialog.showOpenDialog(windows.main, {
     title: 'Select a .torrent file to open.',
+    filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
@@ -145,36 +149,44 @@ function showOpenTorrentAddress () {
 }
 
 function getAppMenuTemplate () {
+  var fileMenu = [
+    {
+      label: 'Create New Torrent...',
+      accelerator: 'CmdOrCtrl+N',
+      click: showCreateTorrent
+    },
+    {
+      label: 'Open Torrent File...',
+      accelerator: 'CmdOrCtrl+O',
+      click: showOpenTorrentFile
+    },
+    {
+      label: 'Open Torrent Address...',
+      accelerator: 'CmdOrCtrl+U',
+      click: showOpenTorrentAddress
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: process.platform === 'windows' ? 'Close' : 'Close Window',
+      accelerator: 'CmdOrCtrl+W',
+      role: 'close'
+    }
+  ]
+
+  // File > Quit for Linux users with distros where the system tray is broken
+  if (process.platform === 'linux') {
+    fileMenu.push({
+      label: 'Quit',
+      click: () => app.quit()
+    })
+  }
+
   var template = [
     {
       label: 'File',
-      submenu: [
-        {
-          label: 'Create New Torrent...',
-          accelerator: 'CmdOrCtrl+N',
-          click: showCreateTorrent
-        },
-        {
-          label: 'Open Torrent File...',
-          accelerator: 'CmdOrCtrl+O',
-          click: showOpenTorrentFile
-        },
-        {
-          label: 'Open Torrent Address...',
-          accelerator: 'CmdOrCtrl+U',
-          click: showOpenTorrentAddress
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: process.platform === 'darwin'
-            ? 'Close Window'
-            : 'Close',
-          accelerator: 'CmdOrCtrl+W',
-          role: 'close'
-        }
-      ]
+      submenu: fileMenu
     },
     {
       label: 'Edit',
@@ -239,16 +251,18 @@ function getAppMenuTemplate () {
           label: 'Developer',
           submenu: [
             {
-              label: 'Reload',
-              accelerator: 'CmdOrCtrl+R',
-              click: reloadWindow
-            },
-            {
               label: 'Developer Tools',
               accelerator: process.platform === 'darwin'
                 ? 'Alt+Command+I'
                 : 'Ctrl+Shift+I',
               click: toggleDevTools
+            },
+            {
+              label: 'Show WebTorrent Process',
+              accelerator: process.platform === 'darwin'
+                ? 'Alt+Command+P'
+                : 'Ctrl+Shift+P',
+              click: showWebTorrentWindow
             },
             {
               type: 'separator'
@@ -286,14 +300,14 @@ function getAppMenuTemplate () {
         },
         {
           label: 'Contribute on GitHub',
-          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-app')
+          click: () => electron.shell.openExternal(config.GITHUB_URL)
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: () => electron.shell.openExternal('https://github.com/feross/webtorrent-app/issues')
+          click: () => electron.shell.openExternal(config.GITHUB_URL + '/issues')
         }
       ]
     }

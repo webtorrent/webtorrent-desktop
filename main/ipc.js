@@ -2,7 +2,6 @@ module.exports = {
   init
 }
 
-var debug = require('debug')('webtorrent-app:ipcMain')
 var electron = require('electron')
 
 var app = electron.app
@@ -21,10 +20,19 @@ function init () {
   ipcMain.on('ipcReady', function (e) {
     app.ipcReady = true
     app.emit('ipcReady')
-    setTimeout(function () {
-      windows.main.show()
-      console.timeEnd('init')
-    }, 50)
+    windows.main.show()
+    console.timeEnd('init')
+  })
+
+  var messageQueueMainToWebTorrent = []
+  ipcMain.on('ipcReadyWebTorrent', function (e) {
+    app.ipcReadyWebTorrent = true
+    log('sending %d queued messages from the main win to the webtorrent window',
+      messageQueueMainToWebTorrent.length)
+    messageQueueMainToWebTorrent.forEach(function (message) {
+      windows.webtorrent.send(message.name, ...message.args)
+      log('webtorrent: sent queued %s', message.name)
+    })
   })
 
   ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
@@ -70,19 +78,60 @@ function init () {
     menu.onPlayerClose()
     shortcuts.unregisterPlayerShortcuts()
   })
+
+  ipcMain.on('focusWindow', function (e, windowName) {
+    windows.focusWindow(windows[windowName])
+  })
+
+  // Capture all events
+  var oldEmit = ipcMain.emit
+  ipcMain.emit = function (name, e, ...args) {
+    // Relay messages between the main window and the WebTorrent hidden window
+    if (name.startsWith('wt-')) {
+      if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
+        // Send message to main window
+        windows.main.send(name, ...args)
+        log('webtorrent: got %s', name)
+      } else if (app.ipcReadyWebTorrent) {
+        // Send message to webtorrent window
+        windows.webtorrent.send(name, ...args)
+        log('webtorrent: sent %s', name)
+      } else {
+        // Queue message for webtorrent window, it hasn't finished loading yet
+        messageQueueMainToWebTorrent.push({
+          name: name,
+          args: args
+        })
+        log('webtorrent: queueing %s', name)
+      }
+      return
+    }
+
+    // Emit all other events normally
+    oldEmit.call(ipcMain, name, e, ...args)
+  }
 }
 
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
-  if (!windows.main || windows.main.isFullScreen()) return
+  if (!windows.main || windows.main.isFullScreen()) {
+    log('setBounds: not setting bounds because we\'re in full screen')
+    return
+  }
 
   // Maximize or minimize, if the second argument is present
   var willBeMaximized
   if (maximize === true) {
-    if (!windows.main.isMaximized()) windows.main.maximize()
+    if (!windows.main.isMaximized()) {
+      log('setBounds: maximizing')
+      windows.main.maximize()
+    }
     willBeMaximized = true
   } else if (maximize === false) {
-    if (windows.main.isMaximized()) windows.main.unmaximize()
+    if (windows.main.isMaximized()) {
+      log('setBounds: unmaximizing')
+      windows.main.unmaximize()
+    }
     willBeMaximized = false
   } else {
     willBeMaximized = windows.main.isMaximized()
@@ -90,12 +139,15 @@ function setBounds (bounds, maximize) {
 
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
+    log('setBounds: setting bounds to ' + JSON.stringify(bounds))
     windows.main.setBounds(bounds, true)
+  } else {
+    log('setBounds: not setting bounds because of window maximization')
   }
 }
 
 function setAspectRatio (aspectRatio, extraSize) {
-  debug('setAspectRatio %o %o', aspectRatio, extraSize)
+  log('setAspectRatio %o %o', aspectRatio, extraSize)
   if (windows.main) {
     windows.main.setAspectRatio(aspectRatio, extraSize)
   }
@@ -103,13 +155,13 @@ function setAspectRatio (aspectRatio, extraSize) {
 
 // Display string in dock badging area (OS X)
 function setBadge (text) {
-  debug('setBadge %s', text)
+  log('setBadge %s', text)
   if (app.dock) app.dock.setBadge(String(text))
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
 function setProgress (progress) {
-  debug('setProgress %s', progress)
+  log('setProgress %s', progress)
   if (windows.main) {
     windows.main.setProgressBar(progress)
   }
@@ -117,12 +169,12 @@ function setProgress (progress) {
 
 function blockPowerSave () {
   powerSaveBlockID = powerSaveBlocker.start('prevent-display-sleep')
-  debug('blockPowerSave %d', powerSaveBlockID)
+  log('blockPowerSave %d', powerSaveBlockID)
 }
 
 function unblockPowerSave () {
   if (powerSaveBlocker.isStarted(powerSaveBlockID)) {
     powerSaveBlocker.stop(powerSaveBlockID)
-    debug('unblockPowerSave %d', powerSaveBlockID)
+    log('unblockPowerSave %d', powerSaveBlockID)
   }
 }

@@ -16,18 +16,19 @@ var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
   var platform = process.argv[2]
+  var packageType = process.argv.length > 3 ? process.argv[3] : 'all'
   if (platform === 'darwin') {
     buildDarwin(printDone)
   } else if (platform === 'win32') {
     buildWin32(printDone)
   } else if (platform === 'linux') {
-    buildLinux(printDone)
+    buildLinux(packageType, printDone)
   } else {
     buildDarwin(function (err, buildPath) {
       printDone(err, buildPath)
       buildWin32(function (err, buildPath) {
         printDone(err, buildPath)
-        buildLinux(printDone)
+        buildLinux(packageType, printDone)
       })
     })
   }
@@ -63,7 +64,7 @@ var all = {
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
-  ignore: /^\/dist|\/(appveyor.yml|.appveyor.yml|appdmg|AUTHORS|CONTRIBUTORS|bench|benchmark|benchmark\.js|bin|bower\.json|component\.json|coverage|doc|docs|docs\.mli|dragdrop\.min\.js|example|examples|example\.html|example\.js|externs|ipaddr\.min\.js|Makefile|min|minimist|perf|rusha|simplepeer\.min\.js|simplewebsocket\.min\.js|static\/screenshot\.png|test|tests|test\.js|tests\.js|webtorrent\.min\.js|\.[^\/]*|.*\.md|.*\.markdown)$/,
+  ignore: /^\/dist|\/(appveyor.yml|\.appveyor.yml|\.github|appdmg|AUTHORS|CONTRIBUTORS|bench|benchmark|benchmark\.js|bin|bower\.json|component\.json|coverage|doc|docs|docs\.mli|dragdrop\.min\.js|example|examples|example\.html|example\.js|externs|ipaddr\.min\.js|Makefile|min|minimist|perf|rusha|simplepeer\.min\.js|simplewebsocket\.min\.js|static\/screenshot\.png|test|tests|test\.js|tests\.js|webtorrent\.min\.js|\.[^\/]*|.*\.md|.*\.markdown)$/,
 
   // The application name.
   name: config.APP_NAME,
@@ -114,7 +115,7 @@ var win32 = {
     // Original name of the file, not including a path. This information enables an
     // application to determine whether a file has been renamed by a user. The format of
     // the name depends on the file system for which the file was created.
-    OriginalFilename: 'WebTorrent.exe',
+    OriginalFilename: config.APP_NAME + '.exe',
 
     // Name of the product with which the file is distributed.
     ProductName: config.APP_NAME,
@@ -206,13 +207,11 @@ function buildDarwin (cb) {
         verbose: true
       }
 
-      // TODO: Use the built-in `sign` opt to electron-packager that takes an options
-      // object as of v6.
       sign(signOpts, function (err) {
         if (err) return cb(err)
 
         // Create .zip file (used by the auto-updater)
-        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.zip')
+        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-darwin.zip')
         cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
         console.log('Created OS X .zip file.')
 
@@ -263,21 +262,23 @@ function buildWin32 (cb) {
 
     console.log('Creating Windows installer...')
     installer.createWindowsInstaller({
-      name: config.APP_NAME,
-      productName: config.APP_NAME,
-      title: config.APP_NAME,
-      exe: config.APP_NAME + '.exe',
-
       appDirectory: buildPath[0],
-      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
-      version: pkg.version,
-      description: config.APP_NAME,
       authors: config.APP_TEAM,
-      iconUrl: config.APP_ICON + '.ico',
-      setupIcon: config.APP_ICON + '.ico',
       // certificateFile: '', // TODO
+      description: config.APP_NAME,
+      exe: config.APP_NAME + '.exe',
+      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
+      loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+      remoteReleases: config.GITHUB_URL,
+      name: config.APP_NAME,
+      noMsi: true,
+      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+      productName: config.APP_NAME,
+      setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+      setupIcon: config.APP_ICON + '.ico',
+      title: config.APP_NAME,
       usePackageJson: false,
-      loadingGif: path.join(config.STATIC_PATH, 'loading.gif')
+      version: pkg.version
     }).then(function () {
       console.log('Created Windows installer.')
       cb(null, buildPath)
@@ -285,16 +286,47 @@ function buildWin32 (cb) {
   })
 }
 
-function buildLinux (cb) {
+function buildLinux (packageType, cb) {
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
 
-    // Create .zip file for Linux
     var distPath = path.join(config.ROOT_PATH, 'dist')
-    var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
-    var appFolderName = path.basename(buildPath[0])
-    cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
-    console.log('Created Linux .zip file.')
+    var filesPath = buildPath[0]
+
+    if (packageType === 'deb' || packageType === 'all') {
+      // Create .deb file for debian based platforms
+      var deb = require('nobin-debian-installer')()
+      var destPath = path.join('/opt', pkg.name)
+
+      deb.pack({
+        package: pkg,
+        info: {
+          arch: 'amd64',
+          targetDir: distPath,
+          depends: 'libc6 (>= 2.4)',
+          scripts: {
+            postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
+            prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
+          }
+        }
+      }, [{
+        src: ['./**'],
+        dest: destPath,
+        expand: true,
+        cwd: filesPath
+      }], function (err, done) {
+        if (err) return console.error(err.message || err)
+        console.log('Created Linux .deb file.')
+      })
+    }
+
+    if (packageType === 'zip' || packageType === 'all') {
+      // Create .zip file for Linux
+      var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux.zip')
+      var appFolderName = path.basename(filesPath)
+      cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
+      console.log('Created Linux .zip file.')
+    }
   })
 }
 

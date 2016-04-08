@@ -1,7 +1,8 @@
 module.exports = {
   isPlayable,
   isVideo,
-  isAudio
+  isAudio,
+  isPlayableTorrent
 }
 
 var path = require('path')
@@ -21,4 +22,8 @@ function isVideo (file) {
 function isAudio (file) {
   var ext = path.extname(file.name)
   return ['.mp3', '.aac', '.ogg', '.wav'].indexOf(ext) !== -1
+}
+
+function isPlayableTorrent (torrentSummary) {
+  return torrentSummary.files && torrentSummary.files.some(isPlayable)
 }

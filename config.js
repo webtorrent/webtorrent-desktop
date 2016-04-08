@@ -14,12 +14,18 @@ module.exports = {
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
 
-  AUTO_UPDATE_URL: 'https://webtorrent.io/app/update?version=' + APP_VERSION,
+  AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update' +
+    '?version=' + APP_VERSION + '&platform=' + process.platform,
   AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
+
+  CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
 
   CONFIG_PATH: applicationConfigPath(APP_NAME),
   CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(applicationConfigPath(APP_NAME), 'Torrents'),
+
+  GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
+  GITHUB_URL_RAW: 'https://raw.githubusercontent.com/feross/webtorrent-desktop/master',
 
   IS_PRODUCTION: isProduction(),
 
@@ -60,7 +66,11 @@ module.exports = {
   },
 
   WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
-  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html')
+  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html'),
+  WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, 'renderer', 'webtorrent.html'),
+
+  WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
+  WINDOW_MIN_WIDTH: 425
 }
 
 function isProduction () {

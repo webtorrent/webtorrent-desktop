@@ -1,8 +1,78 @@
 # WebTorrent Desktop Version History
 
+## v0.3.3 - 2016-04-07
+
+### Fixed
+
+- App icon was incorrect (OS X)
+
+## v0.3.2 - 2016-04-07
+
+### Added
+
+- Register WebTorrent as default handler for magnet links (OS X)
+
+### Changed
+
+- Faster startup time (50ms)
+- Update Electron to 0.37.5
+  - Remove the white flash when loading pages and resizing the window
+  - Fix crash when sending IPC messages
+
+### Fixed
+
+- Fix installation bugs with .deb file (Linux)
+- Pause audio reliably when closing the window
+- Enforce minimimum window size when resizing player (for audio-only .mov files, which are 0x0)
+
+## v0.3.1 - 2016-04-06
+
+### Added
+
+- Add crash reporter to torrent engine process
+
+### Fixed
+
+- Fix cast screen background: cover, don't tile
+
+## v0.3.0 - 2016-04-06
+
+### Added
+
+- **Ubuntu/Debian support!** (.deb installer)
+- **DLNA streaming support**
+- Add "File > Quit" menu item (Linux)
+- App uninstaller (Windows)
+- Crash reporting
+
+### Changed
+
+- On startup, do not re-verify files when timestamps are unchanged
+- Moved torrent engine to an independent process, for better UI performance
+- Removed media queries (UI resizing based on window width)
+- Improved Chromecast icon, when connected
+
+### Fixed
+
+- "Download Complete" notification shows consistently
+- Create new torrents and seed them without copying to temporary folder
+- Clicking the "Download Complete" notification will always activate app
+- Fixed harmless "-psn_###" error on first app startup
+- Hide play buttons on unplayable torrents
+- Better error handling when Chromecast/Airplay cannot connect
+- Show player controls immediately on mouse move
+- When creating a torrent, show it in UI immediately
+- Stop casting to TV when player is closed
+- Torrent engine: Fixed memory leaks in `torrent-discovery` and `bittorrent-tracker`
+- Torrent engine: Fixed sub-optimal tcp/webrtc connection timeouts
+- Torrent engine: Throttle web seed connections to maximum of 4
+
+Thanks to @dcposch, @grunjol, and @feross for contributing to this release.
+
 ## v0.2.0 - 2016-03-29
 
-Added
+### Added
+
 - Minimise to tray (Windows, Linux)
 - Show spinner and download speed when player is stalled waiting for data
 - Highlight window on drag-and-drop
@@ -10,11 +80,13 @@ Added
   - We have an auto-updater for Windows and Mac. We don't have one for Linux yet, so
     Linux users need to download new versions manually.
 
-Changed
+### Changed
+
 - Renamed WebTorrent.app to WebTorrent Desktop
 - Add Cosmos Laundromat as a default torrent
 
-Fixed
+### Fixed
+
 - Only capture media keys when player is active
 - Update WebTorrent to 0.88.1 for performance improvements
   - When seeding, do not proactively connect to new peers
@@ -74,7 +146,7 @@ Windows, and Linux. For now, we're only releasing binaries for OS X.
 
 WebTorrent Desktop is in ALPHA and under very active development – expect lots more polish in
 the coming weeks! If you know JavaScript and want to help us out, there's
-[lots to do](https://github.com/feross/webtorrent-app/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
+[lots to do](https://github.com/feross/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
 ### Features
 

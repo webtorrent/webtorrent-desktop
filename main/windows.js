@@ -1,9 +1,10 @@
 var windows = module.exports = {
   about: null,
   main: null,
-  createAboutWindow: createAboutWindow,
-  createMainWindow: createMainWindow,
-  focusWindow: focusWindow
+  createAboutWindow,
+  createWebTorrentHiddenWindow,
+  createMainWindow,
+  focusWindow
 }
 
 var electron = require('electron')
@@ -46,16 +47,43 @@ function createAboutWindow () {
   })
 }
 
+function createWebTorrentHiddenWindow () {
+  var win = windows.webtorrent = new electron.BrowserWindow({
+    backgroundColor: '#1E1E1E',
+    show: false,
+    center: true,
+    title: 'webtorrent-hidden-window',
+    useContentSize: true,
+    width: 150,
+    height: 150,
+    minimizable: false,
+    maximizable: false,
+    resizable: false,
+    fullscreenable: false,
+    fullscreen: false,
+    skipTaskbar: true
+  })
+  win.loadURL(config.WINDOW_WEBTORRENT)
+
+  // Prevent killing the WebTorrent process
+  win.on('close', function (e) {
+    if (!electron.app.isQuitting) {
+      e.preventDefault()
+      win.hide()
+    }
+  })
+}
+
 function createMainWindow () {
   if (windows.main) {
     return focusWindow(windows.main)
   }
   var win = windows.main = new electron.BrowserWindow({
-    backgroundColor: '#282828',
+    backgroundColor: '#1E1E1E',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: config.APP_ICON + '.png',
-    minWidth: 375,
-    minHeight: 38 + (120 * 2), // header height + 2 torrents
+    minWidth: config.WINDOW_MIN_WIDTH,
+    minHeight: config.WINDOW_MIN_HEIGHT,
     show: false, // Hide window until DOM finishes loading
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
