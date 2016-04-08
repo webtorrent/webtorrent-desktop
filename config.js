@@ -66,8 +66,11 @@ module.exports = {
   },
 
   WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
+  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html'),
   WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, 'renderer', 'webtorrent.html'),
-  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html')
+
+  WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
+  WINDOW_MIN_WIDTH: 425
 }
 
 function isProduction () {
