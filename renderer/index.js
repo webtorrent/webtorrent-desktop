@@ -1,6 +1,7 @@
 console.time('init')
 
 var cfg = require('application-config')('WebTorrent')
+var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var EventEmitter = require('events')
@@ -8,6 +9,7 @@ var fs = require('fs')
 var mainLoop = require('main-loop')
 var path = require('path')
 var remote = require('remote')
+var srtToVtt = require('srt-to-vtt')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -459,12 +461,35 @@ function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
   // .torrent file = start downloading the torrent
-  files.filter(isTorrent).forEach(function (torrentFile) {
-    addTorrent(torrentFile)
-  })
+  files.filter(isTorrent).forEach(addTorrent)
+
+  // subtitle file
+  files.filter(isSubtitle).forEach(addSubtitle)
 
   // everything else = seed these files
-  createTorrentFromFileObjects(files.filter(isNotTorrent))
+  var rest = files.filter(not(isTorrent)).filter(not(isSubtitle))
+  if (rest.length > 0) {
+    createTorrentFromFileObjects(rest)
+  }
+}
+
+function isTorrent (file) {
+  var name = typeof file === 'string' ? file : file.name
+  var isTorrentFile = path.extname(name).toLowerCase() === '.torrent'
+  var isMagnet = typeof file === 'string' && /^magnet:/.test(file)
+  return isTorrentFile || isMagnet
+}
+
+function isSubtitle (file) {
+  var name = typeof file === 'string' ? file : file.name
+  var ext = path.extname(name).toLowerCase()
+  return ext === '.srt' || ext === '.vtt'
+}
+
+function not (test) {
+  return function (...args) {
+    return !test(...args)
+  }
 }
 
 function onPaste (e) {
@@ -476,17 +501,6 @@ function onPaste (e) {
     if (torrentId.length === 0) return
     dispatch('addTorrent', torrentId)
   })
-}
-
-function isTorrent (file) {
-  var name = typeof file === 'string' ? file : file.name
-  var isTorrentFile = path.extname(name).toLowerCase() === '.torrent'
-  var isMagnet = typeof file === 'string' && /^magnet:/.test(file)
-  return isTorrentFile || isMagnet
-}
-
-function isNotTorrent (file) {
-  return !isTorrent(file)
 }
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
@@ -507,6 +521,23 @@ function addTorrent (torrentId) {
     torrentId = torrentId.path
   }
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+}
+
+function addSubtitle (file) {
+  if (state.playing.type !== 'video') return
+  fs.createReadStream(file.path || file).pipe(srtToVtt()).pipe(concat(function (buf) {
+    // Set the cue text position so it appears above the player controls.
+    // The only way to change cue text position is by modifying the VTT. It is not
+    // possible via CSS.
+    var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
+    var track = {
+      buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
+      language: 'Language ' + state.playing.subtitles.tracks.length,
+      selected: true
+    }
+    state.playing.subtitles.tracks.push(track)
+    state.playing.subtitles.enabled = true
+  }))
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
