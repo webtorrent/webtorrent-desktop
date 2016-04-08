@@ -744,12 +744,6 @@ function pickFileToPlay (files) {
   return undefined
 }
 
-function stopServer () {
-  ipcRenderer.send('wt-stop-server')
-  state.playing = State.getDefaultPlayState()
-  state.server = null
-}
-
 // Opens the video player
 function openPlayer (infoHash, index, cb) {
   var torrentSummary = getTorrentSummary(infoHash)
@@ -817,23 +811,23 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 }
 
 function closePlayer (cb) {
-  state.window.title = config.APP_WINDOW_TITLE
-  update() /* needed for OSX: toggleFullScreen animation w/ correct title */
-
   if (isCasting()) {
     Cast.close()
   }
+  state.window.title = config.APP_WINDOW_TITLE
+  state.playing = State.getDefaultPlayState()
+  state.server = null
 
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
   restoreBounds()
-  stopServer()
-  update()
 
+  ipcRenderer.send('wt-stop-server')
   ipcRenderer.send('unblockPowerSave')
   ipcRenderer.send('onPlayerClose')
 
+  update()
   cb()
 }
 
