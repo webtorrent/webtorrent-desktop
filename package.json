@@ -36,7 +36,7 @@
     "simple-get": "^2.0.0",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
-    "webtorrent": "^0.90.0",
+    "webtorrent": "0.x",
     "winreg": "feross/node-winreg"
   },
   "devDependencies": {
