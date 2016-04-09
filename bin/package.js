@@ -131,7 +131,10 @@ var win32 = {
 }
 
 var linux = {
-  platform: 'linux'
+  platform: 'linux',
+  
+  // Build 32/64 bit binaries.
+  arch: 'all'
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
