@@ -132,7 +132,7 @@ var win32 = {
 
 var linux = {
   platform: 'linux',
-  
+
   // Build 32/64 bit binaries.
   arch: 'all'
 
