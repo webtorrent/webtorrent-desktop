@@ -15,6 +15,7 @@ var rimraf = require('rimraf')
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
 function build () {
+  rimraf.sync(path.join(config.ROOT_PATH, 'dist'))
   var platform = process.argv[2]
   var packageType = process.argv.length > 3 ? process.argv[3] : 'all'
   if (platform === 'darwin') {
