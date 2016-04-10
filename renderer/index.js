@@ -8,7 +8,6 @@ var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
 var path = require('path')
-var remote = require('remote')
 var srtToVtt = require('srt-to-vtt')
 
 var createElement = require('virtual-dom/create-element')
@@ -25,16 +24,19 @@ var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
 var State = require('./state')
 
-// This dependency is the slowest-loading, so we lazy load it
-var Cast = null
-
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
-
 var clipboard = electron.clipboard
-var dialog = remote.require('dialog')
+
+var dialog = electron.remote.dialog
+var Menu = electron.remote.Menu
+var MenuItem = electron.remote.MenuItem
+var remote = electron.remote
+
+// This dependency is the slowest-loading, so we lazy load it
+var Cast = null
 
 // For easy debugging in Developer Tools
 var state = global.state = State.getInitialState()
@@ -927,18 +929,18 @@ function toggleSelectTorrent (infoHash) {
 
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  var menu = new remote.Menu()
-  menu.append(new remote.MenuItem({
+  var menu = new Menu()
+  menu.append(new MenuItem({
     label: 'Save Torrent File As...',
     click: () => saveTorrentFileAs(torrentSummary)
   }))
 
-  menu.append(new remote.MenuItem({
+  menu.append(new MenuItem({
     label: 'Copy Instant.io Link to Clipboard',
     click: () => clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
   }))
 
-  menu.append(new remote.MenuItem({
+  menu.append(new MenuItem({
     label: 'Copy Magnet Link to Clipboard',
     click: () => clipboard.writeText(torrentSummary.magnetURI)
   }))
@@ -956,7 +958,7 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
+  dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
     var torrentPath = util.getAbsoluteStaticPath(torrentSummary.torrentPath)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
