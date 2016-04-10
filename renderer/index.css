@@ -677,6 +677,7 @@ body.drag .app::after {
 
 .player-controls .device,
 .player-controls .fullscreen,
+.player-controls .closed-captions,
 .player-controls .volume-icon,
 .player-controls .back {
   display: block;
@@ -691,6 +692,7 @@ body.drag .app::after {
 }
 
 .player-controls .device,
+.player-controls .closed-captions,
 .player-controls .fullscreen {
   float: right;
 }
@@ -751,6 +753,15 @@ body.drag .app::after {
   width: 14px;
   height: 14px;
 }
+
+::cue {
+  background: none;
+  color: #FFF;
+  font: 24px;
+  line-height: 1.3em;
+  text-shadow: #000 -1px 0 1px, #000 1px 0 1px, #000 0 -1px 1px, #000 0 1px 1px, rgba(50, 50, 50, 0.5) 2px 2px 0;
+}
+
 
 /*
  * CHROMECAST / AIRPLAY CONTROLS

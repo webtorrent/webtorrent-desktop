@@ -1,4 +1,4 @@
-**What version of WebTorrent Desktop?**
+**What version of WebTorrent Desktop?** (See the 'About WebTorrent' menu)
 
 **What operating system and version?**
 
