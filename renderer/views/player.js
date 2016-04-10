@@ -58,7 +58,7 @@ function renderMedia (state) {
   var trackTags = []
 
   if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
-    for (var i=0; i < state.playing.subtitles.tracks.length; i++) {
+    for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
 
       trackTags.push(hx`
