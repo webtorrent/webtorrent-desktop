@@ -34,6 +34,9 @@ LocationHistory.prototype.back = function () {
   var page = this._history.pop()
 
   if (page.onbeforeunload) {
+    // TODO: this is buggy. If the user clicks back twice, then those pages
+    // may end up in _forward in the wrong order depending on which onbeforeunload
+    // call finishes first.
     page.onbeforeunload(() => {
       this._forward.push(page)
     })
