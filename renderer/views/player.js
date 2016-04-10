@@ -414,15 +414,14 @@ function renderPlayerControls (state) {
   }
 
   function handleSubtitles (e) {
-    if (state.playing.subtitles.enabled) {
-      state.playing.subtitles.enabled = false
+    if (!state.playing.subtitles.tracks.length) {
+      // if no subtitles available select it
+      dispatch('openSubtitles')
     } else {
-      if (state.playing.subtitles.tracks.length) {
-        state.playing.subtitles.enabled = true
-      } else {
-        // TODO: show dialog
-        dispatch('openSubtitles')
-      }
+      // TODO: Show subtitles selector / disable
+      // dispatch('showSubtitlesMenu')
+      // meanwhile, just enable/disable
+      state.playing.subtitles.enabled = !state.playing.subtitles.enabled
     }
   }
 }

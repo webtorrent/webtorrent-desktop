@@ -257,6 +257,9 @@ function dispatch (action, ...args) {
   if (action === 'setVolume') {
     setVolume(args[0] /* increase */)
   }
+  if (action === 'openSubtitles') {
+    openSubtitles()
+  }
   if (action === 'mediaPlaying') {
     state.playing.isPaused = false
     ipcRenderer.send('blockPowerSave')
@@ -333,7 +336,6 @@ function changeVolume (delta) {
   setVolume(state.playing.volume + delta)
 }
 
-// TODO: never called. Either remove or make a volume control that calls it
 function setVolume (volume) {
   // check if its in [0.0 - 1.0] range
   volume = Math.max(0, Math.min(1, volume))
@@ -342,6 +344,17 @@ function setVolume (volume) {
   } else {
     state.playing.setVolume = volume
   }
+}
+
+function openSubtitles () {
+  dialog.showOpenDialog({
+    title: 'Select a subtitles file.',
+    filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
+    properties: [ 'openFile' ]
+  }, function (filenames) {
+    if (!Array.isArray(filenames)) return
+    addSubtitle({path: filenames[0]})
+  })
 }
 
 // Checks whether we are connected and already casting
