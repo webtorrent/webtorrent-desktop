@@ -8,7 +8,6 @@ var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
 var path = require('path')
-var remote = require('remote')
 var srtToVtt = require('srt-to-vtt')
 
 var createElement = require('virtual-dom/create-element')
@@ -16,25 +15,30 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var errors = require('./lib/errors')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
+var errors = require('./lib/errors')
+var sound = require('./lib/sound')
+var State = require('./state')
 var TorrentPlayer = require('./lib/torrent-player')
 var util = require('./util')
+
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
-var State = require('./state')
-
-// This dependency is the slowest-loading, so we lazy load it
-var Cast = null
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
-
 var clipboard = electron.clipboard
-var dialog = remote.require('dialog')
+
+var dialog = electron.remote.dialog
+var Menu = electron.remote.Menu
+var MenuItem = electron.remote.MenuItem
+var remote = electron.remote
+
+// This dependency is the slowest-loading, so we lazy load it
+var Cast = null
 
 // For easy debugging in Developer Tools
 var state = global.state = State.getInitialState()
@@ -60,8 +64,7 @@ function init () {
 
   initWebTorrent()
 
-  // Lazily load the Chromecast/Airplay/DLNA modules
-  window.setTimeout(lazyLoadCast, 5000)
+  window.setTimeout(delayedInit, 5000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -112,9 +115,14 @@ function init () {
   setupIpc()
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
-  playInterfaceSound('STARTUP')
+  sound.play('STARTUP')
 
   console.timeEnd('init')
+}
+
+function delayedInit () {
+  lazyLoadCast()
+  sound.preload()
 }
 
 // Lazily loads Chromecast and Airplay support
@@ -651,7 +659,7 @@ function torrentInfoHash (torrentKey, infoHash) {
       status: 'new'
     }
     state.saved.torrents.push(torrentSummary)
-    playInterfaceSound('ADD')
+    sound.play('ADD')
   }
 
   torrentSummary.infoHash = infoHash
@@ -800,13 +808,13 @@ function openPlayer (infoHash, index, cb) {
   if (index === undefined) return cb(new errors.UnplayableError())
 
   // update UI to show pending playback
-  if (torrentSummary.progress !== 1) playInterfaceSound('PLAY')
+  if (torrentSummary.progress !== 1) sound.play('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    playInterfaceSound('ERROR')
+    sound.play('ERROR')
     cb(new Error('playback timed out'))
     update()
   }, 10000) /* give it a few seconds */
@@ -903,11 +911,11 @@ function toggleTorrent (infoHash) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrentingSummary(torrentSummary)
-    playInterfaceSound('ENABLE')
+    sound.play('ENABLE')
   } else {
     torrentSummary.status = 'paused'
     ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-    playInterfaceSound('DISABLE')
+    sound.play('DISABLE')
   }
 }
 
@@ -919,7 +927,7 @@ function deleteTorrent (infoHash) {
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveStateThrottled()
   state.location.clearForward() // prevent user from going forward to a deleted torrent
-  playInterfaceSound('DELETE')
+  sound.play('DELETE')
 }
 
 function toggleSelectTorrent (infoHash) {
@@ -930,18 +938,18 @@ function toggleSelectTorrent (infoHash) {
 
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  var menu = new remote.Menu()
-  menu.append(new remote.MenuItem({
+  var menu = new Menu()
+  menu.append(new MenuItem({
     label: 'Save Torrent File As...',
     click: () => saveTorrentFileAs(torrentSummary)
   }))
 
-  menu.append(new remote.MenuItem({
+  menu.append(new MenuItem({
     label: 'Copy Instant.io Link to Clipboard',
     click: () => clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
   }))
 
-  menu.append(new remote.MenuItem({
+  menu.append(new MenuItem({
     label: 'Copy Magnet Link to Clipboard',
     click: () => clipboard.writeText(torrentSummary.magnetURI)
   }))
@@ -959,7 +967,7 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  dialog.showSaveDialog(remote.getCurrentWindow(), opts, (savePath) => {
+  dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
     var torrentPath = util.getAbsoluteStaticPath(torrentSummary.torrentPath)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
@@ -1021,7 +1029,7 @@ function restoreBounds () {
 
 function onError (err) {
   console.error(err.stack || err)
-  playInterfaceSound('ERROR')
+  sound.play('ERROR')
   state.errors.push({
     time: new Date().getTime(),
     message: err.message || err
@@ -1043,17 +1051,7 @@ function showDoneNotification (torrent) {
     ipcRenderer.send('focusWindow', 'main')
   }
 
-  playInterfaceSound('DONE')
-}
-
-function playInterfaceSound (name) {
-  var sound = config[`SOUND_${name}`]
-  if (!sound) throw new Error('Invalid sound name')
-
-  var audio = new window.Audio()
-  audio.volume = sound.volume
-  audio.src = sound.url
-  audio.play()
+  sound.play('DONE')
 }
 
 // Finds the longest common prefix
