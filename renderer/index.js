@@ -15,14 +15,16 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
-var errors = require('./lib/errors')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
+var errors = require('./lib/errors')
+var sound = require('./lib/sound')
+var State = require('./state')
 var TorrentPlayer = require('./lib/torrent-player')
 var util = require('./util')
+
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
-var State = require('./state')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -62,8 +64,7 @@ function init () {
 
   initWebTorrent()
 
-  // Lazily load the Chromecast/Airplay/DLNA modules
-  window.setTimeout(lazyLoadCast, 5000)
+  window.setTimeout(delayedInit, 5000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -114,9 +115,14 @@ function init () {
   setupIpc()
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
-  playInterfaceSound('STARTUP')
+  sound.play('STARTUP')
 
   console.timeEnd('init')
+}
+
+function delayedInit () {
+  lazyLoadCast()
+  sound.preload()
 }
 
 // Lazily loads Chromecast and Airplay support
@@ -650,7 +656,7 @@ function torrentInfoHash (torrentKey, infoHash) {
       status: 'new'
     }
     state.saved.torrents.push(torrentSummary)
-    playInterfaceSound('ADD')
+    sound.play('ADD')
   }
 
   torrentSummary.infoHash = infoHash
@@ -799,13 +805,13 @@ function openPlayer (infoHash, index, cb) {
   if (index === undefined) return cb(new errors.UnplayableError())
 
   // update UI to show pending playback
-  if (torrentSummary.progress !== 1) playInterfaceSound('PLAY')
+  if (torrentSummary.progress !== 1) sound.play('PLAY')
   torrentSummary.playStatus = 'requested'
   update()
 
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    playInterfaceSound('ERROR')
+    sound.play('ERROR')
     cb(new Error('playback timed out'))
     update()
   }, 10000) /* give it a few seconds */
@@ -902,11 +908,11 @@ function toggleTorrent (infoHash) {
   if (torrentSummary.status === 'paused') {
     torrentSummary.status = 'new'
     startTorrentingSummary(torrentSummary)
-    playInterfaceSound('ENABLE')
+    sound.play('ENABLE')
   } else {
     torrentSummary.status = 'paused'
     ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-    playInterfaceSound('DISABLE')
+    sound.play('DISABLE')
   }
 }
 
@@ -918,7 +924,7 @@ function deleteTorrent (infoHash) {
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveStateThrottled()
   state.location.clearForward() // prevent user from going forward to a deleted torrent
-  playInterfaceSound('DELETE')
+  sound.play('DELETE')
 }
 
 function toggleSelectTorrent (infoHash) {
@@ -1020,7 +1026,7 @@ function restoreBounds () {
 
 function onError (err) {
   console.error(err.stack || err)
-  playInterfaceSound('ERROR')
+  sound.play('ERROR')
   state.errors.push({
     time: new Date().getTime(),
     message: err.message || err
@@ -1042,17 +1048,7 @@ function showDoneNotification (torrent) {
     ipcRenderer.send('focusWindow', 'main')
   }
 
-  playInterfaceSound('DONE')
-}
-
-function playInterfaceSound (name) {
-  var sound = config[`SOUND_${name}`]
-  if (!sound) throw new Error('Invalid sound name')
-
-  var audio = new window.Audio()
-  audio.volume = sound.volume
-  audio.src = sound.url
-  audio.play()
+  sound.play('DONE')
 }
 
 // Finds the longest common prefix
