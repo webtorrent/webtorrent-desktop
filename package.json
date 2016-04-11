@@ -46,7 +46,7 @@
     "electron-packager": "electron-userland/electron-packager",
     "electron-winstaller": "feross/windows-installer#build",
     "gh-release": "^2.0.3",
-    "nobin-debian-installer": "^0.0.8",
+    "nobin-debian-installer": "^0.0.9",
     "plist": "^1.2.0",
     "standard": "^6.0.5"
   },
