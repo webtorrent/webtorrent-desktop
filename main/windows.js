@@ -72,6 +72,10 @@ function createWebTorrentHiddenWindow () {
       win.hide()
     }
   })
+
+  win.once('closed', function () {
+    windows.webtorrent = null
+  })
 }
 
 function createMainWindow () {
