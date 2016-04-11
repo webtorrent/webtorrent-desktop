@@ -85,7 +85,7 @@ function createMainWindow () {
   var win = windows.main = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     darkTheme: true, // Forces dark theme (GTK+3)
-    icon: config.APP_ICON + 'Smaller.png', //Volume Mixer picture.
+    icon: config.APP_ICON + 'Smaller.png', // Window and Volume Mixer icon.
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
     show: false, // Hide window until DOM finishes loading
