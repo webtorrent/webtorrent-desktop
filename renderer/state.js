@@ -1,5 +1,6 @@
-var os = require('os')
-var path = require('path')
+var electron = require('electron')
+
+var app = electron.app
 
 var config = require('../config')
 var LocationHistory = require('./lib/location-history')
@@ -196,6 +197,6 @@ function getDefaultSavedState () {
         ]
       }
     ],
-    downloadPath: path.join(os.homedir(), 'Downloads')
+    downloadPath: app.getPath('downloads')
   }
 }
