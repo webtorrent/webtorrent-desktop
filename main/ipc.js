@@ -87,7 +87,7 @@ function init () {
   var oldEmit = ipcMain.emit
   ipcMain.emit = function (name, e, ...args) {
     // Relay messages between the main window and the WebTorrent hidden window
-    if (name.startsWith('wt-')) {
+    if (name.startsWith('wt-') && !app.isQuitting) {
       if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
         // Send message to main window
         windows.main.send(name, ...args)
