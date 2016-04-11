@@ -1,6 +1,6 @@
 var electron = require('electron')
 
-var app = electron.app
+var remote = electron.remote
 
 var config = require('../config')
 var LocationHistory = require('./lib/location-history')
@@ -197,6 +197,6 @@ function getDefaultSavedState () {
         ]
       }
     ],
-    downloadPath: app.getPath('downloads')
+    downloadPath: remote.app.getPath('downloads')
   }
 }
