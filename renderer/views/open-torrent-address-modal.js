@@ -11,10 +11,11 @@ function OpenTorrentAddressModal (state) {
     <div class='open-torrent-address-modal'>
       <p><strong>Enter torrent address or magnet link</strong></p>
       <p>
-        <input id='add-torrent-url' type='text' autofocus onkeypress=${handleKeyPress} />
+        <input id='add-torrent-url' type='text' onkeypress=${handleKeyPress} />
         <button class='primary' onclick=${handleOK}>OK</button>
         <button class='cancel' onclick=${handleCancel}>Cancel</button>
       </p>
+      <script>document.querySelector('#add-torrent-url').focus()</script>
     </div>
   `
 }
