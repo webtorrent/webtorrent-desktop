@@ -1,5 +1,6 @@
-var os = require('os')
-var path = require('path')
+var electron = require('electron')
+
+var remote = electron.remote
 
 var config = require('../config')
 var LocationHistory = require('./lib/location-history')
@@ -71,7 +72,11 @@ function getDefaultPlayState () {
     isStalled: false,
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0, /* Unix time in ms */
-    playbackRate: 1
+    playbackRate: 1,
+    subtitles: {
+      tracks: [], /* subtitles file (Buffer) */
+      enabled: false
+    }
   }
 }
 
@@ -193,6 +198,6 @@ function getDefaultSavedState () {
         ]
       }
     ],
-    downloadPath: path.join(os.homedir(), 'Downloads')
+    downloadPath: remote.app.getPath('downloads')
   }
 }

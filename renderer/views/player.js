@@ -57,6 +57,23 @@ function renderMedia (state) {
     state.playing.volume = mediaElement.volume
   }
 
+  // Add subtitles to the <video> tag
+  var trackTags = []
+
+  if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
+    for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
+      var track = state.playing.subtitles.tracks[i]
+
+      trackTags.push(hx`
+        <track
+        default=${track.selected ? 'default' : ''}
+        label=${track.language}
+        type='subtitles'
+        src=${track.buffer}>
+      `)
+    }
+  }
+
   // Create the <audio> or <video> tag
   var mediaTag = hx`
     <div
@@ -69,9 +86,10 @@ function renderMedia (state) {
       onstalling=${dispatcher('mediaStalled')}
       ontimeupdate=${dispatcher('mediaTimeUpdate')}
       autoplay>
+      ${trackTags}
     </div>
   `
-  mediaTag.tagName = mediaType
+  mediaTag.tagName = mediaType // conditional tag name
 
   // Show the media.
   return hx`
@@ -239,6 +257,15 @@ function renderPlayerControls (state) {
     `
   ]
 
+  // show closed captions icon
+  elements.push(hx`
+    <i.icon.closed-captions
+      class=${state.playing.subtitles.enabled ? 'active' : 'disabled'}
+      onclick=${handleSubtitles}>
+      closed_captions
+    </i>
+  `)
+
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var isOnChromecast = state.playing.location.startsWith('chromecast')
   var isOnAirplay = state.playing.location.startsWith('airplay')
@@ -391,6 +418,18 @@ function renderPlayerControls (state) {
           volumeChanging = this.value
         }
         break
+    }
+  }
+
+  function handleSubtitles (e) {
+    if (!state.playing.subtitles.tracks.length) {
+      // if no subtitles available select it
+      dispatch('openSubtitles')
+    } else {
+      // TODO: Show subtitles selector / disable
+      // dispatch('showSubtitlesMenu')
+      // meanwhile, just enable/disable
+      state.playing.subtitles.enabled = !state.playing.subtitles.enabled
     }
   }
 }

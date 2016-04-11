@@ -72,6 +72,10 @@ function createWebTorrentHiddenWindow () {
       win.hide()
     }
   })
+
+  win.once('closed', function () {
+    windows.webtorrent = null
+  })
 }
 
 function createMainWindow () {
@@ -106,7 +110,7 @@ function createMainWindow () {
   win.on('close', function (e) {
     if (!electron.app.isQuitting) {
       e.preventDefault()
-      win.send('dispatch', 'pause')
+      win.send('dispatch', 'backToList')
       win.hide()
     }
   })
