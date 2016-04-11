@@ -291,51 +291,59 @@ function buildWin32 (cb) {
 }
 
 function buildLinux (packageType, cb) {
+  var distPath = path.join(config.ROOT_PATH, 'dist')
+
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
-
-    var distPath = path.join(config.ROOT_PATH, 'dist')
 
     for (var i = 0; i < buildPath.length; i++) {
       var filesPath = buildPath[i]
       var destArch = filesPath.split('-').pop()
 
       if (packageType === 'deb' || packageType === 'all') {
-        // Create .deb file for debian based platforms
-        var deb = require('nobin-debian-installer')()
-        var destPath = path.join('/opt', pkg.name)
-
-        deb.pack({
-          package: pkg,
-          info: {
-            arch: destArch === 'x64' ? 'amd64' : 'i386',
-            targetDir: distPath,
-            depends: 'libc6 (>= 2.4)',
-            scripts: {
-              postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
-              prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
-            }
-          }
-        }, [{
-          src: ['./**'],
-          dest: destPath,
-          expand: true,
-          cwd: filesPath
-        }], function (err, done) {
-          if (err) return console.error(err.message || err)
-          console.log('Created Linux ' + destArch + ' .deb file.')
-        })
+        packageDeb(filesPath, destArch)
       }
 
       if (packageType === 'zip' || packageType === 'all') {
-        // Create .zip file for Linux
-        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux-' + destArch + '.zip')
-        var appFolderName = path.basename(filesPath)
-        cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
-        console.log('Created Linux ' + destArch + ' .zip file.')
+        packageZip(filesPath, destArch)
       }
     }
   })
+
+  function packageDeb (filesPath, destArch) {
+    // Create .deb file for debian based platforms
+    var deb = require('nobin-debian-installer')()
+    var destPath = path.join('/opt', pkg.name)
+
+    deb.pack({
+      package: pkg,
+      info: {
+        arch: destArch === 'x64' ? 'amd64' : 'i386',
+        targetDir: distPath,
+        depends: 'libc6 (>= 2.4)',
+        scripts: {
+          postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
+          prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
+        }
+      }
+    }, [{
+      src: ['./**'],
+      dest: destPath,
+      expand: true,
+      cwd: filesPath
+    }], function (err) {
+      if (err) return console.error(err.message || err)
+      console.log('Created Linux ' + destArch + ' .deb file.')
+    })
+  }
+
+  function packageZip (filesPath, destArch) {
+    // Create .zip file for Linux
+    var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux-' + destArch + '.zip')
+    var appFolderName = path.basename(filesPath)
+    cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
+    console.log('Created Linux ' + destArch + ' .zip file.')
+  }
 }
 
 function printDone (err, buildPath) {
