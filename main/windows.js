@@ -110,9 +110,12 @@ function createMainWindow () {
   win.on('close', function (e) {
     if (!electron.app.isQuitting) {
       e.preventDefault()
-      win.send('dispatch', 'backToList')
       win.hide()
     }
+  })
+
+  win.on('hide', function () {
+    win.send('dispatch', 'backToList')
   })
 
   win.once('closed', function () {
