@@ -955,7 +955,7 @@ function openTorrentContextMenu (infoHash) {
   }))
 
   menu.append(new MenuItem({
-    label: 'Copy Torrent infoHash',
+    label: 'Copy Torrent infoHash to clipboard',
     click: () => clipboard.writeText(torrentSummary.infoHash)
   }))
 
