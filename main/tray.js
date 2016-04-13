@@ -1,7 +1,9 @@
 module.exports = {
-  init
+  init,
+  hasTray
 }
 
+var cp = require('child_process')
 var path = require('path')
 var electron = require('electron')
 
@@ -17,6 +19,22 @@ function init () {
   // OS X has no tray icon
   if (process.platform === 'darwin') return
 
+  // On Linux, asynchronously check for libappindicator1
+  if (process.platform === 'linux') {
+    checkLinuxTraySupport(function (supportsTray) {
+      if (supportsTray) createTrayIcon()
+    })
+  }
+
+  // Windows always supports minimize-to-tray
+  if (process.platform === 'win32') createTrayIcon()
+}
+
+function hasTray () {
+  return !!trayIcon
+}
+
+function createTrayIcon () {
   trayIcon = new Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
 
   // On Windows, left click to open the app, right click for context menu
@@ -27,6 +45,18 @@ function init () {
   updateTrayMenu()
   windows.main.on('show', updateTrayMenu)
   windows.main.on('hide', updateTrayMenu)
+}
+
+function checkLinuxTraySupport (cb) {
+  // Check that we're on Ubuntu (or another debian system) and that we have
+  // libappindicator1. If WebTorrent was installed from the deb file, we should
+  // always have it. If it was installed from the zip file, we might not.
+  cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
+    if (err) return cb(false)
+    // Unfortunately there's no cleaner way, as far as I can tell, to check
+    // whether a debian package is installed:
+    cb(stdout.endsWith('\tinstall\n'))
+  })
 }
 
 function updateTrayMenu () {

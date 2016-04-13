@@ -11,6 +11,7 @@ var electron = require('electron')
 
 var config = require('../config')
 var menu = require('./menu')
+var tray = require('./tray')
 
 function createAboutWindow () {
   if (windows.about) {
@@ -108,11 +109,16 @@ function createMainWindow () {
   win.on('leave-full-screen', () => menu.onToggleFullScreen(false))
 
   win.on('close', function (e) {
-    if (!electron.app.isQuitting) {
+    if (process.platform !== 'darwin' && !tray.hasTray()) {
+      electron.app.quit()
+    } else if (!electron.app.isQuitting) {
       e.preventDefault()
-      win.send('dispatch', 'backToList')
       win.hide()
     }
+  })
+
+  win.on('hide', function () {
+    win.send('dispatch', 'backToList')
   })
 
   win.once('closed', function () {
