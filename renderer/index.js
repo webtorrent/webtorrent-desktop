@@ -276,6 +276,9 @@ function dispatch (action, ...args) {
     ipcRenderer.send('blockPowerSave')
   }
   if (action === 'mediaPaused') {
+    // When removing the <video>/<audio> tag to switch to Chromecast, it sends
+    // a false 'paused' event. Ignore that:
+    if (state.playing.location !== 'local') return
     state.playing.isPaused = true
     ipcRenderer.send('unblockPowerSave')
   }
