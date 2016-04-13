@@ -22,7 +22,7 @@
 ## Screenshot
 
 <p align="center">
-  <img src="./static/screenshot.png" width="562" height="630" alt="screenshot" align="center">
+  <img src="https://webtorrent.io/img/screenshot-main.png" width="562" height="630" alt="screenshot" align="center">
 </p>
 
 ## How to Contribute

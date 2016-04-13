@@ -93,10 +93,8 @@ function getDefaultSavedState () {
         torrentPath: 'bigBuckBunny.torrent',
         files: [
           {
-            'name': 'bbb_sunflower_1080p_30fps_normal.mp4',
-            'length': 276134947,
-            'numPiecesPresent': 0,
-            'numPieces': 527
+            length: 276134947,
+            name: 'bbb_sunflower_1080p_30fps_normal.mp4'
           }
         ]
       },
@@ -109,10 +107,8 @@ function getDefaultSavedState () {
         torrentPath: 'sintel.torrent',
         files: [
           {
-            'name': 'sintel.mp4',
-            'length': 129241752,
-            'numPiecesPresent': 0,
-            'numPieces': 987
+            length: 129241752,
+            name: 'sintel.mp4'
           }
         ]
       },
@@ -125,10 +121,8 @@ function getDefaultSavedState () {
         torrentPath: 'tearsOfSteel.torrent',
         files: [
           {
-            'name': 'tears_of_steel_1080p.webm',
-            'length': 571346576,
-            'numPiecesPresent': 0,
-            'numPieces': 2180
+            length: 571346576,
+            name: 'tears_of_steel_1080p.webm'
           }
         ]
       },
@@ -141,58 +135,122 @@ function getDefaultSavedState () {
         torrentPath: 'cosmosLaundromat.torrent',
         files: [
           {
-            'name': 'Cosmos Laundromat - First Cycle (1080p).gif',
-            'length': 223580,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 223580,
+            name: 'Cosmos Laundromat - First Cycle (1080p).gif'
           },
           {
-            'name': 'Cosmos Laundromat - First Cycle (1080p).mp4',
-            'length': 220087570,
-            'numPiecesPresent': 0,
-            'numPieces': 421
+            length: 220087570,
+            name: 'Cosmos Laundromat - First Cycle (1080p).mp4'
           },
           {
-            'name': 'Cosmos Laundromat - First Cycle (1080p).ogv',
-            'length': 56832560,
-            'numPiecesPresent': 0,
-            'numPieces': 109
+            length: 56832560,
+            name: 'Cosmos Laundromat - First Cycle (1080p).ogv'
           },
           {
-            'name': 'CosmosLaundromat-FirstCycle1080p.en.srt',
-            'length': 3949,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 3949,
+            name: 'CosmosLaundromat-FirstCycle1080p.en.srt'
           },
           {
-            'name': 'CosmosLaundromat-FirstCycle1080p.es.srt',
-            'length': 3907,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 3907,
+            name: 'CosmosLaundromat-FirstCycle1080p.es.srt'
           },
           {
-            'name': 'CosmosLaundromat-FirstCycle1080p.fr.srt',
-            'length': 4119,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 4119,
+            name: 'CosmosLaundromat-FirstCycle1080p.fr.srt'
           },
           {
-            'name': 'CosmosLaundromat-FirstCycle1080p.it.srt',
-            'length': 3941,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 3941,
+            name: 'CosmosLaundromat-FirstCycle1080p.it.srt'
           },
           {
-            'name': 'CosmosLaundromatFirstCycle_meta.sqlite',
-            'length': 11264,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 11264,
+            name: 'CosmosLaundromatFirstCycle_meta.sqlite'
           },
           {
-            'name': 'CosmosLaundromatFirstCycle_meta.xml',
-            'length': 1204,
-            'numPiecesPresent': 0,
-            'numPieces': 1
+            length: 1204,
+            name: 'CosmosLaundromatFirstCycle_meta.xml'
+          }
+        ]
+      },
+      {
+        status: 'paused',
+        infoHash: '3ba219a8634bf7bae3d848192b2da75ae995589d',
+        magnetURI: 'magnet:?xt=urn:btih:3ba219a8634bf7bae3d848192b2da75ae995589d&dn=The+WIRED+CD+-+Rip.+Sample.+Mash.+Share.&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F',
+        displayName: 'The WIRED CD - Rip. Sample. Mash. Share.',
+        posterURL: 'wired-cd.jpg',
+        torrentPath: 'wired-cd.torrent',
+        files: [
+          {
+            length: 1964275,
+            name: '01 - Beastie Boys - Now Get Busy.mp3'
+          },
+          {
+            length: 3610523,
+            name: '02 - David Byrne - My Fair Lady.mp3'
+          },
+          {
+            length: 2759377,
+            name: '03 - Zap Mama - Wadidyusay.mp3'
+          },
+          {
+            length: 5816537,
+            name: '04 - My Morning Jacket - One Big Holiday.mp3'
+          },
+          {
+            length: 2106421,
+            name: '05 - Spoon - Revenge!.mp3'
+          },
+          {
+            length: 3347550,
+            name: '06 - Gilberto Gil - Oslodum.mp3'
+          },
+          {
+            length: 2107577,
+            name: '07 - Dan The Automator - Relaxation Spa Treatment.mp3'
+          },
+          {
+            length: 3108130,
+            name: '08 - Thievery Corporation - Dc 3000.mp3'
+          },
+          {
+            length: 3051528,
+            name: '09 - Le Tigre - Fake French.mp3'
+          },
+          {
+            length: 3270259,
+            name: '10 - Paul Westerberg - Looking Up In Heaven.mp3'
+          },
+          {
+            length: 3263528,
+            name: '11 - Chuck D - No Meaning No (feat. Fine Arts Militia).mp3'
+          },
+          {
+            length: 6380952,
+            name: '12 - The Rapture - Sister Saviour (Blackstrobe Remix).mp3'
+          },
+          {
+            length: 6550396,
+            name: '13 - Cornelius - Wataridori 2.mp3'
+          },
+          {
+            length: 3034692,
+            name: '14 - DJ Danger Mouse - What U Sittin\' On (feat. Jemini, Cee Lo And Tha Alkaholiks).mp3'
+          },
+          {
+            length: 3854611,
+            name: '15 - DJ Dolores - Oslodum 2004.mp3'
+          },
+          {
+            length: 1762120,
+            name: '16 - Matmos - Action At A Distance.mp3'
+          },
+          {
+            length: 4071,
+            name: 'README.md'
+          },
+          {
+            length: 78163,
+            name: 'poster.jpg'
           }
         ]
       }
