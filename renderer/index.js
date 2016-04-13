@@ -8,6 +8,7 @@ var fs = require('fs')
 var mainLoop = require('main-loop')
 var path = require('path')
 var srtToVtt = require('srt-to-vtt')
+var LanguageDetect = require('languagedetect')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -266,6 +267,12 @@ function dispatch (action, ...args) {
   }
   if (action === 'openSubtitles') {
     openSubtitles()
+  }
+  if (action === 'selectSubtitle') {
+    selectSubtitle(args[0] /* label */)
+  }
+  if (action === 'showSubtitles') {
+    showSubtitles()
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
@@ -553,15 +560,41 @@ function addSubtitle (file) {
     // Set the cue text position so it appears above the player controls.
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
+    var langDetected = (new LanguageDetect()).detect(buf.toString().replace(/(.*-->.*)/g, ''), 2)
+    console.log(langDetected)
+    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
-      language: 'Language ' + state.playing.subtitles.tracks.length,
+      label: langDetected,
       selected: true
     }
+    state.playing.subtitles.tracks.forEach(function (trackItem) {
+      trackItem.selected = false
+      if (trackItem.label === track.label) {
+        track.label = isNaN(track.label.slice(-1))
+          ? track.label + ' 2'
+          : track.label.slice(0, -1) + (parseInt(track.label.slice(-1)) + 1)
+      }
+    })
+    state.playing.subtitles.change = track.label
     state.playing.subtitles.tracks.push(track)
     state.playing.subtitles.enabled = true
   }))
+}
+
+function selectSubtitle (label) {
+  state.playing.subtitles.tracks.forEach(function (track) {
+    track.selected = (track.label === label)
+  })
+  state.playing.subtitles.enabled = !!label
+  state.playing.subtitles.change = label
+  state.playing.subtitles.show = false
+}
+
+function showSubtitles () {
+  state.playing.subtitles.show = !state.playing.subtitles.show
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object

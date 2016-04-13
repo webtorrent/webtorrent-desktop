@@ -48,6 +48,16 @@ function renderMedia (state) {
       state.playing.setVolume = null
     }
 
+    // fix textTrack cues not been removed <track> rerender
+    if (state.playing.subtitles.change) {
+      var tracks = mediaElement.textTracks
+      for (var j = 0; j < tracks.length; j++) {
+        // mode is not an <track> attribute, only available on DOM
+        tracks[j].mode = (tracks[j].label === state.playing.subtitles.change) ? 'showing' : 'hidden'
+      }
+      state.playing.subtitles.change = null
+    }
+
     state.playing.currentTime = mediaElement.currentTime
     state.playing.duration = mediaElement.duration
     state.playing.volume = mediaElement.volume
@@ -59,13 +69,12 @@ function renderMedia (state) {
   if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
     for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
-
       trackTags.push(hx`
         <track
-        default=${track.selected ? 'default' : ''}
-        label=${track.language}
-        type='subtitles'
-        src=${track.buffer}>
+          ${track.selected ? 'default' : ''}
+          label=${track.label}
+          type='subtitles'
+          src=${track.buffer}>
       `)
     }
   }
@@ -229,9 +238,27 @@ function renderCastScreen (state) {
   `
 }
 
+function renderSubtitlesOptions (state) {
+  var subtitles = state.playing.subtitles
+  if (subtitles.tracks.length && subtitles.show) {
+    return hx`<ul.subtitles-list>
+      ${subtitles.tracks.map(function (w, i) {
+        return hx`<li onclick=${dispatcher('selectSubtitle', w.label)}><i.icon>${w.selected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>${w.label}</li>`
+      })}
+        <li onclick=${dispatcher('selectSubtitle', '')}><i.icon>${!subtitles.enabled ? 'radio_button_checked' : 'radio_button_unchecked'}</i>None</li>
+      </ul>
+    `
+  }
+}
+
 function renderPlayerControls (state) {
   var positionPercent = 100 * state.playing.currentTime / state.playing.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
+  var captionsClass = state.playing.subtitles.tracks.length === 0
+    ? 'disabled'
+    : state.playing.subtitles.enabled
+      ? 'active'
+      : ''
 
   var elements = [
     hx`
@@ -256,7 +283,7 @@ function renderPlayerControls (state) {
     // show closed captions icon
     elements.push(hx`
       <i.icon.closed-captions
-        class=${state.playing.subtitles.enabled ? 'active' : 'disabled'}
+        class=${captionsClass}
         onclick=${handleSubtitles}>
         closed_captions
       </i>
@@ -369,7 +396,12 @@ function renderPlayerControls (state) {
     </i>
   `)
 
-  return hx`<div class='player-controls'>${elements}</div>`
+  return hx`
+    <div class='player-controls'>
+      ${elements}
+      ${renderSubtitlesOptions(state)}
+    </div>
+  `
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
@@ -414,14 +446,11 @@ function renderPlayerControls (state) {
   }
 
   function handleSubtitles (e) {
-    if (!state.playing.subtitles.tracks.length) {
+    if (!state.playing.subtitles.tracks.length || e.ctrlKey || e.metaKey) {
       // if no subtitles available select it
       dispatch('openSubtitles')
     } else {
-      // TODO: Show subtitles selector / disable
-      // dispatch('showSubtitlesMenu')
-      // meanwhile, just enable/disable
-      state.playing.subtitles.enabled = !state.playing.subtitles.enabled
+      dispatch('showSubtitles')
     }
   }
 }
