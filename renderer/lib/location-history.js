@@ -20,7 +20,10 @@ LocationHistory.prototype._go = function (page, cb) {
     page.onbeforeload((err) => {
       if (this._pending !== page) return /* navigation was cancelled */
       this._pending = null
-      if (err) return cb(err)
+      if (err) {
+        if (cb) cb(err)
+        return
+      }
       this._history.push(page)
       if (cb) cb()
     })
