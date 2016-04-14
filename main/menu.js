@@ -70,11 +70,6 @@ function showWebTorrentWindow () {
   windows.webtorrent.webContents.openDevTools({ detach: true })
 }
 
-function addFakeDevice (device) {
-  log('addFakeDevice %s', device)
-  windows.main.send('addFakeDevice', device)
-}
-
 function onWindowShow () {
   log('onWindowShow')
   getMenuItem('Full Screen').enabled = true
@@ -263,17 +258,6 @@ function getAppMenuTemplate () {
                 ? 'Alt+Command+P'
                 : 'Ctrl+Shift+P',
               click: showWebTorrentWindow
-            },
-            {
-              type: 'separator'
-            },
-            {
-              label: 'Add Fake Airplay',
-              click: () => addFakeDevice('airplay')
-            },
-            {
-              label: 'Add Fake Chromecast',
-              click: () => addFakeDevice('chromecast')
             }
           ]
         }
