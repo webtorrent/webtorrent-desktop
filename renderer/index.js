@@ -285,6 +285,11 @@ function dispatch (action, ...args) {
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
   }
+  if (action === 'mediaError') {
+    state.location.back(function () {
+      onError(new Error('Unsupported file format'))
+    })
+  }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
     state.playing.isStalled = false
