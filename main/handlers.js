@@ -194,17 +194,17 @@ function uninstallWin32 () {
       })
       commandKey.get('', function (err, item) {
         if (!err && item.value.indexOf(command) >= 0) {
-          eraseProtocol()
+          destroyProtocol()
         }
       })
     }
 
-    function eraseProtocol () {
+    function destroyProtocol () {
       var protocolKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol
       })
-      protocolKey.erase(function () {})
+      protocolKey.destroy(function () {})
     }
   }
 
@@ -216,7 +216,7 @@ function uninstallWin32 () {
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + id
       })
-      idKey.erase(getExt)
+      idKey.destroy(getExt)
     }
 
     function getExt () {
@@ -226,17 +226,17 @@ function uninstallWin32 () {
       })
       extKey.get('', function (err, item) {
         if (!err && item.value === id) {
-          eraseExt()
+          destroyExt()
         }
       })
     }
 
-    function eraseExt () {
+    function destroyExt () {
       var extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + ext
       })
-      extKey.erase(function () {})
+      extKey.destroy(function () {})
     }
   }
 }
