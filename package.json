@@ -39,7 +39,7 @@
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
     "webtorrent": "0.x",
-    "winreg": "feross/node-winreg"
+    "winreg": "^1.1.1"
   },
   "devDependencies": {
     "electron-osx-sign": "^0.3.0",
