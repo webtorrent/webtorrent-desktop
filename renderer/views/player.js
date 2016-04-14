@@ -4,6 +4,7 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
+var WebChimeraPlayer = require('wcjs-player')
 var prettyBytes = require('prettier-bytes')
 var Bitfield = require('bitfield')
 
@@ -27,7 +28,14 @@ function Player (state) {
 
 function renderMedia (state) {
   if (!state.server) return
+  if (false) return renderMediaTag(state)
+  else return renderMediaVLC(state)
+}
 
+// Renders using a <video> or <audio> tag
+// Handles only a subset of codecs, but it's cleaner and more efficient
+// See renderMediaVLC()
+function renderMediaTag (state) {
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
   var mediaElement = document.querySelector(state.playing.type) /* get the <video> or <audio> tag */
@@ -65,7 +73,6 @@ function renderMedia (state) {
 
   // Add subtitles to the <video> tag
   var trackTags = []
-
   if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
     for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
@@ -112,6 +119,102 @@ function renderMedia (state) {
     var dimensions = {
       width: video.videoWidth,
       height: video.videoHeight
+    }
+    dispatch('setDimensions', dimensions)
+  }
+
+  // When the video completes, pause the video instead of looping
+  function onEnded (e) {
+    state.playing.isPaused = true
+  }
+}
+
+// Renders using WebChimera.js to render using VLC
+// That lets us play media that the <video> tag can't play
+function renderMediaVLC (state) {
+  // Unfortunately, WebChimera can't be done just by modifying HTML.
+  // Instead, grab the DOM node
+  if (document.querySelector('#media-player')) {
+    if (!state.playing.chimera) {
+      state.playing.chimera = new WebChimeraPlayer('#media-player')
+        .addPlayer({
+          autoplay: true,
+          vlcArgs: ['-vvv'],
+          wcjsRendererOptions: {'fallbackRenderer': true}
+        })
+        .onPlaying(dispatcher('mediaPlaying'))
+        .onPaused(dispatcher('mediaPaused'))
+        .onBuffering(dispatcher('mediaStalled'))
+        .onTime(dispatcher('mediaTimeUpdate'))
+        .onEnded(onEnded)
+        .onFrameSetup(onLoadedMetadata)
+        .addPlaylist(state.server.localURL)
+      state.playing.chimera.ui(false)
+    } else {
+      var player = state.playing.chimera
+      if (state.playing.isPaused && player.playing()) {
+        player.pause()
+      } else if (!state.playing.isPaused && !player.playing()) {
+        player.play()
+      }
+      // When the user clicks or drags on the progress bar, jump to that position
+      if (state.playing.jumpToTime) {
+        player.time(state.playing.jumpToTime * 1000) // WebChimera expects milliseconds
+        state.playing.jumpToTime = null
+      }
+      // Set volume
+      if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
+        player.volume(Math.round(state.playing.setVolume * 100)) // WebChimera expects integer percent
+        state.playing.setVolume = null
+      }
+
+      state.playing.currentTime = player.time() / 1000
+      state.playing.duration = player.length() / 1000
+      state.playing.volume = player.volume() / 100
+    }
+  } else {
+    state.playing.chimera = null
+  }
+
+  // Add subtitles to the <video> tag
+  var trackTags = []
+  if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
+    for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
+      var track = state.playing.subtitles.tracks[i]
+      trackTags.push(hx`
+        <track
+        default=${track.selected ? 'default' : ''}
+        label=${track.language}
+        type='subtitles'
+        src=${track.buffer}>
+      `)
+    }
+  }
+
+  // Create the <audio> or <video> tag
+  var mediaType = state.playing.type /* 'video' or 'audio' */
+  var mediaTag = hx`
+    <div id='media-player' class='${mediaType}-player'>
+      ${trackTags}
+    </div>
+  `
+
+  // Show the media.
+  return hx`
+    <div
+      class='letterbox'
+      onmousemove=${dispatcher('mediaMouseMoved')}>
+      ${mediaTag}
+      ${renderOverlay(state)}
+    </div>
+  `
+
+  // As soon as the video loads enough to know the video dimensions, resize the window
+  function onLoadedMetadata (e) {
+    if (mediaType !== 'video') return
+    var dimensions = {
+      width: player.width(),
+      height: player.height()
     }
     dispatch('setDimensions', dimensions)
   }
