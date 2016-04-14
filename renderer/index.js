@@ -254,10 +254,7 @@ function dispatch (action, ...args) {
       },
       onbeforeunload: closePlayer
     })
-    playPause(false)
-  }
-  if (action === 'pause') {
-    playPause(true)
+    play()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -270,17 +267,6 @@ function dispatch (action, ...args) {
   }
   if (action === 'openSubtitles') {
     openSubtitles()
-  }
-  if (action === 'mediaPlaying') {
-    state.playing.isPaused = false
-    ipcRenderer.send('blockPowerSave')
-  }
-  if (action === 'mediaPaused') {
-    // When removing the <video>/<audio> tag to switch to Chromecast, it sends
-    // a false 'paused' event. Ignore that:
-    if (state.playing.location !== 'local') return
-    state.playing.isPaused = true
-    ipcRenderer.send('unblockPowerSave')
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
@@ -330,16 +316,30 @@ function updateAvailable (version) {
   state.modal = { id: 'update-available-modal', version: version }
 }
 
-// Plays or pauses the video. If isPaused is undefined, acts as a toggle
-function playPause (isPaused) {
-  if (isPaused === state.playing.isPaused) {
-    return // Nothing to do
-  }
-  // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
+function play () {
+  if (!state.playing.isPaused) return
+  state.playing.isPaused = false
   if (isCasting()) {
-    Cast.playPause()
+    Cast.play()
   }
-  state.playing.isPaused = !state.playing.isPaused
+  ipcRenderer.send('blockPowerSave')
+}
+
+function pause () {
+  if (state.playing.isPaused) return
+  state.playing.isPaused = true
+  if (isCasting()) {
+    Cast.pause()
+  }
+  ipcRenderer.send('unblockPowerSave')
+}
+
+function playPause () {
+  if (state.playing.isPaused) {
+    play()
+  } else {
+    pause()
+  }
 }
 
 function jumpToTime (time) {

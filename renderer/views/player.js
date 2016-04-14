@@ -78,8 +78,6 @@ function renderMedia (state) {
       ondblclick=${dispatcher('toggleFullScreen')}
       onloadedmetadata=${onLoadedMetadata}
       onended=${onEnded}
-      onplay=${dispatcher('mediaPlaying')}
-      onpause=${dispatcher('mediaPaused')}
       onstalling=${dispatcher('mediaStalled')}
       onerror=${dispatcher('mediaError')}
       ontimeupdate=${dispatcher('mediaTimeUpdate')}
