@@ -957,6 +957,11 @@ function openTorrentContextMenu (infoHash) {
     click: () => clipboard.writeText(torrentSummary.magnetURI)
   }))
 
+  menu.append(new MenuItem({
+    label: 'Copy Torrent infoHash to clipboard',
+    click: () => clipboard.writeText(torrentSummary.infoHash)
+  }))
+
   menu.popup(remote.getCurrentWindow())
 }
 
