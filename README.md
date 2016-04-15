@@ -50,12 +50,15 @@ $ npm run package
 To build for one platform:
 
 ```
-$ npm run package -- [platform] [package-type]
+$ npm run package -- [platform]
 ```
 
-Where `[platform]` is `darwin`, `linux`, or `win32`
+Where `[platform]` is `darwin`, `linux`, `win32`, or `all` (default).
 
-and `[package-type]` is `all` (default), `deb` or `zip` (`linux` platform only)
+The following optional arguments are available:
+
+- `--package=[type]` - Package only one output file. `type` is `deb`, `dmg`, `zip`, or `all` (default)
+- `--sign` - Sign the application (OS X, Windows)
 
 #### Windows build notes
 
