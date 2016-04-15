@@ -346,6 +346,25 @@ function dispatch (action, ...args) {
   if (action === 'exitModal') {
     state.modal = null
   }
+  if (action === 'preferences') {
+    state.location.go({
+      url: 'preferences',
+      onbeforeload: function (cb) {
+        // initialize preferences
+        state.window.title = 'Preferences'
+        state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
+        cb()
+      },
+      onbeforeunload: function (cb) {
+        // save state after preferences
+        savePreferences()
+        cb()
+      }
+    })
+  }
+  if (action === 'updatePreferences') {
+    updatePreferences(args[0], args[1] /* property, value */)
+  }
   if (action === 'updateAvailable') {
     updateAvailable(args[0] /* version */)
   }
@@ -523,6 +542,23 @@ function resumeTorrents () {
     .forEach((x) => startTorrentingSummary(x))
 }
 
+function updatePreferences (property, value) {
+  var path = property.split('.')
+  var key = state.unsaved.prefs
+  for (var i = 0; i < path.length - 1; i++) {
+    if (typeof key[path[i]] === 'undefined') {
+      key[path[i]] = {}
+    }
+    key = key[path[i]]
+  }
+  key[path[i]] = value
+}
+
+function savePreferences () {
+  state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
+  saveState()
+}
+
 // Don't write state.saved to file more than once a second
 function saveStateThrottled () {
   if (state.saveStateTimeout) return
@@ -620,7 +656,7 @@ var instantIoRegex = /^(https:\/\/)?instant\.io\/#/
 function addTorrent (torrentId) {
   backToList()
   var torrentKey = state.nextTorrentKey++
-  var path = state.saved.downloadPath
+  var path = state.saved.prefs.downloadPath
   if (torrentId.path) {
     // Use path string instead of W3C File object
     torrentId = torrentId.path
@@ -742,7 +778,7 @@ function startTorrentingSummary (torrentSummary) {
   if (!s.torrentKey) s.torrentKey = state.nextTorrentKey++
 
   // Use Downloads folder by default
-  var path = s.path || state.saved.downloadPath
+  var path = s.path || state.saved.prefs.downloadPath
 
   var torrentID
   if (s.torrentFileName) { // Load torrent file from disk
@@ -1191,7 +1227,7 @@ function saveTorrentFileAs (torrentSummary) {
   var newFileName = `${path.parse(torrentSummary.name).name}.torrent`
   var opts = {
     title: 'Save Torrent File',
-    defaultPath: path.join(state.saved.downloadPath, newFileName),
+    defaultPath: path.join(state.saved.prefs.downloadPath, newFileName),
     filters: [
       { name: 'Torrent Files', extensions: ['torrent'] },
       { name: 'All Files', extensions: ['*'] }

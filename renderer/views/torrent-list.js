@@ -142,7 +142,8 @@ function TorrentList (state) {
     // of the play button, unless already showing a spinner there:
     var positionElem
     var willShowSpinner = torrentSummary.playStatus === 'requested'
-    var defaultFile = torrentSummary.files[torrentSummary.defaultPlayFileIndex]
+    var defaultFile = torrentSummary.files &&
+      torrentSummary.files[torrentSummary.defaultPlayFileIndex]
     if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
       var fraction = defaultFile.currentTime / defaultFile.duration
       positionElem = renderRadialProgressBar(fraction, 'radial-progress-large')

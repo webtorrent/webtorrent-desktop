@@ -8,7 +8,8 @@ var Header = require('./header')
 var Views = {
   'home': require('./torrent-list'),
   'player': require('./player'),
-  'create-torrent': require('./create-torrent-page')
+  'create-torrent': require('./create-torrent-page'),
+  'preferences': require('./preferences')
 }
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
