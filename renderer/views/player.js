@@ -30,8 +30,7 @@ function renderMedia (state) {
 
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
-  var mediaType = state.playing.type /* 'audio' or 'video' */
-  var mediaElement = document.querySelector(mediaType) /* get the <video> or <audio> tag */
+  var mediaElement = document.querySelector(state.playing.type) /* get the <video> or <audio> tag */
   if (mediaElement !== null) {
     if (state.playing.isPaused && !mediaElement.paused) {
       mediaElement.pause()
@@ -85,7 +84,7 @@ function renderMedia (state) {
       ${trackTags}
     </div>
   `
-  mediaTag.tagName = mediaType // conditional tag name
+  mediaTag.tagName = state.playing.type // conditional tag name
 
   // Show the media.
   return hx`
@@ -99,7 +98,7 @@ function renderMedia (state) {
 
   // As soon as the video loads enough to know the video dimensions, resize the window
   function onLoadedMetadata (e) {
-    if (mediaType !== 'video') return
+    if (state.playing.type !== 'video') return
     var video = e.target
     var dimensions = {
       width: video.videoWidth,
@@ -253,14 +252,16 @@ function renderPlayerControls (state) {
     `
   ]
 
-  // show closed captions icon
-  elements.push(hx`
-    <i.icon.closed-captions
-      class=${state.playing.subtitles.enabled ? 'active' : 'disabled'}
-      onclick=${handleSubtitles}>
-      closed_captions
-    </i>
-  `)
+  if (state.playing.type === 'video') {
+    // show closed captions icon
+    elements.push(hx`
+      <i.icon.closed-captions
+        class=${state.playing.subtitles.enabled ? 'active' : 'disabled'}
+        onclick=${handleSubtitles}>
+        closed_captions
+      </i>
+    `)
+  }
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var isOnChromecast = state.playing.location.startsWith('chromecast')
