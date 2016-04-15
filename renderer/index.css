@@ -707,6 +707,7 @@ body.drag .app::after {
   margin-top: 8px !important;
 }
 
+.player-controls .closed-captions.active,
 .player-controls .device.active {
   color: #9af;
 }
@@ -787,6 +788,29 @@ body.drag .app::after {
 
 .cast-screen .cast-type {
   font-weight: bold;
+}
+
+/*
+ * Subtitles list
+ */
+
+.subtitles-list {
+  position: fixed;
+  background: rgba(40, 40, 40, 0.8);
+  min-width: 100px;
+  bottom: 45px;
+  right: 3px;
+  transition: opacity 0.15s ease-out;
+  padding: 5px 10px;
+  border-radius: 3px;
+  margin: 0;
+  list-style-type: none;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.subtitles-list i {
+  font-size: 11px; /* make the cast icons less huge */
+  margin-right: 4px !important;
 }
 
 /*
