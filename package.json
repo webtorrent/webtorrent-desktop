@@ -47,6 +47,7 @@
     "electron-packager": "^6.0.2",
     "electron-winstaller": "feross/windows-installer#build",
     "gh-release": "^2.0.3",
+    "minimist": "^1.2.0",
     "nobin-debian-installer": "^0.0.9",
     "plist": "^1.2.0",
     "standard": "^6.0.5"
@@ -71,7 +72,6 @@
   "scripts": {
     "clean": "node ./bin/clean.js",
     "package": "npm install && npm prune && npm dedupe && node ./bin/package.js",
-    "size": "npm run package -- darwin && du -ch dist/WebTorrent-darwin-x64 | grep total",
     "start": "electron .",
     "test": "standard",
     "update-authors": "./bin/update-authors.sh"
