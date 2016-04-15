@@ -4,7 +4,6 @@ var cfg = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
-var EventEmitter = require('events')
 var fs = require('fs')
 var mainLoop = require('main-loop')
 var path = require('path')
@@ -400,13 +399,6 @@ function setupIpc () {
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
     state.window.isFullScreen = isFullScreen
-    update()
-  })
-
-  ipcRenderer.on('addFakeDevice', function (e, device) {
-    var player = new EventEmitter()
-    player.play = (networkURL) => console.log(networkURL)
-    state.devices[device] = player
     update()
   })
 
