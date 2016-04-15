@@ -561,7 +561,6 @@ function addSubtitle (file) {
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
     var langDetected = (new LanguageDetect()).detect(buf.toString().replace(/(.*-->.*)/g, ''), 2)
-    console.log(langDetected)
     langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
     langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
@@ -573,7 +572,7 @@ function addSubtitle (file) {
     state.playing.subtitles.tracks.forEach(function (trackItem) {
       trackItem.selected = false
       if (trackItem.label === track.label) {
-        track.label = isNaN(track.label.slice(-1))
+        track.label = Number.isNaN(track.label.slice(-1))
           ? track.label + ' 2'
           : track.label.slice(0, -1) + (parseInt(track.label.slice(-1)) + 1)
       }
