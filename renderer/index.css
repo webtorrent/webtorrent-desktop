@@ -912,6 +912,176 @@ video::-webkit-media-text-track-container {
 }
 
 /*
+ * Preferences page, based on Atom settings style
+ */
+
+.preferences {
+  font-size: 12px;
+  line-height: calc(10/7);
+}
+
+.preferences .text {
+  color: #a8a8a8;
+}
+
+.preferences .icon {
+  color: rgba(170, 170, 170, 0.6);
+  font-size: 16px;
+  margin-right: 0.2em;
+}
+
+.preferences .btn {
+  display: inline-block;
+  -webkit-appearance: button;
+  margin: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  border-color: #cccccc;
+  border-radius: 3px;
+  color: #9da5b4;
+  text-shadow: none;
+  border: 1px solid #181a1f;
+  background-color: #3d3d3d;
+  white-space: initial;
+  font-size: 0.889em;
+  line-height: 1;
+  padding: 0.5em 0.75em;
+}
+
+.preferences .btn .icon {
+  margin: 0;
+  color: #a8a8a8;
+  cursor: pointer;
+}
+
+.preferences .help .icon {
+  vertical-align: sub;
+}
+
+
+.preferences .preferences-panel .control-group + .control-group {
+  margin-top: 1.5em;
+}
+
+.preferences .section {
+  padding: 20px;
+  border-top: 1px solid #181a1f;
+}
+
+.preferences .section:first {
+  border-top: 0px;
+}
+
+.preferences .section:first-child,
+.preferences .section:last-child {
+  padding: 20px;
+}
+
+.preferences .section.section:empty {
+  padding: 0;
+  border-top: none;
+}
+
+.preferences .section-container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.preferences section .section-heading,
+.preferences .section .section-heading {
+  margin-bottom: 10px;
+  color: #dcdcdc;
+  font-size: 1.75em;
+  font-weight: bold;
+  line-height: 1;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.preferences .sub-section-heading.icon:before,
+.preferences .section-heading.icon:before {
+  margin-right: 8px;
+}
+
+.preferences .section-heading-count {
+  margin-left: .5em;
+}
+
+.preferences .section-body {
+  margin-top: 20px;
+}
+
+.preferences .sub-section {
+  margin: 20px 0;
+}
+
+.preferences .sub-section .sub-section-heading {
+  color: #dcdcdc;
+  font-size: 1.4em;
+  font-weight: bold;
+  line-height: 1;
+  -webkit-user-select: none;
+}
+
+.preferences .preferences-panel label {
+  color: #a8a8a8;
+}
+
+.preferences .preferences-panel .control-group + .control-group {
+  margin-top: 1.5em;
+}
+
+.preferences .preferences-panel .control-group .editor-container {
+  margin: 0;
+}
+
+.preferences .preference-title {
+  font-size: 1.2em;
+  -webkit-user-select: none;
+  display: inline-block;
+}
+
+.preferences .preference-description {
+    color: rgba(170, 170, 170, 0.6);
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+.preferences input {
+  font-size: 1.1em;
+  line-height: 1.15em;
+  max-height: none;
+  width: 100%;
+  padding-left: 0.5em;
+  border-radius: 3px;
+  color: #a8a8a8;
+  border: 1px solid #181a1f;
+  background-color: #1b1d23;
+}
+
+.preferences input::-webkit-input-placeholder {
+  color: rgba(170, 170, 170, 0.6);
+}
+
+.preferences .control-group input {
+  margin-top: 0.2em;
+}
+
+.preferences .control-group input.file-picker-text {
+  width: calc(100% - 40px);
+}
+
+.preferences .control-group .checkbox .icon {
+  font-size: 1.5em;
+  margin: 0;
+  vertical-align: text-bottom;;
+  cursor: pointer;
+}
+
+
+/*
  * MEDIA OVERLAY / AUDIO DETAILS
  */
 

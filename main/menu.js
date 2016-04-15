@@ -116,6 +116,11 @@ function decreasePlaybackRate () {
   }
 }
 
+// Open the preferences window
+function showPreferences () {
+  windows.main.send('dispatch', 'preferences')
+}
+
 function onWindowShow () {
   log('onWindowShow')
   getMenuItem('Full Screen').enabled = true
@@ -269,6 +274,14 @@ function getAppMenuTemplate () {
           label: 'Select All',
           accelerator: 'CmdOrCtrl+A',
           role: 'selectall'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Preferences',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => showPreferences()
         }
       ]
     },
@@ -407,6 +420,14 @@ function getAppMenuTemplate () {
         {
           label: 'About ' + config.APP_NAME,
           role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Preferences',
+          accelerator: 'Cmd+,',
+          click: () => showPreferences()
         },
         {
           type: 'separator'

@@ -266,9 +266,11 @@ function getDefaultSavedState () {
         ]
       }
     ],
-    downloadPath: config.IS_PORTABLE
-      ? path.join(config.CONFIG_PATH, 'Downloads')
-      : remote.app.getPath('downloads')
+    prefs: {
+      downloadPath: config.IS_PORTABLE
+        ? path.join(config.CONFIG_PATH, 'Downloads')
+        : remote.app.getPath('downloads')
+    }
   }
 }
 
