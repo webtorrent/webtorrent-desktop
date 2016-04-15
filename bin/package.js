@@ -163,6 +163,16 @@ var linux = {
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
+/*
+ * Print a large warning when signing is disabled so we are less likely to accidentally
+ * ship unsigned binaries to users.
+ */
+process.on('exit', function () {
+  if (!argv.sign) {
+    printWarning()
+  }
+})
+
 build()
 
 function buildDarwin (cb) {
@@ -220,8 +230,11 @@ function buildDarwin (cb) {
           pack()
         })
       } else {
+        printWarning()
         pack()
       }
+    } else {
+      printWarning()
     }
 
     function signApp (cb) {
@@ -322,11 +335,17 @@ function buildWin32 (cb) {
     console.log('Windows: Packaged electron.')
 
     var signWithParams
-    if (argv.sign) {
-      var certificateFile = path.join(CERT_PATH, 'authenticode.p12')
-      var certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
-      var timestampServer = 'http://timestamp.comodoca.com'
-      signWithParams = `/a /f "${certificateFile}" /p "${certificatePassword}" /tr "${timestampServer}" /td sha256`
+    if (process.platform === 'win32') {
+      if (argv.sign) {
+        var certificateFile = path.join(CERT_PATH, 'authenticode.p12')
+        var certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
+        var timestampServer = 'http://timestamp.comodoca.com'
+        signWithParams = `/a /f "${certificateFile}" /p "${certificatePassword}" /tr "${timestampServer}" /td sha256`
+      } else {
+        printWarning()
+      }
+    } else {
+      printWarning()
     }
 
     console.log('Windows: Creating installer...')
@@ -420,12 +439,6 @@ function printDone (err, buildPath) {
   else console.log('Built ' + buildPath[0])
 }
 
-/*
- * Print a large warning when signing is disabled so we are less likely to accidentally
- * ship unsigned binaries to users.
- */
-process.on('exit', function () {
-  if (!argv.sign) {
-    console.log(fs.readFileSync(path.join(__dirname, 'warning.txt'), 'utf8'))
-  }
-})
+function printWarning () {
+  console.log(fs.readFileSync(path.join(__dirname, 'warning.txt'), 'utf8'))
+}
