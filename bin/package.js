@@ -273,8 +273,9 @@ function buildDarwin (cb) {
       // Create .zip file (used by the auto-updater)
       console.log('OS X: Creating zip...')
 
-      var zipPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
-      cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
+      var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
+      var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
+      zip(inPath, outPath)
 
       console.log('OS X: Created zip.')
     }
@@ -386,9 +387,9 @@ function buildWin32 (cb) {
       var portablePath = path.join(buildPath[0], 'Portable Settings')
       mkdirp.sync(portablePath)
 
-      var buildName = path.basename(buildPath[0])
-      var zipPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
-      cp.execSync(`cd ${DIST_PATH} && zip -r -y ${zipPath} ${buildName}`)
+      var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
+      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
+      zip(inPath, outPath)
 
       console.log('Windows: Created portable app.')
       cb(null)
@@ -450,10 +451,9 @@ function buildLinux (cb) {
     // Create .zip file for Linux
     console.log(`Linux: Creating ${destArch} zip...`)
 
-    var zipPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
-    var buildName = path.basename(filesPath)
-
-    cp.execSync(`cd ${DIST_PATH} && zip -r -y ${zipPath} ${buildName}`)
+    var inPath = path.join(DIST_PATH, path.basename(filesPath))
+    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
+    zip(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)
     cb(null)
@@ -464,6 +464,20 @@ function printDone (err) {
   if (err) console.error(err.message || err)
 }
 
+/*
+ * Print a large warning when signing is disabled so we are less likely to accidentally
+ * ship unsigned binaries to users.
+ */
 function printWarning () {
   console.log(fs.readFileSync(path.join(__dirname, 'warning.txt'), 'utf8'))
+}
+
+function zip (inPath, outPath) {
+  if (process.platform === 'win32') {
+    cp.execSync(`powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('${outPath}', '${inPath}'); }"`)
+  } else {
+    var dirPath = path.dirname(inPath)
+    var fileName = path.basename(inPath)
+    cp.execSync(`cd ${dirPath} && zip -r -y ${outPath} ${fileName}`)
+  }
 }
