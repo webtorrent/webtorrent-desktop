@@ -1,5 +1,6 @@
 var applicationConfigPath = require('application-config-path')
 var path = require('path')
+var pathExists = require('path-exists')
 
 var APP_NAME = 'WebTorrent'
 var APP_TEAM = 'The WebTorrent Project'
@@ -20,9 +21,9 @@ module.exports = {
 
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
 
-  CONFIG_PATH: applicationConfigPath(APP_NAME),
-  CONFIG_POSTER_PATH: path.join(applicationConfigPath(APP_NAME), 'Posters'),
-  CONFIG_TORRENT_PATH: path.join(applicationConfigPath(APP_NAME), 'Torrents'),
+  CONFIG_PATH: getConfigPath(),
+  CONFIG_POSTER_PATH: path.join(getConfigPath(), 'Posters'),
+  CONFIG_TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
 
   GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/feross/webtorrent-desktop/master',
@@ -53,4 +54,14 @@ function isProduction () {
   if (process.platform === 'linux') {
     return !/\/electron$/.test(process.execPath)
   }
+}
+
+function getConfigPath () {
+  if (process.platform === 'win32' && isProduction()) {
+    var portablePath = path.join(path.dirname(process.execPath), 'Portable Settings')
+    if (pathExists(portablePath)) {
+      return portablePath
+    }
+  }
+  return applicationConfigPath(APP_NAME)
 }
