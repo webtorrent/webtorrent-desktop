@@ -38,7 +38,7 @@ if (!shouldQuit) {
 
 function init () {
   if (config.IS_PORTABLE) {
-    app.setPath('userData', config.PORTABLE_PATH)
+    app.setPath('userData', config.CONFIG_PATH)
   }
 
   app.ipcReady = false // main window has finished loading and IPC is ready

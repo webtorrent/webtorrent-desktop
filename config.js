@@ -33,7 +33,6 @@ module.exports = {
   IS_PORTABLE: isPortable(),
   IS_PRODUCTION: isProduction(),
 
-  PORTABLE_PATH: PORTABLE_PATH,
   ROOT_PATH: __dirname,
   STATIC_PATH: path.join(__dirname, 'static'),
 
