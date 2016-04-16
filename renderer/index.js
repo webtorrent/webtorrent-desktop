@@ -64,8 +64,10 @@ function init () {
   // Push the first page into the location history
   state.location.go({ url: 'home' })
 
-  initWebTorrent()
+  // Restart everything we were torrenting last time the app ran
+  resumeTorrents()
 
+  // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, 5000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
@@ -79,6 +81,11 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
+  // Calling update() updates the UI given the current state
+  // Do this at least once a second to give every file in every torrentSummary
+  // a progress bar and to keep the cursor in sync when playing a video
+  setInterval(update, 1000)
+
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', (files) => dispatch('onOpen', files))
@@ -87,31 +94,11 @@ function init () {
   document.addEventListener('paste', onPaste)
 
   // ...keyboard shortcuts
-  document.addEventListener('keydown', function (e) {
-    if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-      if (state.modal) {
-        dispatch('exitModal')
-      } else if (state.window.isFullScreen) {
-        dispatch('toggleFullScreen')
-      } else {
-        dispatch('back')
-      }
-    } else if (e.which === 32) { /* spacebar pauses or plays the video */
-      dispatch('playPause')
-    }
-  })
+  document.addEventListener('keydown', onKeyDown)
 
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
-  window.addEventListener('focus', function () {
-    state.window.isFocused = true
-    state.dock.badge = 0
-    update()
-  })
-
-  window.addEventListener('blur', function () {
-    state.window.isFocused = false
-    update()
-  })
+  window.addEventListener('focus', onFocus)
+  window.addEventListener('blur', onBlur)
 
   // Listen for messages from the main process
   setupIpc()
@@ -134,17 +121,6 @@ function lazyLoadCast () {
     Cast.init(state, update) // Search the local network for Chromecast and Airplays
   }
   return Cast
-}
-
-// Talk to WebTorrent process, resume torrents, start monitoring torrent progress
-function initWebTorrent () {
-  // Restart everything we were torrenting last time the app ran
-  resumeTorrents()
-
-  // Calling update() updates the UI given the current state
-  // Do this at least once a second to give every file in every torrentSummary
-  // a progress bar and to keep the cursor in sync when playing a video
-  setInterval(update, 1000)
 }
 
 // This is the (mostly) pure function from state -> UI. Returns a virtual DOM
@@ -523,17 +499,6 @@ function not (test) {
   return function (...args) {
     return !test(...args)
   }
-}
-
-function onPaste (e) {
-  if (e.target.tagName.toLowerCase() === 'input') return
-
-  var torrentIds = clipboard.readText().split('\n')
-  torrentIds.forEach(function (torrentId) {
-    torrentId = torrentId.trim()
-    if (torrentId.length === 0) return
-    dispatch('addTorrent', torrentId)
-  })
 }
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
@@ -1061,20 +1026,6 @@ function restoreBounds () {
   }
 }
 
-function onError (err) {
-  console.error(err.stack || err)
-  sound.play('ERROR')
-  state.errors.push({
-    time: new Date().getTime(),
-    message: err.message || err
-  })
-  update()
-}
-
-function onWarning (err) {
-  console.log('warning: %s', err.message || err)
-}
-
 function showDoneNotification (torrent) {
   var notif = new window.Notification('Download Complete', {
     body: torrent.name,
@@ -1115,4 +1066,55 @@ function showOrHidePlayerControls () {
     return true
   }
   return false
+}
+
+// Event handlers
+function onError (err) {
+  console.error(err.stack || err)
+  sound.play('ERROR')
+  state.errors.push({
+    time: new Date().getTime(),
+    message: err.message || err
+  })
+  update()
+}
+
+function onWarning (err) {
+  console.log('warning: %s', err.message || err)
+}
+
+function onPaste (e) {
+  if (e.target.tagName.toLowerCase() === 'input') return
+
+  var torrentIds = clipboard.readText().split('\n')
+  torrentIds.forEach(function (torrentId) {
+    torrentId = torrentId.trim()
+    if (torrentId.length === 0) return
+    dispatch('addTorrent', torrentId)
+  })
+}
+
+function onKeyDown (e) {
+  if (e.which === 27) { /* ESC means either exit fullscreen or go back */
+    if (state.modal) {
+      dispatch('exitModal')
+    } else if (state.window.isFullScreen) {
+      dispatch('toggleFullScreen')
+    } else {
+      dispatch('back')
+    }
+  } else if (e.which === 32) { /* spacebar pauses or plays the video */
+    dispatch('playPause')
+  }
+}
+
+function onFocus (e) {
+  state.window.isFocused = true
+  state.dock.badge = 0
+  update()
+}
+
+function onBlur () {
+  state.window.isFocused = false
+  update()
 }
