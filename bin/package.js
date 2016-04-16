@@ -269,23 +269,19 @@ function buildDarwin (cb) {
     }
 
     function pack (cb) {
-      var tasks = []
-      if (argv.package === 'zip' || argv.package === 'all') {
-        tasks.push(packageZip)
-      }
+      packageZip() // always produce .zip file, used for automatic updates
+
       if (argv.package === 'dmg' || argv.package === 'all') {
-        tasks.push(packageDmg)
+        packageDmg(cb)
       }
-      series(tasks, cb)
     }
 
-    function packageZip (cb) {
+    function packageZip () {
       // Create .zip file (used by the auto-updater)
       var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-darwin.zip')
       console.log('OS X: Creating zip...')
       cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
       console.log('OS X: Created zip.')
-      cb(null)
     }
 
     function packageDmg (cb) {
@@ -352,29 +348,43 @@ function buildWin32 (cb) {
       printWarning()
     }
 
-    console.log('Windows: Creating installer...')
-    installer.createWindowsInstaller({
-      appDirectory: buildPath[0],
-      authors: config.APP_TEAM,
-      description: config.APP_NAME,
-      exe: config.APP_NAME + '.exe',
-      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
-      loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
-      name: config.APP_NAME,
-      noMsi: true,
-      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
-      productName: config.APP_NAME,
-      remoteReleases: config.GITHUB_URL,
-      setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
-      setupIcon: config.APP_ICON + '.ico',
-      signWithParams: signWithParams,
-      title: config.APP_NAME,
-      usePackageJson: false,
-      version: pkg.version
-    }).then(function () {
-      console.log('Windows: Created installer.')
+    var tasks = []
+    if (argv.package === 'exe' || argv.package === 'all') {
+      tasks.push((cb) => packageInstaller(cb))
+    }
+    if (argv.package === 'portable' || argv.package === 'all') {
+      tasks.push((cb) => packagePortable(cb))
+    }
+
+    function packageInstaller (cb) {
+      console.log('Windows: Creating installer...')
+      installer.createWindowsInstaller({
+        appDirectory: buildPath[0],
+        authors: config.APP_TEAM,
+        description: config.APP_NAME,
+        exe: config.APP_NAME + '.exe',
+        iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
+        loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+        name: config.APP_NAME,
+        noMsi: true,
+        outputDirectory: path.join(config.ROOT_PATH, 'dist'),
+        productName: config.APP_NAME,
+        remoteReleases: config.GITHUB_URL,
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+        setupIcon: config.APP_ICON + '.ico',
+        signWithParams: signWithParams,
+        title: config.APP_NAME,
+        usePackageJson: false,
+        version: pkg.version
+      }).then(function () {
+        console.log('Windows: Created installer.')
+        cb(null)
+      }).catch(cb)
+    }
+
+    function packagePortable (cb) {
       cb(null)
-    }).catch(cb)
+    }
   })
 }
 
