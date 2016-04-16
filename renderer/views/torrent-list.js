@@ -141,7 +141,7 @@ function TorrentList (state) {
     var playButton
     if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
       playButton = hx`
-        <i.btn.icon.play
+        <i.button-round.icon.play
           title=${playTooltip}
           class=${playClass}
           onclick=${dispatcher('play', infoHash)}>
@@ -153,7 +153,7 @@ function TorrentList (state) {
     return hx`
       <div class='buttons'>
         ${playButton}
-        <i.btn.icon.download
+        <i.button-round.icon.download
           class=${torrentSummary.status}
           title=${downloadTooltip}
           onclick=${dispatcher('toggleTorrent', infoHash)}>
