@@ -57,8 +57,16 @@ Where `[platform]` is `darwin`, `linux`, `win32`, or `all` (default).
 
 The following optional arguments are available:
 
-- `--package=[type]` - Package only one output file. `type` is `deb`, `dmg`, `zip`, or `all` (default)
 - `--sign` - Sign the application (OS X, Windows)
+- `--package=[type]` - Package single output type.
+   - `deb` - Debian package
+   - `zip` - Linux zip file
+   - `dmg` - OS X disk image
+   - `exe` - Windows installer
+   - `portable` - Windows portable app
+   - `all` - All platforms (default)
+
+Note: Even with the `--package` option, the auto-update files (.nupkg for Windows, *-darwin.zip for OS X) will always be produced.
 
 #### Windows build notes
 

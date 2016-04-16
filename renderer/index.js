@@ -1,6 +1,6 @@
 console.time('init')
 
-var cfg = require('application-config')('WebTorrent')
+var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
@@ -25,6 +25,8 @@ var util = require('./util')
 
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
+
+appConfig.filePath = config.CONFIG_PATH + path.sep + 'config.json'
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -425,9 +427,9 @@ function setupIpc () {
 
 // Load state.saved from the JSON state file
 function loadState (cb) {
-  cfg.read(function (err, data) {
+  appConfig.read(function (err, data) {
     if (err) console.error(err)
-    console.log('loaded state from ' + cfg.filePath)
+    console.log('loaded state from ' + appConfig.filePath)
 
     // populate defaults if they're not there
     state.saved = Object.assign({}, State.getDefaultSavedState(), data)
@@ -457,7 +459,7 @@ function saveStateThrottled () {
 
 // Write state.saved to the JSON state file
 function saveState () {
-  console.log('saving state to ' + cfg.filePath)
+  console.log('saving state to ' + appConfig.filePath)
 
   // Clean up, so that we're not saving any pending state
   var copy = Object.assign({}, state.saved)
@@ -479,7 +481,7 @@ function saveState () {
       return torrent
     })
 
-  cfg.write(copy, function (err) {
+  appConfig.write(copy, function (err) {
     if (err) console.error(err)
     ipcRenderer.send('savedState')
   })
