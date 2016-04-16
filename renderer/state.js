@@ -1,4 +1,5 @@
 var electron = require('electron')
+var path = require('path')
 
 var remote = electron.remote
 
@@ -255,6 +256,8 @@ function getDefaultSavedState () {
         ]
       }
     ],
-    downloadPath: remote.app.getPath('downloads')
+    downloadPath: config.IS_PORTABLE
+      ? path.join(config.CONFIG_PATH, 'Downloads')
+      : remote.app.getPath('downloads')
   }
 }
