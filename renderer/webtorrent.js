@@ -159,9 +159,10 @@ function getTorrentFileInfo (file) {
 function saveTorrentFile (torrentKey) {
   var torrent = getTorrent(torrentKey)
   checkIfTorrentFileExists(torrent.infoHash, function (torrentPath, exists) {
+    var fileName = torrent.infoHash + '.torrent'
     if (exists) {
       // We've already saved the file
-      return ipc.send('wt-file-saved', torrentKey, torrentPath)
+      return ipc.send('wt-file-saved', torrentKey, fileName)
     }
 
     // Otherwise, save the .torrent file, under the app config folder
@@ -169,7 +170,7 @@ function saveTorrentFile (torrentKey) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
-        return ipc.send('wt-file-saved', torrentKey, torrentPath)
+        return ipc.send('wt-file-saved', torrentKey, fileName)
       })
     })
   })
@@ -193,11 +194,12 @@ function generateTorrentPoster (torrentKey) {
     // save it for next time
     mkdirp(config.CONFIG_POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + extension)
+      var posterFileName = torrent.infoHash + extension
+      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, posterFileName)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster
-        ipc.send('wt-poster', torrentKey, posterFilePath)
+        ipc.send('wt-poster', torrentKey, posterFileName)
       })
     })
   })

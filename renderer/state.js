@@ -45,6 +45,7 @@ function getInitialState () {
     /*
      * Saved state is read from and written to a file every time the app runs.
      * It should be simple and minimal and must be JSON.
+     * It must never contain absolute paths since we have a portable app.
      *
      * Config path:
      *

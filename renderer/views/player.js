@@ -7,7 +7,7 @@ var hx = hyperx(h)
 var prettyBytes = require('prettier-bytes')
 var Bitfield = require('bitfield')
 
-var util = require('../util')
+var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -499,10 +499,9 @@ function renderLoadingBar (state) {
 // Returns the CSS background-image string for a poster image + dark vignette
 function cssBackgroundImagePoster (state) {
   var torrentSummary = getPlayingTorrentSummary(state)
-  if (!torrentSummary || !torrentSummary.posterURL) return ''
-  var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
-  var cleanURL = posterURL.replace(/\\/g, '/')
-  return cssBackgroundImageDarkGradient() + `, url(${cleanURL})`
+  var posterPath = TorrentSummary.getPosterPath(torrentSummary)
+  if (!posterPath) return ''
+  return cssBackgroundImageDarkGradient() + `, url(${posterPath})`
 }
 
 function cssBackgroundImageDarkGradient () {
