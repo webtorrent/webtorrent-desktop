@@ -1,4 +1,4 @@
-var applicationConfigPath = require('application-config-path')
+var appConfig = require('application-config')('WebTorrent')
 var path = require('path')
 var pathExists = require('path-exists')
 
@@ -63,5 +63,5 @@ function getConfigPath () {
       return portablePath
     }
   }
-  return applicationConfigPath(APP_NAME)
+  return appConfig.filePath
 }
