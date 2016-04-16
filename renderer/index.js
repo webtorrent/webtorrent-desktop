@@ -4,7 +4,7 @@ var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
-var fs = require('fs')
+var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var path = require('path')
 var srtToVtt = require('srt-to-vtt')
@@ -21,7 +21,7 @@ var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./state')
 var TorrentPlayer = require('./lib/torrent-player')
-var util = require('./util')
+var TorrentSummary = require('./lib/torrent-summary')
 
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
@@ -61,6 +61,9 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  // Clean up the freshly-loaded config file, which may be from an older version
+  cleanUpConfig()
+
   // Push the first page into the location history
   state.location.go({ url: 'home' })
 
@@ -112,6 +115,46 @@ function init () {
 function delayedInit () {
   lazyLoadCast()
   sound.preload()
+}
+
+// Change `state.saved` (which will be saved back to config.json on exit) as
+// needed, for example to deal with config.json format changes across versions
+function cleanUpConfig () {
+  state.saved.torrents.forEach(function (ts) {
+    var infoHash = ts.infoHash
+
+    // Migration: replace torrentPath with torrentFileName
+    var src, dst
+    if (ts.torrentPath) {
+      console.log('migration: replacing torrentPath %s', ts.torrentPath)
+      src = path.isAbsolute(ts.torrentPath)
+        ? ts.torrentPath
+        : path.join(config.STATIC_PATH, ts.torrentPath)
+      dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
+      // Synchronous FS calls aren't ideal, but probably OK in a migration
+      // that only runs once
+      if (src !== dst) fs.copySync(src, dst)
+
+      delete ts.torrentPath
+      ts.torrentFileName = infoHash + '.torrent'
+    }
+
+    // Migration: replace posterURL with posterFileName
+    if (ts.posterURL) {
+      console.log('migration: replacing posterURL %s', ts.posterURL)
+      var extension = path.extname(ts.posterURL)
+      src = path.isAbsolute(ts.posterURL)
+        ? ts.posterURL
+        : path.join(config.STATIC_PATH, ts.posterURL)
+      dst = path.join(config.CONFIG_POSTER_PATH, infoHash + extension)
+      // Synchronous FS calls aren't ideal, but probably OK in a migration
+      // that only runs once
+      if (src !== dst) fs.copySync(src, dst)
+
+      delete ts.posterURL
+      ts.posterFileName = infoHash + extension
+    }
+  })
 }
 
 // Lazily loads Chromecast and Airplay support
@@ -574,8 +617,8 @@ function startTorrentingSummary (torrentSummary) {
   var path = s.path || state.saved.downloadPath
 
   var torrentID
-  if (s.torrentPath) { // Load torrent file from disk
-    torrentID = util.getAbsoluteStaticPath(s.torrentPath)
+  if (s.torrentFileName) { // Load torrent file from disk
+    torrentID = TorrentSummary.getTorrentPath(torrentSummary)
   } else { // Load torrent from DHT
     torrentID = s.magnetURI || s.infoHash
   }
@@ -696,10 +739,10 @@ function torrentMetadata (torrentKey, torrentInfo) {
   update()
 
   // Save the .torrent file, if it hasn't been saved already
-  if (!torrentSummary.torrentPath) ipcRenderer.send('wt-save-torrent-file', torrentKey)
+  if (!torrentSummary.torrentFileName) ipcRenderer.send('wt-save-torrent-file', torrentKey)
 
   // Auto-generate a poster image, if it hasn't been generated already
-  if (!torrentSummary.posterURL) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
+  if (!torrentSummary.posterFileName) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
 }
 
 function torrentDone (torrentKey, torrentInfo) {
@@ -752,16 +795,16 @@ function torrentFileModtimes (torrentKey, fileModtimes) {
   saveStateThrottled()
 }
 
-function torrentFileSaved (torrentKey, torrentPath) {
-  console.log('torrent file saved %s: %s', torrentKey, torrentPath)
+function torrentFileSaved (torrentKey, torrentFileName) {
+  console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
   var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.torrentPath = torrentPath
+  torrentSummary.torrentFileName = torrentFileName
   saveStateThrottled()
 }
 
-function torrentPosterSaved (torrentKey, posterPath) {
+function torrentPosterSaved (torrentKey, posterFileName) {
   var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.posterURL = posterPath
+  torrentSummary.posterFileName = posterFileName
   saveStateThrottled()
 }
 
@@ -967,7 +1010,7 @@ function saveTorrentFileAs (torrentSummary) {
     ]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
-    var torrentPath = util.getAbsoluteStaticPath(torrentSummary.torrentPath)
+    var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
       fs.writeFile(savePath, torrentFile, function (err) {

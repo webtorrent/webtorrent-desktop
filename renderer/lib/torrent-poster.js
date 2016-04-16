@@ -20,7 +20,7 @@ function torrentPoster (torrent, cb) {
 
 function getLargestFileByExtension (torrent, extensions) {
   var files = torrent.files.filter(function (file) {
-    var extname = path.extname(file.name)
+    var extname = path.extname(file.name).toLowerCase()
     return extensions.indexOf(extname) !== -1
   })
   if (files.length === 0) return undefined
