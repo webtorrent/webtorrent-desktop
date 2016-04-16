@@ -26,7 +26,7 @@ var util = require('./util')
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
 
-appConfig.filePath = config.CONFIG_PATH
+appConfig.filePath = config.CONFIG_PATH + path.sep + 'config.json'
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,

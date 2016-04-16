@@ -47,9 +47,9 @@ module.exports = {
 
 function getConfigPath () {
   if (isPortable()) {
-    return PORTABLE_PATH + '\\config.json'
+    return PORTABLE_PATH
   } else {
-    return appConfig.filePath
+    return path.dirname(appConfig.filePath)
   }
 }
 
