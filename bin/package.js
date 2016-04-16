@@ -12,6 +12,7 @@ var mkdirp = require('mkdirp')
 var path = require('path')
 var rimraf = require('rimraf')
 var series = require('run-series')
+var zip = require('cross-zip')
 
 var config = require('../config')
 var pkg = require('../package.json')
@@ -470,14 +471,4 @@ function printDone (err) {
  */
 function printWarning () {
   console.log(fs.readFileSync(path.join(__dirname, 'warning.txt'), 'utf8'))
-}
-
-function zip (inPath, outPath) {
-  if (process.platform === 'win32') {
-    cp.execSync(`powershell.exe -nologo -noprofile -command "& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::CreateFromDirectory('${outPath}', '${inPath}'); }"`)
-  } else {
-    var dirPath = path.dirname(inPath)
-    var fileName = path.basename(inPath)
-    cp.execSync(`cd ${dirPath} && zip -r -y ${outPath} ${fileName}`)
-  }
 }
