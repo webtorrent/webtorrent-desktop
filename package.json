@@ -72,7 +72,7 @@
   },
   "scripts": {
     "clean": "node ./bin/clean.js",
-    "package": "npm install && npm prune && npm dedupe && node ./bin/package.js",
+    "package": "node ./bin/package.js",
     "start": "electron .",
     "test": "standard",
     "update-authors": "./bin/update-authors.sh"
