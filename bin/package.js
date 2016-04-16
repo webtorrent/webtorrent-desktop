@@ -10,6 +10,7 @@ var fs = require('fs')
 var minimist = require('minimist')
 var path = require('path')
 var rimraf = require('rimraf')
+var series = require('run-series')
 
 var config = require('../config')
 var pkg = require('../package.json')
@@ -48,10 +49,10 @@ function build () {
   } else if (platform === 'linux') {
     buildLinux(printDone)
   } else {
-    buildDarwin(function (err, buildPath) {
-      printDone(err, buildPath)
-      buildWin32(function (err, buildPath) {
-        printDone(err, buildPath)
+    buildDarwin(function (err) {
+      printDone(err)
+      buildWin32(function (err) {
+        printDone(err)
         buildLinux(printDone)
       })
     })
@@ -181,7 +182,7 @@ function buildDarwin (cb) {
   console.log('OS X: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('OS X: Packaged electron.')
+    console.log('OS X: Packaged electron. ' + buildPath[0])
 
     var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
     var contentsPath = path.join(appPath, 'Contents')
@@ -227,11 +228,11 @@ function buildDarwin (cb) {
       if (argv.sign) {
         signApp(function (err) {
           if (err) return cb(err)
-          pack()
+          pack(cb)
         })
       } else {
         printWarning()
-        pack()
+        pack(cb)
       }
     } else {
       printWarning()
@@ -267,24 +268,27 @@ function buildDarwin (cb) {
       })
     }
 
-    function pack () {
+    function pack (cb) {
+      var tasks = []
       if (argv.package === 'zip' || argv.package === 'all') {
-        packageZip()
+        tasks.push(packageZip)
       }
       if (argv.package === 'dmg' || argv.package === 'all') {
-        packageDmg()
+        tasks.push(packageDmg)
       }
+      series(tasks, cb)
     }
 
-    function packageZip () {
+    function packageZip (cb) {
       // Create .zip file (used by the auto-updater)
       var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-darwin.zip')
       console.log('OS X: Creating zip...')
       cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
       console.log('OS X: Created zip.')
+      cb(null)
     }
 
-    function packageDmg () {
+    function packageDmg (cb) {
       var appDmg = require('appdmg')
 
       var targetPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg')
@@ -320,7 +324,7 @@ function buildDarwin (cb) {
       })
       dmg.on('finish', function (info) {
         console.log('OS X: Created dmg.')
-        cb(null, buildPath)
+        cb(null)
       })
     }
   })
@@ -332,7 +336,7 @@ function buildWin32 (cb) {
   console.log('Windows: Packaging electron...')
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Windows: Packaged electron.')
+    console.log('Windows: Packaged electron. ' + buildPath[0])
 
     var signWithParams
     if (process.platform === 'win32') {
@@ -369,7 +373,7 @@ function buildWin32 (cb) {
       version: pkg.version
     }).then(function () {
       console.log('Windows: Created installer.')
-      cb(null, buildPath)
+      cb(null)
     }).catch(cb)
   })
 }
@@ -380,23 +384,24 @@ function buildLinux (cb) {
   console.log('Linux: Packaging electron...')
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Linux: Packaged electron.')
+    console.log('Linux: Packaged electron. ' + buildPath[0])
 
+    var tasks = []
     for (var i = 0; i < buildPath.length; i++) {
       var filesPath = buildPath[i]
       var destArch = filesPath.split('-').pop()
 
       if (argv.package === 'deb' || argv.package === 'all') {
-        packageDeb(filesPath, destArch)
+        tasks.push((cb) => packageDeb(filesPath, destArch, cb))
       }
-
       if (argv.package === 'zip' || argv.package === 'all') {
-        packageZip(filesPath, destArch)
+        tasks.push((cb) => packageZip(filesPath, destArch, cb))
       }
     }
+    series(tasks, cb)
   })
 
-  function packageDeb (filesPath, destArch) {
+  function packageDeb (filesPath, destArch, cb) {
     // Create .deb file for Debian-based platforms
     var deb = require('nobin-debian-installer')()
     var destPath = path.join('/opt', pkg.name)
@@ -419,24 +424,25 @@ function buildLinux (cb) {
       expand: true,
       cwd: filesPath
     }], function (err) {
-      if (err) return console.error(err.message || err)
+      if (err) return cb(err)
       console.log(`Linux: Created ${destArch} deb.`)
+      cb(null)
     })
   }
 
-  function packageZip (filesPath, destArch) {
+  function packageZip (filesPath, destArch, cb) {
     // Create .zip file for Linux
     var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux-' + destArch + '.zip')
     var appFolderName = path.basename(filesPath)
     console.log(`Linux: Creating ${destArch} zip...`)
     cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
     console.log(`Linux: Created ${destArch} zip.`)
+    cb(null)
   }
 }
 
-function printDone (err, buildPath) {
+function printDone (err) {
   if (err) console.error(err.message || err)
-  else console.log('Built ' + buildPath[0])
 }
 
 function printWarning () {
