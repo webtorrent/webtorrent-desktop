@@ -167,16 +167,6 @@ var linux = {
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
 
-/*
- * Print a large warning when signing is disabled so we are less likely to accidentally
- * ship unsigned binaries to users.
- */
-process.on('exit', function () {
-  if (!argv.sign) {
-    printWarning()
-  }
-})
-
 build()
 
 function buildDarwin (cb) {
