@@ -35,7 +35,7 @@
     "prettier-bytes": "^1.0.1",
     "rimraf": "^2.5.2",
     "simple-get": "^2.0.0",
-    "srt-to-vtt": "^1.0.3",
+    "srt-to-vtt": "^1.1.1",
     "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
     "webtorrent": "0.x",
