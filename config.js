@@ -6,6 +6,8 @@ var APP_NAME = 'WebTorrent'
 var APP_TEAM = 'The WebTorrent Project'
 var APP_VERSION = require('./package.json').version
 
+var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
+
 module.exports = {
   APP_COPYRIGHT: 'Copyright © 2014-2016 ' + APP_TEAM,
   APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
@@ -15,9 +17,9 @@ module.exports = {
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
 
+  AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update' +
     '?version=' + APP_VERSION + '&platform=' + process.platform,
-  AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
 
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
 
@@ -28,8 +30,10 @@ module.exports = {
   GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/feross/webtorrent-desktop/master',
 
+  IS_PORTABLE: isPortable(),
   IS_PRODUCTION: isProduction(),
 
+  PORTABLE_PATH: PORTABLE_PATH,
   ROOT_PATH: __dirname,
   STATIC_PATH: path.join(__dirname, 'static'),
 
@@ -39,6 +43,18 @@ module.exports = {
 
   WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
   WINDOW_MIN_WIDTH: 425
+}
+
+function getConfigPath () {
+  if (isPortable()) {
+    return PORTABLE_PATH + '\\config.json'
+  } else {
+    return appConfig.filePath
+  }
+}
+
+function isPortable () {
+  return process.platform === 'win32' && isProduction() && pathExists(PORTABLE_PATH)
 }
 
 function isProduction () {
@@ -54,14 +70,4 @@ function isProduction () {
   if (process.platform === 'linux') {
     return !/\/electron$/.test(process.execPath)
   }
-}
-
-function getConfigPath () {
-  if (process.platform === 'win32' && isProduction()) {
-    var portablePath = path.join(path.dirname(process.execPath), 'Portable Settings')
-    if (pathExists(portablePath)) {
-      return portablePath
-    }
-  }
-  return appConfig.filePath
 }
