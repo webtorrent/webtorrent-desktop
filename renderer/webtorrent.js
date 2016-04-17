@@ -6,8 +6,7 @@ var WebTorrent = require('webtorrent')
 var defaultAnnounceList = require('create-torrent').announceList
 var deepEqual = require('deep-equal')
 var electron = require('electron')
-var fs = require('fs')
-var mkdirp = require('mkdirp')
+var fs = require('fs-extra')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
@@ -192,7 +191,7 @@ function generateTorrentPoster (torrentKey) {
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+    fs.mkdirp(config.CONFIG_POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
       var posterFileName = torrent.infoHash + extension
       var posterFilePath = path.join(config.CONFIG_POSTER_PATH, posterFileName)
