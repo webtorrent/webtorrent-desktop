@@ -114,11 +114,8 @@ function createMainWindow () {
     } else if (!electron.app.isQuitting) {
       e.preventDefault()
       win.hide()
+      win.send('dispatch', 'backToList')
     }
-  })
-
-  win.on('hide', function () {
-    win.send('dispatch', 'backToList')
   })
 
   win.once('closed', function () {
