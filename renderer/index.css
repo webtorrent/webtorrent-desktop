@@ -987,3 +987,7 @@ body.drag .app::after {
 .error-popover .error:last-child {
   border-bottom: none;
 }
+
+.error-text {
+  color: #c44;
+}

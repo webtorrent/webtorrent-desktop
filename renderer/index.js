@@ -251,6 +251,8 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'backToList') {
+    // Exit any modals and screens with a back button
+    state.modal = null
     while (state.location.hasBack()) state.location.back()
 
     // Work around virtual-dom issue: it doesn't expose its redraw function,
@@ -302,19 +304,37 @@ function dispatch (action, ...args) {
     state.playing.isStalled = true
   }
   if (action === 'mediaError') {
-    state.location.back(function () {
-      onError(new Error('Unsupported file format'))
-    })
+    if (state.location.current().url === 'player') {
+      state.playing.location = 'error'
+      ipcRenderer.send('vlcVersion')
+      ipcRenderer.once('vlcVersion', function (e, version) {
+        console.log('vlcVersion', version)
+        state.modal = {
+          id: 'unsupported-media-modal',
+          error: args[0],
+          vlcInstalled: !!version
+        }
+      })
+    }
   }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
     state.playing.isStalled = false
   }
-  if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
-  }
   if (action === 'mediaMouseMoved') {
     state.playing.mouseStationarySince = new Date().getTime()
+  }
+  if (action === 'vlcPlay') {
+    ipcRenderer.send('vlcPlay', state.server.localURL)
+    state.playing.location = 'vlc'
+  }
+  if (action === 'vlcNotFound') {
+    if (state.modal && state.modal.id === 'unsupported-media-modal') {
+      state.modal.vlcNotFound = true
+    }
+  }
+  if (action === 'toggleFullScreen') {
+    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
   }
   if (action === 'exitModal') {
     state.modal = null
@@ -624,6 +644,7 @@ function startTorrentingSummary (torrentSummary) {
     torrentID = s.magnetURI || s.infoHash
   }
 
+  console.log('start torrenting %s %s', s.torrentKey, torrentID)
   ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
 }
 
@@ -907,6 +928,9 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 function closePlayer (cb) {
   if (isCasting()) {
     Cast.close()
+  }
+  if (state.playing.location === 'vlc') {
+    ipcRenderer.send('vlcQuit')
   }
   state.window.title = config.APP_WINDOW_TITLE
   state.playing = State.getDefaultPlayState()
