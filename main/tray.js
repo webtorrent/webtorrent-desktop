@@ -79,4 +79,5 @@ function showApp () {
 
 function hideApp () {
   windows.main.hide()
+  windows.main.send('dispatch', 'backToList')
 }
