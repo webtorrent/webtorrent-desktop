@@ -2,6 +2,7 @@ module.exports = {
   init
 }
 
+var cp = require('child_process')
 var electron = require('electron')
 
 var app = electron.app
@@ -16,6 +17,12 @@ var shortcuts = require('./shortcuts')
 // has to be a number, not a boolean, and undefined throws an error
 var powerSaveBlockID = 0
 
+// messages from the main process, to be sent once the WebTorrent process starts
+var messageQueueMainToWebTorrent = []
+
+// holds a ChildProcess while we're playing a video in VLC, null otherwise
+var vlcProcess
+
 function init () {
   ipcMain.on('ipcReady', function (e) {
     app.ipcReady = true
@@ -24,7 +31,6 @@ function init () {
     console.timeEnd('init')
   })
 
-  var messageQueueMainToWebTorrent = []
   ipcMain.on('ipcReadyWebTorrent', function (e) {
     app.ipcReadyWebTorrent = true
     log('sending %d queued messages from the main win to the webtorrent window',
@@ -36,6 +42,7 @@ function init () {
   })
 
   ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
+
   ipcMain.on('showOpenSeedFiles', menu.showOpenSeedFiles)
 
   ipcMain.on('setBounds', function (e, bounds, maximize) {
@@ -68,12 +75,14 @@ function init () {
   })
 
   ipcMain.on('blockPowerSave', blockPowerSave)
+
   ipcMain.on('unblockPowerSave', unblockPowerSave)
 
   ipcMain.on('onPlayerOpen', function () {
     menu.onPlayerOpen()
     shortcuts.registerPlayerShortcuts()
   })
+
   ipcMain.on('onPlayerClose', function () {
     menu.onPlayerClose()
     shortcuts.unregisterPlayerShortcuts()
@@ -81,6 +90,55 @@ function init () {
 
   ipcMain.on('focusWindow', function (e, windowName) {
     windows.focusWindow(windows[windowName])
+  })
+
+  ipcMain.on('vlcVersion', function (e) {
+    cp.exec('vlc --version', function (e, stdout, stderr) {
+      var version
+      if (e) {
+        version = null
+      } else {
+        // Prints several lines, starting with eg: VLC media player 2.7.0
+        if (!stdout.startsWith('VLC media player')) version = 'unknown'
+        else version = stdout.split(' ')[3]
+      }
+      windows.main.send('vlcVersion', version)
+    })
+  })
+
+  ipcMain.on('vlcPlay', function (e, url) {
+    // TODO: cross-platform VLC detection
+    var command = 'vlc'
+    var args = ['--play-and-exit', '--quiet', url]
+    console.log('Running ' + command + ' ' + args.join(' '))
+
+    vlcProcess = cp.spawn(command, args)
+
+    // If it works, close the modal after a second
+    var closeModalTimeout = setTimeout(() => windows.main.send('dispatch', 'exitModal'), 1000)
+
+    vlcProcess.on('close', function (code) {
+      clearTimeout(closeModalTimeout)
+      if (!vlcProcess) return // Killed
+      console.log('VLC exited with code ', code)
+      if (code === 0) {
+        windows.main.send('dispatch', 'backToList')
+      } else {
+        windows.main.send('dispatch', 'vlcNotFound')
+      }
+      vlcProcess = null
+    })
+
+    vlcProcess.on('error', function (e) {
+      console.log('VLC error', e)
+    })
+  })
+
+  ipcMain.on('vlcQuit', function () {
+    if (!vlcProcess) return
+    console.log('Killing VLC, pid ' + vlcProcess.pid)
+    vlcProcess.kill('SIGKILL') // kill -9
+    vlcProcess = null
   })
 
   // Capture all events
