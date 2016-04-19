@@ -44,7 +44,7 @@
   "devDependencies": {
     "cross-zip": "^1.0.0",
     "electron-osx-sign": "^0.3.0",
-    "electron-packager": "^6.0.2",
+    "electron-packager": "^7.0.0",
     "electron-winstaller": "feross/windows-installer#build",
     "gh-release": "^2.0.3",
     "minimist": "^1.2.0",
