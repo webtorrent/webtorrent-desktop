@@ -34,10 +34,6 @@ var sounds = {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'error.wav'),
     volume: 0.2
   },
-  POP: {
-    url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'pop.wav'),
-    volume: 0.2
-  },
   PLAY: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'play.wav'),
     volume: 0.2

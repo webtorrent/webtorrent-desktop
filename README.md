@@ -22,7 +22,7 @@
 ## Screenshot
 
 <p align="center">
-  <img src="./static/screenshot.png" width="562" height="630" alt="screenshot" align="center">
+  <img src="https://webtorrent.io/img/screenshot-main.png" width="562" height="630" alt="screenshot" align="center">
 </p>
 
 ## How to Contribute
@@ -50,12 +50,23 @@ $ npm run package
 To build for one platform:
 
 ```
-$ npm run package -- [platform] [package-type]
+$ npm run package -- [platform]
 ```
 
-Where `[platform]` is `darwin`, `linux`, or `win32`
+Where `[platform]` is `darwin`, `linux`, `win32`, or `all` (default).
 
-and `[package-type]` is `all` (default), `deb` or `zip` (`linux` platform only)
+The following optional arguments are available:
+
+- `--sign` - Sign the application (OS X, Windows)
+- `--package=[type]` - Package single output type.
+   - `deb` - Debian package
+   - `zip` - Linux zip file
+   - `dmg` - OS X disk image
+   - `exe` - Windows installer
+   - `portable` - Windows portable app
+   - `all` - All platforms (default)
+
+Note: Even with the `--package` option, the auto-update files (.nupkg for Windows, *-darwin.zip for OS X) will always be produced.
 
 #### Windows build notes
 

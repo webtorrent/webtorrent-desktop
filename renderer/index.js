@@ -1,14 +1,14 @@
 console.time('init')
 
-var cfg = require('application-config')('WebTorrent')
+var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
-var EventEmitter = require('events')
-var fs = require('fs')
+var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var path = require('path')
 var srtToVtt = require('srt-to-vtt')
+var LanguageDetect = require('languagedetect')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -21,10 +21,12 @@ var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./state')
 var TorrentPlayer = require('./lib/torrent-player')
-var util = require('./util')
+var TorrentSummary = require('./lib/torrent-summary')
 
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
+
+appConfig.filePath = config.CONFIG_PATH + path.sep + 'config.json'
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -59,11 +61,16 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  // Clean up the freshly-loaded config file, which may be from an older version
+  cleanUpConfig()
+
   // Push the first page into the location history
   state.location.go({ url: 'home' })
 
-  initWebTorrent()
+  // Restart everything we were torrenting last time the app ran
+  resumeTorrents()
 
+  // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, 5000)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
@@ -77,6 +84,11 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
+  // Calling update() updates the UI given the current state
+  // Do this at least once a second to give every file in every torrentSummary
+  // a progress bar and to keep the cursor in sync when playing a video
+  setInterval(update, 1000)
+
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
   dragDrop('body', (files) => dispatch('onOpen', files))
@@ -85,39 +97,11 @@ function init () {
   document.addEventListener('paste', onPaste)
 
   // ...keyboard shortcuts
-  document.addEventListener('keydown', function (e) {
-    if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-      if (state.modal) {
-        dispatch('exitModal')
-      } else if (state.window.isFullScreen) {
-        dispatch('toggleFullScreen')
-      } else {
-        dispatch('back')
-      }
-    } else if (e.which === 32) { /* spacebar pauses or plays the video */
-      dispatch('playPause')
-    } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39) {
-      dispatch('playbackJump', state.playing.currentTime + 10)
-    } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) {
-      dispatch('playbackJump', state.playing.currentTime - 10)
-    } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+"   */
-      dispatch('setPlaybackRate', 1)
-    } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-"   */
-      dispatch('setPlaybackRate', -1)
-    }
-  })
+  document.addEventListener('keydown', onKeyDown)
 
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
-  window.addEventListener('focus', function () {
-    state.window.isFocused = true
-    state.dock.badge = 0
-    update()
-  })
-
-  window.addEventListener('blur', function () {
-    state.window.isFocused = false
-    update()
-  })
+  window.addEventListener('focus', onFocus)
+  window.addEventListener('blur', onBlur)
 
   // Listen for messages from the main process
   setupIpc()
@@ -133,6 +117,46 @@ function delayedInit () {
   sound.preload()
 }
 
+// Change `state.saved` (which will be saved back to config.json on exit) as
+// needed, for example to deal with config.json format changes across versions
+function cleanUpConfig () {
+  state.saved.torrents.forEach(function (ts) {
+    var infoHash = ts.infoHash
+
+    // Migration: replace torrentPath with torrentFileName
+    var src, dst
+    if (ts.torrentPath) {
+      console.log('migration: replacing torrentPath %s', ts.torrentPath)
+      src = path.isAbsolute(ts.torrentPath)
+        ? ts.torrentPath
+        : path.join(config.STATIC_PATH, ts.torrentPath)
+      dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
+      // Synchronous FS calls aren't ideal, but probably OK in a migration
+      // that only runs once
+      if (src !== dst) fs.copySync(src, dst)
+
+      delete ts.torrentPath
+      ts.torrentFileName = infoHash + '.torrent'
+    }
+
+    // Migration: replace posterURL with posterFileName
+    if (ts.posterURL) {
+      console.log('migration: replacing posterURL %s', ts.posterURL)
+      var extension = path.extname(ts.posterURL)
+      src = path.isAbsolute(ts.posterURL)
+        ? ts.posterURL
+        : path.join(config.STATIC_PATH, ts.posterURL)
+      dst = path.join(config.CONFIG_POSTER_PATH, infoHash + extension)
+      // Synchronous FS calls aren't ideal, but probably OK in a migration
+      // that only runs once
+      if (src !== dst) fs.copySync(src, dst)
+
+      delete ts.posterURL
+      ts.posterFileName = infoHash + extension
+    }
+  })
+}
+
 // Lazily loads Chromecast and Airplay support
 function lazyLoadCast () {
   if (!Cast) {
@@ -140,17 +164,6 @@ function lazyLoadCast () {
     Cast.init(state, update) // Search the local network for Chromecast and Airplays
   }
   return Cast
-}
-
-// Talk to WebTorrent process, resume torrents, start monitoring torrent progress
-function initWebTorrent () {
-  // Restart everything we were torrenting last time the app ran
-  resumeTorrents()
-
-  // Calling update() updates the UI given the current state
-  // Do this at least once a second to give every file in every torrentSummary
-  // a progress bar and to keep the cursor in sync when playing a video
-  setInterval(update, 1000)
 }
 
 // This is the (mostly) pure function from state -> UI. Returns a virtual DOM
@@ -262,10 +275,7 @@ function dispatch (action, ...args) {
       },
       onbeforeunload: closePlayer
     })
-    playPause(false)
-  }
-  if (action === 'pause') {
-    playPause(true)
+    play()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -282,16 +292,19 @@ function dispatch (action, ...args) {
   if (action === 'openSubtitles') {
     openSubtitles()
   }
-  if (action === 'mediaPlaying') {
-    state.playing.isPaused = false
-    ipcRenderer.send('blockPowerSave')
+  if (action === 'selectSubtitle') {
+    selectSubtitle(args[0] /* label */)
   }
-  if (action === 'mediaPaused') {
-    state.playing.isPaused = true
-    ipcRenderer.send('unblockPowerSave')
+  if (action === 'showSubtitles') {
+    showSubtitles()
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
+  }
+  if (action === 'mediaError') {
+    state.location.back(function () {
+      onError(new Error('Unsupported file format'))
+    })
   }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
@@ -333,16 +346,30 @@ function updateAvailable (version) {
   state.modal = { id: 'update-available-modal', version: version }
 }
 
-// Plays or pauses the video. If isPaused is undefined, acts as a toggle
-function playPause (isPaused) {
-  if (isPaused === state.playing.isPaused) {
-    return // Nothing to do
-  }
-  // Either isPaused is undefined, or it's the opposite of the current state. Toggle.
+function play () {
+  if (!state.playing.isPaused) return
+  state.playing.isPaused = false
   if (isCasting()) {
-    Cast.playPause()
+    Cast.play()
   }
-  state.playing.isPaused = !state.playing.isPaused
+  ipcRenderer.send('blockPowerSave')
+}
+
+function pause () {
+  if (state.playing.isPaused) return
+  state.playing.isPaused = true
+  if (isCasting()) {
+    Cast.pause()
+  }
+  ipcRenderer.send('unblockPowerSave')
+}
+
+function playPause () {
+  if (state.playing.isPaused) {
+    play()
+  } else {
+    pause()
+  }
 }
 
 function jumpToTime (time) {
@@ -419,13 +446,6 @@ function setupIpc () {
     update()
   })
 
-  ipcRenderer.on('addFakeDevice', function (e, device) {
-    var player = new EventEmitter()
-    player.play = (networkURL) => console.log(networkURL)
-    state.devices[device] = player
-    update()
-  })
-
   ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
@@ -442,9 +462,9 @@ function setupIpc () {
 
 // Load state.saved from the JSON state file
 function loadState (cb) {
-  cfg.read(function (err, data) {
+  appConfig.read(function (err, data) {
     if (err) console.error(err)
-    console.log('loaded state from ' + cfg.filePath)
+    console.log('loaded state from ' + appConfig.filePath)
 
     // populate defaults if they're not there
     state.saved = Object.assign({}, State.getDefaultSavedState(), data)
@@ -474,7 +494,7 @@ function saveStateThrottled () {
 
 // Write state.saved to the JSON state file
 function saveState () {
-  console.log('saving state to ' + cfg.filePath)
+  console.log('saving state to ' + appConfig.filePath)
 
   // Clean up, so that we're not saving any pending state
   var copy = Object.assign({}, state.saved)
@@ -496,7 +516,7 @@ function saveState () {
       return torrent
     })
 
-  cfg.write(copy, function (err) {
+  appConfig.write(copy, function (err) {
     if (err) console.error(err)
     ipcRenderer.send('savedState')
   })
@@ -540,17 +560,6 @@ function not (test) {
   }
 }
 
-function onPaste (e) {
-  if (e.target.tagName.toLowerCase() === 'input') return
-
-  var torrentIds = clipboard.readText().split('\n')
-  torrentIds.forEach(function (torrentId) {
-    torrentId = torrentId.trim()
-    if (torrentId.length === 0) return
-    dispatch('addTorrent', torrentId)
-  })
-}
-
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (torrentKey) {
@@ -577,15 +586,40 @@ function addSubtitle (file) {
     // Set the cue text position so it appears above the player controls.
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
+    var langDetected = (new LanguageDetect()).detect(buf.toString().replace(/(.*-->.*)/g, ''), 2)
+    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
-      language: 'Language ' + state.playing.subtitles.tracks.length,
+      label: langDetected,
       selected: true
     }
+    state.playing.subtitles.tracks.forEach(function (trackItem) {
+      trackItem.selected = false
+      if (trackItem.label === track.label) {
+        track.label = Number.isNaN(track.label.slice(-1))
+          ? track.label + ' 2'
+          : track.label.slice(0, -1) + (parseInt(track.label.slice(-1)) + 1)
+      }
+    })
+    state.playing.subtitles.change = track.label
     state.playing.subtitles.tracks.push(track)
     state.playing.subtitles.enabled = true
   }))
+}
+
+function selectSubtitle (label) {
+  state.playing.subtitles.tracks.forEach(function (track) {
+    track.selected = (track.label === label)
+  })
+  state.playing.subtitles.enabled = !!label
+  state.playing.subtitles.change = label
+  state.playing.subtitles.show = false
+}
+
+function showSubtitles () {
+  state.playing.subtitles.show = !state.playing.subtitles.show
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
@@ -599,8 +633,8 @@ function startTorrentingSummary (torrentSummary) {
   var path = s.path || state.saved.downloadPath
 
   var torrentID
-  if (s.torrentPath) { // Load torrent file from disk
-    torrentID = util.getAbsoluteStaticPath(s.torrentPath)
+  if (s.torrentFileName) { // Load torrent file from disk
+    torrentID = TorrentSummary.getTorrentPath(torrentSummary)
   } else { // Load torrent from DHT
     torrentID = s.magnetURI || s.infoHash
   }
@@ -699,7 +733,7 @@ function torrentError (torrentKey, message) {
 
   // TODO: WebTorrent should have semantic errors
   if (message.startsWith('There is already a swarm')) {
-    onError(new Error('Couldn\'t add duplicate torrent'))
+    onError(new Error('Can\'t add duplicate torrent'))
   } else if (!torrentSummary) {
     onError(message)
   } else {
@@ -721,10 +755,10 @@ function torrentMetadata (torrentKey, torrentInfo) {
   update()
 
   // Save the .torrent file, if it hasn't been saved already
-  if (!torrentSummary.torrentPath) ipcRenderer.send('wt-save-torrent-file', torrentKey)
+  if (!torrentSummary.torrentFileName) ipcRenderer.send('wt-save-torrent-file', torrentKey)
 
   // Auto-generate a poster image, if it hasn't been generated already
-  if (!torrentSummary.posterURL) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
+  if (!torrentSummary.posterFileName) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
 }
 
 function torrentDone (torrentKey, torrentInfo) {
@@ -777,16 +811,16 @@ function torrentFileModtimes (torrentKey, fileModtimes) {
   saveStateThrottled()
 }
 
-function torrentFileSaved (torrentKey, torrentPath) {
-  console.log('torrent file saved %s: %s', torrentKey, torrentPath)
+function torrentFileSaved (torrentKey, torrentFileName) {
+  console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
   var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.torrentPath = torrentPath
+  torrentSummary.torrentFileName = torrentFileName
   saveStateThrottled()
 }
 
-function torrentPosterSaved (torrentKey, posterPath) {
+function torrentPosterSaved (torrentKey, posterFileName) {
   var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.posterURL = posterPath
+  torrentSummary.posterFileName = posterFileName
   saveStateThrottled()
 }
 
@@ -992,7 +1026,7 @@ function saveTorrentFileAs (torrentSummary) {
     ]
   }
   dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
-    var torrentPath = util.getAbsoluteStaticPath(torrentSummary.torrentPath)
+    var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
       fs.writeFile(savePath, torrentFile, function (err) {
@@ -1051,20 +1085,6 @@ function restoreBounds () {
   }
 }
 
-function onError (err) {
-  console.error(err.stack || err)
-  sound.play('ERROR')
-  state.errors.push({
-    time: new Date().getTime(),
-    message: err.message || err
-  })
-  update()
-}
-
-function onWarning (err) {
-  console.log('warning: %s', err.message || err)
-}
-
 function showDoneNotification (torrent) {
   var notif = new window.Notification('Download Complete', {
     body: torrent.name,
@@ -1105,4 +1125,63 @@ function showOrHidePlayerControls () {
     return true
   }
   return false
+}
+
+// Event handlers
+function onError (err) {
+  console.error(err.stack || err)
+  sound.play('ERROR')
+  state.errors.push({
+    time: new Date().getTime(),
+    message: err.message || err
+  })
+  update()
+}
+
+function onWarning (err) {
+  console.log('warning: %s', err.message || err)
+}
+
+function onPaste (e) {
+  if (e.target.tagName.toLowerCase() === 'input') return
+
+  var torrentIds = clipboard.readText().split('\n')
+  torrentIds.forEach(function (torrentId) {
+    torrentId = torrentId.trim()
+    if (torrentId.length === 0) return
+    dispatch('addTorrent', torrentId)
+  })
+}
+
+function onKeyDown (e) {
+  if (e.which === 27) { /* ESC means either exit fullscreen or go back */
+    if (state.modal) {
+      dispatch('exitModal')
+    } else if (state.window.isFullScreen) {
+      dispatch('toggleFullScreen')
+    } else {
+      dispatch('back')
+    }
+  } else if (e.which === 32) { /* spacebar pauses or plays the video */
+    dispatch('playPause')
+  }else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39) { /*ALT + right arrow */
+    dispatch('playbackJump', state.playing.currentTime + 10)
+  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) { /*ALT + left arrow */
+    dispatch('playbackJump', state.playing.currentTime - 10)
+  } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+"   */
+    dispatch('setPlaybackRate', 1)
+  } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-"   */
+    dispatch('setPlaybackRate', -1)
+  }
+}
+
+function onFocus (e) {
+  state.window.isFocused = true
+  state.dock.badge = 0
+  update()
+}
+
+function onBlur () {
+  state.window.isFocused = false
+  update()
 }

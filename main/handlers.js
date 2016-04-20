@@ -194,17 +194,17 @@ function uninstallWin32 () {
       })
       commandKey.get('', function (err, item) {
         if (!err && item.value.indexOf(command) >= 0) {
-          eraseProtocol()
+          destroyProtocol()
         }
       })
     }
 
-    function eraseProtocol () {
+    function destroyProtocol () {
       var protocolKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol
       })
-      protocolKey.erase(function () {})
+      protocolKey.destroy(function () {})
     }
   }
 
@@ -216,7 +216,7 @@ function uninstallWin32 () {
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + id
       })
-      idKey.erase(getExt)
+      idKey.destroy(getExt)
     }
 
     function getExt () {
@@ -226,24 +226,23 @@ function uninstallWin32 () {
       })
       extKey.get('', function (err, item) {
         if (!err && item.value === id) {
-          eraseExt()
+          destroyExt()
         }
       })
     }
 
-    function eraseExt () {
+    function destroyExt () {
       var extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + ext
       })
-      extKey.erase(function () {})
+      extKey.destroy(function () {})
     }
   }
 }
 
 function installLinux () {
-  var fs = require('fs')
-  var mkdirp = require('mkdirp')
+  var fs = require('fs-extra')
   var os = require('os')
   var path = require('path')
 
@@ -277,7 +276,7 @@ function installLinux () {
       'applications',
       'webtorrent-desktop.desktop'
     )
-    mkdirp(path.dirname(desktopFilePath))
+    fs.mkdirp(path.dirname(desktopFilePath))
     fs.writeFile(desktopFilePath, desktopFile, function (err) {
       if (err) return log.error(err.message)
     })
@@ -298,7 +297,7 @@ function installLinux () {
       'icons',
       'webtorrent-desktop.png'
     )
-    mkdirp(path.dirname(iconFilePath))
+    fs.mkdirp(path.dirname(iconFilePath))
     fs.writeFile(iconFilePath, iconFile, function (err) {
       if (err) return log.error(err.message)
     })
@@ -308,7 +307,7 @@ function installLinux () {
 function uninstallLinux () {
   var os = require('os')
   var path = require('path')
-  var rimraf = require('rimraf')
+  var fs = require('fs-extra')
 
   var desktopFilePath = path.join(
     os.homedir(),
@@ -317,7 +316,7 @@ function uninstallLinux () {
     'applications',
     'webtorrent-desktop.desktop'
   )
-  rimraf.sync(desktopFilePath)
+  fs.removeSync(desktopFilePath)
 
   var iconFilePath = path.join(
     os.homedir(),
@@ -326,5 +325,5 @@ function uninstallLinux () {
     'icons',
     'webtorrent-desktop.png'
   )
-  rimraf.sync(iconFilePath)
+  fs.removeSync(iconFilePath)
 }

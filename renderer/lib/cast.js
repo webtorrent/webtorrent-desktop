@@ -5,7 +5,8 @@ module.exports = {
   init,
   open,
   close,
-  playPause,
+  play,
+  pause,
   seek,
   setVolume,
   setRate
@@ -82,9 +83,12 @@ function chromecastPlayer (player) {
     })
   }
 
-  function playPause (callback) {
-    if (!state.playing.isPaused) player.pause(callback)
-    else player.play(null, null, callback)
+  function play (callback) {
+    player.play(null, null, callback)
+  }
+
+  function pause (callback) {
+    player.pause(callback)
   }
 
   function stop (callback) {
@@ -114,7 +118,8 @@ function chromecastPlayer (player) {
   return {
     player: player,
     open: open,
-    playPause: playPause,
+    play: play,
+    pause: pause,
     stop: stop,
     status: status,
     seek: seek,
@@ -139,9 +144,12 @@ function airplayPlayer (player) {
     })
   }
 
-  function playPause (callback) {
-    if (!state.playing.isPaused) player.rate(0, callback)
-    else player.rate(1, callback)
+  function play (callback) {
+    player.rate(1, callback)
+  }
+
+  function pause (callback) {
+    player.rate(0, callback)
   }
 
   function stop (callback) {
@@ -173,7 +181,8 @@ function airplayPlayer (player) {
   return {
     player: player,
     open: open,
-    playPause: playPause,
+    play: play,
+    pause: pause,
     stop: stop,
     status: status,
     seek: seek,
@@ -218,9 +227,12 @@ function dlnaPlayer (player) {
     })
   }
 
-  function playPause (callback) {
-    if (!state.playing.isPaused) player.pause(callback)
-    else player.play(null, null, callback)
+  function play (callback) {
+    player.play(null, null, callback)
+  }
+
+  function pause (callback) {
+    player.pause(callback)
   }
 
   function stop (callback) {
@@ -254,7 +266,8 @@ function dlnaPlayer (player) {
   return {
     player: player,
     open: open,
-    playPause: playPause,
+    play: play,
+    pause: pause,
     stop: stop,
     status: status,
     seek: seek,
@@ -318,10 +331,17 @@ function getDevice (location) {
   }
 }
 
-function playPause () {
+function play () {
   var device = getDevice()
   if (device) {
-    device.playPause(castCallback)
+    device.play(castCallback)
+  }
+}
+
+function pause () {
+  var device = getDevice()
+  if (device) {
+    device.pause(castCallback)
   }
 }
 

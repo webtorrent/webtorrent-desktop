@@ -5,8 +5,7 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 var prettyBytes = require('prettier-bytes')
 
-var util = require('../util')
-
+var TorrentSummary = require('../lib/torrent-summary')
 var TorrentPlayer = require('../lib/torrent-player')
 var {dispatcher} = require('../lib/dispatcher')
 
@@ -31,15 +30,12 @@ function TorrentList (state) {
 
     // Background image: show some nice visuals, like a frame from the movie, if possible
     var style = {}
-    if (torrentSummary.posterURL) {
+    if (torrentSummary.posterFileName) {
       var gradient = isSelected
         ? 'linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%)'
         : 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%)'
-      var posterURL = util.getAbsoluteStaticPath(torrentSummary.posterURL)
-      // Work around a Chrome bug (reproduced in vanilla Chrome, not just Electron):
-      // Backslashes in URLS in CSS cause bizarre string encoding issues
-      var cleanURL = posterURL.replace(/\\/g, '/')
-      style.backgroundImage = gradient + `, url('${cleanURL}')`
+      var posterPath = TorrentSummary.getPosterPath(torrentSummary)
+      style.backgroundImage = gradient + `, url('${posterPath}')`
     }
 
     // Foreground: name of the torrent, basic info like size, play button,
@@ -141,7 +137,7 @@ function TorrentList (state) {
     var playButton
     if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
       playButton = hx`
-        <i.btn.icon.play
+        <i.button-round.icon.play
           title=${playTooltip}
           class=${playClass}
           onclick=${dispatcher('play', infoHash)}>
@@ -153,7 +149,7 @@ function TorrentList (state) {
     return hx`
       <div class='buttons'>
         ${playButton}
-        <i.btn.icon.download
+        <i.button-round.icon.download
           class=${torrentSummary.status}
           title=${downloadTooltip}
           onclick=${dispatcher('toggleTorrent', infoHash)}>

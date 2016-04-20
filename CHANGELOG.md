@@ -1,5 +1,16 @@
 # WebTorrent Desktop Version History
 
+## UNRELEASED
+
+### Added
+### Changed
+
+- Use Squirrel.Windows 1.3.0
+  - Fix installing when the app is already installed
+  - Don't kill unrelated processes on uninstall
+
+### Fixed
+
 ## v0.3.3 - 2016-04-07
 
 ### Fixed

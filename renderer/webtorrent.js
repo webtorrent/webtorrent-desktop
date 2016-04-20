@@ -6,8 +6,7 @@ var WebTorrent = require('webtorrent')
 var defaultAnnounceList = require('create-torrent').announceList
 var deepEqual = require('deep-equal')
 var electron = require('electron')
-var fs = require('fs')
-var mkdirp = require('mkdirp')
+var fs = require('fs-extra')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
@@ -69,10 +68,21 @@ function init () {
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-  var torrent = client.add(torrentID, {
-    path: path,
-    fileModtimes: fileModtimes
-  })
+  var torrent
+  try {
+    torrent = client.add(torrentID, {
+      path: path,
+      fileModtimes: fileModtimes
+    })
+  } catch (err) {
+    return ipc.send('wt-error', torrentKey, err.message)
+  }
+  // If we add a duplicate magnet URI or infohash, WebTorrent returns the
+  // existing torrent object! (If we add a duplicate torrent file, it creates a
+  // new torrent object and raises an error later.) Workaround:
+  if (torrent.key) {
+    return ipc.send('wt-error', torrentKey, 'Can\'t add duplicate torrent')
+  }
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   return torrent
@@ -159,9 +169,10 @@ function getTorrentFileInfo (file) {
 function saveTorrentFile (torrentKey) {
   var torrent = getTorrent(torrentKey)
   checkIfTorrentFileExists(torrent.infoHash, function (torrentPath, exists) {
+    var fileName = torrent.infoHash + '.torrent'
     if (exists) {
       // We've already saved the file
-      return ipc.send('wt-file-saved', torrentKey, torrentPath)
+      return ipc.send('wt-file-saved', torrentKey, fileName)
     }
 
     // Otherwise, save the .torrent file, under the app config folder
@@ -169,7 +180,7 @@ function saveTorrentFile (torrentKey) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
-        return ipc.send('wt-file-saved', torrentKey, torrentPath)
+        return ipc.send('wt-file-saved', torrentKey, fileName)
       })
     })
   })
@@ -191,13 +202,14 @@ function generateTorrentPoster (torrentKey) {
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+    fs.mkdirp(config.CONFIG_POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, torrent.infoHash + extension)
+      var posterFileName = torrent.infoHash + extension
+      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, posterFileName)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster
-        ipc.send('wt-poster', torrentKey, posterFilePath)
+        ipc.send('wt-poster', torrentKey, posterFileName)
       })
     })
   })

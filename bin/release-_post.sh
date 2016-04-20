@@ -2,7 +2,7 @@
 set -e
 
 git diff --exit-code
-npm run package
+npm run package -- --sign
 git push
 git push --tags
 npm publish

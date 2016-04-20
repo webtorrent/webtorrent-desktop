@@ -7,7 +7,6 @@ var electron = require('electron')
 var fs = require('fs')
 var os = require('os')
 var path = require('path')
-var pathExists = require('path-exists')
 
 var app = electron.app
 
@@ -118,7 +117,8 @@ function updateShortcuts (cb) {
     var desktopShortcutPath = path.join(homeDir, 'Desktop', 'WebTorrent.lnk')
     // Check if the desktop shortcut has been previously deleted and and keep it deleted
     // if it was
-    pathExists(desktopShortcutPath).then(function (desktopShortcutExists) {
+    fs.access(desktopShortcutPath, function (err) {
+      var desktopShortcutExists = !err
       createShortcuts(function () {
         if (desktopShortcutExists) {
           cb()

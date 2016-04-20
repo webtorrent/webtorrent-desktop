@@ -113,28 +113,8 @@ table {
   opacity: 0.3;
 }
 
-/*
- * BUTTONS
- */
-
-a,
-i {
-  cursor: default;
-  -webkit-app-region: no-drag;
-}
-
-a:not(.disabled):hover,
-i:not(.disabled):hover {
-  -webkit-filter: brightness(1.3);
-}
-
-.btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  font-size: 22px;
-  transition: all 0.1s ease-out;
-  text-align: center;
+.float-right {
+  float: right;
 }
 
 /*
@@ -266,14 +246,18 @@ i:not(.disabled):hover {
   width: calc(100% - 20px);
   max-width: 600px;
   box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.4);
-  background-color: white;
+  background-color: #eee;
   color: #222;
   padding: 20px;
 }
 
-.create-torrent-modal input,
+.modal label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .open-torrent-address-modal input {
-  width: calc(100% - 100px)
+  width: 100%;
 }
 
 .create-torrent-modal .torrent-attribute {
@@ -295,35 +279,71 @@ i:not(.disabled):hover {
   white-space: nowrap;
 }
 
-
-
 /*
  * BUTTONS
+ * See https://www.google.com/design/spec/components/buttons.html
  */
 
-button {
+a,
+i { /* Links and icons */
+  cursor: default;
+  -webkit-app-region: no-drag;
+}
+
+a:not(.disabled):hover,
+i:not(.disabled):hover { /* Show they're clickable without pointer: cursor */
+  -webkit-filter: brightness(1.3);
+}
+
+.button-round { /* Circular icon buttons, used on <i> tags */
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 22px;
+  transition: all 0.1s ease-out;
+  text-align: center;
+}
+
+button { /* Rectangular text buttons */
   background: transparent;
   margin-left: 10px;
   padding: 0;
   border: none;
+  border-radius: 3px;
   font-size: 14px;
   font-weight: bold;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   color: #aaa;
+  outline: none;
 }
 
-button.primary {
-  color: #0cf;
+button.button-flat {
+  color: #222;
+  padding: 7px 18px;
 }
 
-button:hover {
-  -webkit-filter: brightness(1.1);
+button.button-flat:hover,
+button.button-flat:focus { /* Material design: focused */
+  background-color: rgba(153, 153, 153, 0.2);
 }
 
-button:active {
-  -webkit-filter: brightness(1.1);
-  text-shadow: none;
+button.button-flat:active { /* Material design: pressed */
+  background-color: rgba(153, 153, 153, 0.4);
+}
+
+button.button-raised {
+  background-color: #2196f3;
+  color: #eee;
+  padding: 7px 18px;
+}
+
+button.button-raised:hover,
+button.button-raised:focus {
+  background-color: #38a0f5;
+}
+
+button.button-raised:active {
+  background-color: #51abf6;
 }
 
 /*
@@ -336,7 +356,7 @@ input {
   padding: 6px;
   border: 1px solid #bbb;
   border-radius: 3px;
-  box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.1);
+  outline: none;
 }
 
 /*
@@ -714,6 +734,7 @@ body.drag .app::after {
   margin-top: 8px !important;
 }
 
+.player-controls .closed-captions.active,
 .player-controls .device.active {
   color: #9af;
 }
@@ -794,6 +815,29 @@ body.drag .app::after {
 
 .cast-screen .cast-type {
   font-weight: bold;
+}
+
+/*
+ * Subtitles list
+ */
+
+.subtitles-list {
+  position: fixed;
+  background: rgba(40, 40, 40, 0.8);
+  min-width: 100px;
+  bottom: 45px;
+  right: 3px;
+  transition: opacity 0.15s ease-out;
+  padding: 5px 10px;
+  border-radius: 3px;
+  margin: 0;
+  list-style-type: none;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.subtitles-list i {
+  font-size: 11px; /* make the cast icons less huge */
+  margin-right: 4px !important;
 }
 
 /*

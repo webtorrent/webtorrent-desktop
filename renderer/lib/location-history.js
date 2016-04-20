@@ -7,28 +7,33 @@ function LocationHistory () {
   this._pending = null
 }
 
-LocationHistory.prototype.go = function (page) {
+LocationHistory.prototype.go = function (page, cb) {
   console.log('go', page)
   this.clearForward()
-  this._go(page)
+  this._go(page, cb)
 }
 
-LocationHistory.prototype._go = function (page) {
+LocationHistory.prototype._go = function (page, cb) {
   if (this._pending) return
   if (page.onbeforeload) {
     this._pending = page
     page.onbeforeload((err) => {
       if (this._pending !== page) return /* navigation was cancelled */
       this._pending = null
-      if (err) return
+      if (err) {
+        if (cb) cb(err)
+        return
+      }
       this._history.push(page)
+      if (cb) cb()
     })
   } else {
     this._history.push(page)
+    if (cb) cb()
   }
 }
 
-LocationHistory.prototype.back = function () {
+LocationHistory.prototype.back = function (cb) {
   if (this._history.length <= 1) return
 
   var page = this._history.pop()
@@ -39,17 +44,19 @@ LocationHistory.prototype.back = function () {
     // call finishes first.
     page.onbeforeunload(() => {
       this._forward.push(page)
+      if (cb) cb()
     })
   } else {
     this._forward.push(page)
+    if (cb) cb()
   }
 }
 
-LocationHistory.prototype.forward = function () {
+LocationHistory.prototype.forward = function (cb) {
   if (this._forward.length === 0) return
 
   var page = this._forward.pop()
-  this._go(page)
+  this._go(page, cb)
 }
 
 LocationHistory.prototype.clearForward = function () {

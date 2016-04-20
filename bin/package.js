@@ -4,32 +4,60 @@
  * Builds app binaries for OS X, Linux, and Windows.
  */
 
-var config = require('../config')
 var cp = require('child_process')
 var electronPackager = require('electron-packager')
 var fs = require('fs')
+var minimist = require('minimist')
+var mkdirp = require('mkdirp')
 var path = require('path')
-var pkg = require('../package.json')
 var rimraf = require('rimraf')
+var series = require('run-series')
+var zip = require('cross-zip')
+
+var config = require('../config')
+var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 
+/*
+ * Path to folder with the following files:
+ *   - Windows Authenticode private key and cert (authenticode.p12)
+ *   - Windows Authenticode password file (authenticode.txt)
+ */
+var CERT_PATH = process.platform === 'win32'
+  ? 'D:'
+  : '/Volumes/Certs'
+
+var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+
+var argv = minimist(process.argv.slice(2), {
+  boolean: [
+    'sign'
+  ],
+  default: {
+    package: 'all',
+    sign: false
+  },
+  string: [
+    'package'
+  ]
+})
+
 function build () {
-  rimraf.sync(path.join(config.ROOT_PATH, 'dist'))
-  var platform = process.argv[2]
-  var packageType = process.argv.length > 3 ? process.argv[3] : 'all'
+  rimraf.sync(DIST_PATH)
+  var platform = argv._[0]
   if (platform === 'darwin') {
     buildDarwin(printDone)
   } else if (platform === 'win32') {
     buildWin32(printDone)
   } else if (platform === 'linux') {
-    buildLinux(packageType, printDone)
+    buildLinux(printDone)
   } else {
-    buildDarwin(function (err, buildPath) {
-      printDone(err, buildPath)
-      buildWin32(function (err, buildPath) {
-        printDone(err, buildPath)
-        buildLinux(packageType, printDone)
+    buildDarwin(function (err) {
+      printDone(err)
+      buildWin32(function (err) {
+        printDone(err)
+        buildLinux(printDone)
       })
     })
   }
@@ -39,7 +67,8 @@ var all = {
   // Build 64 bit binaries only.
   arch: 'x64',
 
-  // The human-readable copyright line for the app.
+  // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
+  // property on Windows, and `NSHumanReadableCopyright` on OS X.
   'app-copyright': config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
@@ -71,7 +100,7 @@ var all = {
   name: config.APP_NAME,
 
   // The base directory where the finished package(s) are created.
-  out: path.join(config.ROOT_PATH, 'dist'),
+  out: DIST_PATH,
 
   // Replace an already existing output directory.
   overwrite: true,
@@ -145,8 +174,10 @@ build()
 function buildDarwin (cb) {
   var plist = require('plist')
 
+  console.log('OS X: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
+    console.log('OS X: Packaged electron. ' + buildPath[0])
 
     var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
     var contentsPath = path.join(appPath, 'Contents')
@@ -189,11 +220,24 @@ function buildDarwin (cb) {
     cp.execSync(`cp ${config.APP_FILE_ICON + '.icns'} ${resourcesPath}`)
 
     if (process.platform === 'darwin') {
-      var appDmg = require('appdmg')
+      if (argv.sign) {
+        signApp(function (err) {
+          if (err) return cb(err)
+          pack(cb)
+        })
+      } else {
+        printWarning()
+        pack(cb)
+      }
+    } else {
+      printWarning()
+    }
+
+    function signApp (cb) {
       var sign = require('electron-osx-sign')
 
       /*
-       * Sign the app with Apple Developer ID certificate. We sign the app for 2 reasons:
+       * Sign the app with Apple Developer ID certificates. We sign the app for 2 reasons:
        *   - So the auto-updater (Squirrrel.Mac) can check that app updates are signed by
        *     the same author as the current version.
        *   - So users will not a see a warning about the app coming from an "Unidentified
@@ -211,48 +255,71 @@ function buildDarwin (cb) {
         verbose: true
       }
 
+      console.log('OS X: Signing app...')
       sign(signOpts, function (err) {
         if (err) return cb(err)
+        console.log('OS X: Signed app.')
+        cb(null)
+      })
+    }
 
-        // Create .zip file (used by the auto-updater)
-        var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-darwin.zip')
-        cp.execSync(`cd ${buildPath[0]} && zip -r -y ${zipPath} ${config.APP_NAME + '.app'}`)
-        console.log('Created OS X .zip file.')
+    function pack (cb) {
+      packageZip() // always produce .zip file, used for automatic updates
 
-        var targetPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '.dmg')
-        rimraf.sync(targetPath)
+      if (argv.package === 'dmg' || argv.package === 'all') {
+        packageDmg(cb)
+      }
+    }
 
-        // Create a .dmg (OS X disk image) file, for easy user installation.
-        var dmgOpts = {
-          basepath: config.ROOT_PATH,
-          target: targetPath,
-          specification: {
-            title: config.APP_NAME,
-            icon: config.APP_ICON + '.icns',
-            background: path.join(config.STATIC_PATH, 'appdmg.png'),
-            'icon-size': 128,
-            contents: [
-              { x: 122, y: 240, type: 'file', path: appPath },
-              { x: 380, y: 240, type: 'link', path: '/Applications' },
-              // Hide hidden icons out of view, for users who have hidden files shown.
-              // https://github.com/LinusU/node-appdmg/issues/45#issuecomment-153924954
-              { x: 50, y: 500, type: 'position', path: '.background' },
-              { x: 100, y: 500, type: 'position', path: '.DS_Store' },
-              { x: 150, y: 500, type: 'position', path: '.Trashes' },
-              { x: 200, y: 500, type: 'position', path: '.VolumeIcon.icns' }
-            ]
-          }
+    function packageZip () {
+      // Create .zip file (used by the auto-updater)
+      console.log('OS X: Creating zip...')
+
+      var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
+      var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
+      zip(inPath, outPath)
+
+      console.log('OS X: Created zip.')
+    }
+
+    function packageDmg (cb) {
+      console.log('OS X: Creating dmg...')
+
+      var appDmg = require('appdmg')
+
+      var targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
+      rimraf.sync(targetPath)
+
+      // Create a .dmg (OS X disk image) file, for easy user installation.
+      var dmgOpts = {
+        basepath: config.ROOT_PATH,
+        target: targetPath,
+        specification: {
+          title: config.APP_NAME,
+          icon: config.APP_ICON + '.icns',
+          background: path.join(config.STATIC_PATH, 'appdmg.png'),
+          'icon-size': 128,
+          contents: [
+            { x: 122, y: 240, type: 'file', path: appPath },
+            { x: 380, y: 240, type: 'link', path: '/Applications' },
+            // Hide hidden icons out of view, for users who have hidden files shown.
+            // https://github.com/LinusU/node-appdmg/issues/45#issuecomment-153924954
+            { x: 50, y: 500, type: 'position', path: '.background' },
+            { x: 100, y: 500, type: 'position', path: '.DS_Store' },
+            { x: 150, y: 500, type: 'position', path: '.Trashes' },
+            { x: 200, y: 500, type: 'position', path: '.VolumeIcon.icns' }
+          ]
         }
+      }
 
-        var dmg = appDmg(dmgOpts)
-        dmg.on('error', cb)
-        dmg.on('progress', function (info) {
-          if (info.type === 'step-begin') console.log(info.title + '...')
-        })
-        dmg.on('finish', function (info) {
-          console.log('Created OS X disk image (.dmg) file.')
-          cb(null, buildPath)
-        })
+      var dmg = appDmg(dmgOpts)
+      dmg.on('error', cb)
+      dmg.on('progress', function (info) {
+        if (info.type === 'step-begin') console.log(info.title + '...')
+      })
+      dmg.on('finish', function (info) {
+        console.log('OS X: Created dmg.')
+        cb(null)
       })
     }
   })
@@ -261,57 +328,101 @@ function buildDarwin (cb) {
 function buildWin32 (cb) {
   var installer = require('electron-winstaller')
 
+  console.log('Windows: Packaging electron...')
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
+    console.log('Windows: Packaged electron. ' + buildPath[0])
 
-    console.log('Creating Windows installer...')
-    installer.createWindowsInstaller({
-      appDirectory: buildPath[0],
-      authors: config.APP_TEAM,
-      // certificateFile: '', // TODO
-      description: config.APP_NAME,
-      exe: config.APP_NAME + '.exe',
-      iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
-      loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
-      remoteReleases: config.GITHUB_URL,
-      name: config.APP_NAME,
-      noMsi: true,
-      outputDirectory: path.join(config.ROOT_PATH, 'dist'),
-      productName: config.APP_NAME,
-      setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
-      setupIcon: config.APP_ICON + '.ico',
-      title: config.APP_NAME,
-      usePackageJson: false,
-      version: pkg.version
-    }).then(function () {
-      console.log('Created Windows installer.')
-      cb(null, buildPath)
-    }).catch(cb)
+    var signWithParams
+    if (process.platform === 'win32') {
+      if (argv.sign) {
+        var certificateFile = path.join(CERT_PATH, 'authenticode.p12')
+        var certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
+        var timestampServer = 'http://timestamp.comodoca.com'
+        signWithParams = `/a /f "${certificateFile}" /p "${certificatePassword}" /tr "${timestampServer}" /td sha256`
+      } else {
+        printWarning()
+      }
+    } else {
+      printWarning()
+    }
+
+    var tasks = []
+    if (argv.package === 'exe' || argv.package === 'all') {
+      tasks.push((cb) => packageInstaller(cb))
+    }
+    if (argv.package === 'portable' || argv.package === 'all') {
+      tasks.push((cb) => packagePortable(cb))
+    }
+    series(tasks, cb)
+
+    function packageInstaller (cb) {
+      console.log('Windows: Creating installer...')
+      installer.createWindowsInstaller({
+        appDirectory: buildPath[0],
+        authors: config.APP_TEAM,
+        description: config.APP_NAME,
+        exe: config.APP_NAME + '.exe',
+        iconUrl: config.GITHUB_URL_RAW + '/static/' + config.APP_NAME + '.ico',
+        loadingGif: path.join(config.STATIC_PATH, 'loading.gif'),
+        name: config.APP_NAME,
+        noMsi: true,
+        outputDirectory: DIST_PATH,
+        productName: config.APP_NAME,
+        remoteReleases: config.GITHUB_URL,
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+        setupIcon: config.APP_ICON + '.ico',
+        signWithParams: signWithParams,
+        title: config.APP_NAME,
+        usePackageJson: false,
+        version: pkg.version
+      }).then(function () {
+        console.log('Windows: Created installer.')
+        cb(null)
+      }).catch(cb)
+    }
+
+    function packagePortable (cb) {
+      // Create Windows portable app
+      console.log('Windows: Creating portable app...')
+
+      var portablePath = path.join(buildPath[0], 'Portable Settings')
+      mkdirp.sync(portablePath)
+
+      var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
+      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
+      zip(inPath, outPath)
+
+      console.log('Windows: Created portable app.')
+      cb(null)
+    }
   })
 }
 
-function buildLinux (packageType, cb) {
-  var distPath = path.join(config.ROOT_PATH, 'dist')
-
+function buildLinux (cb) {
+  console.log('Linux: Packaging electron...')
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
+    console.log('Linux: Packaged electron. ' + buildPath[0])
 
-    for (var i = 0; i < buildPath.length; i++) {
-      var filesPath = buildPath[i]
+    var tasks = []
+    buildPath.forEach(function (filesPath) {
       var destArch = filesPath.split('-').pop()
 
-      if (packageType === 'deb' || packageType === 'all') {
-        packageDeb(filesPath, destArch)
+      if (argv.package === 'deb' || argv.package === 'all') {
+        tasks.push((cb) => packageDeb(filesPath, destArch, cb))
       }
-
-      if (packageType === 'zip' || packageType === 'all') {
-        packageZip(filesPath, destArch)
+      if (argv.package === 'zip' || argv.package === 'all') {
+        tasks.push((cb) => packageZip(filesPath, destArch, cb))
       }
-    }
+    })
+    series(tasks, cb)
   })
 
-  function packageDeb (filesPath, destArch) {
-    // Create .deb file for debian based platforms
+  function packageDeb (filesPath, destArch, cb) {
+    // Create .deb file for Debian-based platforms
+    console.log(`Linux: Creating ${destArch} deb...`)
+
     var deb = require('nobin-debian-installer')()
     var destPath = path.join('/opt', pkg.name)
 
@@ -319,7 +430,7 @@ function buildLinux (packageType, cb) {
       package: pkg,
       info: {
         arch: destArch === 'x64' ? 'amd64' : 'i386',
-        targetDir: distPath,
+        targetDir: DIST_PATH,
         depends: 'libc6 (>= 2.4)',
         scripts: {
           postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
@@ -332,21 +443,33 @@ function buildLinux (packageType, cb) {
       expand: true,
       cwd: filesPath
     }], function (err) {
-      if (err) return console.error(err.message || err)
-      console.log('Created Linux ' + destArch + ' .deb file.')
+      if (err) return cb(err)
+      console.log(`Linux: Created ${destArch} deb.`)
+      cb(null)
     })
   }
 
-  function packageZip (filesPath, destArch) {
+  function packageZip (filesPath, destArch, cb) {
     // Create .zip file for Linux
-    var zipPath = path.join(config.ROOT_PATH, 'dist', BUILD_NAME + '-linux-' + destArch + '.zip')
-    var appFolderName = path.basename(filesPath)
-    cp.execSync(`cd ${distPath} && zip -r -y ${zipPath} ${appFolderName}`)
-    console.log('Created Linux ' + destArch + ' .zip file.')
+    console.log(`Linux: Creating ${destArch} zip...`)
+
+    var inPath = path.join(DIST_PATH, path.basename(filesPath))
+    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
+    zip(inPath, outPath)
+
+    console.log(`Linux: Created ${destArch} zip.`)
+    cb(null)
   }
 }
 
-function printDone (err, buildPath) {
+function printDone (err) {
   if (err) console.error(err.message || err)
-  else console.log('Built ' + buildPath[0])
+}
+
+/*
+ * Print a large warning when signing is disabled so we are less likely to accidentally
+ * ship unsigned binaries to users.
+ */
+function printWarning () {
+  console.log(fs.readFileSync(path.join(__dirname, 'warning.txt'), 'utf8'))
 }
