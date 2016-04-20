@@ -68,10 +68,15 @@ function init () {
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-  var torrent = client.add(torrentID, {
-    path: path,
-    fileModtimes: fileModtimes
-  })
+  var torrent
+  try {
+    torrent = client.add(torrentID, {
+      path: path,
+      fileModtimes: fileModtimes
+    })
+  } catch (err) {
+    return ipc.send('wt-error', torrentKey, err.message)
+  }
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   return torrent
