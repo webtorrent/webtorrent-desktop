@@ -67,7 +67,8 @@ var all = {
   // Build 64 bit binaries only.
   arch: 'x64',
 
-  // The human-readable copyright line for the app.
+  // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
+  // property on Windows, and `NSHumanReadableCopyright` on OS X.
   'app-copyright': config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
