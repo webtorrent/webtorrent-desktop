@@ -280,8 +280,11 @@ function dispatch (action, ...args) {
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
   }
+  if (action === 'skip') {
+    jumpToTime(state.playing.currentTime + (args[0] /* direction */ * 10))
+  }
   if (action === 'setPlaybackRate') {
-    setPlaybackRate(args[0] /* seconds */)
+    setPlaybackRate(args[0] /* direction */)
   }
   if (action === 'changeVolume') {
     changeVolume(args[0] /* increase */)
@@ -381,12 +384,20 @@ function jumpToTime (time) {
 }
 function setPlaybackRate (direction) {
   var rate = state.playing.playbackRate
-  if ((direction > 0 && rate >= 1 && rate < 16) || (direction < 0 && rate > -16 && rate <= -1)) {
+  if (direction > 0 && rate >= 0.25 && rate < 2) {
+    rate += 0.25
+  } else if (direction < 0 && rate > 0.25 && rate <= 2) {
+    rate -= 0.25
+  } else if (direction < 0 && rate === 0.25) { /* when we set playback rate at 0 in html 5, playback hangs ;( */
+    rate = -1
+  } else if (direction > 0 && rate === -1) {
+    rate = 0.25
+  } else if ((direction > 0 && rate >= 1 && rate < 16) || (direction < 0 && rate > -16 && rate <= -1)) {
     rate *= 2
   } else if ((direction < 0 && rate > 1 && rate <= 16) || (direction > 0 && rate >= -16 && rate < -1)) {
     rate /= 2
-  } else if (rate === -1 || rate === 1) {
-    rate *= -1
+  } else if (direction < 0 && rate === 1) {
+    rate = -1
   }
   state.playing.playbackRate = rate
   if (lazyLoadCast().isCasting()) {
@@ -1164,13 +1175,13 @@ function onKeyDown (e) {
     }
   } else if (e.which === 32) { /* spacebar pauses or plays the video */
     dispatch('playPause')
-  }else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39) { /*ALT + right arrow */
-    dispatch('playbackJump', state.playing.currentTime + 10)
-  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) { /*ALT + left arrow */
-    dispatch('playbackJump', state.playing.currentTime - 10)
-  } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+"   */
+  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39) { /* ALT + right arrow */
+    dispatch('skip', 1)
+  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) { /* ALT + left arrow */
+    dispatch('skip', -1)
+  } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+" */
     dispatch('setPlaybackRate', 1)
-  } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-"   */
+  } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-" */
     dispatch('setPlaybackRate', -1)
   }
 }

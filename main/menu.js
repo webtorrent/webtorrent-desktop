@@ -58,6 +58,30 @@ function decreaseVolume () {
   }
 }
 
+function skipForward () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'skip', 1)
+  }
+}
+
+function skipBack () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'skip', -1)
+  }
+}
+
+function increasePlaybackRate () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'setPlaybackRate', 1)
+  }
+}
+
+function decreasePlaybackRate () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'setPlaybackRate', -1)
+  }
+}
+
 function toggleDevTools () {
   log('toggleDevTools')
   if (windows.main) {
@@ -85,11 +109,19 @@ function onWindowHide () {
 function onPlayerOpen () {
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
+  getMenuItem('Skip forward 10 seconds').enabled = true
+  getMenuItem('Skip back 10 seconds').enabled = true
+  getMenuItem('Increase video speed').enabled = true
+  getMenuItem('Decrease video speed').enabled = true
 }
 
 function onPlayerClose () {
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
+  getMenuItem('Skip forward 10 seconds').enabled = false
+  getMenuItem('Skip back 10 seconds').enabled = false
+  getMenuItem('Increase video speed').enabled = false
+  getMenuItem('Decrease video speed').enabled = false
 }
 
 function onToggleFullScreen (isFullScreen) {
@@ -237,6 +269,36 @@ function getAppMenuTemplate () {
           label: 'Decrease Volume',
           accelerator: 'CmdOrCtrl+Down',
           click: decreaseVolume,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Skip forward 10 seconds',
+          accelerator: 'CmdOrCtrl+Alt+Right',
+          click: skipForward,
+          enabled: false
+        },
+        {
+          label: 'Skip back 10 seconds',
+          accelerator: 'CmdOrCtrl+Alt+Left',
+          click: skipBack,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Increase video speed',
+          accelerator: 'CmdOrCtrl+plus',
+          click: increasePlaybackRate,
+          enabled: false
+        },
+        {
+          label: 'Decrease video speed',
+          accelerator: 'CmdOrCtrl+-',
+          click: decreasePlaybackRate,
           enabled: false
         },
         {
