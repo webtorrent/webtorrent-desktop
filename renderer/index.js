@@ -717,7 +717,7 @@ function torrentError (torrentKey, message) {
 
   // TODO: WebTorrent should have semantic errors
   if (message.startsWith('There is already a swarm')) {
-    onError(new Error('Couldn\'t add duplicate torrent'))
+    onError(new Error('Can\'t add duplicate torrent'))
   } else if (!torrentSummary) {
     onError(message)
   } else {

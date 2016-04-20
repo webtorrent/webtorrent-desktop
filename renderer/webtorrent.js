@@ -77,6 +77,12 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
   } catch (err) {
     return ipc.send('wt-error', torrentKey, err.message)
   }
+  // If we add a duplicate magnet URI or infohash, WebTorrent returns the
+  // existing torrent object! (If we add a duplicate torrent file, it creates a
+  // new torrent object and raises an error later.) Workaround:
+  if (torrent.key) {
+    return ipc.send('wt-error', torrentKey, 'Can\'t add duplicate torrent')
+  }
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   return torrent
