@@ -523,12 +523,7 @@ function onOpen (files) {
 
   // everything else = seed these files
   var rest = files.filter(not(isTorrent)).filter(not(isSubtitle))
-  if (rest.length > 0) {
-    state.modal = {
-      id: 'create-torrent-modal',
-      files: rest
-    }
-  }
+  if (rest.length > 0) showCreateTorrent(rest)
 }
 
 function isTorrent (file) {
@@ -640,34 +635,49 @@ function startTorrentingSummary (torrentSummary) {
 // Shows the Create Torrent page with options to seed a given file or folder
 function showCreateTorrent (files) {
   if (Array.isArray(files)) {
-    state.modal = {
-      id: 'create-torrent-modal',
+    if (state.location.pending() || state.location.current().url !== 'home') return
+    state.location.go({
+      url: 'create-torrent',
       files: files
-    }
+    })
     return
   }
 
   var fileOrFolder = files
+  findFilesRecursive(fileOrFolder, showCreateTorrent)
+}
+
+// Recursively finds {name, length, path} for all files in a folder
+// Calls `cb` on success, calls `onError` on failure
+function findFilesRecursive (fileOrFolder, cb) {
   fs.stat(fileOrFolder, function (err, stat) {
     if (err) return onError(err)
-    if (stat.isDirectory()) {
-      fs.readdir(fileOrFolder, function (err, fileNames) {
-        if (err) return onError(err)
-        // TODO: support nested folders
-        var fileObjs = fileNames.map(function (fileName) {
-          return {
-            name: fileName,
-            path: path.join(fileOrFolder, fileName)
-          }
-        })
-        showCreateTorrent(fileObjs)
-      })
-    } else {
-      showCreateTorrent([{
-        name: path.basename(fileOrFolder),
-        path: fileOrFolder
+
+    // Files: return name, path, and size
+    if (!stat.isDirectory()) {
+      var filePath = fileOrFolder
+      return cb([{
+        name: path.basename(filePath),
+        path: filePath,
+        length: stat.size
       }])
     }
+
+    // Folders: recurse, make a list of all the files
+    var folderPath = fileOrFolder
+    fs.readdir(folderPath, function (err, fileNames) {
+      if (err) return onError(err)
+      var numComplete = 0
+      var ret = []
+      fileNames.forEach(function (fileName) {
+        findFilesRecursive(path.join(folderPath, fileName), function (fileObjs) {
+          ret = ret.concat(fileObjs)
+          if (++numComplete === fileNames.length) {
+            cb(ret)
+          }
+        })
+      })
+    })
   })
 }
 
