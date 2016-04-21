@@ -5,7 +5,7 @@ module.exports = {
   onWindowShow,
   onPlayerOpen,
   onPlayerClose,
-  showCreateTorrent,
+  showOpenSeedFiles,
   showOpenTorrentFile,
   toggleFullScreen
 }
@@ -109,7 +109,7 @@ function getMenuItem (label) {
 }
 
 // Prompts the user for a file or folder, then makes a torrent out of the data
-function showCreateTorrent () {
+function showOpenSeedFiles () {
   // Allow only a single selection
   // To create a multi-file torrent, the user must select a folder
   electron.dialog.showOpenDialog({
@@ -117,10 +117,8 @@ function showCreateTorrent () {
     properties: [ 'openFile', 'openDirectory' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    var options = {
-      files: filenames[0]
-    }
-    windows.main.send('dispatch', 'createTorrent', options)
+    var fileOrFolder = filenames[0]
+    windows.main.send('dispatch', 'showCreateTorrent', fileOrFolder)
   })
 }
 
@@ -148,7 +146,7 @@ function getAppMenuTemplate () {
     {
       label: 'Create New Torrent...',
       accelerator: 'CmdOrCtrl+N',
-      click: showCreateTorrent
+      click: showOpenSeedFiles
     },
     {
       label: 'Open Torrent File...',
@@ -373,7 +371,7 @@ function getDockMenuTemplate () {
     {
       label: 'Create New Torrent...',
       accelerator: 'CmdOrCtrl+N',
-      click: showCreateTorrent
+      click: showOpenSeedFiles
     },
     {
       label: 'Open Torrent File...',
