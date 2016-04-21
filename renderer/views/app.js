@@ -5,15 +5,17 @@ var hyperx = require('hyperx')
 var hx = hyperx(h)
 
 var Header = require('./header')
-var Player = require('./player')
-var TorrentList = require('./torrent-list')
+var Views = {
+  'home': require('./torrent-list'),
+  'player': require('./player'),
+  'create-torrent': require('./create-torrent-page')
+}
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
-  'update-available-modal': require('./update-available-modal'),
-  'create-torrent-modal': require('./create-torrent-modal')
+  'update-available-modal': require('./update-available-modal')
 }
 
-function App (state, dispatch) {
+function App (state) {
   // Hide player controls while playing video, if the mouse stays still for a while
   // Never hide the controls when:
   // * The mouse is over the controls or we're scrubbing (see CSS)
@@ -40,47 +42,43 @@ function App (state, dispatch) {
 
   return hx`
     <div class='app ${cls.join(' ')}'>
-      ${Header(state, dispatch)}
-      ${getErrorPopover()}
-      <div class='content'>${getView()}</div>
-      ${getModal()}
+      ${Header(state)}
+      ${getErrorPopover(state)}
+      <div class='content'>${getView(state)}</div>
+      ${getModal(state)}
     </div>
   `
+}
 
-  function getErrorPopover () {
-    var now = new Date().getTime()
-    var recentErrors = state.errors.filter((x) => now - x.time < 5000)
+function getErrorPopover (state) {
+  var now = new Date().getTime()
+  var recentErrors = state.errors.filter((x) => now - x.time < 5000)
 
-    var errorElems = recentErrors.map(function (error) {
-      return hx`<div class='error'>${error.message}</div>`
-    })
-    return hx`
-    <div class='error-popover ${recentErrors.length > 0 ? 'visible' : 'hidden'}'>
-        <div class='title'>Error</div>
-        ${errorElems}
+  var errorElems = recentErrors.map(function (error) {
+    return hx`<div class='error'>${error.message}</div>`
+  })
+  return hx`
+  <div class='error-popover ${recentErrors.length > 0 ? 'visible' : 'hidden'}'>
+      <div class='title'>Error</div>
+      ${errorElems}
+    </div>
+  `
+}
+
+function getModal (state) {
+  if (!state.modal) return
+  var contents = Modals[state.modal.id](state)
+  return hx`
+    <div class='modal'>
+      <div class='modal-background'></div>
+      <div class='modal-content'>
+        ${contents}
       </div>
-    `
-  }
+    </div>
+  `
+}
 
-  function getModal () {
-    if (state.modal) {
-      var contents = Modals[state.modal.id](state, dispatch)
-      return hx`
-        <div class='modal'>
-          <div class='modal-background'></div>
-          <div class='modal-content'>
-            ${contents}
-          </div>
-        </div>
-      `
-    }
-  }
-
-  function getView () {
-    if (state.location.current().url === 'home') {
-      return TorrentList(state, dispatch)
-    } else if (state.location.current().url === 'player') {
-      return Player(state, dispatch)
-    }
-  }
+function getView (state) {
+  var url = state.location.current().url
+  return Views[url](state)
 }

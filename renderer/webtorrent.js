@@ -95,8 +95,9 @@ function stopTorrenting (infoHash) {
 
 // Create a new torrent, start seeding
 function createTorrent (torrentKey, options) {
-  console.log('creating torrent %s', torrentKey, options)
-  var torrent = client.seed(options.files, options)
+  console.log('creating torrent', torrentKey, options)
+  var paths = options.files.map((f) => f.path)
+  var torrent = client.seed(paths, options)
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   ipc.send('wt-new-torrent')

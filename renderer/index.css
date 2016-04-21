@@ -117,6 +117,30 @@ table {
   float: right;
 }
 
+.expand-collapse {
+  cursor: pointer;
+}
+
+.expand-collapse.expanded::before {
+  content: '▲'
+}
+
+.expand-collapse.collapsed::before {
+  content: '▼'
+}
+
+.expand-collapse::before {
+  margin-right: 5px;
+}
+
+.expand-collapse.collapsed {
+  display: block;
+}
+
+.collapsed {
+  display: none;
+}
+
 /*
  * HEADER
  */
@@ -260,23 +284,54 @@ table {
   width: 100%;
 }
 
-.create-torrent-modal .torrent-attribute {
+.create-torrent-page {
+  padding: 10px 25px;
+  overflow: hidden;
+}
+
+.create-torrent-page .torrent-attribute {
   white-space: nowrap;
 }
 
-.create-torrent-modal .torrent-attribute>* {
+.create-torrent-page .torrent-attribute>* {
   display: inline-block;
 }
 
-.create-torrent-modal .torrent-attribute label {
+.create-torrent-page .torrent-attribute label {
   width: 60px;
   margin-right: 10px;
   vertical-align: top;
 }
 
-.create-torrent-modal .torrent-attribute div {
-  font-family: Consolas, monospace;
+.create-torrent-page .torrent-attribute>div {
+  width: calc(100% - 90px);
+}
+
+.create-torrent-page .torrent-attribute div {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.create-torrent-page .torrent-attribute textarea {
+  width: calc(100% - 80px);
+  height: 80px;
+  color: #eee;
+  background-color: transparent;
+  line-height: 1.5;
+  font-size: 14px;
+  font-family: inherit;
+  border-radius: 2px;
+  padding: 4px 6px;
+}
+
+.create-torrent-page textarea.torrent-trackers {
+  height: 200px;
+}
+
+.create-torrent-page input.torrent-is-private {
+  width: initial;
+  margin: 0;
 }
 
 /*
@@ -320,6 +375,10 @@ button { /* Rectangular text buttons */
 button.button-flat {
   color: #222;
   padding: 7px 18px;
+}
+
+button.button-flat.light {
+  color: #eee;
 }
 
 button.button-flat:hover,
