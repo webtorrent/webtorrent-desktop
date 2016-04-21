@@ -211,11 +211,14 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
-  if (action === 'showCreateTorrent') {
-    ipcRenderer.send('showCreateTorrent') /* open file or folder to seed */
+  if (action === 'showOpenSeedFiles') {
+    ipcRenderer.send('showOpenSeedFiles') /* open file or folder to seed */
   }
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
+  }
+  if (action === 'showCreateTorrent') {
+    showCreateTorrent(args[0] /* fileOrFolder */)
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
@@ -521,7 +524,10 @@ function onOpen (files) {
   // everything else = seed these files
   var rest = files.filter(not(isTorrent)).filter(not(isSubtitle))
   if (rest.length > 0) {
-    createTorrentFromFileObjects(rest)
+    state.modal = {
+      id: 'create-torrent-modal',
+      files: rest
+    }
   }
 }
 
@@ -626,62 +632,43 @@ function startTorrentingSummary (torrentSummary) {
   ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
 }
 
-// TODO: maybe have a "create torrent" modal in the future, with options like
-// custom trackers, private flag, and so on?
-//
-// Right now create-torrent-modal is v basic, only user input is OK / Cancel
-//
-// Also, if you uncomment below below, creating a torrent thru
-// File > Create New Torrent will still create a new torrent directly, while
-// dragging files or folders onto the app opens the create-torrent-modal
-//
-// That's because the former gets a single string and the latter gets a list
-// of W3C File objects. We should fix this inconsistency, ideally without
-// duping this code in the drag-drop module:
-// https://github.com/feross/drag-drop/blob/master/index.js
-//
-// function showCreateTorrentModal (files) {
-//   if (files.length === 0) return
-//   state.modal = {
-//     id: 'create-torrent-modal',
-//     files: files
-//   }
-// }
-
 //
 // TORRENT MANAGEMENT
 // Send commands to the WebTorrent process, handle events
 //
 
-// Creates a new torrent from a drag-dropped file or folder
-function createTorrentFromFileObjects (files) {
-  var filePaths = files.map((x) => x.path)
-
-  // Single-file torrents are easy. Multi-file torrents require special handling
-  // make sure WebTorrent seeds all files in place, without copying to /tmp
-  if (filePaths.length === 1) {
-    return createTorrent({files: filePaths[0]})
+// Shows the Create Torrent page with options to seed a given file or folder
+function showCreateTorrent (files) {
+  if (Array.isArray(files)) {
+    state.modal = {
+      id: 'create-torrent-modal',
+      files: files
+    }
+    return
   }
 
-  // First, extract the base folder that the files are all in
-  var pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
-  if (files.length > 0 && !pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
-    pathPrefix = path.dirname(pathPrefix)
-  }
-
-  // Then, use the name of the base folder (or sole file, for a single file torrent)
-  // as the default name. Show all files relative to the base folder.
-  var defaultName = path.basename(pathPrefix)
-  var basePath = path.dirname(pathPrefix)
-  var options = {
-    // TODO: we can't let the user choose their own name if we want WebTorrent
-    // to use the files in place rather than creating a new folder.
-    name: defaultName,
-    path: basePath,
-    files: filePaths
-  }
-
-  createTorrent(options)
+  var fileOrFolder = files
+  fs.stat(fileOrFolder, function (err, stat) {
+    if (err) return onError(err)
+    if (stat.isDirectory()) {
+      fs.readdir(fileOrFolder, function (err, fileNames) {
+        if (err) return onError(err)
+        // TODO: support nested folders
+        var fileObjs = fileNames.map(function (fileName) {
+          return {
+            name: fileName,
+            path: path.join(fileOrFolder, fileName)
+          }
+        })
+        showCreateTorrent(fileObjs)
+      })
+    } else {
+      showCreateTorrent([{
+        name: path.basename(fileOrFolder),
+        path: fileOrFolder
+      }])
+    }
+  })
 }
 
 // Creates a new torrent and start seeeding
@@ -1076,16 +1063,6 @@ function showDoneNotification (torrent) {
   }
 
   sound.play('DONE')
-}
-
-// Finds the longest common prefix
-function findCommonPrefix (a, b) {
-  for (var i = 0; i < a.length && i < b.length; i++) {
-    if (a.charCodeAt(i) !== b.charCodeAt(i)) break
-  }
-  if (i === a.length) return a
-  if (i === b.length) return b
-  return a.substring(0, i)
 }
 
 // Hide player controls while playing video, if the mouse stays still for a while

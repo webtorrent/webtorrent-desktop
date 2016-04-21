@@ -9,11 +9,20 @@ var path = require('path')
 var {dispatch} = require('../lib/dispatcher')
 
 function UpdateAvailableModal (state) {
+  var info = state.modal
+
   // First, extract the base folder that the files are all in
-  var files = state.modal.files
-  var pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
-  if (files.length > 0 && !pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
-    pathPrefix = path.dirname(pathPrefix)
+  var files = info.files
+  var pathPrefix = info.folderPath
+  if (!pathPrefix) {
+    if (files.length > 0) {
+      pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
+      if (!pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
+        pathPrefix = path.dirname(pathPrefix)
+      }
+    } else {
+      pathPrefix = files[0]
+    }
   }
 
   // Then, use the name of the base folder (or sole file, for a single file torrent)

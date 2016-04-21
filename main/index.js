@@ -120,7 +120,7 @@ function sliceArgv (argv) {
 function processArgv (argv) {
   argv.forEach(function (arg) {
     if (arg === '-n') {
-      windows.main.send('dispatch', 'showCreateTorrent')
+      windows.main.send('dispatch', 'showOpenSeedFiles')
     } else if (arg === '-o') {
       windows.main.send('dispatch', 'showOpenTorrentFile')
     } else if (arg === '-u') {
