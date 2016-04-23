@@ -11,6 +11,8 @@ module.exports = {
 }
 
 var electron = require('electron')
+var window = electron.BrowserWindow
+var path = require('path')
 
 var app = electron.app
 
@@ -85,11 +87,13 @@ function onWindowHide () {
 function onPlayerOpen () {
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
+  showPlayerThumbnailBar(true)
 }
 
 function onPlayerClose () {
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
+  showPlayerThumbnailBar(false)
 }
 
 function onToggleFullScreen (isFullScreen) {
@@ -97,6 +101,24 @@ function onToggleFullScreen (isFullScreen) {
   windows.main.setMenuBarVisibility(!isFullScreen)
   getMenuItem('Full Screen').checked = isFullScreen
   windows.main.send('fullscreenChanged', isFullScreen)
+}
+
+function showPlayerThumbnailBar (shouldShow) {
+  var focusedWindow = window.getFocusedWindow()
+  if (!focusedWindow) {
+    return
+  }
+
+  shouldShow ?
+  focusedWindow.setThumbarButtons([
+    {
+      tooltip: "button1",
+      icon: path.join(config.STATIC_PATH, 'PauseThumbnailBarButton.png'),
+      click: function(){
+        windows.main.send('dispatch', 'playPause')
+      }
+    }
+  ]) : focusedWindow.setThumbarButtons([])
 }
 
 function getMenuItem (label) {
