@@ -7,15 +7,16 @@ var electron = require('electron')
 
 var window = electron.BrowserWindow
 var path = require('path')
+var config = require('../config')
 
 var windows = require('./windows')
+var focusedWindow
 
 function showPlayerThumbnailBar () {
-  var focusedWindow = window.getFocusedWindow()
   if (!focusedWindow) {
-    return
+    focusedWindow = window.getFocusedWindow()
   }
-  
+
   focusedWindow.setThumbarButtons([
     {
       tooltip: "playPause",
@@ -28,9 +29,5 @@ function showPlayerThumbnailBar () {
 }
 
 function hidePlayerThumbnailBar () {
-  var focusedWindow = window.getFocusedWindow()
-  if (!focusedWindow) {
-    return
-  }
   focusedWindow.setThumbarButtons([])
 }
