@@ -372,14 +372,18 @@ function pause () {
 
 function playPause () {
   if (state.location.url() !== 'player') return
+
   if (state.playing.isPaused) {
     play()
   } else {
     pause()
   }
+
   // force rerendering if window is hidden,
   // in order to bypass `raf` and play/pause media immediately
   if (!state.window.isVisible) render(state)
+
+  ipcRenderer.send('updateThumbnailBar', state.playing.isPaused)
 }
 
 function jumpToTime (time) {

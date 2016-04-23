@@ -15,6 +15,7 @@ var shell = require('./shell')
 var shortcuts = require('./shortcuts')
 var vlc = require('./vlc')
 var windows = require('./windows')
+var thumbnail = require('./thumbnail')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 var messageQueueMainToWebTorrent = []
@@ -66,6 +67,10 @@ function init () {
   ipc.on('onPlayerClose', function () {
     menu.onPlayerClose()
     shortcuts.onPlayerOpen()
+  })
+
+  ipc.on('updateThumbnailBar', function (e, isPaused) {
+    thumbnail.updateThumbarButtons(isPaused)
   })
 
   /**
