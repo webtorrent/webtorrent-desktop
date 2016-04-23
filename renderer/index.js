@@ -1054,12 +1054,8 @@ function setDimensions (dimensions) {
     config.WINDOW_MIN_HEIGHT
   )
 
-  // Center window on screen
-  var x = Math.floor((screenWidth - width) / 2)
-  var y = Math.floor((screenHeight - height) / 2)
-
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {x, y, width, height})
+  ipcRenderer.send('setBounds', {x: null, y: null, width, height})
 }
 
 function restoreBounds () {

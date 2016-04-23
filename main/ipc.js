@@ -140,6 +140,14 @@ function setBounds (bounds, maximize) {
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
     log('setBounds: setting bounds to ' + JSON.stringify(bounds))
+    if (bounds.x === null && bounds.y === null) {
+      // X and Y not specified? By default, center on current screen
+      var screen = require('screen')
+      var scr = screen.getDisplayMatching(windows.main.getBounds())
+      bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
+      bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
+      log('setBounds: centered to ' + JSON.stringify(bounds))
+    }
     windows.main.setBounds(bounds, true)
   } else {
     log('setBounds: not setting bounds because of window maximization')
