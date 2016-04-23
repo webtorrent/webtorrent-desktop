@@ -103,24 +103,6 @@ function onToggleFullScreen (isFullScreen) {
   windows.main.send('fullscreenChanged', isFullScreen)
 }
 
-function showPlayerThumbnailBar (shouldShow) {
-  var focusedWindow = window.getFocusedWindow()
-  if (!focusedWindow) {
-    return
-  }
-
-  shouldShow ?
-  focusedWindow.setThumbarButtons([
-    {
-      tooltip: "button1",
-      icon: path.join(config.STATIC_PATH, 'PauseThumbnailBarButton.png'),
-      click: function(){
-        windows.main.send('dispatch', 'playPause')
-      }
-    }
-  ]) : focusedWindow.setThumbarButtons([])
-}
-
 function getMenuItem (label) {
   for (var i = 0; i < appMenu.items.length; i++) {
     var menuItem = appMenu.items[i].submenu.items.find(function (item) {
