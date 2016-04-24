@@ -1,8 +1,8 @@
 module.exports = {
   showPlayerThumbnailBar,
-  hidePlayerThumbnailBar
+  hidePlayerThumbnailBar,
+  updateThumbarButtons
 }
-
 var electron = require('electron')
 
 var window = electron.BrowserWindow
@@ -17,17 +17,24 @@ function showPlayerThumbnailBar () {
     focusedWindow = window.getFocusedWindow()
   }
 
-  focusedWindow.setThumbarButtons([
-    {
-      tooltip: "playPause",
-      icon: path.join(config.STATIC_PATH, 'PauseThumbnailBarButton.png'),
-      click: function () {
-        windows.main.send('dispatch', 'playPause')
-      }
-    }
-  ])
+  updateThumbarButtons(false)
 }
 
 function hidePlayerThumbnailBar () {
   focusedWindow.setThumbarButtons([])
+}
+
+function updateThumbarButtons (isPaused) {
+  var icon = isPaused ? 'PlayThumbnailBarButton.png' : 'PauseThumbnailBarButton.png'
+  var tooltip = isPaused ? 'Play' : 'Pause'
+  var buttons = [
+    {
+      tooltip: tooltip,
+      icon: path.join(config.STATIC_PATH, icon),
+      click: function () {
+        windows.main.send('dispatch', 'playPause')
+      }
+    }
+  ]
+  focusedWindow.setThumbarButtons(buttons)
 }
