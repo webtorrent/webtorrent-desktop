@@ -15,7 +15,7 @@ var focusedWindow
 
 // gets called on player open
 function showPlayerThumbnailBar () {
-  //save the window reference
+  // save the window reference
   if (!focusedWindow) {
     focusedWindow = window.getFocusedWindow()
   }
