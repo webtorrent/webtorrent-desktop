@@ -367,6 +367,7 @@ function playPause () {
   } else {
     pause()
   }
+
   ipcRenderer.send('updateThumbnailBar', state.playing.isPaused)
 }
 

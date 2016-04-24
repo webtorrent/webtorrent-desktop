@@ -3,16 +3,19 @@ module.exports = {
   hidePlayerThumbnailBar,
   updateThumbarButtons
 }
+
 var electron = require('electron')
 
-var window = electron.BrowserWindow
 var path = require('path')
 var config = require('../config')
 
+var window = electron.BrowserWindow
 var windows = require('./windows')
 var focusedWindow
 
+// gets called on player open
 function showPlayerThumbnailBar () {
+  //save the window reference
   if (!focusedWindow) {
     focusedWindow = window.getFocusedWindow()
   }
@@ -20,6 +23,7 @@ function showPlayerThumbnailBar () {
   updateThumbarButtons(false)
 }
 
+// gets called on player close
 function hidePlayerThumbnailBar () {
   focusedWindow.setThumbarButtons([])
 }
