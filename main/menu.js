@@ -11,8 +11,6 @@ module.exports = {
 }
 
 var electron = require('electron')
-var window = electron.BrowserWindow
-var path = require('path')
 
 var app = electron.app
 
