@@ -2,7 +2,6 @@ module.exports = {
   init
 }
 
-var cp = require('child_process')
 var electron = require('electron')
 
 var app = electron.app
@@ -13,6 +12,7 @@ var log = require('./log')
 var menu = require('./menu')
 var windows = require('./windows')
 var shortcuts = require('./shortcuts')
+var vlc = require('./vlc')
 
 // has to be a number, not a boolean, and undefined throws an error
 var powerSaveBlockID = 0
@@ -93,44 +93,38 @@ function init () {
   })
 
   ipcMain.on('vlcVersion', function (e) {
-    cp.exec('vlc --version', function (e, stdout, stderr) {
-      var version
-      if (e) {
-        version = null
-      } else {
-        // Prints several lines, starting with eg: VLC media player 2.7.0
-        if (!stdout.startsWith('VLC media player')) version = 'unknown'
-        else version = stdout.split(' ')[3]
-      }
+    vlc.getInstalledVersion(function (version) {
       windows.main.send('vlcVersion', version)
     })
   })
 
   ipcMain.on('vlcPlay', function (e, url) {
-    // TODO: cross-platform VLC detection
-    var command = 'vlc'
     var args = ['--play-and-exit', '--quiet', url]
-    console.log('Running ' + command + ' ' + args.join(' '))
+    console.log('Running vlc ' + args.join(' '))
 
-    vlcProcess = cp.spawn(command, args)
+    vlc.spawn(args, function (err, proc) {
+      if (err) windows.main.send('dispatch', 'vlcNotFound')
+      vlcProcess = proc
 
-    // If it works, close the modal after a second
-    var closeModalTimeout = setTimeout(() => windows.main.send('dispatch', 'exitModal'), 1000)
+      // If it works, close the modal after a second
+      var closeModalTimeout = setTimeout(() =>
+        windows.main.send('dispatch', 'exitModal'), 1000)
 
-    vlcProcess.on('close', function (code) {
-      clearTimeout(closeModalTimeout)
-      if (!vlcProcess) return // Killed
-      console.log('VLC exited with code ', code)
-      if (code === 0) {
-        windows.main.send('dispatch', 'backToList')
-      } else {
-        windows.main.send('dispatch', 'vlcNotFound')
-      }
-      vlcProcess = null
-    })
+      vlcProcess.on('close', function (code) {
+        clearTimeout(closeModalTimeout)
+        if (!vlcProcess) return // Killed
+        console.log('VLC exited with code ', code)
+        if (code === 0) {
+          windows.main.send('dispatch', 'backToList')
+        } else {
+          windows.main.send('dispatch', 'vlcNotFound')
+        }
+        vlcProcess = null
+      })
 
-    vlcProcess.on('error', function (e) {
-      console.log('VLC error', e)
+      vlcProcess.on('error', function (e) {
+        console.log('VLC error', e)
+      })
     })
   })
 
