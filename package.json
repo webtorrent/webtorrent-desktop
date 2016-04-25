@@ -37,7 +37,7 @@
     "srt-to-vtt": "^1.1.1",
     "virtual-dom": "^2.1.1",
     "webtorrent": "0.x",
-    "winreg": "^1.1.1"
+    "winreg": "^1.2.0"
   },
   "devDependencies": {
     "cross-zip": "^2.0.1",
