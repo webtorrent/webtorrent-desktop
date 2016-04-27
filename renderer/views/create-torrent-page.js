@@ -41,7 +41,9 @@ function CreateTorrentPage (state) {
 
   // Then, use the name of the base folder (or sole file, for a single file torrent)
   // as the default name. Show all files relative to the base folder.
-  var defaultName = path.basename(pathPrefix)
+  var defaultName = files.length === 1
+    ? files[0].name
+    : path.basename(pathPrefix)
   var basePath = path.dirname(pathPrefix)
   var maxFileElems = 100
   var fileElems = files.slice(0, maxFileElems).map(function (file) {
