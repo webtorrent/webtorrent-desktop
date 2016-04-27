@@ -40,7 +40,7 @@
     "winreg": "^1.1.1"
   },
   "devDependencies": {
-    "cross-zip": "^1.0.0",
+    "cross-zip": "^2.0.1",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^7.0.0",
     "electron-winstaller": "feross/windows-installer#build",
