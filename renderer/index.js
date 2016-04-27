@@ -647,7 +647,7 @@ function showCreateTorrent (files) {
   findFilesRecursive(fileOrFolder, showCreateTorrent)
 }
 
-// Recursively finds {name, length, path} for all files in a folder
+// Recursively finds {name, path, size} for all files in a folder
 // Calls `cb` on success, calls `onError` on failure
 function findFilesRecursive (fileOrFolder, cb) {
   fs.stat(fileOrFolder, function (err, stat) {
@@ -659,7 +659,7 @@ function findFilesRecursive (fileOrFolder, cb) {
       return cb([{
         name: path.basename(filePath),
         path: filePath,
-        length: stat.size
+        size: stat.size
       }])
     }
 

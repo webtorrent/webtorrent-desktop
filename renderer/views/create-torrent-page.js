@@ -13,8 +13,12 @@ var {dispatch} = require('../lib/dispatcher')
 function CreateTorrentPage (state) {
   var info = state.location.current()
 
-  // First, extract the base folder that the files are all in
+  // Preprocess: exclude .DS_Store and other dotfiles
   var files = info.files
+    .filter((f) => !f.name.startsWith('.'))
+    .map((f) => ({name: f.name, path: f.path, size: f.size}))
+
+  // First, extract the base folder that the files are all in
   var pathPrefix = info.folderPath
   if (!pathPrefix) {
     if (files.length > 0) {
@@ -29,8 +33,9 @@ function CreateTorrentPage (state) {
 
   // Sanity check: show the number of files and total size
   var numFiles = files.length
+  console.log('FILES', files)
   var totalBytes = files
-    .map((f) => f.length)
+    .map((f) => f.size)
     .reduce((a, b) => a + b, 0)
   var torrentInfo = `${numFiles} files, ${prettyBytes(totalBytes)}`
 
