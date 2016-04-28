@@ -49,6 +49,7 @@
     "minimist": "^1.2.0",
     "nobin-debian-installer": "^0.0.9",
     "plist": "^1.2.0",
+    "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
     "standard": "^7.0.0"
   },
