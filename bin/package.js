@@ -277,7 +277,7 @@ function buildDarwin (cb) {
 
       var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
       var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
-      zip(inPath, outPath)
+      zip.zipSync(inPath, outPath)
 
       console.log('OS X: Created zip.')
     }
@@ -391,7 +391,7 @@ function buildWin32 (cb) {
 
       var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
       var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
-      zip(inPath, outPath)
+      zip.zipSync(inPath, outPath)
 
       console.log('Windows: Created portable app.')
       cb(null)
@@ -455,7 +455,7 @@ function buildLinux (cb) {
 
     var inPath = path.join(DIST_PATH, path.basename(filesPath))
     var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
-    zip(inPath, outPath)
+    zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)
     cb(null)
