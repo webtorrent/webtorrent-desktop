@@ -90,7 +90,7 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
 
 function stopTorrenting (infoHash) {
   var torrent = client.get(infoHash)
-  torrent.destroy()
+  if (torrent) torrent.destroy()
 }
 
 // Create a new torrent, start seeding
