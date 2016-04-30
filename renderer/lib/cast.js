@@ -12,7 +12,7 @@ module.exports = {
   setRate
 }
 
-var airplay = require('airplay-js')
+var airplayer = require('airplayer')()
 var chromecasts = require('chromecasts')()
 var dlnacasts = require('dlnacasts')()
 
@@ -41,10 +41,9 @@ function init (appState, callback) {
     state.devices.dlna = dlnaPlayer(player)
   })
 
-  var browser = airplay.createBrowser()
-  browser.on('deviceOn', function (player) {
+  airplayer.on('update', function (player) {
     state.devices.airplay = airplayPlayer(player)
-  }).start()
+  })
 }
 
 // chromecast player implementation
@@ -130,12 +129,12 @@ function chromecastPlayer (player) {
 // airplay player implementation
 function airplayPlayer (player) {
   function open () {
-    player.play(state.server.networkURL, 0, function (res) {
-      if (res.statusCode !== 200) {
+    player.play(state.server.networkURL, function (err, res) {
+      if (err) {
         state.playing.location = 'local'
         state.errors.push({
           time: new Date().getTime(),
-          message: 'Could not connect to AirPlay.'
+          message: 'Could not connect to AirPlay. ' + err.message
         })
       } else {
         state.playing.location = 'airplay'
@@ -145,11 +144,11 @@ function airplayPlayer (player) {
   }
 
   function play (callback) {
-    player.rate(1, callback)
+    player.resume(callback)
   }
 
   function pause (callback) {
-    player.rate(0, callback)
+    player.pause(callback)
   }
 
   function stop (callback) {
@@ -157,13 +156,21 @@ function airplayPlayer (player) {
   }
 
   function status () {
-    player.status(function (status) {
-      state.playing.isPaused = status.rate === 0
-      state.playing.currentTime = status.position
-      // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
-      // According to docs is in [-30 - 0] (db) range
-      // should be converted to [0 - 1] using (val / 30 + 1)
-      update()
+    player.playbackInfo(function (err, res, status) {
+      if (err) {
+        state.playing.location = 'local'
+        state.errors.push({
+          time: new Date().getTime(),
+          message: 'Could not connect to AirPlay. ' + err.message
+        })
+      } else {
+        state.playing.isPaused = status.rate === 0
+        state.playing.currentTime = status.position
+        // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
+        // According to docs is in [-30 - 0] (db) range
+        // should be converted to [0 - 1] using (val / 30 + 1)
+        update()
+      }
     })
   }
 
