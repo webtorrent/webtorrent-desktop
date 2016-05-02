@@ -261,7 +261,7 @@ function installLinux () {
     if (err) return log.error(err.message)
 
     var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
-    var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' \.')
+    var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' .')
     var tryExecPath = process.execPath
 
     desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
