@@ -35,7 +35,6 @@
     "prettier-bytes": "^1.0.1",
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",
-    "upload-element": "^1.0.1",
     "virtual-dom": "^2.1.1",
     "webtorrent": "0.x",
     "winreg": "^1.1.1"
@@ -75,7 +74,7 @@
     "clean": "node ./bin/clean.js",
     "package": "node ./bin/package.js",
     "start": "electron .",
-    "test": "standard",
+    "test": "standard && ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"
   }
 }
