@@ -92,9 +92,9 @@ function init () {
     windows.focusWindow(windows[windowName])
   })
 
-  ipcMain.on('vlcVersion', function (e) {
-    vlc.getInstalledVersion(function (version) {
-      windows.main.send('vlcVersion', version)
+  ipcMain.on('checkForVLC', function (e) {
+    vlc.checkForVLC(function (isInstalled) {
+      windows.main.send('checkForVLC', isInstalled)
     })
   })
 

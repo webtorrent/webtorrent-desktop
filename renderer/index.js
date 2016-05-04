@@ -306,13 +306,12 @@ function dispatch (action, ...args) {
   if (action === 'mediaError') {
     if (state.location.current().url === 'player') {
       state.playing.location = 'error'
-      ipcRenderer.send('vlcVersion')
-      ipcRenderer.once('vlcVersion', function (e, version) {
-        console.log('vlcVersion', version)
+      ipcRenderer.send('checkForVLC')
+      ipcRenderer.once('checkForVLC', function (e, isInstalled) {
         state.modal = {
           id: 'unsupported-media-modal',
           error: args[0],
-          vlcInstalled: !!version
+          vlcInstalled: isInstalled
         }
       })
     }
