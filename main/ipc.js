@@ -12,6 +12,7 @@ var log = require('./log')
 var menu = require('./menu')
 var windows = require('./windows')
 var shortcuts = require('./shortcuts')
+var thumbnail = require('./thumbnail')
 
 // has to be a number, not a boolean, and undefined throws an error
 var powerSaveBlockID = 0
@@ -69,6 +70,10 @@ function init () {
 
   ipcMain.on('blockPowerSave', blockPowerSave)
   ipcMain.on('unblockPowerSave', unblockPowerSave)
+
+  ipcMain.on('updateThumbnailBar', function (e, isPaused) {
+    thumbnail.updateThumbarButtons(isPaused)
+  })
 
   ipcMain.on('onPlayerOpen', function () {
     menu.onPlayerOpen()

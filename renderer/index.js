@@ -370,6 +370,8 @@ function playPause () {
   } else {
     pause()
   }
+
+  ipcRenderer.send('updateThumbnailBar', state.playing.isPaused)
 }
 
 function jumpToTime (time) {

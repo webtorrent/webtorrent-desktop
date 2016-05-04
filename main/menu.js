@@ -17,6 +17,7 @@ var app = electron.app
 var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
+var thumbnail = require('./thumbnail')
 
 var appMenu, dockMenu
 
@@ -85,11 +86,13 @@ function onWindowHide () {
 function onPlayerOpen () {
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
+  thumbnail.showPlayerThumbnailBar()
 }
 
 function onPlayerClose () {
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
+  thumbnail.hidePlayerThumbnailBar()
 }
 
 function onToggleFullScreen (isFullScreen) {
