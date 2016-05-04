@@ -36,6 +36,7 @@
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",
     "virtual-dom": "^2.1.1",
+    "vlc-command": "^1.0.1",
     "webtorrent": "0.x",
     "winreg": "^1.2.0"
   },
