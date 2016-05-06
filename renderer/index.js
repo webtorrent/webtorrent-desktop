@@ -38,6 +38,7 @@ var dialog = electron.remote.dialog
 var Menu = electron.remote.Menu
 var MenuItem = electron.remote.MenuItem
 var remote = electron.remote
+var shell = electron.shell
 
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
@@ -1002,6 +1003,11 @@ function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
   var menu = new Menu()
   menu.append(new MenuItem({
+    label: 'Go to folder',
+    click: () => openDownloadFolder(torrentSummary)
+  }))
+
+  menu.append(new MenuItem({
     label: 'Save Torrent File As...',
     click: () => saveTorrentFileAs(torrentSummary)
   }))
@@ -1017,6 +1023,12 @@ function openTorrentContextMenu (infoHash) {
   }))
 
   menu.popup(remote.getCurrentWindow())
+}
+
+function openDownloadFolder (torrentSummary) {
+  var folder = path.parse(torrentSummary.name).name
+  var fullPath = path.join(torrentSummary.path, folder)
+  shell.showItemInFolder(fullPath)
 }
 
 function saveTorrentFileAs (torrentSummary) {
