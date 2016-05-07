@@ -108,6 +108,18 @@ function getMenuItem (label) {
   }
 }
 
+// Prompts the user for a file, then makes a torrent out of the data
+function showOpenSeedFile () {
+  electron.dialog.showOpenDialog({
+    title: 'Select a file for the torrent file',
+    properties: ['openFile']
+  }, function (filenames) {
+    if (!Array.isArray(filenames)) return
+    var file = filenames[0]
+    windows.main.send('dispatch', 'showCreateTorrent', file)
+  })
+}
+
 // Prompts the user for a file or folder, then makes a torrent out of the data
 function showOpenSeedFiles () {
   // Allow only a single selection
@@ -144,7 +156,12 @@ function showOpenTorrentAddress () {
 function getAppMenuTemplate () {
   var fileMenu = [
     {
-      label: 'Create New Torrent...',
+      label: 'Create New Torrent from File',
+      accelerator: 'CmdOrCtrl+F',
+      click: showOpenSeedFile
+    },
+    {
+      label: 'Create New Torrent from Folder',
       accelerator: 'CmdOrCtrl+N',
       click: showOpenSeedFiles
     },
