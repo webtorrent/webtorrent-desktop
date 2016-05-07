@@ -166,9 +166,6 @@ function airplayPlayer (player) {
       } else {
         state.playing.isPaused = status.rate === 0
         state.playing.currentTime = status.position
-        // TODO: get airplay volume, implementation needed. meanwhile set value in setVolume
-        // According to docs is in [-30 - 0] (db) range
-        // should be converted to [0 - 1] using (val / 30 + 1)
         update()
       }
     })
@@ -179,10 +176,9 @@ function airplayPlayer (player) {
   }
 
   function volume (volume, callback) {
-    // TODO remove line below once we can fetch the information in status update
+    // AirPlay doesn't support volume
+    // TODO: We should just disable the volume slider
     state.playing.volume = volume
-    volume = (volume - 1) * 30
-    player.volume(volume, callback)
   }
 
   return {
