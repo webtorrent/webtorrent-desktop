@@ -7,13 +7,37 @@ var defaultAnnounceList = require('create-torrent').announceList
 var deepEqual = require('deep-equal')
 var electron = require('electron')
 var fs = require('fs-extra')
+var hat = require('hat')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
+var zeroFill = require('zero-fill')
 
 var crashReporter = require('../crash-reporter')
 var config = require('../config')
 var torrentPoster = require('./lib/torrent-poster')
+
+/**
+ * WebTorrent Desktop version.
+ */
+var VERSION = require('../package.json').version
+
+/**
+ * Version number in Azureus-style. Generated from major and minor semver version.
+ * For example:
+ *   '0.16.1' -> '0016'
+ *   '1.2.5' -> '0102'
+ */
+var VERSION_STR = VERSION.match(/([0-9]+)/g).slice(0, 2).map(zeroFill(2)).join('')
+
+/**
+ * Version prefix string (used in peer ID). WebTorrent Desktop uses the Azureus-style
+ * fork encoding: '-', two characters for client id ('WW'), four ascii digits for
+ * version number, 'D-', followed by random numbers.
+ * For example:
+ *   '-WW0102D-'...
+ */
+var VERSION_PREFIX = '-WW' + VERSION_STR + 'D-'
 
 // Report when the process crashes
 crashReporter.init()
@@ -28,7 +52,9 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = window.client = new WebTorrent()
+var client = window.client = new WebTorrent({
+  peerId: VERSION_PREFIX + hat(40)
+})
 
 // WebTorrent-to-HTTP streaming sever
 var server = window.server = null
