@@ -156,12 +156,7 @@ function showOpenTorrentAddress () {
 function getAppMenuTemplate () {
   var fileMenu = [
     {
-      label: 'Create New Torrent from File',
-      accelerator: 'CmdOrCtrl+F',
-      click: showOpenSeedFile
-    },
-    {
-      label: 'Create New Torrent from Folder',
+      label: process.platform === 'darwin' ? 'Create New Torrent...' : 'Create New Torrent from Folder...',
       accelerator: 'CmdOrCtrl+N',
       click: showOpenSeedFiles
     },
@@ -185,6 +180,13 @@ function getAppMenuTemplate () {
     }
   ]
 
+  // In Linux and Windows it is not possible to open both folders and files
+  if (process.platform !== 'darwin') {
+    fileMenu.unshift({
+      label: 'Create New Torrent from File...',
+      click: showOpenSeedFile
+    })
+  }
   // File > Quit for Linux users with distros where the system tray is broken
   if (process.platform === 'linux') {
     fileMenu.push({
