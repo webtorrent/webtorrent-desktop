@@ -70,8 +70,13 @@ function init () {
   })
 
   ipcMain.on('openItem', function (e, path) {
-    log('opening file or folder: ' + path)
+    log('open item: ' + path)
     electron.shell.openItem(path)
+  })
+
+  ipcMain.on('showItemInFolder', function (e, path) {
+    log('show item in folder: ' + path)
+    electron.shell.showItemInFolder(path)
   })
 
   ipcMain.on('blockPowerSave', blockPowerSave)
