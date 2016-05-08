@@ -600,10 +600,6 @@ body.drag .app::after {
   padding: 8em 20px 20px 20px;
 }
 
-.torrent-details .open-folder {
-  float: right;
-}
-
 .torrent-details table {
   width: 100%;
   white-space: nowrap;
@@ -615,8 +611,7 @@ body.drag .app::after {
   height: 28px;
 }
 
-.torrent-details tr:hover,
-.torrent-details .open-folder:hover {
+.torrent-details tr:hover {
   background-color: rgba(200, 200, 200, 0.3);
 }
 
