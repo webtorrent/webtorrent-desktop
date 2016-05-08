@@ -6,41 +6,43 @@ module.exports = {
 var config = require('../../config')
 var path = require('path')
 
+var VOLUME = 0.15
+
 /* Cache of Audio elements, for instant playback */
 var cache = {}
 
 var sounds = {
   ADD: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'add.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   DELETE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'delete.wav'),
-    volume: 0.1
+    volume: VOLUME
   },
   DISABLE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'disable.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   DONE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'done.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   ENABLE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'enable.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   ERROR: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'error.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   PLAY: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'play.wav'),
-    volume: 0.2
+    volume: VOLUME
   },
   STARTUP: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'startup.wav'),
-    volume: 0.4
+    volume: VOLUME * 2
   }
 }
 
