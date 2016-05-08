@@ -226,9 +226,6 @@ function dispatch (action, ...args) {
   if (action === 'openFile') {
     openFile(args[0] /* infoHash */, args[1] /* index */)
   }
-  if (action === 'openFolder') {
-    openFolder(args[0] /* infoHash */)
-  }
   if (action === 'toggleTorrent') {
     toggleTorrent(args[0] /* infoHash */)
   }
@@ -956,17 +953,6 @@ function openFile (infoHash, index) {
   ipcRenderer.send('openItem', filePath)
 }
 
-function openFolder (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
-
-  var firstFilePath = path.join(
-    torrentSummary.path,
-    torrentSummary.files[0].path)
-  var folderPath = path.dirname(firstFilePath)
-
-  ipcRenderer.send('openItem', folderPath)
-}
-
 // TODO: use torrentKey, not infoHash
 function toggleTorrent (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
@@ -1001,9 +987,20 @@ function toggleSelectTorrent (infoHash) {
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
   var menu = new Menu()
+
+  if (torrentSummary.files) {
+    menu.append(new MenuItem({
+      label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
+      click: () => showItemInFolder(torrentSummary)
+    }))
+    menu.append(new MenuItem({
+      type: 'separator'
+    }))
+  }
+
   menu.append(new MenuItem({
-    label: 'Save Torrent File As...',
-    click: () => saveTorrentFileAs(torrentSummary)
+    label: 'Copy Magnet Link to Clipboard',
+    click: () => clipboard.writeText(torrentSummary.magnetURI)
   }))
 
   menu.append(new MenuItem({
@@ -1012,11 +1009,19 @@ function openTorrentContextMenu (infoHash) {
   }))
 
   menu.append(new MenuItem({
-    label: 'Copy Magnet Link to Clipboard',
-    click: () => clipboard.writeText(torrentSummary.magnetURI)
+    label: 'Save Torrent File As...',
+    click: () => saveTorrentFileAs(torrentSummary)
   }))
 
   menu.popup(remote.getCurrentWindow())
+}
+
+function showItemInFolder (torrentSummary) {
+  var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
+  if (torrentSummary.files.length > 1) {
+    itemPath = path.dirname(itemPath)
+  }
+  ipcRenderer.send('showItemInFolder', itemPath)
 }
 
 function saveTorrentFileAs (torrentSummary) {

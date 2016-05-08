@@ -167,7 +167,6 @@ function TorrentList (state) {
 
   // Show files, per-file download status and play buttons, and so on
   function renderTorrentDetails (torrentSummary) {
-    var infoHash = torrentSummary.infoHash
     var filesElement
     if (!torrentSummary.files) {
       // We don't know what files this torrent contains
@@ -182,10 +181,6 @@ function TorrentList (state) {
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
-          <span class='open-folder'
-            onclick=${dispatcher('openFolder', infoHash)}>
-            Open folder
-          </span>
           <table>
             ${fileRows}
           </table>
