@@ -108,6 +108,18 @@ function getMenuItem (label) {
   }
 }
 
+// Prompts the user for a file, then makes a torrent out of the data
+function showOpenSeedFile () {
+  electron.dialog.showOpenDialog({
+    title: 'Select a file for the torrent file',
+    properties: ['openFile']
+  }, function (filenames) {
+    if (!Array.isArray(filenames)) return
+    var file = filenames[0]
+    windows.main.send('dispatch', 'showCreateTorrent', file)
+  })
+}
+
 // Prompts the user for a file or folder, then makes a torrent out of the data
 function showOpenSeedFiles () {
   // Allow only a single selection
@@ -144,7 +156,7 @@ function showOpenTorrentAddress () {
 function getAppMenuTemplate () {
   var fileMenu = [
     {
-      label: 'Create New Torrent...',
+      label: process.platform === 'darwin' ? 'Create New Torrent...' : 'Create New Torrent from Folder...',
       accelerator: 'CmdOrCtrl+N',
       click: showOpenSeedFiles
     },
@@ -168,6 +180,13 @@ function getAppMenuTemplate () {
     }
   ]
 
+  // In Linux and Windows it is not possible to open both folders and files
+  if (process.platform !== 'darwin') {
+    fileMenu.unshift({
+      label: 'Create New Torrent from File...',
+      click: showOpenSeedFile
+    })
+  }
   // File > Quit for Linux users with distros where the system tray is broken
   if (process.platform === 'linux') {
     fileMenu.push({
