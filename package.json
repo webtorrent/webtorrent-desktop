@@ -48,6 +48,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "nobin-debian-installer": "^0.0.9",
+    "open": "0.0.5",
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
@@ -76,6 +77,7 @@
   },
   "scripts": {
     "clean": "node ./bin/clean.js",
+    "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "start": "electron .",
     "test": "standard && ./bin/check-deps.js",
