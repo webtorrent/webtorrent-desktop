@@ -18,6 +18,7 @@ var config = require('../config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
+var GIT_HASH = cp.execSync('git rev-parse --short HEAD').toString().replace('\n', '')
 
 /*
  * Path to folder with the following files:
@@ -85,9 +86,10 @@ var all = {
   'asar-unpack': 'WebTorrent*',
 
   // The build version of the application. Maps to the FileVersion metadata property on
-  // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
-  // Windows requires the build version to start with a number :/ so we stick on a prefix
-  'build-version': '0-' + cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
+  // Windows, and CFBundleVersion on OS X. We're using the version of the underlying
+  // WebTorrent library, plus a short git hash (e.g. 'e7d837e'). Note: Windows requires
+  // the build version to start with a number.
+  'build-version': require('webtorrent/package.json').version + '-' + GIT_HASH,
 
   // The application source directory.
   dir: config.ROOT_PATH,
@@ -110,7 +112,7 @@ var all = {
   prune: true,
 
   // The Electron version with which the app is built (without the leading 'v')
-  version: pkg.dependencies['electron-prebuilt']
+  version: require('electron-prebuilt/package.json').version
 }
 
 var darwin = {
