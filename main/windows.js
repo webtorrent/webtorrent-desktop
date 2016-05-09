@@ -79,6 +79,9 @@ function createWebTorrentHiddenWindow () {
   })
 }
 
+var HEADER_HEIGHT = 37
+var TORRENT_HEIGHT = 120
+
 function createMainWindow () {
   if (windows.main) {
     return focusWindow(windows.main)
@@ -94,9 +97,10 @@ function createMainWindow () {
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
-    height: 38 + (120 * 5) // header height + 4 torrents
+    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 5) // header height + 4 torrents
   })
   win.loadURL(config.WINDOW_MAIN)
+  win.setSheetOffset(HEADER_HEIGHT)
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen()
