@@ -64,9 +64,6 @@ function build () {
 }
 
 var all = {
-  // Build 64 bit binaries only.
-  arch: 'x64',
-
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on OS X.
   'app-copyright': config.APP_COPYRIGHT,
@@ -114,7 +111,11 @@ var all = {
 }
 
 var darwin = {
+  // Build for OS X
   platform: 'darwin',
+
+  // Build 64 bit binaries only.
+  arch: 'x64',
 
   // The bundle identifier to use in the application's plist (OS X only).
   'app-bundle-id': 'io.webtorrent.webtorrent',
@@ -131,7 +132,11 @@ var darwin = {
 }
 
 var win32 = {
+  // Build for Windows.
   platform: 'win32',
+
+  // Build 64 bit binaries only.
+  arch: 'x64',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   'version-string': {
@@ -161,9 +166,10 @@ var win32 = {
 }
 
 var linux = {
+  // Build for Linux.
   platform: 'linux',
 
-  // Build 32/64 bit binaries.
+  // Build 32 and 64 bit binaries.
   arch: 'all'
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
@@ -177,7 +183,7 @@ function buildDarwin (cb) {
   console.log('OS X: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('OS X: Packaged electron. ' + buildPath[0])
+    console.log('OS X: Packaged electron. ' + buildPath)
 
     var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
     var contentsPath = path.join(appPath, 'Contents')
@@ -331,7 +337,7 @@ function buildWin32 (cb) {
   console.log('Windows: Packaging electron...')
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Windows: Packaged electron. ' + buildPath[0])
+    console.log('Windows: Packaged electron. ' + buildPath)
 
     var signWithParams
     if (process.platform === 'win32') {
@@ -358,6 +364,7 @@ function buildWin32 (cb) {
 
     function packageInstaller (cb) {
       console.log('Windows: Creating installer...')
+
       installer.createWindowsInstaller({
         appDirectory: buildPath[0],
         authors: config.APP_TEAM,
@@ -376,14 +383,15 @@ function buildWin32 (cb) {
         title: config.APP_NAME,
         usePackageJson: false,
         version: pkg.version
-      }).then(function () {
+      })
+      .then(function () {
         console.log('Windows: Created installer.')
         cb(null)
-      }).catch(cb)
+      })
+      .catch(cb)
     }
 
     function packagePortable (cb) {
-      // Create Windows portable app
       console.log('Windows: Creating portable app...')
 
       var portablePath = path.join(buildPath[0], 'Portable Settings')
@@ -403,7 +411,7 @@ function buildLinux (cb) {
   console.log('Linux: Packaging electron...')
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Linux: Packaged electron. ' + buildPath[0])
+    console.log('Linux: Packaged electron. ' + buildPath)
 
     var tasks = []
     buildPath.forEach(function (filesPath) {
