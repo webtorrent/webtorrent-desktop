@@ -211,9 +211,6 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
-  if (action === 'showOpenSeedFiles') {
-    ipcRenderer.send('showOpenSeedFiles') /* open file or folder to seed */
-  }
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
   }
