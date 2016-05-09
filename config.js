@@ -1,6 +1,6 @@
 var appConfig = require('application-config')('WebTorrent')
+var fs = require('fs')
 var path = require('path')
-var pathExists = require('path-exists')
 
 var APP_NAME = 'WebTorrent'
 var APP_TEAM = 'The WebTorrent Project'
@@ -53,7 +53,11 @@ function getConfigPath () {
 }
 
 function isPortable () {
-  return process.platform === 'win32' && isProduction() && pathExists(PORTABLE_PATH)
+  try {
+    return process.platform === 'win32' && isProduction() && !!fs.statSync(PORTABLE_PATH)
+  } catch (err) {
+    return false
+  }
 }
 
 function isProduction () {

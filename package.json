@@ -31,7 +31,6 @@
     "main-loop": "^3.2.0",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
-    "path-exists": "^2.1.0",
     "prettier-bytes": "^1.0.1",
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",
