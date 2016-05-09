@@ -85,9 +85,9 @@ var all = {
   'asar-unpack': 'WebTorrent*',
 
   // The build version of the application. Maps to the FileVersion metadata property on
-  // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
-  // Windows requires the build version to start with a number :/ so we stick on a prefix
-  'build-version': '0-' + cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
+  // Windows, and CFBundleVersion on OS X. Note: Windows requires the build version to
+  // start with a number. We're using the version of the underlying WebTorrent library.
+  'build-version': require('webtorrent/package.json').version,
 
   // The application source directory.
   dir: config.ROOT_PATH,
@@ -110,7 +110,7 @@ var all = {
   prune: true,
 
   // The Electron version with which the app is built (without the leading 'v')
-  version: pkg.dependencies['electron-prebuilt']
+  version: require('electron-prebuilt/package.json').version
 }
 
 var darwin = {

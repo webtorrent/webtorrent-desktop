@@ -29,7 +29,10 @@
   <body>
     <img src="../static/WebTorrent.png">
     <h1>WebTorrent</h1>
-    <p>Version <script>document.write(require('../package.json').version)</script></p>
+    <p>
+      Version <script>document.write(require('../package.json').version)</script>
+      (<script>document.write(require('webtorrent/package.json').version)</script>)
+    </p>
     <p><script>document.write(require('../config').APP_COPYRIGHT)</script></p>
   </body>
 </html>
