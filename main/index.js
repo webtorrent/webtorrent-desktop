@@ -120,11 +120,11 @@ function sliceArgv (argv) {
 function processArgv (argv) {
   argv.forEach(function (arg) {
     if (arg === '-n') {
-      windows.main.send('dispatch', 'showOpenSeedFiles')
+      menu.showOpenSeedFiles()
     } else if (arg === '-o') {
-      windows.main.send('dispatch', 'showOpenTorrentFile')
+      menu.showOpenTorrentFile()
     } else if (arg === '-u') {
-      windows.main.send('showOpenTorrentAddress')
+      menu.showOpenTorrentAddress()
     } else if (arg.startsWith('-psn')) {
       // Ignore OS X launchd "process serial number" argument
       // More: https://github.com/feross/webtorrent-desktop/issues/214

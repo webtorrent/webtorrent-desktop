@@ -43,8 +43,6 @@ function init () {
 
   ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
 
-  ipcMain.on('showOpenSeedFiles', menu.showOpenSeedFiles)
-
   ipcMain.on('setBounds', function (e, bounds, maximize) {
     setBounds(bounds, maximize)
   })

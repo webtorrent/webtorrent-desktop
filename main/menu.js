@@ -1,11 +1,12 @@
 module.exports = {
   init,
+  onPlayerClose,
+  onPlayerOpen,
   onToggleFullScreen,
   onWindowHide,
   onWindowShow,
-  onPlayerOpen,
-  onPlayerClose,
   showOpenSeedFiles,
+  showOpenTorrentAddress,
   showOpenTorrentFile,
   toggleFullScreen
 }
@@ -111,8 +112,8 @@ function getMenuItem (label) {
 // Prompts the user for a file, then makes a torrent out of the data
 function showOpenSeedFile () {
   electron.dialog.showOpenDialog({
-    title: 'Select a file for the torrent file',
-    properties: ['openFile']
+    title: 'Select a file for the torrent file.',
+    properties: [ 'openFile' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
     var file = filenames[0]
