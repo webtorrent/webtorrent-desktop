@@ -5,7 +5,6 @@ var electron = require('electron')
 var app = electron.app
 var ipcMain = electron.ipcMain
 
-var autoUpdater = require('./auto-updater')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
 var handlers = require('./handlers')
@@ -14,8 +13,9 @@ var log = require('./log')
 var menu = require('./menu')
 var shortcuts = require('./shortcuts')
 var squirrelWin32 = require('./squirrel-win32')
-var windows = require('./windows')
 var tray = require('./tray')
+var updater = require('./updater')
+var windows = require('./windows')
 
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
@@ -93,7 +93,7 @@ function init () {
 }
 
 function delayedInit () {
-  autoUpdater.init()
+  updater.init()
 }
 
 function onOpen (e, torrentId) {
