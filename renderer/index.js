@@ -153,6 +153,11 @@ function cleanUpConfig () {
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
     }
+
+    // Migration: add per-file selections
+    if (!ts.selections) {
+      ts.selections = ts.files.map((x) => true)
+    }
   })
 }
 
@@ -230,6 +235,9 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleSelectTorrent') {
     toggleSelectTorrent(args[0] /* infoHash */)
+  }
+  if (action === 'toggleTorrentFile') {
+    toggleTorrentFile(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'openTorrentContextMenu') {
     openTorrentContextMenu(args[0] /* infoHash */)
@@ -709,7 +717,7 @@ function startTorrentingSummary (torrentSummary) {
   }
 
   console.log('start torrenting %s %s', s.torrentKey, torrentID)
-  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
+  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes, s.selections)
 }
 
 //
@@ -818,6 +826,9 @@ function torrentMetadata (torrentKey, torrentInfo) {
   torrentSummary.path = torrentInfo.path
   torrentSummary.files = torrentInfo.files
   torrentSummary.magnetURI = torrentInfo.magnetURI
+  if (!torrentSummary.selections) {
+    torrentSummary.selections = torrentSummary.files.map((x) => true)
+  }
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -1056,6 +1067,14 @@ function toggleSelectTorrent (infoHash) {
   // toggle selection
   state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
   update()
+}
+
+function toggleTorrentFile (infoHash, index) {
+  var torrentSummary = getTorrentSummary(infoHash)
+  torrentSummary.selections[index] = !torrentSummary.selections[index]
+
+  // Let the WebTorrent process know to start or stop fetching that file
+  ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
 }
 
 function openTorrentContextMenu (infoHash) {

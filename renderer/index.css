@@ -113,6 +113,10 @@ table {
   opacity: 0.3;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
 .float-right {
   float: right;
 }
@@ -597,7 +601,7 @@ body.drag .app::after {
 }
 
 .torrent-details {
-  padding: 8em 20px 20px 20px;
+  padding: 8em 12px 20px 20px;
 }
 
 .torrent-details table {
@@ -611,6 +615,10 @@ body.drag .app::after {
   height: 28px;
 }
 
+.torrent-details td {
+  vertical-align: center;
+}
+
 .torrent-details tr:hover {
   background-color: rgba(200, 200, 200, 0.3);
 }
@@ -621,14 +629,14 @@ body.drag .app::after {
   vertical-align: bottom;
 }
 
-.torrent-details td.col-icon {
-  width: 2em;
-}
-
-.torrent-details td.col-icon .icon {
+.torrent-details td .icon {
   font-size: 18px;
   position: relative;
   top: 3px;
+}
+
+.torrent-details td.col-icon {
+  width: 2em;
 }
 
 .torrent-details td.col-name {
@@ -643,6 +651,11 @@ body.drag .app::after {
 
 .torrent-details td.col-size {
   width: 4em;
+  text-align: right;
+}
+
+.torrent-details td.col-select {
+  width: 2em;
   text-align: right;
 }
 

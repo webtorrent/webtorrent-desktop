@@ -49,8 +49,8 @@ function init () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
 
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes) =>
-    startTorrenting(torrentKey, torrentID, path, fileModtimes))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
+    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
   ipc.on('wt-stop-torrenting', (e, infoHash) =>
     stopTorrenting(infoHash))
   ipc.on('wt-create-torrent', (e, torrentKey, options) =>
@@ -65,6 +65,8 @@ function init () {
     startServer(infoHash, index))
   ipc.on('wt-stop-server', (e) =>
     stopServer())
+  ipc.on('wt-select-files', (e, infoHash, selections) =>
+    selectFiles(infoHash, selections))
 
   ipc.send('ipcReadyWebTorrent')
 
@@ -73,7 +75,7 @@ function init () {
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
+function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 
   var torrent = client.add(torrentID, {
@@ -81,7 +83,12 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
     fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
+
+  // Listen for ready event, progress notifications, etc
   addTorrentEvents(torrent)
+
+  // Only download the files the user wants, not necessarily all files
+  torrent.once('ready', () => selectFiles(torrent, selections))
 
   return torrent
 }
@@ -306,6 +313,48 @@ function getAudioMetadata (infoHash, index) {
     console.log('got audio metadata for %s: %o', file.name, info)
     ipc.send('wt-audio-metadata', infoHash, index, info)
   })
+}
+
+function selectFiles (torrentOrInfoHash, selections) {
+  // Get the torrent object
+  var torrent
+  if (typeof torrentOrInfoHash === 'string') {
+    torrent = client.get(torrentOrInfoHash)
+  } else {
+    torrent = torrentOrInfoHash
+  }
+
+  // Selections not specified?
+  // Load all files. We still need to replace the default whole-torrent
+  // selection with individual selections for each file, so we can
+  // select/deselect files later on
+  if (!selections) {
+    selections = torrent.files.map((x) => true)
+  }
+
+  // Selections specified incorrectly?
+  if (selections.length !== torrent.files.length) {
+    throw new Error('got ' + selections.length + ' file selections, ' +
+      'but the torrent contains ' + torrent.files.length + ' files')
+  }
+
+  // Remove default selection (whole torrent)
+  torrent.deselect(0, torrent.pieces.length - 1, false)
+
+  // Add selections (individual files)
+  for (var i = 0; i < selections.length; i++) {
+    var file = torrent.files[i]
+    if (selections[i]) {
+      file.select()
+    } else {
+      console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
+      file.deselect()
+
+      // If we deselected a file, try to nuke it to save disk space
+      var filePath = path.join(torrent.path, file.path)
+      fs.unlink(filePath) // Ignore errors for now
+    }
+  }
 }
 
 // Gets a WebTorrent handle by torrentKey
