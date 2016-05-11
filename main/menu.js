@@ -57,6 +57,7 @@ function toggleDevTools () {
 }
 
 function showWebTorrentWindow () {
+  log('showWebTorrentWindow')
   windows.webtorrent.show()
   windows.webtorrent.webContents.openDevTools({ detach: true })
 }
