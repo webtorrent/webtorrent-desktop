@@ -5,6 +5,8 @@ module.exports = {
   onToggleFullScreen,
   onWindowHide,
   onWindowShow,
+
+  // TODO: move these out of menu.js -- they don't belong here
   showOpenSeedFiles,
   showOpenTorrentAddress,
   showOpenTorrentFile,
