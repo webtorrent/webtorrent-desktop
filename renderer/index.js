@@ -45,6 +45,9 @@ var vdomLoop
 // Not global JS exceptions, not like Rollbar, handles segfaults/core dumps only
 crashReporter.init()
 
+// Listen for messages from the main process
+setupIpc()
+
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
 loadState(init)
@@ -93,9 +96,6 @@ function init () {
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
-
-  // Listen for messages from the main process
-  setupIpc()
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
   sound.play('STARTUP')
