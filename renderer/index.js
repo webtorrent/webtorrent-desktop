@@ -1,9 +1,21 @@
 console.time('init')
 
+var crashReporter = require('../crash-reporter')
+crashReporter.init()
+
+var electron = require('electron')
+
+// Electron apps have two processes: a main process (node) runs first and starts
+// a renderer process (essentially a Chrome window). We're in the renderer process,
+// and this IPC channel receives from and sends messages to the main process
+var ipcRenderer = electron.ipcRenderer
+
+// Listen for messages from the main process
+setupIpc()
+
 var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
-var electron = require('electron')
 var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var path = require('path')
@@ -14,7 +26,6 @@ var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
 var config = require('../config')
-var crashReporter = require('../crash-reporter')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./state')
@@ -26,11 +37,6 @@ setDispatch(dispatch)
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
-// Electron apps have two processes: a main process (node) runs first and starts
-// a renderer process (essentially a Chrome window). We're in the renderer process,
-// and this IPC channel receives from and sends messages to the main process
-var ipcRenderer = electron.ipcRenderer
-
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
 
@@ -38,13 +44,6 @@ var Cast = null
 var state = global.state = State.getInitialState()
 
 var vdomLoop
-
-// Report crashes back to our server.
-// Not global JS exceptions, not like Rollbar, handles segfaults/core dumps only
-crashReporter.init()
-
-// Listen for messages from the main process
-setupIpc()
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
