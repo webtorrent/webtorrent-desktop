@@ -9,42 +9,63 @@ var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
-var autoUpdater = electron.autoUpdater
-
 function init () {
-  autoUpdater.on('error', function (err) {
-    log.error('App update error: ' + err.message || err)
-  })
-
-  autoUpdater.setFeedURL(config.AUTO_UPDATE_URL)
-
-  /*
-   * We always check for updates on app startup. To keep app startup fast, we delay this
-   * first check so it happens when there is less going on.
-   */
-  setTimeout(checkForUpdates, config.AUTO_UPDATE_CHECK_STARTUP_DELAY)
-
-  autoUpdater.on('checking-for-update', () => log('Checking for app update'))
-  autoUpdater.on('update-available', () => log('App update available'))
-  autoUpdater.on('update-not-available', () => log('App update not available'))
-  autoUpdater.on('update-downloaded', function (e, releaseNotes, releaseName, releaseDate, updateURL) {
-    log('App update downloaded: ', releaseName, updateURL)
-  })
+  if (process.platform === 'linux') {
+    initLinux()
+  } else {
+    initDarwinWin32()
+  }
 }
 
-function checkForUpdates () {
-  // Electron's built-in auto updater only supports Mac and Windows, for now
-  if (process.platform !== 'linux') {
-    return autoUpdater.checkForUpdates()
+// The Electron auto-updater does not support Linux yet, so manually check for updates and
+// `show the user a modal notification.
+function initLinux () {
+  get.concat(config.AUTO_UPDATE_URL, onResponse)
+
+  function onResponse (err, res, data) {
+    if (err) return log(`Update error: ${err.message}`)
+    if (res.statusCode === 200) {
+      // Update available
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        return log(`Update error: Invalid JSON response: ${err.message}`)
+      }
+      windows.main.send('dispatch', 'updateAvailable', data.version)
+    } else if (res.statusCode === 204) {
+      // No update available
+    } else {
+      // Unexpected status code
+      log(`Update error: Unexpected status code: ${res.statusCode}`)
+    }
   }
+}
 
-  // If we're on Linux, we have to do it ourselves
-  get.concat(config.AUTO_UPDATE_URL, function (err, res, data) {
-    if (err) return log('Error checking for app update: ' + err.message)
-    if (![200, 204].includes(res.statusCode)) return log('Error checking for app update, got HTTP ' + res.statusCode)
-    if (res.statusCode !== 200) return
+function initDarwinWin32 () {
+  electron.autoUpdater.on(
+    'error',
+    (err) => log.error(`Update error: ${err.message}`)
+  )
 
-    var obj = JSON.parse(data)
-    windows.main.send('dispatch', 'updateAvailable', obj.version)
-  })
+  electron.autoUpdater.on(
+    'checking-for-update',
+    () => log('Checking for update')
+  )
+
+  electron.autoUpdater.on(
+    'update-available',
+    () => log('Update available')
+  )
+
+  electron.autoUpdater.on(
+    'update-not-available',
+    () => log('Update not available')
+  )
+
+  electron.autoUpdater.on(
+    'update-downloaded',
+    (e, notes, name, date, url) => log(`Update downloaded: ${name}: ${url}`)
+  )
+
+  electron.autoUpdater.setFeedURL(config.AUTO_UPDATE_URL)
 }
