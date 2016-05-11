@@ -378,6 +378,7 @@ function pause () {
 }
 
 function playPause () {
+  if (state.location.current().url !== 'player') return
   if (state.playing.isPaused) {
     play()
   } else {
