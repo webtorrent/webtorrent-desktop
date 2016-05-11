@@ -33,7 +33,6 @@ function CreateTorrentPage (state) {
 
   // Sanity check: show the number of files and total size
   var numFiles = files.length
-  console.log('FILES', files)
   var totalBytes = files
     .map((f) => f.size)
     .reduce((a, b) => a + b, 0)
@@ -41,10 +40,16 @@ function CreateTorrentPage (state) {
 
   // Then, use the name of the base folder (or sole file, for a single file torrent)
   // as the default name. Show all files relative to the base folder.
-  var defaultName = files.length === 1
-    ? files[0].name
-    : path.basename(pathPrefix)
-  var basePath = path.dirname(pathPrefix)
+  var defaultName, basePath
+  if (files.length === 1) {
+    // Single file torrent: /a/b/foo.jpg -> torrent name "foo.jpg", path "/a/b"
+    defaultName = files[0].name
+    basePath = pathPrefix
+  } else {
+    // Multi file torrent: /a/b/{foo, bar}.jpg -> torrent name "b", path "/a"
+    defaultName = files[0].name
+    basePath = path.basename(pathPrefix)
+  }
   var maxFileElems = 100
   var fileElems = files.slice(0, maxFileElems).map(function (file) {
     var relativePath = files.length === 0 ? file.name : path.relative(pathPrefix, file.path)
