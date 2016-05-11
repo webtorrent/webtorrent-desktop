@@ -45,8 +45,8 @@ function init () {
     setBounds(bounds, maximize)
   })
 
-  ipcMain.on('setAspectRatio', function (e, aspectRatio, extraSize) {
-    setAspectRatio(aspectRatio, extraSize)
+  ipcMain.on('setAspectRatio', function (e, aspectRatio) {
+    setAspectRatio(aspectRatio)
   })
 
   ipcMain.on('setBadge', function (e, text) {
@@ -206,10 +206,10 @@ function setBounds (bounds, maximize) {
   }
 }
 
-function setAspectRatio (aspectRatio, extraSize) {
-  log('setAspectRatio %o %o', aspectRatio, extraSize)
+function setAspectRatio (aspectRatio) {
+  log('setAspectRatio %o', aspectRatio)
   if (windows.main) {
-    windows.main.setAspectRatio(aspectRatio, extraSize)
+    windows.main.setAspectRatio(aspectRatio)
   }
 }
 
