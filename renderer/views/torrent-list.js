@@ -73,7 +73,7 @@ function TorrentList (state) {
       if (downloaded !== total) downloaded += ` / ${total}`
 
       elements.push(hx`
-        <div class='status ellipsis'>
+        <div class='ellipsis'>
           ${getFilesLength()}
           <span>${getPeers()}</span>
           <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
@@ -81,7 +81,7 @@ function TorrentList (state) {
         </div>
       `)
       elements.push(hx`
-        <div class='status2 ellipsis'>
+        <div class='ellipsis'>
           <span class='progress'>${progress}%</span>
           <span>${downloaded}</span>
         </div>

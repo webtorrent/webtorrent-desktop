@@ -80,7 +80,7 @@ function createWebTorrentHiddenWindow () {
 }
 
 var HEADER_HEIGHT = 37
-var TORRENT_HEIGHT = 120
+var TORRENT_HEIGHT = 110
 
 function createMainWindow () {
   if (windows.main) {

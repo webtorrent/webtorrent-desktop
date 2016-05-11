@@ -276,7 +276,6 @@ table {
 }
 
 .modal label {
-  font-size: 16px;
   font-weight: bold;
 }
 
@@ -434,7 +433,7 @@ input {
 
 .torrent,
 .torrent-placeholder {
-  height: 120px;
+  height: 110px;
 }
 
 .torrent:not(:last-child) {
@@ -464,7 +463,7 @@ input {
 
 .torrent .buttons {
   position: absolute;
-  top: 25px;
+  top: 34px;
   right: 10px;
   align-items: center;
   display: none;
@@ -547,15 +546,15 @@ input {
 }
 
 .torrent .name {
-  font-size: 1.5em;
+  font-size: 18px;
   font-weight: bold;
   line-height: 1.5em;
 }
 
 .torrent .status,
 .torrent .status2 {
-  font-size: 1em;
-  line-height: 1.5em;
+/*  font-size: 14px;
+  line-height: 1.5em;*/
 }
 
 /*
