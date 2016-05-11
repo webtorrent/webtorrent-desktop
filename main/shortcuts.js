@@ -13,17 +13,17 @@ var menu = require('./menu')
 var windows = require('./windows')
 
 function init () {
-  // ⌘+Shift+F is an alternative fullscreen shortcut to the ones defined in menu.js.
-  // Electron does not support multiple accelerators for a single menu item, so this
-  // is registered separately here.
+  // Register alternate shortcuts here. Most shortcuts are registered in menu,js, but Electron does not support multiple shortcuts for a single menu item.
   localShortcut.register('CmdOrCtrl+Shift+F', menu.toggleFullScreen)
+  localShortcut.register('Space', () => windows.main.send('dispatch', 'playPause'))
 }
 
 function onPlayerOpen () {
   // Register special "media key" for play/pause, available on some keyboards
-  globalShortcut.register('MediaPlayPause', function () {
-    windows.main.send('dispatch', 'playPause')
-  })
+  globalShortcut.register(
+    'MediaPlayPause',
+    () => windows.main.send('dispatch', 'playPause')
+  )
 }
 
 function onPlayerClose () {

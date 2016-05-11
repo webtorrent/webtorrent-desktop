@@ -1155,8 +1155,6 @@ function onKeyDown (e) {
     } else {
       dispatch('back')
     }
-  } else if (e.which === 32) { /* spacebar pauses or plays the video */
-    dispatch('playPause')
   }
 }
 
