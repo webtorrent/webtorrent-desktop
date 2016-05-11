@@ -54,7 +54,6 @@ function init () {
 
   app.on('will-finish-launching', function () {
     crashReporter.init()
-    autoUpdater.init()
   })
 
   app.on('ready', function () {
@@ -64,6 +63,12 @@ function init () {
     shortcuts.init()
     tray.init()
     handlers.install()
+
+    /*
+     * We always check for updates on app startup. To keep app startup fast, we delay this
+     * first check so it happens when there is less going on.
+     */
+    setTimeout(delayedInit, config.DELAYED_INIT)
   })
 
   app.on('ipcReady', function () {
@@ -85,6 +90,10 @@ function init () {
   app.on('activate', function () {
     windows.createMainWindow()
   })
+}
+
+function delayedInit () {
+  autoUpdater.init()
 }
 
 function onOpen (e, torrentId) {
