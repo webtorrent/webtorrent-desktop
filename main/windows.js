@@ -97,7 +97,7 @@ function createMainWindow () {
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
-    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 5) // header height + 4 torrents
+    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
   })
   win.loadURL(config.WINDOW_MAIN)
   win.setSheetOffset(HEADER_HEIGHT)
