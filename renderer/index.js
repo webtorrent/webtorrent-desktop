@@ -7,8 +7,6 @@ var electron = require('electron')
 var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var path = require('path')
-var srtToVtt = require('srt-to-vtt')
-var LanguageDetect = require('languagedetect')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -580,6 +578,9 @@ function addTorrent (torrentId) {
 }
 
 function addSubtitle (file) {
+  var srtToVtt = require('srt-to-vtt')
+  var LanguageDetect = require('languagedetect')
+
   if (state.playing.type !== 'video') return
   fs.createReadStream(file.path || file).pipe(srtToVtt()).pipe(concat(function (buf) {
     // Set the cue text position so it appears above the player controls.
