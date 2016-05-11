@@ -35,6 +35,10 @@ function toggleFullScreen (flag) {
   log('toggleFullScreen %s', flag)
   if (windows.main && windows.main.isVisible()) {
     flag = flag != null ? flag : !windows.main.isFullScreen()
+    if (flag) {
+      // Allows the window to use the full screen in fullscreen mode (OS X).
+      windows.main.setAspectRatio(0)
+    }
     windows.main.setFullScreen(flag)
   }
 }

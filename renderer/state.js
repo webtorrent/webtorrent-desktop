@@ -77,7 +77,8 @@ function getDefaultPlayState () {
     subtitles: {
       tracks: [], /* subtitles file (Buffer) */
       enabled: false
-    }
+    },
+    aspectRatio: 0 /* aspect ratio of the video */
   }
 }
 
