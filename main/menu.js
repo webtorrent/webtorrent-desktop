@@ -231,21 +231,6 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Increase Volume',
-          accelerator: 'CmdOrCtrl+Up',
-          click: increaseVolume,
-          enabled: false
-        },
-        {
-          label: 'Decrease Volume',
-          accelerator: 'CmdOrCtrl+Down',
-          click: decreaseVolume,
-          enabled: false
-        },
-        {
-          type: 'separator'
-        },
-        {
           label: 'Developer',
           submenu: [
             {
@@ -263,6 +248,23 @@ function getAppMenuTemplate () {
               click: showWebTorrentWindow
             }
           ]
+        }
+      ]
+    },
+    {
+      label: 'Playback',
+      submenu: [
+        {
+          label: 'Increase Volume',
+          accelerator: 'CmdOrCtrl+Up',
+          click: increaseVolume,
+          enabled: false
+        },
+        {
+          label: 'Decrease Volume',
+          accelerator: 'CmdOrCtrl+Down',
+          click: decreaseVolume,
+          enabled: false
         }
       ]
     },
@@ -346,7 +348,7 @@ function getAppMenuTemplate () {
     })
 
     // Window menu (OS X)
-    template[4].submenu.push(
+    template[5].submenu.push(
       {
         type: 'separator'
       },
@@ -366,7 +368,7 @@ function getAppMenuTemplate () {
     })
 
     // Help menu (Windows, Linux)
-    template[4].submenu.push(
+    template[5].submenu.push(
       {
         type: 'separator'
       },
