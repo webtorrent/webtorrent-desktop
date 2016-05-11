@@ -6,7 +6,6 @@ var electron = require('electron')
 
 var app = electron.app
 var ipcMain = electron.ipcMain
-var powerSaveBlocker = electron.powerSaveBlocker
 
 var log = require('./log')
 var menu = require('./menu')
@@ -15,7 +14,7 @@ var shortcuts = require('./shortcuts')
 var vlc = require('./vlc')
 
 // has to be a number, not a boolean, and undefined throws an error
-var powerSaveBlockID = 0
+var powerSaveBlockerId = 0
 
 // messages from the main process, to be sent once the WebTorrent process starts
 var messageQueueMainToWebTorrent = []
@@ -229,13 +228,13 @@ function setProgress (progress) {
 }
 
 function blockPowerSave () {
-  powerSaveBlockID = powerSaveBlocker.start('prevent-display-sleep')
-  log('blockPowerSave %d', powerSaveBlockID)
+  powerSaveBlockerId = electron.powerSaveBlocker.start('prevent-display-sleep')
+  log('blockPowerSave %d', powerSaveBlockerId)
 }
 
 function unblockPowerSave () {
-  if (powerSaveBlocker.isStarted(powerSaveBlockID)) {
-    powerSaveBlocker.stop(powerSaveBlockID)
-    log('unblockPowerSave %d', powerSaveBlockID)
+  if (electron.powerSaveBlocker.isStarted(powerSaveBlockerId)) {
+    electron.powerSaveBlocker.stop(powerSaveBlockerId)
+    log('unblockPowerSave %d', powerSaveBlockerId)
   }
 }
