@@ -49,18 +49,6 @@ function toggleFloatOnTop (flag) {
   }
 }
 
-function increaseVolume () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changeVolume', 0.1)
-  }
-}
-
-function decreaseVolume () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changeVolume', -0.1)
-  }
-}
-
 function toggleDevTools () {
   log('toggleDevTools')
   if (windows.main) {
@@ -71,6 +59,24 @@ function toggleDevTools () {
 function showWebTorrentWindow () {
   windows.webtorrent.show()
   windows.webtorrent.webContents.openDevTools({ detach: true })
+}
+
+function playPause () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'playPause')
+  }
+}
+
+function increaseVolume () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'changeVolume', 0.1)
+  }
+}
+
+function decreaseVolume () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'changeVolume', -0.1)
+  }
 }
 
 function onWindowShow () {
@@ -86,11 +92,15 @@ function onWindowHide () {
 }
 
 function onPlayerOpen () {
+  log('onPlayerOpen')
+  getMenuItem('Play/Pause').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
 }
 
 function onPlayerClose () {
+  log('onPlayerClose')
+  getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
 }
@@ -182,7 +192,9 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: process.platform === 'windows' ? 'Close' : 'Close Window',
+          label: process.platform === 'windows'
+            ? 'Close'
+            : 'Close Window',
           accelerator: 'CmdOrCtrl+W',
           role: 'close'
         }
@@ -256,6 +268,15 @@ function getAppMenuTemplate () {
     {
       label: 'Playback',
       submenu: [
+        {
+          label: 'Play/Pause',
+          accelerator: 'CmdOrCtrl+P',
+          click: playPause,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
         {
           label: 'Increase Volume',
           accelerator: 'CmdOrCtrl+Up',
@@ -378,7 +399,8 @@ function getAppMenuTemplate () {
       }
     )
   }
-  // Add "File > Quit" menu item for Linux distros where the system tray is broken
+  // Add "File > Quit" menu item so Linux distros where the system tray icon is missing
+  // will have a way to quit the app.
   if (process.platform === 'linux') {
     // File menu (Linux)
     template[0].push({
