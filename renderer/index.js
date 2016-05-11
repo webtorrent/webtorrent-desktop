@@ -32,12 +32,6 @@ appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
-var clipboard = electron.clipboard
-
-var dialog = electron.remote.dialog
-var Menu = electron.remote.Menu
-var MenuItem = electron.remote.MenuItem
-var remote = electron.remote
 
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
@@ -416,7 +410,7 @@ function setVolume (volume) {
 }
 
 function openSubtitles () {
-  dialog.showOpenDialog({
+  electron.remote.dialog.showOpenDialog({
     title: 'Select a subtitles file.',
     filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
     properties: [ 'openFile' ]
@@ -990,34 +984,34 @@ function toggleSelectTorrent (infoHash) {
 
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  var menu = new Menu()
+  var menu = new electron.remote.Menu()
 
   if (torrentSummary.files) {
-    menu.append(new MenuItem({
+    menu.append(new electron.remote.MenuItem({
       label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
       click: () => showItemInFolder(torrentSummary)
     }))
-    menu.append(new MenuItem({
+    menu.append(new electron.remote.MenuItem({
       type: 'separator'
     }))
   }
 
-  menu.append(new MenuItem({
+  menu.append(new electron.remote.MenuItem({
     label: 'Copy Magnet Link to Clipboard',
-    click: () => clipboard.writeText(torrentSummary.magnetURI)
+    click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
   }))
 
-  menu.append(new MenuItem({
+  menu.append(new electron.remote.MenuItem({
     label: 'Copy Instant.io Link to Clipboard',
-    click: () => clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
+    click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
   }))
 
-  menu.append(new MenuItem({
+  menu.append(new electron.remote.MenuItem({
     label: 'Save Torrent File As...',
     click: () => saveTorrentFileAs(torrentSummary)
   }))
 
-  menu.popup(remote.getCurrentWindow())
+  menu.popup(electron.remote.getCurrentWindow())
 }
 
 function showItemInFolder (torrentSummary) {
@@ -1038,7 +1032,7 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
+  electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
@@ -1052,7 +1046,7 @@ function saveTorrentFileAs (torrentSummary) {
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
-  if (remote.getCurrentWindow().isMaximized()) {
+  if (electron.remote.getCurrentWindow().isMaximized()) {
     state.window.bounds = null
     return
   }
@@ -1064,7 +1058,7 @@ function setDimensions (dimensions) {
     width: window.outerWidth,
     height: window.outerHeight
   }
-  state.window.wasMaximized = remote.getCurrentWindow().isMaximized
+  state.window.wasMaximized = electron.remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   var screenWidth = window.screen.width
@@ -1144,7 +1138,7 @@ function onWarning (err) {
 function onPaste (e) {
   if (e.target.tagName.toLowerCase() === 'input') return
 
-  var torrentIds = clipboard.readText().split('\n')
+  var torrentIds = electron.clipboard.readText().split('\n')
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
