@@ -25,10 +25,9 @@ var vlcProcess
 
 function init () {
   ipcMain.on('ipcReady', function (e) {
+    windows.main.show()
     app.ipcReady = true
     app.emit('ipcReady')
-    windows.main.show()
-    console.timeEnd('init')
   })
 
   ipcMain.on('ipcReadyWebTorrent', function (e) {

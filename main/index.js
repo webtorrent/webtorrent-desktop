@@ -1,3 +1,5 @@
+console.time('init')
+
 var electron = require('electron')
 
 var app = electron.app
@@ -67,6 +69,7 @@ function init () {
   app.on('ipcReady', function () {
     log('Command line args:', argv)
     processArgv(argv)
+    console.timeEnd('init')
   })
 
   app.on('before-quit', function (e) {
