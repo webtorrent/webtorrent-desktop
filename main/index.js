@@ -57,17 +57,12 @@ function init () {
   })
 
   app.on('ready', function () {
-    menu.init()
     windows.createMainWindow()
     windows.createWebTorrentHiddenWindow()
+    menu.init()
     shortcuts.init()
-    tray.init()
-    handlers.install()
 
-    /*
-     * We always check for updates on app startup. To keep app startup fast, we delay this
-     * first check so it happens when there is less going on.
-     */
+    // To keep app startup fast, some code is delayed.
     setTimeout(delayedInit, config.DELAYED_INIT)
   })
 
@@ -93,6 +88,8 @@ function init () {
 }
 
 function delayedInit () {
+  tray.init()
+  handlers.install()
   updater.init()
 }
 
