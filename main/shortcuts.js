@@ -1,7 +1,7 @@
 module.exports = {
   init,
-  registerPlayerShortcuts,
-  unregisterPlayerShortcuts
+  onPlayerClose,
+  onPlayerOpen
 }
 
 var electron = require('electron')
@@ -19,11 +19,13 @@ function init () {
   localShortcut.register('CmdOrCtrl+Shift+F', menu.toggleFullScreen)
 }
 
-function registerPlayerShortcuts () {
-  // Special "media key" for play/pause, available on some keyboards
-  globalShortcut.register('MediaPlayPause', () => windows.main.send('dispatch', 'playPause'))
+function onPlayerOpen () {
+  // Register special "media key" for play/pause, available on some keyboards
+  globalShortcut.register('MediaPlayPause', function () {
+    windows.main.send('dispatch', 'playPause')
+  })
 }
 
-function unregisterPlayerShortcuts () {
+function onPlayerClose () {
   globalShortcut.unregister('MediaPlayPause')
 }
