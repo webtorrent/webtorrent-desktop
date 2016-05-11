@@ -269,17 +269,6 @@ function getAppMenuTemplate () {
       ]
     },
     {
-      label: 'Window',
-      role: 'window',
-      submenu: [
-        {
-          label: 'Minimize',
-          accelerator: 'CmdOrCtrl+M',
-          role: 'minimize'
-        }
-      ]
-    },
-    {
       label: 'Help',
       role: 'help',
       submenu: [
@@ -303,7 +292,7 @@ function getAppMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    // WebTorrent menu (OS X)
+    // Add WebTorrent app menu (OS X)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -347,16 +336,25 @@ function getAppMenuTemplate () {
       ]
     })
 
-    // Window menu (OS X)
-    template[5].submenu.push(
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Bring All to Front',
-        role: 'front'
-      }
-    )
+    // Add Window menu (OS X)
+    template.splice(5, 0, {
+      label: 'Window',
+      role: 'window',
+      submenu: [
+        {
+          label: 'Minimize',
+          accelerator: 'CmdOrCtrl+M',
+          role: 'minimize'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Bring All to Front',
+          role: 'front'
+        }
+      ]
+    })
   }
 
   // In Linux and Windows it is not possible to open both folders and files
@@ -368,7 +366,7 @@ function getAppMenuTemplate () {
     })
 
     // Help menu (Windows, Linux)
-    template[5].submenu.push(
+    template[4].submenu.push(
       {
         type: 'separator'
       },
