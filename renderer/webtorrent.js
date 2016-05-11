@@ -68,23 +68,14 @@ function init () {
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-  var torrent
-  try {
-    torrent = client.add(torrentID, {
-      path: path,
-      fileModtimes: fileModtimes
-    })
-  } catch (err) {
-    return ipc.send('wt-error', torrentKey, err.message)
-  }
-  // If we add a duplicate magnet URI or infohash, WebTorrent returns the
-  // existing torrent object! (If we add a duplicate torrent file, it creates a
-  // new torrent object and raises an error later.) Workaround:
-  if (torrent.key) {
-    return ipc.send('wt-error', torrentKey, 'Can\'t add duplicate torrent')
-  }
+
+  var torrent = client.add(torrentID, {
+    path: path,
+    fileModtimes: fileModtimes
+  })
   torrent.key = torrentKey
   addTorrentEvents(torrent)
+
   return torrent
 }
 
