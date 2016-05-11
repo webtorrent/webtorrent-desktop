@@ -65,7 +65,7 @@ function init () {
   resumeTorrents()
 
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
-  window.setTimeout(delayedInit, 5000)
+  window.setTimeout(delayedInit, config.DELAYED_INIT)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
