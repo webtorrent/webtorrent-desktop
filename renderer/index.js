@@ -724,16 +724,16 @@ function torrentWarning (torrentKey, message) {
 }
 
 function torrentError (torrentKey, message) {
-  var torrentSummary = getTorrentSummary(torrentKey)
+  // TODO: WebTorrent needs semantic errors
+  if (message.startsWith('Cannot add duplicate torrent')) {
+    // Remove infohash from the message
+    message = 'Cannot add duplicate torrent'
+  }
+  onError(message)
 
-  // TODO: WebTorrent should have semantic errors
-  if (message.startsWith('There is already a swarm')) {
-    onError(new Error('Can\'t add duplicate torrent'))
-  } else if (!torrentSummary) {
-    onError(message)
-  } else {
-    console.log('error, stopping torrent %s (%s):\n\t%o',
-      torrentSummary.name, torrentSummary.infoHash, message)
+  var torrentSummary = getTorrentSummary(torrentKey)
+  if (torrentSummary) {
+    console.log('Pausing torrent %s due to error: %s', torrentSummary.infoHash, message)
     torrentSummary.status = 'paused'
     update()
   }
