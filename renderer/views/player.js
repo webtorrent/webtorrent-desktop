@@ -522,13 +522,13 @@ function renderLoadingBar (state) {
     <div class='loading-bar'>
       ${parts.map(function (part) {
     var style = {
-        left: (100 * part.start / fileProg.numPieces) + '%',
-        width: (100 * part.count / fileProg.numPieces) + '%'
+      left: (100 * part.start / fileProg.numPieces) + '%',
+      width: (100 * part.count / fileProg.numPieces) + '%'
     }
 
     return hx`<div class='loading-bar-part' style=${style}></div>`
   })}
-      </div>
+    </div>
   `
 }
 
