@@ -100,7 +100,9 @@ function createMainWindow () {
     height: HEADER_HEIGHT + (TORRENT_HEIGHT * 5) // header height + 4 torrents
   })
   win.loadURL(config.WINDOW_MAIN)
-  win.setSheetOffset(HEADER_HEIGHT)
+  if (process.platform === 'darwin') {
+    win.setSheetOffset(HEADER_HEIGHT)
+  }
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen()
