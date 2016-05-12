@@ -10,14 +10,21 @@ var Bitfield = require('bitfield')
 var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 
+// Handles volume change by wheel
+var handleVolumeWheel = function (e) {
+  dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
+};
+
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state) {
   // Show the video as large as will fit in the window, play immediately
   // If the video is on Chromecast or Airplay, show a title screen instead
-  var showVideo = state.playing.location === 'local'
+  var showVideo = state.playing.location === 'local';
+
   return hx`
     <div
       class='player'
+      onwheel=${handleVolumeWheel}
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${showVideo ? renderMedia(state) : renderCastScreen(state)}
       ${renderPlayerControls(state)}
@@ -125,7 +132,7 @@ function renderMedia (state) {
   function onCanPlay (e) {
     var video = e.target
     if (video.webkitVideoDecodedByteCount > 0 &&
-      video.webkitAudioDecodedByteCount === 0) {
+        video.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
     } else {
       video.play()
@@ -195,7 +202,7 @@ function renderAudioMetadata (state) {
 function renderLoadingSpinner (state) {
   if (state.playing.isPaused) return
   var isProbablyStalled = state.playing.isStalled ||
-    (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
+      (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
   var prog = getPlayingTorrentSummary(state).progress || {}
@@ -290,8 +297,8 @@ function renderPlayerControls (state) {
   var positionPercent = 100 * state.playing.currentTime / state.playing.duration
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
   var captionsClass = state.playing.subtitles.tracks.length === 0
-    ? 'disabled'
-    : state.playing.subtitles.enabled
+      ? 'disabled'
+      : state.playing.subtitles.enabled
       ? 'active'
       : ''
 
@@ -403,8 +410,8 @@ function renderPlayerControls (state) {
   var volume = state.playing.volume
   var volumeIcon = 'volume_' + (volume === 0 ? 'off' : volume < 0.3 ? 'mute' : volume < 0.6 ? 'down' : 'up')
   var volumeStyle = { background: '-webkit-gradient(linear, left top, right top, ' +
-    'color-stop(' + (volume * 100) + '%, #eee), ' +
-    'color-stop(' + (volume * 100) + '%, #727272))'
+  'color-stop(' + (volume * 100) + '%, #eee), ' +
+  'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
   elements.push(hx`
@@ -445,11 +452,6 @@ function renderPlayerControls (state) {
     var fraction = e.clientX / windowWidth
     var position = fraction * state.playing.duration /* seconds */
     dispatch('playbackJump', position)
-  }
-
-  // Handles volume change by wheel
-  function handleVolumeWheel (e) {
-    dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
   }
 
   // Handles volume muting and Unmuting
@@ -520,13 +522,13 @@ function renderLoadingBar (state) {
   return hx`
     <div class='loading-bar'>
       ${parts.map(function (part) {
-        var style = {
-          left: (100 * part.start / fileProg.numPieces) + '%',
-          width: (100 * part.count / fileProg.numPieces) + '%'
-        }
+    var style = {
+      left: (100 * part.start / fileProg.numPieces) + '%',
+      width: (100 * part.count / fileProg.numPieces) + '%'
+    }
 
-        return hx`<div class='loading-bar-part' style=${style}></div>`
-      })}
+    return hx`<div class='loading-bar-part' style=${style}></div>`
+  })}
     </div>
   `
 }
@@ -541,7 +543,7 @@ function cssBackgroundImagePoster (state) {
 
 function cssBackgroundImageDarkGradient () {
   return 'radial-gradient(circle at center, ' +
-    'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
+      'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
 function getPlayingTorrentSummary (state) {
