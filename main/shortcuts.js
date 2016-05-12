@@ -1,7 +1,7 @@
 module.exports = {
   init,
-  registerPlayerShortcuts,
-  unregisterPlayerShortcuts
+  onPlayerClose,
+  onPlayerOpen
 }
 
 var electron = require('electron')
@@ -13,17 +13,23 @@ var menu = require('./menu')
 var windows = require('./windows')
 
 function init () {
-  // ⌘+Shift+F is an alternative fullscreen shortcut to the ones defined in menu.js.
-  // Electron does not support multiple accelerators for a single menu item, so this
-  // is registered separately here.
+  // Alternate shortcuts. Most shortcuts are registered in menu,js, but Electron does not
+  // support multiple shortcuts for a single menu item.
   localShortcut.register('CmdOrCtrl+Shift+F', menu.toggleFullScreen)
+  localShortcut.register('Space', () => windows.main.send('dispatch', 'playPause'))
+
+  // Hidden shortcuts, i.e. not shown in the menu
+  localShortcut.register('Esc', () => windows.main.send('dispatch', 'escapeBack'))
 }
 
-function registerPlayerShortcuts () {
-  // Special "media key" for play/pause, available on some keyboards
-  globalShortcut.register('MediaPlayPause', () => windows.main.send('dispatch', 'playPause'))
+function onPlayerOpen () {
+  // Register special "media key" for play/pause, available on some keyboards
+  globalShortcut.register(
+    'MediaPlayPause',
+    () => windows.main.send('dispatch', 'playPause')
+  )
 }
 
-function unregisterPlayerShortcuts () {
+function onPlayerClose () {
   globalShortcut.unregister('MediaPlayPause')
 }
