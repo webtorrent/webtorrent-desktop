@@ -67,38 +67,48 @@ function TorrentList (state) {
     // If it's downloading/seeding then show progress info
     var prog = torrentSummary.progress
     if (torrentSummary.status !== 'paused' && prog) {
-      var progress = Math.floor(100 * prog.progress)
-      var downloaded = prettyBytes(prog.downloaded)
-      var total = prettyBytes(prog.length || 0)
-      if (downloaded !== total) downloaded += ` / ${total}`
-
       elements.push(hx`
-        <div class='status ellipsis'>
-          ${getFilesLength()}
-          <span>${getPeers()}</span>
-          <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
-          <span>↑ ${prettyBytes(prog.uploadSpeed || 0)}/s</span>
-        </div>
-      `)
-      elements.push(hx`
-        <div class='status2 ellipsis'>
-          <span class='progress'>${progress}%</span>
-          <span>${downloaded}</span>
+        <div class='ellipsis'>
+          ${renderPercentProgress()}
+          ${renderTotalProgress()}
+          ${renderPeers()}
+          ${renderDownloadSpeed()}
+          ${renderUploadSpeed()}
         </div>
       `)
     }
 
     return hx`<div class='metadata'>${elements}</div>`
 
-    function getPeers () {
-      var count = prog.numPeers === 1 ? 'peer' : 'peers'
-      return `${prog.numPeers} ${count}`
+    function renderPercentProgress () {
+      var progress = Math.floor(100 * prog.progress)
+      return hx`<span>${progress}%</span>`
     }
 
-    function getFilesLength () {
-      if (torrentSummary.files && torrentSummary.files.length > 1) {
-        return hx`<span class='files'>${torrentSummary.files.length} files</span>`
+    function renderTotalProgress () {
+      var downloaded = prettyBytes(prog.downloaded)
+      var total = prettyBytes(prog.length || 0)
+      if (downloaded === total) {
+        return hx`<span>${downloaded}</span>`
+      } else {
+        return hx`<span>${downloaded} / ${total}</span>`
       }
+    }
+
+    function renderPeers () {
+      if (prog.numPeers === 0) return
+      var count = prog.numPeers === 1 ? 'peer' : 'peers'
+      return hx`<span>${prog.numPeers} ${count}</span>`
+    }
+
+    function renderDownloadSpeed () {
+      if (prog.downloadSpeed === 0) return
+      return hx`<span>↓ ${prettyBytes(prog.downloadSpeed)}/s</span>`
+    }
+
+    function renderUploadSpeed () {
+      if (prog.uploadSpeed === 0) return
+      return hx`<span>↑ ${prettyBytes(prog.uploadSpeed)}/s</span>`
     }
   }
 
