@@ -24,7 +24,7 @@
     "dlnacasts": "^0.0.3",
     "drag-drop": "^2.11.0",
     "electron-localshortcut": "^0.6.0",
-    "electron-prebuilt": "0.37.8",
+    "electron-prebuilt": "1.0.1",
     "fs-extra": "^0.27.0",
     "hyperx": "^2.0.2",
     "languagedetect": "^1.1.1",
