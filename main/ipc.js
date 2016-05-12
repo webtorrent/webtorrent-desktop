@@ -82,12 +82,12 @@ function init () {
 
   ipcMain.on('onPlayerOpen', function () {
     menu.onPlayerOpen()
-    shortcuts.registerPlayerShortcuts()
+    shortcuts.onPlayerOpen()
   })
 
   ipcMain.on('onPlayerClose', function () {
     menu.onPlayerClose()
-    shortcuts.unregisterPlayerShortcuts()
+    shortcuts.onPlayerOpen()
   })
 
   ipcMain.on('focusWindow', function (e, windowName) {

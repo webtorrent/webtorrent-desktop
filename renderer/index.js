@@ -96,9 +96,6 @@ function init () {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
-  // ...keyboard shortcuts
-  document.addEventListener('keydown', onKeyDown)
-
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
@@ -256,6 +253,15 @@ function dispatch (action, ...args) {
     var mediaTag = document.querySelector('video,audio')
     if (mediaTag) mediaTag.pause()
   }
+  if (action === 'escapeBack') {
+    if (state.modal) {
+      dispatch('exitModal')
+    } else if (state.window.isFullScreen) {
+      dispatch('toggleFullScreen')
+    } else {
+      dispatch('back')
+    }
+  }
   if (action === 'back') {
     state.location.back()
   }
@@ -378,6 +384,7 @@ function pause () {
 }
 
 function playPause () {
+  if (state.location.current().url !== 'player') return
   if (state.playing.isPaused) {
     play()
   } else {
@@ -1143,20 +1150,6 @@ function onPaste (e) {
     if (torrentId.length === 0) return
     dispatch('addTorrent', torrentId)
   })
-}
-
-function onKeyDown (e) {
-  if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-    if (state.modal) {
-      dispatch('exitModal')
-    } else if (state.window.isFullScreen) {
-      dispatch('toggleFullScreen')
-    } else {
-      dispatch('back')
-    }
-  } else if (e.which === 32) { /* spacebar pauses or plays the video */
-    dispatch('playPause')
-  }
 }
 
 function onFocus (e) {
