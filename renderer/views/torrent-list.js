@@ -71,9 +71,9 @@ function TorrentList (state) {
         <div class='ellipsis'>
           ${renderPercentProgress()}
           ${renderTotalProgress()}
+          ${renderPeers()}
           ${renderDownloadSpeed()}
           ${renderUploadSpeed()}
-          ${renderPeers()}
         </div>
       `)
     }
@@ -95,6 +95,12 @@ function TorrentList (state) {
       }
     }
 
+    function renderPeers () {
+      if (prog.numPeers === 0) return
+      var count = prog.numPeers === 1 ? 'peer' : 'peers'
+      return hx`<span>${prog.numPeers} ${count}</span>`
+    }
+
     function renderDownloadSpeed () {
       if (prog.downloadSpeed === 0) return
       return hx`<span>↓ ${prettyBytes(prog.downloadSpeed)}/s</span>`
@@ -103,12 +109,6 @@ function TorrentList (state) {
     function renderUploadSpeed () {
       if (prog.uploadSpeed === 0) return
       return hx`<span>↑ ${prettyBytes(prog.uploadSpeed)}/s</span>`
-    }
-
-    function renderPeers () {
-      if (prog.numPeers === 0) return
-      var count = prog.numPeers === 1 ? 'peer' : 'peers'
-      return hx`<span>${prog.numPeers} ${count}</span>`
     }
   }
 
