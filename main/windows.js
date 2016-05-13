@@ -9,6 +9,8 @@ var windows = module.exports = {
 
 var electron = require('electron')
 
+var app = electron.app
+
 var config = require('../config')
 var menu = require('./menu')
 var tray = require('./tray')
@@ -68,7 +70,7 @@ function createWebTorrentHiddenWindow () {
 
   // Prevent killing the WebTorrent process
   win.on('close', function (e) {
-    if (!electron.app.isQuitting) {
+    if (!app.isQuitting) {
       e.preventDefault()
       win.hide()
     }
@@ -116,8 +118,8 @@ function createMainWindow () {
 
   win.on('close', function (e) {
     if (process.platform !== 'darwin' && !tray.hasTray()) {
-      electron.app.quit()
-    } else if (!electron.app.isQuitting) {
+      app.quit()
+    } else if (!app.isQuitting) {
       e.preventDefault()
       win.hide()
       win.send('dispatch', 'backToList')

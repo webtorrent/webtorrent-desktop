@@ -12,8 +12,7 @@ function checkForVLC (cb) {
   vlcCommand((err) => cb(!err))
 }
 
-// Finds if VLC is installed on Mac, Windows, or Linux.
-// Uses child_process.spawn() to return a ChildProcess object
+// Spawns VLC with child_process.spawn() to return a ChildProcess object
 // Calls back with (err, childProcess)
 function spawn (args, cb) {
   vlcCommand(function (err, vlcPath) {

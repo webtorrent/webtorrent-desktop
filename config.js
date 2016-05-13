@@ -17,7 +17,6 @@ module.exports = {
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
 
-  AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update' +
     '?version=' + APP_VERSION + '&platform=' + process.platform,
 
@@ -26,6 +25,8 @@ module.exports = {
   CONFIG_PATH: getConfigPath(),
   CONFIG_POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
+
+  DELAYED_INIT: 3000 /* 3 seconds */,
 
   GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/feross/webtorrent-desktop/issues',
