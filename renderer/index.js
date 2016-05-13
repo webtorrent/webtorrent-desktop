@@ -539,15 +539,18 @@ function saveState () {
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // .torrent file = start downloading the torrent
-  files.filter(isTorrent).forEach(addTorrent)
+  // All .torrent files? Start downloading
+  if (files.every(isTorrent)) {
+    return files.forEach(addTorrent)
+  }
 
-  // subtitle file
-  files.filter(isSubtitle).forEach(addSubtitle)
+  // Playing media and adding subtitles?
+  if (files.some(isSubtitle) && state.location.current().url === 'player') {
+    return files.filter(isSubtitle).forEach(addSubtitle)
+  }
 
-  // everything else = seed these files
-  var rest = files.filter(not(isTorrent)).filter(not(isSubtitle))
-  if (rest.length > 0) showCreateTorrent(rest)
+  // Show the Create Torrent screen. Let's seed those files.
+  if (files.length > 0) showCreateTorrent(files)
 }
 
 function isTorrent (file) {
