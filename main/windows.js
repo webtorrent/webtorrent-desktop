@@ -94,7 +94,7 @@ function createMainWindow () {
     icon: config.APP_ICON + 'Smaller.png', // Window and Volume Mixer icon.
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
-    show: false, // Hide window until DOM finishes loading
+    show: false, // Hide window until renderer sends 'ipcReady' event
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
