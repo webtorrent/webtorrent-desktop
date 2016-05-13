@@ -751,9 +751,15 @@ body.drag .app::after {
 .player-controls .volume-icon,
 .player-controls .back {
   display: block;
-  width: 20px;
   height: 20px;
   margin: 5px;
+
+  /*
+   * Fix for overflowing captions icon
+   * https://github.com/feross/webtorrent-desktop/issues/467
+   */
+  max-width: 22px;
+  overflow: hidden;
 }
 
 .player-controls .volume,
