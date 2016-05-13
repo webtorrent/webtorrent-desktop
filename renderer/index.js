@@ -114,10 +114,19 @@ function cleanUpConfig () {
     // Migration: replace torrentPath with torrentFileName
     var src, dst
     if (ts.torrentPath) {
+      // There are a number of cases to handle here:
+      // * Originally we used absolute paths
+      // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
+      // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
+      // * Finally, now we're getting rid of torrentPath altogether
       console.log('migration: replacing torrentPath %s', ts.torrentPath)
-      src = path.isAbsolute(ts.torrentPath)
-        ? ts.torrentPath
-        : path.join(config.STATIC_PATH, ts.torrentPath)
+      if (path.isAbsolute(ts.torrentPath)) {
+        src = ts.torrentPath
+      } else if (ts.torrentPath.startsWith('..')) {
+        src = ts.torrentPath
+      } else {
+        src = path.join(config.STATIC_PATH, ts.torrentPath)
+      }
       dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
