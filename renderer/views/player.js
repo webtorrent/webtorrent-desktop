@@ -10,11 +10,6 @@ var Bitfield = require('bitfield')
 var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 
-// Handles volume change by wheel
-function handleVolumeWheel (e) {
-  dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
-}
-
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state) {
   // Show the video as large as will fit in the window, play immediately
@@ -29,6 +24,11 @@ function Player (state) {
       ${renderPlayerControls(state)}
       </div>
   `
+}
+
+// Handles volume change by wheel
+function handleVolumeWheel (e) {
+  dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
 }
 
 function renderMedia (state) {
@@ -414,8 +414,7 @@ function renderPlayerControls (state) {
   }
 
   elements.push(hx`
-    <div.volume
-      onwheel=${handleVolumeWheel}>
+    <div.volume>
         <i.icon.volume-icon onmousedown=${handleVolumeMute}>
           ${volumeIcon}
         </i>
@@ -424,7 +423,6 @@ function renderPlayerControls (state) {
           onmousedown=${handleVolumeScrub}
           onmouseup=${handleVolumeScrub}
           onmousemove=${handleVolumeScrub}
-          onwheel=${handleVolumeWheel}
           style=${volumeStyle}
         />
     </div>
