@@ -93,6 +93,13 @@ function init () {
     windows.focusWindow(windows[windowName])
   })
 
+  ipcMain.on('downloadFinished', function (e, filePath) {
+    if (app.dock) {
+      // Bounces the Downloads stack if the filePath is inside the Downloads folder.
+      app.dock.downloadFinished(filePath)
+    }
+  })
+
   ipcMain.on('checkForVLC', function (e) {
     vlc.checkForVLC(function (isInstalled) {
       windows.main.send('checkForVLC', isInstalled)
@@ -216,7 +223,9 @@ function setAspectRatio (aspectRatio) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   log('setBadge %s', text)
-  if (app.dock) app.dock.setBadge(String(text))
+  if (app.dock) {
+    app.dock.setBadge(String(text))
+  }
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.

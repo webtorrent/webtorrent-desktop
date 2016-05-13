@@ -21,14 +21,16 @@ var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
-var appMenu, dockMenu
+var appMenu
 
 function init () {
   appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
   electron.Menu.setApplicationMenu(appMenu)
 
-  dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
-  if (app.dock) app.dock.setMenu(dockMenu)
+  if (app.dock) {
+    var dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
+    app.dock.setMenu(dockMenu)
+  }
 }
 
 function toggleFullScreen (flag) {
