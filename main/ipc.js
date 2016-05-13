@@ -93,6 +93,13 @@ function init () {
     windows.focusWindow(windows[windowName])
   })
 
+  ipcMain.on('downloadFinished', function (e, filePath) {
+    if (app.dock) {
+      // Bounces the Downloads stack if the filePath is inside the Downloads folder.
+      app.dock.downloadFinished(filePath)
+    }
+  })
+
   ipcMain.on('checkForVLC', function (e) {
     vlc.checkForVLC(function (isInstalled) {
       windows.main.send('checkForVLC', isInstalled)
