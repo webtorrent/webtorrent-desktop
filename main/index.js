@@ -5,7 +5,6 @@ var electron = require('electron')
 var app = electron.app
 var ipcMain = electron.ipcMain
 
-var autoUpdater = require('./auto-updater')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
 var handlers = require('./handlers')
@@ -14,8 +13,9 @@ var log = require('./log')
 var menu = require('./menu')
 var shortcuts = require('./shortcuts')
 var squirrelWin32 = require('./squirrel-win32')
-var windows = require('./windows')
 var tray = require('./tray')
+var updater = require('./updater')
+var windows = require('./windows')
 
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
@@ -54,16 +54,16 @@ function init () {
 
   app.on('will-finish-launching', function () {
     crashReporter.init()
-    autoUpdater.init()
   })
 
   app.on('ready', function () {
-    menu.init()
     windows.createMainWindow()
     windows.createWebTorrentHiddenWindow()
+    menu.init()
     shortcuts.init()
-    tray.init()
-    handlers.install()
+
+    // To keep app startup fast, some code is delayed.
+    setTimeout(delayedInit, config.DELAYED_INIT)
   })
 
   app.on('ipcReady', function () {
@@ -85,6 +85,12 @@ function init () {
   app.on('activate', function () {
     windows.createMainWindow()
   })
+}
+
+function delayedInit () {
+  tray.init()
+  handlers.install()
+  updater.init()
 }
 
 function onOpen (e, torrentId) {
