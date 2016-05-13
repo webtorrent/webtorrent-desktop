@@ -22,6 +22,7 @@ function isVideo (file) {
     '.mkv',
     '.mov',
     '.mp4',
+    '.mpg',
     '.ogv',
     '.webm'
   ].includes(ext)
