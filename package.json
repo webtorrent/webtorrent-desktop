@@ -26,6 +26,7 @@
     "electron-localshortcut": "^0.6.0",
     "electron-prebuilt": "1.0.2",
     "fs-extra": "^0.27.0",
+    "hat": "0.0.3",
     "hyperx": "^2.0.2",
     "languagedetect": "^1.1.1",
     "main-loop": "^3.2.0",
@@ -37,7 +38,8 @@
     "virtual-dom": "^2.1.1",
     "vlc-command": "^1.0.1",
     "webtorrent": "0.x",
-    "winreg": "^1.2.0"
+    "winreg": "^1.2.0",
+    "zero-fill": "^2.2.3"
   },
   "devDependencies": {
     "cross-zip": "^2.0.1",
