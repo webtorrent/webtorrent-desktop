@@ -135,8 +135,8 @@ var win32 = {
   // Build for Windows.
   platform: 'win32',
 
-  // Build 64 bit binaries only.
-  arch: 'x64',
+  // Build 32 bit binaries only.
+  arch: 'ia32',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   'version-string': {
