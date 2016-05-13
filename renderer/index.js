@@ -441,6 +441,10 @@ function setupIpc () {
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
     state.window.isFullScreen = isFullScreen
+    if (!isFullScreen) {
+      // Aspect ratio gets reset in fullscreen mode, so restore it (OS X)
+      ipcRenderer.send('setAspectRatio', state.playing.aspectRatio)
+    }
     update()
   })
 
@@ -1079,6 +1083,7 @@ function setDimensions (dimensions) {
 
   ipcRenderer.send('setAspectRatio', aspectRatio)
   ipcRenderer.send('setBounds', {x: null, y: null, width, height})
+  state.playing.aspectRatio = aspectRatio
 }
 
 function restoreBounds () {
