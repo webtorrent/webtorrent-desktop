@@ -799,6 +799,7 @@ body.drag .app::after {
   border: none;
   padding: 0;
   vertical-align: sub;
+  -webkit-app-region: no-drag;
 }
 
 .player-controls .volume-slider::-webkit-slider-thumb {
@@ -809,6 +810,7 @@ body.drag .app::after {
   height: 10px;
   border: 1px solid #303233;
   border-radius: 50%;
+  -webkit-app-region: no-drag;
 }
 
 .player-controls .volume-slider:focus {
