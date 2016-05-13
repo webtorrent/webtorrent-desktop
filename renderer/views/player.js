@@ -11,7 +11,7 @@ var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Handles volume change by wheel
-function handleVolumeWheel(e) {
+function handleVolumeWheel (e) {
   dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
 }
 
@@ -409,8 +409,8 @@ function renderPlayerControls (state) {
   var volume = state.playing.volume
   var volumeIcon = 'volume_' + (volume === 0 ? 'off' : volume < 0.3 ? 'mute' : volume < 0.6 ? 'down' : 'up')
   var volumeStyle = { background: '-webkit-gradient(linear, left top, right top, ' +
-   'color-stop(' + (volume * 100) + '%, #eee), ' +
-   'color-stop(' + (volume * 100) + '%, #727272))'
+    'color-stop(' + (volume * 100) + '%, #eee), ' +
+    'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
   elements.push(hx`
