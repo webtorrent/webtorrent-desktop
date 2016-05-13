@@ -5,6 +5,8 @@ module.exports = {
 
 var path = require('path')
 
+var config = require('../config')
+
 function install () {
   if (process.platform === 'darwin') {
     installDarwin()
@@ -42,6 +44,13 @@ function installDarwin () {
 
 function uninstallDarwin () {}
 
+var EXEC_COMMAND = [ process.execPath ]
+
+if (!config.IS_PRODUCTION) {
+  EXEC_COMMAND.push(config.ROOT_PATH)
+}
+console.log(EXEC_COMMAND.join(' '))
+
 function installWin32 () {
   var Registry = require('winreg')
 
@@ -49,8 +58,8 @@ function installWin32 () {
 
   var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
 
-  registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, process.execPath)
-  registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, process.execPath)
+  registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, EXEC_COMMAND)
+  registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, EXEC_COMMAND)
 
   /**
    * To add a protocol handler, the following keys must be added to the Windows registry:
@@ -108,7 +117,7 @@ function installWin32 () {
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
       })
-      commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', done)
+      commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
@@ -169,7 +178,7 @@ function installWin32 () {
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + id + '\\shell\\open\\command'
       })
-      commandKey.set('', Registry.REG_SZ, '"' + command + '" "%1"', done)
+      commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
@@ -181,8 +190,8 @@ function installWin32 () {
 function uninstallWin32 () {
   var Registry = require('winreg')
 
-  unregisterProtocolHandlerWin32('magnet', process.execPath)
-  unregisterFileHandlerWin32('.torrent', 'io.webtorrent.torrent', process.execPath)
+  unregisterProtocolHandlerWin32('magnet', EXEC_COMMAND)
+  unregisterFileHandlerWin32('.torrent', 'io.webtorrent.torrent', EXEC_COMMAND)
 
   function unregisterProtocolHandlerWin32 (protocol, command) {
     getCommand()
@@ -193,7 +202,7 @@ function uninstallWin32 () {
         key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
       })
       commandKey.get('', function (err, item) {
-        if (!err && item.value.indexOf(command) >= 0) {
+        if (!err && item.value.indexOf(commandToArgs(command)) >= 0) {
           destroyProtocol()
         }
       })
@@ -241,6 +250,10 @@ function uninstallWin32 () {
   }
 }
 
+function commandToArgs (command) {
+  return command.map((arg) => `"${arg}"`).join(' ')
+}
+
 function installLinux () {
   var fs = require('fs-extra')
   var os = require('os')
@@ -260,14 +273,14 @@ function installLinux () {
   function writeDesktopFile (err, desktopFile) {
     if (err) return log.error(err.message)
 
-    var appPath = config.IS_PRODUCTION ? path.dirname(process.execPath) : config.ROOT_PATH
-    var execPath = process.execPath + (config.IS_PRODUCTION ? '' : ' .')
-    var tryExecPath = process.execPath
+    var appPath = config.IS_PRODUCTION
+      ? path.dirname(process.execPath)
+      : config.ROOT_PATH
 
     desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
     desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
-    desktopFile = desktopFile.replace(/\$EXEC_PATH/g, execPath)
-    desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, tryExecPath)
+    desktopFile = desktopFile.replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
+    desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
 
     var desktopFilePath = path.join(
       os.homedir(),
