@@ -388,7 +388,7 @@ function getAppMenuTemplate () {
   // In Linux and Windows it is not possible to open both folders and files
   if (process.platform === 'linux' || process.platform === 'windows') {
     // File menu (Windows, Linux)
-    template[0].unshift({
+    template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
       click: showOpenSeedFile
     })
@@ -408,7 +408,7 @@ function getAppMenuTemplate () {
   // will have a way to quit the app.
   if (process.platform === 'linux') {
     // File menu (Linux)
-    template[0].push({
+    template[0].submenu.push({
       label: 'Quit',
       click: () => app.quit()
     })
