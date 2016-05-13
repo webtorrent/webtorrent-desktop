@@ -69,7 +69,7 @@ function isProduction () {
     return false
   }
   if (process.platform === 'darwin') {
-    return !/\/Electron\.app\/Contents\/MacOS\/Electron$/.test(process.execPath)
+    return !/\/Electron\.app\//.test(process.execPath)
   }
   if (process.platform === 'win32') {
     return !/\\electron\.exe$/.test(process.execPath)
