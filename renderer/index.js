@@ -773,6 +773,7 @@ function torrentDone (torrentKey, torrentInfo) {
       state.dock.badge += 1
     }
     showDoneNotification(torrentSummary)
+    ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
   }
 
   update()
@@ -1018,12 +1019,16 @@ function openTorrentContextMenu (infoHash) {
   menu.popup(electron.remote.getCurrentWindow())
 }
 
-function showItemInFolder (torrentSummary) {
+function getTorrentPath (torrentSummary) {
   var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
   if (torrentSummary.files.length > 1) {
     itemPath = path.dirname(itemPath)
   }
-  ipcRenderer.send('showItemInFolder', itemPath)
+  return itemPath
+}
+
+function showItemInFolder (torrentSummary) {
+  ipcRenderer.send('showItemInFolder', getTorrentPath(torrentSummary))
 }
 
 function saveTorrentFileAs (torrentSummary) {
