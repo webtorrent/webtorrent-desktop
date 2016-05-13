@@ -17,25 +17,25 @@ function isPlayable (file) {
 function isVideo (file) {
   var ext = path.extname(file.name).toLowerCase()
   return [
-    '.mp4',
-    '.m4v',
-    '.webm',
-    '.mov',
-    '.mkv',
     '.avi',
-    '.ogv'
-  ].indexOf(ext) > -1
+    '.m4v',
+    '.mkv',
+    '.mov',
+    '.mp4',
+    '.ogv',
+    '.webm'
+  ].includes(ext)
 }
 
 function isAudio (file) {
   var ext = path.extname(file.name).toLowerCase()
   return [
-    '.mp3',
     '.aac',
+    '.ac3',
+    '.mp3',
     '.ogg',
-    '.wav',
-    '.ac3'
-  ].indexOf(ext) > -1
+    '.wav'
+  ].includes(ext)
 }
 
 function isPlayableTorrent (torrentSummary) {
