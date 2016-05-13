@@ -216,7 +216,9 @@ function setAspectRatio (aspectRatio) {
 // Display string in dock badging area (OS X)
 function setBadge (text) {
   log('setBadge %s', text)
-  if (app.dock) app.dock.setBadge(String(text))
+  if (app.dock) {
+    app.dock.setBadge(String(text))
+  }
 }
 
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
