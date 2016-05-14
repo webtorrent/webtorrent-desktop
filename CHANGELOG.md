@@ -1,15 +1,58 @@
 # WebTorrent Desktop Version History
 
-## UNRELEASED
+## v0.4.0 - 2016-05-13
 
 ### Added
+
+- Better Windows support!
+  - Windows 32-bit build.
+  - Windows Portable App build.
+  - Windows app signing, for fewer install warnings.
+- Better Linux support!
+  - Linux 32-bit build.
+- Subtitles support!
+  - .srt and .vtt file support.
+  - Drag-and-drop files on video, or choose from file selector.
+  - Multiple subtitle files support.
+- Stream to VLC when the audio codec is unplayable (e.g. AC3, EAC3).
+- "Show in Folder" item in context menu.
+- Volume slider, with mute/unmute button.
+- New "Create torrent" page to modify:
+  - Torrent comment.
+  - Trackers.
+  - Private torrent flag.
+- Use mouse wheel to increase/decrease volume.
+- Bounce the Downloads stack when download completes. (OS X)
+- New default torrent on first launch: The WIRED CD.
+
 ### Changed
 
-- Use Squirrel.Windows 1.3.0
-  - Fix installing when the app is already installed
-  - Don't kill unrelated processes on uninstall
+- Improve app startup time by 40%.
+- UI tweaks: Reduce font size, reduce torrent list item height.
+- Add Playback menu for playback-related functionality.
+- Fix installing when the app is already installed. (Windows)
+- Don't kill unrelated processes on uninstall. (Windows)
+- Set "sheet offset" correctly for create torrent dialog. (OS X)
+- Remove OS X-style Window menu. (Linux, Windows)
+- Remove "Add Fake Airplay/Chromecast" menu items.
 
 ### Fixed
+
+- Disable WebRTC to fix 100% CPU usage/crashes caused by Chromium issue. This is temporary. (OS X)
+- When fullscreen, make controls use the full window. (OS X)
+- Support creating torrents that contain .torrent files.
+- Block power save while casting to a remote device.
+- Do not block power save when the space key is pressed from the torrent list.
+- Support playing .mpg and .ogv extensions in the app.
+- Fix video centering for multi-screen setups.
+- Show an error when adding a duplicate torrent.
+- Show an error when adding an invalid magnet link.
+- Do not stop music when tabbing to another program (OS X)
+- Properly size the Windows volume mixer icon.
+- Default to the user's OS-defined, localized "Downloads" folder.
+- Enforce minimimum window size when resizing player, to prevent window disappearing.
+- Fix rare race condition error on app quit.
+- Don't use zero-byte torrent "poster" images.
 
 ## v0.3.3 - 2016-04-07
 
