@@ -9,6 +9,7 @@ var electronPackager = require('electron-packager')
 var fs = require('fs')
 var minimist = require('minimist')
 var mkdirp = require('mkdirp')
+var os = require('os')
 var path = require('path')
 var rimraf = require('rimraf')
 var series = require('run-series')
@@ -18,16 +19,6 @@ var config = require('../config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
-
-/*
- * Path to folder with the following files:
- *   - Windows Authenticode private key and cert (authenticode.p12)
- *   - Windows Authenticode password file (authenticode.txt)
- */
-var CERT_PATH = process.platform === 'win32'
-  ? 'D:'
-  : '/Volumes/Certs'
-
 var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
 
 var argv = minimist(process.argv.slice(2), {
@@ -333,8 +324,21 @@ function buildDarwin (cb) {
 
 function buildWin32 (cb) {
   var installer = require('electron-winstaller')
-
   console.log('Windows: Packaging electron...')
+
+  /*
+   * Path to folder with the following files:
+   *   - Windows Authenticode private key and cert (authenticode.p12)
+   *   - Windows Authenticode password file (authenticode.txt)
+   */
+  var CERT_PATH
+  try {
+    fs.accessSync('D:')
+    CERT_PATH = 'D:'
+  } catch (err) {
+    CERT_PATH = path.join(os.homedir(), 'Desktop')
+  }
+
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
     console.log('Windows: Packaged electron. ' + buildPath)
