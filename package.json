@@ -80,7 +80,7 @@
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "start": "electron .",
-    "test": "standard && ./bin/check-deps.js",
+    "test": "standard && node ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"
   }
 }
