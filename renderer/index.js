@@ -612,9 +612,10 @@ function addSubtitle (file) {
     state.playing.subtitles.tracks.forEach(function (trackItem) {
       trackItem.selected = false
       if (trackItem.label === track.label) {
-        track.label = Number.isNaN(track.label.slice(-1))
-          ? track.label + ' 2'
-          : track.label.slice(0, -1) + (parseInt(track.label.slice(-1)) + 1)
+        var labelParts = /([^\d]+)(\d+)$/.exec(track.label)
+        track.label = labelParts
+          ? labelParts[1] + (parseInt(labelParts[2]) + 1)
+          : track.label + ' 2'
       }
     })
     state.playing.subtitles.change = track.label
