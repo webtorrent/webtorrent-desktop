@@ -38,7 +38,8 @@
 
 ### Fixed
 
-- Disable WebRTC to fix 100% CPU usage/crashes caused by Chromium issue. This is temporary. (OS X)
+- Disable WebRTC to fix 100% CPU usage/crashes caused by Chromium issue. This is
+  temporary. (OS X)
 - When fullscreen, make controls use the full window. (OS X)
 - Support creating torrents that contain .torrent files.
 - Block power save while casting to a remote device.
@@ -50,9 +51,13 @@
 - Do not stop music when tabbing to another program (OS X)
 - Properly size the Windows volume mixer icon.
 - Default to the user's OS-defined, localized "Downloads" folder.
-- Enforce minimimum window size when resizing player, to prevent window disappearing.
+- Enforce minimimum window size when resizing player to prevent window disappearing.
 - Fix rare race condition error on app quit.
 - Don't use zero-byte torrent "poster" images.
+
+Thanks to @grunjol, @rguedes, @furstenheim, @karloluis, @DiegoRBaquero, @alxhotel,
+@AgentEpsilon, @remijouannet, Rolando Guedes, @dcposch, and @feross for contributing
+to this release!
 
 ## v0.3.3 - 2016-04-07
 
