@@ -199,7 +199,7 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: process.platform === 'windows'
+          label: process.platform === 'win32'
             ? 'Close'
             : 'Close Window',
           accelerator: 'CmdOrCtrl+W',
@@ -388,7 +388,7 @@ function getAppMenuTemplate () {
   }
 
   // In Linux and Windows it is not possible to open both folders and files
-  if (process.platform === 'linux' || process.platform === 'windows') {
+  if (process.platform === 'linux' || process.platform === 'win32') {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
