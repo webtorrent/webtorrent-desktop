@@ -539,18 +539,23 @@ function saveState () {
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // All .torrent files? Start downloading
-  if (files.every(isTorrent)) {
-    return files.forEach(addTorrent)
-  }
-
-  // Playing media and adding subtitles?
-  if (files.some(isSubtitle) && state.location.current().url === 'player') {
+  // In the player, the only drag-drop function is adding subtitles
+  var isInPlayer = state.location.current().url === 'player'
+  if (isInPlayer) {
     return files.filter(isSubtitle).forEach(addSubtitle)
   }
 
-  // Show the Create Torrent screen. Let's seed those files.
-  if (files.length > 0) showCreateTorrent(files)
+  // Otherwise, you can only drag-drop onto the home screen
+  var isHome = state.location.current().url === 'home' && !state.modal
+  if (isHome) {
+    if (files.every(isTorrent)) {
+      // All .torrent files? Start downloading
+      files.forEach(addTorrent)
+    } else {
+      // Show the Create Torrent screen. Let's seed those files.
+      showCreateTorrent(files)
+    }
+  }
 }
 
 function isTorrent (file) {
@@ -564,12 +569,6 @@ function isSubtitle (file) {
   var name = typeof file === 'string' ? file : file.name
   var ext = path.extname(name).toLowerCase()
   return ext === '.srt' || ext === '.vtt'
-}
-
-function not (test) {
-  return function (...args) {
-    return !test(...args)
-  }
 }
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
