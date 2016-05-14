@@ -28,7 +28,14 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = window.client = new WebTorrent()
+var client = window.client = new WebTorrent({
+  tracker: {
+    // HACK: OS X: Disable WebRTC peers to fix 100% CPU issue caused by Chrome bug.
+    // Fixed in Chrome 51, so we can remove this hack once Electron updates Chrome.
+    // Issue: https://github.com/feross/webtorrent-desktop/issues/353
+    wrtc: process.platform !== 'darwin'
+  }
+})
 
 // WebTorrent-to-HTTP streaming sever
 var server = window.server = null
