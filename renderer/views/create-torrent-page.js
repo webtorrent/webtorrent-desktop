@@ -30,6 +30,7 @@ function CreateTorrentPage (state) {
       pathPrefix = files[0]
     }
   }
+  console.log('WTF', pathPrefix, files)
 
   // Sanity check: show the number of files and total size
   var numFiles = files.length
