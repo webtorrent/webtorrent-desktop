@@ -423,7 +423,7 @@ function openSubtitles () {
     properties: [ 'openFile' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    addSubtitle({path: filenames[0]})
+    addSubtitle({path: filenames[0]}, true)
   })
 }
 
@@ -543,7 +543,7 @@ function onOpen (files) {
   // In the player, the only drag-drop function is adding subtitles
   var isInPlayer = state.location.current().url === 'player'
   if (isInPlayer) {
-    return files.filter(isSubtitle).forEach(addSubtitle)
+    return files.filter(isSubtitle).forEach((file) => addSubtitle(file, true))
   }
 
   // Otherwise, you can only drag-drop onto the home screen
@@ -592,12 +592,20 @@ function addTorrent (torrentId) {
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
 
-function addSubtitle (file) {
+function addSubtitle (file, autoSelect) {
   var srtToVtt = require('srt-to-vtt')
   var LanguageDetect = require('languagedetect')
 
+  // Subtitles are only supported while playing video
   if (state.playing.type !== 'video') return
-  fs.createReadStream(file.path || file).pipe(srtToVtt()).pipe(concat(function (buf) {
+
+  // No dupes allowed
+  var subs = state.playing.subtitles
+  var filePath = file.path || file
+  if (subs.tracks.some((track) => track.filePath === filePath)) return
+
+  // Read the .SRT or .VTT file, parse it, add subtitle track
+  fs.createReadStream(filePath).pipe(srtToVtt()).pipe(concat(function (buf) {
     // Set the cue text position so it appears above the player controls.
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
@@ -609,11 +617,11 @@ function addSubtitle (file) {
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
       language: langDetected,
-      label: langDetected
+      label: langDetected,
+      filePath: filePath
     }
-    var subs = state.playing.subtitles
     subs.tracks.push(track)
-    selectNewlyAddedSubtitle()
+    if (autoSelect) selectNewlyAddedSubtitle()
     relabelSubtitles()
   }))
 }
@@ -650,6 +658,20 @@ function relabelSubtitles () {
     var lang = track.language
     counts[lang] = (counts[lang] || 0) + 1
     track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
+  })
+}
+
+function checkForSubtitles () {
+  if (state.playing.type !== 'video') return
+  var torrentSummary = state.getPlayingTorrentSummary()
+  if (!torrentSummary || !torrentSummary.progress) return
+
+  torrentSummary.progress.files.forEach(function (fp, ix) {
+    if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
+    var file = torrentSummary.files[ix]
+    if (!isSubtitle(file.name)) return
+    var filePath = path.join(torrentSummary.path, file.path)
+    addSubtitle(filePath)
   })
 }
 
@@ -835,6 +857,8 @@ function torrentProgress (progressInfo) {
     torrentSummary.progress = p
   })
 
+  checkForSubtitles()
+
   update()
 }
 
@@ -933,6 +957,9 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
     ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
   }
+
+  // if it's video, check for subtitles files that are done downloading
+  checkForSubtitles()
 
   ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {

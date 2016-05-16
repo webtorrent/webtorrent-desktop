@@ -161,7 +161,7 @@ function renderOverlay (state) {
 }
 
 function renderAudioMetadata (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   var fileSummary = torrentSummary.files[state.playing.fileIndex]
   if (!fileSummary.audioInfo) return
   var info = fileSummary.audioInfo
@@ -200,7 +200,7 @@ function renderLoadingSpinner (state) {
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
-  var prog = getPlayingTorrentSummary(state).progress || {}
+  var prog = state.getPlayingTorrentSummary().progress || {}
   var fileProgress = 0
   if (prog.files) {
     var file = prog.files[state.playing.fileIndex]
@@ -493,7 +493,7 @@ var volumeChanging = false
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
     return []
   }
@@ -530,7 +530,7 @@ function renderLoadingBar (state) {
 
 // Returns the CSS background-image string for a poster image + dark vignette
 function cssBackgroundImagePoster (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   var posterPath = TorrentSummary.getPosterPath(torrentSummary)
   if (!posterPath) return ''
   return cssBackgroundImageDarkGradient() + `, url(${posterPath})`
@@ -539,9 +539,4 @@ function cssBackgroundImagePoster (state) {
 function cssBackgroundImageDarkGradient () {
   return 'radial-gradient(circle at center, ' +
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
-}
-
-function getPlayingTorrentSummary (state) {
-  var infoHash = state.playing.infoHash
-  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }

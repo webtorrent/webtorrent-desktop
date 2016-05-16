@@ -9,7 +9,8 @@ var LocationHistory = require('./lib/location-history')
 module.exports = {
   getInitialState,
   getDefaultPlayState,
-  getDefaultSavedState
+  getDefaultSavedState,
+  getPlayingTorrentSummary
 }
 
 function getInitialState () {
@@ -57,7 +58,12 @@ function getInitialState () {
      *
      * Also accessible via `require('application-config')('WebTorrent').filePath`
      */
-    saved: {}
+    saved: {},
+
+    /*
+     * Getters, for convenience
+     */
+    getPlayingTorrentSummary
   }
 }
 
@@ -263,4 +269,9 @@ function getDefaultSavedState () {
       ? path.join(config.CONFIG_PATH, 'Downloads')
       : remote.app.getPath('downloads')
   }
+}
+
+function getPlayingTorrentSummary () {
+  var infoHash = this.playing.infoHash
+  return this.saved.torrents.find((x) => x.infoHash === infoHash)
 }
