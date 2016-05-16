@@ -43,7 +43,7 @@ function init () {
     app.setPath('userData', config.CONFIG_PATH)
   }
 
-  app.isReady = false // app ready, windows can be created
+  var isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
   app.isQuitting = false
 
@@ -58,7 +58,7 @@ function init () {
   })
 
   app.on('ready', function () {
-    app.isReady = true
+    isReady = true
 
     windows.createMainWindow()
     windows.createWebTorrentHiddenWindow()
@@ -86,7 +86,7 @@ function init () {
   })
 
   app.on('activate', function () {
-    if (app.isReady) windows.createMainWindow()
+    if (isReady) windows.createMainWindow()
   })
 }
 

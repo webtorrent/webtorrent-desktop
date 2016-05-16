@@ -423,6 +423,8 @@ function openSubtitles () {
     properties: [ 'openFile' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
+    // autoselect the newly added subtitle tracks
+    state.playing.subtitles.selectedIndex = -1
     addSubtitle({path: filenames[0]}, true)
   })
 }
@@ -543,6 +545,8 @@ function onOpen (files) {
   // In the player, the only drag-drop function is adding subtitles
   var isInPlayer = state.location.current().url === 'player'
   if (isInPlayer) {
+    // always autoselect one of the newly added subtitle tracks
+    state.playing.subtitles.selectedIndex = -1
     return files.filter(isSubtitle).forEach((file) => addSubtitle(file, true))
   }
 
