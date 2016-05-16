@@ -117,6 +117,30 @@ table {
   float: right;
 }
 
+.expand-collapse {
+  cursor: pointer;
+}
+
+.expand-collapse.expanded::before {
+  content: '▲'
+}
+
+.expand-collapse.collapsed::before {
+  content: '▼'
+}
+
+.expand-collapse::before {
+  margin-right: 5px;
+}
+
+.expand-collapse.collapsed {
+  display: block;
+}
+
+.collapsed {
+  display: none;
+}
+
 /*
  * HEADER
  */
@@ -252,7 +276,6 @@ table {
 }
 
 .modal label {
-  font-size: 16px;
   font-weight: bold;
 }
 
@@ -260,23 +283,54 @@ table {
   width: 100%;
 }
 
-.create-torrent-modal .torrent-attribute {
+.create-torrent-page {
+  padding: 10px 25px;
+  overflow: hidden;
+}
+
+.create-torrent-page .torrent-attribute {
   white-space: nowrap;
 }
 
-.create-torrent-modal .torrent-attribute>* {
+.create-torrent-page .torrent-attribute>* {
   display: inline-block;
 }
 
-.create-torrent-modal .torrent-attribute label {
+.create-torrent-page .torrent-attribute label {
   width: 60px;
   margin-right: 10px;
   vertical-align: top;
 }
 
-.create-torrent-modal .torrent-attribute div {
-  font-family: Consolas, monospace;
+.create-torrent-page .torrent-attribute>div {
+  width: calc(100% - 90px);
+}
+
+.create-torrent-page .torrent-attribute div {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.create-torrent-page .torrent-attribute textarea {
+  width: calc(100% - 80px);
+  height: 80px;
+  color: #eee;
+  background-color: transparent;
+  line-height: 1.5;
+  font-size: 14px;
+  font-family: inherit;
+  border-radius: 2px;
+  padding: 4px 6px;
+}
+
+.create-torrent-page textarea.torrent-trackers {
+  height: 200px;
+}
+
+.create-torrent-page input.torrent-is-private {
+  width: initial;
+  margin: 0;
 }
 
 /*
@@ -320,6 +374,10 @@ button { /* Rectangular text buttons */
 button.button-flat {
   color: #222;
   padding: 7px 18px;
+}
+
+button.button-flat.light {
+  color: #eee;
 }
 
 button.button-flat:hover,
@@ -375,7 +433,7 @@ input {
 
 .torrent,
 .torrent-placeholder {
-  height: 120px;
+  height: 100px;
 }
 
 .torrent:not(:last-child) {
@@ -388,9 +446,9 @@ input {
 
 .torrent .metadata {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
+  top: 25px;
+  left: 15px;
+  right: 15px;
   width: calc(100% - 40px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
@@ -400,12 +458,15 @@ input {
 }
 
 .torrent .metadata span:not(:last-child)::after {
-  content: ' — ';
+  content: ' • ';
+  opacity: 0.7;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .torrent .buttons {
   position: absolute;
-  top: 25px;
+  top: 29px;
   right: 10px;
   align-items: center;
   display: none;
@@ -488,14 +549,8 @@ input {
 }
 
 .torrent .name {
-  font-size: 1.5em;
+  font-size: 18px;
   font-weight: bold;
-  line-height: 1.5em;
-}
-
-.torrent .status,
-.torrent .status2 {
-  font-size: 1em;
   line-height: 1.5em;
 }
 
@@ -545,10 +600,6 @@ body.drag .app::after {
   padding: 8em 20px 20px 20px;
 }
 
-.torrent-details .open-folder {
-  float: right;
-}
-
 .torrent-details table {
   width: 100%;
   white-space: nowrap;
@@ -560,8 +611,7 @@ body.drag .app::after {
   height: 28px;
 }
 
-.torrent-details tr:hover,
-.torrent-details .open-folder:hover {
+.torrent-details tr:hover {
   background-color: rgba(200, 200, 200, 0.3);
 }
 
@@ -708,9 +758,15 @@ body.drag .app::after {
 .player-controls .volume-icon,
 .player-controls .back {
   display: block;
-  width: 20px;
   height: 20px;
   margin: 5px;
+
+  /*
+   * Fix for overflowing captions icon
+   * https://github.com/feross/webtorrent-desktop/issues/467
+   */
+  max-width: 22px;
+  overflow: hidden;
 }
 
 .player-controls .volume,
@@ -756,6 +812,7 @@ body.drag .app::after {
   border: none;
   padding: 0;
   vertical-align: sub;
+  -webkit-app-region: no-drag;
 }
 
 .player-controls .volume-slider::-webkit-slider-thumb {
@@ -766,6 +823,7 @@ body.drag .app::after {
   height: 10px;
   border: 1px solid #303233;
   border-radius: 50%;
+  -webkit-app-region: no-drag;
 }
 
 .player-controls .volume-slider:focus {
@@ -934,4 +992,8 @@ body.drag .app::after {
 
 .error-popover .error:last-child {
   border-bottom: none;
+}
+
+.error-text {
+  color: #c44;
 }

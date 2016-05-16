@@ -1,14 +1,24 @@
 console.time('init')
 
+var crashReporter = require('../crash-reporter')
+crashReporter.init()
+
+var electron = require('electron')
+
+// Electron apps have two processes: a main process (node) runs first and starts
+// a renderer process (essentially a Chrome window). We're in the renderer process,
+// and this IPC channel receives from and sends messages to the main process
+var ipcRenderer = electron.ipcRenderer
+
+// Listen for messages from the main process
+setupIpc()
+
 var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
-var electron = require('electron')
 var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var path = require('path')
-var srtToVtt = require('srt-to-vtt')
-var LanguageDetect = require('languagedetect')
 
 var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
@@ -16,7 +26,6 @@ var patch = require('virtual-dom/patch')
 
 var App = require('./views/app')
 var config = require('../config')
-var crashReporter = require('../crash-reporter')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./state')
@@ -26,18 +35,7 @@ var TorrentSummary = require('./lib/torrent-summary')
 var {setDispatch} = require('./lib/dispatcher')
 setDispatch(dispatch)
 
-appConfig.filePath = config.CONFIG_PATH + path.sep + 'config.json'
-
-// Electron apps have two processes: a main process (node) runs first and starts
-// a renderer process (essentially a Chrome window). We're in the renderer process,
-// and this IPC channel receives from and sends messages to the main process
-var ipcRenderer = electron.ipcRenderer
-var clipboard = electron.clipboard
-
-var dialog = electron.remote.dialog
-var Menu = electron.remote.Menu
-var MenuItem = electron.remote.MenuItem
-var remote = electron.remote
+appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
@@ -45,11 +43,10 @@ var Cast = null
 // For easy debugging in Developer Tools
 var state = global.state = State.getInitialState()
 
-var vdomLoop
+// Push the first page into the location history
+state.location.go({ url: 'home' })
 
-// Report crashes back to our server.
-// Not global JS exceptions, not like Rollbar, handles segfaults/core dumps only
-crashReporter.init()
+var vdomLoop
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
@@ -64,14 +61,11 @@ function init () {
   // Clean up the freshly-loaded config file, which may be from an older version
   cleanUpConfig()
 
-  // Push the first page into the location history
-  state.location.go({ url: 'home' })
-
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
-  window.setTimeout(delayedInit, 5000)
+  window.setTimeout(delayedInit, config.DELAYED_INIT)
 
   // The UI is built with virtual-dom, a minimalist library extracted from React
   // The concepts--one way data flow, a pure function that renders state to a
@@ -96,15 +90,9 @@ function init () {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
-  // ...keyboard shortcuts
-  document.addEventListener('keydown', onKeyDown)
-
   // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
-
-  // Listen for messages from the main process
-  setupIpc()
 
   // Done! Ideally we want to get here <100ms after the user clicks the app
   sound.play('STARTUP')
@@ -126,10 +114,19 @@ function cleanUpConfig () {
     // Migration: replace torrentPath with torrentFileName
     var src, dst
     if (ts.torrentPath) {
+      // There are a number of cases to handle here:
+      // * Originally we used absolute paths
+      // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
+      // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
+      // * Finally, now we're getting rid of torrentPath altogether
       console.log('migration: replacing torrentPath %s', ts.torrentPath)
-      src = path.isAbsolute(ts.torrentPath)
-        ? ts.torrentPath
-        : path.join(config.STATIC_PATH, ts.torrentPath)
+      if (path.isAbsolute(ts.torrentPath)) {
+        src = ts.torrentPath
+      } else if (ts.torrentPath.startsWith('..')) {
+        src = ts.torrentPath
+      } else {
+        src = path.join(config.STATIC_PATH, ts.torrentPath)
+      }
       dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
@@ -211,20 +208,17 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
-  if (action === 'showCreateTorrent') {
-    ipcRenderer.send('showCreateTorrent') /* open file or folder to seed */
-  }
   if (action === 'showOpenTorrentFile') {
     ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
+  }
+  if (action === 'showCreateTorrent') {
+    showCreateTorrent(args[0] /* fileOrFolder */)
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
   }
   if (action === 'openFile') {
     openFile(args[0] /* infoHash */, args[1] /* index */)
-  }
-  if (action === 'openFolder') {
-    openFolder(args[0] /* infoHash */)
   }
   if (action === 'toggleTorrent') {
     toggleTorrent(args[0] /* infoHash */)
@@ -248,6 +242,8 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'backToList') {
+    // Exit any modals and screens with a back button
+    state.modal = null
     while (state.location.hasBack()) state.location.back()
 
     // Work around virtual-dom issue: it doesn't expose its redraw function,
@@ -256,6 +252,15 @@ function dispatch (action, ...args) {
     // the video, we update the vdom but it keeps playing until you reopen!
     var mediaTag = document.querySelector('video,audio')
     if (mediaTag) mediaTag.pause()
+  }
+  if (action === 'escapeBack') {
+    if (state.modal) {
+      dispatch('exitModal')
+    } else if (state.window.isFullScreen) {
+      dispatch('toggleFullScreen')
+    } else {
+      dispatch('back')
+    }
   }
   if (action === 'back') {
     state.location.back()
@@ -305,19 +310,36 @@ function dispatch (action, ...args) {
     state.playing.isStalled = true
   }
   if (action === 'mediaError') {
-    state.location.back(function () {
-      onError(new Error('Unsupported file format'))
-    })
+    if (state.location.current().url === 'player') {
+      state.playing.location = 'error'
+      ipcRenderer.send('checkForVLC')
+      ipcRenderer.once('checkForVLC', function (e, isInstalled) {
+        state.modal = {
+          id: 'unsupported-media-modal',
+          error: args[0],
+          vlcInstalled: isInstalled
+        }
+      })
+    }
   }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
     state.playing.isStalled = false
   }
-  if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
-  }
   if (action === 'mediaMouseMoved') {
     state.playing.mouseStationarySince = new Date().getTime()
+  }
+  if (action === 'vlcPlay') {
+    ipcRenderer.send('vlcPlay', state.server.localURL)
+    state.playing.location = 'vlc'
+  }
+  if (action === 'vlcNotFound') {
+    if (state.modal && state.modal.id === 'unsupported-media-modal') {
+      state.modal.vlcNotFound = true
+    }
+  }
+  if (action === 'toggleFullScreen') {
+    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
   }
   if (action === 'exitModal') {
     state.modal = null
@@ -368,6 +390,7 @@ function pause () {
 }
 
 function playPause () {
+  if (state.location.current().url !== 'player') return
   if (state.playing.isPaused) {
     play()
   } else {
@@ -420,7 +443,7 @@ function setVolume (volume) {
 }
 
 function openSubtitles () {
-  dialog.showOpenDialog({
+  electron.remote.dialog.showOpenDialog({
     title: 'Select a subtitles file.',
     filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
     properties: [ 'openFile' ]
@@ -454,6 +477,10 @@ function setupIpc () {
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
     state.window.isFullScreen = isFullScreen
+    if (!isFullScreen) {
+      // Aspect ratio gets reset in fullscreen mode, so restore it (OS X)
+      ipcRenderer.send('setAspectRatio', state.playing.aspectRatio)
+    }
     update()
   })
 
@@ -539,16 +566,22 @@ function saveState () {
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // .torrent file = start downloading the torrent
-  files.filter(isTorrent).forEach(addTorrent)
+  // In the player, the only drag-drop function is adding subtitles
+  var isInPlayer = state.location.current().url === 'player'
+  if (isInPlayer) {
+    return files.filter(isSubtitle).forEach(addSubtitle)
+  }
 
-  // subtitle file
-  files.filter(isSubtitle).forEach(addSubtitle)
-
-  // everything else = seed these files
-  var rest = files.filter(not(isTorrent)).filter(not(isSubtitle))
-  if (rest.length > 0) {
-    createTorrentFromFileObjects(rest)
+  // Otherwise, you can only drag-drop onto the home screen
+  var isHome = state.location.current().url === 'home' && !state.modal
+  if (isHome) {
+    if (files.every(isTorrent)) {
+      // All .torrent files? Start downloading
+      files.forEach(addTorrent)
+    } else {
+      // Show the Create Torrent screen. Let's seed those files.
+      showCreateTorrent(files)
+    }
   }
 }
 
@@ -563,12 +596,6 @@ function isSubtitle (file) {
   var name = typeof file === 'string' ? file : file.name
   var ext = path.extname(name).toLowerCase()
   return ext === '.srt' || ext === '.vtt'
-}
-
-function not (test) {
-  return function (...args) {
-    return !test(...args)
-  }
 }
 
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
@@ -592,6 +619,9 @@ function addTorrent (torrentId) {
 }
 
 function addSubtitle (file) {
+  var srtToVtt = require('srt-to-vtt')
+  var LanguageDetect = require('languagedetect')
+
   if (state.playing.type !== 'video') return
   fs.createReadStream(file.path || file).pipe(srtToVtt()).pipe(concat(function (buf) {
     // Set the cue text position so it appears above the player controls.
@@ -609,9 +639,10 @@ function addSubtitle (file) {
     state.playing.subtitles.tracks.forEach(function (trackItem) {
       trackItem.selected = false
       if (trackItem.label === track.label) {
-        track.label = Number.isNaN(track.label.slice(-1))
-          ? track.label + ' 2'
-          : track.label.slice(0, -1) + (parseInt(track.label.slice(-1)) + 1)
+        var labelParts = /([^\d]+)(\d+)$/.exec(track.label)
+        track.label = labelParts
+          ? labelParts[1] + (parseInt(labelParts[2]) + 1)
+          : track.label + ' 2'
       }
     })
     state.playing.subtitles.change = track.label
@@ -650,65 +681,62 @@ function startTorrentingSummary (torrentSummary) {
     torrentID = s.magnetURI || s.infoHash
   }
 
+  console.log('start torrenting %s %s', s.torrentKey, torrentID)
   ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
 }
-
-// TODO: maybe have a "create torrent" modal in the future, with options like
-// custom trackers, private flag, and so on?
-//
-// Right now create-torrent-modal is v basic, only user input is OK / Cancel
-//
-// Also, if you uncomment below below, creating a torrent thru
-// File > Create New Torrent will still create a new torrent directly, while
-// dragging files or folders onto the app opens the create-torrent-modal
-//
-// That's because the former gets a single string and the latter gets a list
-// of W3C File objects. We should fix this inconsistency, ideally without
-// duping this code in the drag-drop module:
-// https://github.com/feross/drag-drop/blob/master/index.js
-//
-// function showCreateTorrentModal (files) {
-//   if (files.length === 0) return
-//   state.modal = {
-//     id: 'create-torrent-modal',
-//     files: files
-//   }
-// }
 
 //
 // TORRENT MANAGEMENT
 // Send commands to the WebTorrent process, handle events
 //
 
-// Creates a new torrent from a drag-dropped file or folder
-function createTorrentFromFileObjects (files) {
-  var filePaths = files.map((x) => x.path)
-
-  // Single-file torrents are easy. Multi-file torrents require special handling
-  // make sure WebTorrent seeds all files in place, without copying to /tmp
-  if (filePaths.length === 1) {
-    return createTorrent({files: filePaths[0]})
+// Shows the Create Torrent page with options to seed a given file or folder
+function showCreateTorrent (files) {
+  if (Array.isArray(files)) {
+    if (state.location.pending() || state.location.current().url !== 'home') return
+    state.location.go({
+      url: 'create-torrent',
+      files: files
+    })
+    return
   }
 
-  // First, extract the base folder that the files are all in
-  var pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
-  if (files.length > 0 && !pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
-    pathPrefix = path.dirname(pathPrefix)
-  }
+  var fileOrFolder = files
+  findFilesRecursive(fileOrFolder, showCreateTorrent)
+}
 
-  // Then, use the name of the base folder (or sole file, for a single file torrent)
-  // as the default name. Show all files relative to the base folder.
-  var defaultName = path.basename(pathPrefix)
-  var basePath = path.dirname(pathPrefix)
-  var options = {
-    // TODO: we can't let the user choose their own name if we want WebTorrent
-    // to use the files in place rather than creating a new folder.
-    name: defaultName,
-    path: basePath,
-    files: filePaths
-  }
+// Recursively finds {name, path, size} for all files in a folder
+// Calls `cb` on success, calls `onError` on failure
+function findFilesRecursive (fileOrFolder, cb) {
+  fs.stat(fileOrFolder, function (err, stat) {
+    if (err) return onError(err)
 
-  createTorrent(options)
+    // Files: return name, path, and size
+    if (!stat.isDirectory()) {
+      var filePath = fileOrFolder
+      return cb([{
+        name: path.basename(filePath),
+        path: filePath,
+        size: stat.size
+      }])
+    }
+
+    // Folders: recurse, make a list of all the files
+    var folderPath = fileOrFolder
+    fs.readdir(folderPath, function (err, fileNames) {
+      if (err) return onError(err)
+      var numComplete = 0
+      var ret = []
+      fileNames.forEach(function (fileName) {
+        findFilesRecursive(path.join(folderPath, fileName), function (fileObjs) {
+          ret = ret.concat(fileObjs)
+          if (++numComplete === fileNames.length) {
+            cb(ret)
+          }
+        })
+      })
+    })
+  })
 }
 
 // Creates a new torrent and start seeeding
@@ -740,16 +768,16 @@ function torrentWarning (torrentKey, message) {
 }
 
 function torrentError (torrentKey, message) {
-  var torrentSummary = getTorrentSummary(torrentKey)
+  // TODO: WebTorrent needs semantic errors
+  if (message.startsWith('Cannot add duplicate torrent')) {
+    // Remove infohash from the message
+    message = 'Cannot add duplicate torrent'
+  }
+  onError(message)
 
-  // TODO: WebTorrent should have semantic errors
-  if (message.startsWith('There is already a swarm')) {
-    onError(new Error('Can\'t add duplicate torrent'))
-  } else if (!torrentSummary) {
-    onError(message)
-  } else {
-    console.log('error, stopping torrent %s (%s):\n\t%o',
-      torrentSummary.name, torrentSummary.infoHash, message)
+  var torrentSummary = getTorrentSummary(torrentKey)
+  if (torrentSummary) {
+    console.log('Pausing torrent %s due to error: %s', torrentSummary.infoHash, message)
     torrentSummary.status = 'paused'
     update()
   }
@@ -784,6 +812,7 @@ function torrentDone (torrentKey, torrentInfo) {
       state.dock.badge += 1
     }
     showDoneNotification(torrentSummary)
+    ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
   }
 
   update()
@@ -938,6 +967,9 @@ function closePlayer (cb) {
   if (isCasting()) {
     Cast.close()
   }
+  if (state.playing.location === 'vlc') {
+    ipcRenderer.send('vlcQuit')
+  }
   state.window.title = config.APP_WINDOW_TITLE
   state.playing = State.getDefaultPlayState()
   state.server = null
@@ -961,17 +993,6 @@ function openFile (infoHash, index) {
     torrentSummary.path,
     torrentSummary.files[index].path)
   ipcRenderer.send('openItem', filePath)
-}
-
-function openFolder (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
-
-  var firstFilePath = path.join(
-    torrentSummary.path,
-    torrentSummary.files[0].path)
-  var folderPath = path.dirname(firstFilePath)
-
-  ipcRenderer.send('openItem', folderPath)
 }
 
 // TODO: use torrentKey, not infoHash
@@ -1007,23 +1028,46 @@ function toggleSelectTorrent (infoHash) {
 
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
-  var menu = new Menu()
-  menu.append(new MenuItem({
+  var menu = new electron.remote.Menu()
+
+  if (torrentSummary.files) {
+    menu.append(new electron.remote.MenuItem({
+      label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
+      click: () => showItemInFolder(torrentSummary)
+    }))
+    menu.append(new electron.remote.MenuItem({
+      type: 'separator'
+    }))
+  }
+
+  menu.append(new electron.remote.MenuItem({
+    label: 'Copy Magnet Link to Clipboard',
+    click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
+  }))
+
+  menu.append(new electron.remote.MenuItem({
+    label: 'Copy Instant.io Link to Clipboard',
+    click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
+  }))
+
+  menu.append(new electron.remote.MenuItem({
     label: 'Save Torrent File As...',
     click: () => saveTorrentFileAs(torrentSummary)
   }))
 
-  menu.append(new MenuItem({
-    label: 'Copy Instant.io Link to Clipboard',
-    click: () => clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
-  }))
+  menu.popup(electron.remote.getCurrentWindow())
+}
 
-  menu.append(new MenuItem({
-    label: 'Copy Magnet Link to Clipboard',
-    click: () => clipboard.writeText(torrentSummary.magnetURI)
-  }))
+function getTorrentPath (torrentSummary) {
+  var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
+  if (torrentSummary.files.length > 1) {
+    itemPath = path.dirname(itemPath)
+  }
+  return itemPath
+}
 
-  menu.popup(remote.getCurrentWindow())
+function showItemInFolder (torrentSummary) {
+  ipcRenderer.send('showItemInFolder', getTorrentPath(torrentSummary))
 }
 
 function saveTorrentFileAs (torrentSummary) {
@@ -1036,7 +1080,7 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  dialog.showSaveDialog(remote.getCurrentWindow(), opts, function (savePath) {
+  electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return onError(err)
@@ -1050,7 +1094,7 @@ function saveTorrentFileAs (torrentSummary) {
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
-  if (remote.getCurrentWindow().isMaximized()) {
+  if (electron.remote.getCurrentWindow().isMaximized()) {
     state.window.bounds = null
     return
   }
@@ -1062,7 +1106,7 @@ function setDimensions (dimensions) {
     width: window.outerWidth,
     height: window.outerHeight
   }
-  state.window.wasMaximized = remote.getCurrentWindow().isMaximized
+  state.window.wasMaximized = electron.remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   var screenWidth = window.screen.width
@@ -1081,12 +1125,9 @@ function setDimensions (dimensions) {
     config.WINDOW_MIN_HEIGHT
   )
 
-  // Center window on screen
-  var x = Math.floor((screenWidth - width) / 2)
-  var y = Math.floor((screenHeight - height) / 2)
-
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {x, y, width, height})
+  ipcRenderer.send('setBounds', {x: null, y: null, width, height})
+  state.playing.aspectRatio = aspectRatio
 }
 
 function restoreBounds () {
@@ -1107,16 +1148,6 @@ function showDoneNotification (torrent) {
   }
 
   sound.play('DONE')
-}
-
-// Finds the longest common prefix
-function findCommonPrefix (a, b) {
-  for (var i = 0; i < a.length && i < b.length; i++) {
-    if (a.charCodeAt(i) !== b.charCodeAt(i)) break
-  }
-  if (i === a.length) return a
-  if (i === b.length) return b
-  return a.substring(0, i)
 }
 
 // Hide player controls while playing video, if the mouse stays still for a while
@@ -1156,34 +1187,12 @@ function onWarning (err) {
 function onPaste (e) {
   if (e.target.tagName.toLowerCase() === 'input') return
 
-  var torrentIds = clipboard.readText().split('\n')
+  var torrentIds = electron.clipboard.readText().split('\n')
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
     dispatch('addTorrent', torrentId)
   })
-}
-
-function onKeyDown (e) {
-  if (e.which === 27) { /* ESC means either exit fullscreen or go back */
-    if (state.modal) {
-      dispatch('exitModal')
-    } else if (state.window.isFullScreen) {
-      dispatch('toggleFullScreen')
-    } else {
-      dispatch('back')
-    }
-  } else if (e.which === 32) { /* spacebar pauses or plays the video */
-    dispatch('playPause')
-  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 39) { /* ALT + right arrow */
-    dispatch('skip', 1)
-  } else if ((e.ctrlKey || e.metaKey) && e.altKey && e.which === 37) { /* ALT + left arrow */
-    dispatch('skip', -1)
-  } else if ((e.ctrlKey || e.metaKey) && (e.which === 107 || (e.which === 187 && e.shiftKey))) { /* CMD || CTRL + "+" */
-    dispatch('setPlaybackRate', 1)
-  } else if ((e.ctrlKey || e.metaKey) && (e.which === 109 || e.which === 189)) { /* CMD || CTRL + "-" */
-    dispatch('setPlaybackRate', -1)
-  }
 }
 
 function onFocus (e) {

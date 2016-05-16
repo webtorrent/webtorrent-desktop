@@ -9,6 +9,8 @@ var windows = module.exports = {
 
 var electron = require('electron')
 
+var app = electron.app
+
 var config = require('../config')
 var menu = require('./menu')
 var tray = require('./tray')
@@ -68,7 +70,7 @@ function createWebTorrentHiddenWindow () {
 
   // Prevent killing the WebTorrent process
   win.on('close', function (e) {
-    if (!electron.app.isQuitting) {
+    if (!app.isQuitting) {
       e.preventDefault()
       win.hide()
     }
@@ -78,6 +80,9 @@ function createWebTorrentHiddenWindow () {
     windows.webtorrent = null
   })
 }
+
+var HEADER_HEIGHT = 37
+var TORRENT_HEIGHT = 100
 
 function createMainWindow () {
   if (windows.main) {
@@ -89,14 +94,17 @@ function createMainWindow () {
     icon: config.APP_ICON + 'Smaller.png', // Window and Volume Mixer icon.
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
-    show: false, // Hide window until DOM finishes loading
+    show: false, // Hide window until renderer sends 'ipcReady' event
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide OS chrome, except traffic light buttons (OS X)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
-    height: 38 + (120 * 5) // header height + 4 torrents
+    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
   })
   win.loadURL(config.WINDOW_MAIN)
+  if (process.platform === 'darwin') {
+    win.setSheetOffset(HEADER_HEIGHT)
+  }
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen()
@@ -110,8 +118,8 @@ function createMainWindow () {
 
   win.on('close', function (e) {
     if (process.platform !== 'darwin' && !tray.hasTray()) {
-      electron.app.quit()
-    } else if (!electron.app.isQuitting) {
+      app.quit()
+    } else if (!app.isQuitting) {
       e.preventDefault()
       win.hide()
       win.send('dispatch', 'backToList')

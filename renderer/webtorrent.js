@@ -28,7 +28,14 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = window.client = new WebTorrent()
+var client = window.client = new WebTorrent({
+  tracker: {
+    // HACK: OS X: Disable WebRTC peers to fix 100% CPU issue caused by Chrome bug.
+    // Fixed in Chrome 51, so we can remove this hack once Electron updates Chrome.
+    // Issue: https://github.com/feross/webtorrent-desktop/issues/353
+    wrtc: process.platform !== 'darwin'
+  }
+})
 
 // WebTorrent-to-HTTP streaming sever
 var server = window.server = null
@@ -68,35 +75,27 @@ function init () {
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
 function startTorrenting (torrentKey, torrentID, path, fileModtimes) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-  var torrent
-  try {
-    torrent = client.add(torrentID, {
-      path: path,
-      fileModtimes: fileModtimes
-    })
-  } catch (err) {
-    return ipc.send('wt-error', torrentKey, err.message)
-  }
-  // If we add a duplicate magnet URI or infohash, WebTorrent returns the
-  // existing torrent object! (If we add a duplicate torrent file, it creates a
-  // new torrent object and raises an error later.) Workaround:
-  if (torrent.key) {
-    return ipc.send('wt-error', torrentKey, 'Can\'t add duplicate torrent')
-  }
+
+  var torrent = client.add(torrentID, {
+    path: path,
+    fileModtimes: fileModtimes
+  })
   torrent.key = torrentKey
   addTorrentEvents(torrent)
+
   return torrent
 }
 
 function stopTorrenting (infoHash) {
   var torrent = client.get(infoHash)
-  torrent.destroy()
+  if (torrent) torrent.destroy()
 }
 
 // Create a new torrent, start seeding
 function createTorrent (torrentKey, options) {
-  console.log('creating torrent %s', torrentKey, options)
-  var torrent = client.seed(options.files, options)
+  console.log('creating torrent', torrentKey, options)
+  var paths = options.files.map((f) => f.path)
+  var torrent = client.seed(paths, options)
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   ipc.send('wt-new-torrent')

@@ -11,5 +11,4 @@ function init () {
     productName: config.APP_NAME,
     submitURL: config.CRASH_REPORT_URL
   })
-  console.log('crash reporter started')
 }

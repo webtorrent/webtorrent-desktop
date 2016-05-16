@@ -1,6 +1,6 @@
 var appConfig = require('application-config')('WebTorrent')
+var fs = require('fs')
 var path = require('path')
-var pathExists = require('path-exists')
 
 var APP_NAME = 'WebTorrent'
 var APP_TEAM = 'The WebTorrent Project'
@@ -17,7 +17,6 @@ module.exports = {
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
 
-  AUTO_UPDATE_CHECK_STARTUP_DELAY: 5 * 1000 /* 5 seconds */,
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update' +
     '?version=' + APP_VERSION + '&platform=' + process.platform,
 
@@ -27,8 +26,13 @@ module.exports = {
   CONFIG_POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   CONFIG_TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
 
+  DELAYED_INIT: 3000 /* 3 seconds */,
+
   GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
+  GITHUB_URL_ISSUES: 'https://github.com/feross/webtorrent-desktop/issues',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/feross/webtorrent-desktop/master',
+
+  HOME_PAGE_URL: 'https://webtorrent.io',
 
   IS_PORTABLE: isPortable(),
   IS_PRODUCTION: isProduction(),
@@ -53,7 +57,11 @@ function getConfigPath () {
 }
 
 function isPortable () {
-  return process.platform === 'win32' && isProduction() && pathExists(PORTABLE_PATH)
+  try {
+    return process.platform === 'win32' && isProduction() && !!fs.statSync(PORTABLE_PATH)
+  } catch (err) {
+    return false
+  }
 }
 
 function isProduction () {
@@ -61,7 +69,7 @@ function isProduction () {
     return false
   }
   if (process.platform === 'darwin') {
-    return !/\/Electron\.app\/Contents\/MacOS\/Electron$/.test(process.execPath)
+    return !/\/Electron\.app\//.test(process.execPath)
   }
   if (process.platform === 'win32') {
     return !/\\electron\.exe$/.test(process.execPath)

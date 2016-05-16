@@ -8,8 +8,6 @@ var path = require('path')
 var electron = require('electron')
 
 var app = electron.app
-var Menu = electron.Menu
-var Tray = electron.Tray
 
 var windows = require('./windows')
 
@@ -35,7 +33,7 @@ function hasTray () {
 }
 
 function createTrayIcon () {
-  trayIcon = new Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
+  trayIcon = new electron.Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
 
   // On Windows, left click to open the app, right click for context menu
   // On Linux, any click (right or left) opens the context menu
@@ -66,7 +64,7 @@ function updateTrayMenu () {
   } else {
     showHideMenuItem = { label: 'Show', click: showApp }
   }
-  var contextMenu = Menu.buildFromTemplate([
+  var contextMenu = electron.Menu.buildFromTemplate([
     showHideMenuItem,
     { label: 'Quit', click: () => app.quit() }
   ])

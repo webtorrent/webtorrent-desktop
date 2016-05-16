@@ -6,4 +6,4 @@ npm run package -- --sign
 git push
 git push --tags
 npm publish
-gh-release
+./node_modules/.bin/gh-release

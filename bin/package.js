@@ -9,6 +9,7 @@ var electronPackager = require('electron-packager')
 var fs = require('fs')
 var minimist = require('minimist')
 var mkdirp = require('mkdirp')
+var os = require('os')
 var path = require('path')
 var rimraf = require('rimraf')
 var series = require('run-series')
@@ -18,16 +19,6 @@ var config = require('../config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
-
-/*
- * Path to folder with the following files:
- *   - Windows Authenticode private key and cert (authenticode.p12)
- *   - Windows Authenticode password file (authenticode.txt)
- */
-var CERT_PATH = process.platform === 'win32'
-  ? 'D:'
-  : '/Volumes/Certs'
-
 var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
 
 var argv = minimist(process.argv.slice(2), {
@@ -64,9 +55,6 @@ function build () {
 }
 
 var all = {
-  // Build 64 bit binaries only.
-  arch: 'x64',
-
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on OS X.
   'app-copyright': config.APP_COPYRIGHT,
@@ -85,9 +73,9 @@ var all = {
   'asar-unpack': 'WebTorrent*',
 
   // The build version of the application. Maps to the FileVersion metadata property on
-  // Windows, and CFBundleVersion on OS X. We're using the short git hash (e.g. 'e7d837e')
-  // Windows requires the build version to start with a number :/ so we stick on a prefix
-  'build-version': '0-' + cp.execSync('git rev-parse --short HEAD').toString().replace('\n', ''),
+  // Windows, and CFBundleVersion on OS X. Note: Windows requires the build version to
+  // start with a number. We're using the version of the underlying WebTorrent library.
+  'build-version': require('webtorrent/package.json').version,
 
   // The application source directory.
   dir: config.ROOT_PATH,
@@ -110,11 +98,15 @@ var all = {
   prune: true,
 
   // The Electron version with which the app is built (without the leading 'v')
-  version: pkg.dependencies['electron-prebuilt']
+  version: require('electron-prebuilt/package.json').version
 }
 
 var darwin = {
+  // Build for OS X
   platform: 'darwin',
+
+  // Build 64 bit binaries only.
+  arch: 'x64',
 
   // The bundle identifier to use in the application's plist (OS X only).
   'app-bundle-id': 'io.webtorrent.webtorrent',
@@ -131,7 +123,11 @@ var darwin = {
 }
 
 var win32 = {
+  // Build for Windows.
   platform: 'win32',
+
+  // Build 32 bit binaries only.
+  arch: 'ia32',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   'version-string': {
@@ -161,9 +157,10 @@ var win32 = {
 }
 
 var linux = {
+  // Build for Linux.
   platform: 'linux',
 
-  // Build 32/64 bit binaries.
+  // Build 32 and 64 bit binaries.
   arch: 'all'
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
@@ -177,7 +174,7 @@ function buildDarwin (cb) {
   console.log('OS X: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('OS X: Packaged electron. ' + buildPath[0])
+    console.log('OS X: Packaged electron. ' + buildPath)
 
     var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
     var contentsPath = path.join(appPath, 'Contents')
@@ -277,7 +274,7 @@ function buildDarwin (cb) {
 
       var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
       var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
-      zip(inPath, outPath)
+      zip.zipSync(inPath, outPath)
 
       console.log('OS X: Created zip.')
     }
@@ -327,11 +324,24 @@ function buildDarwin (cb) {
 
 function buildWin32 (cb) {
   var installer = require('electron-winstaller')
-
   console.log('Windows: Packaging electron...')
+
+  /*
+   * Path to folder with the following files:
+   *   - Windows Authenticode private key and cert (authenticode.p12)
+   *   - Windows Authenticode password file (authenticode.txt)
+   */
+  var CERT_PATH
+  try {
+    fs.accessSync('D:')
+    CERT_PATH = 'D:'
+  } catch (err) {
+    CERT_PATH = path.join(os.homedir(), 'Desktop')
+  }
+
   electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Windows: Packaged electron. ' + buildPath[0])
+    console.log('Windows: Packaged electron. ' + buildPath)
 
     var signWithParams
     if (process.platform === 'win32') {
@@ -358,6 +368,7 @@ function buildWin32 (cb) {
 
     function packageInstaller (cb) {
       console.log('Windows: Creating installer...')
+
       installer.createWindowsInstaller({
         appDirectory: buildPath[0],
         authors: config.APP_TEAM,
@@ -376,14 +387,15 @@ function buildWin32 (cb) {
         title: config.APP_NAME,
         usePackageJson: false,
         version: pkg.version
-      }).then(function () {
+      })
+      .then(function () {
         console.log('Windows: Created installer.')
         cb(null)
-      }).catch(cb)
+      })
+      .catch(cb)
     }
 
     function packagePortable (cb) {
-      // Create Windows portable app
       console.log('Windows: Creating portable app...')
 
       var portablePath = path.join(buildPath[0], 'Portable Settings')
@@ -391,7 +403,7 @@ function buildWin32 (cb) {
 
       var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
       var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
-      zip(inPath, outPath)
+      zip.zipSync(inPath, outPath)
 
       console.log('Windows: Created portable app.')
       cb(null)
@@ -403,7 +415,7 @@ function buildLinux (cb) {
   console.log('Linux: Packaging electron...')
   electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('Linux: Packaged electron. ' + buildPath[0])
+    console.log('Linux: Packaged electron. ' + buildPath)
 
     var tasks = []
     buildPath.forEach(function (filesPath) {
@@ -455,7 +467,7 @@ function buildLinux (cb) {
 
     var inPath = path.join(DIST_PATH, path.basename(filesPath))
     var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
-    zip(inPath, outPath)
+    zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)
     cb(null)

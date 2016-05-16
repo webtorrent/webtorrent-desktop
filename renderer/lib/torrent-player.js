@@ -15,13 +15,28 @@ function isPlayable (file) {
 }
 
 function isVideo (file) {
-  var ext = path.extname(file.name)
-  return ['.mp4', '.m4v', '.webm', '.mov', '.mkv'].indexOf(ext) !== -1
+  var ext = path.extname(file.name).toLowerCase()
+  return [
+    '.avi',
+    '.m4v',
+    '.mkv',
+    '.mov',
+    '.mp4',
+    '.mpg',
+    '.ogv',
+    '.webm'
+  ].includes(ext)
 }
 
 function isAudio (file) {
-  var ext = path.extname(file.name)
-  return ['.mp3', '.aac', '.ogg', '.wav'].indexOf(ext) !== -1
+  var ext = path.extname(file.name).toLowerCase()
+  return [
+    '.aac',
+    '.ac3',
+    '.mp3',
+    '.ogg',
+    '.wav'
+  ].includes(ext)
 }
 
 function isPlayableTorrent (torrentSummary) {

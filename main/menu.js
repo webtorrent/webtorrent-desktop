@@ -1,11 +1,14 @@
 module.exports = {
   init,
+  onPlayerClose,
+  onPlayerOpen,
   onToggleFullScreen,
   onWindowHide,
   onWindowShow,
-  onPlayerOpen,
-  onPlayerClose,
-  showCreateTorrent,
+
+  // TODO: move these out of menu.js -- they don't belong here
+  showOpenSeedFiles,
+  showOpenTorrentAddress,
   showOpenTorrentFile,
   toggleFullScreen
 }
@@ -18,20 +21,26 @@ var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
-var appMenu, dockMenu
+var appMenu
 
 function init () {
   appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
   electron.Menu.setApplicationMenu(appMenu)
 
-  dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
-  if (app.dock) app.dock.setMenu(dockMenu)
+  if (app.dock) {
+    var dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
+    app.dock.setMenu(dockMenu)
+  }
 }
 
 function toggleFullScreen (flag) {
   log('toggleFullScreen %s', flag)
   if (windows.main && windows.main.isVisible()) {
     flag = flag != null ? flag : !windows.main.isFullScreen()
+    if (flag) {
+      // Allows the window to use the full screen in fullscreen mode (OS X).
+      windows.main.setAspectRatio(0)
+    }
     windows.main.setFullScreen(flag)
   }
 }
@@ -43,6 +52,25 @@ function toggleFloatOnTop (flag) {
     flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
     windows.main.setAlwaysOnTop(flag)
     getMenuItem('Float on Top').checked = flag
+  }
+}
+
+function toggleDevTools () {
+  log('toggleDevTools')
+  if (windows.main) {
+    windows.main.toggleDevTools()
+  }
+}
+
+function showWebTorrentWindow () {
+  log('showWebTorrentWindow')
+  windows.webtorrent.show()
+  windows.webtorrent.webContents.openDevTools({ detach: true })
+}
+
+function playPause () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'playPause')
   }
 }
 
@@ -82,18 +110,6 @@ function decreasePlaybackRate () {
   }
 }
 
-function toggleDevTools () {
-  log('toggleDevTools')
-  if (windows.main) {
-    windows.main.toggleDevTools()
-  }
-}
-
-function showWebTorrentWindow () {
-  windows.webtorrent.show()
-  windows.webtorrent.webContents.openDevTools({ detach: true })
-}
-
 function onWindowShow () {
   log('onWindowShow')
   getMenuItem('Full Screen').enabled = true
@@ -107,6 +123,8 @@ function onWindowHide () {
 }
 
 function onPlayerOpen () {
+  log('onPlayerOpen')
+  getMenuItem('Play/Pause').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
   getMenuItem('Skip forward 10 seconds').enabled = true
@@ -116,6 +134,8 @@ function onPlayerOpen () {
 }
 
 function onPlayerClose () {
+  log('onPlayerClose')
+  getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
   getMenuItem('Skip forward 10 seconds').enabled = false
@@ -140,19 +160,29 @@ function getMenuItem (label) {
   }
 }
 
-// Prompts the user for a file or folder, then makes a torrent out of the data
-function showCreateTorrent () {
-  // Allow only a single selection
-  // To create a multi-file torrent, the user must select a folder
+// Prompts the user for a file, then creates a torrent. Only allows a single file
+// selection.
+function showOpenSeedFile () {
+  electron.dialog.showOpenDialog({
+    title: 'Select a file for the torrent file.',
+    properties: [ 'openFile' ]
+  }, function (selectedPaths) {
+    if (!Array.isArray(selectedPaths)) return
+    var selectedPath = selectedPaths[0]
+    windows.main.send('dispatch', 'showCreateTorrent', selectedPath)
+  })
+}
+
+// Prompts the user for a file or directory, then creates a torrent. Only allows a single
+// selection. To create a multi-file torrent, the user must select a directory.
+function showOpenSeedFiles () {
   electron.dialog.showOpenDialog({
     title: 'Select a file or folder for the torrent file.',
     properties: [ 'openFile', 'openDirectory' ]
-  }, function (filenames) {
-    if (!Array.isArray(filenames)) return
-    var options = {
-      files: filenames[0]
-    }
-    windows.main.send('dispatch', 'createTorrent', options)
+  }, function (selectedPaths) {
+    if (!Array.isArray(selectedPaths)) return
+    var selectedPath = selectedPaths[0]
+    windows.main.send('dispatch', 'showCreateTorrent', selectedPath)
   })
 }
 
@@ -162,10 +192,10 @@ function showOpenTorrentFile () {
     title: 'Select a .torrent file to open.',
     filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
-  }, function (filenames) {
-    if (!Array.isArray(filenames)) return
-    filenames.forEach(function (filename) {
-      windows.main.send('dispatch', 'addTorrent', filename)
+  }, function (selectedPaths) {
+    if (!Array.isArray(selectedPaths)) return
+    selectedPaths.forEach(function (selectedPath) {
+      windows.main.send('dispatch', 'addTorrent', selectedPath)
     })
   })
 }
@@ -176,44 +206,38 @@ function showOpenTorrentAddress () {
 }
 
 function getAppMenuTemplate () {
-  var fileMenu = [
-    {
-      label: 'Create New Torrent...',
-      accelerator: 'CmdOrCtrl+N',
-      click: showCreateTorrent
-    },
-    {
-      label: 'Open Torrent File...',
-      accelerator: 'CmdOrCtrl+O',
-      click: showOpenTorrentFile
-    },
-    {
-      label: 'Open Torrent Address...',
-      accelerator: 'CmdOrCtrl+U',
-      click: showOpenTorrentAddress
-    },
-    {
-      type: 'separator'
-    },
-    {
-      label: process.platform === 'windows' ? 'Close' : 'Close Window',
-      accelerator: 'CmdOrCtrl+W',
-      role: 'close'
-    }
-  ]
-
-  // File > Quit for Linux users with distros where the system tray is broken
-  if (process.platform === 'linux') {
-    fileMenu.push({
-      label: 'Quit',
-      click: () => app.quit()
-    })
-  }
-
   var template = [
     {
       label: 'File',
-      submenu: fileMenu
+      submenu: [
+        {
+          label: process.platform === 'darwin'
+            ? 'Create New Torrent...'
+            : 'Create New Torrent from Folder...',
+          accelerator: 'CmdOrCtrl+N',
+          click: showOpenSeedFiles
+        },
+        {
+          label: 'Open Torrent File...',
+          accelerator: 'CmdOrCtrl+O',
+          click: showOpenTorrentFile
+        },
+        {
+          label: 'Open Torrent Address...',
+          accelerator: 'CmdOrCtrl+U',
+          click: showOpenTorrentAddress
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: process.platform === 'win32'
+            ? 'Close'
+            : 'Close Window',
+          accelerator: 'CmdOrCtrl+W',
+          role: 'close'
+        }
+      ]
     },
     {
       label: 'Edit',
@@ -260,6 +284,39 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
+          label: 'Developer',
+          submenu: [
+            {
+              label: 'Developer Tools',
+              accelerator: process.platform === 'darwin'
+                ? 'Alt+Command+I'
+                : 'Ctrl+Shift+I',
+              click: toggleDevTools
+            },
+            {
+              label: 'Show WebTorrent Process',
+              accelerator: process.platform === 'darwin'
+                ? 'Alt+Command+P'
+                : 'Ctrl+Shift+P',
+              click: showWebTorrentWindow
+            }
+          ]
+        }
+      ]
+    },
+    {
+      label: 'Playback',
+      submenu: [
+        {
+          label: 'Play/Pause',
+          accelerator: 'CmdOrCtrl+P',
+          click: playPause,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Increase Volume',
           accelerator: 'CmdOrCtrl+Up',
           click: increaseVolume,
@@ -301,39 +358,6 @@ function getAppMenuTemplate () {
           click: decreasePlaybackRate,
           enabled: false
         },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Developer',
-          submenu: [
-            {
-              label: 'Developer Tools',
-              accelerator: process.platform === 'darwin'
-                ? 'Alt+Command+I'
-                : 'Ctrl+Shift+I',
-              click: toggleDevTools
-            },
-            {
-              label: 'Show WebTorrent Process',
-              accelerator: process.platform === 'darwin'
-                ? 'Alt+Command+P'
-                : 'Ctrl+Shift+P',
-              click: showWebTorrentWindow
-            }
-          ]
-        }
-      ]
-    },
-    {
-      label: 'Window',
-      role: 'window',
-      submenu: [
-        {
-          label: 'Minimize',
-          accelerator: 'CmdOrCtrl+M',
-          role: 'minimize'
-        }
       ]
     },
     {
@@ -342,7 +366,7 @@ function getAppMenuTemplate () {
       submenu: [
         {
           label: 'Learn more about ' + config.APP_NAME,
-          click: () => electron.shell.openExternal('https://webtorrent.io')
+          click: () => electron.shell.openExternal(config.HOME_PAGE_URL)
         },
         {
           label: 'Contribute on GitHub',
@@ -353,14 +377,14 @@ function getAppMenuTemplate () {
         },
         {
           label: 'Report an Issue...',
-          click: () => electron.shell.openExternal(config.GITHUB_URL + '/issues')
+          click: () => electron.shell.openExternal(config.GITHUB_URL_ISSUES)
         }
       ]
     }
   ]
 
   if (process.platform === 'darwin') {
-    // WebTorrent menu (OS X)
+    // Add WebTorrent app menu (OS X)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -404,17 +428,35 @@ function getAppMenuTemplate () {
       ]
     })
 
-    // Window menu (OS X)
-    template[4].submenu.push(
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Bring All to Front',
-        role: 'front'
-      }
-    )
-  } else {
+    // Add Window menu (OS X)
+    template.splice(5, 0, {
+      label: 'Window',
+      role: 'window',
+      submenu: [
+        {
+          label: 'Minimize',
+          accelerator: 'CmdOrCtrl+M',
+          role: 'minimize'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Bring All to Front',
+          role: 'front'
+        }
+      ]
+    })
+  }
+
+  // In Linux and Windows it is not possible to open both folders and files
+  if (process.platform === 'linux' || process.platform === 'win32') {
+    // File menu (Windows, Linux)
+    template[0].submenu.unshift({
+      label: 'Create New Torrent from File...',
+      click: showOpenSeedFile
+    })
+
     // Help menu (Windows, Linux)
     template[4].submenu.push(
       {
@@ -426,6 +468,15 @@ function getAppMenuTemplate () {
       }
     )
   }
+  // Add "File > Quit" menu item so Linux distros where the system tray icon is missing
+  // will have a way to quit the app.
+  if (process.platform === 'linux') {
+    // File menu (Linux)
+    template[0].submenu.push({
+      label: 'Quit',
+      click: () => app.quit()
+    })
+  }
 
   return template
 }
@@ -435,7 +486,7 @@ function getDockMenuTemplate () {
     {
       label: 'Create New Torrent...',
       accelerator: 'CmdOrCtrl+N',
-      click: showCreateTorrent
+      click: showOpenSeedFiles
     },
     {
       label: 'Open Torrent File...',

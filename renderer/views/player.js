@@ -18,11 +18,17 @@ function Player (state) {
   return hx`
     <div
       class='player'
+      onwheel=${handleVolumeWheel}
       onmousemove=${dispatcher('mediaMouseMoved')}>
       ${showVideo ? renderMedia(state) : renderCastScreen(state)}
       ${renderPlayerControls(state)}
       </div>
   `
+}
+
+// Handles volume change by wheel
+function handleVolumeWheel (e) {
+  dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
 }
 
 function renderMedia (state) {
@@ -92,7 +98,8 @@ function renderMedia (state) {
       onstalling=${dispatcher('mediaStalled')}
       onerror=${dispatcher('mediaError')}
       ontimeupdate=${dispatcher('mediaTimeUpdate')}
-      autoplay>
+      onencrypted=${dispatcher('mediaEncrypted')}
+      oncanplay=${onCanPlay}>
       ${trackTags}
     </div>
   `
@@ -122,6 +129,16 @@ function renderMedia (state) {
   // When the video completes, pause the video instead of looping
   function onEnded (e) {
     state.playing.isPaused = true
+  }
+
+  function onCanPlay (e) {
+    var video = e.target
+    if (video.webkitVideoDecodedByteCount > 0 &&
+      video.webkitAudioDecodedByteCount === 0) {
+      dispatch('mediaError', 'Audio codec unsupported')
+    } else {
+      video.play()
+    }
   }
 }
 
@@ -210,20 +227,33 @@ function renderLoadingSpinner (state) {
 }
 
 function renderCastScreen (state) {
-  var castIcon, castType
+  var castIcon, castType, isCast
   if (state.playing.location.startsWith('chromecast')) {
     castIcon = 'cast_connected'
     castType = 'Chromecast'
+    isCast = true
   } else if (state.playing.location.startsWith('airplay')) {
     castIcon = 'airplay'
     castType = 'AirPlay'
+    isCast = true
   } else if (state.playing.location.startsWith('dlna')) {
     castIcon = 'tv'
     castType = 'DLNA'
+    isCast = true
+  } else if (state.playing.location === 'vlc') {
+    castIcon = 'tv'
+    castType = 'VLC'
+    isCast = false
+  } else if (state.playing.location === 'error') {
+    castIcon = 'error_outline'
+    castType = 'Error'
+    isCast = false
   }
 
   var isStarting = state.playing.location.endsWith('-pending')
-  var castStatus = isStarting ? 'Connecting...' : 'Connected'
+  var castStatus
+  if (isCast) castStatus = isStarting ? 'Connecting...' : 'Connected'
+  else castStatus = ''
 
   // Show a nice title image, if possible
   var style = {
@@ -243,15 +273,26 @@ function renderCastScreen (state) {
 
 function renderSubtitlesOptions (state) {
   var subtitles = state.playing.subtitles
-  if (subtitles.tracks.length && subtitles.show) {
-    return hx`<ul.subtitles-list>
-      ${subtitles.tracks.map(function (w, i) {
-        return hx`<li onclick=${dispatcher('selectSubtitle', w.label)}><i.icon>${w.selected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>${w.label}</li>`
-      })}
-        <li onclick=${dispatcher('selectSubtitle', '')}><i.icon>${!subtitles.enabled ? 'radio_button_checked' : 'radio_button_unchecked'}</i>None</li>
-      </ul>
+  if (!subtitles.tracks.length || !subtitles.show) return
+
+  var items = subtitles.tracks.map(function (track) {
+    return hx`
+      <li onclick=${dispatcher('selectSubtitle', track.label)}>
+        <i.icon>${track.selected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        ${track.label}
+      </li>
     `
-  }
+  })
+
+  return hx`
+    <ul.subtitles-list>
+      ${items}
+      <li onclick=${dispatcher('selectSubtitle', '')}>
+        <i.icon>${!subtitles.enabled ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        None
+      </li>
+    </ul>
+  `
 }
 
 function renderPlayerControls (state) {
@@ -376,8 +417,7 @@ function renderPlayerControls (state) {
   }
 
   elements.push(hx`
-    <div.volume
-      onwheel=${handleVolumeWheel}>
+    <div.volume>
         <i.icon.volume-icon onmousedown=${handleVolumeMute}>
           ${volumeIcon}
         </i>
@@ -386,7 +426,6 @@ function renderPlayerControls (state) {
           onmousedown=${handleVolumeScrub}
           onmouseup=${handleVolumeScrub}
           onmousemove=${handleVolumeScrub}
-          onwheel=${handleVolumeWheel}
           style=${volumeStyle}
         />
     </div>
@@ -418,11 +457,6 @@ function renderPlayerControls (state) {
     var fraction = e.clientX / windowWidth
     var position = fraction * state.playing.duration /* seconds */
     dispatch('playbackJump', position)
-  }
-
-  // Handles volume change by wheel
-  function handleVolumeWheel (e) {
-    dispatch('changeVolume', (-e.deltaY | e.deltaX) / 500)
   }
 
   // Handles volume muting and Unmuting
