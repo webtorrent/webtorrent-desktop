@@ -637,7 +637,6 @@ function selectNewlyAddedSubtitle () {
   var newIx = state.playing.subtitles.tracks.length - 1
 
   // Find which subtitle track fits the current locale
-  var langIx
   var osLangISO = window.navigator.language.split('-')[0] // eg "en"
   var trackLang = state.playing.subtitles.tracks[newIx].language // eg "German"
   var trackLangISO = iso639.getCode(trackLang) // eg "de"
@@ -646,8 +645,6 @@ function selectNewlyAddedSubtitle () {
   } else {
     selectSubtitle(oldIx || newIx) // otherwise, if we've already selected a track, keep it
   }
-
-  console.log('SELECTING', langIx, oldIx, newIx)
 }
 
 // Make sure we don't have two subtitle tracks with the same label
