@@ -157,9 +157,7 @@ function getTorrentFileInfo (file) {
   return {
     name: file.name,
     length: file.length,
-    path: file.path,
-    numPiecesPresent: 0,
-    numPieces: null
+    path: file.path
   }
 }
 
