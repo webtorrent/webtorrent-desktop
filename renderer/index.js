@@ -43,6 +43,9 @@ var Cast = null
 // For easy debugging in Developer Tools
 var state = global.state = State.getInitialState()
 
+// Push the first page into the location history
+state.location.go({ url: 'home' })
+
 var vdomLoop
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
@@ -57,9 +60,6 @@ loadState(init)
 function init () {
   // Clean up the freshly-loaded config file, which may be from an older version
   cleanUpConfig()
-
-  // Push the first page into the location history
-  state.location.go({ url: 'home' })
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
