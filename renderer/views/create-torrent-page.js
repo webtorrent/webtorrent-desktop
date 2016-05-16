@@ -47,8 +47,8 @@ function CreateTorrentPage (state) {
     basePath = pathPrefix
   } else {
     // Multi file torrent: /a/b/{foo, bar}.jpg -> torrent name "b", path "/a"
-    defaultName = files[0].name
-    basePath = path.basename(pathPrefix)
+    defaultName = path.basename(pathPrefix)
+    basePath = path.dirname(pathPrefix)
   }
   var maxFileElems = 100
   var fileElems = files.slice(0, maxFileElems).map(function (file) {
