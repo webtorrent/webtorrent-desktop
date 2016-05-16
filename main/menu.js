@@ -357,7 +357,7 @@ function getAppMenuTemplate () {
           accelerator: 'CmdOrCtrl+-',
           click: decreasePlaybackRate,
           enabled: false
-        },
+        }
       ]
     },
     {
