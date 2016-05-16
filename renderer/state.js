@@ -75,8 +75,9 @@ function getDefaultPlayState () {
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0, /* Unix time in ms */
     subtitles: {
-      tracks: [], /* subtitles file (Buffer) */
-      enabled: false
+      tracks: [], /* subtitle tracks, each {label, language, ...} */
+      selectedIndex: -1, /* current subtitle track */
+      showMenu: false /* popover menu, above the video */
     },
     aspectRatio: 0 /* aspect ratio of the video */
   }

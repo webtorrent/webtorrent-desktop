@@ -54,14 +54,10 @@ function renderMedia (state) {
       state.playing.setVolume = null
     }
 
-    // fix textTrack cues not been removed <track> rerender
-    if (state.playing.subtitles.change) {
-      var tracks = mediaElement.textTracks
-      for (var j = 0; j < tracks.length; j++) {
-        // mode is not an <track> attribute, only available on DOM
-        tracks[j].mode = (tracks[j].label === state.playing.subtitles.change) ? 'showing' : 'hidden'
-      }
-      state.playing.subtitles.change = null
+    // Switch to the newly added subtitle track, if available
+    var tracks = mediaElement.textTracks
+    for (var j = 0; j < tracks.length; j++) {
+      tracks[j].mode = (j === state.playing.subtitles.selectedIndex) ? 'showing' : 'hidden'
     }
 
     state.playing.currentTime = mediaElement.currentTime
@@ -71,13 +67,13 @@ function renderMedia (state) {
 
   // Add subtitles to the <video> tag
   var trackTags = []
-
-  if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
+  if (state.playing.subtitles.selectedIndex >= 0) {
     for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
+      var isSelected = state.playing.subtitles.selectedIndex === i
       trackTags.push(hx`
         <track
-          ${track.selected ? 'default' : ''}
+          ${isSelected ? 'default' : ''}
           label=${track.label}
           type='subtitles'
           src=${track.buffer}>
@@ -270,22 +266,24 @@ function renderCastScreen (state) {
 
 function renderSubtitlesOptions (state) {
   var subtitles = state.playing.subtitles
-  if (!subtitles.tracks.length || !subtitles.show) return
+  if (!subtitles.tracks.length || !subtitles.showMenu) return
 
-  var items = subtitles.tracks.map(function (track) {
+  var items = subtitles.tracks.map(function (track, ix) {
+    var isSelected = state.playing.subtitles.selectedIndex === ix
     return hx`
-      <li onclick=${dispatcher('selectSubtitle', track.label)}>
-        <i.icon>${track.selected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+      <li onclick=${dispatcher('selectSubtitle', ix)}>
+        <i.icon>${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
         ${track.label}
       </li>
     `
   })
 
+  var noneSelected = state.playing.subtitles.selectedIndex === -1
   return hx`
     <ul.subtitles-list>
       ${items}
-      <li onclick=${dispatcher('selectSubtitle', '')}>
-        <i.icon>${!subtitles.enabled ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+      <li onclick=${dispatcher('selectSubtitle', -1)}>
+        <i.icon>${noneSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
         None
       </li>
     </ul>
@@ -297,7 +295,7 @@ function renderPlayerControls (state) {
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
   var captionsClass = state.playing.subtitles.tracks.length === 0
     ? 'disabled'
-    : state.playing.subtitles.enabled
+    : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
 
@@ -484,7 +482,7 @@ function renderPlayerControls (state) {
       // if no subtitles available select it
       dispatch('openSubtitles')
     } else {
-      dispatch('showSubtitles')
+      dispatch('toggleSubtitlesMenu')
     }
   }
 }

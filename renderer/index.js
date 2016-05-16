@@ -17,6 +17,7 @@ var appConfig = require('application-config')('WebTorrent')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
+var iso639 = require('iso-639-1')
 var mainLoop = require('main-loop')
 var path = require('path')
 
@@ -295,10 +296,10 @@ function dispatch (action, ...args) {
     openSubtitles()
   }
   if (action === 'selectSubtitle') {
-    selectSubtitle(args[0] /* label */)
+    selectSubtitle(args[0] /* index */)
   }
-  if (action === 'showSubtitles') {
-    showSubtitles()
+  if (action === 'toggleSubtitlesMenu') {
+    toggleSubtitlesMenu()
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
@@ -600,41 +601,60 @@ function addSubtitle (file) {
     // Set the cue text position so it appears above the player controls.
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
-    var langDetected = (new LanguageDetect()).detect(buf.toString().replace(/(.*-->.*)/g, ''), 2)
+    var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
+    var langDetected = (new LanguageDetect()).detect(vttContents, 2)
     langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
     langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
-      label: langDetected,
-      selected: true
+      language: langDetected,
+      label: langDetected
     }
-    state.playing.subtitles.tracks.forEach(function (trackItem) {
-      trackItem.selected = false
-      if (trackItem.label === track.label) {
-        var labelParts = /([^\d]+)(\d+)$/.exec(track.label)
-        track.label = labelParts
-          ? labelParts[1] + (parseInt(labelParts[2]) + 1)
-          : track.label + ' 2'
-      }
-    })
-    state.playing.subtitles.change = track.label
-    state.playing.subtitles.tracks.push(track)
-    state.playing.subtitles.enabled = true
+    var subs = state.playing.subtitles
+    subs.tracks.push(track)
+    selectNewlyAddedSubtitle()
+    relabelSubtitles()
   }))
 }
 
-function selectSubtitle (label) {
-  state.playing.subtitles.tracks.forEach(function (track) {
-    track.selected = (track.label === label)
-  })
-  state.playing.subtitles.enabled = !!label
-  state.playing.subtitles.change = label
-  state.playing.subtitles.show = false
+function selectSubtitle (ix) {
+  state.playing.subtitles.selectedIndex = ix
 }
 
-function showSubtitles () {
-  state.playing.subtitles.show = !state.playing.subtitles.show
+// Automatically choose the subtitle in the user's language, if possible
+function selectNewlyAddedSubtitle () {
+  var oldIx = state.playing.subtitles.selectedIndex
+  if (oldIx === -1) oldIx = undefined
+  var newIx = state.playing.subtitles.tracks.length - 1
+
+  // Find which subtitle track fits the current locale
+  var langIx
+  var osLangISO = window.navigator.language.split('-')[0] // eg "en"
+  var trackLang = state.playing.subtitles.tracks[newIx].language // eg "German"
+  var trackLangISO = iso639.getCode(trackLang) // eg "de"
+  if (trackLangISO === osLangISO) {
+    selectSubtitle(newIx) // newly added track is in the user's language
+  } else {
+    selectSubtitle(oldIx || newIx) // otherwise, if we've already selected a track, keep it
+  }
+
+  console.log('SELECTING', langIx, oldIx, newIx)
+}
+
+// Make sure we don't have two subtitle tracks with the same label
+// Labels each track by language, eg "German", "English", "English 2", ...
+function relabelSubtitles () {
+  var counts = {}
+  state.playing.subtitles.tracks.forEach(function (track) {
+    var lang = track.language
+    counts[lang] = (counts[lang] || 0) + 1
+    track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
+  })
+}
+
+function toggleSubtitlesMenu () {
+  state.playing.subtitles.showMenu = !state.playing.subtitles.showMenu
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object

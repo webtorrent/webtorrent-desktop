@@ -27,6 +27,7 @@
     "electron-prebuilt": "1.0.2",
     "fs-extra": "^0.27.0",
     "hyperx": "^2.0.2",
+    "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
     "main-loop": "^3.2.0",
     "musicmetadata": "^2.0.2",
