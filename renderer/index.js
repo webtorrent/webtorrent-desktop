@@ -14,6 +14,7 @@ var ipcRenderer = electron.ipcRenderer
 setupIpc()
 
 var appConfig = require('application-config')('WebTorrent')
+var Async = require('async')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
@@ -423,9 +424,7 @@ function openSubtitles () {
     properties: [ 'openFile' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    // autoselect the newly added subtitle tracks
-    state.playing.subtitles.selectedIndex = -1
-    addSubtitle({path: filenames[0]}, true)
+    addSubtitles(filenames, true)
   })
 }
 
@@ -545,9 +544,7 @@ function onOpen (files) {
   // In the player, the only drag-drop function is adding subtitles
   var isInPlayer = state.location.current().url === 'player'
   if (isInPlayer) {
-    // always autoselect one of the newly added subtitle tracks
-    state.playing.subtitles.selectedIndex = -1
-    return files.filter(isSubtitle).forEach((file) => addSubtitle(file, true))
+    return addSubtitles(files.filter(isSubtitle), true)
   }
 
   // Otherwise, you can only drag-drop onto the home screen
@@ -596,27 +593,51 @@ function addTorrent (torrentId) {
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
 
-function addSubtitle (file, autoSelect) {
-  var srtToVtt = require('srt-to-vtt')
-  var LanguageDetect = require('languagedetect')
-
+function addSubtitles (files, autoSelect) {
   // Subtitles are only supported while playing video
   if (state.playing.type !== 'video') return
 
-  // No dupes allowed
+  // Read the files concurrently, then add all resulting subtitle tracks
+  console.log(files)
   var subs = state.playing.subtitles
-  var filePath = file.path || file
-  if (subs.tracks.some((track) => track.filePath === filePath)) return
+  Async.map(files, loadSubtitle, function (err, tracks) {
+    if (err) return onError(err)
+
+    for (var i = 0; i < tracks.length; i++) {
+      // No dupes allowed
+      var track = tracks[i]
+      if (subs.tracks.some((t) => track.filePath === t.filePath)) continue
+
+      // Add the track
+      subs.tracks.push(track)
+
+      // If we're auto-selecting a track, try to find one in the user's language
+      if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
+        state.playing.subtitles.selectedIndex = subs.tracks.length - 1
+      }
+    }
+
+    // Finally, make sure no two tracks have the same label
+    relabelSubtitles()
+  })
+}
+
+function loadSubtitle (file, cb) {
+  var srtToVtt = require('srt-to-vtt')
+  var LanguageDetect = require('languagedetect')
 
   // Read the .SRT or .VTT file, parse it, add subtitle track
+  var filePath = file.path || file
   fs.createReadStream(filePath).pipe(srtToVtt()).pipe(concat(function (buf) {
-    // Set the cue text position so it appears above the player controls.
-    // The only way to change cue text position is by modifying the VTT. It is not
-    // possible via CSS.
+    // Detect what language the subtitles are in
     var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
     var langDetected = (new LanguageDetect()).detect(vttContents, 2)
     langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
     langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+
+    // Set the cue text position so it appears above the player controls.
+    // The only way to change cue text position is by modifying the VTT. It is not
+    // possible via CSS.
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
@@ -624,9 +645,8 @@ function addSubtitle (file, autoSelect) {
       label: langDetected,
       filePath: filePath
     }
-    subs.tracks.push(track)
-    if (autoSelect) selectNewlyAddedSubtitle()
-    relabelSubtitles()
+
+    cb(null, track)
   }))
 }
 
@@ -634,21 +654,12 @@ function selectSubtitle (ix) {
   state.playing.subtitles.selectedIndex = ix
 }
 
-// Automatically choose the subtitle in the user's language, if possible
-function selectNewlyAddedSubtitle () {
-  var oldIx = state.playing.subtitles.selectedIndex
-  if (oldIx === -1) oldIx = undefined
-  var newIx = state.playing.subtitles.tracks.length - 1
-
-  // Find which subtitle track fits the current locale
+// Checks whether a language name like "English" or "German" matches the system
+// language, aka the current locale
+function isSystemLanguage (language) {
   var osLangISO = window.navigator.language.split('-')[0] // eg "en"
-  var trackLang = state.playing.subtitles.tracks[newIx].language // eg "German"
-  var trackLangISO = iso639.getCode(trackLang) // eg "de"
-  if (trackLangISO === osLangISO) {
-    selectSubtitle(newIx) // newly added track is in the user's language
-  } else {
-    selectSubtitle(oldIx || newIx) // otherwise, if we've already selected a track, keep it
-  }
+  var langIso = iso639.getCode(language) // eg "de" if language is "German"
+  return langIso === osLangISO
 }
 
 // Make sure we don't have two subtitle tracks with the same label
@@ -672,7 +683,7 @@ function checkForSubtitles () {
     var file = torrentSummary.files[ix]
     if (!isSubtitle(file.name)) return
     var filePath = path.join(torrentSummary.path, file.path)
-    addSubtitle(filePath)
+    addSubtitles([filePath], false)
   })
 }
 

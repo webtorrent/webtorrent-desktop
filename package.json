@@ -16,6 +16,7 @@
   "dependencies": {
     "airplay-js": "guerrerocarlos/node-airplay-js",
     "application-config": "^0.2.1",
+    "async": "^2.0.0-rc.5",
     "bitfield": "^1.0.2",
     "chromecasts": "^1.8.0",
     "concat-stream": "^1.5.1",
