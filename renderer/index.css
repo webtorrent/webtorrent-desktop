@@ -113,16 +113,8 @@ table {
   opacity: 0.3;
 }
 
-.clickable {
-  cursor: pointer;
-}
-
 .float-right {
   float: right;
-}
-
-.expand-collapse {
-  cursor: pointer;
 }
 
 .expand-collapse.expanded::before {
@@ -370,7 +362,6 @@ button { /* Rectangular text buttons */
   border-radius: 3px;
   font-size: 14px;
   font-weight: bold;
-  cursor: pointer;
   color: #aaa;
   outline: none;
 }
