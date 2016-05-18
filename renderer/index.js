@@ -14,7 +14,7 @@ var ipcRenderer = electron.ipcRenderer
 setupIpc()
 
 var appConfig = require('application-config')('WebTorrent')
-var Async = require('async')
+var parallel = require('run-parallel')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
@@ -606,22 +606,23 @@ function addSubtitles (files, autoSelect) {
   if (state.playing.type !== 'video') return
 
   // Read the files concurrently, then add all resulting subtitle tracks
-  console.log(files)
-  var subs = state.playing.subtitles
-  Async.map(files, loadSubtitle, function (err, tracks) {
+  var jobs = files.map((file) => (cb) => loadSubtitle(file, cb))
+  parallel(jobs, function (err, tracks) {
     if (err) return onError(err)
 
     for (var i = 0; i < tracks.length; i++) {
       // No dupes allowed
       var track = tracks[i]
-      if (subs.tracks.some((t) => track.filePath === t.filePath)) continue
+      if (state.playing.subtitles.tracks.some(
+        (t) => track.filePath === t.filePath)) continue
 
       // Add the track
-      subs.tracks.push(track)
+      state.playing.subtitles.tracks.push(track)
 
       // If we're auto-selecting a track, try to find one in the user's language
       if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
-        state.playing.subtitles.selectedIndex = subs.tracks.length - 1
+        state.playing.subtitles.selectedIndex =
+          state.playing.subtitles.tracks.length - 1
       }
     }
 
