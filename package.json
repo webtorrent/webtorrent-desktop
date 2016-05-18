@@ -1,7 +1,7 @@
 {
   "name": "webtorrent-desktop",
   "description": "WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "Feross Aboukhadijeh",
     "email": "feross@feross.org",
