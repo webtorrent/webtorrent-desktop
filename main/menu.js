@@ -109,7 +109,7 @@ function onPlayerOpen () {
   getMenuItem('Play/Pause').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
-  getMenuItem('Add Subtitles File').enabled = true
+  getMenuItem('Add Subtitles File...').enabled = true
 }
 
 function onPlayerClose () {
@@ -117,7 +117,7 @@ function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
-  getMenuItem('Add Subtitles File').enabled = false
+  getMenuItem('Add Subtitles File...').enabled = false
 }
 
 function onToggleFullScreen (isFullScreen) {
@@ -308,7 +308,7 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Add Subtitles File',
+          label: 'Add Subtitles File...',
           click: openSubtitles,
           enabled: false
         }
