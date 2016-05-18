@@ -68,4 +68,5 @@ function initDarwinWin32 () {
   )
 
   electron.autoUpdater.setFeedURL(config.AUTO_UPDATE_URL)
+  electron.autoUpdater.checkForUpdates()
 }
