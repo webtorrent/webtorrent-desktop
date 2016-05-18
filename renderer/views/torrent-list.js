@@ -208,7 +208,8 @@ function TorrentList (state) {
   // Show a single torrentSummary file in the details view for a single torrent
   function renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var isDone = false
+    var isSelected = torrentSummary.selections[index] // Are we even torrenting it?
+    var isDone = false // Are we finished torrenting it?
     var progress = ''
     if (torrentSummary.progress && torrentSummary.progress.files) {
       var fileProg = torrentSummary.progress.files[index]
@@ -217,26 +218,38 @@ function TorrentList (state) {
     }
 
     // Second, render the file as a table row
+    var isPlayable = TorrentPlayer.isPlayable(file)
     var infoHash = torrentSummary.infoHash
     var icon
-    var rowClass = ''
     var handleClick
-    if (TorrentPlayer.isPlayable(file)) {
+    if (isPlayable) {
       icon = 'play_arrow' /* playable? add option to play */
       handleClick = dispatcher('play', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
-      rowClass = isDone ? '' : 'disabled'
       handleClick = dispatcher('openFile', infoHash, index)
     }
+    var rowClass = ''
+    if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
+    if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return hx`
-      <tr onclick=${handleClick} class='${rowClass}'>
-        <td class='col-icon'>
+      <tr>
+        <td class='col-icon ${rowClass}' onclick=${handleClick}>
           <i class='icon'>${icon}</i>
         </td>
-        <td class='col-name'>${file.name}</td>
-        <td class='col-progress'>${progress}</td>
-        <td class='col-size'>${prettyBytes(file.length)}</td>
+        <td class='col-name ${rowClass}' onclick=${handleClick}>
+          ${file.name}
+        </td>
+        <td class='col-progress ${rowClass}' onclick=${handleClick}>
+          ${isSelected ? progress : ''}
+        </td>
+        <td class='col-size ${rowClass}' onclick=${handleClick}>
+          ${prettyBytes(file.length)}
+        </td>
+        <td class='col-select'
+            onclick=${dispatcher('toggleTorrentFile', infoHash, index)}>
+          <i class='icon'>${isSelected ? 'close' : 'add'}</i>
+        </td>
       </tr>
     `
   }

@@ -57,14 +57,10 @@ function renderMedia (state) {
       state.playing.setVolume = null
     }
 
-    // fix textTrack cues not been removed <track> rerender
-    if (state.playing.subtitles.change) {
-      var tracks = mediaElement.textTracks
-      for (var j = 0; j < tracks.length; j++) {
-        // mode is not an <track> attribute, only available on DOM
-        tracks[j].mode = (tracks[j].label === state.playing.subtitles.change) ? 'showing' : 'hidden'
-      }
-      state.playing.subtitles.change = null
+    // Switch to the newly added subtitle track, if available
+    var tracks = mediaElement.textTracks
+    for (var j = 0; j < tracks.length; j++) {
+      tracks[j].mode = (j === state.playing.subtitles.selectedIndex) ? 'showing' : 'hidden'
     }
 
     state.playing.currentTime = mediaElement.currentTime
@@ -74,13 +70,13 @@ function renderMedia (state) {
 
   // Add subtitles to the <video> tag
   var trackTags = []
-
-  if (state.playing.subtitles.enabled && state.playing.subtitles.tracks.length > 0) {
+  if (state.playing.subtitles.selectedIndex >= 0) {
     for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
+      var isSelected = state.playing.subtitles.selectedIndex === i
       trackTags.push(hx`
         <track
-          ${track.selected ? 'default' : ''}
+          ${isSelected ? 'default' : ''}
           label=${track.label}
           type='subtitles'
           src=${track.buffer}>
@@ -168,7 +164,7 @@ function renderOverlay (state) {
 }
 
 function renderAudioMetadata (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   var fileSummary = torrentSummary.files[state.playing.fileIndex]
   if (!fileSummary.audioInfo) return
   var info = fileSummary.audioInfo
@@ -207,7 +203,7 @@ function renderLoadingSpinner (state) {
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
-  var prog = getPlayingTorrentSummary(state).progress || {}
+  var prog = state.getPlayingTorrentSummary().progress || {}
   var fileProgress = 0
   if (prog.files) {
     var file = prog.files[state.playing.fileIndex]
@@ -273,22 +269,24 @@ function renderCastScreen (state) {
 
 function renderSubtitlesOptions (state) {
   var subtitles = state.playing.subtitles
-  if (!subtitles.tracks.length || !subtitles.show) return
+  if (!subtitles.tracks.length || !subtitles.showMenu) return
 
-  var items = subtitles.tracks.map(function (track) {
+  var items = subtitles.tracks.map(function (track, ix) {
+    var isSelected = state.playing.subtitles.selectedIndex === ix
     return hx`
-      <li onclick=${dispatcher('selectSubtitle', track.label)}>
-        <i.icon>${track.selected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+      <li onclick=${dispatcher('selectSubtitle', ix)}>
+        <i.icon>${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
         ${track.label}
       </li>
     `
   })
 
+  var noneSelected = state.playing.subtitles.selectedIndex === -1
   return hx`
     <ul.subtitles-list>
       ${items}
-      <li onclick=${dispatcher('selectSubtitle', '')}>
-        <i.icon>${!subtitles.enabled ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+      <li onclick=${dispatcher('selectSubtitle', -1)}>
+        <i.icon>${noneSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
         None
       </li>
     </ul>
@@ -300,7 +298,7 @@ function renderPlayerControls (state) {
   var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
   var captionsClass = state.playing.subtitles.tracks.length === 0
     ? 'disabled'
-    : state.playing.subtitles.enabled
+    : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
 
@@ -492,7 +490,7 @@ function renderPlayerControls (state) {
       // if no subtitles available select it
       dispatch('openSubtitles')
     } else {
-      dispatch('showSubtitles')
+      dispatch('toggleSubtitlesMenu')
     }
   }
 }
@@ -503,7 +501,7 @@ var volumeChanging = false
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be "spongey" / non-contiguous
 function renderLoadingBar (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
     return []
   }
@@ -540,7 +538,7 @@ function renderLoadingBar (state) {
 
 // Returns the CSS background-image string for a poster image + dark vignette
 function cssBackgroundImagePoster (state) {
-  var torrentSummary = getPlayingTorrentSummary(state)
+  var torrentSummary = state.getPlayingTorrentSummary()
   var posterPath = TorrentSummary.getPosterPath(torrentSummary)
   if (!posterPath) return ''
   return cssBackgroundImageDarkGradient() + `, url(${posterPath})`
@@ -549,9 +547,4 @@ function cssBackgroundImagePoster (state) {
 function cssBackgroundImageDarkGradient () {
   return 'radial-gradient(circle at center, ' +
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
-}
-
-function getPlayingTorrentSummary (state) {
-  var infoHash = state.playing.infoHash
-  return state.saved.torrents.find((x) => x.infoHash === infoHash)
 }

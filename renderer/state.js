@@ -9,7 +9,8 @@ var LocationHistory = require('./lib/location-history')
 module.exports = {
   getInitialState,
   getDefaultPlayState,
-  getDefaultSavedState
+  getDefaultSavedState,
+  getPlayingTorrentSummary
 }
 
 function getInitialState () {
@@ -57,7 +58,12 @@ function getInitialState () {
      *
      * Also accessible via `require('application-config')('WebTorrent').filePath`
      */
-    saved: {}
+    saved: {},
+
+    /*
+     * Getters, for convenience
+     */
+    getPlayingTorrentSummary
   }
 }
 
@@ -76,8 +82,9 @@ function getDefaultPlayState () {
     mouseStationarySince: 0, /* Unix time in ms */
     playbackRate: 1,
     subtitles: {
-      tracks: [], /* subtitles file (Buffer) */
-      enabled: false
+      tracks: [], /* subtitle tracks, each {label, language, ...} */
+      selectedIndex: -1, /* current subtitle track */
+      showMenu: false /* popover menu, above the video */
     },
     aspectRatio: 0 /* aspect ratio of the video */
   }
@@ -263,4 +270,9 @@ function getDefaultSavedState () {
       ? path.join(config.CONFIG_PATH, 'Downloads')
       : remote.app.getPath('downloads')
   }
+}
+
+function getPlayingTorrentSummary () {
+  var infoHash = this.playing.infoHash
+  return this.saved.torrents.find((x) => x.infoHash === infoHash)
 }

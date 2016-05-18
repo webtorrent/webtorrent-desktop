@@ -1,5 +1,30 @@
 # WebTorrent Desktop Version History
 
+## v0.5.1 - 2016-05-18
+
+### Fixed
+
+- Fix auto-updater (OS X, Windows).
+
+## v0.5.0 - 2016-05-17
+
+### Added
+
+- Select/deselect individual files to torrent.
+- Automatically include subtitle files (.srt, .vtt) from torrent in the subtitles menu.
+- "Add Subtitle File..." menu item.
+
+### Changed
+
+- When manually adding subtitle track(s), always switch to the new track.
+
+### Fixed
+
+- Magnet links throw exception on app launch. (OS X)
+- Multi-file torrents would not seed in-place, were copied to Downloads folder.
+- Missing 'About WebTorrent' menu item. (Windows)
+- Rare exception. ("Cannot create BrowserWindow before app is ready")
+
 ## v0.4.0 - 2016-05-13
 
 ### Added

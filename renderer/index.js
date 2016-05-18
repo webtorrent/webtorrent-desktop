@@ -14,9 +14,11 @@ var ipcRenderer = electron.ipcRenderer
 setupIpc()
 
 var appConfig = require('application-config')('WebTorrent')
+var parallel = require('run-parallel')
 var concat = require('concat-stream')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
+var iso639 = require('iso-639-1')
 var mainLoop = require('main-loop')
 var path = require('path')
 
@@ -151,6 +153,11 @@ function cleanUpConfig () {
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
     }
+
+    // Migration: add per-file selections
+    if (!ts.selections) {
+      ts.selections = ts.files.map((x) => true)
+    }
   })
 }
 
@@ -229,6 +236,9 @@ function dispatch (action, ...args) {
   if (action === 'toggleSelectTorrent') {
     toggleSelectTorrent(args[0] /* infoHash */)
   }
+  if (action === 'toggleTorrentFile') {
+    toggleTorrentFile(args[0] /* infoHash */, args[1] /* index */)
+  }
   if (action === 'openTorrentContextMenu') {
     openTorrentContextMenu(args[0] /* infoHash */)
   }
@@ -301,10 +311,10 @@ function dispatch (action, ...args) {
     openSubtitles()
   }
   if (action === 'selectSubtitle') {
-    selectSubtitle(args[0] /* label */)
+    selectSubtitle(args[0] /* index */)
   }
-  if (action === 'showSubtitles') {
-    showSubtitles()
+  if (action === 'toggleSubtitlesMenu') {
+    toggleSubtitlesMenu()
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
@@ -449,7 +459,7 @@ function openSubtitles () {
     properties: [ 'openFile' ]
   }, function (filenames) {
     if (!Array.isArray(filenames)) return
-    addSubtitle({path: filenames[0]})
+    addSubtitles(filenames, true)
   })
 }
 
@@ -569,7 +579,7 @@ function onOpen (files) {
   // In the player, the only drag-drop function is adding subtitles
   var isInPlayer = state.location.current().url === 'player'
   if (isInPlayer) {
-    return files.filter(isSubtitle).forEach(addSubtitle)
+    return addSubtitles(files.filter(isSubtitle), true)
   }
 
   // Otherwise, you can only drag-drop onto the home screen
@@ -618,50 +628,103 @@ function addTorrent (torrentId) {
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
 
-function addSubtitle (file) {
+function addSubtitles (files, autoSelect) {
+  // Subtitles are only supported while playing video
+  if (state.playing.type !== 'video') return
+
+  // Read the files concurrently, then add all resulting subtitle tracks
+  var jobs = files.map((file) => (cb) => loadSubtitle(file, cb))
+  parallel(jobs, function (err, tracks) {
+    if (err) return onError(err)
+
+    for (var i = 0; i < tracks.length; i++) {
+      // No dupes allowed
+      var track = tracks[i]
+      if (state.playing.subtitles.tracks.some(
+        (t) => track.filePath === t.filePath)) continue
+
+      // Add the track
+      state.playing.subtitles.tracks.push(track)
+
+      // If we're auto-selecting a track, try to find one in the user's language
+      if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
+        state.playing.subtitles.selectedIndex =
+          state.playing.subtitles.tracks.length - 1
+      }
+    }
+
+    // Finally, make sure no two tracks have the same label
+    relabelSubtitles()
+  })
+}
+
+function loadSubtitle (file, cb) {
   var srtToVtt = require('srt-to-vtt')
   var LanguageDetect = require('languagedetect')
 
-  if (state.playing.type !== 'video') return
-  fs.createReadStream(file.path || file).pipe(srtToVtt()).pipe(concat(function (buf) {
+  // Read the .SRT or .VTT file, parse it, add subtitle track
+  var filePath = file.path || file
+  fs.createReadStream(filePath).pipe(srtToVtt()).pipe(concat(function (buf) {
+    // Detect what language the subtitles are in
+    var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
+    var langDetected = (new LanguageDetect()).detect(vttContents, 2)
+    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+
     // Set the cue text position so it appears above the player controls.
     // The only way to change cue text position is by modifying the VTT. It is not
     // possible via CSS.
-    var langDetected = (new LanguageDetect()).detect(buf.toString().replace(/(.*-->.*)/g, ''), 2)
-    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
-    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
     var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
       buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
+      language: langDetected,
       label: langDetected,
-      selected: true
+      filePath: filePath
     }
-    state.playing.subtitles.tracks.forEach(function (trackItem) {
-      trackItem.selected = false
-      if (trackItem.label === track.label) {
-        var labelParts = /([^\d]+)(\d+)$/.exec(track.label)
-        track.label = labelParts
-          ? labelParts[1] + (parseInt(labelParts[2]) + 1)
-          : track.label + ' 2'
-      }
-    })
-    state.playing.subtitles.change = track.label
-    state.playing.subtitles.tracks.push(track)
-    state.playing.subtitles.enabled = true
+
+    cb(null, track)
   }))
 }
 
-function selectSubtitle (label) {
-  state.playing.subtitles.tracks.forEach(function (track) {
-    track.selected = (track.label === label)
-  })
-  state.playing.subtitles.enabled = !!label
-  state.playing.subtitles.change = label
-  state.playing.subtitles.show = false
+function selectSubtitle (ix) {
+  state.playing.subtitles.selectedIndex = ix
 }
 
-function showSubtitles () {
-  state.playing.subtitles.show = !state.playing.subtitles.show
+// Checks whether a language name like "English" or "German" matches the system
+// language, aka the current locale
+function isSystemLanguage (language) {
+  var osLangISO = window.navigator.language.split('-')[0] // eg "en"
+  var langIso = iso639.getCode(language) // eg "de" if language is "German"
+  return langIso === osLangISO
+}
+
+// Make sure we don't have two subtitle tracks with the same label
+// Labels each track by language, eg "German", "English", "English 2", ...
+function relabelSubtitles () {
+  var counts = {}
+  state.playing.subtitles.tracks.forEach(function (track) {
+    var lang = track.language
+    counts[lang] = (counts[lang] || 0) + 1
+    track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
+  })
+}
+
+function checkForSubtitles () {
+  if (state.playing.type !== 'video') return
+  var torrentSummary = state.getPlayingTorrentSummary()
+  if (!torrentSummary || !torrentSummary.progress) return
+
+  torrentSummary.progress.files.forEach(function (fp, ix) {
+    if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
+    var file = torrentSummary.files[ix]
+    if (!isSubtitle(file.name)) return
+    var filePath = path.join(torrentSummary.path, file.path)
+    addSubtitles([filePath], false)
+  })
+}
+
+function toggleSubtitlesMenu () {
+  state.playing.subtitles.showMenu = !state.playing.subtitles.showMenu
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
@@ -682,7 +745,7 @@ function startTorrentingSummary (torrentSummary) {
   }
 
   console.log('start torrenting %s %s', s.torrentKey, torrentID)
-  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes)
+  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes, s.selections)
 }
 
 //
@@ -791,6 +854,9 @@ function torrentMetadata (torrentKey, torrentInfo) {
   torrentSummary.path = torrentInfo.path
   torrentSummary.files = torrentInfo.files
   torrentSummary.magnetURI = torrentInfo.magnetURI
+  if (!torrentSummary.selections) {
+    torrentSummary.selections = torrentSummary.files.map((x) => true)
+  }
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -841,6 +907,8 @@ function torrentProgress (progressInfo) {
     }
     torrentSummary.progress = p
   })
+
+  checkForSubtitles()
 
   update()
 }
@@ -941,6 +1009,9 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
     ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
   }
 
+  // if it's video, check for subtitles files that are done downloading
+  checkForSubtitles()
+
   ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
     clearTimeout(timeout)
@@ -1024,6 +1095,14 @@ function toggleSelectTorrent (infoHash) {
   // toggle selection
   state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
   update()
+}
+
+function toggleTorrentFile (infoHash, index) {
+  var torrentSummary = getTorrentSummary(infoHash)
+  torrentSummary.selections[index] = !torrentSummary.selections[index]
+
+  // Let the WebTorrent process know to start or stop fetching that file
+  ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
 }
 
 function openTorrentContextMenu (infoHash) {

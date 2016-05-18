@@ -86,6 +86,12 @@ function decreaseVolume () {
   }
 }
 
+function openSubtitles () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'openSubtitles')
+  }
+}
+
 function skipForward () {
   if (windows.main) {
     windows.main.send('dispatch', 'skip', 1)
@@ -127,6 +133,7 @@ function onPlayerOpen () {
   getMenuItem('Play/Pause').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
+  getMenuItem('Add Subtitles File...').enabled = true
   getMenuItem('Skip forward 10 seconds').enabled = true
   getMenuItem('Skip back 10 seconds').enabled = true
   getMenuItem('Increase video speed').enabled = true
@@ -138,6 +145,7 @@ function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
+  getMenuItem('Add Subtitles File...').enabled = false
   getMenuItem('Skip forward 10 seconds').enabled = false
   getMenuItem('Skip back 10 seconds').enabled = false
   getMenuItem('Increase video speed').enabled = false
@@ -326,6 +334,14 @@ function getAppMenuTemplate () {
           label: 'Decrease Volume',
           accelerator: 'CmdOrCtrl+Down',
           click: decreaseVolume,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Add Subtitles File...',
+          click: openSubtitles,
           enabled: false
         },
         {
