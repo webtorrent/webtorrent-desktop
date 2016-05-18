@@ -349,10 +349,6 @@ function selectFiles (torrentOrInfoHash, selections) {
     } else {
       console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
       file.deselect()
-
-      // If we deselected a file, try to nuke it to save disk space
-      var filePath = path.join(torrent.path, file.path)
-      fs.unlink(filePath) // Ignore errors for now
     }
   }
 }
