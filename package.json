@@ -16,7 +16,6 @@
   "dependencies": {
     "airplay-js": "guerrerocarlos/node-airplay-js",
     "application-config": "^0.2.1",
-    "async": "^2.0.0-rc.5",
     "bitfield": "^1.0.2",
     "chromecasts": "^1.8.0",
     "concat-stream": "^1.5.1",
@@ -34,6 +33,7 @@
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
     "prettier-bytes": "^1.0.1",
+    "run-parallel": "^1.1.6",
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",
     "virtual-dom": "^2.1.1",
