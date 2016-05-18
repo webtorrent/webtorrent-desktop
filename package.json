@@ -70,7 +70,7 @@
   "license": "MIT",
   "main": "index.js",
   "optionalDependencies": {
-    "appdmg": "^0.3.6"
+    "appdmg": "^0.4.3"
   },
   "productName": "WebTorrent",
   "repository": {
