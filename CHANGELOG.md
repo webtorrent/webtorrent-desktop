@@ -1,5 +1,11 @@
 # WebTorrent Desktop Version History
 
+## v0.5.1 - 2016-05-18
+
+### Fixed
+
+- Fix auto-updater (OS X, Windows).
+
 ## v0.5.0 - 2016-05-17
 
 ### Added
