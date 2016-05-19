@@ -213,6 +213,7 @@ function dispatch (action, ...args) {
     onOpen(args[0] /* files */)
   }
   if (action === 'addTorrent') {
+    backToList()
     addTorrent(args[0] /* torrent */)
   }
   if (action === 'showOpenTorrentFile') {
@@ -427,10 +428,15 @@ function openSubtitles () {
   })
 }
 
+// Quits any modal popovers and returns to the torrent list screen
 function backToList () {
   // Exit any modals and screens with a back button
   state.modal = null
   while (state.location.hasBack()) state.location.back()
+
+  // If we were already on the torrent list, scroll to the top
+  var contentTag = document.querySelector('.content')
+  if (contentTag) contentTag.scrollTop = 0
 
   // Work around virtual-dom issue: it doesn't expose its redraw function,
   // and only redraws on requestAnimationFrame(). That means when the user
@@ -555,7 +561,6 @@ function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
   // Return to the home screen
-  state.modal = null
   backToList()
 
   if (files.every(isTorrent)) {
@@ -814,7 +819,7 @@ function torrentInfoHash (torrentKey, infoHash) {
       torrentKey: torrentKey,
       status: 'new'
     }
-    state.saved.torrents.push(torrentSummary)
+    state.saved.torrents.unshift(torrentSummary)
     sound.play('ADD')
   }
 
@@ -1266,8 +1271,10 @@ function onPaste (e) {
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
-    dispatch('addTorrent', torrentId)
+    addTorrent(torrentId)
   })
+
+  update()
 }
 
 function onFocus (e) {
