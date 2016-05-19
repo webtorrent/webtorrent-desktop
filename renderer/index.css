@@ -845,6 +845,9 @@ body.drag .app::after {
   text-shadow: #000 -1px 0 1px, #000 1px 0 1px, #000 0 -1px 1px, #000 0 1px 1px, rgba(50, 50, 50, 0.5) 2px 2px 0;
 }
 
+.visualizer {
+  width:100%;
+}
 
 /*
  * CHROMECAST / AIRPLAY CONTROLS
