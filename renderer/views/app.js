@@ -54,12 +54,13 @@ function App (state) {
 function getErrorPopover (state) {
   var now = new Date().getTime()
   var recentErrors = state.errors.filter((x) => now - x.time < 5000)
+  var hasErrors = recentErrors.length > 0
 
   var errorElems = recentErrors.map(function (error) {
     return hx`<div class='error'>${error.message}</div>`
   })
   return hx`
-  <div class='error-popover ${recentErrors.length > 0 ? 'visible' : 'hidden'}'>
+    <div class='error-popover ${hasErrors ? 'visible' : 'hidden'}'>
       <div class='title'>Error</div>
       ${errorElems}
     </div>
