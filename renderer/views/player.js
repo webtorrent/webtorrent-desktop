@@ -533,8 +533,8 @@ function renderLoadingBar (state) {
           width: (100 * part.count / fileProg.numPieces) + '%'
         }
 
-    return hx`<div class='loading-bar-part' style=${style}></div>`
-  })}
+        return hx`<div class='loading-bar-part' style=${style}></div>`
+      })}
     </div>
   `
 }
