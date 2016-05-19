@@ -87,7 +87,7 @@ function init () {
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
-  dragDrop('body', (files) => dispatch('onOpen', files))
+  dragDrop('body', onDrag)
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
@@ -252,16 +252,7 @@ function dispatch (action, ...args) {
     setDimensions(args[0] /* dimensions */)
   }
   if (action === 'backToList') {
-    // Exit any modals and screens with a back button
-    state.modal = null
-    while (state.location.hasBack()) state.location.back()
-
-    // Work around virtual-dom issue: it doesn't expose its redraw function,
-    // and only redraws on requestAnimationFrame(). That means when the user
-    // closes the window (hide window / minimize to tray) and we want to pause
-    // the video, we update the vdom but it keeps playing until you reopen!
-    var mediaTag = document.querySelector('video,audio')
-    if (mediaTag) mediaTag.pause()
+    backToList()
   }
   if (action === 'escapeBack') {
     if (state.modal) {
@@ -436,6 +427,19 @@ function openSubtitles () {
   })
 }
 
+function backToList () {
+  // Exit any modals and screens with a back button
+  state.modal = null
+  while (state.location.hasBack()) state.location.back()
+
+  // Work around virtual-dom issue: it doesn't expose its redraw function,
+  // and only redraws on requestAnimationFrame(). That means when the user
+  // closes the window (hide window / minimize to tray) and we want to pause
+  // the video, we update the vdom but it keeps playing until you reopen!
+  var mediaTag = document.querySelector('video,audio')
+  if (mediaTag) mediaTag.pause()
+}
+
 // Checks whether we are connected and already casting
 // Returns false if we not casting (state.playing.location === 'local')
 // or if we're trying to connect but haven't yet ('chromecast-pending', etc)
@@ -546,18 +550,35 @@ function saveState () {
   update()
 }
 
+// Called when the user clicks a magnet link or torrent, or uses the Open dialog
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // In the player, the only drag-drop function is adding subtitles
-  var isInPlayer = state.location.current().url === 'player'
-  if (isInPlayer) {
-    return addSubtitles(files.filter(isSubtitle), true)
-  }
+  // Return to the home screen
+  state.modal = null
+  backToList()
 
-  // Otherwise, you can only drag-drop onto the home screen
+  if (files.every(isTorrent)) {
+    // All .torrent files? Start downloading
+    files.forEach(addTorrent)
+  } else {
+    // Show the Create Torrent screen. Let's seed those files.
+    showCreateTorrent(files)
+  }
+}
+
+// Called when the user drag-drops files onto the app
+function onDrag (files) {
+  if (!Array.isArray(files)) files = [ files ]
+
+  var isInPlayer = state.location.current().url === 'player'
   var isHome = state.location.current().url === 'home' && !state.modal
-  if (isHome) {
+
+  if (isInPlayer) {
+    // In the player, the only drag-drop function is adding subtitles
+    addSubtitles(files.filter(isSubtitle), true)
+  } else if (isHome) {
+    // Otherwise, you can only drag-drop onto the home screen
     if (files.every(isTorrent)) {
       // All .torrent files? Start downloading
       files.forEach(addTorrent)
@@ -566,6 +587,8 @@ function onOpen (files) {
       showCreateTorrent(files)
     }
   }
+
+  update()
 }
 
 function isTorrent (file) {
