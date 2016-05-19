@@ -14,12 +14,12 @@ var ipcRenderer = electron.ipcRenderer
 setupIpc()
 
 var appConfig = require('application-config')('WebTorrent')
-var parallel = require('run-parallel')
-var concat = require('concat-stream')
+var concat = require('simple-concat')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
 var iso639 = require('iso-639-1')
 var mainLoop = require('main-loop')
+var parallel = require('run-parallel')
 var path = require('path')
 
 var createElement = require('virtual-dom/create-element')
@@ -665,7 +665,12 @@ function loadSubtitle (file, cb) {
 
   // Read the .SRT or .VTT file, parse it, add subtitle track
   var filePath = file.path || file
-  fs.createReadStream(filePath).pipe(srtToVtt()).pipe(concat(function (buf) {
+
+  var vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
+
+  concat(vttStream, function (err, buf) {
+    if (err) return onError(new Error('Error parsing subtitles file.'))
+
     // Detect what language the subtitles are in
     var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
     var langDetected = (new LanguageDetect()).detect(vttContents, 2)
@@ -684,7 +689,7 @@ function loadSubtitle (file, cb) {
     }
 
     cb(null, track)
-  }))
+  })
 }
 
 function selectSubtitle (ix) {
