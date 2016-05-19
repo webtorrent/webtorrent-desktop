@@ -3,7 +3,7 @@ var fs = require('fs')
 var path = require('path')
 
 var APP_NAME = 'WebTorrent'
-var APP_TEAM = 'The WebTorrent Project'
+var APP_TEAM = 'WebTorrent, LLC'
 var APP_VERSION = require('./package.json').version
 
 var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
