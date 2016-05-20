@@ -660,8 +660,8 @@ function addSubtitles (files, autoSelect) {
 }
 
 function loadSubtitle (file, cb) {
-  var srtToVtt = require('srt-to-vtt')
   var LanguageDetect = require('languagedetect')
+  var srtToVtt = require('srt-to-vtt')
 
   // Read the .SRT or .VTT file, parse it, add subtitle track
   var filePath = file.path || file
@@ -672,12 +672,8 @@ function loadSubtitle (file, cb) {
     langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
     langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
 
-    // Set the cue text position so it appears above the player controls.
-    // The only way to change cue text position is by modifying the VTT. It is not
-    // possible via CSS.
-    var subtitles = Buffer(buf.toString().replace(/(-->.*)/g, '$1 line:88%'))
     var track = {
-      buffer: 'data:text/vtt;base64,' + subtitles.toString('base64'),
+      buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
       language: langDetected,
       label: langDetected,
       filePath: filePath
