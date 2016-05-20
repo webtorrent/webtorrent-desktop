@@ -213,7 +213,6 @@ function dispatch (action, ...args) {
     onOpen(args[0] /* files */)
   }
   if (action === 'addTorrent') {
-    backToList()
     addTorrent(args[0] /* torrent */)
   }
   if (action === 'showOpenTorrentFile') {
@@ -620,6 +619,7 @@ function getTorrentSummary (torrentKey) {
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
 function addTorrent (torrentId) {
+  backToList()
   var torrentKey = state.nextTorrentKey++
   var path = state.saved.downloadPath
   if (torrentId.path) {
