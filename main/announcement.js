@@ -17,11 +17,22 @@ function init () {
     if (err) return log('failed to retrieve remote message')
     if (res.statusCode !== 200) return log('no remote message')
 
+    try {
+      data = JSON.parse(data.toString())
+    } catch (err) {
+      data = {
+        title: 'WebTorrent Desktop Announcement',
+        message: 'WebTorrent Desktop Announcement',
+        detail: data.toString()
+      }
+    }
+
     electron.dialog.showMessageBox({
       type: 'info',
       buttons: ['OK'],
-      title: 'WebTorrent Desktop Announcement',
-      message: data.toString()
+      title: data.title,
+      message: data.message,
+      detail: data.detail
     })
   })
 }
