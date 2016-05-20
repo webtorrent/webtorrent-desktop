@@ -87,7 +87,7 @@ function init () {
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
-  dragDrop('body', onDrag)
+  dragDrop('body', onOpen)
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
@@ -213,7 +213,6 @@ function dispatch (action, ...args) {
     onOpen(args[0] /* files */)
   }
   if (action === 'addTorrent') {
-    backToList()
     addTorrent(args[0] /* torrent */)
   }
   if (action === 'showOpenTorrentFile') {
@@ -274,15 +273,14 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'play') {
-    if (state.location.pending()) return
     state.location.go({
       url: 'player',
       onbeforeload: function (cb) {
+        play()
         openPlayer(args[0] /* infoHash */, args[1] /* index */, cb)
       },
       onbeforeunload: closePlayer
     })
-    play()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -306,7 +304,7 @@ function dispatch (action, ...args) {
     state.playing.isStalled = true
   }
   if (action === 'mediaError') {
-    if (state.location.current().url === 'player') {
+    if (state.location.url() === 'player') {
       state.playing.location = 'error'
       ipcRenderer.send('checkForVLC')
       ipcRenderer.once('checkForVLC', function (e, isInstalled) {
@@ -386,7 +384,7 @@ function pause () {
 }
 
 function playPause () {
-  if (state.location.current().url !== 'player') return
+  if (state.location.url() !== 'player') return
   if (state.playing.isPaused) {
     play()
   } else {
@@ -432,18 +430,18 @@ function openSubtitles () {
 function backToList () {
   // Exit any modals and screens with a back button
   state.modal = null
-  while (state.location.hasBack()) state.location.back()
+  state.location.backToFirst(function () {
+    // If we were already on the torrent list, scroll to the top
+    var contentTag = document.querySelector('.content')
+    if (contentTag) contentTag.scrollTop = 0
 
-  // If we were already on the torrent list, scroll to the top
-  var contentTag = document.querySelector('.content')
-  if (contentTag) contentTag.scrollTop = 0
-
-  // Work around virtual-dom issue: it doesn't expose its redraw function,
-  // and only redraws on requestAnimationFrame(). That means when the user
-  // closes the window (hide window / minimize to tray) and we want to pause
-  // the video, we update the vdom but it keeps playing until you reopen!
-  var mediaTag = document.querySelector('video,audio')
-  if (mediaTag) mediaTag.pause()
+    // Work around virtual-dom issue: it doesn't expose its redraw function,
+    // and only redraws on requestAnimationFrame(). That means when the user
+    // closes the window (hide window / minimize to tray) and we want to pause
+    // the video, we update the vdom but it keeps playing until you reopen!
+    var mediaTag = document.querySelector('video,audio')
+    if (mediaTag) mediaTag.pause()
+  })
 }
 
 // Checks whether we are connected and already casting
@@ -556,41 +554,29 @@ function saveState () {
   update()
 }
 
-// Called when the user clicks a magnet link or torrent, or uses the Open dialog
+// Called when the user drag-drops files onto the app
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // Return to the home screen
-  backToList()
-
-  if (files.every(isTorrent)) {
-    // All .torrent files? Start downloading
-    files.forEach(addTorrent)
-  } else {
-    // Show the Create Torrent screen. Let's seed those files.
-    showCreateTorrent(files)
+  if (state.modal) {
+    state.modal = null
   }
-}
 
-// Called when the user drag-drops files onto the app
-function onDrag (files) {
-  if (!Array.isArray(files)) files = [ files ]
+  var subtitles = files.filter(isSubtitle)
 
-  var isInPlayer = state.location.current().url === 'player'
-  var isHome = state.location.current().url === 'home' && !state.modal
-
-  if (isInPlayer) {
-    // In the player, the only drag-drop function is adding subtitles
-    addSubtitles(files.filter(isSubtitle), true)
-  } else if (isHome) {
-    // Otherwise, you can only drag-drop onto the home screen
+  if (state.location.url() === 'home' || subtitles.length === 0) {
     if (files.every(isTorrent)) {
-      // All .torrent files? Start downloading
+      if (state.location.url() !== 'home') {
+        backToList()
+      }
+      // All .torrent files? Add them.
       files.forEach(addTorrent)
     } else {
       // Show the Create Torrent screen. Let's seed those files.
       showCreateTorrent(files)
     }
+  } else if (state.location.url() === 'player') {
+    addSubtitles(subtitles, true)
   }
 
   update()
@@ -620,6 +606,7 @@ function getTorrentSummary (torrentKey) {
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
 function addTorrent (torrentId) {
+  backToList()
   var torrentKey = state.nextTorrentKey++
   var path = state.saved.downloadPath
   if (torrentId.path) {
@@ -762,7 +749,6 @@ function startTorrentingSummary (torrentSummary) {
 // Shows the Create Torrent page with options to seed a given file or folder
 function showCreateTorrent (files) {
   if (Array.isArray(files)) {
-    if (state.location.pending() || state.location.current().url !== 'home') return
     state.location.go({
       url: 'create-torrent',
       files: files
@@ -812,6 +798,9 @@ function findFilesRecursive (fileOrFolder, cb) {
 function createTorrent (options) {
   var torrentKey = state.nextTorrentKey++
   ipcRenderer.send('wt-create-torrent', torrentKey, options)
+  state.location.backToFirst(function () {
+    state.location.clearForward('create-torrent')
+  })
 }
 
 function torrentInfoHash (torrentKey, infoHash) {
@@ -1093,7 +1082,7 @@ function deleteTorrent (infoHash) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveStateThrottled()
-  state.location.clearForward() // prevent user from going forward to a deleted torrent
+  state.location.clearForward('player') // prevent user from going forward to a deleted torrent
   sound.play('DELETE')
 }
 
@@ -1241,7 +1230,7 @@ function showDoneNotification (torrent) {
 // * The video is paused
 // * The video is playing remotely on Chromecast or Airplay
 function showOrHidePlayerControls () {
-  var hideControls = state.location.current().url === 'player' &&
+  var hideControls = state.location.url() === 'player' &&
     state.playing.mouseStationarySince !== 0 &&
     new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
     !state.playing.isPaused &&
