@@ -107,11 +107,11 @@ function init () {
   })
 
   ipcMain.on('vlcPlay', function (e, url) {
-    var args = ['--play-and-exit', '--quiet', url]
+    var args = ['--play-and-exit', '--video-on-top', '--no-video-title-show', '--quiet', url]
     console.log('Running vlc ' + args.join(' '))
 
     vlc.spawn(args, function (err, proc) {
-      if (err) windows.main.send('dispatch', 'vlcNotFound')
+      if (err) return windows.main.send('dispatch', 'vlcNotFound')
       vlcProcess = proc
 
       // If it works, close the modal after a second
