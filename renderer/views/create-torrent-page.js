@@ -119,11 +119,10 @@ function CreateTorrentPage (state) {
       comment: comment
     }
     dispatch('createTorrent', options)
-    dispatch('backToList')
   }
 
   function handleCancel () {
-    dispatch('backToList')
+    dispatch('back')
   }
 
   function handleToggleShowAdvanced () {
