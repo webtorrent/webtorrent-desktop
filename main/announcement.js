@@ -33,6 +33,6 @@ function init () {
       title: data.title,
       message: data.message,
       detail: data.detail
-    })
+    }, function () {})
   })
 }
