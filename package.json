@@ -49,7 +49,7 @@
     "gh-release": "^2.0.3",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "nobin-debian-installer": "^0.0.9",
+    "nobin-debian-installer": "^0.0.10",
     "open": "0.0.5",
     "plist": "^1.2.0",
     "rimraf": "^2.5.2",
