@@ -5,6 +5,7 @@ var electron = require('electron')
 var app = electron.app
 var ipcMain = electron.ipcMain
 
+var announcement = require('./announcement')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
 var handlers = require('./handlers')
@@ -91,6 +92,7 @@ function init () {
 }
 
 function delayedInit () {
+  announcement.init()
   tray.init()
   handlers.install()
   updater.init()
