@@ -1091,7 +1091,7 @@ function deleteTorrent (infoHash) {
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
   saveStateThrottled()
-  state.location.clearForward() // prevent user from going forward to a deleted torrent
+  state.location.clearForward('player') // prevent user from going forward to a deleted torrent
   sound.play('DELETE')
 }
 
