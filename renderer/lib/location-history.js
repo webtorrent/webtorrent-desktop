@@ -4,81 +4,118 @@ function LocationHistory () {
   if (!new.target) return new LocationHistory()
   this._history = []
   this._forward = []
-  this._pending = null
+  this._pending = false
+}
+LocationHistory.prototype.current = function () {
+  return this._history[this._history.length - 1]
 }
 
 LocationHistory.prototype.go = function (page, cb) {
+  if (!cb) cb = noop
+  if (this._pending) return cb(null)
+
   console.log('go', page)
+
   this.clearForward()
   this._go(page, cb)
 }
 
-LocationHistory.prototype._go = function (page, cb) {
-  if (this._pending) return
-  if (page.onbeforeload) {
-    this._pending = page
-    page.onbeforeload((err) => {
-      if (this._pending !== page) return /* navigation was cancelled */
-      this._pending = null
-      if (err) {
-        if (cb) cb(err)
-        return
-      }
-      this._history.push(page)
-      if (cb) cb()
-    })
-  } else {
-    this._history.push(page)
-    if (cb) cb()
-  }
-}
-
 LocationHistory.prototype.back = function (cb) {
-  if (this._history.length <= 1) return
+  var self = this
+  if (!cb) cb = noop
+  if (self._history.length <= 1 || self._pending) return cb(null)
 
-  var page = this._history.pop()
+  var page = self._history.pop()
+  self._unload(page, done)
 
-  if (page.onbeforeunload) {
-    // TODO: this is buggy. If the user clicks back twice, then those pages
-    // may end up in _forward in the wrong order depending on which onbeforeunload
-    // call finishes first.
-    page.onbeforeunload(() => {
-      this._forward.push(page)
-      if (cb) cb()
-    })
-  } else {
-    this._forward.push(page)
-    if (cb) cb()
+  function done (err) {
+    if (err) return cb(err)
+    self._forward.push(page)
+    self._load(self.current(), cb)
   }
-}
-
-LocationHistory.prototype.forward = function (cb) {
-  if (this._forward.length === 0) return
-
-  var page = this._forward.pop()
-  this._go(page, cb)
-}
-
-LocationHistory.prototype.clearForward = function () {
-  this._forward = []
-}
-
-LocationHistory.prototype.current = function () {
-  return this._history[this._history.length - 1]
 }
 
 LocationHistory.prototype.hasBack = function () {
   return this._history.length > 1
 }
 
+LocationHistory.prototype.forward = function (cb) {
+  if (!cb) cb = noop
+  if (this._forward.length === 0 || this._pending) return cb(null)
+
+  var page = this._forward.pop()
+  this._go(page, cb)
+}
+
 LocationHistory.prototype.hasForward = function () {
   return this._forward.length > 0
 }
 
-LocationHistory.prototype.pending = function () {
-  return this._pending
+LocationHistory.prototype.clearForward = function (url) {
+  if (url == null) {
+    this._forward = []
+  } else {
+    console.log(this._forward)
+    console.log(url)
+    this._forward = this._forward.filter(function (page) {
+      return page.url !== url
+    })
+  }
 }
 
-LocationHistory.prototype.clearPending = function () {
-  this._pending = null
+LocationHistory.prototype.backToFirst = function (cb) {
+  var self = this
+  if (!cb) cb = noop
+  if (self._history.length <= 1) return cb(null)
+
+  self.back(function (err) {
+    if (err) return cb(err)
+    self.backToFirst(cb)
+  })
 }
+
+LocationHistory.prototype._go = function (page, cb) {
+  var self = this
+  if (!cb) cb = noop
+
+  self._unload(self.current(), done1)
+
+  function done1 (err) {
+    if (err) return cb(err)
+    self._load(page, done2)
+  }
+
+  function done2 (err) {
+    if (err) return cb(err)
+    self._history.push(page)
+    cb(null)
+  }
+}
+
+LocationHistory.prototype._load = function (page, cb) {
+  var self = this
+  self._pending = true
+
+  if (page && page.onbeforeload) page.onbeforeload(done)
+  else done(null)
+
+  function done (err) {
+    self._pending = false
+    cb(err)
+  }
+}
+
+LocationHistory.prototype._unload = function (page, cb) {
+  var self = this
+  self._pending = true
+
+  if (page && page.onbeforeunload) page.onbeforeunload(done)
+  else done(null)
+
+  function done (err) {
+    self._pending = false
+    cb(err)
+  }
+}
+
+function noop () {}
