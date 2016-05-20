@@ -6,6 +6,11 @@ function LocationHistory () {
   this._forward = []
   this._pending = false
 }
+
+LocationHistory.prototype.url = function () {
+  return this.current() && this.current().url
+}
+
 LocationHistory.prototype.current = function () {
   return this._history[this._history.length - 1]
 }

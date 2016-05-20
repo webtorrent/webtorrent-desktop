@@ -306,7 +306,7 @@ function dispatch (action, ...args) {
     state.playing.isStalled = true
   }
   if (action === 'mediaError') {
-    if (state.location.current().url === 'player') {
+    if (state.location.url() === 'player') {
       state.playing.location = 'error'
       ipcRenderer.send('checkForVLC')
       ipcRenderer.once('checkForVLC', function (e, isInstalled) {
@@ -386,7 +386,7 @@ function pause () {
 }
 
 function playPause () {
-  if (state.location.current().url !== 'player') return
+  if (state.location.url() !== 'player') return
   if (state.playing.isPaused) {
     play()
   } else {
@@ -1236,7 +1236,7 @@ function showDoneNotification (torrent) {
 // * The video is paused
 // * The video is playing remotely on Chromecast or Airplay
 function showOrHidePlayerControls () {
-  var hideControls = state.location.current().url === 'player' &&
+  var hideControls = state.location.url() === 'player' &&
     state.playing.mouseStationarySince !== 0 &&
     new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
     !state.playing.isPaused &&
