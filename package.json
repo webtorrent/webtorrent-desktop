@@ -3,9 +3,9 @@
   "description": "WebTorrent, the streaming torrent client. For OS X, Windows, and Linux.",
   "version": "0.5.1",
   "author": {
-    "name": "Feross Aboukhadijeh",
+    "name": "WebTorrent, LLC",
     "email": "feross@feross.org",
-    "url": "http://feross.org"
+    "url": "https://webtorrent.io"
   },
   "bin": {
     "webtorrent-desktop": "./bin/cmd.js"
