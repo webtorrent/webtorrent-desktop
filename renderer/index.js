@@ -807,6 +807,9 @@ function findFilesRecursive (fileOrFolder, cb) {
 function createTorrent (options) {
   var torrentKey = state.nextTorrentKey++
   ipcRenderer.send('wt-create-torrent', torrentKey, options)
+  state.location.backToFirst(function () {
+    state.location.clearForward('create-torrent')
+  })
 }
 
 function torrentInfoHash (torrentKey, infoHash) {
