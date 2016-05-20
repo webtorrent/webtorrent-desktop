@@ -87,7 +87,7 @@ function init () {
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
-  dragDrop('body', onDrag)
+  dragDrop('body', onOpen)
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
@@ -273,15 +273,14 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'play') {
-    if (state.location.pending()) return
     state.location.go({
       url: 'player',
       onbeforeload: function (cb) {
+        play()
         openPlayer(args[0] /* infoHash */, args[1] /* index */, cb)
       },
       onbeforeunload: closePlayer
     })
-    play()
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -431,18 +430,18 @@ function openSubtitles () {
 function backToList () {
   // Exit any modals and screens with a back button
   state.modal = null
-  while (state.location.hasBack()) state.location.back()
+  state.location.backToFirst(function () {
+    // If we were already on the torrent list, scroll to the top
+    var contentTag = document.querySelector('.content')
+    if (contentTag) contentTag.scrollTop = 0
 
-  // If we were already on the torrent list, scroll to the top
-  var contentTag = document.querySelector('.content')
-  if (contentTag) contentTag.scrollTop = 0
-
-  // Work around virtual-dom issue: it doesn't expose its redraw function,
-  // and only redraws on requestAnimationFrame(). That means when the user
-  // closes the window (hide window / minimize to tray) and we want to pause
-  // the video, we update the vdom but it keeps playing until you reopen!
-  var mediaTag = document.querySelector('video,audio')
-  if (mediaTag) mediaTag.pause()
+    // Work around virtual-dom issue: it doesn't expose its redraw function,
+    // and only redraws on requestAnimationFrame(). That means when the user
+    // closes the window (hide window / minimize to tray) and we want to pause
+    // the video, we update the vdom but it keeps playing until you reopen!
+    var mediaTag = document.querySelector('video,audio')
+    if (mediaTag) mediaTag.pause()
+  })
 }
 
 // Checks whether we are connected and already casting
@@ -555,41 +554,29 @@ function saveState () {
   update()
 }
 
-// Called when the user clicks a magnet link or torrent, or uses the Open dialog
+// Called when the user drag-drops files onto the app
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  // Return to the home screen
-  backToList()
-
-  if (files.every(isTorrent)) {
-    // All .torrent files? Start downloading
-    files.forEach(addTorrent)
-  } else {
-    // Show the Create Torrent screen. Let's seed those files.
-    showCreateTorrent(files)
+  if (state.modal) {
+    state.modal = null
   }
-}
 
-// Called when the user drag-drops files onto the app
-function onDrag (files) {
-  if (!Array.isArray(files)) files = [ files ]
+  var subtitles = files.filter(isSubtitle)
 
-  var isInPlayer = state.location.current().url === 'player'
-  var isHome = state.location.current().url === 'home' && !state.modal
-
-  if (isInPlayer) {
-    // In the player, the only drag-drop function is adding subtitles
-    addSubtitles(files.filter(isSubtitle), true)
-  } else if (isHome) {
-    // Otherwise, you can only drag-drop onto the home screen
+  if (state.location.url() === 'home' || subtitles.length === 0) {
     if (files.every(isTorrent)) {
-      // All .torrent files? Start downloading
+      if (state.location.url() !== 'home') {
+        backToList()
+      }
+      // All .torrent files? Add them.
       files.forEach(addTorrent)
     } else {
       // Show the Create Torrent screen. Let's seed those files.
       showCreateTorrent(files)
     }
+  } else if (state.location.url() === 'player') {
+    addSubtitles(subtitles, true)
   }
 
   update()
@@ -757,7 +744,6 @@ function startTorrentingSummary (torrentSummary) {
 // Shows the Create Torrent page with options to seed a given file or folder
 function showCreateTorrent (files) {
   if (Array.isArray(files)) {
-    if (state.location.pending() || state.location.current().url !== 'home') return
     state.location.go({
       url: 'create-torrent',
       files: files
