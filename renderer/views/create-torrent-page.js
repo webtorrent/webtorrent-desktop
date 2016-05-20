@@ -123,7 +123,7 @@ function CreateTorrentPage (state) {
   }
 
   function handleCancel () {
-    dispatch('backToList')
+    dispatch('back')
   }
 
   function handleToggleShowAdvanced () {
