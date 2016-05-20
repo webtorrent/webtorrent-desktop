@@ -9,6 +9,8 @@ var APP_VERSION = require('./package.json').version
 var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
 
 module.exports = {
+  ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
+
   APP_COPYRIGHT: 'Copyright © 2014-2016 ' + APP_TEAM,
   APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
   APP_ICON: path.join(__dirname, 'static', 'WebTorrent'),
