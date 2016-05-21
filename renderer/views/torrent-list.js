@@ -190,7 +190,6 @@ function TorrentList (state) {
         (file, index) => renderFileRow(torrentSummary, file, index))
       filesElement = hx`
         <div class='files'>
-          <strong>Files</strong>
           <table>
             ${fileRows}
           </table>
@@ -223,7 +222,7 @@ function TorrentList (state) {
     var icon
     var handleClick
     if (isPlayable) {
-      icon = 'play_arrow' /* playable? add option to play */
+      icon = 'play_circle_outline' /* playable? add option to play */
       handleClick = dispatcher('play', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
