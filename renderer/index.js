@@ -1025,6 +1025,15 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
     : TorrentPlayer.isAudio(fileSummary) ? 'audio'
     : 'other'
 
+  // pick up where we left off
+  if (fileSummary.currentTime) {
+    var fraction = fileSummary.currentTime / fileSummary.duration
+    var secondsLeft = fileSummary.duration - fileSummary.currentTime
+    if (fraction < 0.9 && secondsLeft > 10) {
+      state.playing.jumpToTime = fileSummary.currentTime
+    }
+  }
+
   // if it's audio, parse out the metadata (artist, title, etc)
   if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
     ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
