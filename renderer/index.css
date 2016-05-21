@@ -592,7 +592,7 @@ body.drag .app::after {
 }
 
 .torrent-details {
-  padding: 8em 12px 20px 20px;
+  padding: 8em 0 20px 0;
 }
 
 .torrent-details table {
@@ -617,7 +617,7 @@ body.drag .app::after {
 .torrent-details td {
   overflow: hidden;
   padding: 0;
-  vertical-align: bottom;
+  vertical-align: middle;
 }
 
 .torrent-details td .icon {
@@ -627,7 +627,8 @@ body.drag .app::after {
 }
 
 .torrent-details td.col-icon {
-  width: 2em;
+  width: 3em;
+  padding-left: 16px;
 }
 
 .torrent-details td.col-name {
@@ -646,7 +647,8 @@ body.drag .app::after {
 }
 
 .torrent-details td.col-select {
-  width: 2em;
+  width: 3em;
+  padding-right: 13px;
   text-align: right;
 }
 
