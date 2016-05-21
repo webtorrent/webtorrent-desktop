@@ -9,8 +9,7 @@ var LocationHistory = require('./lib/location-history')
 module.exports = {
   getInitialState,
   getDefaultPlayState,
-  getDefaultSavedState,
-  getPlayingTorrentSummary
+  getDefaultSavedState
 }
 
 function getInitialState () {
@@ -63,7 +62,8 @@ function getInitialState () {
     /*
      * Getters, for convenience
      */
-    getPlayingTorrentSummary
+    getPlayingTorrentSummary,
+    getPlayingFileSummary
   }
 }
 
@@ -275,4 +275,10 @@ function getDefaultSavedState () {
 function getPlayingTorrentSummary () {
   var infoHash = this.playing.infoHash
   return this.saved.torrents.find((x) => x.infoHash === infoHash)
+}
+
+function getPlayingFileSummary () {
+  var torrentSummary = this.getPlayingTorrentSummary()
+  if (!torrentSummary) return null
+  return torrentSummary.files[this.playing.fileIndex]
 }
