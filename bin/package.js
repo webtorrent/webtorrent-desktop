@@ -103,7 +103,7 @@ var all = {
 
 var darwin = {
   // Build for OS X
-  platform: 'darwin',
+  platform: 'mas',
 
   // Build 64 bit binaries only.
   arch: 'x64',
@@ -211,6 +211,8 @@ function buildDarwin (cb) {
       }
     ]
 
+    infoPlist.ElectronTeamID = '5MAMC8G3L8'
+
     fs.writeFileSync(infoPlistPath, plist.build(infoPlist))
 
     // Copy torrent file icon into app bundle
@@ -248,8 +250,9 @@ function buildDarwin (cb) {
        */
       var signOpts = {
         app: appPath,
-        platform: 'darwin',
-        verbose: true
+        entitlements: path.join(config.STATIC_PATH, 'parent.entitlements'),
+        'entitlements-inherit': path.join(config.STATIC_PATH, 'child.entitlements'),
+        platform: 'mas'
       }
 
       console.log('OS X: Signing app...')
