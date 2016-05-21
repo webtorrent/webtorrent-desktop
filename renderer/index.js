@@ -605,6 +605,7 @@ function getTorrentSummary (torrentKey) {
 
 // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
 // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
+var instantIoRegex = /^(https:\/\/)?instant\.io\/#/
 function addTorrent (torrentId) {
   backToList()
   var torrentKey = state.nextTorrentKey++
@@ -612,6 +613,10 @@ function addTorrent (torrentId) {
   if (torrentId.path) {
     // Use path string instead of W3C File object
     torrentId = torrentId.path
+  }
+  // Allow a instant.io link to be pasted
+  if (typeof torrentId === 'string' && instantIoRegex.test(torrentId)) {
+    torrentId = torrentId.slice(torrentId.indexOf('#') + 1)
   }
   ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 }
