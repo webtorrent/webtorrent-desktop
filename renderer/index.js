@@ -562,7 +562,7 @@ function saveState () {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
         }
-        if (key === 'playStatus' && x.playStatus !== 'unplayable') {
+        if (key === 'playStatus') {
           continue // Don't save whether a torrent is playing / pending
         }
         torrent[key] = x[key]
@@ -878,6 +878,7 @@ function torrentMetadata (torrentKey, torrentInfo) {
   if (!torrentSummary.selections) {
     torrentSummary.selections = torrentSummary.files.map((x) => true)
   }
+  torrentSummary.defaultPlayFileIndex = pickFileToPlay(torrentInfo.files)
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -991,7 +992,7 @@ function openPlayer (infoHash, index, cb) {
   var torrentSummary = getTorrentSummary(infoHash)
 
   // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
+  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
   if (index === undefined) return cb(new errors.UnplayableError())
 
   // update UI to show pending playback

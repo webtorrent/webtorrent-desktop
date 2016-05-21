@@ -535,12 +535,21 @@ input {
   }
 }
 
+.torrent .buttons .play.resume-position {
+  position: relative;
+  -webkit-clip-path: circle(18px at center);
+}
+
 .torrent .buttons .delete {
   opacity: 0.5;
 }
 
 .torrent .buttons .delete:hover {
   opacity: 0.7;
+}
+
+.torrent .buttons .radial-progress {
+  position: absolute;
 }
 
 .torrent .name {
@@ -629,6 +638,12 @@ body.drag .app::after {
 .torrent-details td.col-icon {
   width: 3em;
   padding-left: 16px;
+}
+
+.torrent-details td.col-icon .radial-progress {
+  position: absolute;
+  margin-top: 4px;
+  margin-left: 0.5px;
 }
 
 .torrent-details td.col-name {
@@ -1014,4 +1029,67 @@ video::-webkit-media-text-track-container {
 
 .error-text {
   color: #c44;
+}
+
+/*
+ * RADIAL PROGRESS BAR
+ */
+
+.radial-progress {
+  width:  16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #888;
+}
+
+.radial-progress .circle .mask,
+.radial-progress .circle .fill {
+  width:    16px;
+  height:   16px;
+  position: absolute;
+  border-radius: 50%;
+  -webkit-backface-visibility: hidden;
+}
+
+.radial-progress .circle .mask {
+  clip: rect(0px, 16px, 16px, 8px);
+}
+
+.radial-progress .circle .fill {
+  clip: rect(0px, 8px, 16px, 0px);
+  background-color: white;
+}
+
+.radial-progress .inset {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: 2px 0 0 2px;
+  border-radius: 50%;
+  background-color: black;
+}
+
+.radial-progress-large {
+  width:  40px;
+  height: 40px;
+}
+
+.radial-progress-large .circle .mask,
+.radial-progress-large .circle .fill {
+  width:  40px;
+  height: 40px;
+}
+.radial-progress-large .circle .mask {
+  clip: rect(0px, 40px, 40px, 20px);
+}
+
+.radial-progress-large .circle .fill {
+  clip: rect(0px, 20px, 40px, 0px);
+  background-color: white;
+}
+
+.radial-progress-large .inset {
+  width: 32px;
+  height: 32px;
+  margin: 4px 0 0 4px;
 }

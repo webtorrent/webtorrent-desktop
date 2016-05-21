@@ -118,12 +118,7 @@ function TorrentList (state) {
     var infoHash = torrentSummary.infoHash
 
     var playIcon, playTooltip, playClass
-    if (torrentSummary.playStatus === 'unplayable') {
-      playIcon = 'play_arrow'
-      playClass = 'disabled'
-      playTooltip = 'Sorry, WebTorrent can\'t play any of the files in this torrent. ' +
-        'View details and click on individual files to open them in another program.'
-    } else if (torrentSummary.playStatus === 'timeout') {
+    if (torrentSummary.playStatus === 'timeout') {
       playIcon = 'warning'
       playTooltip = 'Playback timed out. No seeds? No internet? Click to try again.'
     } else {
@@ -143,6 +138,17 @@ function TorrentList (state) {
       downloadTooltip = 'Click to start torrenting.'
     }
 
+    // Do we have a saved position? Show it using a radial progress bar on top
+    // of the play button, unless already showing a spinner there:
+    var positionElem
+    var willShowSpinner = torrentSummary.playStatus === 'requested'
+    var defaultFile = torrentSummary.files[torrentSummary.defaultPlayFileIndex]
+    if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
+      var fraction = defaultFile.currentTime / defaultFile.duration
+      positionElem = renderRadialProgressBar(fraction, 'radial-progress-large')
+      playClass = 'resume-position'
+    }
+
     // Only show the play button for torrents that contain playable media
     var playButton
     if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
@@ -158,6 +164,7 @@ function TorrentList (state) {
 
     return hx`
       <div class='buttons'>
+        ${positionElem}
         ${playButton}
         <i.button-round.icon.download
           class=${torrentSummary.status}
@@ -216,13 +223,20 @@ function TorrentList (state) {
       progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
-    // Second, render the file as a table row
+    // Second, for media files where we saved our position, show how far we got
+    var positionElem
+    if (file.currentTime) {
+      // Radial progress bar. 0% = start from 0:00, 270% = 3/4 of the way thru
+      positionElem = renderRadialProgressBar(file.currentTime / file.duration)
+    }
+
+    // Finally, render the file as a table row
     var isPlayable = TorrentPlayer.isPlayable(file)
     var infoHash = torrentSummary.infoHash
     var icon
     var handleClick
     if (isPlayable) {
-      icon = 'play_circle_outline' /* playable? add option to play */
+      icon = 'play_arrow' /* playable? add option to play */
       handleClick = dispatcher('play', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
@@ -234,6 +248,7 @@ function TorrentList (state) {
     return hx`
       <tr onclick=${handleClick}>
         <td class='col-icon ${rowClass}'>
+          ${positionElem}
           <i class='icon'>${icon}</i>
         </td>
         <td class='col-name ${rowClass}'>
@@ -252,4 +267,25 @@ function TorrentList (state) {
       </tr>
     `
   }
+}
+
+function renderRadialProgressBar (fraction, cssClass) {
+  var rotation = 360 * fraction
+  var transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
+  var transformFix = {transform: 'rotate(' + rotation + 'deg)'}
+
+  return hx`
+    <div class="radial-progress ${cssClass}">
+      <div class="circle">
+        <div class="mask full" style=${transformFill}>
+          <div class="fill" style=${transformFill}></div>
+        </div>
+        <div class="mask half">
+          <div class="fill" style=${transformFill}></div>
+          <div class="fill fix" style=${transformFix}></div>
+        </div>
+      </div>
+      <div class="inset"></div>
+    </div>
+  `
 }
