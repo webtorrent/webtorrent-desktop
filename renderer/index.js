@@ -873,8 +873,13 @@ function torrentMetadata (torrentKey, torrentInfo) {
   torrentSummary.status = 'downloading'
   torrentSummary.name = torrentSummary.displayName || torrentInfo.name
   torrentSummary.path = torrentInfo.path
-  torrentSummary.files = torrentInfo.files
   torrentSummary.magnetURI = torrentInfo.magnetURI
+  // TODO: make torrentInfo immutable, save separately as torrentSummary.info
+  // For now, check whether torrentSummary.files has already been set:
+  var hasDetailedFileInfo = torrentSummary.files && torrentSummary.files[0].path
+  if (!hasDetailedFileInfo) {
+    torrentSummary.files = torrentInfo.files
+  }
   if (!torrentSummary.selections) {
     torrentSummary.selections = torrentSummary.files.map((x) => true)
   }
