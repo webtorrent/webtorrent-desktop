@@ -8,7 +8,10 @@ var prettyBytes = require('prettier-bytes')
 var Bitfield = require('bitfield')
 
 var TorrentSummary = require('../lib/torrent-summary')
+var visualizeAudio = require('./visualize-audio.js')
+
 var {dispatch, dispatcher} = require('../lib/dispatcher')
+var visualizer
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state) {
@@ -110,6 +113,10 @@ function renderMedia (state) {
 
   // As soon as the video loads enough to know the video dimensions, resize the window
   function onLoadedMetadata (e) {
+    if (state.playing.type === 'audio') {
+      visualizer = visualizeAudio(e)
+    }
+
     if (state.playing.type !== 'video') return
     var video = e.target
     var dimensions = {
@@ -164,6 +171,10 @@ function renderAudioMetadata (state) {
   var torrentSummary = state.getPlayingTorrentSummary()
   var fileSummary = torrentSummary.files[state.playing.fileIndex]
   if (!fileSummary.audioInfo) return
+
+  if (visualizer && state.playing.isPaused) visualizer.stop()
+  if (visualizer && !state.playing.isPaused) visualizer.start()
+
   var info = fileSummary.audioInfo
 
   // Get audio track info
@@ -191,13 +202,13 @@ function renderAudioMetadata (state) {
   var emptyLabel = hx`<label></label>`
   elems.unshift(hx`<div class='audio-title'>${elems.length ? emptyLabel : undefined}${title}</div>`)
 
-  return hx`<div class='audio-metadata'>${elems}</div>`
+  return hx`<div><canvas class="visualizer"></canvas><div class='audio-metadata'>${elems}</div></div>`
 }
 
 function renderLoadingSpinner (state) {
   if (state.playing.isPaused) return
   var isProbablyStalled = state.playing.isStalled ||
-    (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
+  (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
   var prog = state.getPlayingTorrentSummary().progress || {}
