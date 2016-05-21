@@ -837,14 +837,21 @@ body.drag .app::after {
   height: 14px;
 }
 
+/**
+ * Set the cue text position so it appears above the player controls.
+ */
+video::-webkit-media-text-track-container {
+  bottom: 60px;
+  transition: bottom 0.1s ease-out;
+}
+.app.hide-video-controls video::-webkit-media-text-track-container {
+  bottom: 30px;
+}
 ::cue {
   background: none;
   color: #FFF;
-  font: 24px;
-  line-height: 1.3em;
   text-shadow: #000 -1px 0 1px, #000 1px 0 1px, #000 0 -1px 1px, #000 0 1px 1px, rgba(50, 50, 50, 0.5) 2px 2px 0;
 }
-
 
 /*
  * CHROMECAST / AIRPLAY CONTROLS
