@@ -10,9 +10,6 @@ var electron = require('electron')
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
 
-// Listen for messages from the main process
-setupIpc()
-
 var appConfig = require('application-config')('WebTorrent')
 var concat = require('simple-concat')
 var dragDrop = require('drag-drop')
@@ -60,6 +57,9 @@ loadState(init)
  * the dock icon and drag+drop.
  */
 function init () {
+  // Listen for messages from the main process
+  setupIpc()
+
   // Clean up the freshly-loaded config file, which may be from an older version
   cleanUpConfig()
 
