@@ -4,12 +4,18 @@ var captureVideoFrame = require('./capture-video-frame')
 var path = require('path')
 
 function torrentPoster (torrent, cb) {
-  // First, try to use the largest video file
+  // First, try to use a poster image if available
+  var posterFile = torrent.files.filter(function (file) {
+    return /^poster\.(jpg|png|gif)$/.test(file.name)
+  })[0]
+  if (posterFile) return torrentPosterFromImage(posterFile, torrent, cb)
+
+  // Second, try to use the largest video file
   // Filter out file formats that the <video> tag definitely can't play
   var videoFile = getLargestFileByExtension(torrent, ['.mp4', '.m4v', '.webm', '.mov', '.mkv'])
   if (videoFile) return torrentPosterFromVideo(videoFile, torrent, cb)
 
-  // Second, try to use the largest image file
+  // Third, try to use the largest image file
   var imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.png'])
   if (imgFile) return torrentPosterFromImage(imgFile, torrent, cb)
 
