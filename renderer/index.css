@@ -827,6 +827,11 @@ body.drag .app::after {
   outline: none;
 }
 
+.player-controls .time {
+  float: left;
+  line-height: 33px;
+}
+
 .player .playback-bar:hover .loading-bar {
   height: 5px;
 }
