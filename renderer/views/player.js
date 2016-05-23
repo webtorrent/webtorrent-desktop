@@ -452,7 +452,7 @@ function renderPlayerControls (state) {
   if (state.playing.playbackRate !== 1) {
     elements.push(hx`
       <span class='rate float-left'>
-        speed: ${state.playing.playbackRate}X
+        ${state.playing.playbackRate}x
       </span>
     `)
   }
