@@ -273,14 +273,7 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'play') {
-    state.location.go({
-      url: 'player',
-      onbeforeload: function (cb) {
-        play()
-        openPlayer(args[0] /* infoHash */, args[1] /* index */, cb)
-      },
-      onbeforeunload: closePlayer
-    })
+    playFile(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'playbackJump') {
     jumpToTime(args[0] /* seconds */)
@@ -992,7 +985,20 @@ function pickFileToPlay (files) {
   return undefined
 }
 
-// Opens the video player
+function playFile (infoHash, index) {
+  state.location.go({
+    url: 'player',
+    onbeforeload: function (cb) {
+      play()
+      openPlayer(infoHash, index, cb)
+    },
+    onbeforeunload: closePlayer
+  }, function (err) {
+    if (err) onError(err)
+  })
+}
+
+// Opens the video player to a specific torrent
 function openPlayer (infoHash, index, cb) {
   var torrentSummary = getTorrentSummary(infoHash)
 
