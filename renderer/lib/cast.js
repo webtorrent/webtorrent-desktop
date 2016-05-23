@@ -8,7 +8,8 @@ module.exports = {
   play,
   pause,
   seek,
-  setVolume
+  setVolume,
+  setRate
 }
 
 var airplay = require('airplay-js')
@@ -342,6 +343,22 @@ function pause () {
   if (device) {
     device.pause(castCallback)
   }
+}
+
+function setRate (rate) {
+  var device
+  var result = true
+  if (state.playing.location === 'chromecast') {
+    // TODO find how to control playback rate on chromecast
+    castCallback()
+    result = false
+  } else if (state.playing.location === 'airplay') {
+    device = state.devices.airplay
+    device.rate(rate, castCallback)
+  } else {
+    result = false
+  }
+  return result
 }
 
 function seek (time) {
