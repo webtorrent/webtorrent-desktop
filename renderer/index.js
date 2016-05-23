@@ -183,7 +183,7 @@ function render (state) {
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
   showOrHidePlayerControls()
-  vdomLoop.update(state)
+  if (vdomLoop) vdomLoop.update(state)
   updateElectron()
 }
 
