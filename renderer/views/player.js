@@ -48,6 +48,9 @@ function renderMedia (state) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
     }
+    if (state.playing.playbackRate !== mediaElement.playbackRate) {
+      mediaElement.playbackRate = state.playing.playbackRate
+    }
     // Set volume
     if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
       mediaElement.volume = state.playing.setVolume
@@ -440,6 +443,12 @@ function renderPlayerControls (state) {
     </span>
   `)
 
+  // render playback rate
+  if (state.playing.playbackRate !== 1) {
+    elements.push(hx`
+     <span class="rate">speed: ${state.playing.playbackRate}X</span>
+    `)
+  }
   // Finally, the big button in the center plays or pauses the video
   elements.push(hx`
     <i class='icon play-pause' onclick=${dispatcher('playPause')}>
