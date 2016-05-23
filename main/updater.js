@@ -9,6 +9,10 @@ var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
+var AUTO_UPDATE_URL = config.AUTO_UPDATE_URL +
+  '?version=' + config.APP_VERSION +
+  '&platform=' + process.platform
+
 function init () {
   if (process.platform === 'linux') {
     initLinux()
@@ -20,7 +24,7 @@ function init () {
 // The Electron auto-updater does not support Linux yet, so manually check for updates and
 // `show the user a modal notification.
 function initLinux () {
-  get.concat(config.AUTO_UPDATE_URL, onResponse)
+  get.concat(AUTO_UPDATE_URL, onResponse)
 
   function onResponse (err, res, data) {
     if (err) return log(`Update error: ${err.message}`)
@@ -67,6 +71,6 @@ function initDarwinWin32 () {
     (e, notes, name, date, url) => log(`Update downloaded: ${name}: ${url}`)
   )
 
-  electron.autoUpdater.setFeedURL(config.AUTO_UPDATE_URL)
+  electron.autoUpdater.setFeedURL(AUTO_UPDATE_URL)
   electron.autoUpdater.checkForUpdates()
 }

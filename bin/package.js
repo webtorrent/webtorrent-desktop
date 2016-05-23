@@ -182,8 +182,6 @@ function buildDarwin (cb) {
     var infoPlistPath = path.join(contentsPath, 'Info.plist')
     var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
-    // TODO: Use new `extend-info` and `extra-resource` opts to electron-packager,
-    // available as of v6.
     infoPlist.CFBundleDocumentTypes = [
       {
         CFBundleTypeExtensions: [ 'torrent' ],
@@ -208,6 +206,25 @@ function buildDarwin (cb) {
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
         CFBundleURLSchemes: [ 'magnet' ]
+      }
+    ]
+
+    infoPlist.UTExportedTypeDeclarations = [
+      {
+        UTTypeConformsTo: [
+          'public.data',
+          'public.item',
+          'com.bittorrent.torrent'
+        ],
+        UTTypeDescription: 'BitTorrent Document',
+        UTTypeIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
+        UTTypeIdentifier: 'org.bittorrent.torrent',
+        UTTypeReferenceURL: 'http://www.bittorrent.org/beps/bep_0000.html',
+        UTTypeTagSpecification: {
+          'com.apple.ostype': 'TORR',
+          'public.filename-extension': [ 'torrent' ],
+          'public.mime-type': 'application/x-bittorrent'
+        }
       }
     ]
 

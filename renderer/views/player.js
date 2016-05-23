@@ -128,12 +128,18 @@ function renderMedia (state) {
   }
 
   function onCanPlay (e) {
-    var video = e.target
-    if (video.webkitVideoDecodedByteCount > 0 &&
-      video.webkitAudioDecodedByteCount === 0) {
+    var elem = e.target
+    if (state.playing.type === 'video') {
+      if (elem.webkitVideoDecodedByteCount === 0) {
+        dispatch('mediaError', 'Video codec unsupported')
+      } else if (elem.webkitAudioDecodedByteCount === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+    } else if (state.playing.type === 'audio' &&
+        elem.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
     } else {
-      video.play()
+      elem.play()
     }
   }
 }
@@ -428,6 +434,15 @@ function renderPlayerControls (state) {
         />
     </div>
   `)
+
+  // Show video playback progress
+  var videoProgress = formatPlaybackProgress(state.playing.currentTime, state.playing.duration)
+  elements.push(hx`
+    <span.time>
+      ${videoProgress[0]} / ${videoProgress[1]}
+    </span>
+  `)
+
   // render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push(hx`
@@ -547,4 +562,41 @@ function cssBackgroundImagePoster (state) {
 function cssBackgroundImageDarkGradient () {
   return 'radial-gradient(circle at center, ' +
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
+}
+
+// Format the playback time of the video
+function formatPlaybackProgress (currentTime, duration) {
+  if (
+    typeof currentTime !== 'number' || typeof duration !== 'number' ||
+    isNaN(currentTime) || isNaN(duration)
+  ) {
+    return ['00:00', '00:00']
+  }
+
+  var durationHours = formatTimePart(duration / 3600)
+  var durationMinutes = formatTimePart(duration % 3600 / 60)
+  var durationSeconds = formatTimePart(duration % 60)
+
+  var durationString =
+    (durationHours !== '00' ? durationHours + ':' : '') +
+    durationMinutes + ':' +
+    durationSeconds
+
+  var currentTimeHours = durationHours !== '00' && formatTimePart(currentTime / 3600)
+  var currentTimeMinutes = formatTimePart(currentTime % 3600 / 60)
+  var currentTimeSeconds = formatTimePart(currentTime % 60)
+
+  var currentTimeString =
+    (currentTimeHours ? currentTimeHours + ':' : '') +
+    currentTimeMinutes + ':' +
+    currentTimeSeconds
+
+  return [currentTimeString, durationString]
+}
+
+function formatTimePart (num) {
+  num = Math.floor(num)
+  return num < 100
+    ? ('00' + num).slice(-2)
+    : num
 }

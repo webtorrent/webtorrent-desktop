@@ -233,17 +233,17 @@ function TorrentList (state) {
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return hx`
-      <tr>
-        <td class='col-icon ${rowClass}' onclick=${handleClick}>
+      <tr onclick=${handleClick}>
+        <td class='col-icon ${rowClass}'>
           <i class='icon'>${icon}</i>
         </td>
-        <td class='col-name ${rowClass}' onclick=${handleClick}>
+        <td class='col-name ${rowClass}'>
           ${file.name}
         </td>
-        <td class='col-progress ${rowClass}' onclick=${handleClick}>
+        <td class='col-progress ${rowClass}'>
           ${isSelected ? progress : ''}
         </td>
-        <td class='col-size ${rowClass}' onclick=${handleClick}>
+        <td class='col-size ${rowClass}'>
           ${prettyBytes(file.length)}
         </td>
         <td class='col-select'

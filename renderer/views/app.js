@@ -22,7 +22,7 @@ function App (state) {
   // * The mouse is over the controls or we're scrubbing (see CSS)
   // * The video is paused
   // * The video is playing remotely on Chromecast or Airplay
-  var hideControls = state.location.current().url === 'player' &&
+  var hideControls = state.location.url() === 'player' &&
     state.playing.mouseStationarySince !== 0 &&
     new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
     !state.playing.isPaused &&
@@ -31,10 +31,10 @@ function App (state) {
 
   // Hide the header on Windows/Linux when in the player
   // On OSX, the header appears as part of the title bar
-  var hideHeader = process.platform !== 'darwin' && state.location.current().url === 'player'
+  var hideHeader = process.platform !== 'darwin' && state.location.url() === 'player'
 
   var cls = [
-    'view-' + state.location.current().url, /* e.g. view-home, view-player */
+    'view-' + state.location.url(), /* e.g. view-home, view-player */
     'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
   ]
   if (state.window.isFullScreen) cls.push('is-fullscreen')
@@ -55,12 +55,13 @@ function App (state) {
 function getErrorPopover (state) {
   var now = new Date().getTime()
   var recentErrors = state.errors.filter((x) => now - x.time < 5000)
+  var hasErrors = recentErrors.length > 0
 
   var errorElems = recentErrors.map(function (error) {
     return hx`<div class='error'>${error.message}</div>`
   })
   return hx`
-  <div class='error-popover ${recentErrors.length > 0 ? 'visible' : 'hidden'}'>
+    <div class='error-popover ${hasErrors ? 'visible' : 'hidden'}'>
       <div class='title'>Error</div>
       ${errorElems}
     </div>
@@ -81,6 +82,6 @@ function getModal (state) {
 }
 
 function getView (state) {
-  var url = state.location.current().url
+  var url = state.location.url()
   return Views[url](state)
 }

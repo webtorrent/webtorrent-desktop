@@ -37,7 +37,7 @@ function Header (state) {
   }
 
   function getAddButton () {
-    if (state.location.current().url !== 'player') {
+    if (state.location.url() !== 'player') {
       return hx`
         <i
           class='icon add'
