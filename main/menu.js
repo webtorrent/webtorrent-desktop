@@ -134,10 +134,10 @@ function onPlayerOpen () {
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
   getMenuItem('Add Subtitles File...').enabled = true
-  getMenuItem('Skip forward 10 seconds').enabled = true
-  getMenuItem('Skip back 10 seconds').enabled = true
-  getMenuItem('Increase video speed').enabled = true
-  getMenuItem('Decrease video speed').enabled = true
+  getMenuItem('Step Forward').enabled = true
+  getMenuItem('Step Backward').enabled = true
+  getMenuItem('Increase Speed').enabled = true
+  getMenuItem('Decrease Speed').enabled = true
 }
 
 function onPlayerClose () {
@@ -146,10 +146,10 @@ function onPlayerClose () {
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
   getMenuItem('Add Subtitles File...').enabled = false
-  getMenuItem('Skip forward 10 seconds').enabled = false
-  getMenuItem('Skip back 10 seconds').enabled = false
-  getMenuItem('Increase video speed').enabled = false
-  getMenuItem('Decrease video speed').enabled = false
+  getMenuItem('Step Forward').enabled = false
+  getMenuItem('Step Backward').enabled = false
+  getMenuItem('Increase Speed').enabled = false
+  getMenuItem('Decrease Speed').enabled = false
 }
 
 function onToggleFullScreen (isFullScreen) {
@@ -340,21 +340,13 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Add Subtitles File...',
-          click: openSubtitles,
-          enabled: false
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Skip forward 10 seconds',
+          label: 'Step Forward',
           accelerator: 'CmdOrCtrl+Alt+Right',
           click: skipForward,
           enabled: false
         },
         {
-          label: 'Skip back 10 seconds',
+          label: 'Step Backward',
           accelerator: 'CmdOrCtrl+Alt+Left',
           click: skipBack,
           enabled: false
@@ -363,15 +355,23 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Increase video speed',
-          accelerator: 'CmdOrCtrl+plus',
+          label: 'Increase Speed',
+          accelerator: 'CmdOrCtrl+=',
           click: increasePlaybackRate,
           enabled: false
         },
         {
-          label: 'Decrease video speed',
+          label: 'Decrease Speed',
           accelerator: 'CmdOrCtrl+-',
           click: decreasePlaybackRate,
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Add Subtitles File...',
+          click: openSubtitles,
           enabled: false
         }
       ]

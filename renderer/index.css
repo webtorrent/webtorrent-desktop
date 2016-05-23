@@ -94,9 +94,18 @@ table {
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
+  opacity: 0.85;
 
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+.icon.disabled {
+  opacity: 0.3;
+}
+
+.icon:not(.disabled):hover {
+  opacity: 1;
 }
 
 /*
@@ -109,8 +118,8 @@ table {
   white-space: nowrap;
 }
 
-.disabled {
-  opacity: 0.3;
+.float-left {
+  float: left;
 }
 
 .float-right {
@@ -144,8 +153,8 @@ table {
 .header {
   background: rgb(40, 40, 40);
   border-bottom: 1px solid rgb(20, 20, 20);
-  height: 37px; /* vertically center OS menu buttons (OS X) */
-  padding-top: 6px;
+  height: 38px; /* vertically center OS menu buttons (OS X) */
+  padding-top: 7px;
   overflow: hidden;
   flex: 0 1 auto;
   opacity: 1;
@@ -164,7 +173,13 @@ table {
 }
 
 .app.view-player .header {
-  opacity: 0.8;
+  background: rgba(40, 40, 40, 0.8);
+  border-bottom: none;
+}
+
+.app.view-player.is-win32 .header,
+.app.view-player.is-linux .header {
+  background: none;
 }
 
 .app.hide-video-controls.view-player .header {
@@ -172,12 +187,8 @@ table {
   cursor: none;
 }
 
-.app.hide-header .header {
-  display: none;
-}
-
 .header .title {
-  opacity: 0.6;
+  opacity: 0.7;
   position: absolute;
   margin-top: 1px;
   padding: 0 150px 0 150px;
@@ -188,35 +199,22 @@ table {
 
 .header .nav {
   font-weight: bold;
-  margin-right: 9px;
 }
 
 .header .nav.left {
-  float: left;
+  margin-left: 10px;
+}
+
+.header .nav.right {
+  margin-right: 10px;
 }
 
 .app.is-darwin:not(.is-fullscreen) .header .nav.left {
   margin-left: 78px;
 }
 
-.header .nav.right {
-  float: right;
-}
-
-.header .nav * {
-  opacity: 0.6;
-}
-
-.header .nav .disabled {
-  opacity: 0.1;
-}
-
-.header .nav *:not(.disabled):hover {
-  opacity: 1;
-}
-
-.header .nav .back,
-.header .nav .forward {
+.header .back,
+.header .forward {
   font-size: 30px;
   margin-top: -3px;
 }
@@ -695,7 +693,7 @@ body.drag .app::after {
  * PLAYER CONTROLS
  */
 
-.player-controls {
+.player .controls {
   position: fixed;
   background: rgba(40, 40, 40, 0.8);
   width: 100%;
@@ -704,7 +702,63 @@ body.drag .app::after {
   transition: opacity 0.15s ease-out;
 }
 
-.app.hide-video-controls .player-controls {
+.player .controls .icon {
+  display: block;
+  margin: 8px;
+  font-size: 22px;
+  opacity: 0.85;
+
+  /*
+   * Fix for overflowing captions icon
+   * https://github.com/feross/webtorrent-desktop/issues/467
+   */
+  max-width: 23px;
+  overflow: hidden;
+}
+
+.player .controls .icon:hover {
+  opacity: 1;
+}
+
+.player .controls .play-pause {
+  font-size: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+.player .controls .volume-slider {
+  -webkit-appearance: none;
+  -webkit-app-region: no-drag;
+  width: 60px;
+  height: 3px;
+  margin: 18px 8px 8px 0;
+  border: none;
+  padding: 0;
+  opacity: 0.85;
+  vertical-align: sub;
+}
+
+.player .controls .time,
+.player .controls .rate {
+  font-weight: 100;
+  font-size: 13px;
+  margin: 9px 8px 8px 8px;
+  opacity: 0.8;
+}
+
+.player .controls .icon.closed-captions {
+  font-size: 26px;
+  margin-top: 6px;
+}
+
+.player .controls .icon.fullscreen {
+  font-size: 26px;
+  margin-right: 15px;
+  margin-top: 6px;
+}
+
+.app.hide-video-controls .player .controls {
   opacity: 0;
 }
 
@@ -712,13 +766,16 @@ body.drag .app::after {
   cursor: none;
 }
 
-.app.hide-video-controls .player .player-controls:hover {
+/* TODO: find better way to handle this (that also
+ * keeps the header visible too).
+ */
+.app.hide-video-controls .player .controls:hover {
   opacity: 1;
   cursor: default;
 }
 
 /* invisible click target for scrubbing */
-.player-controls .scrub-bar {
+.player .controls .scrub-bar {
   position: absolute;
   width: 100%;
   height: 23px; /* 3px .loading-bar plus 10px above and below */
@@ -727,7 +784,7 @@ body.drag .app::after {
   -webkit-app-region: no-drag;
 }
 
-.player-controls .loading-bar {
+.player .controls .loading-bar {
   position: relative;
   width: 100%;
   top: -3px;
@@ -737,14 +794,14 @@ body.drag .app::after {
   position: absolute;
 }
 
-.player-controls .loading-bar-part {
+.player .controls .loading-bar-part {
   position: absolute;
   background-color: #dd0000;
   top: 0;
   height: 100%;
 }
 
-.player-controls .playback-cursor {
+.player .controls .playback-cursor {
   position: absolute;
   top: -3px;
   background-color: #FFF;
@@ -758,102 +815,22 @@ body.drag .app::after {
   transition-timing-function: ease-out;
 }
 
-.player-controls .play-pause {
-  display: block;
-  width: 30px;
-  height: 30px;
-  padding: 5px;
-  margin: 0 auto;
-}
-.player-controls .rate {
-  display: inline;
-  height: 30px;
-  padding: 5px;
-  margin-left: 20px;
-  float: left;
-}
-
-.player-controls .device,
-.player-controls .fullscreen,
-.player-controls .closed-captions,
-.player-controls .volume-icon,
-.player-controls .back {
-  display: block;
-  height: 20px;
-  margin: 5px;
-
-  /*
-   * Fix for overflowing captions icon
-   * https://github.com/feross/webtorrent-desktop/issues/467
-   */
-  max-width: 22px;
-  overflow: hidden;
-}
-
-.player-controls .volume,
-.player-controls .back {
-  float: left;
-}
-
-.player-controls .device,
-.player-controls .closed-captions,
-.player-controls .fullscreen {
-  float: right;
-}
-
-.player-controls .fullscreen {
-  margin-right: 15px;
-}
-
-.player-controls .volume-icon,
-.player-controls .device {
-  font-size: 18px; /* make the cast icons less huge */
-  margin-top: 8px !important;
-}
-
-.player-controls .closed-captions.active,
-.player-controls .device.active {
+.player .controls .closed-captions.active,
+.player .controls .device.active {
   color: #9af;
 }
 
-.player-controls .volume {
-  display: block;
-  width: 90px;
-}
-
-.player-controls .volume-icon {
-  float: left;
-  margin-right: 0px;
-}
-
-.player-controls .volume-slider {
+.player .controls .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 50px;
-  height: 3px;
-  border: none;
-  padding: 0;
-  vertical-align: sub;
   -webkit-app-region: no-drag;
-}
-
-.player-controls .volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
   background-color: #fff;
-  opacity: 1.0;
-  width: 10px;
-  height: 10px;
-  border: 1px solid #303233;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  -webkit-app-region: no-drag;
 }
 
-.player-controls .volume-slider:focus {
+.player .controls .volume-slider:focus {
   outline: none;
-}
-
-.player-controls .time {
-  float: left;
-  line-height: 33px;
 }
 
 .player .playback-bar:hover .loading-bar {
@@ -997,10 +974,6 @@ video::-webkit-media-text-track-container {
   width: 100%;
   overflow: hidden;
   z-index: 1;
-}
-
-.app.hide-header .error-popover {
-  top: 0px;
 }
 
 .error-popover.hidden {
