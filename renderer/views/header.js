@@ -10,7 +10,7 @@ function Header (state) {
   return hx`
     <div class='header'>
       ${getTitle()}
-      <div class='nav left'>
+      <div class='nav left float-left'>
         <i.icon.back
           class=${state.location.hasBack() ? '' : 'disabled'}
           title='Back'
@@ -24,7 +24,7 @@ function Header (state) {
           chevron_right
         </i>
       </div>
-      <div class='nav right'>
+      <div class='nav right float-right'>
         ${getAddButton()}
       </div>
     </div>

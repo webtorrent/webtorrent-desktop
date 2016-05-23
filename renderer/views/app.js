@@ -29,10 +29,6 @@ function App (state) {
     state.playing.location === 'local' &&
     state.playing.playbackRate === 1
 
-  // Hide the header on Windows/Linux when in the player
-  // On OSX, the header appears as part of the title bar
-  var hideHeader = process.platform !== 'darwin' && state.location.url() === 'player'
-
   var cls = [
     'view-' + state.location.url(), /* e.g. view-home, view-player */
     'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
@@ -40,7 +36,6 @@ function App (state) {
   if (state.window.isFullScreen) cls.push('is-fullscreen')
   if (state.window.isFocused) cls.push('is-focused')
   if (hideControls) cls.push('hide-video-controls')
-  if (hideHeader) cls.push('hide-header')
 
   return hx`
     <div class='app ${cls.join(' ')}'>

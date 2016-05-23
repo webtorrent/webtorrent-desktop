@@ -4,8 +4,9 @@ var h = require('virtual-dom/h')
 var hyperx = require('hyperx')
 var hx = hyperx(h)
 
-var prettyBytes = require('prettier-bytes')
 var Bitfield = require('bitfield')
+var prettyBytes = require('prettier-bytes')
+var zeroFill = require('zero-fill')
 
 var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
@@ -313,15 +314,26 @@ function renderPlayerControls (state) {
     hx`
       <div class='playback-bar'>
         ${renderLoadingBar(state)}
-        <div class='playback-cursor' style=${playbackCursorStyle}></div>
-        <div class='scrub-bar'
+        <div
+          class='playback-cursor'
+          style=${playbackCursorStyle}>
+        </div>
+        <div
+          class='scrub-bar'
           draggable='true'
           onclick=${handleScrub},
-          ondrag=${handleScrub}></div>
+          ondrag=${handleScrub}>
+        </div>
       </div>
     `,
     hx`
-      <i class='icon fullscreen'
+      <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
+        ${state.playing.isPaused ? 'play_arrow' : 'pause'}
+      </i>
+    `,
+    hx`
+      <i
+        class='icon fullscreen float-right'
         onclick=${dispatcher('toggleFullScreen')}>
         ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
       </i>
@@ -331,7 +343,7 @@ function renderPlayerControls (state) {
   if (state.playing.type === 'video') {
     // show closed captions icon
     elements.push(hx`
-      <i.icon.closed-captions
+      <i.icon.closed-captions.float-right
         class=${captionsClass}
         onclick=${handleSubtitles}>
         closed_captions
@@ -376,7 +388,7 @@ function renderPlayerControls (state) {
   if (state.devices.chromecast || isOnChromecast) {
     var castIcon = isOnChromecast ? 'cast_connected' : 'cast'
     elements.push(hx`
-      <i.icon.device
+      <i.icon.device.float-right
         class=${chromecastClass}
         onclick=${chromecastHandler}>
         ${castIcon}
@@ -385,7 +397,7 @@ function renderPlayerControls (state) {
   }
   if (state.devices.airplay || isOnAirplay) {
     elements.push(hx`
-      <i.icon.device
+      <i.icon.device.float-right
         class=${airplayClass}
         onclick=${airplayHandler}>
         airplay
@@ -394,21 +406,11 @@ function renderPlayerControls (state) {
   }
   if (state.devices.dlna || isOnDlna) {
     elements.push(hx`
-      <i.icon.device
+      <i
+        class='icon device float-right'
         class=${dlnaClass}
         onclick=${dlnaHandler}>
         tv
-      </i>
-    `)
-  }
-
-  // On OSX, the back button is in the title bar of the window; see app.js
-  // On other platforms, we render one over the video on mouseover
-  if (process.platform !== 'darwin') {
-    elements.push(hx`
-      <i.icon.back
-        onclick=${dispatcher('back')}>
-        chevron_left
       </i>
     `)
   }
@@ -422,43 +424,41 @@ function renderPlayerControls (state) {
   }
 
   elements.push(hx`
-    <div.volume>
-        <i.icon.volume-icon onmousedown=${handleVolumeMute}>
-          ${volumeIcon}
-        </i>
-        <input.volume-slider
-          type='range' min='0' max='1' step='0.05' value=${volumeChanging !== false ? volumeChanging : volume}
-          onmousedown=${handleVolumeScrub}
-          onmouseup=${handleVolumeScrub}
-          onmousemove=${handleVolumeScrub}
-          style=${volumeStyle}
-        />
+    <div class='volume float-left'>
+      <i
+        class='icon volume-icon float-left'
+        onmousedown=${handleVolumeMute}>
+        ${volumeIcon}
+      </i>
+      <input
+        class='volume-slider float-right'
+        type='range' min='0' max='1' step='0.05' value=${volumeChanging !== false ? volumeChanging : volume}
+        onmousedown=${handleVolumeScrub}
+        onmouseup=${handleVolumeScrub}
+        onmousemove=${handleVolumeScrub}
+        style=${volumeStyle}
+      />
     </div>
   `)
 
   // Show video playback progress
-  var videoProgress = formatPlaybackProgress(state.playing.currentTime, state.playing.duration)
   elements.push(hx`
-    <span.time>
-      ${videoProgress[0]} / ${videoProgress[1]}
+    <span class='time float-left'>
+      ${formatTime(state.playing.currentTime)} / ${formatTime(state.playing.duration)}
     </span>
   `)
 
   // render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push(hx`
-     <span class="rate">speed: ${state.playing.playbackRate}X</span>
+      <span class='rate float-left'>
+        speed: ${state.playing.playbackRate}X
+      </span>
     `)
   }
-  // Finally, the big button in the center plays or pauses the video
-  elements.push(hx`
-    <i class='icon play-pause' onclick=${dispatcher('playPause')}>
-      ${state.playing.isPaused ? 'play_arrow' : 'pause'}
-    </i>
-  `)
 
   return hx`
-    <div class='player-controls'>
+    <div class='controls'>
       ${elements}
       ${renderSubtitlesOptions(state)}
     </div>
@@ -565,39 +565,17 @@ function cssBackgroundImageDarkGradient () {
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
-// Format the playback time of the video
-function formatPlaybackProgress (currentTime, duration) {
-  if (
-    typeof currentTime !== 'number' || typeof duration !== 'number' ||
-    isNaN(currentTime) || isNaN(duration)
-  ) {
-    return ['00:00', '00:00']
+function formatTime (time) {
+  if (typeof time !== 'number' || Number.isNaN(time)) {
+    return '0:00'
   }
 
-  var durationHours = formatTimePart(duration / 3600)
-  var durationMinutes = formatTimePart(duration % 3600 / 60)
-  var durationSeconds = formatTimePart(duration % 60)
+  var hours = Math.floor(time / 3600)
+  var minutes = Math.floor(time % 3600 / 60)
+  if (hours > 0) {
+    minutes = zeroFill(2, minutes)
+  }
+  var seconds = zeroFill(2, Math.floor(time % 60))
 
-  var durationString =
-    (durationHours !== '00' ? durationHours + ':' : '') +
-    durationMinutes + ':' +
-    durationSeconds
-
-  var currentTimeHours = durationHours !== '00' && formatTimePart(currentTime / 3600)
-  var currentTimeMinutes = formatTimePart(currentTime % 3600 / 60)
-  var currentTimeSeconds = formatTimePart(currentTime % 60)
-
-  var currentTimeString =
-    (currentTimeHours ? currentTimeHours + ':' : '') +
-    currentTimeMinutes + ':' +
-    currentTimeSeconds
-
-  return [currentTimeString, durationString]
-}
-
-function formatTimePart (num) {
-  num = Math.floor(num)
-  return num < 100
-    ? ('00' + num).slice(-2)
-    : num
+  return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }
