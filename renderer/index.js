@@ -1015,7 +1015,7 @@ function openPlayer (infoHash, index, cb) {
   var timeout = setTimeout(function () {
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
     sound.play('ERROR')
-    cb(new Error('playback timed out'))
+    cb(new Error('Playback timed out. Try again.'))
     update()
   }, 10000) /* give it a few seconds */
 
