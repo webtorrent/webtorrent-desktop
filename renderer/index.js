@@ -998,6 +998,7 @@ function openPlayer (infoHash, index, cb) {
 
   // automatically choose which file in the torrent to play, if necessary
   if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
   if (index === undefined) return cb(new errors.UnplayableError())
 
   // update UI to show pending playback
