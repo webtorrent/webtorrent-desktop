@@ -9,7 +9,8 @@ module.exports = {
   pause,
   seek,
   setVolume,
-  setRate
+  setRate,
+  selectDevice
 }
 
 var airplayer = require('airplayer')()
@@ -33,23 +34,43 @@ function init (appState, callback) {
   update = callback
 
   // Listen for devices: Chromecast, DLNA and Airplay
-  chromecasts.on('update', function (player) {
-    state.devices.chromecast = chromecastPlayer(player)
+  chromecasts.on('update', function () {
+    // TODO: how do we tell if there are *no longer* any Chromecasts available?
+    // From looking at the code, chromecasts.players only grows, never shrinks
+    if (!state.devices.chromecast) state.devices.chromecast = chromecastPlayer()
   })
 
-  dlnacasts.on('update', function (player) {
-    state.devices.dlna = dlnaPlayer(player)
+  dlnacasts.on('update', function () {
+    if (!state.devices.dlna) state.devices.dlna = dlnaPlayer()
   })
 
   airplayer.on('update', function (player) {
-    state.devices.airplay = airplayPlayer(player)
+    if (!state.devices.airplay) state.devices.airplay = airplayPlayer(player)
   })
 }
 
 // chromecast player implementation
-function chromecastPlayer (player) {
+function chromecastPlayer () {
+  var ret = {
+    device: null,
+    addEvents,
+    getDevices,
+    open,
+    play,
+    pause,
+    stop,
+    status,
+    seek,
+    volume
+  }
+  return ret
+
+  function getDevices () {
+    return chromecasts.players
+  }
+
   function addEvents () {
-    player.on('error', function (err) {
+    ret.device.on('error', function (err) {
       state.playing.location = 'local'
       state.errors.push({
         time: new Date().getTime(),
@@ -57,7 +78,7 @@ function chromecastPlayer (player) {
       })
       update()
     })
-    player.on('disconnect', function () {
+    ret.device.on('disconnect', function () {
       state.playing.location = 'local'
       update()
     })
@@ -65,7 +86,7 @@ function chromecastPlayer (player) {
 
   function open () {
     var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-    player.play(state.server.networkURL, {
+    ret.device.play(state.server.networkURL, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name
     }, function (err) {
@@ -83,19 +104,19 @@ function chromecastPlayer (player) {
   }
 
   function play (callback) {
-    player.play(null, null, callback)
+    ret.device.play(null, null, callback)
   }
 
   function pause (callback) {
-    player.pause(callback)
+    ret.device.pause(callback)
   }
 
   function stop (callback) {
-    player.stop(callback)
+    ret.device.stop(callback)
   }
 
   function status () {
-    player.status(function (err, status) {
+    ret.device.status(function (err, status) {
       if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
@@ -105,31 +126,36 @@ function chromecastPlayer (player) {
   }
 
   function seek (time, callback) {
-    player.seek(time, callback)
+    ret.device.seek(time, callback)
   }
 
   function volume (volume, callback) {
-    player.volume(volume, callback)
-  }
-
-  addEvents()
-
-  return {
-    player: player,
-    open: open,
-    play: play,
-    pause: pause,
-    stop: stop,
-    status: status,
-    seek: seek,
-    volume: volume
+    ret.device.volume(volume, callback)
   }
 }
 
 // airplay player implementation
-function airplayPlayer (player) {
+function airplayPlayer () {
+  var ret = {
+    device: null,
+    addEvents,
+    getDevices,
+    open,
+    play,
+    pause,
+    stop,
+    status,
+    seek,
+    volume
+  }
+  return ret
+
+  function getDevices () {
+    return airplay.players
+  }
+
   function addEvents () {
-    player.on('event', function (event) {
+    ret.device.on('event', function (event) {
       switch (event.state) {
         case 'loading':
           break
@@ -147,7 +173,7 @@ function airplayPlayer (player) {
   }
 
   function open () {
-    player.play(state.server.networkURL, function (err, res) {
+    ret.device.play(state.server.networkURL, function (err, res) {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -162,19 +188,19 @@ function airplayPlayer (player) {
   }
 
   function play (callback) {
-    player.resume(callback)
+    ret.device.resume(callback)
   }
 
   function pause (callback) {
-    player.pause(callback)
+    ret.device.pause(callback)
   }
 
   function stop (callback) {
-    player.stop(callback)
+    ret.device.stop(callback)
   }
 
   function status () {
-    player.playbackInfo(function (err, res, status) {
+    ret.device.playbackInfo(function (err, res, status) {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -190,7 +216,7 @@ function airplayPlayer (player) {
   }
 
   function seek (time, callback) {
-    player.scrub(time, callback)
+    ret.device.scrub(time, callback)
   }
 
   function volume (volume, callback) {
@@ -198,25 +224,30 @@ function airplayPlayer (player) {
     // TODO: We should just disable the volume slider
     state.playing.volume = volume
   }
-
-  addEvents()
-
-  return {
-    player: player,
-    open: open,
-    play: play,
-    pause: pause,
-    stop: stop,
-    status: status,
-    seek: seek,
-    volume: volume
-  }
 }
 
 // DLNA player implementation
 function dlnaPlayer (player) {
+  var ret = {
+    device: null,
+    addEvents,
+    getDevices,
+    open,
+    play,
+    pause,
+    stop,
+    status,
+    seek,
+    volume
+  }
+  return ret
+
+  function getDevices () {
+    return dlnacasts.players
+  }
+
   function addEvents () {
-    player.on('error', function (err) {
+    ret.device.on('error', function (err) {
       state.playing.location = 'local'
       state.errors.push({
         time: new Date().getTime(),
@@ -224,7 +255,7 @@ function dlnaPlayer (player) {
       })
       update()
     })
-    player.on('disconnect', function () {
+    ret.device.on('disconnect', function () {
       state.playing.location = 'local'
       update()
     })
@@ -232,7 +263,7 @@ function dlnaPlayer (player) {
 
   function open () {
     var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-    player.play(state.server.networkURL, {
+    ret.device.play(state.server.networkURL, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name,
       seek: state.playing.currentTime > 10 ? state.playing.currentTime : 0
@@ -251,19 +282,19 @@ function dlnaPlayer (player) {
   }
 
   function play (callback) {
-    player.play(null, null, callback)
+    ret.device.play(null, null, callback)
   }
 
   function pause (callback) {
-    player.pause(callback)
+    ret.device.pause(callback)
   }
 
   function stop (callback) {
-    player.stop(callback)
+    ret.device.stop(callback)
   }
 
   function status () {
-    player.status(function (err, status) {
+    ret.device.status(function (err, status) {
       if (err) return console.log('error getting %s status: %o', state.playing.location, err)
       state.playing.isPaused = status.playerState === 'PAUSED'
       state.playing.currentTime = status.currentTime
@@ -273,38 +304,23 @@ function dlnaPlayer (player) {
   }
 
   function seek (time, callback) {
-    player.seek(time, callback)
+    ret.device.seek(time, callback)
   }
 
   function volume (volume, callback) {
-    player.volume(volume, function (err) {
+    ret.device.volume(volume, function (err) {
       // quick volume update
       state.playing.volume = volume
       callback(err)
     })
-  }
-
-  addEvents()
-
-  return {
-    player: player,
-    open: open,
-    play: play,
-    pause: pause,
-    stop: stop,
-    status: status,
-    seek: seek,
-    volume: volume
   }
 }
 
 // Start polling cast device state, whenever we're connected
 function startStatusInterval () {
   statusInterval = setInterval(function () {
-    var device = getDevice()
-    if (device) {
-      device.status()
-    }
+    var player = getPlayer()
+    if (player) player.status()
   }, 1000)
 }
 
@@ -313,21 +329,43 @@ function open (location) {
     throw new Error('You can\'t connect to ' + location + ' when already connected to another device')
   }
 
-  state.playing.location = location + '-pending'
-  var device = getDevice(location)
-  if (device) {
-    getDevice(location).open()
-    startStatusInterval()
-  }
+  var player = getPlayer(location)
+  var devices = player ? player.getDevices() : []
+  if (devices.length === 0) throw new Error('No ' + location + ' devices available')
 
+  // Show a menu
+  state.devices.castMenu = {location, devices}
+
+  /* if (devices.length === 1) {
+    // Start casting to the only available Chromecast, Airplay, or DNLA device
+    openDevice(location, devices[0])
+  } else {
+    // Show a menu
+  } */
+}
+
+function selectDevice (index) {
+  var {location, devices} = state.devices.castMenu
+
+  // Start casting
+  var player = getPlayer(location)
+  player.device = devices[index]
+  player.open()
+
+  // Poll the casting device's status every few seconds
+  startStatusInterval()
+
+  // Show the Connecting... screen
+  state.devices.castMenu = null
+  state.playing.location = location + '-pending'
   update()
 }
 
 // Stops casting, move video back to local screen
 function close () {
-  var device = getDevice()
-  if (device) {
-    device.stop(stoppedCasting)
+  var player = getPlayer()
+  if (player) {
+    player.stop(stoppedCasting)
     clearInterval(statusInterval)
   } else {
     stoppedCasting()
@@ -340,8 +378,8 @@ function stoppedCasting () {
   update()
 }
 
-function getDevice (location) {
-  if (location && state.devices[location]) {
+function getPlayer (location) {
+  if (location) {
     return state.devices[location]
   } else if (state.playing.location === 'chromecast') {
     return state.devices.chromecast
@@ -355,29 +393,25 @@ function getDevice (location) {
 }
 
 function play () {
-  var device = getDevice()
-  if (device) {
-    device.play(castCallback)
-  }
+  var player = getPlayer()
+  if (player) player.play(castCallback)
 }
 
 function pause () {
-  var device = getDevice()
-  if (device) {
-    device.pause(castCallback)
-  }
+  var player = getPlayer()
+  if (player) player.pause(castCallback)
 }
 
 function setRate (rate) {
-  var device
+  var player
   var result = true
   if (state.playing.location === 'chromecast') {
     // TODO find how to control playback rate on chromecast
     castCallback()
     result = false
   } else if (state.playing.location === 'airplay') {
-    device = state.devices.airplay
-    device.rate(rate, castCallback)
+    player = state.devices.airplay
+    player.rate(rate, castCallback)
   } else {
     result = false
   }
@@ -385,17 +419,13 @@ function setRate (rate) {
 }
 
 function seek (time) {
-  var device = getDevice()
-  if (device) {
-    device.seek(time, castCallback)
-  }
+  var player = getPlayer()
+  if (player) player.seek(time, castCallback)
 }
 
 function setVolume (volume) {
-  var device = getDevice()
-  if (device) {
-    device.volume(volume, castCallback)
-  }
+  var player = getPlayer()
+  if (player) player.volume(volume, castCallback)
 }
 
 function castCallback () {
