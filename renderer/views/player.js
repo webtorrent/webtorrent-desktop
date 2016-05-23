@@ -129,6 +129,9 @@ function renderMedia (state) {
     if (video.webkitVideoDecodedByteCount > 0 &&
       video.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
+    } else if (state.playing.type === 'video' &&
+      video.webkitVideoDecodedByteCount === 0) {
+      dispatch('mediaError', 'Video codec unsupported')
     } else {
       video.play()
     }
