@@ -106,13 +106,13 @@ function skipBack () {
 
 function increasePlaybackRate () {
   if (windows.main) {
-    windows.main.send('dispatch', 'setPlaybackRate', 1)
+    windows.main.send('dispatch', 'changePlaybackRate', 1)
   }
 }
 
 function decreasePlaybackRate () {
   if (windows.main) {
-    windows.main.send('dispatch', 'setPlaybackRate', -1)
+    windows.main.send('dispatch', 'changePlaybackRate', -1)
   }
 }
 

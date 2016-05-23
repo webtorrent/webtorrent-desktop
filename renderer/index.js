@@ -288,8 +288,8 @@ function dispatch (action, ...args) {
   if (action === 'skip') {
     jumpToTime(state.playing.currentTime + (args[0] /* direction */ * 10))
   }
-  if (action === 'setPlaybackRate') {
-    setPlaybackRate(args[0] /* direction */)
+  if (action === 'changePlaybackRate') {
+    changePlaybackRate(args[0] /* direction */)
   }
   if (action === 'changeVolume') {
     changeVolume(args[0] /* increase */)
@@ -405,7 +405,7 @@ function jumpToTime (time) {
     state.playing.jumpToTime = time
   }
 }
-function setPlaybackRate (direction) {
+function changePlaybackRate (direction) {
   var rate = state.playing.playbackRate
   if (direction > 0 && rate >= 0.25 && rate < 2) {
     rate += 0.25
@@ -419,12 +419,10 @@ function setPlaybackRate (direction) {
     rate *= 2
   } else if ((direction < 0 && rate > 1 && rate <= 16) || (direction > 0 && rate >= -16 && rate < -1)) {
     rate /= 2
-  } else if (direction < 0 && rate === 1) {
-    rate = -1
   }
   state.playing.playbackRate = rate
-  if (lazyLoadCast().isCasting()) {
-    Cast.setRate(rate)
+  if (lazyLoadCast().isCasting() && !Cast.setRate(rate)) {
+    state.playing.playbackRate = 1
   }
 }
 function changeVolume (delta) {
