@@ -739,7 +739,8 @@ body.drag .app::after {
   vertical-align: sub;
 }
 
-.player .controls .time {
+.player .controls .time,
+.player .controls .rate {
   font-weight: 100;
   font-size: 13px;
   margin: 9px 8px 8px 8px;
@@ -817,13 +818,6 @@ body.drag .app::after {
 .player .controls .closed-captions.active,
 .player .controls .device.active {
   color: #9af;
-}
-
-.player-controls .rate {
-  display: inline;
-  height: 30px;
-  padding: 5px;
-  margin-left: 20px;
 }
 
 .player .controls .volume-slider::-webkit-slider-thumb {
