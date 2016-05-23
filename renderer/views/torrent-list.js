@@ -186,8 +186,8 @@ function TorrentList (state) {
       filesElement = hx`<div class='files warning'>${message}</div>`
     } else {
       // We do know the files. List them and show download stats for each one
-      var fileRows = torrentSummary.files.map(
-        (file, index) => renderFileRow(torrentSummary, file, index))
+      var fileRows = torrentSummary.files.sort(fileSortHelper).map(
+          (file, index) => renderFileRow(torrentSummary, file, index))
       filesElement = hx`
         <div class='files'>
           <strong>Files</strong>
@@ -205,6 +205,15 @@ function TorrentList (state) {
     `
   }
 
+  function fileSortHelper (a, b) {
+    var result = 0
+    if (a.name > b.name) {
+      result = 1
+    } else if (a.name < b.name) {
+      result = -1
+    }
+    return result
+  }
   // Show a single torrentSummary file in the details view for a single torrent
   function renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
