@@ -132,14 +132,9 @@ function renderMedia (state) {
 
   function onCanPlay (e) {
     var elem = e.target
-    if (state.playing.type === 'video') {
-      if (elem.webkitVideoDecodedByteCount === 0) {
-        dispatch('mediaError', 'Video codec unsupported')
-      } else if (elem.webkitAudioDecodedByteCount === 0) {
-        dispatch('mediaError', 'Audio codec unsupported')
-      }
-    } else if (state.playing.type === 'audio' &&
-        elem.webkitAudioDecodedByteCount === 0) {
+    if (state.playing.type === 'video' && elem.webkitVideoDecodedByteCount === 0) {
+      dispatch('mediaError', 'Video codec unsupported')
+    } else if (elem.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
     } else {
       elem.play()
