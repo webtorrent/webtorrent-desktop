@@ -316,6 +316,7 @@ function renderPlayerControls (state) {
         <div
           class='scrub-bar'
           draggable='true'
+          ondragstart=${handleDragStart}
           onclick=${handleScrub},
           ondrag=${handleScrub}>
         </div>
@@ -458,6 +459,14 @@ function renderPlayerControls (state) {
       ${renderSubtitlesOptions(state)}
     </div>
   `
+
+  function handleDragStart (e) {
+    // Prevent the cursor from changing, eg to a green + icon on Mac
+    if (e.dataTransfer) {
+      var dt = e.dataTransfer
+      dt.effectAllowed = 'none'
+    }
+  }
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
