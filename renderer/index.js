@@ -542,6 +542,9 @@ function resumeTorrents () {
     .forEach((x) => startTorrentingSummary(x))
 }
 
+// Updates a single property in the UNSAVED prefs
+// For example: updatePreferences("foo.bar", "baz")
+// Call savePreferences to save to config.json
 function updatePreferences (property, value) {
   var path = property.split('.')
   var key = state.unsaved.prefs
@@ -554,6 +557,7 @@ function updatePreferences (property, value) {
   key[path[i]] = value
 }
 
+// All unsaved prefs take effect atomically, and are saved to config.json
 function savePreferences () {
   state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
   saveState()
