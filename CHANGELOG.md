@@ -1,5 +1,34 @@
 # WebTorrent Desktop Version History
 
+## v0.6.0 - 2016-05-24
+
+### Added
+
+- Added Preferences page
+- Save video position, resume playback from saved position
+- Add additional video player keyboard shortcuts (#275)
+- Use `poster.jpg` file as the poster image if available (#558)
+- Associate .torrent files to WebTorrent Desktop (OS X) (#553)
+- Add support for pasting a `instant.io` links (#559)
+- Add announcement feature
+
+### Changed
+
+- Nicer player UI
+- Reduce startup jank, improve startup time (#568)
+- Cleanup unsupported codec detection (#569, #570)
+- Cleaner look for the torrent file list
+- Improve subtitle positioning (#551)
+
+### Fixed
+
+- Fix Uncaught TypeError: Cannot read property 'update' of undefined (#567)
+- Fix bugs in LocationHistory
+  - When player is active, and magnet link is pasted, go back to list
+  - After deleting torrent, remove just the player from forward stack
+  - After creating torrent, remove create torrent page from forward stack
+  - Cancel button on create torrent page should only go back one page
+
 ## v0.5.1 - 2016-05-18
 
 ### Fixed
