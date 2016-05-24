@@ -14,10 +14,8 @@ var ipcRenderer = electron.ipcRenderer
 setupIpc()
 
 var appConfig = require('application-config')('WebTorrent')
-var concat = require('simple-concat')
 var dragDrop = require('drag-drop')
 var fs = require('fs-extra')
-var iso639 = require('iso-639-1')
 var mainLoop = require('main-loop')
 var parallel = require('run-parallel')
 var path = require('path')
@@ -42,17 +40,28 @@ appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
 
-// For easy debugging in Developer Tools
-var state = global.state = State.getInitialState()
-
-// Push the first page into the location history
-state.location.go({ url: 'home' })
-
 var vdomLoop
+
+var state = State.getInitialState()
+state.location.go({ url: 'home' }) // Add first page to location history
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
 loadState(init)
+
+function loadState (cb) {
+  appConfig.read(function (err, data) {
+    if (err) console.error(err)
+
+    // populate defaults if they're not there
+    state.saved = Object.assign({}, State.getDefaultSavedState(), data)
+    state.saved.torrents.forEach(function (torrentSummary) {
+      if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
+    })
+
+    if (cb) cb()
+  })
+}
 
 /**
  * Called once when the application loads. (Not once per window.)
@@ -507,22 +516,6 @@ function setupIpc () {
   ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
 }
 
-// Load state.saved from the JSON state file
-function loadState (cb) {
-  appConfig.read(function (err, data) {
-    if (err) console.error(err)
-    console.log('loaded state from ' + appConfig.filePath)
-
-    // populate defaults if they're not there
-    state.saved = Object.assign({}, State.getDefaultSavedState(), data)
-    state.saved.torrents.forEach(function (torrentSummary) {
-      if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
-    })
-
-    if (cb) cb()
-  })
-}
-
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
@@ -670,6 +663,7 @@ function addSubtitles (files, autoSelect) {
 }
 
 function loadSubtitle (file, cb) {
+  var concat = require('simple-concat')
   var LanguageDetect = require('languagedetect')
   var srtToVtt = require('srt-to-vtt')
 
@@ -705,6 +699,7 @@ function selectSubtitle (ix) {
 // Checks whether a language name like "English" or "German" matches the system
 // language, aka the current locale
 function isSystemLanguage (language) {
+  var iso639 = require('iso-639-1')
   var osLangISO = window.navigator.language.split('-')[0] // eg "en"
   var langIso = iso639.getCode(language) // eg "de" if language is "German"
   return langIso === osLangISO
