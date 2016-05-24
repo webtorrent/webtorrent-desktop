@@ -442,7 +442,7 @@ function renderPlayerControls (state) {
     airplayHandler = dispatcher('startCasting', 'airplay')
     dlnaHandler = dispatcher('startCasting', 'dlna')
   }
-  if (state.devices.chromecast || isOnChromecast) {
+  if (state.devices.chromecast.getDevices().length > 0 || isOnChromecast) {
     var castIcon = isOnChromecast ? 'cast_connected' : 'cast'
     elements.push(hx`
       <i.icon.device.float-right
@@ -452,7 +452,7 @@ function renderPlayerControls (state) {
       </i>
     `)
   }
-  if (state.devices.airplay || isOnAirplay) {
+  if (state.devices.airplay.getDevices().length > 0 || isOnAirplay) {
     elements.push(hx`
       <i.icon.device.float-right
         class=${airplayClass}
@@ -461,7 +461,7 @@ function renderPlayerControls (state) {
       </i>
     `)
   }
-  if (state.devices.dlna || isOnDlna) {
+  if (state.devices.dlna.getDevices().length > 0 || isOnDlna) {
     elements.push(hx`
       <i
         class='icon device float-right'
