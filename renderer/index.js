@@ -358,6 +358,7 @@ function dispatch (action, ...args) {
       onbeforeunload: function (cb) {
         // save state after preferences
         savePreferences()
+        state.window.title = config.APP_WINDOW_TITLE
         cb()
       }
     })
