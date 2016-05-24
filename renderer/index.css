@@ -813,7 +813,7 @@ body.drag .app::after {
   border-radius: 50%;
   margin-top: 0;
   margin-left: 0;
-  transition-property: width, height, border-radius, margin-top, margin-left;
+  transition-property: width, height, top, margin-left;
   transition-duration: 0.1s;
   transition-timing-function: ease-out;
 }
@@ -842,6 +842,7 @@ body.drag .app::after {
 
 .player .playback-bar:hover .playback-cursor {
   top: -8px;
+  margin-left: -5px;
   width: 14px;
   height: 14px;
 }
