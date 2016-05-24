@@ -298,7 +298,7 @@ function renderSubtitlesOptions (state) {
 
 function renderPlayerControls (state) {
   var positionPercent = 100 * state.playing.currentTime / state.playing.duration
-  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 8px)' }
+  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
   var captionsClass = state.playing.subtitles.tracks.length === 0
     ? 'disabled'
     : state.playing.subtitles.selectedIndex >= 0
