@@ -937,7 +937,6 @@ video::-webkit-media-text-track-container {
   font-weight: normal;
   text-align: center;
   vertical-align: middle;
-  cursor: pointer;
   border-color: #cccccc;
   border-radius: 3px;
   color: #9da5b4;
@@ -953,7 +952,6 @@ video::-webkit-media-text-track-container {
 .preferences .btn .icon {
   margin: 0;
   color: #a8a8a8;
-  cursor: pointer;
 }
 
 .preferences .help .icon {
@@ -1076,8 +1074,7 @@ video::-webkit-media-text-track-container {
 .preferences .control-group .checkbox .icon {
   font-size: 1.5em;
   margin: 0;
-  vertical-align: text-bottom;;
-  cursor: pointer;
+  vertical-align: text-bottom;
 }
 
 
