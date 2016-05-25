@@ -24,7 +24,7 @@ function createAboutWindow () {
     show: false,
     center: true,
     resizable: false,
-    icon: config.APP_ICON + '.png',
+    icon: getIconPath(),
     title: process.platform !== 'darwin'
       ? 'About ' + config.APP_WINDOW_TITLE
       : '',
@@ -91,7 +91,7 @@ function createMainWindow () {
   var win = windows.main = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     darkTheme: true, // Forces dark theme (GTK+3)
-    icon: config.APP_ICON + 'Smaller.png', // Window and Volume Mixer icon.
+    icon: getIconPath(), // Window icon (Windows, Linux)
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
     show: false, // Hide window until renderer sends 'ipcReady' event
@@ -136,4 +136,10 @@ function focusWindow (win) {
     win.restore()
   }
   win.show() // shows and gives focus
+}
+
+function getIconPath () {
+  return process.platform === 'win32'
+    ? config.APP_ICON + '.ico'
+    : config.APP_ICON + '.png'
 }

@@ -4,11 +4,11 @@ module.exports = {
 }
 
 var cp = require('child_process')
-var path = require('path')
 var electron = require('electron')
 
 var app = electron.app
 
+var config = require('../config')
 var windows = require('./windows')
 
 var trayIcon
@@ -33,7 +33,7 @@ function hasTray () {
 }
 
 function createTrayIcon () {
-  trayIcon = new electron.Tray(path.join(__dirname, '..', 'static', 'WebTorrentSmall.png'))
+  trayIcon = new electron.Tray(getIconPath())
 
   // On Windows, left click to open the app, right click for context menu
   // On Linux, any click (right or left) opens the context menu
@@ -78,4 +78,10 @@ function showApp () {
 function hideApp () {
   windows.main.hide()
   windows.main.send('dispatch', 'backToList')
+}
+
+function getIconPath () {
+  return process.platform === 'win32'
+    ? config.APP_ICON + '.ico'
+    : config.APP_ICON + '.png'
 }
