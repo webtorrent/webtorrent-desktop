@@ -118,7 +118,15 @@ function decreasePlaybackRate () {
 
 // Open the preferences window
 function showPreferences () {
-  windows.main.send('dispatch', 'preferences')
+  if (windows.main) {
+    windows.main.send('dispatch', 'preferences')
+  }
+}
+
+function escapeBack () {
+  if (windows.main) {
+    windows.main.send('dispatch', 'escapeBack')
+  }
 }
 
 function onWindowShow () {
@@ -322,6 +330,14 @@ function getAppMenuTemplate () {
               click: showWebTorrentWindow
             }
           ]
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Go Back',
+          accelerator: 'Esc',
+          click: escapeBack
         }
       ]
     },
@@ -330,7 +346,7 @@ function getAppMenuTemplate () {
       submenu: [
         {
           label: 'Play/Pause',
-          accelerator: 'CmdOrCtrl+P',
+          accelerator: 'Space',
           click: playPause,
           enabled: false
         },

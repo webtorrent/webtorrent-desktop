@@ -12,7 +12,6 @@ var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
 var menu = require('./menu')
-var shortcuts = require('./shortcuts')
 var squirrelWin32 = require('./squirrel-win32')
 var tray = require('./tray')
 var updater = require('./updater')
@@ -64,7 +63,6 @@ function init () {
     windows.createMainWindow()
     windows.createWebTorrentHiddenWindow()
     menu.init()
-    shortcuts.init()
 
     // To keep app startup fast, some code is delayed.
     setTimeout(delayedInit, config.DELAYED_INIT)
