@@ -3,23 +3,25 @@
 ## v0.6.1 - 2016-05-26
 
 ### Fixed
-- Disable WebRTC on Windows to work around Electron crash
-  This will be re-enabled in the next version of WebTorrent, which will be based on the next version of Electron, where the bug is fixed.
-- Fix selections migration (#583)
-- Fix crash when dropping files onto the dock icon
-- Simplify shortcuts. Fix Space and ESC capture (#585)
+
+- Disable WebRTC to work around Electron crash (Windows)
+  - Will be re-enabled in the next version of WebTorrent, which will be based on
+    the next version of Electron, where the bug is fixed.
+- Fix crash when updating from WebTorrent 0.5.x in some situtations (#583)
+- Fix crash when dropping files onto the dock icon (OS X)
+- Fix keyboard shortcuts Space and ESC being captured globally (#585)
 - Fix crash, show error when drag-dropping hidden files (#586)
 
 ## v0.6.0 - 2016-05-24
 
 ### Added
 
-- Added Preferences page
+- Added Preferences page to set Download folder
 - Save video position, resume playback from saved position
 - Add additional video player keyboard shortcuts (#275)
 - Use `poster.jpg` file as the poster image if available (#558)
 - Associate .torrent files to WebTorrent Desktop (OS X) (#553)
-- Add support for pasting a `instant.io` links (#559)
+- Add support for pasting `instant.io` links (#559)
 - Add announcement feature
 
 ### Changed
