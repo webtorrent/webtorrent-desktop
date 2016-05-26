@@ -804,20 +804,38 @@ function startTorrentingSummary (torrentSummary) {
 // Shows the Create Torrent page with options to seed a given file or folder
 function showCreateTorrent (files) {
   if (Array.isArray(files)) {
-    state.location.go({
-      url: 'create-torrent',
-      files: files
-    })
-    return
+    if (files.length === 0 || typeof files[0] !== 'string') {
+      state.location.go({
+        url: 'create-torrent',
+        files: files
+      })
+      return
+    }
+  } else {
+    files = [files]
   }
 
-  var fileOrFolder = files
-  findFilesRecursive(fileOrFolder, showCreateTorrent)
+  findFilesRecursive(files, showCreateTorrent)
 }
 
 // Recursively finds {name, path, size} for all files in a folder
 // Calls `cb` on success, calls `onError` on failure
-function findFilesRecursive (fileOrFolder, cb) {
+function findFilesRecursive (paths, cb) {
+  if (paths.length > 1) {
+    var numComplete = 0
+    var ret = []
+    paths.forEach(function (path) {
+      findFilesRecursive([path], function (fileObjs) {
+        ret = ret.concat(fileObjs)
+        if (++numComplete === paths.length) {
+          cb(ret)
+        }
+      })
+    })
+    return
+  }
+
+  var fileOrFolder = paths[0]
   fs.stat(fileOrFolder, function (err, stat) {
     if (err) return onError(err)
 
@@ -835,16 +853,8 @@ function findFilesRecursive (fileOrFolder, cb) {
     var folderPath = fileOrFolder
     fs.readdir(folderPath, function (err, fileNames) {
       if (err) return onError(err)
-      var numComplete = 0
-      var ret = []
-      fileNames.forEach(function (fileName) {
-        findFilesRecursive(path.join(folderPath, fileName), function (fileObjs) {
-          ret = ret.concat(fileObjs)
-          if (++numComplete === fileNames.length) {
-            cb(ret)
-          }
-        })
-      })
+      var paths = fileNames.map((fileName) => path.join(folderPath, fileName))
+      findFilesRecursive(paths, cb)
     })
   })
 }

@@ -130,6 +130,7 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
+  var pathsToOpen = []
   argv.forEach(function (arg) {
     if (arg === '-n') {
       menu.showOpenSeedFiles()
@@ -141,7 +142,15 @@ function processArgv (argv) {
       // Ignore OS X launchd "process serial number" argument
       // More: https://github.com/feross/webtorrent-desktop/issues/214
     } else {
-      windows.main.send('dispatch', 'onOpen', arg)
+      pathsToOpen.push(arg)
     }
   })
+  if (pathsToOpen.length > 0) openFilePaths(pathsToOpen)
+}
+
+// Convert paths to {name, path, size} objects, then send to renderer process
+// Opening files means either adding torrents, creating and seeding a torrent
+// from files, or adding subtitles
+function openFilePaths (paths) {
+  windows.main.send('dispatch', 'onOpen', paths)
 }
