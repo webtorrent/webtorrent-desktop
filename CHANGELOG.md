@@ -1,5 +1,15 @@
 # WebTorrent Desktop Version History
 
+## v0.6.1 - 2016-05-26
+
+### Fixed
+- Disable WebRTC on Windows to work around Electron crash
+  This will be re-enabled in the next version of WebTorrent, which will be based on the next version of Electron, where the bug is fixed.
+- Fix selections migration (#583)
+- Fix crash when dropping files onto the dock icon
+- Simplify shortcuts. Fix Space and ESC capture (#585)
+- Fix crash, show error when drag-dropping hidden files (#586)
+
 ## v0.6.0 - 2016-05-24
 
 ### Added
