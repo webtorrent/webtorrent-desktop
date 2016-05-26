@@ -164,7 +164,7 @@ function cleanUpConfig () {
     }
 
     // Migration: add per-file selections
-    if (!ts.selections) {
+    if (!ts.selections && ts.files) {
       ts.selections = ts.files.map((x) => true)
     }
   })
