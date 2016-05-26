@@ -33,7 +33,9 @@ var client = window.client = new WebTorrent({
     // HACK: OS X: Disable WebRTC peers to fix 100% CPU issue caused by Chrome bug.
     // Fixed in Chrome 51, so we can remove this hack once Electron updates Chrome.
     // Issue: https://github.com/feross/webtorrent-desktop/issues/353
-    wrtc: process.platform !== 'darwin'
+    // HACK #2: Windows: Disable WebRTC to fix Chrome 50 / Electron 1.1.[1-3] crash.
+    // Issue: https://github.com/electron/electron/issues/5629
+    wrtc: process.platform === 'linux'
   }
 })
 
