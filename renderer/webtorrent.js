@@ -31,10 +31,10 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 var client = new WebTorrent()
 
 // WebTorrent-to-HTTP streaming sever
-var server = window.server = null
+var server = null
 
 // Used for diffing, so we only send progress updates when necessary
-var prevProgress = window.prevProgress = null
+var prevProgress = null
 
 init()
 
