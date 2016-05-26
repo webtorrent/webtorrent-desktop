@@ -228,7 +228,7 @@ function dispatch (action, ...args) {
     ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
   }
   if (action === 'showCreateTorrent') {
-    showCreateTorrent(args[0] /* fileOrFolder */)
+    showCreateTorrent(args[0] /* paths */)
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
@@ -803,18 +803,18 @@ function startTorrentingSummary (torrentSummary) {
 
 // Shows the Create Torrent page with options to seed a given file or folder
 function showCreateTorrent (files) {
-  if (Array.isArray(files)) {
-    if (files.length === 0 || typeof files[0] !== 'string') {
-      state.location.go({
-        url: 'create-torrent',
-        files: files
-      })
-      return
-    }
-  } else {
-    files = [files]
+  // Files will either be an array of file objects, which we can send directly
+  // to the create-torrent screen
+  if (files.length === 0 || typeof files[0] !== 'string') {
+    state.location.go({
+      url: 'create-torrent',
+      files: files
+    })
+    return
   }
 
+  // ... or it will be an array of mixed file and folder paths. We have to walk
+  // through all the folders and find the files
   findFilesRecursive(files, showCreateTorrent)
 }
 

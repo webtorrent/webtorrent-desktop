@@ -189,8 +189,7 @@ function showOpenSeedFile () {
     properties: [ 'openFile' ]
   }, function (selectedPaths) {
     if (!Array.isArray(selectedPaths)) return
-    var selectedPath = selectedPaths[0]
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPath)
+    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
   })
 }
 
@@ -202,8 +201,7 @@ function showOpenSeedFiles () {
     properties: [ 'openFile', 'openDirectory' ]
   }, function (selectedPaths) {
     if (!Array.isArray(selectedPaths)) return
-    var selectedPath = selectedPaths[0]
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPath)
+    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
   })
 }
 

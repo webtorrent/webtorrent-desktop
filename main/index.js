@@ -148,7 +148,7 @@ function processArgv (argv) {
   if (pathsToOpen.length > 0) openFilePaths(pathsToOpen)
 }
 
-// Convert paths to {name, path, size} objects, then send to renderer process
+// Send files to the renderer process
 // Opening files means either adding torrents, creating and seeding a torrent
 // from files, or adding subtitles
 function openFilePaths (paths) {
