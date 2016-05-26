@@ -37,7 +37,8 @@ function renderMedia (state) {
 
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
-  var mediaElement = document.querySelector(state.playing.type) /* get the <video> or <audio> tag */
+  // Get the <video> or <audio> tag
+  var mediaElement = document.querySelector(state.playing.type)
   if (mediaElement !== null) {
     if (state.playing.isPaused && !mediaElement.paused) {
       mediaElement.pause()
@@ -61,7 +62,8 @@ function renderMedia (state) {
     // Switch to the newly added subtitle track, if available
     var tracks = mediaElement.textTracks
     for (var j = 0; j < tracks.length; j++) {
-      tracks[j].mode = (j === state.playing.subtitles.selectedIndex) ? 'showing' : 'hidden'
+      var isSelectedTrack = j === state.playing.subtitles.selectedIndex
+      tracks[j].mode = isSelectedTrack ? 'showing' : 'hidden'
     }
 
     // Save video position
@@ -114,7 +116,7 @@ function renderMedia (state) {
     </div>
   `
 
-  // As soon as the video loads enough to know the video dimensions, resize the window
+  // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
     if (state.playing.type !== 'video') return
     var video = e.target
@@ -132,7 +134,8 @@ function renderMedia (state) {
 
   function onCanPlay (e) {
     var elem = e.target
-    if (state.playing.type === 'video' && elem.webkitVideoDecodedByteCount === 0) {
+    if (state.playing.type === 'video' &&
+      elem.webkitVideoDecodedByteCount === 0) {
       dispatch('mediaError', 'Video codec unsupported')
     } else if (elem.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
@@ -157,7 +160,8 @@ function renderOverlay (state) {
   } else if (elems.length !== 0) {
     style = { backgroundImage: cssBackgroundImageDarkGradient() }
   } else {
-    return /* Video, not audio, and it isn't stalled, so no spinner. No overlay needed. */
+    // Video playing, so no spinner. No overlay needed
+    return
   }
 
   return hx`
@@ -187,15 +191,37 @@ function renderAudioMetadata (state) {
     track = info.track.no + ' of ' + info.track.of
   }
 
-  // Show a small info box in the middle of the screen with title/album/artist/etc
+  // Show a small info box in the middle of the screen with title/album/etc
   var elems = []
-  if (artist) elems.push(hx`<div class='audio-artist'><label>Artist</label>${artist}</div>`)
-  if (album) elems.push(hx`<div class='audio-album'><label>Album</label>${album}</div>`)
-  if (track) elems.push(hx`<div class='audio-track'><label>Track</label>${track}</div>`)
+  if (artist) {
+    elems.push(hx`
+      <div class='audio-artist'>
+        <label>Artist</label>${artist}
+      </div>
+    `)
+  }
+  if (album) {
+    elems.push(hx`
+      <div class='audio-album'>
+        <label>Album</label>${album}
+      </div>
+    `)
+  }
+  if (track) {
+    elems.push(hx`
+      <div class='audio-track'>
+        <label>Track</label>${track}
+      </div>
+    `)
+  }
 
-  // Align the title with the artist/etc info, if available. Otherwise, center the title
+  // Align the title with the other info, if available. Otherwise, center title
   var emptyLabel = hx`<label></label>`
-  elems.unshift(hx`<div class='audio-title'>${elems.length ? emptyLabel : undefined}${title}</div>`)
+  elems.unshift(hx`
+    <div class='audio-title'>
+      ${elems.length ? emptyLabel : undefined}${title}
+    </div>
+  `)
 
   return hx`<div class='audio-metadata'>${elems}</div>`
 }
@@ -278,18 +304,19 @@ function renderSubtitlesOptions (state) {
     var isSelected = state.playing.subtitles.selectedIndex === ix
     return hx`
       <li onclick=${dispatcher('selectSubtitle', ix)}>
-        <i.icon>${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        <i.icon>${'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
         ${track.label}
       </li>
     `
   })
 
   var noneSelected = state.playing.subtitles.selectedIndex === -1
+  var noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
   return hx`
     <ul.subtitles-list>
       ${items}
       <li onclick=${dispatcher('selectSubtitle', -1)}>
-        <i.icon>${noneSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        <i.icon>${noneClass}</i>
         None
       </li>
     </ul>
@@ -351,7 +378,9 @@ function renderPlayerControls (state) {
   var isOnChromecast = state.playing.location.startsWith('chromecast')
   var isOnAirplay = state.playing.location.startsWith('airplay')
   var isOnDlna = state.playing.location.startsWith('dlna')
-  var chromecastClass, chromecastHandler, airplayClass, airplayHandler, dlnaClass, dlnaHandler
+  var chromecastClass, chromecastHandler
+  var airplayClass, airplayHandler
+  var dlnaClass, dlnaHandler
   if (isOnChromecast) {
     chromecastClass = 'active'
     dlnaClass = 'disabled'
@@ -413,10 +442,15 @@ function renderPlayerControls (state) {
 
   // render volume
   var volume = state.playing.volume
-  var volumeIcon = 'volume_' + (volume === 0 ? 'off' : volume < 0.3 ? 'mute' : volume < 0.6 ? 'down' : 'up')
-  var volumeStyle = { background: '-webkit-gradient(linear, left top, right top, ' +
-    'color-stop(' + (volume * 100) + '%, #eee), ' +
-    'color-stop(' + (volume * 100) + '%, #727272))'
+  var volumeIcon = 'volume_' + (
+    volume === 0 ? 'off'
+    : volume < 0.3 ? 'mute'
+    : volume < 0.6 ? 'down'
+    : 'up')
+  var volumeStyle = {
+    background: '-webkit-gradient(linear, left top, right top, ' +
+      'color-stop(' + (volume * 100) + '%, #eee), ' +
+      'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
   elements.push(hx`
@@ -428,7 +462,8 @@ function renderPlayerControls (state) {
       </i>
       <input
         class='volume-slider float-right'
-        type='range' min='0' max='1' step='0.05' value=${volumeChanging !== false ? volumeChanging : volume}
+        type='range' min='0' max='1' step='0.05'
+        value=${volumeChanging !== false ? volumeChanging : volume}
         onmousedown=${handleVolumeScrub}
         onmouseup=${handleVolumeScrub}
         onmousemove=${handleVolumeScrub}
@@ -438,9 +473,11 @@ function renderPlayerControls (state) {
   `)
 
   // Show video playback progress
+  var currentTimeStr = formatTime(state.playing.currentTime)
+  var durationStr = formatTime(state.playing.duration)
   elements.push(hx`
     <span class='time float-left'>
-      ${formatTime(state.playing.currentTime)} / ${formatTime(state.playing.duration)}
+      ${currentTimeStr} / ${durationStr}
     </span>
   `)
 
