@@ -8,7 +8,7 @@ var createTorrent = require('create-torrent')
 var path = require('path')
 var prettyBytes = require('prettier-bytes')
 
-var {dispatch} = require('../lib/dispatcher')
+var {dispatch, dispatcher} = require('../lib/dispatcher')
 
 function CreateTorrentPage (state) {
   var info = state.location.current()
@@ -17,17 +17,14 @@ function CreateTorrentPage (state) {
   var files = info.files
     .filter((f) => !f.name.startsWith('.'))
     .map((f) => ({name: f.name, path: f.path, size: f.size}))
+  if (files.length === 0) return CreateTorrentErrorPage()
 
   // First, extract the base folder that the files are all in
   var pathPrefix = info.folderPath
   if (!pathPrefix) {
-    if (files.length > 0) {
-      pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
-      if (!pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
-        pathPrefix = path.dirname(pathPrefix)
-      }
-    } else {
-      pathPrefix = files[0]
+    pathPrefix = files.map((x) => x.path).reduce(findCommonPrefix)
+    if (!pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
+      pathPrefix = path.dirname(pathPrefix)
     }
   }
 
@@ -131,6 +128,27 @@ function CreateTorrentPage (state) {
     info.showAdvanced = !info.showAdvanced
     dispatch('update')
   }
+}
+
+function CreateTorrentErrorPage () {
+  return hx`
+    <div class='create-torrent-page'>
+      <h2>Create torrent</h2>
+      <p class="torrent-info">
+        <p>
+          Sorry, you must select at least one file that is not a hidden file.
+        </p>
+        <p>
+          Hidden files, starting with a . character, are not included.
+        </p>
+      </p>
+      <p class="float-right">
+        <button class='button-flat light' onclick=${dispatcher('back')}>
+          Cancel
+        </button>
+      </p>
+    </div>
+  `
 }
 
 // Finds the longest common prefix
