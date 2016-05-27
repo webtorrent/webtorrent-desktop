@@ -13,26 +13,30 @@ var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
   '&platform=' + process.platform
 
 function init () {
-  get.concat(ANNOUNCEMENT_URL, function (err, res, data) {
-    if (err) return log('failed to retrieve remote message')
-    if (res.statusCode !== 200) return log('no remote message')
-
-    try {
-      data = JSON.parse(data.toString())
-    } catch (err) {
-      data = {
-        title: 'WebTorrent Desktop Announcement',
-        message: 'WebTorrent Desktop Announcement',
-        detail: data.toString()
-      }
-    }
-
-    electron.dialog.showMessageBox({
-      type: 'info',
-      buttons: ['OK'],
-      title: data.title,
-      message: data.message,
-      detail: data.detail
-    }, function () {})
-  })
+  get.concat(ANNOUNCEMENT_URL, onResponse)
 }
+
+function onResponse (err, res, data) {
+  if (err) return log('failed to retrieve remote message')
+  if (res.statusCode !== 200) return log('no remote message')
+
+  try {
+    data = JSON.parse(data.toString())
+  } catch (err) {
+    data = {
+      title: 'WebTorrent Desktop Announcement',
+      message: 'Announcement',
+      detail: data.toString()
+    }
+  }
+
+  electron.dialog.showMessageBox({
+    type: 'info',
+    buttons: ['OK'],
+    title: data.title,
+    message: data.message,
+    detail: data.detail
+  }, noop)
+}
+
+function noop () {}
