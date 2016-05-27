@@ -22,7 +22,7 @@
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^2.11.0",
-    "electron-prebuilt": "1.1.1",
+    "electron-prebuilt": "1.2.0",
     "fs-extra": "^0.27.0",
     "hyperx": "^2.0.2",
     "iso-639-1": "^1.2.1",
