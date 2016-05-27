@@ -1,8 +1,6 @@
 module.exports = Preferences
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
+var hx = require('../lib/hx')
 var {dispatch} = require('../lib/dispatcher')
 
 var remote = require('electron').remote

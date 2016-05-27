@@ -28,7 +28,7 @@ var App = require('./views/app')
 var config = require('../config')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
-var State = require('./state')
+var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
 

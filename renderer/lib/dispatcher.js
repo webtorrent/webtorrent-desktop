@@ -8,6 +8,7 @@ module.exports = {
 // () => dispatch(<args>)
 // ... this prevents virtual-dom from updating every listener on every update()
 var _dispatchers = {}
+
 var _dispatch = () => {}
 
 function setDispatch (dispatch) {
@@ -17,14 +18,18 @@ function setDispatch (dispatch) {
 // Get a _memoized event handler that calls dispatch()
 // All args must be JSON-able
 function dispatcher (...args) {
-  var json = JSON.stringify(args)
-  var handler = _dispatchers[json]
+  var str = JSON.stringify(args)
+  var handler = _dispatchers[str]
   if (!handler) {
-    handler = _dispatchers[json] = (e) => {
-      // Don't click on whatever is below the button
+    handler = _dispatchers[str] = function (e) {
+      // Do not propagate click to elements below the button
       e.stopPropagation()
-      // Don't regisiter clicks on disabled buttons
-      if (e.currentTarget.classList.contains('disabled')) return
+
+      if (e.currentTarget.classList.contains('disabled')) {
+        // Do not allow clicks on disabled buttons
+        return
+      }
+
       _dispatch.apply(null, args)
     }
   }

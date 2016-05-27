@@ -1,10 +1,7 @@
 module.exports = Header
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var {dispatcher} = require('../lib/dispatcher')
+var hx = require('../lib/hx')
 
 function Header (state) {
   return hx`
