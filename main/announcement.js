@@ -3,7 +3,6 @@ module.exports = {
 }
 
 var electron = require('electron')
-var get = require('simple-get')
 
 var config = require('../config')
 var log = require('./log')
@@ -13,6 +12,7 @@ var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
   '&platform=' + process.platform
 
 function init () {
+  var get = require('simple-get')
   get.concat(ANNOUNCEMENT_URL, onResponse)
 }
 

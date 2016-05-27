@@ -5,24 +5,23 @@ module.exports = {
 var electron = require('electron')
 
 var app = electron.app
-var ipcMain = electron.ipcMain
 
 var log = require('./log')
 var menu = require('./menu')
-var windows = require('./windows')
+var powerSaveBlocker = require('./power-save-blocker')
 var shortcuts = require('./shortcuts')
 var vlc = require('./vlc')
+var windows = require('./windows')
 
-// has to be a number, not a boolean, and undefined throws an error
-var powerSaveBlockerId = 0
-
-// messages from the main process, to be sent once the WebTorrent process starts
+// Messages from the main process, to be sent once the WebTorrent process starts
 var messageQueueMainToWebTorrent = []
 
 // holds a ChildProcess while we're playing a video in VLC, null otherwise
 var vlcProcess
 
 function init () {
+  var ipcMain = electron.ipcMain
+
   ipcMain.on('ipcReady', function (e) {
     windows.main.show()
     app.ipcReady = true
@@ -39,7 +38,7 @@ function init () {
     })
   })
 
-  ipcMain.on('showOpenTorrentFile', menu.showOpenTorrentFile)
+  ipcMain.on('showOpenTorrentFile', () => menu.showOpenTorrentFile())
 
   ipcMain.on('setBounds', function (e, bounds, maximize) {
     setBounds(bounds, maximize)
@@ -58,11 +57,11 @@ function init () {
   })
 
   ipcMain.on('toggleFullScreen', function (e, flag) {
-    menu.toggleFullScreen(flag)
+    windows.main.toggleFullScreen(flag)
   })
 
   ipcMain.on('setTitle', function (e, title) {
-    windows.main.setTitle(title)
+    windows.main.win.setTitle(title)
   })
 
   ipcMain.on('openItem', function (e, path) {
@@ -75,9 +74,8 @@ function init () {
     electron.shell.showItemInFolder(path)
   })
 
-  ipcMain.on('blockPowerSave', blockPowerSave)
-
-  ipcMain.on('unblockPowerSave', unblockPowerSave)
+  ipcMain.on('blockPowerSave', () => powerSaveBlocker.start())
+  ipcMain.on('unblockPowerSave', () => powerSaveBlocker.stop())
 
   ipcMain.on('onPlayerOpen', function () {
     menu.onPlayerOpen()
@@ -174,7 +172,7 @@ function init () {
 
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
-  if (!windows.main || windows.main.isFullScreen()) {
+  if (!windows.main.win || windows.main.win.isFullScreen()) {
     log('setBounds: not setting bounds because we\'re in full screen')
     return
   }
@@ -182,19 +180,19 @@ function setBounds (bounds, maximize) {
   // Maximize or minimize, if the second argument is present
   var willBeMaximized
   if (maximize === true) {
-    if (!windows.main.isMaximized()) {
+    if (!windows.main.win.isMaximized()) {
       log('setBounds: maximizing')
-      windows.main.maximize()
+      windows.main.win.maximize()
     }
     willBeMaximized = true
   } else if (maximize === false) {
-    if (windows.main.isMaximized()) {
+    if (windows.main.win.isMaximized()) {
       log('setBounds: unmaximizing')
-      windows.main.unmaximize()
+      windows.main.win.unmaximize()
     }
     willBeMaximized = false
   } else {
-    willBeMaximized = windows.main.isMaximized()
+    willBeMaximized = windows.main.win.isMaximized()
   }
 
   // Assuming we're not maximized or maximizing, set the window size
@@ -202,12 +200,12 @@ function setBounds (bounds, maximize) {
     log('setBounds: setting bounds to ' + JSON.stringify(bounds))
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
-      var scr = electron.screen.getDisplayMatching(windows.main.getBounds())
+      var scr = electron.screen.getDisplayMatching(windows.main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
       bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
       log('setBounds: centered to ' + JSON.stringify(bounds))
     }
-    windows.main.setBounds(bounds, true)
+    windows.main.win.setBounds(bounds, true)
   } else {
     log('setBounds: not setting bounds because of window maximization')
   }
@@ -215,9 +213,8 @@ function setBounds (bounds, maximize) {
 
 function setAspectRatio (aspectRatio) {
   log('setAspectRatio %o', aspectRatio)
-  if (windows.main) {
-    windows.main.setAspectRatio(aspectRatio)
-  }
+  if (!windows.main.win) return
+  windows.main.win.setAspectRatio(aspectRatio)
 }
 
 // Display string in dock badging area (OS X)
@@ -231,19 +228,6 @@ function setBadge (text) {
 // Show progress bar. Valid range is [0, 1]. Remove when < 0; indeterminate when > 1.
 function setProgress (progress) {
   log('setProgress %s', progress)
-  if (windows.main) {
-    windows.main.setProgressBar(progress)
-  }
-}
-
-function blockPowerSave () {
-  powerSaveBlockerId = electron.powerSaveBlocker.start('prevent-display-sleep')
-  log('blockPowerSave %d', powerSaveBlockerId)
-}
-
-function unblockPowerSave () {
-  if (electron.powerSaveBlocker.isStarted(powerSaveBlockerId)) {
-    electron.powerSaveBlocker.stop(powerSaveBlockerId)
-    log('unblockPowerSave %d', powerSaveBlockerId)
-  }
+  if (!windows.main.win) return
+  windows.main.win.setProgressBar(progress)
 }

@@ -606,7 +606,8 @@ function saveState () {
   update()
 }
 
-// Called when the user drag-drops files onto the app
+// Called when the user adds files (.torrent, files to seed, subtitles) to the app
+// via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
@@ -674,12 +675,13 @@ function addTorrent (torrentId) {
 }
 
 function addSubtitles (files, autoSelect) {
-  // Subtitles are only supported while playing video
+  // Subtitles are only supported when playing video files
   if (state.playing.type !== 'video') return
+  if (files.length === 0) return
 
   // Read the files concurrently, then add all resulting subtitle tracks
-  var jobs = files.map((file) => (cb) => loadSubtitle(file, cb))
-  parallel(jobs, function (err, tracks) {
+  var tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
+  parallel(tasks, function (err, tracks) {
     if (err) return onError(err)
 
     for (var i = 0; i < tracks.length; i++) {

@@ -8,6 +8,7 @@ var ipcMain = electron.ipcMain
 var announcement = require('./announcement')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
+var dialog = require('./dialog')
 var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
@@ -60,8 +61,8 @@ function init () {
   app.on('ready', function () {
     isReady = true
 
-    windows.createMainWindow()
-    windows.createWebTorrentHiddenWindow()
+    windows.main.create()
+    windows.webtorrent.create()
     menu.init()
 
     // To keep app startup fast, some code is delayed.
@@ -79,13 +80,13 @@ function init () {
 
     app.isQuitting = true
     e.preventDefault()
-    windows.main.send('dispatch', 'saveState') /* try to save state on exit */
+    windows.main.send('dispatch', 'saveState') // try to save state on exit
     ipcMain.once('savedState', () => app.quit())
-    setTimeout(() => app.quit(), 2000) /* quit after 2 secs, at most */
+    setTimeout(() => app.quit(), 2000) // quit after 2 secs, at most
   })
 
   app.on('activate', function () {
-    if (isReady) windows.createMainWindow()
+    if (isReady) windows.main.create()
   })
 }
 
@@ -101,11 +102,11 @@ function onOpen (e, torrentId) {
 
   if (app.ipcReady) {
     windows.main.send('dispatch', 'onOpen', torrentId)
-    // Magnet links opened from Chrome won't focus the app without a setTimeout. The
-    // confirmation dialog Chrome shows causes Chrome to steal back the focus.
+    // Magnet links opened from Chrome won't focus the app without a setTimeout.
+    // The confirmation dialog Chrome shows causes Chrome to steal back the focus.
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(function () {
-      windows.focusWindow(windows.main)
+      windows.main.focus()
     }, 100)
   } else {
     argv.push(torrentId)
@@ -114,10 +115,11 @@ function onOpen (e, torrentId) {
 
 function onAppOpen (newArgv) {
   newArgv = sliceArgv(newArgv)
+  console.log(newArgv)
 
   if (app.ipcReady) {
     log('Second app instance opened, but was prevented:', newArgv)
-    windows.focusWindow(windows.main)
+    windows.main.focus()
 
     processArgv(newArgv)
   } else {
@@ -130,27 +132,22 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  var pathsToOpen = []
+  var paths = []
   argv.forEach(function (arg) {
     if (arg === '-n') {
-      menu.showOpenSeedFiles()
+      dialog.openSeedDirectory()
     } else if (arg === '-o') {
-      menu.showOpenTorrentFile()
+      dialog.openTorrentFile()
     } else if (arg === '-u') {
-      menu.showOpenTorrentAddress()
+      dialog.openTorrentAddress()
     } else if (arg.startsWith('-psn')) {
       // Ignore OS X launchd "process serial number" argument
-      // More: https://github.com/feross/webtorrent-desktop/issues/214
+      // Issue: https://github.com/feross/webtorrent-desktop/issues/214
     } else {
-      pathsToOpen.push(arg)
+      paths.push(arg)
     }
   })
-  if (pathsToOpen.length > 0) openFilePaths(pathsToOpen)
-}
-
-// Send files to the renderer process
-// Opening files means either adding torrents, creating and seeding a torrent
-// from files, or adding subtitles
-function openFilePaths (paths) {
-  windows.main.send('dispatch', 'onOpen', paths)
+  if (paths.length > 0) {
+    windows.main.send('dispatch', 'onOpen', paths)
+  }
 }

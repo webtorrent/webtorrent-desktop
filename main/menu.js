@@ -4,13 +4,7 @@ module.exports = {
   onPlayerOpen,
   onToggleFullScreen,
   onWindowHide,
-  onWindowShow,
-
-  // TODO: move these out of menu.js -- they don't belong here
-  showOpenSeedFiles,
-  showOpenTorrentAddress,
-  showOpenTorrentFile,
-  toggleFullScreen
+  onWindowShow
 }
 
 var electron = require('electron')
@@ -18,6 +12,7 @@ var electron = require('electron')
 var app = electron.app
 
 var config = require('../config')
+var dialog = require('./dialog')
 var log = require('./log')
 var windows = require('./windows')
 
@@ -33,100 +28,76 @@ function init () {
   }
 }
 
-function toggleFullScreen (flag) {
-  log('toggleFullScreen %s', flag)
-  if (windows.main && windows.main.isVisible()) {
-    flag = flag != null ? flag : !windows.main.isFullScreen()
-    if (flag) {
-      // Allows the window to use the full screen in fullscreen mode (OS X).
-      windows.main.setAspectRatio(0)
-    }
-    windows.main.setFullScreen(flag)
-  }
-}
-
 // Sets whether the window should always show on top of other windows
 function toggleFloatOnTop (flag) {
+  if (!windows.main.win) return
   log('toggleFloatOnTop %s', flag)
-  if (windows.main) {
-    flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
-    windows.main.setAlwaysOnTop(flag)
-    getMenuItem('Float on Top').checked = flag
-  }
+  flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
+  windows.main.setAlwaysOnTop(flag)
+  getMenuItem('Float on Top').checked = flag
 }
 
 function toggleDevTools () {
+  if (!windows.main.win) return
   log('toggleDevTools')
-  if (windows.main) {
-    windows.main.toggleDevTools()
-  }
+  windows.main.toggleDevTools()
 }
 
 function showWebTorrentWindow () {
   log('showWebTorrentWindow')
   windows.webtorrent.show()
-  windows.webtorrent.webContents.openDevTools({ detach: true })
+  windows.webtorrent.win.webContents.openDevTools({ detach: true })
 }
 
 function playPause () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'playPause')
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'playPause')
 }
 
 function increaseVolume () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changeVolume', 0.1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'changeVolume', 0.1)
 }
 
 function decreaseVolume () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changeVolume', -0.1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'changeVolume', -0.1)
 }
 
 function openSubtitles () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'openSubtitles')
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'openSubtitles')
 }
 
 function skipForward () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'skip', 1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'skip', 1)
 }
 
 function skipBack () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'skip', -1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'skip', -1)
 }
 
 function increasePlaybackRate () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changePlaybackRate', 1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'changePlaybackRate', 1)
 }
 
 function decreasePlaybackRate () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'changePlaybackRate', -1)
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'changePlaybackRate', -1)
 }
 
 // Open the preferences window
 function showPreferences () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'preferences')
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'preferences')
 }
 
 function escapeBack () {
-  if (windows.main) {
-    windows.main.send('dispatch', 'escapeBack')
-  }
+  if (!windows.main.win) return
+  windows.main.send('dispatch', 'escapeBack')
 }
 
 function onWindowShow () {
@@ -166,8 +137,10 @@ function onPlayerClose () {
 }
 
 function onToggleFullScreen (isFullScreen) {
-  isFullScreen = isFullScreen != null ? isFullScreen : windows.main.isFullScreen()
-  windows.main.setMenuBarVisibility(!isFullScreen)
+  if (isFullScreen == null) {
+    isFullScreen = windows.main.win.isFullScreen()
+  }
+  windows.main.win.setMenuBarVisibility(!isFullScreen)
   getMenuItem('Full Screen').checked = isFullScreen
   windows.main.send('fullscreenChanged', isFullScreen)
 }
@@ -181,49 +154,6 @@ function getMenuItem (label) {
   }
 }
 
-// Prompts the user for a file, then creates a torrent. Only allows a single file
-// selection.
-function showOpenSeedFile () {
-  electron.dialog.showOpenDialog({
-    title: 'Select a file for the torrent file.',
-    properties: [ 'openFile' ]
-  }, function (selectedPaths) {
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
-  })
-}
-
-// Prompts the user for a file or directory, then creates a torrent. Only allows a single
-// selection. To create a multi-file torrent, the user must select a directory.
-function showOpenSeedFiles () {
-  electron.dialog.showOpenDialog({
-    title: 'Select a file or folder for the torrent file.',
-    properties: [ 'openFile', 'openDirectory' ]
-  }, function (selectedPaths) {
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
-  })
-}
-
-// Prompts the user to choose a torrent file, then adds it to the app
-function showOpenTorrentFile () {
-  electron.dialog.showOpenDialog(windows.main, {
-    title: 'Select a .torrent file to open.',
-    filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
-    properties: [ 'openFile', 'multiSelections' ]
-  }, function (selectedPaths) {
-    if (!Array.isArray(selectedPaths)) return
-    selectedPaths.forEach(function (selectedPath) {
-      windows.main.send('dispatch', 'addTorrent', selectedPath)
-    })
-  })
-}
-
-// Prompts the user for the URL of a torrent file, then downloads and adds it
-function showOpenTorrentAddress () {
-  windows.main.send('showOpenTorrentAddress')
-}
-
 function getAppMenuTemplate () {
   var template = [
     {
@@ -234,17 +164,17 @@ function getAppMenuTemplate () {
             ? 'Create New Torrent...'
             : 'Create New Torrent from Folder...',
           accelerator: 'CmdOrCtrl+N',
-          click: showOpenSeedFiles
+          click: () => dialog.openSeedDirectory()
         },
         {
           label: 'Open Torrent File...',
           accelerator: 'CmdOrCtrl+O',
-          click: showOpenTorrentFile
+          click: () => dialog.openTorrentFile()
         },
         {
           label: 'Open Torrent Address...',
           accelerator: 'CmdOrCtrl+U',
-          click: showOpenTorrentAddress
+          click: () => dialog.openTorrentAddress()
         },
         {
           type: 'separator'
@@ -300,7 +230,7 @@ function getAppMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'Ctrl+Command+F'
             : 'F11',
-          click: () => toggleFullScreen()
+          click: () => windows.toggleFullScreen()
         },
         {
           label: 'Float on Top',
@@ -505,7 +435,7 @@ function getAppMenuTemplate () {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
-      click: showOpenSeedFile
+      click: () => dialog.openSeedFile()
     })
 
     // Help menu (Windows, Linux)
@@ -515,7 +445,7 @@ function getAppMenuTemplate () {
       },
       {
         label: 'About ' + config.APP_NAME,
-        click: windows.createAboutWindow
+        click: () => windows.about.create()
       }
     )
   }
@@ -537,17 +467,17 @@ function getDockMenuTemplate () {
     {
       label: 'Create New Torrent...',
       accelerator: 'CmdOrCtrl+N',
-      click: showOpenSeedFiles
+      click: () => dialog.openSeedDirectory()
     },
     {
       label: 'Open Torrent File...',
       accelerator: 'CmdOrCtrl+O',
-      click: showOpenTorrentFile
+      click: () => dialog.openTorrentFile()
     },
     {
       label: 'Open Torrent Address...',
       accelerator: 'CmdOrCtrl+U',
-      click: showOpenTorrentAddress
+      click: () => dialog.openTorrentAddress()
     }
   ]
 }
