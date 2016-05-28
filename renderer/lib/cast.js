@@ -128,6 +128,24 @@ function chromecastPlayer (player) {
 
 // airplay player implementation
 function airplayPlayer (player) {
+  function addEvents () {
+    player.on('event', function (event) {
+      switch (event.state) {
+        case 'loading':
+          break
+        case 'playing':
+          state.playing.isPaused = false
+          break
+        case 'paused':
+          state.playing.isPaused = true
+          break
+        case 'stopped':
+          break
+      }
+      update()
+    })
+  }
+
   function open () {
     player.play(state.server.networkURL, function (err, res) {
       if (err) {
@@ -180,6 +198,8 @@ function airplayPlayer (player) {
     // TODO: We should just disable the volume slider
     state.playing.volume = volume
   }
+
+  addEvents()
 
   return {
     player: player,
