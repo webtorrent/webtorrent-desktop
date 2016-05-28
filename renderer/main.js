@@ -976,7 +976,10 @@ function torrentProgress (progressInfo) {
     torrentSummary.progress = p
   })
 
-  checkForSubtitles()
+  // TODO: Find an efficient way to re-enable this line, which allows subtitle
+  //       files which are completed after a video starts to play to be added
+  //       dynamically to the list of subtitles.
+  // checkForSubtitles()
 
   update()
 }
