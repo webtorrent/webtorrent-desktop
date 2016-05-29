@@ -8,38 +8,46 @@ module.exports = {
 var electron = require('electron')
 var windows = require('./windows')
 
-// Prompts the user for a file, then creates a torrent. Only allows a single file
-// selection.
+/**
+ * Show open dialog to create a single-file torrent.
+ */
 function openSeedFile () {
-  electron.dialog.showOpenDialog({
+  var opts = {
     title: 'Select a file for the torrent file.',
     properties: [ 'openFile' ]
-  }, function (selectedPaths) {
+  }
+  electron.dialog.showOpenDialog(opts, function (selectedPaths) {
     if (!Array.isArray(selectedPaths)) return
     windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
   })
 }
 
-// Prompts the user for a file or directory, then creates a torrent. Only allows a
-// single selection. To create a multi-file torrent, the user must select a
-// directory.
+/*
+ * Show open dialog to create a single-file or single-directory torrent. On
+ * Windows and Linux, open dialogs are for files *or* directories only, not both.
+ * This function shows a directory dialog.
+ */
 function openSeedDirectory () {
-  electron.dialog.showOpenDialog({
+  var opts = {
     title: 'Select a file or folder for the torrent file.',
     properties: [ 'openFile', 'openDirectory' ]
-  }, function (selectedPaths) {
+  }
+  electron.dialog.showOpenDialog(opts, function (selectedPaths) {
     if (!Array.isArray(selectedPaths)) return
     windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
   })
 }
 
-// Prompts the user to choose a torrent file, then adds it.
+/*
+ * Show open dialog to open a .torrent file.
+ */
 function openTorrentFile () {
-  electron.dialog.showOpenDialog(windows.main.win, {
+  var opts = {
     title: 'Select a .torrent file to open.',
     filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
-  }, function (selectedPaths) {
+  }
+  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
     if (!Array.isArray(selectedPaths)) return
     selectedPaths.forEach(function (selectedPath) {
       windows.main.send('dispatch', 'addTorrent', selectedPath)
@@ -47,7 +55,9 @@ function openTorrentFile () {
   })
 }
 
-// Prompts the user for the URL of a torrent file, then downloads and adds it
+/*
+ * Show modal dialog to open a torrent URL (magnet uri, http torrent link, etc.)
+ */
 function openTorrentAddress () {
   windows.main.send('showOpenTorrentAddress')
 }
