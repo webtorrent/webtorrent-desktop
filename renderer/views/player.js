@@ -54,8 +54,9 @@ function renderMedia (state) {
       mediaElement.playbackRate = state.playing.playbackRate
     }
     // Set volume
-    if (state.setVolume !== null && isFinite(state.setVolume)) {
-      mediaElement.volume = state.setVolume
+    if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
+      mediaElement.volume = state.playing.setVolume
+      state.playing.setVolume = null
     }
 
     // Switch to the newly added subtitle track, if available

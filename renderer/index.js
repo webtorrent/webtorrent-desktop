@@ -458,8 +458,7 @@ function setVolume (volume) {
   if (isCasting()) {
     Cast.setVolume(volume)
   } else {
-    // Persist volume across videos
-    state.setVolume = volume
+    state.playing.setVolume = volume
   }
 }
 
