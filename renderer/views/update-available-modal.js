@@ -1,12 +1,9 @@
 module.exports = UpdateAvailableModal
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var electron = require('electron')
 
 var {dispatch} = require('../lib/dispatcher')
+var hx = require('../lib/hx')
 
 function UpdateAvailableModal (state) {
   return hx`

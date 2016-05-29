@@ -10,11 +10,16 @@ module.exports.error = error
 
 var electron = require('electron')
 
+var config = require('../config')
 var windows = require('./windows')
 
 var app = electron.app
 
 function log (...args) {
+  if (!config.IS_PRODUCTION) {
+    // In development, also log to the console
+    console.log(...args)
+  }
   if (app.ipcReady) {
     windows.main.send('log', ...args)
   } else {

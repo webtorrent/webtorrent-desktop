@@ -3,9 +3,8 @@ module.exports = {
   uninstall
 }
 
-var path = require('path')
-
 var config = require('../config')
+var path = require('path')
 
 function install () {
   if (process.platform === 'darwin') {
@@ -35,11 +34,11 @@ function installDarwin () {
   var electron = require('electron')
   var app = electron.app
 
-  // On OS X, only protocols that are listed in Info.plist can be set as the default
-  // handler at runtime.
+  // On OS X, only protocols that are listed in `Info.plist` can be set as the
+  // default handler at runtime.
   app.setAsDefaultProtocolClient('magnet')
 
-  // File handlers are registered in the Info.plist.
+  // File handlers are defined in `Info.plist`.
 }
 
 function uninstallDarwin () {}
@@ -55,10 +54,22 @@ function installWin32 () {
 
   var log = require('./log')
 
-  var iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
-
-  registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, EXEC_COMMAND)
-  registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, EXEC_COMMAND)
+  var iconPath = path.join(
+    process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico'
+  )
+  registerProtocolHandlerWin32(
+    'magnet',
+    'URL:BitTorrent Magnet URL',
+    iconPath,
+    EXEC_COMMAND
+  )
+  registerFileHandlerWin32(
+    '.torrent',
+    'io.webtorrent.torrent',
+    'BitTorrent Document',
+    iconPath,
+    EXEC_COMMAND
+  )
 
   /**
    * To add a protocol handler, the following keys must be added to the Windows registry:
@@ -265,7 +276,9 @@ function installLinux () {
   installIconFile()
 
   function installDesktopFile () {
-    var templatePath = path.join(config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop')
+    var templatePath = path.join(
+      config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop'
+    )
     fs.readFile(templatePath, 'utf8', writeDesktopFile)
   }
 

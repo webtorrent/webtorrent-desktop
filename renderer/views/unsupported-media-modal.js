@@ -1,12 +1,9 @@
 module.exports = UnsupportedMediaModal
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var electron = require('electron')
 
 var {dispatch, dispatcher} = require('../lib/dispatcher')
+var hx = require('../lib/hx')
 
 function UnsupportedMediaModal (state) {
   var err = state.modal.error

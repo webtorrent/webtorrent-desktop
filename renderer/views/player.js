@@ -1,13 +1,10 @@
 module.exports = Player
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var Bitfield = require('bitfield')
 var prettyBytes = require('prettier-bytes')
 var zeroFill = require('zero-fill')
 
+var hx = require('../lib/hx')
 var TorrentSummary = require('../lib/torrent-summary')
 var {dispatch, dispatcher} = require('../lib/dispatcher')
 

@@ -1,17 +1,17 @@
 module.exports = TorrentList
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
 var prettyBytes = require('prettier-bytes')
 
+var hx = require('../lib/hx')
 var TorrentSummary = require('../lib/torrent-summary')
 var TorrentPlayer = require('../lib/torrent-player')
 var {dispatcher} = require('../lib/dispatcher')
 
 function TorrentList (state) {
   var torrentRows = state.saved.torrents.map(
-    (torrentSummary) => renderTorrent(torrentSummary))
+    (torrentSummary) => renderTorrent(torrentSummary)
+  )
+
   return hx`
     <div class='torrent-list'>
       ${torrentRows}
@@ -20,11 +20,7 @@ function TorrentList (state) {
       </div>
     </div>`
 
-  // Renders a torrent in the torrent list
-  // Includes name, download status, play button, background image
-  // May be expanded for additional info, including the list of files inside
   function renderTorrent (torrentSummary) {
-    // Get ephemeral data (like progress %) directly from the WebTorrent handle
     var infoHash = torrentSummary.infoHash
     var isSelected = infoHash && state.selectedInfoHash === infoHash
 

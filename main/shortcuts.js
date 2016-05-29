@@ -7,13 +7,14 @@ var electron = require('electron')
 var windows = require('./windows')
 
 function onPlayerOpen () {
-  // Register special "media key" for play/pause, available on some keyboards
+  // Register play/pause media key, available on some keyboards.
   electron.globalShortcut.register(
     'MediaPlayPause',
-    () => windows.main.send('dispatch', 'playPause')
+    () => windows.main.dispatch('playPause')
   )
 }
 
 function onPlayerClose () {
+  // Return the media key to the OS, so other apps can use it.
   electron.globalShortcut.unregister('MediaPlayPause')
 }

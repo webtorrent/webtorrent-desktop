@@ -280,36 +280,36 @@ table {
   width: 100%;
 }
 
-.create-torrent-page {
+.create-torrent {
   padding: 10px 25px;
   overflow: hidden;
 }
 
-.create-torrent-page .torrent-attribute {
+.create-torrent .torrent-attribute {
   white-space: nowrap;
 }
 
-.create-torrent-page .torrent-attribute>* {
+.create-torrent .torrent-attribute>* {
   display: inline-block;
 }
 
-.create-torrent-page .torrent-attribute label {
+.create-torrent .torrent-attribute label {
   width: 60px;
   margin-right: 10px;
   vertical-align: top;
 }
 
-.create-torrent-page .torrent-attribute>div {
+.create-torrent .torrent-attribute>div {
   width: calc(100% - 90px);
 }
 
-.create-torrent-page .torrent-attribute div {
+.create-torrent .torrent-attribute div {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.create-torrent-page .torrent-attribute textarea {
+.create-torrent .torrent-attribute textarea {
   width: calc(100% - 80px);
   height: 80px;
   color: #eee;
@@ -321,11 +321,11 @@ table {
   padding: 4px 6px;
 }
 
-.create-torrent-page textarea.torrent-trackers {
+.create-torrent textarea.torrent-trackers {
   height: 200px;
 }
 
-.create-torrent-page input.torrent-is-private {
+.create-torrent input.torrent-is-private {
   width: initial;
   margin: 0;
 }
