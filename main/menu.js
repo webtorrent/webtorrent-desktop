@@ -241,6 +241,14 @@ function getAppMenuTemplate () {
           type: 'separator'
         },
         {
+          label: 'Go Back',
+          accelerator: 'Esc',
+          click: escapeBack
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Developer',
           submenu: [
             {
@@ -258,14 +266,6 @@ function getAppMenuTemplate () {
               click: showWebTorrentWindow
             }
           ]
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Go Back',
-          accelerator: 'Esc',
-          click: escapeBack
         }
       ]
     },
