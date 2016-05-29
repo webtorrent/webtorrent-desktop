@@ -377,6 +377,9 @@ function dispatch (action, ...args) {
   if (action === 'saveState') {
     saveState()
   }
+  if (action === 'setTitle') {
+    state.window.title = args[0] /* title */
+  }
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
