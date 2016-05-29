@@ -1320,7 +1320,7 @@ function showDoneNotification (torrent) {
   })
 
   notif.onclick = function () {
-    ipcRenderer.send('focusWindow', 'main')
+    ipcRenderer.send('show')
   }
 
   sound.play('DONE')

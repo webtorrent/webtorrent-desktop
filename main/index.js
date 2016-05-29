@@ -106,7 +106,7 @@ function onOpen (e, torrentId) {
     // The confirmation dialog Chrome shows causes Chrome to steal back the focus.
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(function () {
-      windows.main.focus()
+      windows.main.show()
     }, 100)
   } else {
     argv.push(torrentId)
@@ -119,7 +119,7 @@ function onAppOpen (newArgv) {
 
   if (app.ipcReady) {
     log('Second app instance opened, but was prevented:', newArgv)
-    windows.main.focus()
+    windows.main.show()
 
     processArgv(newArgv)
   } else {

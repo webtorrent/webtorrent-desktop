@@ -65,6 +65,7 @@ function init () {
   })
 
   ipcMain.on('openItem', function (e, path) {
+  ipc.on('show', (e, ...args) => windows.main.show(...args))
     log('open item: ' + path)
     electron.shell.openItem(path)
   })
@@ -85,10 +86,6 @@ function init () {
   ipcMain.on('onPlayerClose', function () {
     menu.onPlayerClose()
     shortcuts.onPlayerOpen()
-  })
-
-  ipcMain.on('focusWindow', function (e, windowName) {
-    windows.focusWindow(windows[windowName])
   })
 
   ipcMain.on('downloadFinished', function (e, filePath) {

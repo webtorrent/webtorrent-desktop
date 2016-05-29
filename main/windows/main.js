@@ -1,6 +1,5 @@
 var main = module.exports = {
   create,
-  focus,
   hide,
   send,
   show,
@@ -16,14 +15,13 @@ var config = require('../../config')
 var log = require('../log')
 var menu = require('../menu')
 var tray = require('../tray')
-var util = require('./util')
 
 var HEADER_HEIGHT = 37
 var TORRENT_HEIGHT = 100
 
 function create () {
   if (main.win) {
-    return util.focusWindow(main.win)
+    return main.win.show()
   }
   var win = main.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
@@ -109,7 +107,4 @@ function hide () {
   main.win.hide()
 }
 
-function focus () {
-  if (!main.win) return
-  util.focusWindow(main.win)
 }

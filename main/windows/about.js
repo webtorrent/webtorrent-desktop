@@ -3,14 +3,12 @@ var about = module.exports = {
   win: null
 }
 
-var electron = require('electron')
-
 var config = require('../../config')
-var util = require('./util')
+var electron = require('electron')
 
 function create () {
   if (about.win) {
-    return util.focusWindow(about.win)
+    return about.win.show()
   }
 
   var win = about.win = new electron.BrowserWindow({
