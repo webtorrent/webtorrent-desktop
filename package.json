@@ -14,7 +14,7 @@
     "url": "https://github.com/feross/webtorrent-desktop/issues"
   },
   "dependencies": {
-    "airplay-js": "guerrerocarlos/node-airplay-js",
+    "airplayer": "^2.0.0",
     "application-config": "^0.2.1",
     "bitfield": "^1.0.2",
     "chromecasts": "^1.8.0",
