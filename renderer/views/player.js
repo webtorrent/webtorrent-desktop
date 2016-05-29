@@ -53,6 +53,12 @@ function renderMedia (state) {
     if (state.playing.playbackRate !== mediaElement.playbackRate) {
       mediaElement.playbackRate = state.playing.playbackRate
     }
+    // Recover previous volume
+    if (state.previousVolume !== null && isFinite(state.previousVolume)) {
+      mediaElement.volume = state.previousVolume
+      state.previousVolume = null
+    }
+
     // Set volume
     if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
       mediaElement.volume = state.playing.setVolume
