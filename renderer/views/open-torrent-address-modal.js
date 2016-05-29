@@ -1,10 +1,7 @@
 module.exports = OpenTorrentAddressModal
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var {dispatch} = require('../lib/dispatcher')
+var hx = require('../lib/hx')
 
 function OpenTorrentAddressModal (state) {
   return hx`

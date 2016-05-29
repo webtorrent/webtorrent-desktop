@@ -3,8 +3,8 @@ var path = require('path')
 
 var remote = electron.remote
 
-var config = require('../config')
-var LocationHistory = require('./lib/location-history')
+var config = require('../../config')
+var LocationHistory = require('./location-history')
 
 module.exports = {
   getInitialState,

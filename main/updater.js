@@ -21,27 +21,27 @@ function init () {
   }
 }
 
-// The Electron auto-updater does not support Linux yet, so manually check for updates and
-// `show the user a modal notification.
+// The Electron auto-updater does not support Linux yet, so manually check for
+// updates and show the user a modal notification.
 function initLinux () {
   get.concat(AUTO_UPDATE_URL, onResponse)
+}
 
-  function onResponse (err, res, data) {
-    if (err) return log(`Update error: ${err.message}`)
-    if (res.statusCode === 200) {
-      // Update available
-      try {
-        data = JSON.parse(data)
-      } catch (err) {
-        return log(`Update error: Invalid JSON response: ${err.message}`)
-      }
-      windows.main.send('dispatch', 'updateAvailable', data.version)
-    } else if (res.statusCode === 204) {
-      // No update available
-    } else {
-      // Unexpected status code
-      log(`Update error: Unexpected status code: ${res.statusCode}`)
+function onResponse (err, res, data) {
+  if (err) return log(`Update error: ${err.message}`)
+  if (res.statusCode === 200) {
+    // Update available
+    try {
+      data = JSON.parse(data)
+    } catch (err) {
+      return log(`Update error: Invalid JSON response: ${err.message}`)
     }
+    windows.main.dispatch('updateAvailable', data.version)
+  } else if (res.statusCode === 204) {
+    // No update available
+  } else {
+    // Unexpected status code
+    log(`Update error: Unexpected status code: ${res.statusCode}`)
   }
 }
 

@@ -1,36 +1,39 @@
 module.exports = {
-  setDispatch,
   dispatch,
-  dispatcher
+  dispatcher,
+  setDispatch
 }
 
-// Memoize most of our event handlers, which are functions in the form
-// () => dispatch(<args>)
-// ... this prevents virtual-dom from updating every listener on every update()
-var _dispatchers = {}
-var _dispatch = () => {}
+var dispatchers = {}
+var _dispatch = function () {}
 
 function setDispatch (dispatch) {
   _dispatch = dispatch
 }
 
-// Get a _memoized event handler that calls dispatch()
-// All args must be JSON-able
+function dispatch (...args) {
+  _dispatch(...args)
+}
+
+// Most DOM event handlers are trivial functions like `() => dispatch(<args>)`.
+// For these, `dispatcher(<args>)` is preferred because it memoizes the handler
+// function. This prevents virtual-dom from updating the listener functions on
+// each update().
 function dispatcher (...args) {
-  var json = JSON.stringify(args)
-  var handler = _dispatchers[json]
+  var str = JSON.stringify(args)
+  var handler = dispatchers[str]
   if (!handler) {
-    handler = _dispatchers[json] = (e) => {
-      // Don't click on whatever is below the button
+    handler = dispatchers[str] = function (e) {
+      // Do not propagate click to elements below the button
       e.stopPropagation()
-      // Don't regisiter clicks on disabled buttons
-      if (e.currentTarget.classList.contains('disabled')) return
-      _dispatch.apply(null, args)
+
+      if (e.currentTarget.classList.contains('disabled')) {
+        // Ignore clicks on disabled elements
+        return
+      }
+
+      dispatch(...args)
     }
   }
   return handler
-}
-
-function dispatch (...args) {
-  _dispatch.apply(null, args)
 }

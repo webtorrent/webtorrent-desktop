@@ -1,9 +1,10 @@
 module.exports = {
+  hasTray,
   init,
-  hasTray
+  onWindowBlur,
+  onWindowFocus
 }
 
-var cp = require('child_process')
 var electron = require('electron')
 
 var app = electron.app
@@ -11,41 +12,51 @@ var app = electron.app
 var config = require('../config')
 var windows = require('./windows')
 
-var trayIcon
+var tray
 
 function init () {
-  // OS X has no tray icon
-  if (process.platform === 'darwin') return
-
-  // On Linux, asynchronously check for libappindicator1
   if (process.platform === 'linux') {
-    checkLinuxTraySupport(function (supportsTray) {
-      if (supportsTray) createTrayIcon()
-    })
+    initLinux()
   }
-
-  // Windows always supports minimize-to-tray
-  if (process.platform === 'win32') createTrayIcon()
+  if (process.platform === 'win32') {
+    initWin32()
+  }
+  // OS X apps generally do not have menu bar icons
 }
 
+/**
+ * Returns true if there a tray icon is active.
+ */
 function hasTray () {
-  return !!trayIcon
+  return !!tray
 }
 
-function createTrayIcon () {
-  trayIcon = new electron.Tray(getIconPath())
-
-  // On Windows, left click to open the app, right click for context menu
-  // On Linux, any click (right or left) opens the context menu
-  trayIcon.on('click', showApp)
-
-  // Show the tray context menu, and keep the available commands up to date
+function onWindowBlur () {
+  if (!tray) return
   updateTrayMenu()
-  windows.main.on('show', updateTrayMenu)
-  windows.main.on('hide', updateTrayMenu)
 }
 
+function onWindowFocus () {
+  if (!tray) return
+  updateTrayMenu()
+}
+
+function initLinux () {
+  checkLinuxTraySupport(function (supportsTray) {
+    if (supportsTray) createTray()
+  })
+}
+
+function initWin32 () {
+  createTray()
+}
+
+/**
+ * Check for libappindicator1 support before creating tray icon
+ */
 function checkLinuxTraySupport (cb) {
+  var cp = require('child_process')
+
   // Check that we're on Ubuntu (or another debian system) and that we have
   // libappindicator1. If WebTorrent was installed from the deb file, we should
   // always have it. If it was installed from the zip file, we might not.
@@ -57,27 +68,44 @@ function checkLinuxTraySupport (cb) {
   })
 }
 
+function createTray () {
+  tray = new electron.Tray(getIconPath())
+
+  // On Windows, left click opens the app, right click opens the context menu.
+  // On Linux, any click (left or right) opens the context menu.
+  tray.on('click', () => windows.main.show())
+
+  // Show the tray context menu, and keep the available commands up to date
+  updateTrayMenu()
+}
+
 function updateTrayMenu () {
-  var showHideMenuItem
-  if (windows.main.isVisible()) {
-    showHideMenuItem = { label: 'Hide to tray', click: hideApp }
-  } else {
-    showHideMenuItem = { label: 'Show', click: showApp }
+  var contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate)
+  tray.setContextMenu(contextMenu)
+}
+
+function getMenuTemplate () {
+  return [
+    getToggleItem(),
+    {
+      label: 'Quit',
+      click: () => app.quit()
+    }
+  ]
+
+  function getToggleItem () {
+    if (windows.main.win.isVisible()) {
+      return {
+        label: 'Hide to tray',
+        click: () => windows.main.hide()
+      }
+    } else {
+      return {
+        label: 'Show WebTorrent',
+        click: () => windows.main.show()
+      }
+    }
   }
-  var contextMenu = electron.Menu.buildFromTemplate([
-    showHideMenuItem,
-    { label: 'Quit', click: () => app.quit() }
-  ])
-  trayIcon.setContextMenu(contextMenu)
-}
-
-function showApp () {
-  windows.main.show()
-}
-
-function hideApp () {
-  windows.main.hide()
-  windows.main.send('dispatch', 'backToList')
 }
 
 function getIconPath () {

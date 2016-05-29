@@ -28,7 +28,7 @@ var App = require('./views/app')
 var config = require('../config')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
-var State = require('./state')
+var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
 
@@ -224,11 +224,15 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
-  if (action === 'showOpenTorrentFile') {
-    ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
+  if (action === 'openTorrentFile') {
+    ipcRenderer.send('openTorrentFile') /* open torrent file */
   }
   if (action === 'showCreateTorrent') {
     showCreateTorrent(args[0] /* paths */)
+  }
+  if (action === 'openTorrentAddress') {
+    state.modal = { id: 'open-torrent-address-modal' }
+    update()
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
@@ -377,6 +381,9 @@ function dispatch (action, ...args) {
   if (action === 'saveState') {
     saveState()
   }
+  if (action === 'setTitle') {
+    state.window.title = args[0] /* title */
+  }
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
@@ -508,11 +515,6 @@ function setupIpc () {
 
   ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
 
-  ipcRenderer.on('showOpenTorrentAddress', function (e) {
-    state.modal = { id: 'open-torrent-address-modal' }
-    update()
-  })
-
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
     state.window.isFullScreen = isFullScreen
     if (!isFullScreen) {
@@ -606,7 +608,8 @@ function saveState () {
   update()
 }
 
-// Called when the user drag-drops files onto the app
+// Called when the user adds files (.torrent, files to seed, subtitles) to the app
+// via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
@@ -674,12 +677,13 @@ function addTorrent (torrentId) {
 }
 
 function addSubtitles (files, autoSelect) {
-  // Subtitles are only supported while playing video
+  // Subtitles are only supported when playing video files
   if (state.playing.type !== 'video') return
+  if (files.length === 0) return
 
   // Read the files concurrently, then add all resulting subtitle tracks
-  var jobs = files.map((file) => (cb) => loadSubtitle(file, cb))
-  parallel(jobs, function (err, tracks) {
+  var tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
+  parallel(tasks, function (err, tracks) {
     if (err) return onError(err)
 
     for (var i = 0; i < tracks.length; i++) {
@@ -974,7 +978,10 @@ function torrentProgress (progressInfo) {
     torrentSummary.progress = p
   })
 
-  checkForSubtitles()
+  // TODO: Find an efficient way to re-enable this line, which allows subtitle
+  //       files which are completed after a video starts to play to be added
+  //       dynamically to the list of subtitles.
+  // checkForSubtitles()
 
   update()
 }
@@ -1315,7 +1322,7 @@ function showDoneNotification (torrent) {
   })
 
   notif.onclick = function () {
-    ipcRenderer.send('focusWindow', 'main')
+    ipcRenderer.send('show')
   }
 
   sound.play('DONE')

@@ -1,16 +1,15 @@
 module.exports = App
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
+var hx = require('../lib/hx')
 var Header = require('./header')
+
 var Views = {
-  'home': require('./torrent-list'),
+  'home': require('./home'),
   'player': require('./player'),
-  'create-torrent': require('./create-torrent-page'),
+  'create-torrent': require('./create-torrent'),
   'preferences': require('./preferences')
 }
+
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
   'update-available-modal': require('./update-available-modal'),

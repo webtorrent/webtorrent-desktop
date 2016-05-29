@@ -12,8 +12,8 @@ var app = electron.app
 
 var handlers = require('./handlers')
 
-var exeName = path.basename(process.execPath)
-var updateDotExe = path.join(process.execPath, '..', '..', 'Update.exe')
+var EXE_NAME = path.basename(process.execPath)
+var UPDATE_EXE = path.join(process.execPath, '..', '..', 'Update.exe')
 
 function handleEvent (cmd) {
   if (cmd === '--squirrel-install') {
@@ -102,12 +102,12 @@ function spawn (command, args, cb) {
 // Spawn Squirrel's Update.exe with the given arguments and invoke the callback when the
 // command completes.
 function spawnUpdate (args, cb) {
-  spawn(updateDotExe, args, cb)
+  spawn(UPDATE_EXE, args, cb)
 }
 
 // Create desktop/start menu shortcuts using the Squirrel Update.exe command line API
 function createShortcuts (cb) {
-  spawnUpdate(['--createShortcut', exeName], cb)
+  spawnUpdate(['--createShortcut', EXE_NAME], cb)
 }
 
 // Update desktop/start menu shortcuts using the Squirrel Update.exe command line API
@@ -135,5 +135,5 @@ function updateShortcuts (cb) {
 
 // Remove desktop/start menu shortcuts using the Squirrel Update.exe command line API
 function removeShortcuts (cb) {
-  spawnUpdate(['--removeShortcut', exeName], cb)
+  spawnUpdate(['--removeShortcut', EXE_NAME], cb)
 }

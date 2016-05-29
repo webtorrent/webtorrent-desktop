@@ -1,14 +1,11 @@
 module.exports = CreateTorrentPage
 
-var h = require('virtual-dom/h')
-var hyperx = require('hyperx')
-var hx = hyperx(h)
-
 var createTorrent = require('create-torrent')
 var path = require('path')
 var prettyBytes = require('prettier-bytes')
 
 var {dispatch, dispatcher} = require('../lib/dispatcher')
+var hx = require('../lib/hx')
 
 function CreateTorrentPage (state) {
   var info = state.location.current()
@@ -59,7 +56,7 @@ function CreateTorrentPage (state) {
   var collapsedClass = info.showAdvanced ? 'expanded' : 'collapsed'
 
   return hx`
-    <div class='create-torrent-page'>
+    <div class='create-torrent'>
       <h2>Create torrent ${defaultName}</h2>
       <p class="torrent-info">
         ${torrentInfo}
@@ -132,7 +129,7 @@ function CreateTorrentPage (state) {
 
 function CreateTorrentErrorPage () {
   return hx`
-    <div class='create-torrent-page'>
+    <div class='create-torrent'>
       <h2>Create torrent</h2>
       <p class="torrent-info">
         <p>
