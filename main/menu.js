@@ -2,9 +2,10 @@ module.exports = {
   init,
   onPlayerClose,
   onPlayerOpen,
+  onToggleAlwaysOnTop,
   onToggleFullScreen,
-  onWindowHide,
-  onWindowShow
+  onWindowBlur,
+  onWindowFocus
 }
 
 var electron = require('electron')
@@ -13,148 +14,66 @@ var app = electron.app
 
 var config = require('../config')
 var dialog = require('./dialog')
-var log = require('./log')
+var shell = require('./shell')
 var windows = require('./windows')
 
-var appMenu
+var menu
 
 function init () {
-  appMenu = electron.Menu.buildFromTemplate(getAppMenuTemplate())
-  electron.Menu.setApplicationMenu(appMenu)
-
-  if (app.dock) {
-    var dockMenu = electron.Menu.buildFromTemplate(getDockMenuTemplate())
-    app.dock.setMenu(dockMenu)
-  }
-}
-
-// Sets whether the window should always show on top of other windows
-function toggleFloatOnTop (flag) {
-  if (!windows.main.win) return
-  log('toggleFloatOnTop %s', flag)
-  flag = flag != null ? flag : !windows.main.isAlwaysOnTop()
-  windows.main.setAlwaysOnTop(flag)
-  getMenuItem('Float on Top').checked = flag
-}
-
-function toggleDevTools () {
-  if (!windows.main.win) return
-  log('toggleDevTools')
-  windows.main.toggleDevTools()
-}
-
-function showWebTorrentWindow () {
-  log('showWebTorrentWindow')
-  windows.webtorrent.show()
-  windows.webtorrent.win.webContents.openDevTools({ detach: true })
-}
-
-function playPause () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'playPause')
-}
-
-function increaseVolume () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'changeVolume', 0.1)
-}
-
-function decreaseVolume () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'changeVolume', -0.1)
-}
-
-function openSubtitles () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'openSubtitles')
-}
-
-function skipForward () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'skip', 1)
-}
-
-function skipBack () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'skip', -1)
-}
-
-function increasePlaybackRate () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'changePlaybackRate', 1)
-}
-
-function decreasePlaybackRate () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'changePlaybackRate', -1)
-}
-
-// Open the preferences window
-function showPreferences () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'preferences')
-}
-
-function escapeBack () {
-  if (!windows.main.win) return
-  windows.main.send('dispatch', 'escapeBack')
-}
-
-function onWindowShow () {
-  log('onWindowShow')
-  getMenuItem('Full Screen').enabled = true
-  getMenuItem('Float on Top').enabled = true
-}
-
-function onWindowHide () {
-  log('onWindowHide')
-  getMenuItem('Full Screen').enabled = false
-  getMenuItem('Float on Top').enabled = false
-}
-
-function onPlayerOpen () {
-  log('onPlayerOpen')
-  getMenuItem('Play/Pause').enabled = true
-  getMenuItem('Increase Volume').enabled = true
-  getMenuItem('Decrease Volume').enabled = true
-  getMenuItem('Add Subtitles File...').enabled = true
-  getMenuItem('Step Forward').enabled = true
-  getMenuItem('Step Backward').enabled = true
-  getMenuItem('Increase Speed').enabled = true
-  getMenuItem('Decrease Speed').enabled = true
+  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  electron.Menu.setApplicationMenu(menu)
 }
 
 function onPlayerClose () {
-  log('onPlayerClose')
   getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
-  getMenuItem('Add Subtitles File...').enabled = false
   getMenuItem('Step Forward').enabled = false
   getMenuItem('Step Backward').enabled = false
   getMenuItem('Increase Speed').enabled = false
   getMenuItem('Decrease Speed').enabled = false
+  getMenuItem('Add Subtitles File...').enabled = false
 }
 
-function onToggleFullScreen (isFullScreen) {
-  if (isFullScreen == null) {
-    isFullScreen = windows.main.win.isFullScreen()
-  }
-  windows.main.win.setMenuBarVisibility(!isFullScreen)
-  getMenuItem('Full Screen').checked = isFullScreen
-  windows.main.send('fullscreenChanged', isFullScreen)
+function onPlayerOpen () {
+  getMenuItem('Play/Pause').enabled = true
+  getMenuItem('Increase Volume').enabled = true
+  getMenuItem('Decrease Volume').enabled = true
+  getMenuItem('Step Forward').enabled = true
+  getMenuItem('Step Backward').enabled = true
+  getMenuItem('Increase Speed').enabled = true
+  getMenuItem('Decrease Speed').enabled = true
+  getMenuItem('Add Subtitles File...').enabled = true
+}
+
+function onToggleAlwaysOnTop (flag) {
+  getMenuItem('Float on Top').checked = flag
+}
+
+function onToggleFullScreen (flag) {
+  getMenuItem('Full Screen').checked = flag
+}
+
+function onWindowBlur () {
+  getMenuItem('Full Screen').enabled = false
+  getMenuItem('Float on Top').enabled = false
+}
+
+function onWindowFocus () {
+  getMenuItem('Full Screen').enabled = true
+  getMenuItem('Float on Top').enabled = true
 }
 
 function getMenuItem (label) {
-  for (var i = 0; i < appMenu.items.length; i++) {
-    var menuItem = appMenu.items[i].submenu.items.find(function (item) {
+  for (var i = 0; i < menu.items.length; i++) {
+    var menuItem = menu.items[i].submenu.items.find(function (item) {
       return item.label === label
     })
     if (menuItem) return menuItem
   }
 }
 
-function getAppMenuTemplate () {
+function getMenuTemplate () {
   var template = [
     {
       label: 'File',
@@ -217,7 +136,7 @@ function getAppMenuTemplate () {
         {
           label: 'Preferences',
           accelerator: 'CmdOrCtrl+,',
-          click: () => showPreferences()
+          click: () => windows.main.dispatch('preferences')
         }
       ]
     },
@@ -235,7 +154,7 @@ function getAppMenuTemplate () {
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: () => toggleFloatOnTop()
+          click: () => windows.toggleAlwaysOnTop()
         },
         {
           type: 'separator'
@@ -243,7 +162,7 @@ function getAppMenuTemplate () {
         {
           label: 'Go Back',
           accelerator: 'Esc',
-          click: escapeBack
+          click: () => windows.main.dispatch('escapeBack')
         },
         {
           type: 'separator'
@@ -256,14 +175,14 @@ function getAppMenuTemplate () {
               accelerator: process.platform === 'darwin'
                 ? 'Alt+Command+I'
                 : 'Ctrl+Shift+I',
-              click: toggleDevTools
+              click: () => windows.main.toggleDevTools()
             },
             {
               label: 'Show WebTorrent Process',
               accelerator: process.platform === 'darwin'
                 ? 'Alt+Command+P'
                 : 'Ctrl+Shift+P',
-              click: showWebTorrentWindow
+              click: () => windows.webtorrent.toggleDevTools()
             }
           ]
         }
@@ -275,7 +194,7 @@ function getAppMenuTemplate () {
         {
           label: 'Play/Pause',
           accelerator: 'Space',
-          click: playPause,
+          click: () => windows.main.dispatch('playPause'),
           enabled: false
         },
         {
@@ -284,13 +203,13 @@ function getAppMenuTemplate () {
         {
           label: 'Increase Volume',
           accelerator: 'CmdOrCtrl+Up',
-          click: increaseVolume,
+          click: () => windows.main.dispatch('changeVolume', 0.1),
           enabled: false
         },
         {
           label: 'Decrease Volume',
           accelerator: 'CmdOrCtrl+Down',
-          click: decreaseVolume,
+          click: () => windows.main.dispatch('changeVolume', -0.1),
           enabled: false
         },
         {
@@ -299,13 +218,13 @@ function getAppMenuTemplate () {
         {
           label: 'Step Forward',
           accelerator: 'CmdOrCtrl+Alt+Right',
-          click: skipForward,
+          click: () => windows.main.dispatch('skip', 1),
           enabled: false
         },
         {
           label: 'Step Backward',
           accelerator: 'CmdOrCtrl+Alt+Left',
-          click: skipBack,
+          click: () => windows.main.dispatch('skip', -1),
           enabled: false
         },
         {
@@ -314,13 +233,13 @@ function getAppMenuTemplate () {
         {
           label: 'Increase Speed',
           accelerator: 'CmdOrCtrl+=',
-          click: increasePlaybackRate,
+          click: () => windows.main.dispatch('changePlaybackRate', 1),
           enabled: false
         },
         {
           label: 'Decrease Speed',
           accelerator: 'CmdOrCtrl+-',
-          click: decreasePlaybackRate,
+          click: () => windows.main.dispatch('changePlaybackRate', -1),
           enabled: false
         },
         {
@@ -328,7 +247,7 @@ function getAppMenuTemplate () {
         },
         {
           label: 'Add Subtitles File...',
-          click: openSubtitles,
+          click: () => windows.main.dispatch('openSubtitles'),
           enabled: false
         }
       ]
@@ -339,18 +258,18 @@ function getAppMenuTemplate () {
       submenu: [
         {
           label: 'Learn more about ' + config.APP_NAME,
-          click: () => electron.shell.openExternal(config.HOME_PAGE_URL)
+          click: () => shell.openExternal(config.HOME_PAGE_URL)
         },
         {
           label: 'Contribute on GitHub',
-          click: () => electron.shell.openExternal(config.GITHUB_URL)
+          click: () => shell.openExternal(config.GITHUB_URL)
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: () => electron.shell.openExternal(config.GITHUB_URL_ISSUES)
+          click: () => shell.openExternal(config.GITHUB_URL_ISSUES)
         }
       ]
     }
@@ -371,7 +290,7 @@ function getAppMenuTemplate () {
         {
           label: 'Preferences',
           accelerator: 'Cmd+,',
-          click: () => showPreferences()
+          click: () => windows.main.dispatch('preferences')
         },
         {
           type: 'separator'
@@ -430,7 +349,8 @@ function getAppMenuTemplate () {
     })
   }
 
-  // In Linux and Windows it is not possible to open both folders and files
+  // On Windows and Linux, open dialogs do not support selecting both files and
+  // folders and files, so add an extra menu item so there is one for each type.
   if (process.platform === 'linux' || process.platform === 'win32') {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
@@ -445,12 +365,12 @@ function getAppMenuTemplate () {
       },
       {
         label: 'About ' + config.APP_NAME,
-        click: () => windows.about.create()
+        click: () => windows.about.init()
       }
     )
   }
-  // Add "File > Quit" menu item so Linux distros where the system tray icon is missing
-  // will have a way to quit the app.
+  // Add "File > Quit" menu item so Linux distros where the system tray icon is
+  // missing will have a way to quit the app.
   if (process.platform === 'linux') {
     // File menu (Linux)
     template[0].submenu.push({
@@ -460,24 +380,4 @@ function getAppMenuTemplate () {
   }
 
   return template
-}
-
-function getDockMenuTemplate () {
-  return [
-    {
-      label: 'Create New Torrent...',
-      accelerator: 'CmdOrCtrl+N',
-      click: () => dialog.openSeedDirectory()
-    },
-    {
-      label: 'Open Torrent File...',
-      accelerator: 'CmdOrCtrl+O',
-      click: () => dialog.openTorrentFile()
-    },
-    {
-      label: 'Open Torrent Address...',
-      accelerator: 'CmdOrCtrl+U',
-      click: () => dialog.openTorrentAddress()
-    }
-  ]
 }

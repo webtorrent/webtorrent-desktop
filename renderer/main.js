@@ -224,11 +224,15 @@ function dispatch (action, ...args) {
   if (action === 'addTorrent') {
     addTorrent(args[0] /* torrent */)
   }
-  if (action === 'showOpenTorrentFile') {
-    ipcRenderer.send('showOpenTorrentFile') /* open torrent file */
+  if (action === 'openTorrentFile') {
+    ipcRenderer.send('openTorrentFile') /* open torrent file */
   }
   if (action === 'showCreateTorrent') {
     showCreateTorrent(args[0] /* paths */)
+  }
+  if (action === 'openTorrentAddress') {
+    state.modal = { id: 'open-torrent-address-modal' }
+    update()
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
@@ -510,11 +514,6 @@ function setupIpc () {
   ipcRenderer.on('error', (e, ...args) => console.error(...args))
 
   ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
-
-  ipcRenderer.on('showOpenTorrentAddress', function (e) {
-    state.modal = { id: 'open-torrent-address-modal' }
-    update()
-  })
 
   ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
     state.window.isFullScreen = isFullScreen

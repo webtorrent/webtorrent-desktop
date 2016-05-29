@@ -1,14 +1,17 @@
 var webtorrent = module.exports = {
-  create,
+  init,
   send,
   show,
+  toggleDevTools,
   win: null
 }
 
-var config = require('../../config')
 var electron = require('electron')
 
-function create () {
+var config = require('../../config')
+var log = require('../log')
+
+function init () {
   var win = webtorrent.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     center: true,
@@ -45,4 +48,15 @@ function show () {
 function send (...args) {
   if (!webtorrent.win) return
   webtorrent.win.send(...args)
+}
+
+function toggleDevTools () {
+  if (!webtorrent.win) return
+  log('toggleDevTools')
+  if (webtorrent.win.webContents.isDevToolsOpened()) {
+    webtorrent.win.webContents.closeDevTools()
+    webtorrent.win.hide()
+  } else {
+    webtorrent.win.webContents.openDevTools({ detach: true })
+  }
 }

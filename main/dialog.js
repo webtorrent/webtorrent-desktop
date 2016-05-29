@@ -5,8 +5,10 @@ module.exports = {
   openTorrentAddress
 }
 
-var config = require('../config')
 var electron = require('electron')
+
+var config = require('../config')
+var log = require('./log')
 var windows = require('./windows')
 
 /**
@@ -14,6 +16,7 @@ var windows = require('./windows')
  */
 function openSeedFile () {
   if (!windows.main.win) return
+  log('openSeedFile')
   var opts = {
     title: 'Select a file for the torrent.',
     properties: [ 'openFile' ]
@@ -22,7 +25,7 @@ function openSeedFile () {
   electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
     resetTitle()
     if (!Array.isArray(selectedPaths)) return
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
+    windows.main.dispatch('showCreateTorrent', selectedPaths)
   })
 }
 
@@ -33,6 +36,7 @@ function openSeedFile () {
  */
 function openSeedDirectory () {
   if (!windows.main.win) return
+  log('openSeedDirectory')
   var opts = process.platform === 'darwin'
     ? {
       title: 'Select a file or folder for the torrent.',
@@ -46,7 +50,7 @@ function openSeedDirectory () {
   electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
     resetTitle()
     if (!Array.isArray(selectedPaths)) return
-    windows.main.send('dispatch', 'showCreateTorrent', selectedPaths)
+    windows.main.dispatch('showCreateTorrent', selectedPaths)
   })
 }
 
@@ -55,6 +59,7 @@ function openSeedDirectory () {
  */
 function openTorrentFile () {
   if (!windows.main.win) return
+  log('openTorrentFile')
   var opts = {
     title: 'Select a .torrent file to open.',
     filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
@@ -65,7 +70,7 @@ function openTorrentFile () {
     resetTitle()
     if (!Array.isArray(selectedPaths)) return
     selectedPaths.forEach(function (selectedPath) {
-      windows.main.send('dispatch', 'addTorrent', selectedPath)
+      windows.main.dispatch('addTorrent', selectedPath)
     })
   })
 }
@@ -74,7 +79,8 @@ function openTorrentFile () {
  * Show modal dialog to open a torrent URL (magnet uri, http torrent link, etc.)
  */
 function openTorrentAddress () {
-  windows.main.send('showOpenTorrentAddress')
+  log('openTorrentAddress')
+  windows.main.dispatch('openTorrentAddress')
 }
 
 /**
@@ -82,7 +88,7 @@ function openTorrentAddress () {
  */
 function setTitle (title) {
   if (process.platform === 'darwin') {
-    windows.main.send('dispatch', 'setTitle', title)
+    windows.main.dispatch('setTitle', title)
   }
 }
 

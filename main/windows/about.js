@@ -1,12 +1,12 @@
 var about = module.exports = {
-  create,
+  init,
   win: null
 }
 
 var config = require('../../config')
 var electron = require('electron')
 
-function create () {
+function init () {
   if (about.win) {
     return about.win.show()
   }

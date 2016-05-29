@@ -9,6 +9,7 @@ var announcement = require('./announcement')
 var config = require('../config')
 var crashReporter = require('../crash-reporter')
 var dialog = require('./dialog')
+var dock = require('./dock')
 var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
@@ -61,8 +62,8 @@ function init () {
   app.on('ready', function () {
     isReady = true
 
-    windows.main.create()
-    windows.webtorrent.create()
+    windows.main.init()
+    windows.webtorrent.init()
     menu.init()
 
     // To keep app startup fast, some code is delayed.
@@ -80,20 +81,21 @@ function init () {
 
     app.isQuitting = true
     e.preventDefault()
-    windows.main.send('dispatch', 'saveState') // try to save state on exit
+    windows.main.dispatch('saveState') // try to save state on exit
     ipcMain.once('savedState', () => app.quit())
     setTimeout(() => app.quit(), 2000) // quit after 2 secs, at most
   })
 
   app.on('activate', function () {
-    if (isReady) windows.main.create()
+    if (isReady) windows.main.show()
   })
 }
 
 function delayedInit () {
   announcement.init()
-  tray.init()
+  dock.init()
   handlers.install()
+  tray.init()
   updater.init()
 }
 
@@ -101,7 +103,7 @@ function onOpen (e, torrentId) {
   e.preventDefault()
 
   if (app.ipcReady) {
-    windows.main.send('dispatch', 'onOpen', torrentId)
+    windows.main.dispatch('onOpen', torrentId)
     // Magnet links opened from Chrome won't focus the app without a setTimeout.
     // The confirmation dialog Chrome shows causes Chrome to steal back the focus.
     // Electron issue: https://github.com/atom/electron/issues/4338
@@ -148,6 +150,6 @@ function processArgv (argv) {
     }
   })
   if (paths.length > 0) {
-    windows.main.send('dispatch', 'onOpen', paths)
+    windows.main.dispatch('onOpen', paths)
   }
 }

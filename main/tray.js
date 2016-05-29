@@ -1,8 +1,8 @@
 module.exports = {
   hasTray,
   init,
-  onWindowHide,
-  onWindowShow
+  onWindowBlur,
+  onWindowFocus
 }
 
 var electron = require('electron')
@@ -24,8 +24,24 @@ function init () {
   // OS X apps generally do not have menu bar icons
 }
 
+/**
+ * Returns true if there a tray icon is active.
+ */
+function hasTray () {
+  return !!tray
+}
+
+function onWindowBlur () {
+  if (!tray) return
+  updateTrayMenu()
+}
+
+function onWindowFocus () {
+  if (!tray) return
+  updateTrayMenu()
+}
+
 function initLinux () {
-  // Check for libappindicator1 support before creating tray icon
   checkLinuxTraySupport(function (supportsTray) {
     if (supportsTray) createTray()
   })
@@ -35,6 +51,9 @@ function initWin32 () {
   createTray()
 }
 
+/**
+ * Check for libappindicator1 support before creating tray icon
+ */
 function checkLinuxTraySupport (cb) {
   var cp = require('child_process')
 
@@ -49,63 +68,44 @@ function checkLinuxTraySupport (cb) {
   })
 }
 
-function hasTray () {
-  return !!tray
-}
-
 function createTray () {
   tray = new electron.Tray(getIconPath())
 
   // On Windows, left click opens the app, right click opens the context menu.
   // On Linux, any click (left or right) opens the context menu.
-  tray.on('click', showApp)
+  tray.on('click', () => windows.main.show())
 
   // Show the tray context menu, and keep the available commands up to date
   updateTrayMenu()
 }
 
-function onWindowHide () {
-  updateTrayMenu()
-}
-
-function onWindowShow () {
-  updateTrayMenu()
-}
-
 function updateTrayMenu () {
-  if (!tray) return
+  var contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate)
+  tray.setContextMenu(contextMenu)
+}
 
-  var contextMenu = electron.Menu.buildFromTemplate([
+function getMenuTemplate () {
+  return [
     getToggleItem(),
     {
       label: 'Quit',
       click: () => app.quit()
     }
-  ])
-  tray.setContextMenu(contextMenu)
+  ]
 
   function getToggleItem () {
     if (windows.main.win.isVisible()) {
       return {
         label: 'Hide to tray',
-        click: hideApp
+        click: () => windows.main.hide()
       }
     } else {
       return {
         label: 'Show WebTorrent',
-        click: showApp
+        click: () => windows.main.show()
       }
     }
   }
-}
-
-function showApp () {
-  windows.main.show()
-}
-
-function hideApp () {
-  windows.main.hide()
-  windows.main.send('dispatch', 'backToList')
 }
 
 function getIconPath () {
