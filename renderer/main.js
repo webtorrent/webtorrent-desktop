@@ -1097,6 +1097,9 @@ function closePlayer (cb) {
     ipcRenderer.send('vlcQuit')
   }
   state.window.title = config.APP_WINDOW_TITLE
+  // Lets save volume for later
+  state.previousVolume = state.playing.volume
+
   state.playing = State.getDefaultPlayState()
   state.server = null
 
