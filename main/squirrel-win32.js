@@ -61,15 +61,17 @@ function handleEvent (cmd) {
   }
 
   if (cmd === '--squirrel-firstrun') {
-    // This is called on the app's first run. Do not quit, allow startup to continue.
+    // App is running for the first time. Do not quit, allow startup to continue.
     return false
   }
 
   return false
 }
 
-// Spawn a command and invoke the callback when it completes with an error and the output
-// from standard out.
+/**
+ * Spawn a command and invoke the callback when it completes with an error and
+ * the output from standard out.
+ */
 function spawn (command, args, cb) {
   var stdout = ''
 
@@ -99,24 +101,31 @@ function spawn (command, args, cb) {
   })
 }
 
-// Spawn Squirrel's Update.exe with the given arguments and invoke the callback when the
-// command completes.
+/**
+ * Spawn the Squirrel `Update.exe` command with the given arguments and invoke
+ * the callback when the command completes.
+ */
 function spawnUpdate (args, cb) {
   spawn(UPDATE_EXE, args, cb)
 }
 
-// Create desktop/start menu shortcuts using the Squirrel Update.exe command line API
+/**
+ * Create desktop and start menu shortcuts using the Squirrel `Update.exe`
+ * command.
+ */
 function createShortcuts (cb) {
   spawnUpdate(['--createShortcut', EXE_NAME], cb)
 }
 
-// Update desktop/start menu shortcuts using the Squirrel Update.exe command line API
+/**
+ * Update desktop and start menu shortcuts using the Squirrel `Update.exe`
+ * command.
+ */
 function updateShortcuts (cb) {
   var homeDir = os.homedir()
   if (homeDir) {
     var desktopShortcutPath = path.join(homeDir, 'Desktop', 'WebTorrent.lnk')
-    // Check if the desktop shortcut has been previously deleted and and keep it deleted
-    // if it was
+    // If the desktop shortcut was deleted by the user, then keep it deleted.
     fs.access(desktopShortcutPath, function (err) {
       var desktopShortcutExists = !err
       createShortcuts(function () {
@@ -133,7 +142,10 @@ function updateShortcuts (cb) {
   }
 }
 
-// Remove desktop/start menu shortcuts using the Squirrel Update.exe command line API
+/**
+ * Remove desktop and start menu shortcuts using the Squirrel `Update.exe`
+ * command.
+ */
 function removeShortcuts (cb) {
   spawnUpdate(['--removeShortcut', EXE_NAME], cb)
 }
