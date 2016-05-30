@@ -605,6 +605,10 @@ body.drag .app::after {
   padding: 8em 0 20px 0;
 }
 
+.torrent-details .warning {
+  padding-left: 15px;
+}
+
 .torrent-details table {
   width: 100%;
   white-space: nowrap;
