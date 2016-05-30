@@ -80,7 +80,7 @@ function createTray () {
 }
 
 function updateTrayMenu () {
-  var contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate)
+  var contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
   tray.setContextMenu(contextMenu)
 }
 
