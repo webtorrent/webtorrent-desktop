@@ -191,12 +191,13 @@ function TorrentList (state) {
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files
+        .map((file, index) => ({ file, index }))
         .sort(function (a, b) {
-          if (a.name < b.name) return -1
-          if (b.name < a.name) return 1
+          if (a.file.name < b.file.name) return -1
+          if (b.file.name < a.file.name) return 1
           return 0
         })
-        .map((file, index) => renderFileRow(torrentSummary, file, index))
+        .map((object) => renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = hx`
         <div class='files'>
