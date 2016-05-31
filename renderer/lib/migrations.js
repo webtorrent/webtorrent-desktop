@@ -13,7 +13,7 @@ var config = require('../../config')
 // Change `state.saved` (which will be saved back to config.json on exit) as
 // needed, for example to deal with config.json format changes across versions
 function run (state) {
-  // Migration: replace "{ version: 1 }" with app version (semver)
+  // Replace "{ version: 1 }" with app version (semver)
   if (!semver.valid(state.saved.version)) {
     state.saved.version = '0.0.0' // Pre-0.7.0 version, so run all migrations
   }
@@ -39,7 +39,7 @@ function migrate_0_7_0 (state) {
   state.saved.torrents.forEach(function (ts) {
     var infoHash = ts.infoHash
 
-    // Migration: replace torrentPath with torrentFileName
+    // Replace torrentPath with torrentFileName
     var src, dst
     if (ts.torrentPath) {
       // There are a number of cases to handle here:
@@ -47,7 +47,7 @@ function migrate_0_7_0 (state) {
       // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
       // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
       // * Finally, now we're getting rid of torrentPath altogether
-      console.log('migration: replacing torrentPath %s', ts.torrentPath)
+      console.log('replacing torrentPath %s', ts.torrentPath)
       if (path.isAbsolute(ts.torrentPath)) {
         src = ts.torrentPath
       } else if (ts.torrentPath.startsWith('..')) {
@@ -64,9 +64,9 @@ function migrate_0_7_0 (state) {
       ts.torrentFileName = infoHash + '.torrent'
     }
 
-    // Migration: replace posterURL with posterFileName
+    // Replace posterURL with posterFileName
     if (ts.posterURL) {
-      console.log('migration: replacing posterURL %s', ts.posterURL)
+      console.log('replacing posterURL %s', ts.posterURL)
       var extension = path.extname(ts.posterURL)
       src = path.isAbsolute(ts.posterURL)
         ? ts.posterURL
@@ -80,9 +80,11 @@ function migrate_0_7_0 (state) {
       ts.posterFileName = infoHash + extension
     }
 
-    // Migration: add per-file selections
-    if (!ts.selections && ts.files) {
-      ts.selections = ts.files.map((x) => true)
-    }
+    // Fix exception caused by incorrect file ordering.
+    // https://github.com/feross/webtorrent-desktop/pull/604#issuecomment-222805214
+    delete ts.defaultPlayFileIndex
+    delete ts.files
+    delete ts.selections
+    delete ts.fileModtimes
   })
 }
