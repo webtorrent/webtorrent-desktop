@@ -244,7 +244,7 @@ function TorrentList (state) {
       handleClick = dispatcher('play', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
-      handleClick = dispatcher('openFile', infoHash, index)
+      handleClick = dispatcher('openItem', infoHash, index)
     }
     var rowClass = ''
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented

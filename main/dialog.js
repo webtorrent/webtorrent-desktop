@@ -3,7 +3,7 @@ module.exports = {
   openSeedDirectory,
   openTorrentFile,
   openTorrentAddress,
-  openAddFiles
+  openFiles
 }
 
 var electron = require('electron')
@@ -56,13 +56,37 @@ function openSeedDirectory () {
 }
 
 /*
+ * Show flexible open dialog that supports selecting .torrent files to add, or
+ * a file or folder to create a single-file or single-directory torrent.
+ */
+function openFiles () {
+  if (!windows.main.win) return
+  log('openFiles')
+  var opts = process.platform === 'darwin'
+    ? {
+      title: 'Select a file or folder to add.',
+      properties: [ 'openFile', 'openDirectory' ]
+    }
+    : {
+      title: 'Select a file to add.',
+      properties: [ 'openFile' ]
+    }
+  setTitle(opts.title)
+  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
+    resetTitle()
+    if (!Array.isArray(selectedPaths)) return
+    windows.main.dispatch('onOpen', selectedPaths)
+  })
+}
+
+/*
  * Show open dialog to open a .torrent file.
  */
 function openTorrentFile () {
   if (!windows.main.win) return
   log('openTorrentFile')
   var opts = {
-    title: 'Select a .torrent file to open.',
+    title: 'Select a .torrent file.',
     filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
   }
@@ -82,24 +106,6 @@ function openTorrentFile () {
 function openTorrentAddress () {
   log('openTorrentAddress')
   windows.main.dispatch('openTorrentAddress')
-}
-
-/*
- * Show open dialog for all file types (.torrent, files to seed)
- */
-function openAddFiles () {
-  if (!windows.main.win) return
-  log('openAddFiles')
-  var opts = {
-    title: 'Select a .torrent file to open or start seeding files.',
-    properties: [ 'openFile', 'multiSelections' ]
-  }
-  setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('onOpen', selectedPaths)
-  })
 }
 
 /**

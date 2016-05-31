@@ -227,8 +227,8 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentFile') {
     ipcRenderer.send('openTorrentFile') /* open torrent file */
   }
-  if (action === 'openAddFiles') {
-    ipcRenderer.send('openAddFiles') /* add files with dialog */
+  if (action === 'openFiles') {
+    ipcRenderer.send('openFiles') /* add files with dialog */
   }
   if (action === 'showCreateTorrent') {
     showCreateTorrent(args[0] /* paths */)
@@ -240,8 +240,8 @@ function dispatch (action, ...args) {
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
   }
-  if (action === 'openFile') {
-    openFile(args[0] /* infoHash */, args[1] /* index */)
+  if (action === 'openItem') {
+    openItem(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'toggleTorrent') {
     toggleTorrent(args[0] /* infoHash */)
@@ -1157,7 +1157,7 @@ function closePlayer (cb) {
   cb()
 }
 
-function openFile (infoHash, index) {
+function openItem (infoHash, index) {
   var torrentSummary = getTorrentSummary(infoHash)
   var filePath = path.join(
     torrentSummary.path,
