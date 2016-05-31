@@ -57,7 +57,7 @@ function renderMedia (state) {
     }
 
     // Switch to the newly added subtitle track, if available
-    var tracks = mediaElement.textTracks
+    var tracks = mediaElement.textTracks || []
     for (var j = 0; j < tracks.length; j++) {
       var isSelectedTrack = j === state.playing.subtitles.selectedIndex
       tracks[j].mode = isSelectedTrack ? 'showing' : 'hidden'
