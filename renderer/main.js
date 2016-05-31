@@ -227,6 +227,9 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentFile') {
     ipcRenderer.send('openTorrentFile') /* open torrent file */
   }
+  if (action === 'openAddFiles') {
+    ipcRenderer.send('openAddFiles') /* add files with dialog */
+  }
   if (action === 'showCreateTorrent') {
     showCreateTorrent(args[0] /* paths */)
   }

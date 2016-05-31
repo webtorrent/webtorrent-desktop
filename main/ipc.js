@@ -46,6 +46,7 @@ function init () {
    */
 
   ipc.on('openTorrentFile', () => dialog.openTorrentFile())
+  ipc.on('openAddFiles', () => dialog.openAddFiles())
 
   /**
    * Dock

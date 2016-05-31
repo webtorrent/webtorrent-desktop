@@ -2,7 +2,8 @@ module.exports = {
   openSeedFile,
   openSeedDirectory,
   openTorrentFile,
-  openTorrentAddress
+  openTorrentAddress,
+  openAddFiles
 }
 
 var electron = require('electron')
@@ -81,6 +82,24 @@ function openTorrentFile () {
 function openTorrentAddress () {
   log('openTorrentAddress')
   windows.main.dispatch('openTorrentAddress')
+}
+
+/*
+ * Show open dialog for all file types (.torrent, files to seed)
+ */
+function openAddFiles () {
+  if (!windows.main.win) return
+  log('openAddFiles')
+  var opts = {
+    title: 'Select a .torrent file to open or start seeding files.',
+    properties: [ 'openFile', 'multiSelections' ]
+  }
+  setTitle(opts.title)
+  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
+    resetTitle()
+    if (!Array.isArray(selectedPaths)) return
+    windows.main.dispatch('onOpen', selectedPaths)
+  })
 }
 
 /**
