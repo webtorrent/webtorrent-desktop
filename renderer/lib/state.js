@@ -93,7 +93,7 @@ function getDefaultPlayState () {
 /* If the saved state file doesn't exist yet, here's what we use instead */
 function getDefaultSavedState () {
   return {
-    version: 1, /* make sure we can upgrade gracefully later */
+    version: config.APP_VERSION, /* make sure we can upgrade gracefully later */
     torrents: [
       {
         status: 'paused',

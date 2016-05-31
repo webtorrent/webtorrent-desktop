@@ -32,6 +32,7 @@
     "network-address": "^1.1.0",
     "prettier-bytes": "^1.0.1",
     "run-parallel": "^1.1.6",
+    "semver": "^5.1.0",
     "simple-concat": "^1.0.0",
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",

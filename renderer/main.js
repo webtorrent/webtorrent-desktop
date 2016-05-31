@@ -27,6 +27,7 @@ var patch = require('virtual-dom/patch')
 var App = require('./views/app')
 var config = require('../config')
 var errors = require('./lib/errors')
+var migrations = require('./lib/migrations')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
@@ -70,7 +71,7 @@ function loadState (cb) {
  */
 function init () {
   // Clean up the freshly-loaded config file, which may be from an older version
-  cleanUpConfig()
+  migrations.run(state)
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
@@ -114,60 +115,6 @@ function init () {
 function delayedInit () {
   lazyLoadCast()
   sound.preload()
-}
-
-// Change `state.saved` (which will be saved back to config.json on exit) as
-// needed, for example to deal with config.json format changes across versions
-function cleanUpConfig () {
-  state.saved.torrents.forEach(function (ts) {
-    var infoHash = ts.infoHash
-
-    // Migration: replace torrentPath with torrentFileName
-    var src, dst
-    if (ts.torrentPath) {
-      // There are a number of cases to handle here:
-      // * Originally we used absolute paths
-      // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
-      // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
-      // * Finally, now we're getting rid of torrentPath altogether
-      console.log('migration: replacing torrentPath %s', ts.torrentPath)
-      if (path.isAbsolute(ts.torrentPath)) {
-        src = ts.torrentPath
-      } else if (ts.torrentPath.startsWith('..')) {
-        src = ts.torrentPath
-      } else {
-        src = path.join(config.STATIC_PATH, ts.torrentPath)
-      }
-      dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
-      // Synchronous FS calls aren't ideal, but probably OK in a migration
-      // that only runs once
-      if (src !== dst) fs.copySync(src, dst)
-
-      delete ts.torrentPath
-      ts.torrentFileName = infoHash + '.torrent'
-    }
-
-    // Migration: replace posterURL with posterFileName
-    if (ts.posterURL) {
-      console.log('migration: replacing posterURL %s', ts.posterURL)
-      var extension = path.extname(ts.posterURL)
-      src = path.isAbsolute(ts.posterURL)
-        ? ts.posterURL
-        : path.join(config.STATIC_PATH, ts.posterURL)
-      dst = path.join(config.CONFIG_POSTER_PATH, infoHash + extension)
-      // Synchronous FS calls aren't ideal, but probably OK in a migration
-      // that only runs once
-      if (src !== dst) fs.copySync(src, dst)
-
-      delete ts.posterURL
-      ts.posterFileName = infoHash + extension
-    }
-
-    // Migration: add per-file selections
-    if (!ts.selections && ts.files) {
-      ts.selections = ts.files.map((x) => true)
-    }
-  })
 }
 
 // Lazily loads Chromecast and Airplay support
