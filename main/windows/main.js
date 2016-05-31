@@ -174,10 +174,10 @@ function show () {
 function toggleAlwaysOnTop (flag) {
   if (!main.win) return
   if (flag == null) {
-    flag = !main.isAlwaysOnTop()
+    flag = !main.win.isAlwaysOnTop()
   }
   log(`toggleAlwaysOnTop ${flag}`)
-  main.setAlwaysOnTop(flag)
+  main.win.setAlwaysOnTop(flag)
   menu.onToggleAlwaysOnTop(flag)
 }
 

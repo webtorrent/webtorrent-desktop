@@ -149,12 +149,12 @@ function getMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'Ctrl+Command+F'
             : 'F11',
-          click: () => windows.toggleFullScreen()
+          click: () => windows.main.toggleFullScreen()
         },
         {
           label: 'Float on Top',
           type: 'checkbox',
-          click: () => windows.toggleAlwaysOnTop()
+          click: () => windows.main.toggleAlwaysOnTop()
         },
         {
           type: 'separator'
