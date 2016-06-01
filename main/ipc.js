@@ -25,13 +25,12 @@ var vlcProcess
 function init () {
   var ipc = electron.ipcMain
 
-  ipc.on('ipcReady', function (e) {
-    windows.main.show()
+  ipc.once('ipcReady', function (e) {
     app.ipcReady = true
     app.emit('ipcReady')
   })
 
-  ipc.on('ipcReadyWebTorrent', function (e) {
+  ipc.once('ipcReadyWebTorrent', function (e) {
     app.ipcReadyWebTorrent = true
     log('sending %d queued messages from the main win to the webtorrent window',
       messageQueueMainToWebTorrent.length)

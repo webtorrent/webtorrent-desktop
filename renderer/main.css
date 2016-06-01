@@ -65,7 +65,7 @@ table {
   display: flex;
   flex-flow: column;
   background: rgb(40, 40, 40);
-  animation: fadein 1s;
+  animation: fadein 0.5s;
 }
 
 .app:not(.is-focused) {

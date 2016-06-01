@@ -31,7 +31,6 @@ function init () {
   // No menu on the About window
   win.setMenu(null)
 
-  // TODO: can this be removed?
   win.webContents.on('did-finish-load', function () {
     win.show()
   })
