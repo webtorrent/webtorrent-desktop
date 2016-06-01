@@ -55,7 +55,7 @@ function init () {
 
   ipc.init()
 
-  app.on('will-finish-launching', function () {
+  app.once('will-finish-launching', function () {
     crashReporter.init()
   })
 
@@ -70,7 +70,7 @@ function init () {
     setTimeout(delayedInit, config.DELAYED_INIT)
   })
 
-  app.on('ipcReady', function () {
+  app.once('ipcReady', function () {
     log('Command line args:', argv)
     processArgv(argv)
     console.timeEnd('init')
@@ -117,7 +117,6 @@ function onOpen (e, torrentId) {
 
 function onAppOpen (newArgv) {
   newArgv = sliceArgv(newArgv)
-  console.log(newArgv)
 
   if (app.ipcReady) {
     log('Second app instance opened, but was prevented:', newArgv)
