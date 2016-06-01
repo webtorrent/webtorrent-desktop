@@ -715,10 +715,7 @@ body.drag .app::after {
   font-size: 22px;
   opacity: 0.85;
 
-  /*
-   * Fix for overflowing captions icon
-   * https://github.com/feross/webtorrent-desktop/issues/467
-   */
+  /* Make all icons have uniform spacing */
   max-width: 23px;
   overflow: hidden;
 }
@@ -754,7 +751,7 @@ body.drag .app::after {
   opacity: 0.8;
 }
 
-.player .controls .icon.closed-captions {
+.player .controls .icon.closed-caption {
   font-size: 26px;
   margin-top: 6px;
 }
@@ -822,7 +819,7 @@ body.drag .app::after {
   transition-timing-function: ease-out;
 }
 
-.player .controls .closed-captions.active,
+.player .controls .closed-caption.active,
 .player .controls .device.active {
   color: #9af;
 }
