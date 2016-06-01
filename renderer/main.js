@@ -828,21 +828,18 @@ function torrentInfoHash (torrentKey, infoHash) {
     torrentSummary ? 'existing' : 'new', torrentKey)
 
   if (!torrentSummary) {
-    // Check if another torrent has the same infoHash
-    var duplicate = state.saved.torrents.find((x) => x.infoHash === infoHash)
-
-    if (duplicate) {
-      duplicate.torrentKey = torrentKey
-      duplicate.status = 'new'
-      sound.play('ENABLE')
-    } else {
-      torrentSummary = {
-        torrentKey: torrentKey,
-        status: 'new'
-      }
-      state.saved.torrents.unshift(torrentSummary)
-      sound.play('ADD')
+    // Check if an existing (non-active) torrent has the same info hash
+    if (state.saved.torrents.find((t) => t.infoHash === infoHash)) {
+      ipcRenderer.send('wt-stop-torrenting', infoHash)
+      return onError(new Error('Cannot add duplicate torrent'))
     }
+
+    torrentSummary = {
+      torrentKey: torrentKey,
+      status: 'new'
+    }
+    state.saved.torrents.unshift(torrentSummary)
+    sound.play('ADD')
   }
 
   torrentSummary.infoHash = infoHash
