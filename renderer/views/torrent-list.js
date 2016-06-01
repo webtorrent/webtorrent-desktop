@@ -172,7 +172,7 @@ function TorrentList (state) {
         <i
           class='icon delete'
           title='Remove torrent'
-          onclick=${dispatcher('deleteTorrent', infoHash)}>
+          onclick=${dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
       </div>

@@ -12,6 +12,7 @@ var Views = {
 
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
+  'remove-torrent-modal': require('./remove-torrent-modal'),
   'update-available-modal': require('./update-available-modal'),
   'unsupported-media-modal': require('./unsupported-media-modal')
 }

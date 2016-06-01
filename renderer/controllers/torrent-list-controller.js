@@ -112,6 +112,14 @@ module.exports = class TorrentListController {
     ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
   }
 
+  confirmDeleteTorrent (infoHash, deleteData) {
+    this.state.modal = {
+      id: 'remove-torrent-modal',
+      infoHash,
+      deleteData
+    }
+  }
+
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
     ipcRenderer.send('wt-stop-torrenting', infoHash)
@@ -151,14 +159,12 @@ module.exports = class TorrentListController {
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
-      click: () => this.deleteTorrent(
-        torrentSummary.infoHash, false)
+      click: dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
     }))
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove Data File',
-      click: () => this.deleteTorrent(
-        torrentSummary.infoHash, true)
+      click: dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
     }))
 
     menu.append(new electron.remote.MenuItem({
