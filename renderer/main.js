@@ -828,12 +828,21 @@ function torrentInfoHash (torrentKey, infoHash) {
     torrentSummary ? 'existing' : 'new', torrentKey)
 
   if (!torrentSummary) {
-    torrentSummary = {
-      torrentKey: torrentKey,
-      status: 'new'
+    // Check if another torrent has the same infoHash
+    var duplicate = state.saved.torrents.find((x) => x.infoHash === infoHash)
+
+    if (duplicate) {
+      duplicate.torrentKey = torrentKey
+      duplicate.status = 'new'
+      sound.play('ENABLE')
+    } else {
+      torrentSummary = {
+        torrentKey: torrentKey,
+        status: 'new'
+      }
+      state.saved.torrents.unshift(torrentSummary)
+      sound.play('ADD')
     }
-    state.saved.torrents.unshift(torrentSummary)
-    sound.play('ADD')
   }
 
   torrentSummary.infoHash = infoHash
