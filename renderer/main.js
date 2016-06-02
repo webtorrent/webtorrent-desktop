@@ -619,6 +619,7 @@ function addTorrent (torrentId) {
     torrentId = torrentId.path
   }
   // Allow a instant.io link to be pasted
+  // TODO: remove this once support is added to webtorrent core
   if (typeof torrentId === 'string' && instantIoRegex.test(torrentId)) {
     torrentId = torrentId.slice(torrentId.indexOf('#') + 1)
   }
