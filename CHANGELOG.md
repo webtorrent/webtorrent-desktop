@@ -1,5 +1,39 @@
 # WebTorrent Desktop Version History
 
+## v0.7.0 - 2016-06-02
+
+### Added
+
+- Improved AirPlay support -- using the new [`airplayer`](https://www.npmjs.com/package/airplayer) package
+- Remember volume setting in player, for as long as the app is open
+
+### Changed
+
+- Add (+) button now also accepts non .torrent files and creates a torrent from
+  those files
+- Show prompt text in title bar for open dialogs (OS X)
+- Upgrade Electron to 1.2.1
+  - Improve window resizing when aspect ratio is enforced (OS X)
+  - Use .ico format for better icon rendering quality (Windows)
+  - Fix crash reporter not working (Windows)
+
+### Fixed
+
+- Re-enable WebRTC (web peers)! (OS X, Windows)
+  - Windows support was disabled in v0.6.1 to work around a bug in Electron
+  - OS X support was disabled in v0.4.0 to work around a 100% CPU bug
+- Fix subtitle selector radio button UI size glitch
+- Fix race condition causing exeption on app startup
+- Fix duplicate torrent detection in some cases
+- Fix "gray screen" exception caused by incorrect file list order
+- Fix torrent loading message UI misalignment
+
+### Known issues
+
+- When upgrading to WebTorrent Desktop v0.7.0, some torrent metadata (file list,
+  selected files, whether torrent is streamable) will be cleared. Just start the
+  torrent to re-populate the metadata.
+
 ## v0.6.1 - 2016-05-26
 
 ### Fixed
