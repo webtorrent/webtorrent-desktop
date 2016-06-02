@@ -4,10 +4,7 @@ module.exports = {
   run
 }
 
-var fs = require('fs-extra')
-var path = require('path')
 var semver = require('semver')
-
 var config = require('../../config')
 
 // Change `state.saved` (which will be saved back to config.json on exit) as
@@ -35,6 +32,9 @@ function run (state) {
 
 function migrate_0_7_0 (state) {
   console.log('migrate to 0.7.0')
+
+  var fs = require('fs-extra')
+  var path = require('path')
 
   state.saved.torrents.forEach(function (ts) {
     var infoHash = ts.infoHash
