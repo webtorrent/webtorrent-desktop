@@ -369,10 +369,10 @@ function renderPlayerControls (state) {
   if (state.playing.type === 'video') {
     // show closed captions icon
     elements.push(hx`
-      <i.icon.closed-captions.float-right
+      <i.icon.closed-caption.float-right
         class=${captionsClass}
         onclick=${handleSubtitles}>
-        closed_captions
+        closed_caption
       </i>
     `)
   }
