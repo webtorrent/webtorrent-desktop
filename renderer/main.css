@@ -848,6 +848,28 @@ body.drag .app::after {
   height: 14px;
 }
 
+.player .controls .subtitles-list {
+  position: fixed;
+  background: rgba(40, 40, 40, 0.8);
+  min-width: 100px;
+  bottom: 45px;
+  right: 3px;
+  transition: opacity 0.15s ease-out;
+  padding: 5px 10px;
+  border-radius: 3px;
+  margin: 0;
+  list-style-type: none;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.player .controls .subtitles-list .icon {
+  display: inline;
+  font-size: 17px;
+  vertical-align: bottom;
+  line-height: 21px;
+  margin: 4px;
+}
+
 /**
  * Set the cue text position so it appears above the player controls.
  */
@@ -888,29 +910,6 @@ video::-webkit-media-text-track-container {
 
 .cast-screen .cast-type {
   font-weight: bold;
-}
-
-/*
- * Subtitles list
- */
-
-.subtitles-list {
-  position: fixed;
-  background: rgba(40, 40, 40, 0.8);
-  min-width: 100px;
-  bottom: 45px;
-  right: 3px;
-  transition: opacity 0.15s ease-out;
-  padding: 5px 10px;
-  border-radius: 3px;
-  margin: 0;
-  list-style-type: none;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.subtitles-list i {
-  font-size: 11px; /* make the cast icons less huge */
-  margin-right: 4px !important;
 }
 
 /*
