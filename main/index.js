@@ -55,7 +55,7 @@ function init () {
 
   ipc.init()
 
-  app.on('will-finish-launching', function () {
+  app.once('will-finish-launching', function () {
     crashReporter.init()
   })
 
@@ -70,7 +70,7 @@ function init () {
     setTimeout(delayedInit, config.DELAYED_INIT)
   })
 
-  app.on('ipcReady', function () {
+  app.once('ipcReady', function () {
     log('Command line args:', argv)
     processArgv(argv)
     console.timeEnd('init')
@@ -103,13 +103,12 @@ function onOpen (e, torrentId) {
   e.preventDefault()
 
   if (app.ipcReady) {
-    windows.main.dispatch('onOpen', torrentId)
     // Magnet links opened from Chrome won't focus the app without a setTimeout.
     // The confirmation dialog Chrome shows causes Chrome to steal back the focus.
     // Electron issue: https://github.com/atom/electron/issues/4338
-    setTimeout(function () {
-      windows.main.show()
-    }, 100)
+    setTimeout(() => windows.main.show(), 100)
+
+    processArgv([ torrentId ])
   } else {
     argv.push(torrentId)
   }
@@ -117,7 +116,6 @@ function onOpen (e, torrentId) {
 
 function onAppOpen (newArgv) {
   newArgv = sliceArgv(newArgv)
-  console.log(newArgv)
 
   if (app.ipcReady) {
     log('Second app instance opened, but was prevented:', newArgv)
@@ -134,7 +132,7 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  var paths = []
+  var torrentIds = []
   argv.forEach(function (arg) {
     if (arg === '-n') {
       dialog.openSeedDirectory()
@@ -146,10 +144,10 @@ function processArgv (argv) {
       // Ignore OS X launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
     } else {
-      paths.push(arg)
+      torrentIds.push(arg)
     }
   })
-  if (paths.length > 0) {
-    windows.main.dispatch('onOpen', paths)
+  if (torrentIds.length > 0) {
+    windows.main.dispatch('onOpen', torrentIds)
   }
 }

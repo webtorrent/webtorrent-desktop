@@ -3,18 +3,9 @@ console.time('init')
 var crashReporter = require('../crash-reporter')
 crashReporter.init()
 
-var electron = require('electron')
-
-// Electron apps have two processes: a main process (node) runs first and starts
-// a renderer process (essentially a Chrome window). We're in the renderer process,
-// and this IPC channel receives from and sends messages to the main process
-var ipcRenderer = electron.ipcRenderer
-
-// Listen for messages from the main process
-setupIpc()
-
 var appConfig = require('application-config')('WebTorrent')
 var dragDrop = require('drag-drop')
+var electron = require('electron')
 var fs = require('fs-extra')
 var mainLoop = require('main-loop')
 var parallel = require('run-parallel')
@@ -45,6 +36,11 @@ var vdomLoop
 
 var state = State.getInitialState()
 state.location.go({ url: 'home' }) // Add first page to location history
+
+// Electron apps have two processes: a main process (node) runs first and starts
+// a renderer process (essentially a Chrome window). We're in the renderer process,
+// and this IPC channel receives from and sends messages to the main process
+var ipcRenderer = electron.ipcRenderer
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
@@ -90,6 +86,9 @@ function init () {
   })
   document.body.appendChild(vdomLoop.target)
 
+  // Listen for messages from the main process
+  setupIpc()
+
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
@@ -106,9 +105,9 @@ function init () {
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
 
-  // Done! Ideally we want to get here <100ms after the user clicks the app
   sound.play('STARTUP')
 
+  // Done! Ideally we want to get here < 500ms after the user clicks the app
   console.timeEnd('init')
 }
 
@@ -139,7 +138,7 @@ function render (state) {
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
   showOrHidePlayerControls()
-  if (vdomLoop) vdomLoop.update(state)
+  vdomLoop.update(state)
   updateElectron()
 }
 
@@ -458,8 +457,6 @@ function isCasting () {
 }
 
 function setupIpc () {
-  ipcRenderer.send('ipcReady')
-
   ipcRenderer.on('log', (e, ...args) => console.log(...args))
   ipcRenderer.on('error', (e, ...args) => console.error(...args))
 
@@ -486,13 +483,15 @@ function setupIpc () {
   ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
   ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
   ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
+
+  ipcRenderer.send('ipcReady')
 }
 
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
-    .filter((x) => x.status !== 'paused')
-    .forEach((x) => startTorrentingSummary(x))
+    .filter((torrentSummary) => torrentSummary.status !== 'paused')
+    .forEach((torrentSummary) => startTorrentingSummary(torrentSummary))
 }
 
 // Updates a single property in the UNSAVED prefs

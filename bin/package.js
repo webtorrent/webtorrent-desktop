@@ -327,11 +327,11 @@ function buildDarwin (cb) {
       }
 
       var dmg = appDmg(dmgOpts)
-      dmg.on('error', cb)
+      dmg.once('error', cb)
       dmg.on('progress', function (info) {
         if (info.type === 'step-begin') console.log(info.title + '...')
       })
-      dmg.on('finish', function (info) {
+      dmg.once('finish', function (info) {
         console.log('OS X: Created dmg.')
         cb(null)
       })

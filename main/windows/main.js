@@ -36,7 +36,6 @@ function init () {
     icon: getIconPath(), // Window icon (Windows, Linux)
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
-    show: false, // Hide window until renderer sends 'ipcReady'
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (OS X)
     useContentSize: true, // Specify web page size without OS chrome

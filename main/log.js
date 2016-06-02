@@ -17,7 +17,7 @@ function log (...args) {
   if (app.ipcReady) {
     windows.main.send('log', ...args)
   } else {
-    app.on('ipcReady', () => windows.main.send('log', ...args))
+    app.once('ipcReady', () => windows.main.send('log', ...args))
   }
 }
 
@@ -25,6 +25,6 @@ function error (...args) {
   if (app.ipcReady) {
     windows.main.send('error', ...args)
   } else {
-    app.on('ipcReady', () => windows.main.send('error', ...args))
+    app.once('ipcReady', () => windows.main.send('error', ...args))
   }
 }

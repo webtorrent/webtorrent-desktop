@@ -270,7 +270,7 @@ function getTorrentProgress () {
 function startServer (infoHash, index) {
   var torrent = client.get(infoHash)
   if (torrent.ready) startServerFromReadyTorrent(torrent, index)
-  else torrent.on('ready', () => startServerFromReadyTorrent(torrent, index))
+  else torrent.once('ready', () => startServerFromReadyTorrent(torrent, index))
 }
 
 function startServerFromReadyTorrent (torrent, index, cb) {
