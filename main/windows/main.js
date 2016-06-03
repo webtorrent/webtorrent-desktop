@@ -51,15 +51,11 @@ function init () {
     menu.onToggleFullScreen(main.win.isFullScreen())
   })
 
-  win.on('blur', function () {
-    menu.onWindowBlur()
-    tray.onWindowBlur()
-  })
+  win.on('blur', onWindowBlur)
+  win.on('focus', onWindowFocus)
 
-  win.on('focus', function () {
-    menu.onWindowFocus()
-    tray.onWindowFocus()
-  })
+  win.on('hide', onWindowBlur)
+  win.on('show', onWindowFocus)
 
   win.on('enter-full-screen', function () {
     menu.onToggleFullScreen(true)
@@ -205,6 +201,16 @@ function toggleFullScreen (flag) {
   }
 
   main.win.setFullScreen(flag)
+}
+
+function onWindowBlur () {
+  menu.onWindowBlur()
+  tray.onWindowBlur()
+}
+
+function onWindowFocus () {
+  menu.onWindowFocus()
+  tray.onWindowFocus()
 }
 
 function getIconPath () {
