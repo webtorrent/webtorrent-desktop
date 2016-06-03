@@ -3,7 +3,6 @@ console.time('init')
 var crashReporter = require('../crash-reporter')
 crashReporter.init()
 
-var appConfig = require('application-config')('WebTorrent')
 var dragDrop = require('drag-drop')
 var electron = require('electron')
 var fs = require('fs-extra')
@@ -18,46 +17,30 @@ var patch = require('virtual-dom/patch')
 var App = require('./views/app')
 var config = require('../config')
 var errors = require('./lib/errors')
-var migrations = require('./lib/migrations')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
-
 var {setDispatch} = require('./lib/dispatcher')
-setDispatch(dispatch)
-
-appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
-
-// This dependency is the slowest-loading, so we lazy load it
-var Cast = null
-
-var vdomLoop
-
-var state = State.getInitialState()
-state.location.go({ url: 'home' }) // Add first page to location history
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
 
-// All state lives in state.js. `state.saved` is read from and written to a file.
-// All other state is ephemeral. First we load state.saved then initialize the app.
-loadState(init)
+var state, vdomLoop
 
-function loadState (cb) {
-  appConfig.read(function (err, data) {
-    if (err) console.error(err)
+// This dependency is the slowest-loading, so we lazy load it
+var Cast = null
 
-    // populate defaults if they're not there
-    state.saved = Object.assign({}, State.getDefaultSavedState(), data)
-    state.saved.torrents.forEach(function (torrentSummary) {
-      if (torrentSummary.displayName) torrentSummary.name = torrentSummary.displayName
-    })
+init()
 
-    if (cb) cb()
-  })
+function init () {
+  // All state lives in state.js. `state.saved` is read from and written to a file.
+  // All other state is ephemeral. First we load state.saved then initialize the app.
+  State.load(onState)
+
+  setDispatch(dispatch)
 }
 
 /**
@@ -65,9 +48,12 @@ function loadState (cb) {
  * Connects to the torrent networks, sets up the UI and OS integrations like
  * the dock icon and drag+drop.
  */
-function init () {
-  // Clean up the freshly-loaded config file, which may be from an older version
-  migrations.run(state)
+function onState (err, _state) {
+  if (err) return onError(err)
+  state = _state
+
+  // Add first page to location history
+  state.location.go({ url: 'home' })
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
@@ -328,7 +314,7 @@ function dispatch (action, ...args) {
     saveStateThrottled()
   }
   if (action === 'saveState') {
-    saveState()
+    State.save(state)
   }
   if (action === 'setTitle') {
     state.window.title = args[0] /* title */
@@ -512,7 +498,8 @@ function updatePreferences (property, value) {
 // All unsaved prefs take effect atomically, and are saved to config.json
 function savePreferences () {
   state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
-  saveState()
+  State.save(state)
+  update()
 }
 
 // Don't write state.saved to file more than once a second
@@ -520,41 +507,9 @@ function saveStateThrottled () {
   if (state.saveStateTimeout) return
   state.saveStateTimeout = setTimeout(function () {
     delete state.saveStateTimeout
-    saveState()
+    State.save(state)
+    update()
   }, 1000)
-}
-
-// Write state.saved to the JSON state file
-function saveState () {
-  console.log('saving state to ' + appConfig.filePath)
-
-  // Clean up, so that we're not saving any pending state
-  var copy = Object.assign({}, state.saved)
-  // Remove torrents pending addition to the list, where we haven't finished
-  // reading the torrent file or file(s) to seed & don't have an infohash
-  copy.torrents = copy.torrents
-    .filter((x) => x.infoHash)
-    .map(function (x) {
-      var torrent = {}
-      for (var key in x) {
-        if (key === 'progress' || key === 'torrentKey') {
-          continue // Don't save progress info or key for the webtorrent process
-        }
-        if (key === 'playStatus') {
-          continue // Don't save whether a torrent is playing / pending
-        }
-        torrent[key] = x[key]
-      }
-      return torrent
-    })
-
-  appConfig.write(copy, function (err) {
-    if (err) console.error(err)
-    ipcRenderer.send('savedState')
-  })
-
-  // Update right away, don't wait for the state to save
-  update()
 }
 
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app

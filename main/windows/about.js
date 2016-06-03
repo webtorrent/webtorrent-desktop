@@ -31,7 +31,7 @@ function init () {
   // No menu on the About window
   win.setMenu(null)
 
-  win.webContents.on('did-finish-load', function () {
+  win.webContents.once('did-finish-load', function () {
     win.show()
   })
 

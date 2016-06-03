@@ -24,10 +24,38 @@ module.exports = {
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
 
   CONFIG_PATH: getConfigPath(),
-  CONFIG_POSTER_PATH: path.join(getConfigPath(), 'Posters'),
-  CONFIG_TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
+
+  DEFAULT_TORRENTS: [
+    {
+      name: 'Big Buck Bunny',
+      posterFileName: 'bigBuckBunny.jpg',
+      torrentFileName: 'bigBuckBunny.torrent'
+    },
+    {
+      name: 'Cosmos Laundromat (Preview)',
+      posterFileName: 'cosmosLaundromat.jpg',
+      torrentFileName: 'cosmosLaundromat.torrent'
+    },
+    {
+      name: 'Sintel',
+      posterFileName: 'sintel.jpg',
+      torrentFileName: 'sintel.torrent'
+    },
+    {
+      name: 'Tears of Steel',
+      posterFileName: 'tearsOfSteel.jpg',
+      torrentFileName: 'tearsOfSteel.torrent'
+    },
+    {
+      name: 'The WIRED CD - Rip. Sample. Mash. Share.',
+      posterFileName: 'wiredCd.jpg',
+      torrentFileName: 'wiredCd.torrent'
+    }
+  ],
 
   DELAYED_INIT: 3000 /* 3 seconds */,
+
+  DEFAULT_DOWNLOAD_PATH: getDefaultDownloadPath(),
 
   GITHUB_URL: 'https://github.com/feross/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/feross/webtorrent-desktop/issues',
@@ -38,8 +66,10 @@ module.exports = {
   IS_PORTABLE: isPortable(),
   IS_PRODUCTION: isProduction(),
 
+  POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: __dirname,
   STATIC_PATH: path.join(__dirname, 'static'),
+  TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
 
   WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
   WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html'),
@@ -55,6 +85,18 @@ function getConfigPath () {
   } else {
     return path.dirname(appConfig.filePath)
   }
+}
+
+function getDefaultDownloadPath () {
+  if (!process || !process.type) {
+    return ''
+  }
+
+  var electron = require('electron')
+
+  return process.type === 'renderer'
+    ? electron.remote.app.getPath('downloads')
+    : electron.app.getPath('downloads')
 }
 
 function isPortable () {
