@@ -217,13 +217,17 @@ function getMenuTemplate () {
         },
         {
           label: 'Step Forward',
-          accelerator: 'CmdOrCtrl+Alt+Right',
+          accelerator: process.platform === 'darwin'
+            ? 'CmdOrCtrl+Alt+Right'
+            : 'Alt+Right',
           click: () => windows.main.dispatch('skip', 1),
           enabled: false
         },
         {
           label: 'Step Backward',
-          accelerator: 'CmdOrCtrl+Alt+Left',
+          accelerator: process.platform === 'darwin'
+            ? 'CmdOrCtrl+Alt+Left'
+            : 'Alt+Left',
           click: () => windows.main.dispatch('skip', -1),
           enabled: false
         },
