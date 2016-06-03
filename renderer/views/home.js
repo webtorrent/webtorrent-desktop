@@ -218,7 +218,8 @@ function TorrentList (state) {
   // Show a single torrentSummary file in the details view for a single torrent
   function renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
-    var isSelected = torrentSummary.selections[index] // Are we even torrenting it?
+    // Are we even torrenting it?
+    var isSelected = torrentSummary.selections && torrentSummary.selections[index]
     var isDone = false // Are we finished torrenting it?
     var progress = ''
     if (torrentSummary.progress && torrentSummary.progress.files) {

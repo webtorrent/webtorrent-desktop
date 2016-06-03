@@ -173,7 +173,7 @@ function saveTorrentFile (torrentKey) {
     }
 
     // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.CONFIG_TORRENT_PATH, function (_) {
+    fs.mkdir(config.TORRENT_PATH, function (_) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
@@ -186,7 +186,7 @@ function saveTorrentFile (torrentKey) {
 // Checks whether we've already resolved a given infohash to a torrent file
 // Calls back with (torrentPath, exists). Logs, does not call back on error
 function checkIfTorrentFileExists (infoHash, cb) {
-  var torrentPath = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
+  var torrentPath = path.join(config.TORRENT_PATH, infoHash + '.torrent')
   fs.exists(torrentPath, function (exists) {
     cb(torrentPath, exists)
   })
@@ -199,10 +199,10 @@ function generateTorrentPoster (torrentKey) {
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    fs.mkdirp(config.CONFIG_POSTER_PATH, function (err) {
+    fs.mkdirp(config.POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
       var posterFileName = torrent.infoHash + extension
-      var posterFilePath = path.join(config.CONFIG_POSTER_PATH, posterFileName)
+      var posterFilePath = path.join(config.POSTER_PATH, posterFileName)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster

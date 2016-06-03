@@ -40,22 +40,20 @@ function migrate_0_7_0 (state) {
     var infoHash = ts.infoHash
 
     // Replace torrentPath with torrentFileName
+    // There are a number of cases to handle here:
+    // * Originally we used absolute paths
+    // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
+    // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
+    // * Finally, now we're getting rid of torrentPath altogether
     var src, dst
     if (ts.torrentPath) {
-      // There are a number of cases to handle here:
-      // * Originally we used absolute paths
-      // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
-      // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
-      // * Finally, now we're getting rid of torrentPath altogether
       console.log('replacing torrentPath %s', ts.torrentPath)
-      if (path.isAbsolute(ts.torrentPath)) {
-        src = ts.torrentPath
-      } else if (ts.torrentPath.startsWith('..')) {
+      if (path.isAbsolute(ts.torrentPath) || ts.torrentPath.startsWith('..')) {
         src = ts.torrentPath
       } else {
         src = path.join(config.STATIC_PATH, ts.torrentPath)
       }
-      dst = path.join(config.CONFIG_TORRENT_PATH, infoHash + '.torrent')
+      dst = path.join(config.TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
       if (src !== dst) fs.copySync(src, dst)
@@ -71,7 +69,7 @@ function migrate_0_7_0 (state) {
       src = path.isAbsolute(ts.posterURL)
         ? ts.posterURL
         : path.join(config.STATIC_PATH, ts.posterURL)
-      dst = path.join(config.CONFIG_POSTER_PATH, infoHash + extension)
+      dst = path.join(config.POSTER_PATH, infoHash + extension)
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
       if (src !== dst) fs.copySync(src, dst)

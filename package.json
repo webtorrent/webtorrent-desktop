@@ -30,6 +30,7 @@
     "main-loop": "^3.2.0",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
+    "parse-torrent": "^5.7.3",
     "prettier-bytes": "^1.0.1",
     "run-parallel": "^1.1.6",
     "semver": "^5.1.0",

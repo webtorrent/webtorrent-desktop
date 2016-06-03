@@ -1,18 +1,20 @@
-var electron = require('electron')
-var path = require('path')
-
-var remote = electron.remote
-
-var config = require('../../config')
-var LocationHistory = require('./location-history')
-
 module.exports = {
-  getInitialState,
   getDefaultPlayState,
-  getDefaultSavedState
+  load,
+  save
 }
 
-function getInitialState () {
+var appConfig = require('application-config')('WebTorrent')
+var path = require('path')
+
+var config = require('../../config')
+var migrations = require('./migrations')
+
+appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
+
+function getDefaultState () {
+  var LocationHistory = require('./location-history')
+
   return {
     /*
      * Temporary state disappears once the program exits.
@@ -91,185 +93,60 @@ function getDefaultPlayState () {
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function getDefaultSavedState () {
-  return {
-    version: config.APP_VERSION, /* make sure we can upgrade gracefully later */
-    torrents: [
-      {
-        status: 'paused',
-        infoHash: '88594aaacbde40ef3e2510c47374ec0aa396c08e',
-        magnetURI: 'magnet:?xt=urn:btih:88594aaacbde40ef3e2510c47374ec0aa396c08e&dn=bbb_sunflower_1080p_30fps_normal.mp4&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80%2Fannounce&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=http%3A%2F%2Fdistribution.bbb3d.renderfarming.net%2Fvideo%2Fmp4%2Fbbb_sunflower_1080p_30fps_normal.mp4',
-        displayName: 'Big Buck Bunny',
-        posterURL: 'bigBuckBunny.jpg',
-        torrentPath: 'bigBuckBunny.torrent',
-        files: [
-          {
-            length: 276134947,
-            name: 'bbb_sunflower_1080p_30fps_normal.mp4'
-          }
-        ]
-      },
-      {
-        status: 'paused',
-        infoHash: '6a9759bffd5c0af65319979fb7832189f4f3c35d',
-        magnetURI: 'magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel-1024-surround.mp4',
-        displayName: 'Sintel',
-        posterURL: 'sintel.jpg',
-        torrentPath: 'sintel.torrent',
-        files: [
-          {
-            length: 129241752,
-            name: 'sintel.mp4'
-          }
-        ]
-      },
-      {
-        status: 'paused',
-        infoHash: '02767050e0be2fd4db9a2ad6c12416ac806ed6ed',
-        magnetURI: 'magnet:?xt=urn:btih:02767050e0be2fd4db9a2ad6c12416ac806ed6ed&dn=tears_of_steel_1080p.webm&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io',
-        displayName: 'Tears of Steel',
-        posterURL: 'tearsOfSteel.jpg',
-        torrentPath: 'tearsOfSteel.torrent',
-        files: [
-          {
-            length: 571346576,
-            name: 'tears_of_steel_1080p.webm'
-          }
-        ]
-      },
-      {
-        status: 'paused',
-        infoHash: '6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5',
-        magnetURI: 'magnet:?xt=urn:btih:6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5&dn=CosmosLaundromatFirstCycle&tr=http%3A%2F%2Fbt1.archive.org%3A6969%2Fannounce&tr=http%3A%2F%2Fbt2.archive.org%3A6969%2Fannounce&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=http%3A%2F%2Fia601508.us.archive.org%2F14%2Fitems%2F&ws=http%3A%2F%2Fia801508.us.archive.org%2F14%2Fitems%2F&ws=https%3A%2F%2Farchive.org%2Fdownload%2F',
-        displayName: 'Cosmos Laundromat (Preview)',
-        posterURL: 'cosmosLaundromat.jpg',
-        torrentPath: 'cosmosLaundromat.torrent',
-        files: [
-          {
-            length: 223580,
-            name: 'Cosmos Laundromat - First Cycle (1080p).gif'
-          },
-          {
-            length: 220087570,
-            name: 'Cosmos Laundromat - First Cycle (1080p).mp4'
-          },
-          {
-            length: 56832560,
-            name: 'Cosmos Laundromat - First Cycle (1080p).ogv'
-          },
-          {
-            length: 3949,
-            name: 'CosmosLaundromat-FirstCycle1080p.en.srt'
-          },
-          {
-            length: 3907,
-            name: 'CosmosLaundromat-FirstCycle1080p.es.srt'
-          },
-          {
-            length: 4119,
-            name: 'CosmosLaundromat-FirstCycle1080p.fr.srt'
-          },
-          {
-            length: 3941,
-            name: 'CosmosLaundromat-FirstCycle1080p.it.srt'
-          },
-          {
-            length: 11264,
-            name: 'CosmosLaundromatFirstCycle_meta.sqlite'
-          },
-          {
-            length: 1204,
-            name: 'CosmosLaundromatFirstCycle_meta.xml'
-          }
-        ]
-      },
-      {
-        status: 'paused',
-        infoHash: '3ba219a8634bf7bae3d848192b2da75ae995589d',
-        magnetURI: 'magnet:?xt=urn:btih:3ba219a8634bf7bae3d848192b2da75ae995589d&dn=The+WIRED+CD+-+Rip.+Sample.+Mash.+Share.&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F',
-        displayName: 'The WIRED CD - Rip. Sample. Mash. Share.',
-        posterURL: 'wired-cd.jpg',
-        torrentPath: 'wired-cd.torrent',
-        files: [
-          {
-            length: 1964275,
-            name: '01 - Beastie Boys - Now Get Busy.mp3'
-          },
-          {
-            length: 3610523,
-            name: '02 - David Byrne - My Fair Lady.mp3'
-          },
-          {
-            length: 2759377,
-            name: '03 - Zap Mama - Wadidyusay.mp3'
-          },
-          {
-            length: 5816537,
-            name: '04 - My Morning Jacket - One Big Holiday.mp3'
-          },
-          {
-            length: 2106421,
-            name: '05 - Spoon - Revenge!.mp3'
-          },
-          {
-            length: 3347550,
-            name: '06 - Gilberto Gil - Oslodum.mp3'
-          },
-          {
-            length: 2107577,
-            name: '07 - Dan The Automator - Relaxation Spa Treatment.mp3'
-          },
-          {
-            length: 3108130,
-            name: '08 - Thievery Corporation - Dc 3000.mp3'
-          },
-          {
-            length: 3051528,
-            name: '09 - Le Tigre - Fake French.mp3'
-          },
-          {
-            length: 3270259,
-            name: '10 - Paul Westerberg - Looking Up In Heaven.mp3'
-          },
-          {
-            length: 3263528,
-            name: '11 - Chuck D - No Meaning No (feat. Fine Arts Militia).mp3'
-          },
-          {
-            length: 6380952,
-            name: '12 - The Rapture - Sister Saviour (Blackstrobe Remix).mp3'
-          },
-          {
-            length: 6550396,
-            name: '13 - Cornelius - Wataridori 2.mp3'
-          },
-          {
-            length: 3034692,
-            name: '14 - DJ Danger Mouse - What U Sittin\' On (feat. Jemini, Cee Lo And Tha Alkaholiks).mp3'
-          },
-          {
-            length: 3854611,
-            name: '15 - DJ Dolores - Oslodum 2004.mp3'
-          },
-          {
-            length: 1762120,
-            name: '16 - Matmos - Action At A Distance.mp3'
-          },
-          {
-            length: 4071,
-            name: 'README.md'
-          },
-          {
-            length: 78163,
-            name: 'poster.jpg'
-          }
-        ]
-      }
-    ],
+function setupSavedState (cb) {
+  var fs = require('fs-extra')
+  var parseTorrent = require('parse-torrent')
+  var parallel = require('run-parallel')
+
+  var saved = {
     prefs: {
       downloadPath: config.IS_PORTABLE
         ? path.join(config.CONFIG_PATH, 'Downloads')
-        : remote.app.getPath('downloads')
+        : config.DEFAULT_DOWNLOAD_PATH
+    },
+    torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
+    version: config.APP_VERSION /* make sure we can upgrade gracefully later */
+  }
+
+  var tasks = []
+
+  config.DEFAULT_TORRENTS.map(function (t, i) {
+    var infoHash = saved.torrents[i].infoHash
+    tasks.push(function (cb) {
+      fs.copy(
+        path.join(config.STATIC_PATH, t.posterFileName),
+        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName)),
+        cb
+      )
+    })
+    tasks.push(function (cb) {
+      fs.copy(
+        path.join(config.STATIC_PATH, t.torrentFileName),
+        path.join(config.TORRENT_PATH, infoHash + '.torrent'),
+        cb
+      )
+    })
+  })
+
+  parallel(tasks, function (err) {
+    if (err) return cb(err)
+    cb(null, saved)
+  })
+
+  function createTorrentObject (t) {
+    var torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
+    var parsedTorrent = parseTorrent(torrent)
+
+    return {
+      status: 'paused',
+      infoHash: parsedTorrent.infoHash,
+      name: t.name,
+      displayName: t.name,
+      posterFileName: parsedTorrent.infoHash + path.extname(t.posterFileName),
+      torrentFileName: parsedTorrent.infoHash + '.torrent',
+      magnetURI: parseTorrent.toMagnetURI(parsedTorrent),
+      files: parsedTorrent.files,
+      selections: parsedTorrent.files.map((x) => true)
     }
   }
 }
@@ -283,4 +160,58 @@ function getPlayingFileSummary () {
   var torrentSummary = this.getPlayingTorrentSummary()
   if (!torrentSummary) return null
   return torrentSummary.files[this.playing.fileIndex]
+}
+
+function load (cb) {
+  var state = getDefaultState()
+
+  appConfig.read(function (err, saved) {
+    if (err || !saved.version) {
+      console.log('Missing config file: Creating new one')
+      setupSavedState(onSaved)
+    } else {
+      onSaved(null, saved)
+    }
+  })
+
+  function onSaved (err, saved) {
+    if (err) return cb(err)
+    state.saved = saved
+    migrations.run(state)
+    cb(null, state)
+  }
+}
+
+// Write state.saved to the JSON state file
+function save (state, cb) {
+  console.log('Saving state to ' + appConfig.filePath)
+
+  var electron = require('electron')
+
+  // Clean up, so that we're not saving any pending state
+  var copy = Object.assign({}, state.saved)
+  // Remove torrents pending addition to the list, where we haven't finished
+  // reading the torrent file or file(s) to seed & don't have an infohash
+  copy.torrents = copy.torrents
+    .filter((x) => x.infoHash)
+    .map(function (x) {
+      var torrent = {}
+      for (var key in x) {
+        if (key === 'progress' || key === 'torrentKey') {
+          continue // Don't save progress info or key for the webtorrent process
+        }
+        if (key === 'playStatus') {
+          continue // Don't save whether a torrent is playing / pending
+        }
+        torrent[key] = x[key]
+      }
+      return torrent
+    })
+
+  appConfig.write(copy, function (err) {
+    if (err) console.error(err)
+
+    // TODO: this doesn't belong here
+    electron.ipcRenderer.send('savedState')
+  })
 }
