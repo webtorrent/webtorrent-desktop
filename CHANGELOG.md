@@ -1,5 +1,13 @@
 # WebTorrent Desktop Version History
 
+## v0.7.2 - 2016-06-02
+
+### Fixed
+
+- Fix exception that affects users upgrading from v0.5.1 or older
+  - Ensure `state.saved.prefs` configuration exists
+- Fix window title on "About WebTorrent" window
+
 ## v0.7.1 - 2016-06-02
 
 ### Changed
