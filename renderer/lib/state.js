@@ -145,7 +145,8 @@ function setupSavedState (cb) {
       posterFileName: parsedTorrent.infoHash + path.extname(t.posterFileName),
       torrentFileName: parsedTorrent.infoHash + '.torrent',
       magnetURI: parseTorrent.toMagnetURI(parsedTorrent),
-      files: parsedTorrent.files
+      files: parsedTorrent.files,
+      selections: parsedTorrent.files.map((x) => true)
     }
   }
 }
