@@ -18,25 +18,24 @@ function run (state) {
   var version = state.saved.version
 
   if (semver.lt(version, '0.7.0')) {
-    migrate_0_7_0(state)
+    migrate_0_7_0(state.saved)
   }
 
-  // Future migrations...
-  // if (semver.lt(version, '0.8.0')) {
-  //   migrate_0_8_0(state)
-  // }
+  if (semver.lt(version, '0.7.2')) {
+    migrate_0_7_2(state.saved)
+  }
 
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
 
-function migrate_0_7_0 (state) {
+function migrate_0_7_0 (saved) {
   console.log('migrate to 0.7.0')
 
   var fs = require('fs-extra')
   var path = require('path')
 
-  state.saved.torrents.forEach(function (ts) {
+  saved.torrents.forEach(function (ts) {
     var infoHash = ts.infoHash
 
     // Replace torrentPath with torrentFileName
@@ -85,4 +84,12 @@ function migrate_0_7_0 (state) {
     delete ts.selections
     delete ts.fileModtimes
   })
+}
+
+function migrate_0_7_2 (saved) {
+  if (!saved.prefs) {
+    saved.prefs = {
+      downloadPath: config.DEFAULT_DOWNLOAD_PATH
+    }
+  }
 }
