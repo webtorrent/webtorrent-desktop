@@ -176,7 +176,6 @@ function load (cb) {
 
   function onSaved (err, saved) {
     if (err) return cb(err)
-    console.log('onSaved', err, saved)
     state.saved = saved
     migrations.run(state)
     cb(null, state)
@@ -185,7 +184,7 @@ function load (cb) {
 
 // Write state.saved to the JSON state file
 function save (state, cb) {
-  console.log('saving state to ' + appConfig.filePath)
+  console.log('Saving state to ' + appConfig.filePath)
 
   var electron = require('electron')
 
