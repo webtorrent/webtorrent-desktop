@@ -12,8 +12,8 @@
 
 ### Changed
 
-- Change "Step Forward" keyboard shortcut to `Alt+Left`
-- Change "Step Backward" keyboard shortcut to to `Alt+Right`
+- Change "Step Forward" keyboard shortcut to `Alt+Left` (Windows)
+- Change "Step Backward" keyboard shortcut to to `Alt+Right` (Windows)
 
 ### Fixed
 
