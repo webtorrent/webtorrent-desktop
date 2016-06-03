@@ -22,6 +22,7 @@ function init () {
     resizable: false,
     show: false,
     skipTaskbar: true,
+    title: 'About ' + config.APP_WINDOW_TITLE,
     useContentSize: true,
     width: 300
   })
