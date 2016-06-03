@@ -92,6 +92,10 @@ function getDefaultDownloadPath () {
     return ''
   }
 
+  if (isPortable()) {
+    return path.join(getConfigPath(), 'Downloads')
+  }
+
   var electron = require('electron')
 
   return process.type === 'renderer'
