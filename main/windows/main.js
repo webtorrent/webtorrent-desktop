@@ -22,14 +22,24 @@ var config = require('../../config')
 var log = require('../log')
 var menu = require('../menu')
 var tray = require('../tray')
+var State = require('../../renderer/lib/state')
 
 var HEADER_HEIGHT = 37
 var TORRENT_HEIGHT = 100
+var state
 
 function init () {
   if (main.win) {
     return main.win.show()
   }
+
+  State.load(createWindow)
+}
+
+function createWindow (err, _state) {
+  if (err) return onError(err)
+  state = _state
+
   var win = main.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     darkTheme: true, // Forces dark theme (GTK+3)
@@ -40,7 +50,9 @@ function init () {
     titleBarStyle: 'hidden-inset', // Hide title bar (OS X)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
-    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
+    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6), // header height + 5 torrents
+    x: state.saved.window ? state.saved.window.bounds.x : null,
+    y: state.saved.window ? state.saved.window.bounds.y : null
   })
 
   win.loadURL(config.WINDOW_MAIN)
@@ -80,6 +92,9 @@ function init () {
 }
 
 function dispatch (...args) {
+  if (args[0] === 'saveState') {
+    args[1] = main.win.getBounds()
+  }
   send('dispatch', ...args)
 }
 
@@ -92,6 +107,10 @@ function hide () {
 function send (...args) {
   if (!main.win) return
   main.win.send(...args)
+}
+
+function onError (err) {
+  log(err)
 }
 
 /**
@@ -109,7 +128,7 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log('setBounds: not setting bounds because we\'re in full screen')
+    log("setBounds: not setting bounds because we're in full screen")
     return
   }
 
