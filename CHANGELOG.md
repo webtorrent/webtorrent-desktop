@@ -1,5 +1,16 @@
 # WebTorrent Desktop Version History
 
+## v0.7.1 - 2016-06-02
+
+### Changed
+
+- Change "Step Forward" keyboard shortcut to `Alt+Left`
+- Change "Step Backward" keyboard shortcut to to `Alt+Right`
+
+### Fixed
+
+- First time startup bug -- invalid torrent/poster paths
+
 ## v0.7.0 - 2016-06-02
 
 ### Added
