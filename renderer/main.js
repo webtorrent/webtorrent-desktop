@@ -91,6 +91,9 @@ function onState (err, _state) {
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
 
+  // ...window visibility state.
+  document.addEventListener('webkitvisibilitychange', onVisibilityChange)
+
   sound.play('STARTUP')
 
   // Done! Ideally we want to get here < 500ms after the user clicks the app
@@ -360,6 +363,9 @@ function playPause () {
   } else {
     pause()
   }
+  // force rerendering if window is hidden,
+  // in order to bypass `raf` and play/pause media immediately
+  if (!state.window.isVisible) render(state)
 }
 
 function jumpToTime (time) {
@@ -1295,4 +1301,8 @@ function onFocus (e) {
 function onBlur () {
   state.window.isFocused = false
   update()
+}
+
+function onVisibilityChange () {
+  state.window.isVisible = !document.webkitHidden
 }
