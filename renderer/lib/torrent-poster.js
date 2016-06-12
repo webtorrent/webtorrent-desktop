@@ -16,7 +16,7 @@ function torrentPoster (torrent, cb) {
   if (videoFile) return torrentPosterFromVideo(videoFile, torrent, cb)
 
   // Third, try to use the largest image file
-  var imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.png'])
+  var imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.jpeg', '.png'])
   if (imgFile) return torrentPosterFromImage(imgFile, torrent, cb)
 
   // TODO: generate a waveform from the largest sound file
