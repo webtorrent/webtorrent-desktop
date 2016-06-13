@@ -1,6 +1,6 @@
 module.exports = OpenTorrentAddressModal
 
-var {dispatch} = require('../lib/dispatcher')
+var {dispatch, dispatcher} = require('../lib/dispatcher')
 var hx = require('../lib/hx')
 
 function OpenTorrentAddressModal (state) {
@@ -11,8 +11,8 @@ function OpenTorrentAddressModal (state) {
         <input id='add-torrent-url' type='text' onkeypress=${handleKeyPress} />
       </p>
       <p class='float-right'>
-        <button class='button button-flat' onclick=${handleCancel}>CANCEL</button>
-          <button class='button button-raised' onclick=${handleOK}>OK</button>
+        <button class='button button-flat' onclick=${dispatcher('exitModal')}>Cancel</button>
+        <button class='button button-raised' onclick=${handleOK}>OK</button>
       </p>
       <script>document.querySelector('#add-torrent-url').focus()</script>
     </div>
@@ -26,8 +26,4 @@ function handleKeyPress (e) {
 function handleOK () {
   dispatch('exitModal')
   dispatch('addTorrent', document.querySelector('#add-torrent-url').value)
-}
-
-function handleCancel () {
-  dispatch('exitModal')
 }
