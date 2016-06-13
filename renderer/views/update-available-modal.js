@@ -10,9 +10,9 @@ function UpdateAvailableModal (state) {
     <div class='update-available-modal'>
       <p><strong>A new version of WebTorrent is available: v${state.modal.version}</strong></p>
       <p>We have an auto-updater for Windows and Mac. We don't have one for Linux yet, so you'll have to download the new version manually.</p>
-      <p>
-        <button class='button button-raised' onclick=${handleOK}>Show Download Page</button>
+      <p class='float-right'>
         <button class='button button-flat' onclick=${handleCancel}>Skip This Release</button>
+        <button class='button button-raised' onclick=${handleOK}>Show Download Page</button>
       </p>
     </div>
   `
