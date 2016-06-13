@@ -170,7 +170,6 @@ function dispatch (action, ...args) {
   }
   if (action === 'openTorrentAddress') {
     state.modal = { id: 'open-torrent-address-modal' }
-    update()
   }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
