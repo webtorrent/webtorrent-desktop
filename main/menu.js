@@ -26,6 +26,8 @@ function init () {
 
 function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
+  getMenuItem('Next Track').enabled = false
+  getMenuItem('Previous Track').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
   getMenuItem('Step Forward').enabled = false
@@ -37,6 +39,8 @@ function onPlayerClose () {
 
 function onPlayerOpen () {
   getMenuItem('Play/Pause').enabled = true
+  getMenuItem('Next Track').enabled = true
+  getMenuItem('Previous Track').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
   getMenuItem('Step Forward').enabled = true
@@ -195,6 +199,21 @@ function getMenuTemplate () {
           label: 'Play/Pause',
           accelerator: 'Space',
           click: () => windows.main.dispatch('playPause'),
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Next Track',
+          accelerator: 'N',
+          click: () => windows.main.dispatch('next'),
+          enabled: false
+        },
+        {
+          label: 'Previous Track',
+          accelerator: 'P',
+          click: () => windows.main.dispatch('prev'),
           enabled: false
         },
         {

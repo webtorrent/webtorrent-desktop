@@ -2,7 +2,9 @@ module.exports = {
   isPlayable,
   isVideo,
   isAudio,
-  isPlayableTorrent
+  isPlayableTorrent,
+  nextIndex,
+  prevIndex
 }
 
 var path = require('path')
@@ -41,4 +43,14 @@ function isAudio (file) {
 
 function isPlayableTorrent (torrentSummary) {
   return torrentSummary.files && torrentSummary.files.some(isPlayable)
+}
+
+function nextIndex (torrentSummary, index) {
+  var diff = 1 + torrentSummary.files.slice(index + 1).map(isPlayable).indexOf(true)
+  return diff > 0 ? index + diff : null
+}
+
+function prevIndex (torrentSummary, index) {
+  var diff = 1 + torrentSummary.files.slice(0, index).reverse().map(isPlayable).indexOf(true)
+  return diff > 0 ? index - diff : null
 }

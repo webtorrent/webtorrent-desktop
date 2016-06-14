@@ -222,6 +222,12 @@ function dispatch (action, ...args) {
   if (action === 'playPause') {
     playPause()
   }
+  if (action === 'next') {
+    nextFile()
+  }
+  if (action === 'prev') {
+    prevFile()
+  }
   if (action === 'play') {
     playFile(args[0] /* infoHash */, args[1] /* index */)
   }
@@ -365,6 +371,18 @@ function playPause () {
   // force rerendering if window is hidden,
   // in order to bypass `raf` and play/pause media immediately
   if (!state.window.isVisible) render(state)
+}
+
+function nextFile () {
+  if (state.playing.nextIndex !== null) {
+    playFile(state.playing.infoHash, state.playing.nextIndex)
+  }
+}
+
+function prevFile () {
+  if (state.playing.prevIndex !== null) {
+    playFile(state.playing.infoHash, state.playing.prevIndex)
+  }
 }
 
 function jumpToTime (time) {
@@ -1003,6 +1021,8 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   // update state
   state.playing.infoHash = torrentSummary.infoHash
   state.playing.fileIndex = index
+  state.playing.nextIndex = TorrentPlayer.nextIndex(torrentSummary, index)
+  state.playing.prevIndex = TorrentPlayer.prevIndex(torrentSummary, index)
   state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
     : TorrentPlayer.isAudio(fileSummary) ? 'audio'
     : 'other'
