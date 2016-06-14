@@ -130,9 +130,13 @@ function renderMedia (state) {
     dispatch('setDimensions', dimensions)
   }
 
-  // When the video completes, pause the video instead of looping
   function onEnded (e) {
-    state.playing.isPaused = true
+    if (state.playing.nextIndex !== null) {
+      dispatch('next')
+    } else {
+      // When the last video completes, pause the video instead of looping
+      state.playing.paused = true
+    }
   }
 
   function onCanPlay (e) {
