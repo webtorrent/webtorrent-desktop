@@ -1,7 +1,8 @@
 module.exports = {
   openExternal,
   openItem,
-  showItemInFolder
+  showItemInFolder,
+  moveItemToTrash
 }
 
 var electron = require('electron')
@@ -29,4 +30,12 @@ function openItem (path) {
 function showItemInFolder (path) {
   log(`showItemInFolder: ${path}`)
   electron.shell.showItemInFolder(path)
+}
+
+/**
+ * Move the given file to trash and returns a boolean status for the operation.
+ */
+function moveItemToTrash (path) {
+  log(`moveItemToTrash: ${path}`)
+  electron.shell.moveItemToTrash(path)
 }

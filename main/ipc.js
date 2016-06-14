@@ -81,6 +81,7 @@ function init () {
 
   ipc.on('openItem', (e, ...args) => shell.openItem(...args))
   ipc.on('showItemInFolder', (e, ...args) => shell.showItemInFolder(...args))
+  ipc.on('moveItemToTrash', (e, ...args) => shell.moveItemToTrash(...args))
 
   /**
    * Windows: Main
