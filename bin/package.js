@@ -206,6 +206,12 @@ function buildDarwin (cb) {
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
         CFBundleURLSchemes: [ 'magnet' ]
+      },
+      {
+        CFBundleTypeRole: 'Editor',
+        CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
+        CFBundleURLName: 'BitTorrent Stream-Magnet URL',
+        CFBundleURLSchemes: [ 'stream-magnet' ]
       }
     ]
 
