@@ -8,6 +8,7 @@ const errors = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
+const Playlist = require('../lib/playlist')
 const State = require('../lib/state')
 
 const ipcRenderer = electron.ipcRenderer
@@ -26,16 +27,37 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, pick the default file to play
   playFile (infoHash, index /* optional */) {
-    this.state.location.go({
-      url: 'player',
-      setup: (cb) => {
-        this.play()
-        this.openPlayer(infoHash, index, cb)
-      },
-      destroy: () => this.closePlayer()
-    }, (err) => {
-      if (err) dispatch('error', err)
-    })
+    var state = this.state
+    if (state.location.url() === 'player') {
+      this.play()
+      state.playlist.jumpToFile(infoHash, index)
+      this.updatePlayer(false, callback)
+    } else {
+      var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+      var playlist = new Playlist(torrentSummary)
+
+      // automatically choose which file in the torrent to play, if necessary
+      if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+      if (index === undefined) index = TorrentPlayer.pickFileToPlay(torrentSummary.files)
+      if (index === undefined) return this.onError(new errors.UnplayableError())
+
+      playlist.jumpToFile(infoHash, index)
+
+      state.location.go({
+        url: 'player',
+        setup: (cb) => {
+          this.play()
+          this.openPlayer(playlist, cb)
+        },
+        destroy: () => this.closePlayer()
+      }, (err) => {
+        if (err) dispatch('error', err)
+      })
+    }
+
+    function callback (err) {
+      if (err) this.onError(err)
+    }
   }
 
   // Open a file in OS default app.
@@ -62,6 +84,30 @@ module.exports = class PlaybackController {
 
     if (state.playing.isPaused) this.play()
     else this.pause()
+  }
+
+  // Play next file in list (if any)
+  nextTrack () {
+    var state = this.state
+    if (state.playlist && state.playlist.hasNext()) {
+      state.playlist.next()
+      this.updatePlayer(false, (err) => {
+        if (err) this.onError(err)
+        else this.play()
+      })
+    }
+  }
+
+  // Play previous track in list (if any)
+  previousTrack () {
+    var state = this.state
+    if (state.playlist && state.playlist.hasPrevious()) {
+      state.playlist.previous()
+      this.updatePlayer(false, (err) => {
+        if (err) this.onError(err)
+        else this.play()
+      })
+    }
   }
 
   // Play (unpause) the current media
@@ -167,14 +213,16 @@ module.exports = class PlaybackController {
     return false
   }
 
-  // Opens the video player to a specific torrent
-  openPlayer (infoHash, index, cb) {
-    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+  // Opens the video player to a specific playlist
+  openPlayer (playlist, cb) {
+    var state = this.state
+    state.playlist = playlist
 
-    // automatically choose which file in the torrent to play, if necessary
-    if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-    if (index === undefined) index = TorrentPlayer.pickFileToPlay(torrentSummary.files)
-    if (index === undefined) return cb(new errors.UnplayableError())
+    var track = playlist.getCurrent()
+    if (track === undefined) return cb(new errors.UnplayableError())
+
+    var torrentSummary = TorrentSummary.getByKey(state, state.playlist.getInfoHash())
+    state.playing.infoHash = torrentSummary.infoHash
 
     // update UI to show pending playback
     if (torrentSummary.progress !== 1) sound.play('PLAY')
@@ -191,50 +239,7 @@ module.exports = class PlaybackController {
       this.update()
     }, 10000) /* give it a few seconds */
 
-    if (torrentSummary.status === 'paused') {
-      dispatch('startTorrentingSummary', torrentSummary.torrentKey)
-      ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
-        () => this.openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
-    } else {
-      this.openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
-    }
-  }
-
-  openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
-    var fileSummary = torrentSummary.files[index]
-
-    // update state
-    var state = this.state
-    state.playing.infoHash = torrentSummary.infoHash
-    state.playing.fileIndex = index
-    state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-      : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-      : 'other'
-
-    // pick up where we left off
-    if (fileSummary.currentTime) {
-      var fraction = fileSummary.currentTime / fileSummary.duration
-      var secondsLeft = fileSummary.duration - fileSummary.currentTime
-      if (fraction < 0.9 && secondsLeft > 10) {
-        state.playing.jumpToTime = fileSummary.currentTime
-      }
-    }
-
-    // if it's audio, parse out the metadata (artist, title, etc)
-    if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
-    }
-
-    // if it's video, check for subtitles files that are done downloading
-    dispatch('checkForSubtitles')
-
-    // enable previously selected subtitle track
-    if (fileSummary.selectedSubtitle) {
-      dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
-    }
-
-    ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
-    ipcRenderer.once('wt-server-' + torrentSummary.infoHash, (e, info) => {
+    this.startServer(torrentSummary, () => {
       clearTimeout(timeout)
 
       // if we timed out (user clicked play a long time ago), don't autoplay
@@ -245,22 +250,82 @@ module.exports = class PlaybackController {
         return this.update()
       }
 
-      state.window.title = torrentSummary.files[state.playing.fileIndex].name
-
-      // play in VLC if set as default player (Preferences / Playback / Play in VLC)
-      if (this.state.saved.prefs.openExternalPlayer) {
-        dispatch('openExternalPlayer')
-        this.update()
-        cb()
-        return
-      }
-
-      // otherwise, play the video
-      this.update()
-
       ipcRenderer.send('onPlayerOpen')
-      cb()
+      this.updatePlayer(true, cb)
     })
+  }
+
+  // Starts WebTorrent server for media streaming
+  startServer (torrentSummary, cb) {
+    if (torrentSummary.status === 'paused') {
+      dispatch('startTorrentingSummary', torrentSummary.torrentKey)
+      ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
+        () => onTorrentReady())
+    } else {
+      onTorrentReady()
+    }
+
+    function onTorrentReady () {
+      ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
+      ipcRenderer.once('wt-server-' + torrentSummary.infoHash, () => cb())
+    }
+  }
+
+  // Called each time the playlist state changes
+  updatePlayer (resume, cb) {
+    var state = this.state
+    var track = state.playlist.getCurrent()
+
+    if (track === undefined) {
+      return cb(new Error('Can\'t play that file'))
+    }
+
+    var torrentSummary = TorrentSummary.getByKey(this.state, state.playlist.getInfoHash())
+    var fileSummary = torrentSummary.files[track.fileIndex]
+
+    // update state
+    state.playing.fileIndex = track.fileIndex
+    state.playing.type = track.type
+
+    // pick up where we left off
+    var jumpToTime = 0
+    if (resume && fileSummary.currentTime) {
+      var fraction = fileSummary.currentTime / fileSummary.duration
+      var secondsLeft = fileSummary.duration - fileSummary.currentTime
+      if (fraction < 0.9 && secondsLeft > 10) {
+        jumpToTime = fileSummary.currentTime
+      }
+    }
+    state.playing.jumpToTime = jumpToTime
+
+    // if it's audio, parse out the metadata (artist, title, etc)
+    if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, track.fileIndex)
+    }
+
+    // if it's video, check for subtitles files that are done downloading
+    dispatch('checkForSubtitles')
+
+    // enable previously selected subtitle track
+    if (fileSummary.selectedSubtitle) {
+      dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
+    }
+
+    state.window.title = fileSummary.name
+
+    // play in VLC if set as default player (Preferences / Playback / Play in VLC)
+    if (this.state.saved.prefs.openExternalPlayer) {
+      dispatch('openExternalPlayer')
+      this.update()
+      cb()
+      return
+    }
+
+    // otherwise, play the video
+    this.update()
+
+    ipcRenderer.send('onPlayerUpdate', state.playlist.hasNext(), state.playlist.hasPrevious())
+    cb()
   }
 
   closePlayer () {
@@ -287,6 +352,7 @@ module.exports = class PlaybackController {
 
     // Reset the window contents back to the home screen
     state.playing = State.getDefaultPlayState()
+    state.playlist = null
     state.server = null
 
     // Reset the window size and location back to where it was

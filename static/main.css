@@ -629,7 +629,25 @@ body.drag .app::after {
   opacity: 1;
 }
 
-.player .controls .play-pause {
+.player .controls .icon.disabled {
+  opacity: 0.3;
+}
+
+.player .controls .icon.skip-previous {
+  font-size: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+.player .controls .icon.play-pause {
+  font-size: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+.player .controls .icon.skip-next {
   font-size: 28px;
   margin-top: 5px;
   margin-right: 10px;

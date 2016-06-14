@@ -64,6 +64,10 @@ function init () {
     thumbar.enable()
   })
 
+  ipc.on('onPlayerUpdate', function (e, ...args) {
+    menu.onPlayerUpdate(...args)
+  })
+
   ipc.on('onPlayerClose', function () {
     menu.setPlayerOpen(false)
     powerSaveBlocker.disable()

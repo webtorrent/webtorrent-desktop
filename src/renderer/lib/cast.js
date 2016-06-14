@@ -96,7 +96,7 @@ function chromecastPlayer () {
 
   function open () {
     var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-    ret.device.play(state.server.networkURL, {
+    ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name
     }, function (err) {
@@ -183,7 +183,7 @@ function airplayPlayer () {
   }
 
   function open () {
-    ret.device.play(state.server.networkURL, function (err, res) {
+    ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, function (err, res) {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -275,7 +275,7 @@ function dlnaPlayer (player) {
 
   function open () {
     var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-    ret.device.play(state.server.networkURL, {
+    ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name,
       seek: state.playing.currentTime > 10 ? state.playing.currentTime : 0

@@ -3,6 +3,7 @@ module.exports = {
   setPlayerOpen,
   setWindowFocus,
   setAllowNav,
+  onPlayerUpdate,
   onToggleAlwaysOnTop,
   onToggleFullScreen
 }
@@ -25,6 +26,8 @@ function init () {
 
 function setPlayerOpen (flag) {
   getMenuItem('Play/Pause').enabled = flag
+  getMenuItem('Skip Next').enabled = flag
+  getMenuItem('Skip Previous').enabled = flag
   getMenuItem('Increase Volume').enabled = flag
   getMenuItem('Decrease Volume').enabled = flag
   getMenuItem('Step Forward').enabled = flag
@@ -32,6 +35,16 @@ function setPlayerOpen (flag) {
   getMenuItem('Increase Speed').enabled = flag
   getMenuItem('Decrease Speed').enabled = flag
   getMenuItem('Add Subtitles File...').enabled = flag
+
+  if (flag === false) {
+    getMenuItem('Skip Next').enabled = false
+    getMenuItem('Skip Previous').enabled = false
+  }
+}
+
+function onPlayerUpdate (hasNext, hasPrevious) {
+  getMenuItem('Skip Next').enabled = hasNext
+  getMenuItem('Skip Previous').enabled = hasPrevious
 }
 
 function setWindowFocus (flag) {
@@ -182,6 +195,21 @@ function getMenuTemplate () {
           label: 'Play/Pause',
           accelerator: 'Space',
           click: () => windows.main.dispatch('playPause'),
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Skip Next',
+          accelerator: 'N',
+          click: () => windows.main.dispatch('nextTrack'),
+          enabled: false
+        },
+        {
+          label: 'Skip Previous',
+          accelerator: 'P',
+          click: () => windows.main.dispatch('previousTrack'),
           enabled: false
         },
         {

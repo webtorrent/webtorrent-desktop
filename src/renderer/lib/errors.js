@@ -1,8 +1,15 @@
 module.exports = {
-  UnplayableError
+  UnplayableTorrentError,
+  UnplayableFileError
 }
 
-function UnplayableError () {
+function UnplayableTorrentError () {
   this.message = 'Can\'t play any files in torrent'
 }
-UnplayableError.prototype = Error
+
+function UnplayableFileError () {
+  this.message = 'Can\'t play that file'
+}
+
+UnplayableTorrentError.prototype = Error
+UnplayableFileError.prototype = Error
