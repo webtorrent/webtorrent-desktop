@@ -339,36 +339,54 @@ function renderPlayerControls (state) {
       ? 'active'
       : ''
 
-  var elements = [
-    hx`
-      <div class='playback-bar'>
-        ${renderLoadingBar(state)}
-        <div
-          class='playback-cursor'
-          style=${playbackCursorStyle}>
-        </div>
-        <div
-          class='scrub-bar'
-          draggable='true'
-          ondragstart=${handleDragStart}
-          onclick=${handleScrub},
-          ondrag=${handleScrub}>
-        </div>
+  var elements = []
+
+  elements.push(hx`
+    <div class='playback-bar'>
+      ${renderLoadingBar(state)}
+      <div
+        class='playback-cursor'
+        style=${playbackCursorStyle}>
       </div>
-    `,
-    hx`
-      <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
-        ${state.playing.isPaused ? 'play_arrow' : 'pause'}
+      <div
+        class='scrub-bar'
+        draggable='true'
+        ondragstart=${handleDragStart}
+        onclick=${handleScrub},
+        ondrag=${handleScrub}>
+      </div>
+    </div>
+  `)
+
+  if (state.playing.prevIndex !== null) {
+    elements.push(hx`
+      <i class='icon play-pause float-left' onclick=${dispatcher('prev')}>
+        skip_previous
       </i>
-    `,
-    hx`
-      <i
-        class='icon fullscreen float-right'
-        onclick=${dispatcher('toggleFullScreen')}>
-        ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
+    `)
+  }
+
+  elements.push(hx`
+    <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
+      ${state.playing.isPaused ? 'play_arrow' : 'pause'}
+    </i>
+  `)
+
+  if (state.playing.nextIndex !== null) {
+    elements.push(hx`
+      <i class='icon play-pause float-left' onclick=${dispatcher('next')}>
+        skip_next
       </i>
-    `
-  ]
+    `)
+  }
+
+  elements.push(hx`
+    <i
+      class='icon fullscreen float-right'
+      onclick=${dispatcher('toggleFullScreen')}>
+      ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
+    </i>
+  `)
 
   if (state.playing.type === 'video') {
     // show closed captions icon
