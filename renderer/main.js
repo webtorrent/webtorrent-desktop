@@ -1021,8 +1021,11 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   // update state
   state.playing.infoHash = torrentSummary.infoHash
   state.playing.fileIndex = index
-  state.playing.nextIndex = TorrentPlayer.nextIndex(torrentSummary, index)
-  state.playing.prevIndex = TorrentPlayer.prevIndex(torrentSummary, index)
+
+  var neighbors = TorrentPlayer.getNeighbors(torrentSummary, index)
+  state.playing.nextIndex = neighbors.next
+  state.playing.prevIndex = neighbors.prev
+
   state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
     : TorrentPlayer.isAudio(fileSummary) ? 'audio'
     : 'other'
