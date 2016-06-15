@@ -60,10 +60,10 @@ function main () {
   var packageDeps = findPackageDeps()
 
   var missingDeps = usedDeps.filter(
-    (dep) => !packageDeps.includes(dep) && !BUILT_IN_DEPS.includes(dep)
+    (dep) => !includes(packageDeps, dep) && !includes(BUILT_IN_DEPS, dep)
   )
   var unusedDeps = packageDeps.filter(
-    (dep) => !usedDeps.includes(dep) && !EXECUTABLE_DEPS.includes(dep)
+    (dep) => !includes(usedDeps, dep) && !includes(EXECUTABLE_DEPS, dep)
   )
 
   if (missingDeps.length > 0) {
@@ -92,4 +92,8 @@ function findPackageDeps () {
 function findUsedDeps () {
   var stdout = cp.execSync('./bin/list-deps.sh')
   return stdout.toString().trim().split('\n')
+}
+
+function includes (arr, elem) {
+  return arr.indexOf(elem) >= 0
 }

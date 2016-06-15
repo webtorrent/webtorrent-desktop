@@ -35,7 +35,7 @@ function init (appState, callback) {
 
   state.devices.chromecast = chromecastPlayer()
   state.devices.dlna = dlnaPlayer()
-  state.devices.airplay = airplayPlayer(browser)
+  state.devices.airplay = airplayPlayer()
 
   // Listen for devices: Chromecast, DLNA and Airplay
   chromecasts.on('update', function (device) {
@@ -175,7 +175,7 @@ function airplayPlayer () {
   }
 
   function getDevices () {
-    return airplay.players
+    return airplayer.players
   }
 
   function open () {
