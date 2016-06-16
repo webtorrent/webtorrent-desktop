@@ -4,7 +4,7 @@
   "version": "0.7.2",
   "author": {
     "name": "WebTorrent, LLC",
-    "email": "feross@feross.org",
+    "email": "feross@webtorrent.io",
     "url": "https://webtorrent.io"
   },
   "bin": {
