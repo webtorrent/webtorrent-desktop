@@ -95,7 +95,7 @@ function renderMedia (state) {
   // Create the <audio> or <video> tag
   var mediaTag = hx`
     <div
-      src='${state.server.localURL}'
+      src='${state.server.localURL + '/' + state.playing.fileIndex}'
       ondblclick=${dispatcher('toggleFullScreen')}
       onloadedmetadata=${onLoadedMetadata}
       onended=${onEnded}

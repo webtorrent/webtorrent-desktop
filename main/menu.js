@@ -1,6 +1,7 @@
 module.exports = {
   init,
   onPlayerClose,
+  onPlayerUpdate,
   onPlayerOpen,
   onToggleAlwaysOnTop,
   onToggleFullScreen,
@@ -26,8 +27,8 @@ function init () {
 
 function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
-  getMenuItem('Next Track').enabled = false
-  getMenuItem('Previous Track').enabled = false
+  getMenuItem('Skip Next').enabled = false
+  getMenuItem('Skip Previous').enabled = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
   getMenuItem('Step Forward').enabled = false
@@ -37,10 +38,17 @@ function onPlayerClose () {
   getMenuItem('Add Subtitles File...').enabled = false
 }
 
+function onPlayerUpdate(playing) {
+  getMenuItem('Skip Next').enabled = (
+    playing.nextIndex === null ? false : true
+  )
+  getMenuItem('Skip Previous').enabled = (
+    playing.prevIndex === null ? false : true
+  )
+}
+
 function onPlayerOpen () {
   getMenuItem('Play/Pause').enabled = true
-  getMenuItem('Next Track').enabled = true
-  getMenuItem('Previous Track').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
   getMenuItem('Step Forward').enabled = true
@@ -205,13 +213,13 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Next Track',
+          label: 'Skip Next',
           accelerator: 'N',
           click: () => windows.main.dispatch('next'),
           enabled: false
         },
         {
-          label: 'Previous Track',
+          label: 'Skip Previous',
           accelerator: 'P',
           click: () => windows.main.dispatch('prev'),
           enabled: false

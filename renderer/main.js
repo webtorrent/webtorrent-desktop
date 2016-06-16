@@ -223,10 +223,10 @@ function dispatch (action, ...args) {
     playPause()
   }
   if (action === 'next') {
-    nextFile()
+    next()
   }
   if (action === 'prev') {
-    prevFile()
+    prev()
   }
   if (action === 'play') {
     playFile(args[0] /* infoHash */, args[1] /* index */)
@@ -373,13 +373,13 @@ function playPause () {
   if (!state.window.isVisible) render(state)
 }
 
-function nextFile () {
+function next () {
   if (state.playing.nextIndex !== null) {
     playFile(state.playing.infoHash, state.playing.nextIndex)
   }
 }
 
-function prevFile () {
+function prev () {
   if (state.playing.prevIndex !== null) {
     playFile(state.playing.infoHash, state.playing.prevIndex)
   }
@@ -973,53 +973,34 @@ function pickFileToPlay (files) {
 }
 
 function playFile (infoHash, index) {
-  state.location.go({
-    url: 'player',
-    onbeforeload: function (cb) {
-      play()
-      openPlayer(infoHash, index, cb)
-    },
-    onbeforeunload: closePlayer
-  }, function (err) {
-    if (err) onError(err)
-  })
-}
-
-// Opens the video player to a specific torrent
-function openPlayer (infoHash, index, cb) {
-  var torrentSummary = getTorrentSummary(infoHash)
-
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
-
-  // update UI to show pending playback
-  if (torrentSummary.progress !== 1) sound.play('PLAY')
-  torrentSummary.playStatus = 'requested'
-  update()
-
-  var timeout = setTimeout(function () {
-    torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    sound.play('ERROR')
-    cb(new Error('Playback timed out. Try again.'))
-    update()
-  }, 10000) /* give it a few seconds */
-
-  if (torrentSummary.status === 'paused') {
-    startTorrentingSummary(torrentSummary)
-    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
-      () => openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
+  if (state.location.url() === 'player') {
+    play()
+    updatePlayer(infoHash, index, callback)
   } else {
-    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        play()
+        openPlayer(infoHash, index, cb)
+      },
+      onbeforeunload: closePlayer
+    }, callback)
+  }
+
+  function callback (err) {
+    if (err) onError(err)
   }
 }
 
-function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
+function updatePlayer (infoHash, index, cb) {
+  // We can only switch files within the current torrent
+  if (infoHash !== state.playing.infoHash) {
+    return cb(new Error('Playback failed: another torrent is already being streamed'))
+  }
+
+  var torrentSummary = getTorrentSummary(infoHash)
   var fileSummary = torrentSummary.files[index]
 
-  // update state
-  state.playing.infoHash = torrentSummary.infoHash
   state.playing.fileIndex = index
 
   var neighbors = TorrentPlayer.getNeighbors(torrentSummary, index)
@@ -1047,8 +1028,37 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   // if it's video, check for subtitles files that are done downloading
   checkForSubtitles()
 
-  ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
-  ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
+  state.window.title = torrentSummary.files[state.playing.fileIndex].name
+
+  ipcRenderer.send('onPlayerUpdate', state.playing)
+  cb()
+  update()
+}
+
+// Opens the video player to a specific torrent
+function openPlayer (infoHash, index, cb) {
+  var torrentSummary = getTorrentSummary(infoHash)
+
+  state.playing.infoHash = torrentSummary.infoHash
+
+  // automatically choose which file in the torrent to play, if necessary
+  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
+  if (index === undefined) return cb(new errors.UnplayableError())
+
+  // update UI to show pending playback
+  if (torrentSummary.progress !== 1) sound.play('PLAY')
+  torrentSummary.playStatus = 'requested'
+  update()
+
+  var timeout = setTimeout(function () {
+    torrentSummary.playStatus = 'timeout' /* no seeders available? */
+    sound.play('ERROR')
+    cb(new Error('Playback timed out. Try again.'))
+    update()
+  }, 10000) /* give it a few seconds */
+
+  startServer(torrentSummary, () => {
     clearTimeout(timeout)
 
     // if we timed out (user clicked play a long time ago), don't autoplay
@@ -1059,14 +1069,24 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
       return update()
     }
 
-    // otherwise, play the video
-    state.window.title = torrentSummary.files[state.playing.fileIndex].name
-    update()
-
     ipcRenderer.send('onPlayerOpen')
-
-    cb()
+    updatePlayer(infoHash, index, cb)
   })
+}
+
+function startServer (torrentSummary, cb) {
+  if (torrentSummary.status === 'paused') {
+    startTorrentingSummary(torrentSummary)
+    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
+      () => onTorrentReady())
+  } else {
+    onTorrentReady()
+  }
+
+  function onTorrentReady() {
+    ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
+    ipcRenderer.once('wt-server-' + torrentSummary.infoHash, () => cb())
+  }
 }
 
 function closePlayer (cb) {
