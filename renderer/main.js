@@ -197,14 +197,14 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentContextMenu') {
     openTorrentContextMenu(args[0] /* infoHash */)
   }
-  if (action === 'startCasting') {
-    lazyLoadCast().open(args[0] /* deviceType */)
+  if (action === 'toggleCastMenu') {
+    lazyLoadCast().toggleMenu(args[0] /* deviceType */)
   }
   if (action === 'selectCastDevice') {
     lazyLoadCast().selectDevice(args[0] /* index */)
   }
-  if (action === 'closeDevice') {
-    lazyLoadCast().close()
+  if (action === 'stopCasting') {
+    lazyLoadCast().stop()
   }
   if (action === 'setDimensions') {
     setDimensions(args[0] /* dimensions */)

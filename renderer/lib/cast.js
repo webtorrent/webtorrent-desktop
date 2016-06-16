@@ -3,14 +3,14 @@
 // * Starts and stops casting, provides remote video controls
 module.exports = {
   init,
-  open,
-  close,
+  toggleMenu,
+  selectDevice,
+  stop,
   play,
   pause,
   seek,
   setVolume,
-  setRate,
-  selectDevice
+  setRate
 }
 
 var airplayer = require('airplayer')()
@@ -48,8 +48,8 @@ function init (appState, callback) {
     state.devices.dlna.addDevice(device)
   })
 
-  airplayer.on('update', function (player) {
-    state.devices.airplay.addDevice(player)
+  airplayer.on('update', function (device) {
+    state.devices.airplay.addDevice(device)
   })
 }
 
@@ -332,24 +332,30 @@ function startStatusInterval () {
   }, 1000)
 }
 
-function open (location) {
+/*
+ * Shows the device menu for a given cast type ('chromecast', 'airplay', etc)
+ * The menu lists eg. all Chromecasts detected; the user can click one to cast.
+ * If the menu was already showing for that type, hides the menu.
+ */
+function toggleMenu (location) {
+  // If the menu is already showing, hide it
+  if (state.devices.castMenu && state.devices.castMenu.location === location) {
+    state.devices.castMenu = null
+    return
+  }
+
+  // Never cast to two devices at the same time
   if (state.playing.location !== 'local') {
     throw new Error('You can\'t connect to ' + location + ' when already connected to another device')
   }
 
+  // Find all cast devices of the given type
   var player = getPlayer(location)
   var devices = player ? player.getDevices() : []
   if (devices.length === 0) throw new Error('No ' + location + ' devices available')
 
   // Show a menu
   state.devices.castMenu = {location, devices}
-
-  /* if (devices.length === 1) {
-    // Start casting to the only available Chromecast, Airplay, or DNLA device
-    openDevice(location, devices[0])
-  } else {
-    // Show a menu
-  } */
 }
 
 function selectDevice (index) {
@@ -370,10 +376,13 @@ function selectDevice (index) {
 }
 
 // Stops casting, move video back to local screen
-function close () {
+function stop () {
   var player = getPlayer()
   if (player) {
-    player.stop(stoppedCasting)
+    player.stop(function () {
+      player.device = null
+      stoppedCasting()
+    })
     clearInterval(statusInterval)
   } else {
     stoppedCasting()

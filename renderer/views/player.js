@@ -309,10 +309,6 @@ function renderCastOptions (state) {
   var items = devices.map(function (device, ix) {
     var isSelected = player.device === device
     var name = device.name
-    // Workaround: the Airplay module produces ugly names
-    if (name.endsWith('._airplay._tcp.local')) {
-      name = name.substring(0, name.length - '._airplay._tcp.local'.length)
-    }
     return hx`
       <li onclick=${dispatcher('selectCastDevice', ix)}>
         <i.icon>${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
@@ -322,7 +318,7 @@ function renderCastOptions (state) {
   })
 
   return hx`
-    <ul.options-list.cast-list>
+    <ul.options-list>
       ${items}
     </ul>
   `
@@ -345,7 +341,7 @@ function renderSubtitlesOptions (state) {
   var noneSelected = state.playing.subtitles.selectedIndex === -1
   var noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
   return hx`
-    <ul.options-list.subtitles-list>
+    <ul.options-list>
       ${items}
       <li onclick=${dispatcher('selectSubtitle', -1)}>
         <i.icon>${noneClass}</i>
@@ -407,72 +403,49 @@ function renderPlayerControls (state) {
   }
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
-  var isOnChromecast = state.playing.location.startsWith('chromecast')
-  var isOnAirplay = state.playing.location.startsWith('airplay')
-  var isOnDlna = state.playing.location.startsWith('dlna')
-  var chromecastClass, chromecastHandler
-  var airplayClass, airplayHandler
-  var dlnaClass, dlnaHandler
-  if (isOnChromecast) {
-    chromecastClass = 'active'
-    dlnaClass = 'disabled'
-    airplayClass = 'disabled'
-    chromecastHandler = dispatcher('closeDevice')
-    airplayHandler = undefined
-    dlnaHandler = undefined
-  } else if (isOnAirplay) {
-    chromecastClass = 'disabled'
-    dlnaClass = 'disabled'
-    airplayClass = 'active'
-    chromecastHandler = undefined
-    airplayHandler = dispatcher('closeDevice')
-    dlnaHandler = undefined
-  } else if (isOnDlna) {
-    chromecastClass = 'disabled'
-    dlnaClass = 'active'
-    airplayClass = 'disabled'
-    chromecastHandler = undefined
-    airplayHandler = undefined
-    dlnaHandler = dispatcher('closeDevice')
-  } else {
-    chromecastClass = ''
-    airplayClass = ''
-    dlnaClass = ''
-    chromecastHandler = dispatcher('startCasting', 'chromecast')
-    airplayHandler = dispatcher('startCasting', 'airplay')
-    dlnaHandler = dispatcher('startCasting', 'dlna')
-  }
-  if (state.devices.chromecast.getDevices().length > 0 || isOnChromecast) {
-    var castIcon = isOnChromecast ? 'cast_connected' : 'cast'
-    elements.push(hx`
-      <i.icon.device.float-right
-        class=${chromecastClass}
-        onclick=${chromecastHandler}>
-        ${castIcon}
-      </i>
-    `)
-  }
-  if (state.devices.airplay.getDevices().length > 0 || isOnAirplay) {
-    elements.push(hx`
-      <i.icon.device.float-right
-        class=${airplayClass}
-        onclick=${airplayHandler}>
-        airplay
-      </i>
-    `)
-  }
-  if (state.devices.dlna.getDevices().length > 0 || isOnDlna) {
-    elements.push(hx`
-      <i
-        class='icon device float-right'
-        class=${dlnaClass}
-        onclick=${dlnaHandler}>
-        tv
-      </i>
-    `)
-  }
+  var castTypes = ['chromecast', 'airplay', 'dlna']
+  var isCastingAnywhere = castTypes.some(
+    (castType) => state.playing.location.startsWith(castType))
 
-  // render volume
+  // Add the cast buttons. Icons for each cast type, connected/disconnected:
+  var buttonIcons = {
+    'chromecast': {true: 'cast_connected', false: 'cast'},
+    'airplay': {true: 'airplay', false: 'airplay'},
+    'dnla': {true: 'tv', false: 'tv'}
+  }
+  castTypes.forEach(function (castType) {
+    // Do we show this button (eg. the Chromecast button) at all?
+    var isCasting = state.playing.location.startsWith(castType)
+    var player = state.devices[castType]
+    if ((!player || player.getDevices().length === 0) && !isCasting) return
+
+    // Show the button. Three options for eg the Chromecast button:
+    var buttonClass, buttonHandler
+    if (isCasting) {
+      // Option 1: we are currently connected to Chromecast. Button stops the cast.
+      buttonClass = 'active'
+      buttonHandler = dispatcher('stopCasting')
+    } else if (isCastingAnywhere) {
+      // Option 2: we are currently connected somewhere else. Button disabled.
+      buttonClass = 'disabled'
+      buttonHandler = undefined
+    } else {
+      // Option 3: we are not connected anywhere. Button opens Chromecast menu.
+      buttonClass = ''
+      buttonHandler = dispatcher('toggleCastMenu', castType)
+    }
+    var buttonIcon = buttonIcons[castType][isCasting]
+
+    elements.push(hx`
+      <i.icon.device.float-right
+        class=${buttonClass}
+        onclick=${buttonHandler}>
+        ${buttonIcon}
+      </i>
+    `)
+  })
+
+  // Render volume slider
   var volume = state.playing.volume
   var volumeIcon = 'volume_' + (
     volume === 0 ? 'off'

@@ -848,7 +848,7 @@ body.drag .app::after {
   height: 14px;
 }
 
-.player .controls .subtitles-list {
+.player .controls .options-list {
   position: fixed;
   background: rgba(40, 40, 40, 0.8);
   min-width: 100px;
@@ -862,7 +862,7 @@ body.drag .app::after {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.player .controls .subtitles-list .icon {
+.player .controls .options-list .icon {
   display: inline;
   font-size: 17px;
   vertical-align: bottom;
