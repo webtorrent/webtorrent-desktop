@@ -28,6 +28,8 @@ function setPlayerOpen (flag) {
   getMenuItem('Play/Pause').enabled = flag
   getMenuItem('Skip Next').enabled = flag
   getMenuItem('Skip Previous').enabled = flag
+  getMenuItem('Enable Shuffle').enabled = flag
+  getMenuItem('Enable Repeat').enabled = flag
   getMenuItem('Increase Volume').enabled = flag
   getMenuItem('Decrease Volume').enabled = flag
   getMenuItem('Step Forward').enabled = flag
@@ -39,12 +41,16 @@ function setPlayerOpen (flag) {
   if (flag === false) {
     getMenuItem('Skip Next').enabled = false
     getMenuItem('Skip Previous').enabled = false
+    getMenuItem('Enable Shuffle').checked = false
+    getMenuItem('Enable Repeat').checked = false
   }
 }
 
-function onPlayerUpdate (hasNext, hasPrevious) {
-  getMenuItem('Skip Next').enabled = hasNext
-  getMenuItem('Skip Previous').enabled = hasPrevious
+function onPlayerUpdate (state) {
+  getMenuItem('Skip Next').enabled = state.hasNext
+  getMenuItem('Skip Previous').enabled = state.hasPrevious
+  getMenuItem('Enable Shuffle').checked = state.shuffle
+  getMenuItem('Enable Repeat').checked = state.repeat
 }
 
 function setWindowFocus (flag) {
@@ -210,6 +216,23 @@ function getMenuTemplate () {
           label: 'Skip Previous',
           accelerator: 'P',
           click: () => windows.main.dispatch('previousTrack'),
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Enable Shuffle',
+          type: 'checkbox',
+          checked: false,
+          click: () => windows.main.dispatch('toggleShuffle'),
+          enabled: false
+        },
+        {
+          label: 'Enable Repeat',
+          type: 'checkbox',
+          checked: false,
+          click: () => windows.main.dispatch('toggleRepeat'),
           enabled: false
         },
         {
