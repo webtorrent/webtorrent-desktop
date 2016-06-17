@@ -987,11 +987,21 @@ function playFile (infoHash, index) {
     state.playlist.jumpTo(infoHash, index)
     updatePlayer(callback)
   } else {
+    var torrentSummary = getTorrentSummary(infoHash)
+    var playlist = new Playlist(torrentSummary)
+
+    // automatically choose which file in the torrent to play, if necessary
+  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
+  if (index === undefined) return cb(new errors.UnplayableError())
+
+    playlist.setPosition(index)
+
     state.location.go({
       url: 'player',
       onbeforeload: function (cb) {
         play()
-        openPlayer(infoHash, index, cb)
+        openPlayer(playlist, cb)
       },
       onbeforeunload: closePlayer
     }, callback)
@@ -1002,6 +1012,7 @@ function playFile (infoHash, index) {
   }
 }
 
+// Called each time the playlist state changes
 function updatePlayer (cb) {
   var track = state.playlist.getCurrent()
 
@@ -1041,19 +1052,16 @@ function updatePlayer (cb) {
   update()
 }
 
-// Opens the video player to a specific torrent
-function openPlayer (infoHash, index, cb) {
-  var torrentSummary = getTorrentSummary(infoHash)
+// Opens the video player to a specific playlist
+function openPlayer (playlist, cb) {
+  state.playlist = playlist
+
+  var track = playlist.getCurrent()
+  if (track === undefined) return cb(new errors.UnplayableError())
+
+  var torrentSummary = getTorrentSummary(track.infoHash)
 
   state.playing.infoHash = torrentSummary.infoHash
-  state.playlist = new Playlist(torrentSummary)
-
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
-
-  state.playlist.jumpTo(infoHash, index)
 
   // update UI to show pending playback
   if (torrentSummary.progress !== 1) sound.play('PLAY')
