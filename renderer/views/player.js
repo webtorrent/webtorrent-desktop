@@ -131,7 +131,7 @@ function renderMedia (state) {
   }
 
   function onEnded (e) {
-    if (state.playing.nextIndex !== null) {
+    if (state.playlist.hasNext()) {
       dispatch('next')
     } else {
       // When the last video completes, pause the video instead of looping
@@ -358,7 +358,7 @@ function renderPlayerControls (state) {
     </div>
   `)
 
-  if (state.playing.prevIndex !== null) {
+  if (state.playlist.hasPrevious()) {
     elements.push(hx`
       <i class='icon play-pause float-left' onclick=${dispatcher('prev')}>
         skip_previous
@@ -372,7 +372,7 @@ function renderPlayerControls (state) {
     </i>
   `)
 
-  if (state.playing.nextIndex !== null) {
+  if (state.playlist.hasNext()) {
     elements.push(hx`
       <i class='icon play-pause float-left' onclick=${dispatcher('next')}>
         skip_next

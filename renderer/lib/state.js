@@ -32,6 +32,7 @@ function getDefaultState () {
     },
     selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
     playing: getDefaultPlayState(), /* the media (audio or video) that we're currently playing */
+    playlist: null,
     devices: { /* playback devices like Chromecast and AppleTV */
       airplay: null, /* airplay client. finds and manages AppleTVs */
       chromecast: null /* chromecast client. finds and manages Chromecasts */

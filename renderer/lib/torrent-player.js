@@ -2,9 +2,7 @@ module.exports = {
   isPlayable,
   isVideo,
   isAudio,
-  isPlayableTorrent,
-  getPlaylist,
-  getNeighbors
+  isPlayableTorrent
 }
 
 var path = require('path')
@@ -43,25 +41,4 @@ function isAudio (file) {
 
 function isPlayableTorrent (torrentSummary) {
   return torrentSummary.files && torrentSummary.files.some(isPlayable)
-}
-
-function getPlaylist (torrentSummary) {
-  return torrentSummary.files.filter(isPlayable)
-    .map((file, index) => ({ file, index }))
-    .sort(function (a, b) {
-      if (a.file.name < b.file.name) return -1
-      if (b.file.name < a.file.name) return 1
-      return 0
-    })
-    .map((object) => object.index)
-}
-
-function getNeighbors (torrentSummary, fileIndex) {
-  var playlist = getPlaylist(torrentSummary)
-  var index = playlist.findIndex((i) => i === fileIndex)
-
-  return {
-    prev: index > 0 ? playlist[index - 1] : null,
-    next: index < playlist.length ? playlist[index + 1] : null
-  }
 }

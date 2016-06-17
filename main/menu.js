@@ -38,13 +38,9 @@ function onPlayerClose () {
   getMenuItem('Add Subtitles File...').enabled = false
 }
 
-function onPlayerUpdate(playing) {
-  getMenuItem('Skip Next').enabled = (
-    playing.nextIndex === null ? false : true
-  )
-  getMenuItem('Skip Previous').enabled = (
-    playing.prevIndex === null ? false : true
-  )
+function onPlayerUpdate (hasNext, hasPrevious) {
+  getMenuItem('Skip Next').enabled = hasNext
+  getMenuItem('Skip Previous').enabled = hasPrevious
 }
 
 function onPlayerOpen () {
