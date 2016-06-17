@@ -1185,7 +1185,7 @@ function saveTorrentFileAs (torrentSummary) {
   })
 }
 
-// Set window dimensions to match video dimensions or fill the screen
+// Set window dimensions to match video dimensions
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
   if (electron.remote.getCurrentWindow().isMaximized()) {
@@ -1220,7 +1220,7 @@ function setDimensions (dimensions) {
   )
 
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {x: null, y: null, width, height})
+  ipcRenderer.send('setContentSize', { width, height })
   state.playing.aspectRatio = aspectRatio
 }
 
