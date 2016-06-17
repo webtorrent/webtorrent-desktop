@@ -135,7 +135,7 @@ function renderMedia (state) {
       dispatch('next')
     } else {
       // When the last video completes, pause the video instead of looping
-      state.playing.paused = true
+      state.playing.isPaused = true
     }
   }
 
@@ -360,7 +360,7 @@ function renderPlayerControls (state) {
 
   if (state.playlist.hasPrevious()) {
     elements.push(hx`
-      <i class='icon play-pause float-left' onclick=${dispatcher('prev')}>
+      <i class='icon prev float-left' onclick=${dispatcher('prev')}>
         skip_previous
       </i>
     `)
@@ -374,7 +374,7 @@ function renderPlayerControls (state) {
 
   if (state.playlist.hasNext()) {
     elements.push(hx`
-      <i class='icon play-pause float-left' onclick=${dispatcher('next')}>
+      <i class='icon next float-left' onclick=${dispatcher('next')}>
         skip_next
       </i>
     `)
