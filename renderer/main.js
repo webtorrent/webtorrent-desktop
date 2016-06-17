@@ -256,6 +256,9 @@ function dispatch (action, ...args) {
   if (action === 'toggleSubtitlesMenu') {
     toggleSubtitlesMenu()
   }
+  if (action === 'toggleRepeat') {
+    toggleRepeat(args[0] /* optional bool */)
+  }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
   }
@@ -390,6 +393,17 @@ function prev () {
     updatePlayer(function (err) {
       if (err) onError(err)
       else play()
+    })
+  }
+}
+
+function toggleRepeat (value) {
+  if (state.playlist) {
+    state.playlist.toggleRepeat(value)
+    ipcRenderer.send('onPlayerUpdate', {
+      hasNext: state.playlist.hasNext(),
+      hasPrevious: state.playlist.hasPrevious(),
+      repeat: state.playlist.repeatEnabled()
     })
   }
 }
@@ -991,9 +1005,9 @@ function playFile (infoHash, index) {
     var playlist = new Playlist(torrentSummary)
 
     // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
+    if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+    if (index === undefined) index = pickFileToPlay(torrentSummary.files)
+    if (index === undefined) return onError(new errors.UnplayableError())
 
     playlist.setPosition(index)
 
@@ -1012,7 +1026,7 @@ function playFile (infoHash, index) {
   }
 }
 
-// Called each time the playlist state changes
+// Called when current file changes
 function updatePlayer (cb) {
   var track = state.playlist.getCurrent()
 
@@ -1047,7 +1061,11 @@ function updatePlayer (cb) {
 
   state.window.title = fileSummary.name
 
-  ipcRenderer.send('onPlayerUpdate', state.playlist.hasNext(), state.playlist.hasPrevious())
+  ipcRenderer.send('onPlayerUpdate', {
+    hasNext: state.playlist.hasNext(),
+    hasPrevious: state.playlist.hasPrevious(),
+    repeat: state.playlist.repeatEnabled()
+  })
   cb()
   update()
 }

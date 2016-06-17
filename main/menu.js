@@ -29,6 +29,8 @@ function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
   getMenuItem('Skip Next').enabled = false
   getMenuItem('Skip Previous').enabled = false
+  getMenuItem('Enable Repeat').enabled = false
+  getMenuItem('Enable Repeat').checked = false
   getMenuItem('Increase Volume').enabled = false
   getMenuItem('Decrease Volume').enabled = false
   getMenuItem('Step Forward').enabled = false
@@ -38,13 +40,15 @@ function onPlayerClose () {
   getMenuItem('Add Subtitles File...').enabled = false
 }
 
-function onPlayerUpdate (hasNext, hasPrevious) {
-  getMenuItem('Skip Next').enabled = hasNext
-  getMenuItem('Skip Previous').enabled = hasPrevious
+function onPlayerUpdate (state) {
+  getMenuItem('Skip Next').enabled = state.hasNext
+  getMenuItem('Skip Previous').enabled = state.hasPrevious
+  getMenuItem('Enable Repeat').checked = state.repeat
 }
 
 function onPlayerOpen () {
   getMenuItem('Play/Pause').enabled = true
+  getMenuItem('Enable Repeat').enabled = true
   getMenuItem('Increase Volume').enabled = true
   getMenuItem('Decrease Volume').enabled = true
   getMenuItem('Step Forward').enabled = true
@@ -218,6 +222,13 @@ function getMenuTemplate () {
           label: 'Skip Previous',
           accelerator: 'P',
           click: () => windows.main.dispatch('prev'),
+          enabled: false
+        },
+        {
+          label: 'Enable Repeat',
+          type: 'checkbox',
+          checked: false,
+          click: () => windows.main.dispatch('toggleRepeat'),
           enabled: false
         },
         {

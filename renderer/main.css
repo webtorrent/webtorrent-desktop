@@ -834,6 +834,7 @@ body.drag .app::after {
 }
 
 .player .controls .closed-caption.active,
+.player .controls .repeat.active,
 .player .controls .device.active {
   color: #9af;
 }

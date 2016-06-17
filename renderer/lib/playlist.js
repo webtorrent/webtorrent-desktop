@@ -5,6 +5,7 @@ module.exports = Playlist
 function Playlist (torrentSummary) {
   this._position = 0
   this._tracks = extractTracks(torrentSummary)
+  this._repeat = false
 }
 
 Playlist.prototype.getTracks = function () {
@@ -12,25 +13,37 @@ Playlist.prototype.getTracks = function () {
 }
 
 Playlist.prototype.hasNext = function () {
-  return this._position + 1 < this._tracks.length
+  return !this._tracks.length ? false
+        : this._repeat ? true
+        : this._position + 1 < this._tracks.length
 }
 
 Playlist.prototype.hasPrevious = function () {
-  return this._position > 0
+  return !this._tracks.length ? false
+        : this._repeat ? true
+        : this._position > 0
 }
 
 Playlist.prototype.next = function () {
   if (this.hasNext()) {
-    this._position++
+    this._position = mod(this._position + 1, this._tracks.length)
     return this.getCurrent()
   }
 }
 
 Playlist.prototype.previous = function () {
   if (this.hasPrevious()) {
-    this._position--
+    this._position = mod(this._position - 1, this._tracks.length)
     return this.getCurrent()
   }
+}
+
+Playlist.prototype.repeatEnabled = function () {
+  return this._repeat
+}
+
+Playlist.prototype.toggleRepeat = function (value) {
+  this._repeat = (value === undefined ? !this._repeat : value)
 }
 
 Playlist.prototype.jumpTo = function (infoHash, fileIndex) {
@@ -70,4 +83,8 @@ function extractTracks (torrentSummary) {
           : TorrentPlayer.isAudio(object.file) ? 'audio'
           : 'other'
     }))
+}
+
+function mod (a, b) {
+  return ((a % b) + b) % b
 }

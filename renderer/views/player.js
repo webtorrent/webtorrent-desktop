@@ -338,6 +338,7 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  var repeatClass = state.playlist.repeatEnabled() ? 'active' : ''
 
   var elements = []
 
@@ -398,6 +399,14 @@ function renderPlayerControls (state) {
       </i>
     `)
   }
+
+  elements.push(hx`
+    <i.icon.repeat.float-right
+      class='${repeatClass}'
+      onclick=${dispatcher('toggleRepeat')}>
+      repeat
+    </i>
+  `)
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var isOnChromecast = state.playing.location.startsWith('chromecast')
