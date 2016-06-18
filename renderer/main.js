@@ -1009,7 +1009,7 @@ function playFile (infoHash, index) {
     if (index === undefined) index = pickFileToPlay(torrentSummary.files)
     if (index === undefined) return onError(new errors.UnplayableError())
 
-    playlist.setPosition(index)
+    playlist.jumpTo(infoHash, index)
 
     state.location.go({
       url: 'player',
