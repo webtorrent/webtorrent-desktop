@@ -54,7 +54,13 @@ function onState (err, _state) {
   state = _state
 
   // Add first page to location history
-  state.location.go({ url: 'home' })
+  state.location.go({
+    url: 'home',
+    onbeforeload: function (cb) {
+      state.window.title = config.APP_WINDOW_TITLE
+      cb()
+    }
+  })
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
@@ -309,7 +315,6 @@ function dispatch (action, ...args) {
       onbeforeunload: function (cb) {
         // save state after preferences
         savePreferences()
-        state.window.title = config.APP_WINDOW_TITLE
         cb()
       }
     })
@@ -1131,7 +1136,6 @@ function closePlayer (cb) {
   if (state.playing.location === 'vlc') {
     ipcRenderer.send('vlcQuit')
   }
-  state.window.title = config.APP_WINDOW_TITLE
   // Lets save volume for later
   state.previousVolume = state.playing.volume
 
