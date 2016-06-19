@@ -339,6 +339,7 @@ function renderPlayerControls (state) {
       ? 'active'
       : ''
   var repeatClass = state.playlist.repeatEnabled() ? 'active' : ''
+  var shuffleClass = state.playlist.shuffleEnabled() ? 'active' : ''
 
   var elements = []
 
@@ -405,6 +406,14 @@ function renderPlayerControls (state) {
       class='${repeatClass}'
       onclick=${dispatcher('toggleRepeat')}>
       repeat
+    </i>
+  `)
+
+  elements.push(hx`
+    <i.icon.shuffle.float-right
+      class='${shuffleClass}'
+      onclick=${dispatcher('toggleShuffle')}>
+      shuffle
     </i>
   `)
 

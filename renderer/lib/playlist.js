@@ -5,8 +5,15 @@ module.exports = Playlist
 function Playlist (torrentSummary) {
   this._position = 0
   this._tracks = extractTracks(torrentSummary)
+  this._order = range(0, this._tracks.length)
+
   this._repeat = false
+  this._shuffled = false
 }
+
+// =============================================================================
+// Public methods
+// =============================================================================
 
 Playlist.prototype.getTracks = function () {
   return this._tracks
@@ -38,6 +45,15 @@ Playlist.prototype.previous = function () {
   }
 }
 
+Playlist.prototype.shuffleEnabled = function () {
+  return this._shuffled
+}
+
+Playlist.prototype.toggleShuffle = function (value) {
+  this._shuffled = (value === undefined ? !this._shuffled : value)
+  this._shuffled ? this._shuffle() : this._unshuffle()
+}
+
 Playlist.prototype.repeatEnabled = function () {
   return this._repeat
 }
@@ -47,15 +63,18 @@ Playlist.prototype.toggleRepeat = function (value) {
 }
 
 Playlist.prototype.jumpTo = function (infoHash, fileIndex) {
-  this.setPosition(this._tracks.findIndex(
-    (track) => track.infoHash === infoHash && track.fileIndex === fileIndex
-  ))
+  this.setPosition(this._order.findIndex((i) => {
+    let track = this._tracks[i]
+    return track.infoHash === infoHash && track.fileIndex === fileIndex
+  }))
   return this.getCurrent()
 }
 
 Playlist.prototype.getCurrent = function () {
   var position = this.getPosition()
-  return position === undefined ? undefined : this._tracks[position]
+
+  return position === undefined ? undefined
+    : this._tracks[this._order[position]]
 }
 
 Playlist.prototype.getPosition = function () {
@@ -67,6 +86,34 @@ Playlist.prototype.getPosition = function () {
 Playlist.prototype.setPosition = function (position) {
   this._position = position
 }
+
+// =============================================================================
+// Private methods
+// =============================================================================
+
+Playlist.prototype._shuffle = function () {
+  let order = this._order
+  if (!order.length) return
+
+  // Move the current track to the beggining of the playlist
+  swap(order, 0, this._position)
+  this._position = 0
+
+  // Shuffle the rest of the tracks with Fisher-Yates Shuffle
+  for (let i = order.length - 1; i > 0; --i) {
+    let j = Math.floor(Math.random() * i) + 1
+    swap(order, i, j)
+  }
+}
+
+Playlist.prototype._unshuffle = function () {
+  this._position = this._order[this._position]
+  this._order = range(0, this._order.length)
+}
+
+// =============================================================================
+// Utility fuctions
+// =============================================================================
 
 function extractTracks (torrentSummary) {
   return torrentSummary.files.map((file, index) => ({ file, index }))
@@ -83,6 +130,16 @@ function extractTracks (torrentSummary) {
           : TorrentPlayer.isAudio(object.file) ? 'audio'
           : 'other'
     }))
+}
+
+function range (begin, end) {
+  return Array.apply(null, {length: end - begin}).map((v, i) => begin + i)
+}
+
+function swap (array, i, j) {
+  let temp = array[i]
+  array[i] = array[j]
+  array[j] = temp
 }
 
 function mod (a, b) {

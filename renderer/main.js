@@ -262,6 +262,9 @@ function dispatch (action, ...args) {
   if (action === 'toggleSubtitlesMenu') {
     toggleSubtitlesMenu()
   }
+  if (action === 'toggleShuffle') {
+    toggleShuffle(args[0] /* optional bool */)
+  }
   if (action === 'toggleRepeat') {
     toggleRepeat(args[0] /* optional bool */)
   }
@@ -402,13 +405,26 @@ function prev () {
   }
 }
 
+function toggleShuffle (value) {
+  if (state.playlist) {
+    state.playlist.toggleShuffle(value)
+    ipcRenderer.send('onPlayerUpdate', {
+      hasNext: state.playlist.hasNext(),
+      hasPrevious: state.playlist.hasPrevious(),
+      repeat: state.playlist.repeatEnabled(),
+      shuffle: state.playlist.shuffleEnabled()
+    })
+  }
+}
+
 function toggleRepeat (value) {
   if (state.playlist) {
     state.playlist.toggleRepeat(value)
     ipcRenderer.send('onPlayerUpdate', {
       hasNext: state.playlist.hasNext(),
       hasPrevious: state.playlist.hasPrevious(),
-      repeat: state.playlist.repeatEnabled()
+      repeat: state.playlist.repeatEnabled(),
+      shuffle: state.playlist.shuffleEnabled()
     })
   }
 }
@@ -1069,7 +1085,8 @@ function updatePlayer (cb) {
   ipcRenderer.send('onPlayerUpdate', {
     hasNext: state.playlist.hasNext(),
     hasPrevious: state.playlist.hasPrevious(),
-    repeat: state.playlist.repeatEnabled()
+    repeat: state.playlist.repeatEnabled(),
+    shuffle: state.playlist.shuffleEnabled()
   })
   cb()
   update()
