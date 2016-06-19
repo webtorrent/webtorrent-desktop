@@ -3,7 +3,48 @@
 var fs = require('fs')
 var cp = require('child_process')
 
-var BUILT_IN_DEPS = ['child_process', 'electron', 'fs', 'os', 'path']
+// We can't use `builtin-modules` here since our TravisCI
+// setup expects this file to run with no dependencies
+var BUILT_IN_NODE_MODULES = [
+  'assert',
+  'buffer',
+  'child_process',
+  'cluster',
+  'console',
+  'constants',
+  'crypto',
+  'dgram',
+  'dns',
+  'domain',
+  'events',
+  'fs',
+  'http',
+  'https',
+  'module',
+  'net',
+  'os',
+  'path',
+  'process',
+  'punycode',
+  'querystring',
+  'readline',
+  'repl',
+  'stream',
+  'string_decoder',
+  'timers',
+  'tls',
+  'tty',
+  'url',
+  'util',
+  'v8',
+  'vm',
+  'zlib'
+]
+
+var BUILT_IN_ELECTRON_MODULES = [ 'electron' ]
+
+var BUILT_IN_DEPS = [].concat(BUILT_IN_NODE_MODULES, BUILT_IN_ELECTRON_MODULES)
+
 var EXECUTABLE_DEPS = ['gh-release', 'standard']
 
 main()

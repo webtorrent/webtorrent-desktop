@@ -14,8 +14,9 @@ var createElement = require('virtual-dom/create-element')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
-var App = require('./views/app')
 var config = require('../config')
+var telemetry = require('../telemetry')
+var App = require('./views/app')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
@@ -103,6 +104,7 @@ function onState (err, _state) {
 function delayedInit () {
   lazyLoadCast()
   sound.preload()
+  telemetry.init(state)
 }
 
 // Lazily loads Chromecast and Airplay support
@@ -254,6 +256,7 @@ function dispatch (action, ...args) {
   }
   if (action === 'mediaError') {
     if (state.location.url() === 'player') {
+      state.playing.result = 'error'
       state.playing.location = 'error'
       ipcRenderer.send('checkForVLC')
       ipcRenderer.once('checkForVLC', function (e, isInstalled) {
@@ -264,6 +267,9 @@ function dispatch (action, ...args) {
         }
       })
     }
+  }
+  if (action === 'mediaSuccess') {
+    state.playing.result = 'success'
   }
   if (action === 'mediaTimeUpdate') {
     state.playing.lastTimeUpdate = new Date().getTime()
@@ -978,10 +984,13 @@ function openPlayer (infoHash, index, cb) {
 
   // update UI to show pending playback
   if (torrentSummary.progress !== 1) sound.play('PLAY')
+  // TODO: remove torrentSummary.playStatus
   torrentSummary.playStatus = 'requested'
   update()
 
   var timeout = setTimeout(function () {
+    telemetry.logPlayAttempt('timeout')
+    // TODO: remove torrentSummary.playStatus
     torrentSummary.playStatus = 'timeout' /* no seeders available? */
     sound.play('ERROR')
     cb(new Error('Playback timed out. Try again.'))
@@ -1047,25 +1056,39 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 }
 
 function closePlayer (cb) {
+  // Quit any external players, like Chromecast/Airplay/etc or VLC
   if (isCasting()) {
     Cast.close()
   }
   if (state.playing.location === 'vlc') {
     ipcRenderer.send('vlcQuit')
   }
-  state.window.title = config.APP_WINDOW_TITLE
-  // Lets save volume for later
+
+  // Save volume (this session only, not in state.saved)
   state.previousVolume = state.playing.volume
 
+  // Telemetry: track what happens after the user clicks play
+  var result = state.playing.result // 'success' or 'error'
+  if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
+  else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
+  else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user exited before first frame
+  else console.error('Unknown state.playing.result', state.playing.result)
+
+  // Reset the window contents back to the home screen
+  state.window.title = config.APP_WINDOW_TITLE
   state.playing = State.getDefaultPlayState()
   state.server = null
 
+  // Reset the window size and location back to where it was
   if (state.window.isFullScreen) {
     dispatch('toggleFullScreen', false)
   }
   restoreBounds()
 
+  // Tell the WebTorrent process to kill the torrent-to-HTTP server
   ipcRenderer.send('wt-stop-server')
+
+  // Tell the OS we're no longer playing media, laptops allowed to sleep again
   ipcRenderer.send('unblockPowerSave')
   ipcRenderer.send('onPlayerClose')
 

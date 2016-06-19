@@ -10,6 +10,9 @@ var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings
 
 module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
+  AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
+  CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
+  TELEMETRY_URL: 'https://webtorrent.io/desktop/telemetry',
 
   APP_COPYRIGHT: 'Copyright © 2014-2016 ' + APP_TEAM,
   APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
@@ -18,10 +21,6 @@ module.exports = {
   APP_TEAM: APP_TEAM,
   APP_VERSION: APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME + ' (BETA)',
-
-  AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
-
-  CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
 
   CONFIG_PATH: getConfigPath(),
 

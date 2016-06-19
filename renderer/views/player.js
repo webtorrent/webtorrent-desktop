@@ -143,6 +143,7 @@ function renderMedia (state) {
     } else if (elem.webkitAudioDecodedByteCount === 0) {
       dispatch('mediaError', 'Audio codec unsupported')
     } else {
+      dispatch('mediaSuccess')
       elem.play()
     }
   }
