@@ -19,7 +19,6 @@ var config = require('../config')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
-var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
 var Playlist = require('./lib/playlist')
 var {setDispatch} = require('./lib/dispatcher')
@@ -904,7 +903,6 @@ function torrentMetadata (torrentKey, torrentInfo) {
   if (!torrentSummary.selections) {
     torrentSummary.selections = torrentSummary.files.map((x) => true)
   }
-  torrentSummary.defaultPlayFileIndex = pickFileToPlay(torrentInfo.files)
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -994,28 +992,6 @@ function torrentServerRunning (serverInfo) {
   state.server = serverInfo
 }
 
-// Picks the default file to play from a list of torrent or torrentSummary files
-// Returns an index or undefined, if no files are playable
-function pickFileToPlay (files) {
-  // first, try to find the biggest video file
-  var videoFiles = files.filter(TorrentPlayer.isVideo)
-  if (videoFiles.length > 0) {
-    var largestVideoFile = videoFiles.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    return files.indexOf(largestVideoFile)
-  }
-
-  // if there are no videos, play the first audio file
-  var audioFiles = files.filter(TorrentPlayer.isAudio)
-  if (audioFiles.length > 0) {
-    return files.indexOf(audioFiles[0])
-  }
-
-  // no video or audio means nothing is playable
-  return undefined
-}
-
 function playFile (infoHash, index) {
   if (state.location.url() === 'player') {
     play()
@@ -1025,12 +1001,8 @@ function playFile (infoHash, index) {
     var torrentSummary = getTorrentSummary(infoHash)
     var playlist = new Playlist(torrentSummary)
 
-    // automatically choose which file in the torrent to play, if necessary
-    if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-    if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-    if (index === undefined) return onError(new errors.UnplayableError())
-
-    playlist.jumpTo(infoHash, index)
+    if (index === undefined) index = torrentSummary.mostRecentFileIndex
+    if (index !== undefined) playlist.jumpTo(infoHash, index)
 
     state.location.go({
       url: 'player',
@@ -1057,6 +1029,8 @@ function updatePlayer (cb) {
 
   var torrentSummary = getTorrentSummary(track.infoHash)
   var fileSummary = torrentSummary.files[track.fileIndex]
+
+  torrentSummary.mostRecentFileIndex = track.fileIndex
 
   state.playing.fileIndex = track.fileIndex
   state.playing.type = track.type
