@@ -45,7 +45,13 @@ var BUILT_IN_ELECTRON_MODULES = [ 'electron' ]
 
 var BUILT_IN_DEPS = [].concat(BUILT_IN_NODE_MODULES, BUILT_IN_ELECTRON_MODULES)
 
-var EXECUTABLE_DEPS = ['gh-release', 'standard']
+var EXECUTABLE_DEPS = [
+  'gh-release',
+  'standard',
+  'mocha',
+  'babel-core',
+  'babel-preset-es2015'
+]
 
 main()
 
