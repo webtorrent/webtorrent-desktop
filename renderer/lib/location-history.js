@@ -1,7 +1,6 @@
 module.exports = LocationHistory
 
 function LocationHistory () {
-  if (!new.target) return new LocationHistory()
   this._history = []
   this._forward = []
   this._pending = false
@@ -19,7 +18,9 @@ LocationHistory.prototype.go = function (page, cb) {
   if (!cb) cb = noop
   if (this._pending) return cb(null)
 
-  console.log('go', page)
+  if (process.env.NODE_ENV !== 'test') {
+    console.log('go', page)
+  }
 
   this.clearForward()
   this._go(page, cb)
