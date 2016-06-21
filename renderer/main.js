@@ -95,9 +95,11 @@ function onState (err, _state) {
   // ...window visibility state.
   document.addEventListener('webkitvisibilitychange', onVisibilityChange)
 
-  sound.play('STARTUP')
+  // Log uncaught JS errors
+  window.addEventListener('error', (err) => telemetry.logUncaughtError('window', err.error), true)
 
   // Done! Ideally we want to get here < 500ms after the user clicks the app
+  sound.play('STARTUP')
   console.timeEnd('init')
 }
 
@@ -327,6 +329,9 @@ function dispatch (action, ...args) {
   if (action === 'setTitle') {
     state.window.title = args[0] /* title */
   }
+  if (action === 'uncaughtError') {
+    telemetry.logUncaughtError(args[0] /* process */, args[1] /* error */)
+  }
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
@@ -480,6 +485,8 @@ function setupIpc () {
   ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
   ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
   ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
+
+  ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
 
   ipcRenderer.send('ipcReady')
 }

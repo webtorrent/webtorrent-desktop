@@ -47,7 +47,6 @@ function reset () {
 
 function postToServer () {
   // Serialize the telemetry summary
-  return console.log(JSON.stringify(telemetry, null, 2))
   var payload = new Buffer(JSON.stringify(telemetry), 'utf8')
 
   // POST to our server
@@ -111,14 +110,16 @@ function getApproxNumTorrents (state) {
 }
 
 // An uncaught error happened in the main process or one in one of the windows
-function logUncaughtError (err) {
-  var errString
+function logUncaughtError (process, err) {
+  var message, stack
   if (typeof err === 'string') {
-    errString = err
+    message = err
+    stack = ''
   } else {
-    errString = err.message + '\n' + err.stack
+    message = err.message
+    stack = err.stack
   }
-  telemetry.uncaughtErrors.push(errString)
+  telemetry.uncaughtErrors.push({process, message, stack})
 }
 
 // The user pressed play. It either worked, timed out, or showed the

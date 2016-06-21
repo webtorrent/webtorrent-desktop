@@ -68,6 +68,13 @@ function init () {
 
     // To keep app startup fast, some code is delayed.
     setTimeout(delayedInit, config.DELAYED_INIT)
+
+    // Report uncaught exceptions
+    process.on('uncaughtException', (err) => {
+      console.error(err)
+      var errJSON = {message: err.message, stack: err.stack}
+      windows.main.dispatch('uncaughtError', 'main', errJSON)
+    })
   })
 
   app.once('ipcReady', function () {
