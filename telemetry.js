@@ -119,6 +119,12 @@ function logUncaughtError (process, err) {
     message = err.message
     stack = err.stack
   }
+
+  // We need to POST the telemetry object, make sure it stays < 100kb
+  if (telemetry.uncaughtErrors.length > 20) return
+  if (message.length > 1000) message = message.substring(0, 1000)
+  if (stack.length > 1000) stack = stack.substring(0, 1000)
+
   telemetry.uncaughtErrors.push({process, message, stack})
 }
 
