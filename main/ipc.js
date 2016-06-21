@@ -63,6 +63,10 @@ function init () {
     shortcuts.onPlayerOpen()
   })
 
+  ipc.on('onPlayerUpdate', function (e, ...args) {
+    menu.onPlayerUpdate(...args)
+  })
+
   ipc.on('onPlayerClose', function () {
     menu.onPlayerClose()
     shortcuts.onPlayerOpen()

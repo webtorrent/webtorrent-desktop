@@ -95,7 +95,7 @@ function renderMedia (state) {
   // Create the <audio> or <video> tag
   var mediaTag = hx`
     <div
-      src='${state.server.localURL}'
+      src='${state.server.localURL + '/' + state.playing.fileIndex}'
       ondblclick=${dispatcher('toggleFullScreen')}
       onloadedmetadata=${onLoadedMetadata}
       onended=${onEnded}
@@ -130,9 +130,13 @@ function renderMedia (state) {
     dispatch('setDimensions', dimensions)
   }
 
-  // When the video completes, pause the video instead of looping
   function onEnded (e) {
-    state.playing.isPaused = true
+    if (state.playlist.hasNext()) {
+      dispatch('next')
+    } else {
+      // When the last video completes, pause the video instead of looping
+      state.playing.isPaused = true
+    }
   }
 
   function onCanPlay (e) {
@@ -334,37 +338,57 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  var repeatClass = state.playlist.repeatEnabled() ? 'active' : ''
+  var shuffleClass = state.playlist.shuffleEnabled() ? 'active' : ''
 
-  var elements = [
-    hx`
-      <div class='playback-bar'>
-        ${renderLoadingBar(state)}
-        <div
-          class='playback-cursor'
-          style=${playbackCursorStyle}>
-        </div>
-        <div
-          class='scrub-bar'
-          draggable='true'
-          ondragstart=${handleDragStart}
-          onclick=${handleScrub},
-          ondrag=${handleScrub}>
-        </div>
+  var elements = []
+
+  elements.push(hx`
+    <div class='playback-bar'>
+      ${renderLoadingBar(state)}
+      <div
+        class='playback-cursor'
+        style=${playbackCursorStyle}>
       </div>
-    `,
-    hx`
-      <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
-        ${state.playing.isPaused ? 'play_arrow' : 'pause'}
+      <div
+        class='scrub-bar'
+        draggable='true'
+        ondragstart=${handleDragStart}
+        onclick=${handleScrub},
+        ondrag=${handleScrub}>
+      </div>
+    </div>
+  `)
+
+  if (state.playlist.hasPrevious()) {
+    elements.push(hx`
+      <i class='icon prev float-left' onclick=${dispatcher('prev')}>
+        skip_previous
       </i>
-    `,
-    hx`
-      <i
-        class='icon fullscreen float-right'
-        onclick=${dispatcher('toggleFullScreen')}>
-        ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
+    `)
+  }
+
+  elements.push(hx`
+    <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
+      ${state.playing.isPaused ? 'play_arrow' : 'pause'}
+    </i>
+  `)
+
+  if (state.playlist.hasNext()) {
+    elements.push(hx`
+      <i class='icon next float-left' onclick=${dispatcher('next')}>
+        skip_next
       </i>
-    `
-  ]
+    `)
+  }
+
+  elements.push(hx`
+    <i
+      class='icon fullscreen float-right'
+      onclick=${dispatcher('toggleFullScreen')}>
+      ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
+    </i>
+  `)
 
   if (state.playing.type === 'video') {
     // show closed captions icon
@@ -376,6 +400,22 @@ function renderPlayerControls (state) {
       </i>
     `)
   }
+
+  elements.push(hx`
+    <i.icon.repeat.float-right
+      class='${repeatClass}'
+      onclick=${dispatcher('toggleRepeat')}>
+      repeat
+    </i>
+  `)
+
+  elements.push(hx`
+    <i.icon.shuffle.float-right
+      class='${shuffleClass}'
+      onclick=${dispatcher('toggleShuffle')}>
+      shuffle
+    </i>
+  `)
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var isOnChromecast = state.playing.location.startsWith('chromecast')

@@ -19,8 +19,8 @@ var config = require('../config')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
-var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
+var Playlist = require('./lib/playlist')
 var {setDispatch} = require('./lib/dispatcher')
 
 // Electron apps have two processes: a main process (node) runs first and starts
@@ -53,7 +53,13 @@ function onState (err, _state) {
   state = _state
 
   // Add first page to location history
-  state.location.go({ url: 'home' })
+  state.location.go({
+    url: 'home',
+    onbeforeload: function (cb) {
+      state.window.title = config.APP_WINDOW_TITLE
+      cb()
+    }
+  })
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
@@ -222,6 +228,12 @@ function dispatch (action, ...args) {
   if (action === 'playPause') {
     playPause()
   }
+  if (action === 'next') {
+    next()
+  }
+  if (action === 'prev') {
+    prev()
+  }
   if (action === 'play') {
     playFile(args[0] /* infoHash */, args[1] /* index */)
   }
@@ -248,6 +260,12 @@ function dispatch (action, ...args) {
   }
   if (action === 'toggleSubtitlesMenu') {
     toggleSubtitlesMenu()
+  }
+  if (action === 'toggleShuffle') {
+    toggleShuffle(args[0] /* optional bool */)
+  }
+  if (action === 'toggleRepeat') {
+    toggleRepeat(args[0] /* optional bool */)
   }
   if (action === 'mediaStalled') {
     state.playing.isStalled = true
@@ -299,7 +317,6 @@ function dispatch (action, ...args) {
       onbeforeunload: function (cb) {
         // save state after preferences
         savePreferences()
-        state.window.title = config.APP_WINDOW_TITLE
         cb()
       }
     })
@@ -367,6 +384,50 @@ function playPause () {
   if (!state.window.isVisible) render(state)
 }
 
+function next () {
+  if (state.playlist && state.playlist.hasNext()) {
+    state.playlist.next()
+    updatePlayer(function (err) {
+      if (err) onError(err)
+      else play()
+    })
+  }
+}
+
+function prev () {
+  if (state.playlist && state.playlist.hasPrevious()) {
+    state.playlist.previous()
+    updatePlayer(function (err) {
+      if (err) onError(err)
+      else play()
+    })
+  }
+}
+
+function toggleShuffle (value) {
+  if (state.playlist) {
+    state.playlist.toggleShuffle(value)
+    ipcRenderer.send('onPlayerUpdate', {
+      hasNext: state.playlist.hasNext(),
+      hasPrevious: state.playlist.hasPrevious(),
+      repeat: state.playlist.repeatEnabled(),
+      shuffle: state.playlist.shuffleEnabled()
+    })
+  }
+}
+
+function toggleRepeat (value) {
+  if (state.playlist) {
+    state.playlist.toggleRepeat(value)
+    ipcRenderer.send('onPlayerUpdate', {
+      hasNext: state.playlist.hasNext(),
+      hasPrevious: state.playlist.hasPrevious(),
+      repeat: state.playlist.repeatEnabled(),
+      shuffle: state.playlist.shuffleEnabled()
+    })
+  }
+}
+
 function jumpToTime (time) {
   if (isCasting()) {
     Cast.seek(time)
@@ -429,8 +490,8 @@ function backToList () {
     var contentTag = document.querySelector('.content')
     if (contentTag) contentTag.scrollTop = 0
 
-    // Work around virtual-dom issue: it doesn't expose its redraw function,
     // and only redraws on requestAnimationFrame(). That means when the user
+    // Work around virtual-dom issue: it doesn't expose its redraw function,
     // closes the window (hide window / minimize to tray) and we want to pause
     // the video, we update the vdom but it keeps playing until you reopen!
     var mediaTag = document.querySelector('video,audio')
@@ -842,7 +903,6 @@ function torrentMetadata (torrentKey, torrentInfo) {
   if (!torrentSummary.selections) {
     torrentSummary.selections = torrentSummary.files.map((x) => true)
   }
-  torrentSummary.defaultPlayFileIndex = pickFileToPlay(torrentInfo.files)
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -932,49 +992,90 @@ function torrentServerRunning (serverInfo) {
   state.server = serverInfo
 }
 
-// Picks the default file to play from a list of torrent or torrentSummary files
-// Returns an index or undefined, if no files are playable
-function pickFileToPlay (files) {
-  // first, try to find the biggest video file
-  var videoFiles = files.filter(TorrentPlayer.isVideo)
-  if (videoFiles.length > 0) {
-    var largestVideoFile = videoFiles.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    return files.indexOf(largestVideoFile)
-  }
-
-  // if there are no videos, play the first audio file
-  var audioFiles = files.filter(TorrentPlayer.isAudio)
-  if (audioFiles.length > 0) {
-    return files.indexOf(audioFiles[0])
-  }
-
-  // no video or audio means nothing is playable
-  return undefined
-}
-
 function playFile (infoHash, index) {
-  state.location.go({
-    url: 'player',
-    onbeforeload: function (cb) {
-      play()
-      openPlayer(infoHash, index, cb)
-    },
-    onbeforeunload: closePlayer
-  }, function (err) {
+  if (state.location.url() === 'player') {
+    play()
+    state.playlist.jumpTo(infoHash, index)
+    updatePlayer(callback)
+  } else {
+    var torrentSummary = getTorrentSummary(infoHash)
+    var playlist = new Playlist(torrentSummary)
+
+    if (index === undefined) index = torrentSummary.mostRecentFileIndex
+    if (index !== undefined) playlist.jumpTo(infoHash, index)
+
+    state.location.go({
+      url: 'player',
+      onbeforeload: function (cb) {
+        play()
+        openPlayer(playlist, cb)
+      },
+      onbeforeunload: closePlayer
+    }, callback)
+  }
+
+  function callback (err) {
     if (err) onError(err)
-  })
+  }
 }
 
-// Opens the video player to a specific torrent
-function openPlayer (infoHash, index, cb) {
-  var torrentSummary = getTorrentSummary(infoHash)
+// Called when current file changes
+function updatePlayer (cb) {
+  var track = state.playlist.getCurrent()
 
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
+  if (track === undefined) {
+    return cb(new Error('Can\'t play that file'))
+  }
+
+  var torrentSummary = getTorrentSummary(track.infoHash)
+  var fileSummary = torrentSummary.files[track.fileIndex]
+
+  torrentSummary.mostRecentFileIndex = track.fileIndex
+
+  state.playing.fileIndex = track.fileIndex
+  state.playing.type = track.type
+
+  // pick up where we left off
+  if (fileSummary.currentTime) {
+    var fraction = fileSummary.currentTime / fileSummary.duration
+    var secondsLeft = fileSummary.duration - fileSummary.currentTime
+    if (fraction < 0.9 && secondsLeft > 10) {
+      state.playing.jumpToTime = fileSummary.currentTime
+    }
+  } else {
+    state.playing.jumpToLine = 0
+  }
+
+  // if it's audio, parse out the metadata (artist, title, etc)
+  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+    ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, track.fileIndex)
+  }
+
+  // if it's video, check for subtitles files that are done downloading
+  checkForSubtitles()
+
+  state.window.title = fileSummary.name
+
+  ipcRenderer.send('onPlayerUpdate', {
+    hasNext: state.playlist.hasNext(),
+    hasPrevious: state.playlist.hasPrevious(),
+    repeat: state.playlist.repeatEnabled(),
+    shuffle: state.playlist.shuffleEnabled()
+  })
+  cb()
+  update()
+}
+
+// Opens the video player to a specific playlist
+function openPlayer (playlist, cb) {
+  state.playlist = playlist
+
+  var track = playlist.getCurrent()
+  if (track === undefined) return cb(new errors.UnplayableError())
+
+  var torrentSummary = getTorrentSummary(track.infoHash)
+
+  state.playing.infoHash = torrentSummary.infoHash
 
   // update UI to show pending playback
   if (torrentSummary.progress !== 1) sound.play('PLAY')
@@ -988,44 +1089,7 @@ function openPlayer (infoHash, index, cb) {
     update()
   }, 10000) /* give it a few seconds */
 
-  if (torrentSummary.status === 'paused') {
-    startTorrentingSummary(torrentSummary)
-    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
-      () => openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
-  } else {
-    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
-  }
-}
-
-function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
-  var fileSummary = torrentSummary.files[index]
-
-  // update state
-  state.playing.infoHash = torrentSummary.infoHash
-  state.playing.fileIndex = index
-  state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-    : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-    : 'other'
-
-  // pick up where we left off
-  if (fileSummary.currentTime) {
-    var fraction = fileSummary.currentTime / fileSummary.duration
-    var secondsLeft = fileSummary.duration - fileSummary.currentTime
-    if (fraction < 0.9 && secondsLeft > 10) {
-      state.playing.jumpToTime = fileSummary.currentTime
-    }
-  }
-
-  // if it's audio, parse out the metadata (artist, title, etc)
-  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-    ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
-  }
-
-  // if it's video, check for subtitles files that are done downloading
-  checkForSubtitles()
-
-  ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
-  ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
+  startServer(torrentSummary, () => {
     clearTimeout(timeout)
 
     // if we timed out (user clicked play a long time ago), don't autoplay
@@ -1036,14 +1100,24 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
       return update()
     }
 
-    // otherwise, play the video
-    state.window.title = torrentSummary.files[state.playing.fileIndex].name
-    update()
-
     ipcRenderer.send('onPlayerOpen')
-
-    cb()
+    updatePlayer(cb)
   })
+}
+
+function startServer (torrentSummary, cb) {
+  if (torrentSummary.status === 'paused') {
+    startTorrentingSummary(torrentSummary)
+    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
+      () => onTorrentReady())
+  } else {
+    onTorrentReady()
+  }
+
+  function onTorrentReady () {
+    ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
+    ipcRenderer.once('wt-server-' + torrentSummary.infoHash, () => cb())
+  }
 }
 
 function closePlayer (cb) {
@@ -1053,11 +1127,11 @@ function closePlayer (cb) {
   if (state.playing.location === 'vlc') {
     ipcRenderer.send('vlcQuit')
   }
-  state.window.title = config.APP_WINDOW_TITLE
   // Lets save volume for later
   state.previousVolume = state.playing.volume
 
   state.playing = State.getDefaultPlayState()
+  state.playlist = null
   state.server = null
 
   if (state.window.isFullScreen) {

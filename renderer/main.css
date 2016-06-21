@@ -724,7 +724,21 @@ body.drag .app::after {
   opacity: 1;
 }
 
-.player .controls .play-pause {
+.player .controls .icon.prev {
+  font-size: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+.player .controls .icon.play-pause {
+  font-size: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+.player .controls .icon.next {
   font-size: 28px;
   margin-top: 5px;
   margin-right: 10px;
@@ -820,6 +834,8 @@ body.drag .app::after {
 }
 
 .player .controls .closed-caption.active,
+.player .controls .repeat.active,
+.player .controls .shuffle.active,
 .player .controls .device.active {
   color: #9af;
 }

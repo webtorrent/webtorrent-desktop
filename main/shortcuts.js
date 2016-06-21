@@ -12,9 +12,19 @@ function onPlayerOpen () {
     'MediaPlayPause',
     () => windows.main.dispatch('playPause')
   )
+  electron.globalShortcut.register(
+    'MediaNextTrack',
+    () => windows.main.dispatch('next')
+  )
+  electron.globalShortcut.register(
+    'MediaPreviousTrack',
+    () => windows.main.dispatch('prev')
+  )
 }
 
 function onPlayerClose () {
   // Return the media key to the OS, so other apps can use it.
   electron.globalShortcut.unregister('MediaPlayPause')
+  electron.globalShortcut.unregister('MediaNext')
+  electron.globalShortcut.unregister('MediaPrev')
 }
