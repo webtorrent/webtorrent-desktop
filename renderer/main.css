@@ -724,6 +724,10 @@ body.drag .app::after {
   opacity: 1;
 }
 
+.player .controls .icon.disabled {
+  opacity: 0.3;
+}
+
 .player .controls .icon.prev {
   font-size: 28px;
   margin-top: 5px;

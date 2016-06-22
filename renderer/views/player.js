@@ -338,6 +338,8 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  var prevClass = state.playlist.hasPrevious() ? '' : 'disabled'
+  var nextClass = state.playlist.hasNext() ? '' : 'disabled'
   var repeatClass = state.playlist.repeatEnabled() ? 'active' : ''
   var shuffleClass = state.playlist.shuffleEnabled() ? 'active' : ''
 
@@ -360,13 +362,13 @@ function renderPlayerControls (state) {
     </div>
   `)
 
-  if (state.playlist.hasPrevious()) {
-    elements.push(hx`
-      <i class='icon prev float-left' onclick=${dispatcher('prev')}>
-        skip_previous
-      </i>
-    `)
-  }
+  elements.push(hx`
+    <i.icon.prev.float-left
+      class='${prevClass}'
+      onclick=${dispatcher('prev')}>
+      skip_previous
+    </i>
+  `)
 
   elements.push(hx`
     <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
@@ -374,13 +376,13 @@ function renderPlayerControls (state) {
     </i>
   `)
 
-  if (state.playlist.hasNext()) {
-    elements.push(hx`
-      <i class='icon next float-left' onclick=${dispatcher('next')}>
-        skip_next
-      </i>
-    `)
-  }
+  elements.push(hx`
+    <i.icon.next.float-left
+      class='${nextClass}'
+      onclick=${dispatcher('next')}>
+      skip_next
+    </i>
+  `)
 
   elements.push(hx`
     <i
