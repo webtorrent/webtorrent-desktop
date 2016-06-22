@@ -15,8 +15,8 @@ var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 
 var config = require('../config')
-var telemetry = require('../telemetry')
 var App = require('./views/app')
+var telemetry = require('./lib/telemetry')
 var errors = require('./lib/errors')
 var sound = require('./lib/sound')
 var State = require('./lib/state')
@@ -96,7 +96,8 @@ function onState (err, _state) {
   document.addEventListener('webkitvisibilitychange', onVisibilityChange)
 
   // Log uncaught JS errors
-  window.addEventListener('error', (err) => telemetry.logUncaughtError('window', err.error), true)
+  window.addEventListener('error',
+    (e) => telemetry.logUncaughtError('window', e.error), true)
 
   // Done! Ideally we want to get here < 500ms after the user clicks the app
   sound.play('STARTUP')

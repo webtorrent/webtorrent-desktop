@@ -3,8 +3,7 @@
 module.exports = {
   init,
   logUncaughtError,
-  logPlayAttempt,
-  getSummary
+  logPlayAttempt
 }
 
 const crypto = require('crypto')
@@ -13,7 +12,7 @@ const https = require('https')
 const os = require('os')
 const url = require('url')
 
-const config = require('./config')
+const config = require('../../config')
 
 var telemetry
 
@@ -109,8 +108,8 @@ function getApproxNumTorrents (state) {
   return 1 << Math.round(log2)
 }
 
-// An uncaught error happened in the main process or one in one of the windows
-function logUncaughtError (process, err) {
+// An uncaught error happened in the main process or in one of the windows
+function logUncaughtError (procName, err) {
   var message, stack
   if (typeof err === 'string') {
     message = err
@@ -125,7 +124,7 @@ function logUncaughtError (process, err) {
   if (message.length > 1000) message = message.substring(0, 1000)
   if (stack.length > 1000) stack = stack.substring(0, 1000)
 
-  telemetry.uncaughtErrors.push({process, message, stack})
+  telemetry.uncaughtErrors.push({process: procName, message, stack})
 }
 
 // The user pressed play. It either worked, timed out, or showed the
@@ -138,9 +137,4 @@ function logPlayAttempt (result) {
   var attempts = telemetry.playAttempts
   attempts.total = (attempts.total || 0) + 1
   attempts[result] = (attempts[result] || 0) + 1
-}
-
-// Gets a summary JSON object to send to the server
-function getSummary () {
-  return telemetry
 }
