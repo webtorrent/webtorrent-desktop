@@ -81,6 +81,10 @@ brew install wine
 
 (Requires the [Homebrew](http://brew.sh/) package manager.)
 
+### Privacy
+
+WebTorrent Desktop collects some basic usage stats to help us make the app better. For example, we track what OSs are users are on, and how well the play button works (how often does it succeed? time out? show a missing codec error?). The app never sends personally identifying or other private info.
+
 ### Code Style
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
