@@ -3,8 +3,17 @@
 var fs = require('fs')
 var cp = require('child_process')
 
-var BUILT_IN_DEPS = ['child_process', 'electron', 'fs', 'os', 'path']
-var EXECUTABLE_DEPS = ['gh-release', 'standard']
+var BUILT_IN_DEPS = [
+  'child_process', 'electron', 'fs', 'os', 'path'
+]
+
+var EXECUTABLE_DEPS = [
+  'gh-release',
+  'standard',
+  'mocha',
+  'babel-core',
+  'babel-preset-es2015'
+]
 
 main()
 
