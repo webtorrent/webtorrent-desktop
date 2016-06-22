@@ -995,14 +995,14 @@ function torrentServerRunning (serverInfo) {
 function playFile (infoHash, index) {
   if (state.location.url() === 'player') {
     play()
-    state.playlist.jumpTo(infoHash, index)
+    state.playlist.jumpToFile(index)
     updatePlayer(callback)
   } else {
     var torrentSummary = getTorrentSummary(infoHash)
     var playlist = new Playlist(torrentSummary)
 
     if (index === undefined) index = torrentSummary.mostRecentFileIndex
-    if (index !== undefined) playlist.jumpTo(infoHash, index)
+    if (index !== undefined) playlist.jumpToFile(index)
 
     state.location.go({
       url: 'player',
@@ -1027,7 +1027,7 @@ function updatePlayer (cb) {
     return cb(new Error('Can\'t play that file'))
   }
 
-  var torrentSummary = getTorrentSummary(track.infoHash)
+  var torrentSummary = getTorrentSummary(state.playlist.getInfoHash())
   var fileSummary = torrentSummary.files[track.fileIndex]
 
   torrentSummary.mostRecentFileIndex = track.fileIndex
@@ -1073,7 +1073,7 @@ function openPlayer (playlist, cb) {
   var track = playlist.getCurrent()
   if (track === undefined) return cb(new errors.UnplayableError())
 
-  var torrentSummary = getTorrentSummary(track.infoHash)
+  var torrentSummary = getTorrentSummary(playlist.getInfoHash())
 
   state.playing.infoHash = torrentSummary.infoHash
 

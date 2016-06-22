@@ -75,8 +75,6 @@ function getDefaultPlayState () {
   return {
     infoHash: null, /* the info hash of the torrent we're playing */
     fileIndex: null, /* the zero-based index within the torrent */
-    nextIndex: null, /* the index of the next playable file (if any) */
-    prevIndex: null, /* the index of the previous playable file (if any) */
     location: 'local', /* 'local', 'chromecast', 'airplay' */
     type: null, /* 'audio' or 'video', could be 'other' if ever support eg streaming to VLC */
     currentTime: 0, /* seconds */

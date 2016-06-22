@@ -3,6 +3,7 @@ var TorrentPlayer = require('./torrent-player')
 module.exports = Playlist
 
 function Playlist (torrentSummary) {
+  this._infoHash = torrentSummary.infoHash
   this._position = 0
   this._tracks = extractTracks(torrentSummary)
   this._order = range(0, this._tracks.length)
@@ -14,6 +15,10 @@ function Playlist (torrentSummary) {
 // =============================================================================
 // Public methods
 // =============================================================================
+
+Playlist.prototype.getInfoHash = function () {
+  return this._infoHash
+}
 
 Playlist.prototype.getTracks = function () {
   return this._tracks
@@ -62,10 +67,10 @@ Playlist.prototype.toggleRepeat = function (value) {
   this._repeat = (value === undefined ? !this._repeat : value)
 }
 
-Playlist.prototype.jumpTo = function (infoHash, fileIndex) {
+Playlist.prototype.jumpToFile = function (fileIndex) {
   this.setPosition(this._order.findIndex((i) => {
     let track = this._tracks[i]
-    return track.infoHash === infoHash && track.fileIndex === fileIndex
+    return track.fileIndex === fileIndex
   }))
   return this.getCurrent()
 }
@@ -124,7 +129,6 @@ function extractTracks (torrentSummary) {
       return 0
     })
     .map((object) => ({
-      infoHash: torrentSummary.infoHash,
       fileIndex: object.index,
       type: TorrentPlayer.isVideo(object.file) ? 'video'
           : TorrentPlayer.isAudio(object.file) ? 'audio'
