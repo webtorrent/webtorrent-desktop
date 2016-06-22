@@ -43,7 +43,21 @@ describe('LocationHistory', () => {
       function waitForCallback (cb) { callback = cb }
     })
 
-    it('should call onafterunload after unloading the current page')
+    it('should call onafterunload after unloading the current page', (done) => {
+      let functionCalled = false
+
+      location.go({ url: FIRST_URL, onafterunload: firstUnloaded }, () => {
+        location.go({ url: SECOND_URL }, () => {
+          assert.ok(functionCalled)
+          done()
+        })
+      })
+
+      function firstUnloaded () {
+        functionCalled = true
+        assert.notEqual(location.url(), FIRST_URL)
+      }
+    })
   })
 
   describe('#back()', () => {
@@ -79,7 +93,23 @@ describe('LocationHistory', () => {
       function waitForCallback (cb) { callback = cb }
     })
 
-    it('should call onafterunload after unloading the current page')
+    it('should call onafterunload after unloading the current page', (done) => {
+      let functionCalled = false
+
+      location.go({ url: FIRST_URL }, () => {
+        location.go({ url: SECOND_URL, onafterunload: secondUnloaded }, () => {
+          location.back(() => {
+            assert.ok(functionCalled)
+            done()
+          })
+        })
+      })
+
+      function secondUnloaded () {
+        functionCalled = true
+        assert.notEqual(location.url(), SECOND_URL)
+      }
+    })
   })
 
   describe('#forward()', () => {
@@ -119,6 +149,28 @@ describe('LocationHistory', () => {
       function waitForCallback (cb) { callback = cb }
     })
 
-    it('should call onafterunload after unloading the current page')
+    it('should call onafterunload after unloading the current page', (done) => {
+      let testing = false
+      let functionCalled = false
+
+      location.go({ url: FIRST_URL, onafterunload: firstUnloaded }, () => {
+        location.go({ url: SECOND_URL }, () => {
+          location.back(() => {
+            testing = true
+            location.forward(() => {
+              assert.ok(functionCalled)
+              done()
+            })
+          })
+        })
+      })
+
+      function firstUnloaded () {
+        // Ignore when the method is called via location.go
+        if (!testing) return
+        functionCalled = true
+        assert.notEqual(location.url(), FIRST_URL)
+      }
+    })
   })
 })
