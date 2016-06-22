@@ -75,6 +75,7 @@ function init () {
     } else if (!app.isQuitting) {
       e.preventDefault()
       win.hide()
+      win.send('dispatch', 'backToList')
     }
   })
 }
