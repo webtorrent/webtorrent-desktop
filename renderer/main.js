@@ -22,33 +22,28 @@ var sound = require('./lib/sound')
 var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
-var {setDispatch} = require('./lib/dispatcher')
+
+// Yo-yo pattern: state object lives here and percolates down thru all the views.
+// Events come back up from the views via dispatch(...)
+require('./lib/dispatcher').setDispatch(dispatch)
+
+// This dependency is the slowest-loading, so we lazy load it
+var Cast = null
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
 var ipcRenderer = electron.ipcRenderer
 
+// All state lives in state.js. `state.saved` is read from and written to a file.
+// All other state is ephemeral. First we load state.saved then initialize the app.
 var state, vdomLoop
 
-// This dependency is the slowest-loading, so we lazy load it
-var Cast = null
+State.load(onState)
 
-init()
-
-function init () {
-  // All state lives in state.js. `state.saved` is read from and written to a file.
-  // All other state is ephemeral. First we load state.saved then initialize the app.
-  State.load(onState)
-
-  setDispatch(dispatch)
-}
-
-/**
- * Called once when the application loads. (Not once per window.)
- * Connects to the torrent networks, sets up the UI and OS integrations like
- * the dock icon and drag+drop.
- */
+// Called once when the application loads. (Not once per window.)
+// Connects to the torrent networks, sets up the UI and OS integrations like
+// the dock icon and drag+drop.
 function onState (err, _state) {
   if (err) return onError(err)
   state = _state
@@ -104,6 +99,7 @@ function onState (err, _state) {
   console.timeEnd('init')
 }
 
+// Runs a few seconds after the app loads, to avoid slowing down startup time
 function delayedInit () {
   lazyLoadCast()
   sound.preload()
@@ -136,6 +132,8 @@ function update () {
   updateElectron()
 }
 
+// Some state changes can't be reflected in the DOM, instead we have to
+// tell the main process to update the window or OS integrations
 function updateElectron () {
   if (state.window.title !== state.prev.title) {
     state.prev.title = state.window.title
@@ -213,13 +211,7 @@ function dispatch (action, ...args) {
     backToList()
   }
   if (action === 'escapeBack') {
-    if (state.modal) {
-      dispatch('exitModal')
-    } else if (state.window.isFullScreen) {
-      dispatch('toggleFullScreen')
-    } else {
-      dispatch('back')
-    }
+    escapeBack()
   }
   if (action === 'back') {
     state.location.back()
@@ -453,6 +445,17 @@ function backToList () {
     var mediaTag = document.querySelector('video,audio')
     if (mediaTag) mediaTag.pause()
   })
+}
+
+// Quits modals, full screen, or goes back. Happens when the user hits ESC
+function escapeBack() {
+  if (state.modal) {
+    dispatch('exitModal')
+  } else if (state.window.isFullScreen) {
+    dispatch('toggleFullScreen')
+  } else {
+    dispatch('back')
+  }
 }
 
 // Checks whether we are connected and already casting
