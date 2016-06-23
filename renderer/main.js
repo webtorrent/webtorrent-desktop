@@ -1127,8 +1127,13 @@ function toggleTorrent (infoHash) {
 }
 
 // TODO: use torrentKey, not infoHash
-function deleteTorrent (infoHash) {
+function deleteTorrent (infoHash, deleteData) {
   ipcRenderer.send('wt-stop-torrenting', infoHash)
+
+  if (deleteData) {
+    var torrentSummary = getTorrentSummary(infoHash)
+    moveItemToTrash(torrentSummary)
+  }
 
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
@@ -1154,6 +1159,20 @@ function toggleTorrentFile (infoHash, index) {
 function openTorrentContextMenu (infoHash) {
   var torrentSummary = getTorrentSummary(infoHash)
   var menu = new electron.remote.Menu()
+
+  menu.append(new electron.remote.MenuItem({
+    label: 'Remove From List',
+    click: () => deleteTorrent(torrentSummary.infoHash, false)
+  }))
+
+  menu.append(new electron.remote.MenuItem({
+    label: 'Remove Data File',
+    click: () => deleteTorrent(torrentSummary.infoHash, true)
+  }))
+
+  menu.append(new electron.remote.MenuItem({
+    type: 'separator'
+  }))
 
   if (torrentSummary.files) {
     menu.append(new electron.remote.MenuItem({
@@ -1193,6 +1212,10 @@ function getTorrentPath (torrentSummary) {
 
 function showItemInFolder (torrentSummary) {
   ipcRenderer.send('showItemInFolder', getTorrentPath(torrentSummary))
+}
+
+function moveItemToTrash (torrentSummary) {
+  ipcRenderer.send('moveItemToTrash', getTorrentPath(torrentSummary))
 }
 
 function saveTorrentFileAs (torrentSummary) {
