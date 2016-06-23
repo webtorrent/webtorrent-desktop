@@ -291,7 +291,7 @@ function dispatch (action, ...args) {
     state.playing.mouseStationarySince = new Date().getTime()
   }
   if (action === 'vlcPlay') {
-    ipcRenderer.send('vlcPlay', state.server.localURL)
+    ipcRenderer.send('vlcPlay', state.server.localURL + '/' + state.playing.fileIndex)
     state.playing.location = 'vlc'
   }
   if (action === 'vlcNotFound') {
