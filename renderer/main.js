@@ -387,7 +387,7 @@ function playPause () {
 function next () {
   if (state.playlist && state.playlist.hasNext()) {
     state.playlist.next()
-    updatePlayer(function (err) {
+    updatePlayer(false, function (err) {
       if (err) onError(err)
       else play()
     })
@@ -397,7 +397,7 @@ function next () {
 function prev () {
   if (state.playlist && state.playlist.hasPrevious()) {
     state.playlist.previous()
-    updatePlayer(function (err) {
+    updatePlayer(false, function (err) {
       if (err) onError(err)
       else play()
     })
@@ -996,7 +996,7 @@ function playFile (infoHash, index) {
   if (state.location.url() === 'player') {
     play()
     state.playlist.jumpToFile(index)
-    updatePlayer(callback)
+    updatePlayer(false, callback)
   } else {
     var torrentSummary = getTorrentSummary(infoHash)
     var playlist = new Playlist(torrentSummary)
@@ -1019,12 +1019,12 @@ function playFile (infoHash, index) {
   }
 }
 
-// Called when current file changes
-function updatePlayer (cb) {
+// Called when the current track changes
+function updatePlayer (resume, cb) {
   var track = state.playlist.getCurrent()
 
   if (track === undefined) {
-    return cb(new Error('Can\'t play that file'))
+    return cb(new errors.UnplayableFileError())
   }
 
   var torrentSummary = getTorrentSummary(state.playlist.getInfoHash())
@@ -1036,14 +1036,12 @@ function updatePlayer (cb) {
   state.playing.type = track.type
 
   // pick up where we left off
-  if (fileSummary.currentTime) {
+  if (resume && fileSummary.currentTime) {
     var fraction = fileSummary.currentTime / fileSummary.duration
     var secondsLeft = fileSummary.duration - fileSummary.currentTime
     if (fraction < 0.9 && secondsLeft > 10) {
       state.playing.jumpToTime = fileSummary.currentTime
     }
-  } else {
-    state.playing.jumpToLine = 0
   }
 
   // if it's audio, parse out the metadata (artist, title, etc)
@@ -1070,8 +1068,7 @@ function updatePlayer (cb) {
 function openPlayer (playlist, cb) {
   state.playlist = playlist
 
-  var track = playlist.getCurrent()
-  if (track === undefined) return cb(new errors.UnplayableError())
+  if (!playlist.getTracks().length) cb(new errors.UnplayableTorrentError())
 
   var torrentSummary = getTorrentSummary(playlist.getInfoHash())
 
@@ -1101,7 +1098,7 @@ function openPlayer (playlist, cb) {
     }
 
     ipcRenderer.send('onPlayerOpen')
-    updatePlayer(cb)
+    updatePlayer(true, cb)
   })
 }
 
