@@ -1,31 +1,37 @@
 console.time('init')
 
-var crashReporter = require('../crash-reporter')
+const crashReporter = require('../crash-reporter')
 crashReporter.init()
 
-var dragDrop = require('drag-drop')
-var electron = require('electron')
-var fs = require('fs-extra')
-var mainLoop = require('main-loop')
-var parallel = require('run-parallel')
-var path = require('path')
+const dragDrop = require('drag-drop')
+const electron = require('electron')
+const fs = require('fs-extra')
+const mainLoop = require('main-loop')
+const parallel = require('run-parallel')
+const path = require('path')
 
-var createElement = require('virtual-dom/create-element')
-var diff = require('virtual-dom/diff')
-var patch = require('virtual-dom/patch')
+const createElement = require('virtual-dom/create-element')
+const diff = require('virtual-dom/diff')
+const patch = require('virtual-dom/patch')
 
-var config = require('../config')
-var App = require('./views/app')
-var telemetry = require('./lib/telemetry')
-var errors = require('./lib/errors')
-var sound = require('./lib/sound')
-var State = require('./lib/state')
-var TorrentPlayer = require('./lib/torrent-player')
-var TorrentSummary = require('./lib/torrent-summary')
+const config = require('../config')
+const App = require('./views/app')
+const telemetry = require('./lib/telemetry')
+const errors = require('./lib/errors')
+const sound = require('./lib/sound')
+const State = require('./lib/state')
+const TorrentPlayer = require('./lib/torrent-player')
+const TorrentSummary = require('./lib/torrent-summary')
+
+const MediaController = require('./controllers/media-controller')
+const UpdateController = require('./controllers/update-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
 require('./lib/dispatcher').setDispatch(dispatch)
+
+// From dispatch(...), events are sent to one of the controllers
+var controllers = null
 
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
@@ -47,6 +53,12 @@ State.load(onState)
 function onState (err, _state) {
   if (err) return onError(err)
   state = _state
+
+  // Create controllers
+  controllers = {
+    media: new MediaController(state),
+    update: new UpdateController(state)
+  }
 
   // Add first page to location history
   state.location.go({ url: 'home' })
@@ -250,40 +262,25 @@ function dispatch (action, ...args) {
     toggleSubtitlesMenu()
   }
   if (action === 'mediaStalled') {
-    state.playing.isStalled = true
+    controllers.media.mediaStalled()
   }
   if (action === 'mediaError') {
-    if (state.location.url() === 'player') {
-      state.playing.result = 'error'
-      state.playing.location = 'error'
-      ipcRenderer.send('checkForVLC')
-      ipcRenderer.once('checkForVLC', function (e, isInstalled) {
-        state.modal = {
-          id: 'unsupported-media-modal',
-          error: args[0],
-          vlcInstalled: isInstalled
-        }
-      })
-    }
+    controllers.media.mediaError(args[0] /* error */)
   }
   if (action === 'mediaSuccess') {
-    state.playing.result = 'success'
+    controllers.media.mediaSuccess()
   }
   if (action === 'mediaTimeUpdate') {
-    state.playing.lastTimeUpdate = new Date().getTime()
-    state.playing.isStalled = false
+    controllers.media.mediaTimeUpdate()
   }
   if (action === 'mediaMouseMoved') {
-    state.playing.mouseStationarySince = new Date().getTime()
+    controllers.media.mediaMouseMoved()
   }
   if (action === 'vlcPlay') {
-    ipcRenderer.send('vlcPlay', state.server.localURL)
-    state.playing.location = 'vlc'
+    controllers.media.vlcPlay()
   }
   if (action === 'vlcNotFound') {
-    if (state.modal && state.modal.id === 'unsupported-media-modal') {
-      state.modal.vlcNotFound = true
-    }
+    controllers.media.vlcNotFound()
   }
   if (action === 'toggleFullScreen') {
     ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
@@ -292,32 +289,16 @@ function dispatch (action, ...args) {
     state.modal = null
   }
   if (action === 'preferences') {
-    state.location.go({
-      url: 'preferences',
-      onbeforeload: function (cb) {
-        // initialize preferences
-        state.window.title = 'Preferences'
-        state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
-        cb()
-      },
-      onbeforeunload: function (cb) {
-        // save state after preferences
-        savePreferences()
-        state.window.title = config.APP_WINDOW_TITLE
-        cb()
-      }
-    })
+    goToPreferences()
   }
   if (action === 'updatePreferences') {
-    updatePreferences(args[0], args[1] /* property, value */)
+    updatePreferences(args[0] /* key */, args[1] /* value */)
   }
   if (action === 'updateAvailable') {
-    updateAvailable(args[0] /* version */)
+    controllers.update.updateAvailable(args[0] /* version */)
   }
   if (action === 'skipVersion') {
-    if (!state.saved.skippedVersions) state.saved.skippedVersions = []
-    state.saved.skippedVersions.push(args[0] /* version */)
-    saveStateThrottled()
+    controllers.update.skipVersion(args[0] /* version */)
   }
   if (action === 'saveState') {
     State.save(state)
@@ -333,15 +314,6 @@ function dispatch (action, ...args) {
   if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
     update()
   }
-}
-
-// Shows a modal saying that we have an update
-function updateAvailable (version) {
-  if (state.saved.skippedVersions && state.saved.skippedVersions.includes(version)) {
-    console.log('new version skipped by user: v' + version)
-    return
-  }
-  state.modal = { id: 'update-available-modal', version: version }
 }
 
 function play () {
@@ -448,7 +420,7 @@ function backToList () {
 }
 
 // Quits modals, full screen, or goes back. Happens when the user hits ESC
-function escapeBack() {
+function escapeBack () {
   if (state.modal) {
     dispatch('exitModal')
   } else if (state.window.isFullScreen) {
@@ -527,16 +499,6 @@ function savePreferences () {
   state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
   State.save(state)
   update()
-}
-
-// Don't write state.saved to file more than once a second
-function saveStateThrottled () {
-  if (state.saveStateTimeout) return
-  state.saveStateTimeout = setTimeout(function () {
-    delete state.saveStateTimeout
-    State.save(state)
-    update()
-  }, 1000)
 }
 
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
@@ -928,20 +890,20 @@ function torrentProgress (progressInfo) {
 function torrentFileModtimes (torrentKey, fileModtimes) {
   var torrentSummary = getTorrentSummary(torrentKey)
   torrentSummary.fileModtimes = fileModtimes
-  saveStateThrottled()
+  State.saveThrottled(state)
 }
 
 function torrentFileSaved (torrentKey, torrentFileName) {
   console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
   var torrentSummary = getTorrentSummary(torrentKey)
   torrentSummary.torrentFileName = torrentFileName
-  saveStateThrottled()
+  State.saveThrottled(state)
 }
 
 function torrentPosterSaved (torrentKey, posterFileName) {
   var torrentSummary = getTorrentSummary(torrentKey)
   torrentSummary.posterFileName = posterFileName
-  saveStateThrottled()
+  State.saveThrottled(state)
 }
 
 function torrentAudioMetadata (infoHash, index, info) {
@@ -987,6 +949,24 @@ function playFile (infoHash, index) {
     onbeforeunload: closePlayer
   }, function (err) {
     if (err) onError(err)
+  })
+}
+
+function goToPreferences () {
+  state.location.go({
+    url: 'preferences',
+    onbeforeload: function (cb) {
+      // initialize preferences
+      state.window.title = 'Preferences'
+      state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
+      cb()
+    },
+    onbeforeunload: function (cb) {
+      // save state after preferences
+      savePreferences()
+      state.window.title = config.APP_WINDOW_TITLE
+      cb()
+    }
   })
 }
 
@@ -1146,7 +1126,7 @@ function deleteTorrent (infoHash, deleteData) {
 
   var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
   if (index > -1) state.saved.torrents.splice(index, 1)
-  saveStateThrottled()
+  State.saveThrottled(state)
   state.location.clearForward('player') // prevent user from going forward to a deleted torrent
   sound.play('DELETE')
 }
