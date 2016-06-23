@@ -1,5 +1,23 @@
 # WebTorrent Desktop Version History
 
+## v0.8.0 - 2016-06-23
+
+### Added
+
+- Cast menu: choose which Chromecast, Airplay, or DLNA device you want to use
+- Telemetry: send basic data, plus stats on how often the play button works
+- Make posters from jpeg files, not just jpg
+- Support .wmv video via Play in VLC
+- Windows thumbnail bar with a play/pause button
+
+### Changed
+
+- Nicer modal styles
+
+### Fixed
+
+- Windows tray icon now stays in the right state
+
 ## v0.7.2 - 2016-06-02
 
 ### Fixed
