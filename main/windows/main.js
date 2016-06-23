@@ -74,7 +74,7 @@ function init () {
       app.quit()
     } else if (!app.isQuitting) {
       e.preventDefault()
-      win.hide()
+      hide()
     }
   })
 }
