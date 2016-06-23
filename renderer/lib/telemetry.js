@@ -30,7 +30,13 @@ function init (state) {
   telemetry.system = getSystemInfo()
   telemetry.approxNumTorrents = getApproxNumTorrents(state)
 
-  postToServer(telemetry)
+  if (config.IS_PRODUCTION) {
+    postToServer()
+  } else {
+    // Development: telemetry used only for local debugging
+    // Empty uncaught errors, etc at the start of every run
+    reset()
+  }
 }
 
 function reset () {
