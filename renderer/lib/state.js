@@ -1,7 +1,8 @@
 module.exports = {
   getDefaultPlayState,
   load,
-  save
+  save,
+  saveThrottled
 }
 
 var appConfig = require('application-config')('WebTorrent')
@@ -180,6 +181,7 @@ function load (cb) {
 // Write state.saved to the JSON state file
 function save (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
+  delete state.saveStateTimeout
 
   var electron = require('electron')
 
@@ -209,4 +211,13 @@ function save (state, cb) {
     // TODO: this doesn't belong here
     electron.ipcRenderer.send('savedState')
   })
+}
+
+// Write, but no more than once a second
+function saveThrottled (state) {
+  if (state.saveStateTimeout) return
+  state.saveStateTimeout = setTimeout(function () {
+    if (!state.saveStateTimeout) return
+    save(state)
+  }, 1000)
 }
