@@ -756,6 +756,7 @@ function findFilesRecursive (paths, cb) {
       findFilesRecursive([path], function (fileObjs) {
         ret = ret.concat(fileObjs)
         if (++numComplete === paths.length) {
+          ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
           cb(ret)
         }
       })
