@@ -280,8 +280,10 @@ function renderCastScreen (state) {
   }
 
   var isStarting = state.playing.location.endsWith('-pending')
+  var castName = state.playing.castName
   var castStatus
-  if (isCast) castStatus = isStarting ? 'Connecting...' : 'Connected'
+  if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
+  else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
   // Show a nice title image, if possible

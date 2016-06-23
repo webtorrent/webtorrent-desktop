@@ -371,6 +371,7 @@ function selectDevice (index) {
 
   // Show the Connecting... screen
   state.devices.castMenu = null
+  state.playing.castName = devices[index].name
   state.playing.location = location + '-pending'
   update()
 }

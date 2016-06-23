@@ -1068,9 +1068,11 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 }
 
 function closePlayer (cb) {
+  console.log('closePlayer')
+
   // Quit any external players, like Chromecast/Airplay/etc or VLC
   if (isCasting()) {
-    Cast.close()
+    Cast.stop()
   }
   if (state.playing.location === 'vlc') {
     ipcRenderer.send('vlcQuit')
