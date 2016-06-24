@@ -154,7 +154,7 @@ function updateElectron () {
 function toggleOpenInVlc (menuItem) {
   var flag = menuItem.checked
   console.log(`toggleOpenInVlc ${flag}`)
-  state.saved.openInVlc = flag;
+  state.saved.openInVlc = flag
 }
 
 function getOpenInVlc () {
