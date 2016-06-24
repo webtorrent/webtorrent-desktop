@@ -1,6 +1,6 @@
 module.exports = {
-  start,
-  stop
+  enable,
+  disable
 }
 
 var electron = require('electron')
@@ -12,19 +12,19 @@ var blockId = 0
  * Block the system from entering low-power (sleep) mode or turning off the
  * display.
  */
-function start () {
-  stop() // Stop the previous power saver block, if one exists.
+function enable () {
+  disable() // Stop the previous power saver block, if one exists.
   blockId = electron.powerSaveBlocker.start('prevent-display-sleep')
-  log(`powerSaveBlocker.start: ${blockId}`)
+  log(`powerSaveBlocker.enable: ${blockId}`)
 }
 
 /**
  * Stop blocking the system from entering low-power mode.
  */
-function stop () {
+function disable () {
   if (!electron.powerSaveBlocker.isStarted(blockId)) {
     return
   }
   electron.powerSaveBlocker.stop(blockId)
-  log(`powerSaveBlocker.stop: ${blockId}`)
+  log(`powerSaveBlocker.disable: ${blockId}`)
 }
