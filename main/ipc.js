@@ -127,7 +127,7 @@ function init () {
         if (!vlcProcess) return // Killed
         log('VLC exited with code ', code)
         if (code === 0) {
-          windows.main.dispatch('backToList')
+          windows.main.dispatch('vlcClosed')
         } else {
           windows.main.dispatch('vlcNotFound')
         }

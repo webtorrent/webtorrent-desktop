@@ -294,6 +294,14 @@ function dispatch (action, ...args) {
     ipcRenderer.send('vlcPlay', state.server.localURL + '/' + state.playing.fileIndex)
     state.playing.location = 'vlc'
   }
+  if (action === 'vlcClosed') {
+    if (state.playlist.hasNext()) {
+      state.playing.location = 'local'
+      next()
+    } else {
+      backToList()
+    }
+  }
   if (action === 'vlcNotFound') {
     if (state.modal && state.modal.id === 'unsupported-media-modal') {
       state.modal.vlcNotFound = true
