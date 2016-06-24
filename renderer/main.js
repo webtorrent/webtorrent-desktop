@@ -154,11 +154,11 @@ function updateElectron () {
 function toggleOpenInVlc (menuItem) {
   var flag = menuItem.checked
   console.log(`toggleOpenInVlc ${flag}`)
-  config.OPEN_IN_VLC = flag
+  state.saved.openInVlc = flag;
 }
 
 function getOpenInVlc () {
-  return config.OPEN_IN_VLC
+  return state.saved.openInVlc
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()

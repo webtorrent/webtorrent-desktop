@@ -17,10 +17,22 @@ var dialog = require('./dialog')
 var shell = require('./shell')
 var windows = require('./windows')
 var thumbnail = require('./thumbnail')
+var State = require('../renderer/lib/state')
 
-var menu
+var menu, state
 
 function init () {
+  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  electron.Menu.setApplicationMenu(menu)
+
+  State.load(onState)
+}
+
+function onState (err, _state) {
+  if (err) return onError(err)
+  state = _state
+  
+  // Refresh menu
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
 }
@@ -263,7 +275,8 @@ function getMenuTemplate () {
           label: 'Open in VLC',
           type: 'checkbox',
           click: () => windows.main.dispatch('toggleOpenInVlc', getMenuItem('Open in VLC')),
-          enabled: true
+          enabled: true,
+          checked: state && state.saved.openInVlc
         }
       ]
     },
