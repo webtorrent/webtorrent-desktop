@@ -570,7 +570,7 @@ function onOpen (files) {
 function isTorrent (file) {
   var name = typeof file === 'string' ? file : file.name
   var isTorrentFile = path.extname(name).toLowerCase() === '.torrent'
-  var isMagnet = typeof file === 'string' && /^magnet:/.test(file) || /^stream-magnet:/.test(file)
+  var isMagnet = typeof file === 'string' && /^(stream-)?magnet:/.test(file)
   return isTorrentFile || isMagnet
 }
 

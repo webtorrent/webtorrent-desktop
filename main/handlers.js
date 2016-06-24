@@ -36,6 +36,7 @@ function installDarwin () {
 
   // On OS X, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.
+  app.setAsDefaultProtocolClient('magnet')
   app.setAsDefaultProtocolClient('stream-magnet')
 
   // File handlers are defined in `Info.plist`.
