@@ -37,6 +37,14 @@ function onState (err, _state) {
   electron.Menu.setApplicationMenu(menu)
 }
 
+function onError (err) {
+  console.error(err.stack || err)
+  state.errors.push({
+    time: new Date().getTime(),
+    message: err.message || err
+  })
+}
+
 function onPlayerClose () {
   getMenuItem('Play/Pause').enabled = false
   getMenuItem('Increase Volume').enabled = false
