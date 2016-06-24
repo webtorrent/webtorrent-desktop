@@ -358,7 +358,7 @@ function play () {
   if (isCasting()) {
     Cast.play()
   }
-  ipcRenderer.send('blockPowerSave')
+  ipcRenderer.send('onPlayerPlay')
 }
 
 function pause () {
@@ -367,7 +367,7 @@ function pause () {
   if (isCasting()) {
     Cast.pause()
   }
-  ipcRenderer.send('unblockPowerSave')
+  ipcRenderer.send('onPlayerPause')
 }
 
 function playPause () {
@@ -382,8 +382,6 @@ function playPause () {
   // force rerendering if window is hidden,
   // in order to bypass `raf` and play/pause media immediately
   if (!state.window.isVisible) render(state)
-
-  ipcRenderer.send('updateThumbnailBar', state.playing.isPaused)
 }
 
 function jumpToTime (time) {
@@ -1106,8 +1104,6 @@ function closePlayer (cb) {
   // Tell the WebTorrent process to kill the torrent-to-HTTP server
   ipcRenderer.send('wt-stop-server')
 
-  // Tell the OS we're no longer playing media, laptops allowed to sleep again
-  ipcRenderer.send('unblockPowerSave')
   ipcRenderer.send('onPlayerClose')
 
   update()

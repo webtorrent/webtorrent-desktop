@@ -1,7 +1,7 @@
 module.exports = {
-  showPlayerThumbnailBar,
-  hidePlayerThumbnailBar,
-  updateThumbarButtons
+  hide,
+  show,
+  update
 }
 
 var path = require('path')
@@ -10,16 +10,16 @@ var config = require('../config')
 var windows = require('./windows')
 
 // gets called on player open
-function showPlayerThumbnailBar () {
-  updateThumbarButtons(false)
+function show () {
+  update(false)
 }
 
 // gets called on player close
-function hidePlayerThumbnailBar () {
+function hide () {
   windows.main.win.setThumbarButtons([])
 }
 
-function updateThumbarButtons (isPaused) {
+function update (isPaused) {
   var icon = isPaused ? 'PlayThumbnailBarButton.png' : 'PauseThumbnailBarButton.png'
   var tooltip = isPaused ? 'Play' : 'Pause'
   var buttons = [
@@ -27,7 +27,7 @@ function updateThumbarButtons (isPaused) {
       tooltip: tooltip,
       icon: path.join(config.STATIC_PATH, icon),
       click: function () {
-        windows.main.send('dispatch', 'playPause')
+        windows.main.dispatch('playPause')
       }
     }
   ]

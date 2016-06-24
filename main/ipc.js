@@ -15,7 +15,7 @@ var shell = require('./shell')
 var shortcuts = require('./shortcuts')
 var vlc = require('./vlc')
 var windows = require('./windows')
-var thumbnail = require('./thumbnail')
+var thumbar = require('./thumbnail')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 var messageQueueMainToWebTorrent = []
@@ -61,24 +61,27 @@ function init () {
 
   ipc.on('onPlayerOpen', function () {
     menu.onPlayerOpen()
+    powerSaveBlocker.start()
     shortcuts.onPlayerOpen()
+    thumbar.onPlayerOpen()
   })
 
   ipc.on('onPlayerClose', function () {
     menu.onPlayerClose()
-    shortcuts.onPlayerOpen()
+    powerSaveBlocker.stop()
+    shortcuts.onPlayerClose()
+    thumbar.onPlayerClose()
   })
 
-  ipc.on('updateThumbnailBar', function (e, isPaused) {
-    thumbnail.updateThumbarButtons(isPaused)
+  ipc.on('onPlayerPlay', function () {
+    powerSaveBlocker.start()
+    thumbar.update(false)
   })
 
-  /**
-   * Power Save Blocker
-   */
-
-  ipc.on('blockPowerSave', () => powerSaveBlocker.start())
-  ipc.on('unblockPowerSave', () => powerSaveBlocker.stop())
+  ipc.on('onPlayerPause', function () {
+    powerSaveBlocker.stop()
+    thumbar.update(true)
+  })
 
   /**
    * Shell
