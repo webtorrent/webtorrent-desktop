@@ -1042,6 +1042,8 @@ function updatePlayer (resume, cb) {
     if (fraction < 0.9 && secondsLeft > 10) {
       state.playing.jumpToTime = fileSummary.currentTime
     }
+  } else {
+    state.playing.jumpToTime = 0
   }
 
   // if it's audio, parse out the metadata (artist, title, etc)

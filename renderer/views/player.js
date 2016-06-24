@@ -43,7 +43,7 @@ function renderMedia (state) {
       mediaElement.play()
     }
     // When the user clicks or drags on the progress bar, jump to that position
-    if (state.playing.jumpToTime) {
+    if (state.playing.jumpToTime != null) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
     }
