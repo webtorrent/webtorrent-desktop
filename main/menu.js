@@ -31,7 +31,7 @@ function init () {
 function onState (err, _state) {
   if (err) return onError(err)
   state = _state
-  
+
   // Refresh menu
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
