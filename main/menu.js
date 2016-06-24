@@ -59,6 +59,10 @@ function onToggleFullScreen (flag) {
   getMenuItem('Full Screen').checked = flag
 }
 
+function onToggleOpenInVlc (flag) {
+  getMenuItem('Open in VLC').checked = flag
+}
+
 function onWindowBlur () {
   getMenuItem('Full Screen').enabled = false
   getMenuItem('Float on Top').enabled = false
@@ -258,6 +262,12 @@ function getMenuTemplate () {
           label: 'Add Subtitles File...',
           click: () => windows.main.dispatch('openSubtitles'),
           enabled: false
+        },
+        {
+          label: 'Open in VLC',
+          type: 'checkbox',
+          click: () => windows.main.dispatch('toggleOpenInVlc', getMenuItem('Open in VLC')),
+          enabled: true
         }
       ]
     },

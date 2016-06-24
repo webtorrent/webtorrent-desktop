@@ -151,6 +151,16 @@ function updateElectron () {
   }
 }
 
+function toggleOpenInVlc(menuItem) {
+  var flag = menuItem.checked;
+  console.log(`toggleOpenInVlc ${flag}`);
+  config.OPEN_IN_VLC = flag;
+}
+
+function getOpenInVlc() {
+  return config.OPEN_IN_VLC;
+}
+
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
   // Log dispatch calls, for debugging
@@ -158,6 +168,9 @@ function dispatch (action, ...args) {
     console.log('dispatch: %s %o', action, args)
   }
 
+  if (action === 'toggleOpenInVlc') {
+    toggleOpenInVlc(args[0]);
+  }
   if (action === 'onOpen') {
     onOpen(args[0] /* files */)
   }
@@ -1060,6 +1073,17 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
       ipcRenderer.send('wt-stop-server')
       return update()
     }
+
+    //------------------------------------------------------ 
+    // play in VLC if set as default player (Menu: Playback / Open in VLC)
+    if (getOpenInVlc()) {
+      console.log('-- OPEN IN VLC', torrentSummary);
+      dispatch('vlcPlay');
+      update()
+      cb()
+      return;
+    }
+    //------------------------------------------------------
 
     // otherwise, play the video
     state.window.title = torrentSummary.files[state.playing.fileIndex].name
