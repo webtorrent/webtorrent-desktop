@@ -167,7 +167,7 @@ function dispatch (action, ...args) {
   if (!['mediaMouseMoved', 'mediaTimeUpdate'].includes(action)) {
     console.log('dispatch: %s %o', action, args)
   }
-  if (action === 'toggleOpenInVlc') {
+  if (action === 'toggleOpenInVlc') {
     toggleOpenInVlc(args[0])
   }
   if (action === 'onOpen') {
@@ -1079,7 +1079,7 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
       dispatch('vlcPlay')
       update()
       cb()
-      return;
+      return
     }
 
     // otherwise, play the video
