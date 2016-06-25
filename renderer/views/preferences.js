@@ -88,7 +88,7 @@ function renderSection (definition, controls) {
   `
 }
 
-function renderCheckbox(definition, value, callback) {
+function renderCheckbox (definition, value, callback) {
   var checked = ''
   if (value) checked = 'checked'
 
