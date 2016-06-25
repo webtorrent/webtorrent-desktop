@@ -151,14 +151,8 @@ function updateElectron () {
   }
 }
 
-function toggleOpenInVlc (menuItem) {
-  var flag = menuItem.checked
-  console.log(`toggleOpenInVlc ${flag}`)
-  state.saved.openInVlc = flag
-}
-
 function getOpenInVlc () {
-  return state.saved.openInVlc
+  return state.saved.prefs.playInVlc
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -166,9 +160,6 @@ function dispatch (action, ...args) {
   // Log dispatch calls, for debugging
   if (!['mediaMouseMoved', 'mediaTimeUpdate'].includes(action)) {
     console.log('dispatch: %s %o', action, args)
-  }
-  if (action === 'toggleOpenInVlc') {
-    toggleOpenInVlc(args[0])
   }
   if (action === 'onOpen') {
     onOpen(args[0] /* files */)
@@ -1073,9 +1064,8 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
       return update()
     }
 
-    // play in VLC if set as default player (Menu: Playback / Open in VLC)
+    // play in VLC if set as default player (Preferences / Playback / Play in VLC)
     if (getOpenInVlc()) {
-      console.log('-- OPEN IN VLC', torrentSummary)
       dispatch('vlcPlay')
       update()
       cb()

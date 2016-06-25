@@ -10,6 +10,7 @@ function Preferences (state) {
   return hx`
     <div class='preferences'>
       ${renderGeneralSection(state)}
+      ${renderPlaybackSection(state)}
     </div>
   `
 }
@@ -22,6 +23,29 @@ function renderGeneralSection (state) {
   }, [
     renderDownloadDirSelector(state)
   ])
+}
+
+function renderPlaybackSection (state) {
+  return renderSection({
+    title: 'Playback',
+    description: '',
+    icon: 'settings'
+  }, [
+    renderPlayInVlcSelector(state)
+  ])
+}
+
+function renderPlayInVlcSelector (state) {
+  return renderCheckbox({
+    label: 'Play in VLC',
+    description: 'Media will play in VLC',
+    property: 'playInVlc',
+    value: state.saved.prefs.playInVlc
+  },
+  state.unsaved.prefs.playInVlc,
+  function (value) {
+    setStateValue('playInVlc', value)
+  })
 }
 
 function renderDownloadDirSelector (state) {
@@ -62,6 +86,34 @@ function renderSection (definition, controls) {
       </div>
     </section>
   `
+}
+
+function renderCheckbox(definition, value, callback) {
+  var checked = ''
+  if (value) checked = 'checked'
+
+  return hx`
+    <div class='control-group'>
+      <div class='controls'>
+        <label class='control-label'>
+          <div class='preference-title'>${definition.label}</div>
+        </label>
+        <div class='controls'>
+          <label>
+            <input type='checkbox' class='checkbox'
+              onclick=${handleClick}
+              id=${definition.property}
+              ${checked} />
+
+            <span class="checkbox-label">${definition.description}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  `
+  function handleClick () {
+    callback(this.checked)
+  }
 }
 
 // Creates a file chooser
