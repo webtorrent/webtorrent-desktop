@@ -5,12 +5,12 @@ module.exports = {
 var config = require('../../config')
 
 /**
- * Downloads specified amount of available subtitles 
+ * Downloads specified amount of available subtitles
  * for specified language.
  * Calls "onSubtitlesDownloaded" after each subtitles file
  * is downloaded and ready to be added.
  * Returns a promise that resolves once all subtitles are downloaded.
- * 
+ *
  * @param {object} torrentSummary
  * @param {function} onSubtitlesDownloaded
  * @return {object} promise
@@ -46,8 +46,3 @@ function getEnabledSubtitlesProvider () {
   var enabledSubtitlesProvider = require('../subtitles-providers/' + enabledSubtitlesProviderId)
   return enabledSubtitlesProvider
 }
-
-
-
-
-

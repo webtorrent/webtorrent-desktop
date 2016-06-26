@@ -1077,12 +1077,12 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 }
 
 function autoloadSubtitles (torrentSummary) {
-  var promise = subtitlesDownloader.downloadSubtitles(torrentSummary, onSubtitlesDownloaded)
+  subtitlesDownloader.downloadSubtitles(torrentSummary, onSubtitlesDownloaded)
 
   function onSubtitlesDownloaded (subtitles) {
     console.log('--- autoloadSubtitles: GOT SUBTITLES!', subtitles)
     addSubtitles([subtitles.file])
-  } 
+  }
 }
 
 function closePlayer (cb) {
