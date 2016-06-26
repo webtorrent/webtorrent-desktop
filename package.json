@@ -38,7 +38,7 @@
     "simple-concat": "^1.0.0",
     "simple-get": "^2.0.0",
     "srt-to-vtt": "^1.1.1",
-    "subtitler": "^2.5.0",
+    "subtitler": "git+https://github.com/codealchemist/node-subtitler.git",
     "virtual-dom": "^2.1.1",
     "vlc-command": "^1.0.1",
     "webtorrent": "0.x",
