@@ -28,11 +28,16 @@ function downloadSubtitles (params) {
         subtitle
       }
       downloadSubtitlesFile(downloadParams)
-        .then(onDownloadSubtitlesFileOk, onDownloadSubtitlesFileError)
+        .then(onDownloadSubtitlesFile)
     })
 
-    function onDownloadSubtitlesFileOk (response) {
-      console.log('[ OPEN-SUBTITLES ]--> onDownloadSubtitlesFileOk:', response)
+    function onDownloadSubtitlesFile (response) {
+      console.log('[ OPEN-SUBTITLES ]--> onDownloadSubtitlesFile:', response)
+
+      if (response.error) {
+        console.log(`--- OOPS: something went wrong while downloading subtitles on ${response.targetPath}`, response.error)
+        return
+      }
 
       // a new subtitles file downloaded ok
       // increment counter
@@ -59,10 +64,6 @@ function downloadSubtitles (params) {
         console.log('-- onExtractSubtitlesFileError:', error)
       }
     }
-
-    function onDownloadSubtitlesFileError (response) {
-      console.log('[ OPEN-SUBTITLES ]--> onDownloadSubtitlesFileError:', response)
-    }
   }
 
   function onGetSubtitlesError (response) {
@@ -84,6 +85,8 @@ function downloadSubtitlesFile (params) {
 
   function onDownloadError (error) {
     console.log('--- onDownloadError:', error)
+    params.error = error
+    return params
   }
 }
 

@@ -24,9 +24,15 @@ function downloadSubtitles (torrentSummary, onSubtitlesDownloaded) {
 
   var findSubtitlesParams = {
     name: torrentSummary.name,
-    path: torrentSummary.path + '/' + torrentSummary.name,
+    path: torrentSummary.path, // first assume a single file torrent
     lang: config.DEFAULT_SUBTITLES_LANGUAGE,
     onSubtitlesDownloaded: onSubtitlesDownloaded
+  }
+
+  // add torrent folder if it's being used
+  // this is the case for multifile torrents
+  if (torrentSummary.files.length > 1) {
+    findSubtitlesParams.path += '/' + torrentSummary.name
   }
 
   return subtitlesProvider.downloadSubtitles(findSubtitlesParams)
