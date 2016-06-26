@@ -23,6 +23,7 @@ var State = require('./lib/state')
 var TorrentPlayer = require('./lib/torrent-player')
 var TorrentSummary = require('./lib/torrent-summary')
 var {setDispatch} = require('./lib/dispatcher')
+var subtitlesDownloader = require('./lib/subtitles-downloader')
 
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
@@ -1049,6 +1050,10 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   // if it's video, check for subtitles files that are done downloading
   checkForSubtitles()
 
+  // search for subtitles matching current video file
+  // and automatically load them
+  autoloadSubtitles(torrentSummary)
+
   ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
     clearTimeout(timeout)
@@ -1069,6 +1074,15 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
 
     cb()
   })
+}
+
+function autoloadSubtitles (torrentSummary) {
+  var promise = subtitlesDownloader.downloadSubtitles(torrentSummary, onSubtitlesDownloaded)
+
+  function onSubtitlesDownloaded (subtitles) {
+    console.log('--- autoloadSubtitles: GOT SUBTITLES!', subtitles)
+    addSubtitles([subtitles.file])
+  } 
 }
 
 function closePlayer (cb) {
