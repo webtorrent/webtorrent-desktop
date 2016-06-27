@@ -1078,6 +1078,18 @@ video::-webkit-media-text-track-container {
   vertical-align: text-bottom;
 }
 
+.preferences .checkbox {
+  width: auto;
+}
+ 
+.checkbox-label {
+  vertical-align: middle;
+}
+
+.selector {
+  width: 100px;
+  margin: 5px 0 0 0;
+}
 
 /*
  * MEDIA OVERLAY / AUDIO DETAILS

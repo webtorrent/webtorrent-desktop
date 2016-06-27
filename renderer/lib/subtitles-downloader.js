@@ -12,10 +12,11 @@ var config = require('../../config')
  * Returns a promise that resolves once all subtitles are downloaded.
  *
  * @param {object} torrentSummary
+ * @param {string} language
  * @param {function} onSubtitlesDownloaded
  * @return {object} promise
  */
-function downloadSubtitles (torrentSummary, onSubtitlesDownloaded) {
+function downloadSubtitles (torrentSummary, language, onSubtitlesDownloaded) {
   // Load currently enabled subtitles provider
   var subtitlesProvider = getEnabledSubtitlesProvider()
 
@@ -25,7 +26,7 @@ function downloadSubtitles (torrentSummary, onSubtitlesDownloaded) {
   var findSubtitlesParams = {
     name: torrentSummary.name,
     path: torrentSummary.path, // first assume a single file torrent
-    lang: config.DEFAULT_SUBTITLES_LANGUAGE,
+    lang: language,
     onSubtitlesDownloaded: onSubtitlesDownloaded
   }
 

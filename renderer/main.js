@@ -1051,8 +1051,10 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   checkForSubtitles()
 
   // search for subtitles matching current video file
-  // and automatically load them
-  autoloadSubtitles(torrentSummary)
+  // and automatically load them selecting the first one available
+  if (state.saved.prefs.autoDownloadSubtitles) {
+    autoDownloadSubtitles(torrentSummary)
+  }
 
   ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
@@ -1076,11 +1078,12 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
   })
 }
 
-function autoloadSubtitles (torrentSummary) {
-  subtitlesDownloader.downloadSubtitles(torrentSummary, onSubtitlesDownloaded)
+function autoDownloadSubtitles (torrentSummary) {
+  var language = state.saved.prefs.subtitlesLanguage
+  subtitlesDownloader.downloadSubtitles(torrentSummary, language, onSubtitlesDownloaded)
 
   function onSubtitlesDownloaded (subtitles) {
-    console.log('--- autoloadSubtitles: GOT SUBTITLES!', subtitles)
+    console.log('--- autoDownloadSubtitles: GOT SUBTITLES!', subtitles)
 
     // auto select first loaded subtitle
     var select = false
