@@ -5,7 +5,8 @@ module.exports = {
   onToggleAlwaysOnTop,
   onToggleFullScreen,
   onWindowBlur,
-  onWindowFocus
+  onWindowFocus,
+  onState
 }
 
 var electron = require('electron')
@@ -17,18 +18,16 @@ var dialog = require('./dialog')
 var shell = require('./shell')
 var windows = require('./windows')
 var thumbnail = require('./thumbnail')
-var State = require('../renderer/lib/state')
 
 var menu, state
 
 function init () {
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
-
-  State.load(onState)
 }
 
-function onState (err, _state) {
+function onState (e, err, _state) {
+  console.log('[ MENU ]--> GOT STATE')
   if (err) return onError(err)
   state = _state
 

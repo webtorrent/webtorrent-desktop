@@ -53,6 +53,9 @@ function onState (err, _state) {
   if (err) return onError(err)
   state = _state
 
+  // send loaded state to main process
+  ipcRenderer.send('onState', err, _state)
+
   // Add first page to location history
   state.location.go({ url: 'home' })
 

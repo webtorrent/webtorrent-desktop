@@ -59,6 +59,8 @@ function init () {
    * Events
    */
 
+  ipc.on('onState', (...args) => menu.onState(...args))
+
   ipc.on('onPlayerOpen', function () {
     menu.onPlayerOpen()
     shortcuts.onPlayerOpen()
