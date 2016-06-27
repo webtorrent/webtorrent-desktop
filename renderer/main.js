@@ -1083,7 +1083,7 @@ function autoloadSubtitles (torrentSummary) {
     console.log('--- autoloadSubtitles: GOT SUBTITLES!', subtitles)
 
     // auto select first loaded subtitle
-    select = false
+    var select = false
     if (state.playing.subtitles.tracks.length === 0) select = true
 
     addSubtitles([subtitles.file], select)
