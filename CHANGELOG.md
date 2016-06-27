@@ -1,5 +1,15 @@
 # WebTorrent Desktop Version History
 
+## v0.8.1 - 2016-06-24
+
+### Added
+
+- New URI handler: stream-magnet
+
+### Fixed
+
+- DLNA crashing bug
+
 ## v0.8.0 - 2016-06-23
 
 ### Added
