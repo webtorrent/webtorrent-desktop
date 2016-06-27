@@ -259,8 +259,8 @@ module.exports = class PlaybackController {
     if (isCasting(state)) {
       Cast.stop()
     }
-    if (state.playing.location === 'vlc') {
-      ipcRenderer.send('vlcQuit')
+    if (state.playing.location === 'external') {
+      ipcRenderer.send('quitExternalPlayer')
     }
 
     // Save volume (this session only, not in state.saved)

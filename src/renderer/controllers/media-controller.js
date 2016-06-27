@@ -22,12 +22,12 @@ module.exports = class MediaController {
     if (state.location.url() === 'player') {
       state.playing.result = 'error'
       state.playing.location = 'error'
-      ipcRenderer.send('checkForVLC')
-      ipcRenderer.once('checkForVLC', function (e, isInstalled) {
+      ipcRenderer.send('checkForExternalPlayer', state.saved.prefs.externalPlayerPath)
+      ipcRenderer.once('checkForExternalPlayer', function (e, isInstalled) {
         state.modal = {
           id: 'unsupported-media-modal',
           error: error,
-          vlcInstalled: isInstalled
+          externalPlayerInstalled: isInstalled
         }
       })
     }
@@ -42,15 +42,16 @@ module.exports = class MediaController {
     this.state.playing.mouseStationarySince = new Date().getTime()
   }
 
-  vlcPlay () {
-    ipcRenderer.send('vlcPlay', this.state.server.localURL)
-    this.state.playing.location = 'vlc'
+  openExternalPlayer () {
+    var state = this.state
+    ipcRenderer.send('openExternalPlayer', state.saved.prefs.externalPlayerPath, state.server.localURL)
+    state.playing.location = 'external'
   }
 
-  vlcNotFound () {
+  externalPlayerNotFound () {
     var modal = this.state.modal
     if (modal && modal.id === 'unsupported-media-modal') {
-      modal.vlcNotFound = true
+      modal.externalPlayerNotFound = true
     }
   }
 }

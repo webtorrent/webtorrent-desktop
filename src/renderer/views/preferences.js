@@ -1,6 +1,7 @@
 const React = require('react')
 const remote = require('electron').remote
 const dialog = remote.dialog
+const path = require('path')
 
 const {dispatch} = require('../lib/dispatcher')
 
@@ -22,7 +23,8 @@ function renderGeneralSection (state) {
     description: '',
     icon: 'settings'
   }, [
-    renderDownloadDirSelector(state)
+    renderDownloadDirSelector(state),
+    renderExternalPlayerSelector(state)
   ])
 }
 
@@ -40,6 +42,27 @@ function renderDownloadDirSelector (state) {
   state.unsaved.prefs.downloadPath,
   function (filePath) {
     setStateValue('downloadPath', filePath)
+  })
+}
+
+function renderExternalPlayerSelector (state) {
+  return renderFileSelector({
+    label: 'External Media Player',
+    description: 'Progam that will be used to play media externally',
+    property: 'externalPlayerPath',
+    options: {
+      title: 'Select media player executable',
+      properties: [ 'openFile' ]
+    }
+  },
+  state.unsaved.prefs.externalPlayerPath || '<VLC>', // TODO: should we get/store vlc path instead?
+  function (filePath) {
+    if (path.extname(filePath) === '.app') {
+      // Get executable in packaged mac app
+      var name = path.basename(filePath, '.app')
+      filePath += '/Contents/MacOS/' + name
+    }
+    setStateValue('externalPlayerPath', filePath)
   })
 }
 
