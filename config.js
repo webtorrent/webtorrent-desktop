@@ -75,8 +75,7 @@ module.exports = {
   WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, 'renderer', 'webtorrent.html'),
 
   WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
-  WINDOW_MIN_WIDTH: 425,
-  OPEN_IN_VLC: false
+  WINDOW_MIN_WIDTH: 425
 }
 
 function getConfigPath () {
