@@ -5,7 +5,8 @@ module.exports = {
   onToggleAlwaysOnTop,
   onToggleFullScreen,
   onWindowBlur,
-  onWindowFocus
+  onWindowFocus,
+  onState
 }
 
 var electron = require('electron')
@@ -17,11 +18,29 @@ var dialog = require('./dialog')
 var shell = require('./shell')
 var windows = require('./windows')
 
-var menu
+var menu, state
 
 function init () {
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
+}
+
+function onState (e, err, _state) {
+  console.log('[ MENU ]--> GOT STATE')
+  if (err) return onError(err)
+  state = _state
+
+  // Refresh menu
+  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  electron.Menu.setApplicationMenu(menu)
+}
+
+function onError (err) {
+  console.error(err.stack || err)
+  state.errors.push({
+    time: new Date().getTime(),
+    message: err.message || err
+  })
 }
 
 function onPlayerClose () {
@@ -253,6 +272,13 @@ function getMenuTemplate () {
           label: 'Add Subtitles File...',
           click: () => windows.main.dispatch('openSubtitles'),
           enabled: false
+        },
+        {
+          label: 'Open in VLC',
+          type: 'checkbox',
+          click: () => windows.main.dispatch('toggleOpenInVlc', getMenuItem('Open in VLC')),
+          enabled: true,
+          checked: state && state.saved.openInVlc
         }
       ]
     },

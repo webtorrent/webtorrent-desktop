@@ -53,6 +53,9 @@ function onState (err, _state) {
   if (err) return onError(err)
   state = _state
 
+  // send loaded state to main process
+  ipcRenderer.send('onState', err, _state)
+
   // Add first page to location history
   state.location.go({ url: 'home' })
 
@@ -151,13 +154,25 @@ function updateElectron () {
   }
 }
 
+function toggleOpenInVlc (menuItem) {
+  var flag = menuItem.checked
+  console.log(`toggleOpenInVlc ${flag}`)
+  state.saved.openInVlc = flag
+}
+
+function getOpenInVlc () {
+  return state.saved.openInVlc
+}
+
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
   // Log dispatch calls, for debugging
   if (!['mediaMouseMoved', 'mediaTimeUpdate'].includes(action)) {
     console.log('dispatch: %s %o', action, args)
   }
-
+  if (action === 'toggleOpenInVlc') {
+    toggleOpenInVlc(args[0])
+  }
   if (action === 'onOpen') {
     onOpen(args[0] /* files */)
   }
@@ -1057,6 +1072,15 @@ function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
     if (timedOut) {
       ipcRenderer.send('wt-stop-server')
       return update()
+    }
+
+    // play in VLC if set as default player (Menu: Playback / Open in VLC)
+    if (getOpenInVlc()) {
+      console.log('-- OPEN IN VLC', torrentSummary)
+      dispatch('vlcPlay')
+      update()
+      cb()
+      return
     }
 
     // otherwise, play the video
