@@ -1,6 +1,8 @@
 module.exports = {
   getPosterPath,
-  getTorrentPath
+  getTorrentPath,
+  getByKey,
+  getTorrentID
 }
 
 var path = require('path')
@@ -21,4 +23,23 @@ function getPosterPath (torrentSummary) {
   // Work around a Chrome bug (reproduced in vanilla Chrome, not just Electron):
   // Backslashes in URLS in CSS cause bizarre string encoding issues
   return posterPath.replace(/\\/g, '/')
+}
+
+// Expects a torrentSummary
+// Returns a torrentID: filename, magnet URI, or infohash
+function getTorrentID (torrentSummary) {
+  var s = torrentSummary
+  if (s.torrentFileName) { // Load torrent file from disk
+    return getTorrentPath(s)
+  } else { // Load torrent from DHT
+    return s.magnetURI || s.infoHash
+  }
+}
+
+// Expects a torrentKey or infoHash
+// Returns the corresponding torrentSummary, or undefined
+function getByKey (state, torrentKey) {
+  if (!torrentKey) return undefined
+  return state.saved.torrents.find((x) =>
+    x.torrentKey === torrentKey || x.infoHash === torrentKey)
 }

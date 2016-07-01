@@ -26,6 +26,7 @@ const TorrentSummary = require('./lib/torrent-summary')
 const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')
 const PrefsController = require('./controllers/prefs-controller')
+const TorrentListController = require('./controllers/torrent-list-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -59,7 +60,8 @@ function onState (err, _state) {
   controllers = {
     media: new MediaController(state),
     update: new UpdateController(state),
-    prefs: new PrefsController(state, config)
+    prefs: new PrefsController(state, config),
+    torrentList: new TorrentListController(state)
   }
 
   // Add first page to location history
@@ -170,68 +172,44 @@ function dispatch (action, ...args) {
     console.log('dispatch: %s %o', action, args)
   }
 
-  if (action === 'onOpen') {
-    onOpen(args[0] /* files */)
-  }
-  if (action === 'addTorrent') {
-    addTorrent(args[0] /* torrent */)
-  }
+  // Torrent list: creating, deleting, selecting torrents
   if (action === 'openTorrentFile') {
     ipcRenderer.send('openTorrentFile') /* open torrent file */
   }
   if (action === 'openFiles') {
     ipcRenderer.send('openFiles') /* add files with dialog */
   }
-  if (action === 'showCreateTorrent') {
-    showCreateTorrent(args[0] /* paths */)
-  }
   if (action === 'openTorrentAddress') {
     state.modal = { id: 'open-torrent-address-modal' }
   }
-  if (action === 'createTorrent') {
-    createTorrent(args[0] /* options */)
+  if (action === 'addTorrent') {
+    controllers.torrentList.addTorrent(args[0] /* torrent */)
   }
-  if (action === 'openItem') {
-    openItem(args[0] /* infoHash */, args[1] /* index */)
+  if (action === 'showCreateTorrent') {
+    controllers.torrentList.showCreateTorrent(args[0] /* paths */)
+  }
+  if (action === 'createTorrent') {
+    controllers.torrentList.createTorrent(args[0] /* options */)
   }
   if (action === 'toggleTorrent') {
-    toggleTorrent(args[0] /* infoHash */)
-  }
-  if (action === 'deleteTorrent') {
-    deleteTorrent(args[0] /* infoHash */)
-  }
-  if (action === 'toggleSelectTorrent') {
-    toggleSelectTorrent(args[0] /* infoHash */)
+    controllers.torrentList.toggleTorrent(args[0] /* infoHash */)
   }
   if (action === 'toggleTorrentFile') {
-    toggleTorrentFile(args[0] /* infoHash */, args[1] /* index */)
+    controllers.torrentList.toggleTorrentFile(args[0] /* infoHash */, args[1] /* index */)
+  }
+  if (action === 'deleteTorrent') {
+    controllers.torrentList.deleteTorrent(args[0] /* infoHash */)
+  }
+  if (action === 'toggleSelectTorrent') {
+    controllers.torrentList.toggleSelectTorrent(args[0] /* infoHash */)
   }
   if (action === 'openTorrentContextMenu') {
-    openTorrentContextMenu(args[0] /* infoHash */)
+    controllers.torrentList.openTorrentContextMenu(args[0] /* infoHash */)
   }
-  if (action === 'toggleCastMenu') {
-    lazyLoadCast().toggleMenu(args[0] /* deviceType */)
-  }
-  if (action === 'selectCastDevice') {
-    lazyLoadCast().selectDevice(args[0] /* index */)
-  }
-  if (action === 'stopCasting') {
-    lazyLoadCast().stop()
-  }
-  if (action === 'setDimensions') {
-    setDimensions(args[0] /* dimensions */)
-  }
-  if (action === 'backToList') {
-    backToList()
-  }
-  if (action === 'escapeBack') {
-    escapeBack()
-  }
-  if (action === 'back') {
-    state.location.back()
-  }
-  if (action === 'forward') {
-    state.location.forward()
+
+  // Playback
+  if (action === 'openItem') {
+    openItem(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'playPause') {
     playPause()
@@ -284,29 +262,71 @@ function dispatch (action, ...args) {
   if (action === 'vlcNotFound') {
     controllers.media.vlcNotFound()
   }
-  if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
+
+  // Casting: Chromecast, Airplay, etc
+  if (action === 'toggleCastMenu') {
+    lazyLoadCast().toggleMenu(args[0] /* deviceType */)
   }
-  if (action === 'exitModal') {
-    state.modal = null
+  if (action === 'selectCastDevice') {
+    lazyLoadCast().selectDevice(args[0] /* index */)
   }
+  if (action === 'stopCasting') {
+    lazyLoadCast().stop()
+  }
+
+  // Preferences screen
   if (action === 'preferences') {
     controllers.prefs.show()
   }
   if (action === 'updatePreferences') {
     controllers.prefs.update(args[0] /* key */, args[1] /* value */)
   }
+
+  // Update (check for new versions on Linux, where there's no auto updater)
   if (action === 'updateAvailable') {
     controllers.update.updateAvailable(args[0] /* version */)
   }
   if (action === 'skipVersion') {
     controllers.update.skipVersion(args[0] /* version */)
   }
-  if (action === 'saveState') {
-    State.save(state)
+
+  // Navigation between screens (back, forward, ESC, etc)
+  if (action === 'exitModal') {
+    state.modal = null
+  }
+  if (action === 'backToList') {
+    backToList()
+  }
+  if (action === 'escapeBack') {
+    escapeBack()
+  }
+  if (action === 'back') {
+    state.location.back()
+  }
+  if (action === 'forward') {
+    state.location.forward()
+  }
+
+  // Controlling the window
+  if (action === 'setDimensions') {
+    setDimensions(args[0] /* dimensions */)
+  }
+  if (action === 'toggleFullScreen') {
+    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
   }
   if (action === 'setTitle') {
     state.window.title = args[0] /* title */
+  }
+
+  // Everything else
+  if (action === 'onOpen') {
+    onOpen(args[0] /* files */)
+  }
+  if (action === 'saveState') {
+    State.save(state)
+  }
+  if (action === 'onError') {
+    onError(args[0] /* user-friendly error */)
   }
   if (action === 'uncaughtError') {
     telemetry.logUncaughtError(args[0] /* process */, args[1] /* error */)
@@ -316,6 +336,33 @@ function dispatch (action, ...args) {
   if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
     update()
   }
+}
+
+// Listen to events from the main and webtorrent processes
+function setupIpc () {
+  ipcRenderer.on('log', (e, ...args) => console.log(...args))
+  ipcRenderer.on('error', (e, ...args) => console.error(...args))
+
+  ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
+
+  ipcRenderer.on('fullscreenChanged', onFullscreenChanged)
+
+  ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
+  ipcRenderer.on('wt-metadata', (e, ...args) => torrentMetadata(...args))
+  ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
+  ipcRenderer.on('wt-warning', (e, ...args) => torrentWarning(...args))
+  ipcRenderer.on('wt-error', (e, ...args) => torrentError(...args))
+
+  ipcRenderer.on('wt-progress', (e, ...args) => torrentProgress(...args))
+  ipcRenderer.on('wt-file-modtimes', (e, ...args) => torrentFileModtimes(...args))
+  ipcRenderer.on('wt-file-saved', (e, ...args) => torrentFileSaved(...args))
+  ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
+  ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
+  ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
+
+  ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
+
+  ipcRenderer.send('ipcReady')
 }
 
 function play () {
@@ -441,73 +488,11 @@ function isCasting () {
     state.playing.location === 'dlna'
 }
 
-function setupIpc () {
-  ipcRenderer.on('log', (e, ...args) => console.log(...args))
-  ipcRenderer.on('error', (e, ...args) => console.error(...args))
-
-  ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
-
-  ipcRenderer.on('fullscreenChanged', function (e, isFullScreen) {
-    state.window.isFullScreen = isFullScreen
-    if (!isFullScreen) {
-      // Aspect ratio gets reset in fullscreen mode, so restore it (OS X)
-      ipcRenderer.send('setAspectRatio', state.playing.aspectRatio)
-    }
-    update()
-  })
-
-  ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
-  ipcRenderer.on('wt-metadata', (e, ...args) => torrentMetadata(...args))
-  ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
-  ipcRenderer.on('wt-warning', (e, ...args) => torrentWarning(...args))
-  ipcRenderer.on('wt-error', (e, ...args) => torrentError(...args))
-
-  ipcRenderer.on('wt-progress', (e, ...args) => torrentProgress(...args))
-  ipcRenderer.on('wt-file-modtimes', (e, ...args) => torrentFileModtimes(...args))
-  ipcRenderer.on('wt-file-saved', (e, ...args) => torrentFileSaved(...args))
-  ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
-  ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
-  ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
-
-  ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
-
-  ipcRenderer.send('ipcReady')
-}
-
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
     .filter((torrentSummary) => torrentSummary.status !== 'paused')
     .forEach((torrentSummary) => startTorrentingSummary(torrentSummary))
-}
-
-// Called when the user adds files (.torrent, files to seed, subtitles) to the app
-// via any method (drag-drop, drag to app icon, command line)
-function onOpen (files) {
-  if (!Array.isArray(files)) files = [ files ]
-
-  if (state.modal) {
-    state.modal = null
-  }
-
-  var subtitles = files.filter(isSubtitle)
-
-  if (state.location.url() === 'home' || subtitles.length === 0) {
-    if (files.every(isTorrent)) {
-      if (state.location.url() !== 'home') {
-        backToList()
-      }
-      // All .torrent files? Add them.
-      files.forEach(addTorrent)
-    } else {
-      // Show the Create Torrent screen. Let's seed those files.
-      showCreateTorrent(files)
-    }
-  } else if (state.location.url() === 'player') {
-    addSubtitles(subtitles, true)
-  }
-
-  update()
 }
 
 function isTorrent (file) {
@@ -526,28 +511,7 @@ function isSubtitle (file) {
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (torrentKey) {
-  if (!torrentKey) return undefined
-  return state.saved.torrents.find((x) =>
-    x.torrentKey === torrentKey || x.infoHash === torrentKey)
-}
-
-// Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
-// magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
-var instantIoRegex = /^(https:\/\/)?instant\.io\/#/
-function addTorrent (torrentId) {
-  backToList()
-  var torrentKey = state.nextTorrentKey++
-  var path = state.saved.prefs.downloadPath
-  if (torrentId.path) {
-    // Use path string instead of W3C File object
-    torrentId = torrentId.path
-  }
-  // Allow a instant.io link to be pasted
-  // TODO: remove this once support is added to webtorrent core
-  if (typeof torrentId === 'string' && instantIoRegex.test(torrentId)) {
-    torrentId = torrentId.slice(torrentId.indexOf('#') + 1)
-  }
-  ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+  return TorrentSummary.getByKey(state, torrentKey)
 }
 
 function addSubtitles (files, autoSelect) {
@@ -661,90 +625,9 @@ function startTorrentingSummary (torrentSummary) {
   if (!s.torrentKey) s.torrentKey = state.nextTorrentKey++
 
   // Use Downloads folder by default
-  var path = s.path || state.saved.prefs.downloadPath
+  if (!s.path) s.path = state.saved.prefs.downloadPath
 
-  var torrentID
-  if (s.torrentFileName) { // Load torrent file from disk
-    torrentID = TorrentSummary.getTorrentPath(torrentSummary)
-  } else { // Load torrent from DHT
-    torrentID = s.magnetURI || s.infoHash
-  }
-
-  console.log('start torrenting %s %s', s.torrentKey, torrentID)
-  ipcRenderer.send('wt-start-torrenting', s.torrentKey, torrentID, path, s.fileModtimes, s.selections)
-}
-
-//
-// TORRENT MANAGEMENT
-// Send commands to the WebTorrent process, handle events
-//
-
-// Shows the Create Torrent page with options to seed a given file or folder
-function showCreateTorrent (files) {
-  // Files will either be an array of file objects, which we can send directly
-  // to the create-torrent screen
-  if (files.length === 0 || typeof files[0] !== 'string') {
-    state.location.go({
-      url: 'create-torrent',
-      files: files
-    })
-    return
-  }
-
-  // ... or it will be an array of mixed file and folder paths. We have to walk
-  // through all the folders and find the files
-  findFilesRecursive(files, showCreateTorrent)
-}
-
-// Recursively finds {name, path, size} for all files in a folder
-// Calls `cb` on success, calls `onError` on failure
-function findFilesRecursive (paths, cb) {
-  if (paths.length > 1) {
-    var numComplete = 0
-    var ret = []
-    paths.forEach(function (path) {
-      findFilesRecursive([path], function (fileObjs) {
-        ret = ret.concat(fileObjs)
-        if (++numComplete === paths.length) {
-          ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
-          cb(ret)
-        }
-      })
-    })
-    return
-  }
-
-  var fileOrFolder = paths[0]
-  fs.stat(fileOrFolder, function (err, stat) {
-    if (err) return onError(err)
-
-    // Files: return name, path, and size
-    if (!stat.isDirectory()) {
-      var filePath = fileOrFolder
-      return cb([{
-        name: path.basename(filePath),
-        path: filePath,
-        size: stat.size
-      }])
-    }
-
-    // Folders: recurse, make a list of all the files
-    var folderPath = fileOrFolder
-    fs.readdir(folderPath, function (err, fileNames) {
-      if (err) return onError(err)
-      var paths = fileNames.map((fileName) => path.join(folderPath, fileName))
-      findFilesRecursive(paths, cb)
-    })
-  })
-}
-
-// Creates a new torrent and start seeeding
-function createTorrent (options) {
-  var torrentKey = state.nextTorrentKey++
-  ipcRenderer.send('wt-create-torrent', torrentKey, options)
-  state.location.backToFirst(function () {
-    state.location.clearForward('create-torrent')
-  })
+  ipcRenderer.send('wt-start-torrenting', s)
 }
 
 function torrentInfoHash (torrentKey, infoHash) {
@@ -1063,131 +946,12 @@ function openItem (infoHash, index) {
   ipcRenderer.send('openItem', filePath)
 }
 
-// TODO: use torrentKey, not infoHash
-function toggleTorrent (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  if (torrentSummary.status === 'paused') {
-    torrentSummary.status = 'new'
-    startTorrentingSummary(torrentSummary)
-    sound.play('ENABLE')
-  } else {
-    torrentSummary.status = 'paused'
-    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-    sound.play('DISABLE')
-  }
-}
-
-// TODO: use torrentKey, not infoHash
-function deleteTorrent (infoHash, deleteData) {
-  ipcRenderer.send('wt-stop-torrenting', infoHash)
-
-  if (deleteData) {
-    var torrentSummary = getTorrentSummary(infoHash)
-    moveItemToTrash(torrentSummary)
-  }
-
-  var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
-  if (index > -1) state.saved.torrents.splice(index, 1)
-  State.saveThrottled(state)
-  state.location.clearForward('player') // prevent user from going forward to a deleted torrent
-  sound.play('DELETE')
-}
-
-function toggleSelectTorrent (infoHash) {
-  // toggle selection
-  state.selectedInfoHash = state.selectedInfoHash === infoHash ? null : infoHash
-  update()
-}
-
-function toggleTorrentFile (infoHash, index) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  torrentSummary.selections[index] = !torrentSummary.selections[index]
-
-  // Let the WebTorrent process know to start or stop fetching that file
-  ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
-}
-
-function openTorrentContextMenu (infoHash) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  var menu = new electron.remote.Menu()
-
-  menu.append(new electron.remote.MenuItem({
-    label: 'Remove From List',
-    click: () => deleteTorrent(torrentSummary.infoHash, false)
-  }))
-
-  menu.append(new electron.remote.MenuItem({
-    label: 'Remove Data File',
-    click: () => deleteTorrent(torrentSummary.infoHash, true)
-  }))
-
-  menu.append(new electron.remote.MenuItem({
-    type: 'separator'
-  }))
-
-  if (torrentSummary.files) {
-    menu.append(new electron.remote.MenuItem({
-      label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
-      click: () => showItemInFolder(torrentSummary)
-    }))
-    menu.append(new electron.remote.MenuItem({
-      type: 'separator'
-    }))
-  }
-
-  menu.append(new electron.remote.MenuItem({
-    label: 'Copy Magnet Link to Clipboard',
-    click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
-  }))
-
-  menu.append(new electron.remote.MenuItem({
-    label: 'Copy Instant.io Link to Clipboard',
-    click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
-  }))
-
-  menu.append(new electron.remote.MenuItem({
-    label: 'Save Torrent File As...',
-    click: () => saveTorrentFileAs(torrentSummary)
-  }))
-
-  menu.popup(electron.remote.getCurrentWindow())
-}
-
 function getTorrentPath (torrentSummary) {
   var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
   if (torrentSummary.files.length > 1) {
     itemPath = path.dirname(itemPath)
   }
   return itemPath
-}
-
-function showItemInFolder (torrentSummary) {
-  ipcRenderer.send('showItemInFolder', getTorrentPath(torrentSummary))
-}
-
-function moveItemToTrash (torrentSummary) {
-  ipcRenderer.send('moveItemToTrash', getTorrentPath(torrentSummary))
-}
-
-function saveTorrentFileAs (torrentSummary) {
-  var newFileName = `${path.parse(torrentSummary.name).name}.torrent`
-  var opts = {
-    title: 'Save Torrent File',
-    defaultPath: path.join(state.saved.prefs.downloadPath, newFileName),
-    filters: [
-      { name: 'Torrent Files', extensions: ['torrent'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
-  }
-  electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
-    var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-    fs.readFile(torrentPath, function (err, torrentFile) {
-      if (err) return onError(err)
-      fs.writeFile(savePath, torrentFile, function (err) {
-        if (err) return onError(err)
-      })
-    })
-  })
 }
 
 // Set window dimensions to match video dimensions or fill the screen
@@ -1268,7 +1032,35 @@ function showOrHidePlayerControls () {
   return false
 }
 
-// Event handlers
+// Called when the user adds files (.torrent, files to seed, subtitles) to the app
+// via any method (drag-drop, drag to app icon, command line)
+function onOpen (files) {
+  if (!Array.isArray(files)) files = [ files ]
+
+  if (state.modal) {
+    state.modal = null
+  }
+
+  var subtitles = files.filter(isSubtitle)
+
+  if (state.location.url() === 'home' || subtitles.length === 0) {
+    if (files.every(isTorrent)) {
+      if (state.location.url() !== 'home') {
+        backToList()
+      }
+      // All .torrent files? Add them.
+      files.forEach((file) => controllers.torrentList.addTorrent(file))
+    } else {
+      // Show the Create Torrent screen. Let's seed those files.
+      controllers.torrentList.showCreateTorrent(files)
+    }
+  } else if (state.location.url() === 'player') {
+    addSubtitles(subtitles, true)
+  }
+
+  update()
+}
+
 function onError (err) {
   console.error(err.stack || err)
   sound.play('ERROR')
@@ -1276,6 +1068,7 @@ function onError (err) {
     time: new Date().getTime(),
     message: err.message || err
   })
+
   update()
 }
 
@@ -1290,7 +1083,7 @@ function onPaste (e) {
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return
-    addTorrent(torrentId)
+    controllers.torrentList.addTorrent(torrentId)
   })
 
   update()
@@ -1309,4 +1102,14 @@ function onBlur () {
 
 function onVisibilityChange () {
   state.window.isVisible = !document.webkitHidden
+}
+
+function onFullscreenChanged (e, isFullScreen) {
+  state.window.isFullScreen = isFullScreen
+  if (!isFullScreen) {
+    // Aspect ratio gets reset in fullscreen mode, so restore it (OS X)
+    ipcRenderer.send('setAspectRatio', state.playing.aspectRatio)
+  }
+
+  update()
 }
