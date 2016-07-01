@@ -25,6 +25,7 @@ const TorrentSummary = require('./lib/torrent-summary')
 
 const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')
+const PrefsController = require('./controllers/prefs-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -57,7 +58,8 @@ function onState (err, _state) {
   // Create controllers
   controllers = {
     media: new MediaController(state),
-    update: new UpdateController(state)
+    update: new UpdateController(state),
+    prefs: new PrefsController(state, config)
   }
 
   // Add first page to location history
@@ -289,10 +291,10 @@ function dispatch (action, ...args) {
     state.modal = null
   }
   if (action === 'preferences') {
-    goToPreferences()
+    controllers.prefs.show()
   }
   if (action === 'updatePreferences') {
-    updatePreferences(args[0] /* key */, args[1] /* value */)
+    controllers.prefs.update(args[0] /* key */, args[1] /* value */)
   }
   if (action === 'updateAvailable') {
     controllers.update.updateAvailable(args[0] /* version */)
@@ -477,28 +479,6 @@ function resumeTorrents () {
   state.saved.torrents
     .filter((torrentSummary) => torrentSummary.status !== 'paused')
     .forEach((torrentSummary) => startTorrentingSummary(torrentSummary))
-}
-
-// Updates a single property in the UNSAVED prefs
-// For example: updatePreferences("foo.bar", "baz")
-// Call savePreferences to save to config.json
-function updatePreferences (property, value) {
-  var path = property.split('.')
-  var key = state.unsaved.prefs
-  for (var i = 0; i < path.length - 1; i++) {
-    if (typeof key[path[i]] === 'undefined') {
-      key[path[i]] = {}
-    }
-    key = key[path[i]]
-  }
-  key[path[i]] = value
-}
-
-// All unsaved prefs take effect atomically, and are saved to config.json
-function savePreferences () {
-  state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
-  State.save(state)
-  update()
 }
 
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
@@ -949,24 +929,6 @@ function playFile (infoHash, index) {
     onbeforeunload: closePlayer
   }, function (err) {
     if (err) onError(err)
-  })
-}
-
-function goToPreferences () {
-  state.location.go({
-    url: 'preferences',
-    onbeforeload: function (cb) {
-      // initialize preferences
-      state.window.title = 'Preferences'
-      state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
-      cb()
-    },
-    onbeforeunload: function (cb) {
-      // save state after preferences
-      savePreferences()
-      state.window.title = config.APP_WINDOW_TITLE
-      cb()
-    }
   })
 }
 
