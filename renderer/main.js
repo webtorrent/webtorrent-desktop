@@ -5,9 +5,7 @@ crashReporter.init()
 
 const dragDrop = require('drag-drop')
 const electron = require('electron')
-const fs = require('fs-extra')
 const mainLoop = require('main-loop')
-const parallel = require('run-parallel')
 const path = require('path')
 
 const createElement = require('virtual-dom/create-element')
@@ -17,7 +15,6 @@ const patch = require('virtual-dom/patch')
 const config = require('../config')
 const App = require('./views/app')
 const telemetry = require('./lib/telemetry')
-const errors = require('./lib/errors')
 const sound = require('./lib/sound')
 const State = require('./lib/state')
 const TorrentPlayer = require('./lib/torrent-player')
@@ -27,6 +24,8 @@ const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')
 const PrefsController = require('./controllers/prefs-controller')
 const TorrentListController = require('./controllers/torrent-list-controller')
+const PlaybackController = require('./controllers/playback-controller')
+const SubtitlesController = require('./controllers/subtitles-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -61,7 +60,9 @@ function onState (err, _state) {
     media: new MediaController(state),
     update: new UpdateController(state),
     prefs: new PrefsController(state, config),
-    torrentList: new TorrentListController(state)
+    torrentList: new TorrentListController(state),
+    playback: new PlaybackController(state, config, update),
+    subtitles: new SubtitlesController(state)
   }
 
   // Add first page to location history
@@ -143,7 +144,7 @@ function render (state) {
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 function update () {
-  showOrHidePlayerControls()
+  controllers.playback.showOrHidePlayerControls()
   vdomLoop.update(state)
   updateElectron()
 }
@@ -206,41 +207,48 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentContextMenu') {
     controllers.torrentList.openTorrentContextMenu(args[0] /* infoHash */)
   }
+  if (action === 'startTorrentingSummary') {
+    startTorrentingSummary(args[0] /* torrentSummary */)
+  }
 
   // Playback
-  if (action === 'openItem') {
-    openItem(args[0] /* infoHash */, args[1] /* index */)
+  if (action === 'playFile') {
+    controllers.playback.playFile(args[0] /* infoHash */, args[1] /* index */)
   }
   if (action === 'playPause') {
-    playPause()
+    controllers.playback.playPause()
   }
-  if (action === 'play') {
-    playFile(args[0] /* infoHash */, args[1] /* index */)
-  }
-  if (action === 'playbackJump') {
-    jumpToTime(args[0] /* seconds */)
-  }
-  if (action === 'skip') {
-    jumpToTime(state.playing.currentTime + (args[0] /* direction */ * 10))
+  if (action === 'skipTo') {
+    controllers.playback.skipTo(args[0] /* seconds */)
   }
   if (action === 'changePlaybackRate') {
-    changePlaybackRate(args[0] /* direction */)
+    controllers.playback.changePlaybackRate(args[0] /* direction */)
   }
   if (action === 'changeVolume') {
-    changeVolume(args[0] /* increase */)
+    controllers.playback.changeVolume(args[0] /* increase */)
   }
   if (action === 'setVolume') {
-    setVolume(args[0] /* increase */)
+    controllers.playback.setVolume(args[0] /* increase */)
   }
+  if (action === 'openItem') {
+    controllers.playback.openItem(args[0] /* infoHash */, args[1] /* index */)
+  }
+
+  // Subtitles
   if (action === 'openSubtitles') {
-    openSubtitles()
+    controllers.subtitles.openSubtitles()
   }
   if (action === 'selectSubtitle') {
-    selectSubtitle(args[0] /* index */)
+    controllers.subtitles.selectSubtitle(args[0] /* index */)
   }
   if (action === 'toggleSubtitlesMenu') {
-    toggleSubtitlesMenu()
+    controllers.subtitles.toggleSubtitlesMenu()
   }
+  if (action === 'checkForSubtitles') {
+    controllers.subtitles.checkForSubtitles()
+  }
+
+  // Local media: <video>, <audio>, VLC
   if (action === 'mediaStalled') {
     controllers.media.mediaStalled()
   }
@@ -263,7 +271,7 @@ function dispatch (action, ...args) {
     controllers.media.vlcNotFound()
   }
 
-  // Casting: Chromecast, Airplay, etc
+  // Remote casting: Chromecast, Airplay, etc
   if (action === 'toggleCastMenu') {
     lazyLoadCast().toggleMenu(args[0] /* deviceType */)
   }
@@ -333,7 +341,8 @@ function dispatch (action, ...args) {
   }
 
   // Update the virtual-dom, unless it's just a mouse move event
-  if (action !== 'mediaMouseMoved' || showOrHidePlayerControls()) {
+  if (action !== 'mediaMouseMoved' ||
+      controllers.playback.showOrHidePlayerControls()) {
     update()
   }
 }
@@ -365,91 +374,6 @@ function setupIpc () {
   ipcRenderer.send('ipcReady')
 }
 
-function play () {
-  if (!state.playing.isPaused) return
-  state.playing.isPaused = false
-  if (isCasting()) {
-    Cast.play()
-  }
-  ipcRenderer.send('onPlayerPlay')
-}
-
-function pause () {
-  if (state.playing.isPaused) return
-  state.playing.isPaused = true
-  if (isCasting()) {
-    Cast.pause()
-  }
-  ipcRenderer.send('onPlayerPause')
-}
-
-function playPause () {
-  if (state.location.url() !== 'player') return
-
-  if (state.playing.isPaused) {
-    play()
-  } else {
-    pause()
-  }
-
-  // force rerendering if window is hidden,
-  // in order to bypass `raf` and play/pause media immediately
-  if (!state.window.isVisible) render(state)
-}
-
-function jumpToTime (time) {
-  if (isCasting()) {
-    Cast.seek(time)
-  } else {
-    state.playing.jumpToTime = time
-  }
-}
-function changePlaybackRate (direction) {
-  var rate = state.playing.playbackRate
-  if (direction > 0 && rate >= 0.25 && rate < 2) {
-    rate += 0.25
-  } else if (direction < 0 && rate > 0.25 && rate <= 2) {
-    rate -= 0.25
-  } else if (direction < 0 && rate === 0.25) { /* when we set playback rate at 0 in html 5, playback hangs ;( */
-    rate = -1
-  } else if (direction > 0 && rate === -1) {
-    rate = 0.25
-  } else if ((direction > 0 && rate >= 1 && rate < 16) || (direction < 0 && rate > -16 && rate <= -1)) {
-    rate *= 2
-  } else if ((direction < 0 && rate > 1 && rate <= 16) || (direction > 0 && rate >= -16 && rate < -1)) {
-    rate /= 2
-  }
-  state.playing.playbackRate = rate
-  if (lazyLoadCast().isCasting() && !Cast.setRate(rate)) {
-    state.playing.playbackRate = 1
-  }
-}
-function changeVolume (delta) {
-  // change volume with delta value
-  setVolume(state.playing.volume + delta)
-}
-
-function setVolume (volume) {
-  // check if its in [0.0 - 1.0] range
-  volume = Math.max(0, Math.min(1, volume))
-  if (isCasting()) {
-    Cast.setVolume(volume)
-  } else {
-    state.playing.setVolume = volume
-  }
-}
-
-function openSubtitles () {
-  electron.remote.dialog.showOpenDialog({
-    title: 'Select a subtitles file.',
-    filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
-    properties: [ 'openFile' ]
-  }, function (filenames) {
-    if (!Array.isArray(filenames)) return
-    addSubtitles(filenames, true)
-  })
-}
-
 // Quits any modal popovers and returns to the torrent list screen
 function backToList () {
   // Exit any modals and screens with a back button
@@ -479,15 +403,6 @@ function escapeBack () {
   }
 }
 
-// Checks whether we are connected and already casting
-// Returns false if we not casting (state.playing.location === 'local')
-// or if we're trying to connect but haven't yet ('chromecast-pending', etc)
-function isCasting () {
-  return state.playing.location === 'chromecast' ||
-    state.playing.location === 'airplay' ||
-    state.playing.location === 'dlna'
-}
-
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
@@ -502,119 +417,10 @@ function isTorrent (file) {
   return isTorrentFile || isMagnet
 }
 
-function isSubtitle (file) {
-  var name = typeof file === 'string' ? file : file.name
-  var ext = path.extname(name).toLowerCase()
-  return ext === '.srt' || ext === '.vtt'
-}
-
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (torrentKey) {
   return TorrentSummary.getByKey(state, torrentKey)
-}
-
-function addSubtitles (files, autoSelect) {
-  // Subtitles are only supported when playing video files
-  if (state.playing.type !== 'video') return
-  if (files.length === 0) return
-
-  // Read the files concurrently, then add all resulting subtitle tracks
-  var tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
-  parallel(tasks, function (err, tracks) {
-    if (err) return onError(err)
-
-    for (var i = 0; i < tracks.length; i++) {
-      // No dupes allowed
-      var track = tracks[i]
-      if (state.playing.subtitles.tracks.some(
-        (t) => track.filePath === t.filePath)) continue
-
-      // Add the track
-      state.playing.subtitles.tracks.push(track)
-
-      // If we're auto-selecting a track, try to find one in the user's language
-      if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
-        state.playing.subtitles.selectedIndex =
-          state.playing.subtitles.tracks.length - 1
-      }
-    }
-
-    // Finally, make sure no two tracks have the same label
-    relabelSubtitles()
-  })
-}
-
-function loadSubtitle (file, cb) {
-  var concat = require('simple-concat')
-  var LanguageDetect = require('languagedetect')
-  var srtToVtt = require('srt-to-vtt')
-
-  // Read the .SRT or .VTT file, parse it, add subtitle track
-  var filePath = file.path || file
-
-  var vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
-
-  concat(vttStream, function (err, buf) {
-    if (err) return onError(new Error('Error parsing subtitles file.'))
-
-    // Detect what language the subtitles are in
-    var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
-    var langDetected = (new LanguageDetect()).detect(vttContents, 2)
-    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
-    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
-
-    var track = {
-      buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
-      language: langDetected,
-      label: langDetected,
-      filePath: filePath
-    }
-
-    cb(null, track)
-  })
-}
-
-function selectSubtitle (ix) {
-  state.playing.subtitles.selectedIndex = ix
-}
-
-// Checks whether a language name like "English" or "German" matches the system
-// language, aka the current locale
-function isSystemLanguage (language) {
-  var iso639 = require('iso-639-1')
-  var osLangISO = window.navigator.language.split('-')[0] // eg "en"
-  var langIso = iso639.getCode(language) // eg "de" if language is "German"
-  return langIso === osLangISO
-}
-
-// Make sure we don't have two subtitle tracks with the same label
-// Labels each track by language, eg "German", "English", "English 2", ...
-function relabelSubtitles () {
-  var counts = {}
-  state.playing.subtitles.tracks.forEach(function (track) {
-    var lang = track.language
-    counts[lang] = (counts[lang] || 0) + 1
-    track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
-  })
-}
-
-function checkForSubtitles () {
-  if (state.playing.type !== 'video') return
-  var torrentSummary = state.getPlayingTorrentSummary()
-  if (!torrentSummary || !torrentSummary.progress) return
-
-  torrentSummary.progress.files.forEach(function (fp, ix) {
-    if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
-    var file = torrentSummary.files[ix]
-    if (!isSubtitle(file.name)) return
-    var filePath = path.join(torrentSummary.path, file.path)
-    addSubtitles([filePath], false)
-  })
-}
-
-function toggleSubtitlesMenu () {
-  state.playing.subtitles.showMenu = !state.playing.subtitles.showMenu
 }
 
 // Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
@@ -690,7 +496,7 @@ function torrentMetadata (torrentKey, torrentInfo) {
   if (!torrentSummary.selections) {
     torrentSummary.selections = torrentSummary.files.map((x) => true)
   }
-  torrentSummary.defaultPlayFileIndex = pickFileToPlay(torrentInfo.files)
+  torrentSummary.defaultPlayFileIndex = TorrentPlayer.pickFileToPlay(torrentInfo.files)
   update()
 
   // Save the .torrent file, if it hasn't been saved already
@@ -780,172 +586,6 @@ function torrentServerRunning (serverInfo) {
   state.server = serverInfo
 }
 
-// Picks the default file to play from a list of torrent or torrentSummary files
-// Returns an index or undefined, if no files are playable
-function pickFileToPlay (files) {
-  // first, try to find the biggest video file
-  var videoFiles = files.filter(TorrentPlayer.isVideo)
-  if (videoFiles.length > 0) {
-    var largestVideoFile = videoFiles.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    return files.indexOf(largestVideoFile)
-  }
-
-  // if there are no videos, play the first audio file
-  var audioFiles = files.filter(TorrentPlayer.isAudio)
-  if (audioFiles.length > 0) {
-    return files.indexOf(audioFiles[0])
-  }
-
-  // no video or audio means nothing is playable
-  return undefined
-}
-
-function playFile (infoHash, index) {
-  state.location.go({
-    url: 'player',
-    onbeforeload: function (cb) {
-      play()
-      openPlayer(infoHash, index, cb)
-    },
-    onbeforeunload: closePlayer
-  }, function (err) {
-    if (err) onError(err)
-  })
-}
-
-// Opens the video player to a specific torrent
-function openPlayer (infoHash, index, cb) {
-  var torrentSummary = getTorrentSummary(infoHash)
-
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
-
-  // update UI to show pending playback
-  if (torrentSummary.progress !== 1) sound.play('PLAY')
-  // TODO: remove torrentSummary.playStatus
-  torrentSummary.playStatus = 'requested'
-  update()
-
-  var timeout = setTimeout(function () {
-    telemetry.logPlayAttempt('timeout')
-    // TODO: remove torrentSummary.playStatus
-    torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    sound.play('ERROR')
-    cb(new Error('Playback timed out. Try again.'))
-    update()
-  }, 10000) /* give it a few seconds */
-
-  if (torrentSummary.status === 'paused') {
-    startTorrentingSummary(torrentSummary)
-    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
-      () => openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
-  } else {
-    openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
-  }
-}
-
-function openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
-  var fileSummary = torrentSummary.files[index]
-
-  // update state
-  state.playing.infoHash = torrentSummary.infoHash
-  state.playing.fileIndex = index
-  state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-    : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-    : 'other'
-
-  // pick up where we left off
-  if (fileSummary.currentTime) {
-    var fraction = fileSummary.currentTime / fileSummary.duration
-    var secondsLeft = fileSummary.duration - fileSummary.currentTime
-    if (fraction < 0.9 && secondsLeft > 10) {
-      state.playing.jumpToTime = fileSummary.currentTime
-    }
-  }
-
-  // if it's audio, parse out the metadata (artist, title, etc)
-  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-    ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
-  }
-
-  // if it's video, check for subtitles files that are done downloading
-  checkForSubtitles()
-
-  ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
-  ipcRenderer.once('wt-server-' + torrentSummary.infoHash, function (e, info) {
-    clearTimeout(timeout)
-
-    // if we timed out (user clicked play a long time ago), don't autoplay
-    var timedOut = torrentSummary.playStatus === 'timeout'
-    delete torrentSummary.playStatus
-    if (timedOut) {
-      ipcRenderer.send('wt-stop-server')
-      return update()
-    }
-
-    // otherwise, play the video
-    state.window.title = torrentSummary.files[state.playing.fileIndex].name
-    update()
-
-    ipcRenderer.send('onPlayerOpen')
-
-    cb()
-  })
-}
-
-function closePlayer (cb) {
-  console.log('closePlayer')
-
-  // Quit any external players, like Chromecast/Airplay/etc or VLC
-  if (isCasting()) {
-    Cast.stop()
-  }
-  if (state.playing.location === 'vlc') {
-    ipcRenderer.send('vlcQuit')
-  }
-
-  // Save volume (this session only, not in state.saved)
-  state.previousVolume = state.playing.volume
-
-  // Telemetry: track what happens after the user clicks play
-  var result = state.playing.result // 'success' or 'error'
-  if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
-  else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
-  else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user exited before first frame
-  else console.error('Unknown state.playing.result', state.playing.result)
-
-  // Reset the window contents back to the home screen
-  state.window.title = config.APP_WINDOW_TITLE
-  state.playing = State.getDefaultPlayState()
-  state.server = null
-
-  // Reset the window size and location back to where it was
-  if (state.window.isFullScreen) {
-    dispatch('toggleFullScreen', false)
-  }
-  restoreBounds()
-
-  // Tell the WebTorrent process to kill the torrent-to-HTTP server
-  ipcRenderer.send('wt-stop-server')
-
-  ipcRenderer.send('onPlayerClose')
-
-  update()
-  cb()
-}
-
-function openItem (infoHash, index) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  var filePath = path.join(
-    torrentSummary.path,
-    torrentSummary.files[index].path)
-  ipcRenderer.send('openItem', filePath)
-}
-
 function getTorrentPath (torrentSummary) {
   var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
   if (torrentSummary.files.length > 1) {
@@ -993,13 +633,6 @@ function setDimensions (dimensions) {
   state.playing.aspectRatio = aspectRatio
 }
 
-function restoreBounds () {
-  ipcRenderer.send('setAspectRatio', 0)
-  if (state.window.bounds) {
-    ipcRenderer.send('setBounds', state.window.bounds, false)
-  }
-}
-
 function showDoneNotification (torrent) {
   var notif = new window.Notification('Download Complete', {
     body: torrent.name,
@@ -1013,25 +646,6 @@ function showDoneNotification (torrent) {
   sound.play('DONE')
 }
 
-// Hide player controls while playing video, if the mouse stays still for a while
-// Never hide the controls when:
-// * The mouse is over the controls or we're scrubbing (see CSS)
-// * The video is paused
-// * The video is playing remotely on Chromecast or Airplay
-function showOrHidePlayerControls () {
-  var hideControls = state.location.url() === 'player' &&
-    state.playing.mouseStationarySince !== 0 &&
-    new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
-    !state.playing.isPaused &&
-    state.playing.location === 'local'
-
-  if (hideControls !== state.playing.hideControls) {
-    state.playing.hideControls = hideControls
-    return true
-  }
-  return false
-}
-
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
 // via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
@@ -1041,7 +655,7 @@ function onOpen (files) {
     state.modal = null
   }
 
-  var subtitles = files.filter(isSubtitle)
+  var subtitles = files.filter(controllers.subtitles.isSubtitle)
 
   if (state.location.url() === 'home' || subtitles.length === 0) {
     if (files.every(isTorrent)) {
@@ -1055,7 +669,7 @@ function onOpen (files) {
       controllers.torrentList.showCreateTorrent(files)
     }
   } else if (state.location.url() === 'player') {
-    addSubtitles(subtitles, true)
+    controllers.subtitles.addSubtitles(subtitles, true)
   }
 
   update()
