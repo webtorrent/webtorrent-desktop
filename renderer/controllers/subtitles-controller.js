@@ -31,10 +31,11 @@ module.exports = class SubtitlesController {
   }
 
   addSubtitles (files, autoSelect) {
+    var state = this.state
     // Subtitles are only supported when playing video files
-    if (this.state.playing.type !== 'video') return
+    if (state.playing.type !== 'video') return
     if (files.length === 0) return
-    var subtitles = this.state.playing.subtitles
+    var subtitles = state.playing.subtitles
 
     // Read the files concurrently, then add all resulting subtitle tracks
     var tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
@@ -44,15 +45,17 @@ module.exports = class SubtitlesController {
       for (var i = 0; i < tracks.length; i++) {
         // No dupes allowed
         var track = tracks[i]
-        if (subtitles.tracks.some(
-          (t) => track.filePath === t.filePath)) continue
+        var trackIndex = state.playing.subtitles.tracks
+          .findIndex((t) => track.filePath === t.filePath)
 
         // Add the track
-        subtitles.tracks.push(track)
+        if (trackIndex === -1) {
+          trackIndex = state.playing.subtitles.tracks.push(track) - 1
+        }
 
         // If we're auto-selecting a track, try to find one in the user's language
         if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
-          subtitles.selectedIndex = subtitles.tracks.length - 1
+          state.playing.subtitles.selectedIndex = trackIndex
         }
       }
 
