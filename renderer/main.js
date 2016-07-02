@@ -166,6 +166,79 @@ function updateElectron () {
   }
 }
 
+const dispatchHandlers = {
+  // Torrent list: creating, deleting, selecting torrents
+  'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
+  'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
+  'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
+
+  'addTorrent': (torrentId) => controllers.torrentList.addTorrent(torrentId),
+  'showCreateTorrent': (paths) => controllers.torrentList.showCreateTorrent(paths),
+  'createTorrent': (options) => controllers.torrentList.createTorrent(options),
+  'toggleTorrent': (infoHash) => controllers.torrentList.toggleTorrent(infoHash),
+  'toggleTorrentFile': (infoHash, index) => controllers.torrentList.toggleTorrentFile(infoHash, index),
+  'deleteTorrent': (infoHash) => controllers.torrentList.deleteTorrent(infoHash),
+  'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
+  'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
+
+  'startTorrentingSummary': startTorrentingSummary,
+
+  // Playback
+  'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
+  'playPause': () => controllers.playback.playPause(),
+  'skipTo': (time) => controllers.playback.skipTo(time),
+  'changePlaybackRate': (dir) => controllers.playback.changePlaybackRate(dir),
+  'changeVolume': (delta) => controllers.playback.changeVolume(delta),
+  'setVolume': (vol) => controllers.playback.setVolume(vol),
+  'openItem': (infoHash, index) => controllers.playback.openItem(infoHash, index),
+
+  // Subtitles
+  'openSubtitles': () => controllers.subtitles.openSubtitles(),
+  'selectSubtitle': (index) => controllers.subtitles.selectSubtitle(index),
+  'toggleSubtitlesMenu': () => controllers.subtitles.toggleSubtitlesMenu(),
+  'checkForSubtitles': () => controllers.subtitles.checkForSubtitles(),
+
+  // Local media: <video>, <audio>, VLC
+  'mediaStalled': () => controllers.media.mediaStalled(),
+  'mediaError': (err) => controllers.media.mediaError(err),
+  'mediaSuccess': () => controllers.media.mediaSuccess(),
+  'mediaTimeUpdate': () => controllers.media.mediaTimeUpdate(),
+  'mediaMouseMoved': () => controllers.media.mediaMouseMoved(),
+  'vlcPlay': () => controllers.media.vlcPlay(),
+  'vlcNotFound': () => controllers.media.vlcNotFound(),
+
+  // Remote casting: Chromecast, Airplay, etc
+  'toggleCastMenu': (deviceType) => lazyLoadCast().toggleMenu(deviceType),
+  'selectCastDevice': (index) => lazyLoadCast().selectDevice(index),
+  'stopCasting': () => lazyLoadCast().stop(),
+
+  // Preferences screen
+  'preferences': () => controllers.prefs.show(),
+  'updatePreferences': (key, value) => controllers.prefs.update(key, value),
+
+  // Update (check for new versions on Linux, where there's no auto updater)
+  'updateAvailable': (version) => controllers.update.updateAvailable(version),
+  'skipVersion': (version) => controllers.update.skipVersion(version),
+
+  // Navigation between screens (back, forward, ESC, etc)
+  'exitModal': () => { state.modal = null },
+  'backToList': backToList,
+  'escapeBack': escapeBack,
+  'back': () => state.location.back(),
+  'forward': () => state.location.forward(),
+
+  // Controlling the window
+  'setDimensions': (dimensions) => setDimensions(dimensions),
+  'toggleFullScreen': (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
+  'setTitle': (title) => { state.window.title = title },
+
+  // Everything else
+  'onOpen': (files) => onOpen(files),
+  'saveState': (state) => State.save(state),
+  'onError': (err) => onError(err),
+  'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err)
+}
+
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
   // Log dispatch calls, for debugging
@@ -173,172 +246,9 @@ function dispatch (action, ...args) {
     console.log('dispatch: %s %o', action, args)
   }
 
-  // Torrent list: creating, deleting, selecting torrents
-  if (action === 'openTorrentFile') {
-    ipcRenderer.send('openTorrentFile') /* open torrent file */
-  }
-  if (action === 'openFiles') {
-    ipcRenderer.send('openFiles') /* add files with dialog */
-  }
-  if (action === 'openTorrentAddress') {
-    state.modal = { id: 'open-torrent-address-modal' }
-  }
-  if (action === 'addTorrent') {
-    controllers.torrentList.addTorrent(args[0] /* torrent */)
-  }
-  if (action === 'showCreateTorrent') {
-    controllers.torrentList.showCreateTorrent(args[0] /* paths */)
-  }
-  if (action === 'createTorrent') {
-    controllers.torrentList.createTorrent(args[0] /* options */)
-  }
-  if (action === 'toggleTorrent') {
-    controllers.torrentList.toggleTorrent(args[0] /* infoHash */)
-  }
-  if (action === 'toggleTorrentFile') {
-    controllers.torrentList.toggleTorrentFile(args[0] /* infoHash */, args[1] /* index */)
-  }
-  if (action === 'deleteTorrent') {
-    controllers.torrentList.deleteTorrent(args[0] /* infoHash */)
-  }
-  if (action === 'toggleSelectTorrent') {
-    controllers.torrentList.toggleSelectTorrent(args[0] /* infoHash */)
-  }
-  if (action === 'openTorrentContextMenu') {
-    controllers.torrentList.openTorrentContextMenu(args[0] /* infoHash */)
-  }
-  if (action === 'startTorrentingSummary') {
-    startTorrentingSummary(args[0] /* torrentSummary */)
-  }
-
-  // Playback
-  if (action === 'playFile') {
-    controllers.playback.playFile(args[0] /* infoHash */, args[1] /* index */)
-  }
-  if (action === 'playPause') {
-    controllers.playback.playPause()
-  }
-  if (action === 'skipTo') {
-    controllers.playback.skipTo(args[0] /* seconds */)
-  }
-  if (action === 'changePlaybackRate') {
-    controllers.playback.changePlaybackRate(args[0] /* direction */)
-  }
-  if (action === 'changeVolume') {
-    controllers.playback.changeVolume(args[0] /* increase */)
-  }
-  if (action === 'setVolume') {
-    controllers.playback.setVolume(args[0] /* increase */)
-  }
-  if (action === 'openItem') {
-    controllers.playback.openItem(args[0] /* infoHash */, args[1] /* index */)
-  }
-
-  // Subtitles
-  if (action === 'openSubtitles') {
-    controllers.subtitles.openSubtitles()
-  }
-  if (action === 'selectSubtitle') {
-    controllers.subtitles.selectSubtitle(args[0] /* index */)
-  }
-  if (action === 'toggleSubtitlesMenu') {
-    controllers.subtitles.toggleSubtitlesMenu()
-  }
-  if (action === 'checkForSubtitles') {
-    controllers.subtitles.checkForSubtitles()
-  }
-
-  // Local media: <video>, <audio>, VLC
-  if (action === 'mediaStalled') {
-    controllers.media.mediaStalled()
-  }
-  if (action === 'mediaError') {
-    controllers.media.mediaError(args[0] /* error */)
-  }
-  if (action === 'mediaSuccess') {
-    controllers.media.mediaSuccess()
-  }
-  if (action === 'mediaTimeUpdate') {
-    controllers.media.mediaTimeUpdate()
-  }
-  if (action === 'mediaMouseMoved') {
-    controllers.media.mediaMouseMoved()
-  }
-  if (action === 'vlcPlay') {
-    controllers.media.vlcPlay()
-  }
-  if (action === 'vlcNotFound') {
-    controllers.media.vlcNotFound()
-  }
-
-  // Remote casting: Chromecast, Airplay, etc
-  if (action === 'toggleCastMenu') {
-    lazyLoadCast().toggleMenu(args[0] /* deviceType */)
-  }
-  if (action === 'selectCastDevice') {
-    lazyLoadCast().selectDevice(args[0] /* index */)
-  }
-  if (action === 'stopCasting') {
-    lazyLoadCast().stop()
-  }
-
-  // Preferences screen
-  if (action === 'preferences') {
-    controllers.prefs.show()
-  }
-  if (action === 'updatePreferences') {
-    controllers.prefs.update(args[0] /* key */, args[1] /* value */)
-  }
-
-  // Update (check for new versions on Linux, where there's no auto updater)
-  if (action === 'updateAvailable') {
-    controllers.update.updateAvailable(args[0] /* version */)
-  }
-  if (action === 'skipVersion') {
-    controllers.update.skipVersion(args[0] /* version */)
-  }
-
-  // Navigation between screens (back, forward, ESC, etc)
-  if (action === 'exitModal') {
-    state.modal = null
-  }
-  if (action === 'backToList') {
-    backToList()
-  }
-  if (action === 'escapeBack') {
-    escapeBack()
-  }
-  if (action === 'back') {
-    state.location.back()
-  }
-  if (action === 'forward') {
-    state.location.forward()
-  }
-
-  // Controlling the window
-  if (action === 'setDimensions') {
-    setDimensions(args[0] /* dimensions */)
-  }
-  if (action === 'toggleFullScreen') {
-    ipcRenderer.send('toggleFullScreen', args[0] /* optional bool */)
-  }
-  if (action === 'setTitle') {
-    state.window.title = args[0] /* title */
-  }
-
-  // Everything else
-  if (action === 'onOpen') {
-    onOpen(args[0] /* files */)
-  }
-  if (action === 'saveState') {
-    State.save(state)
-  }
-  if (action === 'onError') {
-    onError(args[0] /* user-friendly error */)
-  }
-  if (action === 'uncaughtError') {
-    telemetry.logUncaughtError(args[0] /* process */, args[1] /* error */)
-  }
+  var handler = dispatchHandlers[action]
+  if (handler) handler.apply(null, args)
+  else console.error('Missing dispatch handler: ' + action)
 
   // Update the virtual-dom, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved' ||
