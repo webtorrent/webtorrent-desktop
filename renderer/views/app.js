@@ -4,7 +4,7 @@ var hx = require('../lib/hx')
 var Header = require('./header')
 
 var Views = {
-  'home': require('./home'),
+  'home': require('./torrent-list'),
   'player': require('./player'),
   'create-torrent': require('./create-torrent'),
   'preferences': require('./preferences')

@@ -519,7 +519,7 @@ function renderPlayerControls (state) {
     var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
     var position = fraction * state.playing.duration /* seconds */
-    dispatch('playbackJump', position)
+    dispatch('skipTo', position)
   }
 
   // Handles volume muting and Unmuting
