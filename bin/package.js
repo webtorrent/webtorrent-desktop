@@ -460,7 +460,7 @@ function buildLinux (cb) {
       info: {
         arch: destArch === 'x64' ? 'amd64' : 'i386',
         targetDir: DIST_PATH,
-        depends: 'xorg, libnss3, libxss1, libgconf-2-4, libasound2',
+        depends: 'gconf2, libgtk2.0-0, libnss3, libxss1',
         scripts: {
           postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
           prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
