@@ -86,6 +86,11 @@ module.exports = class PlaybackController {
     ipcRenderer.send('onPlayerPause')
   }
 
+  // Skip specified number of seconds (backwards if negative)
+  skip (time) {
+    this.skipTo(this.state.playing.currentTime + time)
+  }
+
   // Skip (aka seek) to a specific point, in seconds
   skipTo (time) {
     if (isCasting(this.state)) Cast.seek(time)

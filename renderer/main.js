@@ -186,6 +186,7 @@ const dispatchHandlers = {
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
   'playPause': () => controllers.playback.playPause(),
+  'skip': (time) => controllers.playback.skip(time),
   'skipTo': (time) => controllers.playback.skipTo(time),
   'changePlaybackRate': (dir) => controllers.playback.changePlaybackRate(dir),
   'changeVolume': (delta) => controllers.playback.changeVolume(delta),

@@ -220,7 +220,7 @@ function getMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Right'
             : 'Alt+Right',
-          click: () => windows.main.dispatch('skip', 1),
+          click: () => windows.main.dispatch('skip', 10),
           enabled: false
         },
         {
@@ -228,7 +228,7 @@ function getMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Left'
             : 'Alt+Left',
-          click: () => windows.main.dispatch('skip', -1),
+          click: () => windows.main.dispatch('skip', -10),
           enabled: false
         },
         {
