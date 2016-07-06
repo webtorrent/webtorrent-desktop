@@ -328,6 +328,8 @@ function dispatch (action, ...args) {
     saveStateThrottled()
   }
   if (action === 'saveState') {
+    state.saved.window = state.saved.window || {}
+    state.saved.window.bounds = args[0]
     State.save(state)
   }
   if (action === 'setTitle') {
