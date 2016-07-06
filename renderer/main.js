@@ -176,6 +176,13 @@ function dispatch (action, ...args) {
   if (action === 'openTorrentAddress') {
     state.modal = { id: 'open-torrent-address-modal' }
   }
+  if (action === 'confirmDeleteTorrent') {
+    state.modal = {
+      id: 'remove-torrent-modal',
+      infoHash: args[0],
+      deleteData: args[1]
+    }
+  }
   if (action === 'createTorrent') {
     createTorrent(args[0] /* options */)
   }
@@ -186,7 +193,7 @@ function dispatch (action, ...args) {
     toggleTorrent(args[0] /* infoHash */)
   }
   if (action === 'deleteTorrent') {
-    deleteTorrent(args[0] /* infoHash */)
+    deleteTorrent(args[0] /* infoHash */, args[1] /* deleteData */)
   }
   if (action === 'toggleSelectTorrent') {
     toggleSelectTorrent(args[0] /* infoHash */)
@@ -1168,12 +1175,12 @@ function openTorrentContextMenu (infoHash) {
 
   menu.append(new electron.remote.MenuItem({
     label: 'Remove From List',
-    click: () => deleteTorrent(torrentSummary.infoHash, false)
+    click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
   }))
 
   menu.append(new electron.remote.MenuItem({
     label: 'Remove Data File',
-    click: () => deleteTorrent(torrentSummary.infoHash, true)
+    click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
   }))
 
   menu.append(new electron.remote.MenuItem({
