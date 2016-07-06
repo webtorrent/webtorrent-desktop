@@ -181,7 +181,8 @@ const dispatchHandlers = {
   'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
   'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
 
-  'startTorrentingSummary': startTorrentingSummary,
+  'startTorrentingSummary': (torrentSummary) =>
+    controllers.torrentList.startTorrentingSummary(torrentSummary),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
@@ -318,7 +319,7 @@ function escapeBack () {
 function resumeTorrents () {
   state.saved.torrents
     .filter((torrentSummary) => torrentSummary.status !== 'paused')
-    .forEach((torrentSummary) => startTorrentingSummary(torrentSummary))
+    .forEach((torrentSummary) => controllers.torrentList.startTorrentingSummary(torrentSummary))
 }
 
 function isTorrent (file) {
@@ -332,19 +333,6 @@ function isTorrent (file) {
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (torrentKey) {
   return TorrentSummary.getByKey(state, torrentKey)
-}
-
-// Starts downloading and/or seeding a given torrentSummary. Returns WebTorrent object
-function startTorrentingSummary (torrentSummary) {
-  var s = torrentSummary
-
-  // Backward compatibility for config files save before we had torrentKey
-  if (!s.torrentKey) s.torrentKey = state.nextTorrentKey++
-
-  // Use Downloads folder by default
-  if (!s.path) s.path = state.saved.prefs.downloadPath
-
-  ipcRenderer.send('wt-start-torrenting', s)
 }
 
 function torrentInfoHash (torrentKey, infoHash) {
