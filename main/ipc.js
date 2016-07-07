@@ -99,6 +99,7 @@ function init () {
 
   ipc.on('setAspectRatio', (e, ...args) => main.setAspectRatio(...args))
   ipc.on('setBounds', (e, ...args) => main.setBounds(...args))
+  ipc.on('setContentSize', (e, ...args) => main.setContentSize(...args))
   ipc.on('setProgress', (e, ...args) => main.setProgress(...args))
   ipc.on('setTitle', (e, ...args) => main.setTitle(...args))
   ipc.on('show', () => main.show())

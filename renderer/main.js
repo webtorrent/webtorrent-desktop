@@ -1245,7 +1245,7 @@ function saveTorrentFileAs (torrentSummary) {
   })
 }
 
-// Set window dimensions to match video dimensions or fill the screen
+// Set window dimensions to match video dimensions
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
   if (electron.remote.getCurrentWindow().isMaximized()) {
@@ -1279,8 +1279,15 @@ function setDimensions (dimensions) {
     config.WINDOW_MIN_HEIGHT
   )
 
-  ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {x: null, y: null, width, height})
+  if (process.platform === 'darwin') {
+    // On Mac, utilize setAspectRatio method
+    ipcRenderer.send('setAspectRatio', aspectRatio)
+    ipcRenderer.send('setBounds', {x: null, y: null, width, height})
+  } else {
+    // On other platforms, manually set content size to match the video
+    ipcRenderer.send('setContentSize', { width, height })
+  }
+
   state.playing.aspectRatio = aspectRatio
 }
 

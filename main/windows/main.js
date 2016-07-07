@@ -5,6 +5,7 @@ var main = module.exports = {
   send,
   setAspectRatio,
   setBounds,
+  setContentSize,
   setProgress,
   setTitle,
   show,
@@ -100,6 +101,26 @@ function send (...args) {
 function setAspectRatio (aspectRatio) {
   if (!main.win) return
   main.win.setAspectRatio(aspectRatio)
+}
+
+function setContentSize (size) {
+  // Do nothing in fullscreen
+  if (!main.win || main.win.isFullScreen()) {
+    log('setContentSize: not setting content size because we\'re in full screen')
+    return
+  }
+
+  log('setContentSize: setting content size to ' + JSON.stringify(size))
+  var pos = main.win.getPosition()
+  var contentSize = main.win.getContentSize()
+  main.win.setContentSize(size.width, size.height, true)
+
+  // Keep the window centered at the same position as before resize
+  var x = Math.round(pos[0] + (contentSize[0] - size.width) / 2)
+  var y = Math.round(pos[1] + (contentSize[1] - size.height) / 2)
+
+  log('setContentSize: position changed to ' + JSON.stringify({ x, y }))
+  main.win.setPosition(x, y, false)
 }
 
 /**
