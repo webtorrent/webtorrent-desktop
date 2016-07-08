@@ -13,9 +13,8 @@ module.exports = {
   setRate
 }
 
-var airplayer = require('airplayer')()
-var chromecasts = require('chromecasts')()
-var dlnacasts = require('dlnacasts')()
+// Lazy load these for a ~300ms improvement in startup time
+var airplayer, chromecasts, dlnacasts
 
 var config = require('../../config')
 
@@ -32,6 +31,11 @@ var statusInterval = null
 function init (appState, callback) {
   state = appState
   update = callback
+
+  // Load modules, scan the network for devices
+  airplayer = require('airplayer')()
+  chromecasts = require('chromecasts')()
+  dlnacasts = require('dlnacasts')()
 
   state.devices.chromecast = chromecastPlayer()
   state.devices.dlna = dlnaPlayer()

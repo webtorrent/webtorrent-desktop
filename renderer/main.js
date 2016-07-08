@@ -249,7 +249,7 @@ function dispatch (action, ...args) {
   }
 
   var handler = dispatchHandlers[action]
-  if (handler) handler.apply(null, args)
+  if (handler) handler(...args)
   else console.error('Missing dispatch handler: ' + action)
 
   // Update the virtual-dom, unless it's just a mouse move event
