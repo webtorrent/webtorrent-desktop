@@ -55,6 +55,13 @@ module.exports = class TorrentListController {
     findFilesRecursive(files, (allFiles) => this.showCreateTorrent(allFiles))
   }
 
+  // Switches between the advanced and simple Create Torrent UI
+  toggleCreateTorrentAdvanced () {
+    var info = this.state.location.current()
+    if (info.url !== 'create-torrent') return
+    info.showAdvanced = !info.showAdvanced
+  }
+
   // Creates a new torrent and start seeeding
   createTorrent (options) {
     var state = this.state

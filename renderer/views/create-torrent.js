@@ -65,7 +65,8 @@ function CreateTorrentPage (state) {
         <label>Path:</label>
         <div class='torrent-attribute'>${pathPrefix}</div>
       </p>
-      <div class='expand-collapse ${collapsedClass}' onclick=${handleToggleShowAdvanced}>
+      <div class='expand-collapse ${collapsedClass}'
+           onclick=${dispatcher('toggleCreateTorrentAdvanced')}>
         ${info.showAdvanced ? 'Basic' : 'Advanced'}
       </div>
       <div class="create-torrent-advanced ${collapsedClass}">
@@ -87,7 +88,7 @@ function CreateTorrentPage (state) {
         </p>
       </div>
       <p class="float-right">
-        <button class='button-flat light' onclick=${handleCancel}>Cancel</button>
+        <button class='button-flat light' onclick=${dispatcher('back')}>Cancel</button>
         <button class='button-raised' onclick=${handleOK}>Create Torrent</button>
       </p>
     </div>
@@ -113,17 +114,6 @@ function CreateTorrentPage (state) {
       comment: comment
     }
     dispatch('createTorrent', options)
-  }
-
-  function handleCancel () {
-    dispatch('back')
-  }
-
-  function handleToggleShowAdvanced () {
-    // TODO: what's the clean way to handle this?
-    // Should every button on every screen have its own dispatch()?
-    info.showAdvanced = !info.showAdvanced
-    dispatch('update')
   }
 }
 
