@@ -1,15 +1,16 @@
-module.exports = {
+var appConfig = require('application-config')('WebTorrent')
+var path = require('path')
+var {EventEmitter} = require('events')
+
+var config = require('../../config')
+var migrations = require('./migrations')
+
+var State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   save,
   saveThrottled
-}
-
-var appConfig = require('application-config')('WebTorrent')
-var path = require('path')
-
-var config = require('../../config')
-var migrations = require('./migrations')
+})
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
@@ -183,8 +184,6 @@ function save (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
   delete state.saveStateTimeout
 
-  var electron = require('electron')
-
   // Clean up, so that we're not saving any pending state
   var copy = Object.assign({}, state.saved)
   // Remove torrents pending addition to the list, where we haven't finished
@@ -205,11 +204,9 @@ function save (state, cb) {
       return torrent
     })
 
-  appConfig.write(copy, function (err) {
+  appConfig.write(copy, (err) => {
     if (err) console.error(err)
-
-    // TODO: this doesn't belong here
-    electron.ipcRenderer.send('savedState')
+    else State.emit('savedState')
   })
 }
 

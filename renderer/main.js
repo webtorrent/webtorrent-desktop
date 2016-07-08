@@ -180,7 +180,6 @@ const dispatchHandlers = {
   'deleteTorrent': (infoHash) => controllers.torrentList.deleteTorrent(infoHash),
   'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
   'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
-
   'startTorrentingSummary': (torrentSummary) =>
     controllers.torrentList.startTorrentingSummary(torrentSummary),
 
@@ -236,9 +235,9 @@ const dispatchHandlers = {
 
   // Everything else
   'onOpen': (files) => onOpen(files),
-  'saveState': (state) => State.save(state),
   'onError': (err) => onError(err),
-  'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err)
+  'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
+  'saveState': () => State.save(state)
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -284,6 +283,8 @@ function setupIpc () {
   ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
 
   ipcRenderer.send('ipcReady')
+
+  State.on('savedState', () => ipcRenderer.send('savedState'))
 }
 
 // Quits any modal popovers and returns to the torrent list screen
