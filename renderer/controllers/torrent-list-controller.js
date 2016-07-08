@@ -65,12 +65,30 @@ module.exports = class TorrentListController {
     })
   }
 
+  // Starts downloading and/or seeding a given torrentSummary.
+  startTorrentingSummary (torrentSummary) {
+    var s = torrentSummary
+
+    // Backward compatibility for config files save before we had torrentKey
+    if (!s.torrentKey) s.torrentKey = this.state.nextTorrentKey++
+
+    // Use Downloads folder by default
+    if (!s.path) s.path = this.state.saved.prefs.downloadPath
+
+    ipcRenderer.send('wt-start-torrenting',
+                      s.torrentKey,
+                      TorrentSummary.getTorrentID(s),
+                      s.path,
+                      s.fileModtimes,
+                      s.selections)
+  }
+
   // TODO: use torrentKey, not infoHash
   toggleTorrent (infoHash) {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     if (torrentSummary.status === 'paused') {
       torrentSummary.status = 'new'
-      ipcRenderer.send('wt-start-torrenting', torrentSummary)
+      this.startTorrentingSummary(torrentSummary)
       sound.play('ENABLE')
     } else {
       torrentSummary.status = 'paused'

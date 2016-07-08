@@ -14,7 +14,6 @@ var path = require('path')
 var crashReporter = require('../crash-reporter')
 var config = require('../config')
 var torrentPoster = require('./lib/torrent-poster')
-var TorrentSummary = require('./lib/torrent-summary')
 
 // Report when the process crashes
 crashReporter.init()
@@ -43,8 +42,8 @@ function init () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
 
-  ipc.on('wt-start-torrenting', (e, torrentSummary) =>
-    startTorrenting(torrentSummary))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
+    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
   ipc.on('wt-stop-torrenting', (e, infoHash) =>
     stopTorrenting(infoHash))
   ipc.on('wt-create-torrent', (e, torrentKey, options) =>
@@ -73,15 +72,12 @@ function init () {
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrenting (torrentSummary) {
-  var s = torrentSummary
-  var torrentKey = s.torrentKey
-  var torrentID = TorrentSummary.getTorrentID(s)
+function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 
   var torrent = client.add(torrentID, {
-    path: s.path,
-    fileModtimes: s.fileModtimes
+    path: path,
+    fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
 
@@ -89,7 +85,7 @@ function startTorrenting (torrentSummary) {
   addTorrentEvents(torrent)
 
   // Only download the files the user wants, not necessarily all files
-  torrent.once('ready', () => selectFiles(torrent, s.selections))
+  torrent.once('ready', () => selectFiles(torrent, selections))
 
   return torrent
 }
