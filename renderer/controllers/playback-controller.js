@@ -224,6 +224,11 @@ function openPlayerFromActiveTorrent (state, torrentSummary, index, timeout, cb)
   // if it's video, check for subtitles files that are done downloading
   dispatch('checkForSubtitles')
 
+  // enable previously selected subtitle track
+  if (fileSummary.selectedSubtitle) {
+    dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
+  }
+
   ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
   ipcRenderer.once('wt-server-' + torrentSummary.infoHash, (e, info) => {
     clearTimeout(timeout)
