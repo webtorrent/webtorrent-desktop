@@ -231,13 +231,13 @@ const dispatchHandlers = {
   'forward': () => state.location.forward(),
 
   // Controlling the window
-  'setDimensions': (dimensions) => setDimensions(dimensions),
+  'setDimensions': setDimensions,
   'toggleFullScreen': (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
   'setTitle': (title) => { state.window.title = title },
 
   // Everything else
-  'onOpen': (files) => onOpen(files),
-  'error': (err) => onError(err),
+  'onOpen': onOpen,
+  'error': onError,
   'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
   'saveState': () => State.save(state)
 }
