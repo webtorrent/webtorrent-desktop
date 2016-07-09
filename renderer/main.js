@@ -237,7 +237,7 @@ const dispatchHandlers = {
 
   // Everything else
   'onOpen': (files) => onOpen(files),
-  'onError': (err) => onError(err),
+  'error': (err) => onError(err),
   'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
   'saveState': () => State.save(state)
 }
