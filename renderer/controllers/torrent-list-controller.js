@@ -229,14 +229,11 @@ function findFilesRecursive (paths, cb) {
   })
 }
 
-// Delete all files in a torren
+// Delete all files in a torrent
 function moveItemToTrash (torrentSummary) {
-  // TODO: delete directories, not just files
-  torrentSummary.files.forEach(function (file) {
-    var filePath = path.join(torrentSummary.path, file.path)
-    console.log('DEBUG DELETING ' + filePath)
-    ipcRenderer.send('moveItemToTrash', filePath)
-  })
+  var filePath = path.join(torrentSummary.path, torrentSummary.files[0].path.split('/')[0])
+  console.log('DEBUG DELETING ' + filePath)
+  ipcRenderer.send('moveItemToTrash', filePath)
 }
 
 function showItemInFolder (torrentSummary) {
