@@ -122,10 +122,8 @@ module.exports = class TorrentListController {
       var summary = this.state.saved.torrents[index]
 
       // remove torrent and poster file
-      var torrentFilePath = TorrentSummary.getTorrentPath(summary)
-      var posterFilePath = TorrentSummary.getPosterPath(summary)
-      ipcRenderer.send('moveItemToTrash', torrentFilePath) // TODO: rimraf?
-      ipcRenderer.send('moveItemToTrash', posterFilePath) // TODO: will the css hack affect windows?
+      deleteFile(TorrentSummary.getTorrentPath(summary))
+      deleteFile(TorrentSummary.getPosterPath(summary)) // TODO: will the css path hack affect windows?
 
       // optionally delete the torrent data
       if (deleteData) moveItemToTrash(summary)
@@ -235,6 +233,13 @@ function findFilesRecursive (paths, cb) {
       var paths = fileNames.map((fileName) => path.join(folderPath, fileName))
       findFilesRecursive(paths, cb)
     })
+  })
+}
+
+function deleteFile (path) {
+  if (!path) return
+  fs.unlink(path, function (err) {
+    if (err) dispatch('onError', err)
   })
 }
 
