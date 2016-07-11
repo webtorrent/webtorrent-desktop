@@ -114,19 +114,28 @@ module.exports = class TorrentListController {
 
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
-    var state = this.state
-
     ipcRenderer.send('wt-stop-torrenting', infoHash)
 
-    if (deleteData) {
-      var torrentSummary = TorrentSummary.getByKey(state, infoHash)
-      moveItemToTrash(torrentSummary)
+    var index = this.state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
+
+    if (index > -1) {
+      var summary = this.state.saved.torrents[index]
+
+      // remove torrent and poster file
+      var torrentFilePath = TorrentSummary.getTorrentPath(summary)
+      var posterFilePath = TorrentSummary.getPosterPath(summary)
+      ipcRenderer.send('moveItemToTrash', torrentFilePath) // TODO: rimraf?
+      ipcRenderer.send('moveItemToTrash', posterFilePath) // TODO: will the css hack affect windows?
+
+      // optionally delete the torrent data
+      if (deleteData) moveItemToTrash(summary)
+
+      // remove torrent from saved list
+      this.state.saved.torrents.splice(index, 1)
+      State.saveThrottled(this.state)
     }
 
-    var index = state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
-    if (index > -1) state.saved.torrents.splice(index, 1)
-    State.saveThrottled(state)
-    state.location.clearForward('player') // prevent user from going forward to a deleted torrent
+    this.state.location.clearForward('player') // prevent user from going forward to a deleted torrent
     sound.play('DELETE')
   }
 
