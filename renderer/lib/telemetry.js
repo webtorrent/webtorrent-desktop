@@ -123,12 +123,12 @@ function logUncaughtError (procName, err) {
   if (!telemetry) return
 
   var message, stack
-  if (typeof err === 'string') {
-    message = err
-    stack = ''
-  } else {
+  if (err instanceof Error) {
     message = err.message
     stack = err.stack
+  } else {
+    message = String(err)
+    stack = ''
   }
 
   // We need to POST the telemetry object, make sure it stays < 100kb
