@@ -207,7 +207,7 @@ function findFilesRecursive (paths, cb) {
 
   var fileOrFolder = paths[0]
   fs.stat(fileOrFolder, function (err, stat) {
-    if (err) return dispatch('onError', err)
+    if (err) return dispatch('error', err)
 
     // Files: return name, path, and size
     if (!stat.isDirectory()) {
@@ -222,7 +222,7 @@ function findFilesRecursive (paths, cb) {
     // Folders: recurse, make a list of all the files
     var folderPath = fileOrFolder
     fs.readdir(folderPath, function (err, fileNames) {
-      if (err) return dispatch('onError', err)
+      if (err) return dispatch('error', err)
       var paths = fileNames.map((fileName) => path.join(folderPath, fileName))
       findFilesRecursive(paths, cb)
     })
@@ -257,9 +257,9 @@ function saveTorrentFileAs (torrentSummary) {
   electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
-      if (err) return dispatch('onError', err)
+      if (err) return dispatch('error', err)
       fs.writeFile(savePath, torrentFile, function (err) {
-        if (err) return dispatch('onError', err)
+        if (err) return dispatch('error', err)
       })
     })
   })
