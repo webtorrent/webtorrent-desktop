@@ -1,12 +1,12 @@
 module.exports = {
-  onPlayerClose,
-  onPlayerOpen
+  disable,
+  enable
 }
 
 var electron = require('electron')
 var windows = require('./windows')
 
-function onPlayerOpen () {
+function enable () {
   // Register play/pause media key, available on some keyboards.
   electron.globalShortcut.register(
     'MediaPlayPause',
@@ -14,7 +14,7 @@ function onPlayerOpen () {
   )
 }
 
-function onPlayerClose () {
+function disable () {
   // Return the media key to the OS, so other apps can use it.
   electron.globalShortcut.unregister('MediaPlayPause')
 }

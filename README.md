@@ -83,7 +83,9 @@ brew install wine
 
 ### Privacy
 
-WebTorrent Desktop collects some basic usage stats to help us make the app better. For example, we track what OSs are users are on, and how well the play button works (how often does it succeed? time out? show a missing codec error?). The app never sends personally identifying or other private info.
+WebTorrent Desktop collects some basic usage stats to help us make the app better. For example, we track how well the play button works. How often does it succeed? Time out? Show a missing codec error?
+
+The app never sends personally identifying information, nor does it track which swarms you join.
 
 ### Code Style
 

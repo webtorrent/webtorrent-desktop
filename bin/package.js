@@ -206,6 +206,12 @@ function buildDarwin (cb) {
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
         CFBundleURLSchemes: [ 'magnet' ]
+      },
+      {
+        CFBundleTypeRole: 'Editor',
+        CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
+        CFBundleURLName: 'BitTorrent Stream-Magnet URL',
+        CFBundleURLSchemes: [ 'stream-magnet' ]
       }
     ]
 
@@ -460,7 +466,7 @@ function buildLinux (cb) {
       info: {
         arch: destArch === 'x64' ? 'amd64' : 'i386',
         targetDir: DIST_PATH,
-        depends: 'libc6 (>= 2.4)',
+        depends: 'gconf2, libgtk2.0-0, libnss3, libxss1',
         scripts: {
           postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
           prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
