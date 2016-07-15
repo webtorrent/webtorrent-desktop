@@ -37,8 +37,6 @@ var controllers = null
 // This dependency is the slowest-loading, so we lazy load it
 var Cast = null
 
-var subtitlesDownloader = require('./lib/subtitles-downloader')
-
 // Electron apps have two processes: a main process (node) runs first and starts
 // a renderer process (essentially a Chrome window). We're in the renderer process,
 // and this IPC channel receives from and sends messages to the main process
