@@ -239,7 +239,7 @@ function findFilesRecursive (paths, cb) {
 function deleteFile (path) {
   if (!path) return
   fs.unlink(path, function (err) {
-    if (err) dispatch('onError', err)
+    if (err) dispatch('error', err)
   })
 }
 
