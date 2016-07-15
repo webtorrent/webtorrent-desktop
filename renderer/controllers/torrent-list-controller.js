@@ -245,7 +245,7 @@ function deleteFile (path) {
 
 // Delete all files in a torrent
 function moveItemToTrash (torrentSummary) {
-  var filePath = path.join(torrentSummary.path, torrentSummary.files[0].path.split('/')[0])
+  var filePath = TorrentSummary.getFileOrFolder(torrentSummary)
   ipcRenderer.send('moveItemToTrash', filePath)
 }
 
@@ -255,7 +255,7 @@ function showItemInFolder (torrentSummary) {
 
 function saveTorrentFileAs (torrentSummary) {
   var downloadPath = this.state.saved.prefs.downloadPath
-  var newFileName = `${path.parse(torrentSummary.name).name}.torrent`
+  var newFileName = path.parse(torrentSummary.name).name + '.torrent'
   var opts = {
     title: 'Save Torrent File',
     defaultPath: path.join(downloadPath, newFileName),
