@@ -326,13 +326,6 @@ function resumeTorrents () {
     .forEach((torrentSummary) => controllers.torrentList.startTorrentingSummary(torrentSummary))
 }
 
-function isTorrent (file) {
-  var name = typeof file === 'string' ? file : file.name
-  var isTorrentFile = path.extname(name).toLowerCase() === '.torrent'
-  var isMagnet = typeof file === 'string' && /^(stream-)?magnet:/.test(file)
-  return isTorrentFile || isMagnet
-}
-
 // Gets a torrent summary {name, infoHash, status} from state.saved.torrents
 // Returns undefined if we don't know that infoHash
 function getTorrentSummary (torrentKey) {
@@ -561,7 +554,7 @@ function onOpen (files) {
   var subtitles = files.filter(controllers.subtitles.isSubtitle)
 
   if (state.location.url() === 'home' || subtitles.length === 0) {
-    if (files.every(isTorrent)) {
+    if (files.every(TorrentPlayer.isTorrent)) {
       if (state.location.url() !== 'home') {
         backToList()
       }
