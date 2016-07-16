@@ -6,7 +6,6 @@ crashReporter.init()
 const dragDrop = require('drag-drop')
 const electron = require('electron')
 const mainLoop = require('main-loop')
-const path = require('path')
 
 const createElement = require('virtual-dom/create-element')
 const diff = require('virtual-dom/diff')
@@ -18,14 +17,14 @@ const telemetry = require('./lib/telemetry')
 const sound = require('./lib/sound')
 const State = require('./lib/state')
 const TorrentPlayer = require('./lib/torrent-player')
-const TorrentSummary = require('./lib/torrent-summary')
 
 const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')
 const PrefsController = require('./controllers/prefs-controller')
-const TorrentListController = require('./controllers/torrent-list-controller')
 const PlaybackController = require('./controllers/playback-controller')
 const SubtitlesController = require('./controllers/subtitles-controller')
+const TorrentListController = require('./controllers/torrent-list-controller')
+const TorrentController = require('./controllers/torrent-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -60,9 +59,10 @@ function onState (err, _state) {
     media: new MediaController(state),
     update: new UpdateController(state),
     prefs: new PrefsController(state, config),
-    torrentList: new TorrentListController(state),
     playback: new PlaybackController(state, config, update),
-    subtitles: new SubtitlesController(state)
+    subtitles: new SubtitlesController(state),
+    torrentList: new TorrentListController(state),
+    torrent: new TorrentController(state)
   }
 
   // Add first page to location history
@@ -240,7 +240,9 @@ const dispatchHandlers = {
   'onOpen': onOpen,
   'error': onError,
   'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
-  'saveState': () => State.save(state)
+  'saveState': () => State.save(state),
+  'saveStateThrottled': () => State.saveThrottled(state),
+  'update': () => {} // No-op, just trigger an update
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -270,18 +272,19 @@ function setupIpc () {
 
   ipcRenderer.on('fullscreenChanged', onFullscreenChanged)
 
-  ipcRenderer.on('wt-infohash', (e, ...args) => torrentInfoHash(...args))
-  ipcRenderer.on('wt-metadata', (e, ...args) => torrentMetadata(...args))
-  ipcRenderer.on('wt-done', (e, ...args) => torrentDone(...args))
-  ipcRenderer.on('wt-warning', (e, ...args) => torrentWarning(...args))
-  ipcRenderer.on('wt-error', (e, ...args) => torrentError(...args))
+  var tc = controllers.torrent
+  ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
+  ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
+  ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
+  ipcRenderer.on('wt-warning', (e, ...args) => tc.torrentWarning(...args))
+  ipcRenderer.on('wt-error', (e, ...args) => tc.torrentError(...args))
 
-  ipcRenderer.on('wt-progress', (e, ...args) => torrentProgress(...args))
-  ipcRenderer.on('wt-file-modtimes', (e, ...args) => torrentFileModtimes(...args))
-  ipcRenderer.on('wt-file-saved', (e, ...args) => torrentFileSaved(...args))
-  ipcRenderer.on('wt-poster', (e, ...args) => torrentPosterSaved(...args))
-  ipcRenderer.on('wt-audio-metadata', (e, ...args) => torrentAudioMetadata(...args))
-  ipcRenderer.on('wt-server-running', (e, ...args) => torrentServerRunning(...args))
+  ipcRenderer.on('wt-progress', (e, ...args) => tc.torrentProgress(...args))
+  ipcRenderer.on('wt-file-modtimes', (e, ...args) => tc.torrentFileModtimes(...args))
+  ipcRenderer.on('wt-file-saved', (e, ...args) => tc.torrentFileSaved(...args))
+  ipcRenderer.on('wt-poster', (e, ...args) => tc.torrentPosterSaved(...args))
+  ipcRenderer.on('wt-audio-metadata', (e, ...args) => tc.torrentAudioMetadata(...args))
+  ipcRenderer.on('wt-server-running', (e, ...args) => tc.torrentServerRunning(...args))
 
   ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
 
@@ -326,170 +329,6 @@ function resumeTorrents () {
     .forEach((torrentSummary) => controllers.torrentList.startTorrentingSummary(torrentSummary))
 }
 
-// Gets a torrent summary {name, infoHash, status} from state.saved.torrents
-// Returns undefined if we don't know that infoHash
-function getTorrentSummary (torrentKey) {
-  return TorrentSummary.getByKey(state, torrentKey)
-}
-
-function torrentInfoHash (torrentKey, infoHash) {
-  var torrentSummary = getTorrentSummary(torrentKey)
-  console.log('got infohash for %s torrent %s',
-    torrentSummary ? 'existing' : 'new', torrentKey)
-
-  if (!torrentSummary) {
-    // Check if an existing (non-active) torrent has the same info hash
-    if (state.saved.torrents.find((t) => t.infoHash === infoHash)) {
-      ipcRenderer.send('wt-stop-torrenting', infoHash)
-      return onError(new Error('Cannot add duplicate torrent'))
-    }
-
-    torrentSummary = {
-      torrentKey: torrentKey,
-      status: 'new'
-    }
-    state.saved.torrents.unshift(torrentSummary)
-    sound.play('ADD')
-  }
-
-  torrentSummary.infoHash = infoHash
-  update()
-}
-
-function torrentWarning (torrentKey, message) {
-  onWarning(message)
-}
-
-function torrentError (torrentKey, message) {
-  // TODO: WebTorrent needs semantic errors
-  if (message.startsWith('Cannot add duplicate torrent')) {
-    // Remove infohash from the message
-    message = 'Cannot add duplicate torrent'
-  }
-  onError(message)
-
-  var torrentSummary = getTorrentSummary(torrentKey)
-  if (torrentSummary) {
-    console.log('Pausing torrent %s due to error: %s', torrentSummary.infoHash, message)
-    torrentSummary.status = 'paused'
-    update()
-  }
-}
-
-function torrentMetadata (torrentKey, torrentInfo) {
-  // Summarize torrent
-  var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.status = 'downloading'
-  torrentSummary.name = torrentSummary.displayName || torrentInfo.name
-  torrentSummary.path = torrentInfo.path
-  torrentSummary.magnetURI = torrentInfo.magnetURI
-  // TODO: make torrentInfo immutable, save separately as torrentSummary.info
-  // For now, check whether torrentSummary.files has already been set:
-  var hasDetailedFileInfo = torrentSummary.files && torrentSummary.files[0].path
-  if (!hasDetailedFileInfo) {
-    torrentSummary.files = torrentInfo.files
-  }
-  if (!torrentSummary.selections) {
-    torrentSummary.selections = torrentSummary.files.map((x) => true)
-  }
-  torrentSummary.defaultPlayFileIndex = TorrentPlayer.pickFileToPlay(torrentInfo.files)
-  update()
-
-  // Save the .torrent file, if it hasn't been saved already
-  if (!torrentSummary.torrentFileName) ipcRenderer.send('wt-save-torrent-file', torrentKey)
-
-  // Auto-generate a poster image, if it hasn't been generated already
-  if (!torrentSummary.posterFileName) ipcRenderer.send('wt-generate-torrent-poster', torrentKey)
-}
-
-function torrentDone (torrentKey, torrentInfo) {
-  // Update the torrent summary
-  var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.status = 'seeding'
-
-  // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
-  // Don't notify if we merely finished verifying data files that were already on disk.
-  if (torrentInfo.bytesReceived > 0) {
-    if (!state.window.isFocused) {
-      state.dock.badge += 1
-    }
-    showDoneNotification(torrentSummary)
-    ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
-  }
-
-  update()
-}
-
-function torrentProgress (progressInfo) {
-  // Overall progress across all active torrents, 0 to 1
-  var progress = progressInfo.progress
-  var hasActiveTorrents = progressInfo.hasActiveTorrents
-
-  // Hide progress bar when client has no torrents, or progress is 100%
-  // TODO: isn't this equivalent to: if (progress === 1) ?
-  if (!hasActiveTorrents || progress === 1) {
-    progress = -1
-  }
-
-  // Show progress bar under the WebTorrent taskbar icon, on OSX
-  state.dock.progress = progress
-
-  // Update progress for each individual torrent
-  progressInfo.torrents.forEach(function (p) {
-    var torrentSummary = getTorrentSummary(p.torrentKey)
-    if (!torrentSummary) {
-      console.log('warning: got progress for missing torrent %s', p.torrentKey)
-      return
-    }
-    torrentSummary.progress = p
-  })
-
-  // TODO: Find an efficient way to re-enable this line, which allows subtitle
-  //       files which are completed after a video starts to play to be added
-  //       dynamically to the list of subtitles.
-  // checkForSubtitles()
-
-  update()
-}
-
-function torrentFileModtimes (torrentKey, fileModtimes) {
-  var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.fileModtimes = fileModtimes
-  State.saveThrottled(state)
-}
-
-function torrentFileSaved (torrentKey, torrentFileName) {
-  console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
-  var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.torrentFileName = torrentFileName
-  State.saveThrottled(state)
-}
-
-function torrentPosterSaved (torrentKey, posterFileName) {
-  var torrentSummary = getTorrentSummary(torrentKey)
-  torrentSummary.posterFileName = posterFileName
-  State.saveThrottled(state)
-}
-
-function torrentAudioMetadata (infoHash, index, info) {
-  var torrentSummary = getTorrentSummary(infoHash)
-  var fileSummary = torrentSummary.files[index]
-  fileSummary.audioInfo = info
-  update()
-}
-
-function torrentServerRunning (serverInfo) {
-  state.server = serverInfo
-}
-
-function getTorrentPath (torrentSummary) {
-  var itemPath = path.join(torrentSummary.path, torrentSummary.files[0].path)
-  if (torrentSummary.files.length > 1) {
-    itemPath = path.dirname(itemPath)
-  }
-  return itemPath
-}
-
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
@@ -527,19 +366,6 @@ function setDimensions (dimensions) {
   ipcRenderer.send('setAspectRatio', aspectRatio)
   ipcRenderer.send('setBounds', {x: null, y: null, width, height})
   state.playing.aspectRatio = aspectRatio
-}
-
-function showDoneNotification (torrent) {
-  var notif = new window.Notification('Download Complete', {
-    body: torrent.name,
-    silent: true
-  })
-
-  notif.onclick = function () {
-    ipcRenderer.send('show')
-  }
-
-  sound.play('DONE')
 }
 
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
@@ -580,10 +406,6 @@ function onError (err) {
   })
 
   update()
-}
-
-function onWarning (err) {
-  console.log('warning: %s', err.message || err)
 }
 
 function onPaste (e) {
