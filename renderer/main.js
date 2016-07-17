@@ -166,10 +166,6 @@ function updateElectron () {
   }
 }
 
-function getOpenInVlc () {
-  return state.saved.prefs.playInVlc
-}
-
 const dispatchHandlers = {
   // Torrent list: creating, deleting, selecting torrents
   'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
@@ -320,8 +316,8 @@ function escapeBack () {
     dispatch('toggleFullScreen')
   } else {
     dispatch('back')
-}
   }
+}
 
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {

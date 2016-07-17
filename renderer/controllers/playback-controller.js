@@ -197,6 +197,10 @@ function openPlayer (state, infoHash, index, cb) {
   }
 }
 
+function getOpenInVlc () {
+  return state.saved.prefs.playInVlc
+}
+
 function openPlayerFromActiveTorrent (state, torrentSummary, index, timeout, cb) {
   var fileSummary = torrentSummary.files[index]
 
@@ -239,6 +243,14 @@ function openPlayerFromActiveTorrent (state, torrentSummary, index, timeout, cb)
     if (timedOut) {
       ipcRenderer.send('wt-stop-server')
       return this.update()
+    }
+
+    // play in VLC if set as default player (Preferences / Playback / Play in VLC)
+    if (getOpenInVlc()) {
+      dispatch('vlcPlay')
+      this.update()
+      cb()
+      return
     }
 
     // otherwise, play the video
