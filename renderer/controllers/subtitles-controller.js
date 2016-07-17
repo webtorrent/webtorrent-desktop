@@ -6,7 +6,8 @@ const request = require('request')
 
 const {dispatch} = require('../lib/dispatcher')
 
-module.exports = class SubtitlesController {
+module.exports =
+  class SubtitlesController {
     constructor (state) {
       this.state = state
     }
@@ -105,9 +106,7 @@ function loadSubtitle (file, cb) {
   var filePath = file.path || file.url
   if (!filePath) return
 
-  var vttStream = filePath.startsWith('http') ?
-    request(filePath).pipe(srtToVtt()) :
-    fs.createReadStream(filePath).pipe(srtToVtt())
+  var vttStream = filePath.startsWith('http') ? request(filePath).pipe(srtToVtt()) : fs.createReadStream(filePath).pipe(srtToVtt())
 
   concat(vttStream, function (err, buf) {
     if (err) return dispatch('error', "Can't parse subtitles file.")

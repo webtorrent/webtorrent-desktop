@@ -285,8 +285,8 @@ function setupIpc () {
 
   ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
 
-  ipcRenderer.on('wt-subtitles-received', (e, ...args) => controllers.subtitles.addSubtitles(...args, true, true))  
-  
+  ipcRenderer.on('wt-subtitles-received', (e, ...args) => controllers.subtitles.addSubtitles(...args, true, true))
+
   ipcRenderer.send('ipcReady')
 
   State.on('savedState', () => ipcRenderer.send('savedState'))

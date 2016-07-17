@@ -10,7 +10,7 @@ var fs = require('fs-extra')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
-var opensubtitles = require('opensubtitles-api')
+var Opensubtitles = require('opensubtitles-api')
 
 var crashReporter = require('../crash-reporter')
 var config = require('../config')
@@ -23,7 +23,7 @@ crashReporter.init()
 var ipc = electron.ipcRenderer
 
 // OpenSubtitles Api
-var OS = new opensubtitles('OSTestUserAgent')
+var os = new Opensubtitles('OSTestUserAgent')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
@@ -46,29 +46,19 @@ function init () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
 
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) => 
-    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
-  ipc.on('wt-stop-torrenting', (e, infoHash) => 
-    stopTorrenting(infoHash))
-  ipc.on('wt-create-torrent', (e, torrentKey, options) => 
-    createTorrent(torrentKey, options))
-  ipc.on('wt-save-torrent-file', (e, torrentKey) => 
-    saveTorrentFile(torrentKey))
-  ipc.on('wt-generate-torrent-poster', (e, torrentKey) => 
-    generateTorrentPoster(torrentKey))
-  ipc.on('wt-get-audio-metadata', (e, infoHash, index) => 
-    getAudioMetadata(infoHash, index))
-  ipc.on('wt-start-server', (e, infoHash, index) => 
-    startServer(infoHash, index))
-  ipc.on('wt-stop-server', (e) => 
-    stopServer())
-  ipc.on('wt-select-files', (e, infoHash, selections) => 
-    selectFiles(infoHash, selections))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) => startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
+  ipc.on('wt-stop-torrenting', (e, infoHash) => stopTorrenting(infoHash))
+  ipc.on('wt-create-torrent', (e, torrentKey, options) => createTorrent(torrentKey, options))
+  ipc.on('wt-save-torrent-file', (e, torrentKey) => saveTorrentFile(torrentKey))
+  ipc.on('wt-generate-torrent-poster', (e, torrentKey) => generateTorrentPoster(torrentKey))
+  ipc.on('wt-get-audio-metadata', (e, infoHash, index) => getAudioMetadata(infoHash, index))
+  ipc.on('wt-start-server', (e, infoHash, index) => startServer(infoHash, index))
+  ipc.on('wt-stop-server', (e) => stopServer())
+  ipc.on('wt-select-files', (e, infoHash, selections) => selectFiles(infoHash, selections))
 
   ipc.send('ipcReadyWebTorrent')
 
-  window.addEventListener('error', (e) => 
-    ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
+  window.addEventListener('error', (e) => ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
     true)
 
   setInterval(updateTorrentProgress, 1000)
@@ -110,12 +100,9 @@ function createTorrent (torrentKey, options) {
 }
 
 function addTorrentEvents (torrent) {
-  torrent.on('warning', (err) =>
-    ipc.send('wt-warning', torrent.key, err.message))
-  torrent.on('error', (err) => 
-    ipc.send('wt-error', torrent.key, err.message))
-  torrent.on('infoHash', () => 
-    ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+  torrent.on('warning', (err) => ipc.send('wt-warning', torrent.key, err.message))
+  torrent.on('error', (err) => ipc.send('wt-error', torrent.key, err.message))
+  torrent.on('infoHash', () => ipc.send('wt-infohash', torrent.key, torrent.infoHash))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
@@ -251,7 +238,8 @@ function getTorrentProgress () {
         startPiece: file._startPiece,
         endPiece: file._endPiece,
         numPieces,
-      numPiecesPresent}
+        numPiecesPresent
+      }
     })
     return {
       torrentKey: torrent.key,
@@ -270,7 +258,8 @@ function getTorrentProgress () {
   return {
     torrents: torrentProg,
     progress,
-  hasActiveTorrents}
+    hasActiveTorrents
+  }
 }
 
 function startServer (infoHash, index) {
@@ -286,12 +275,11 @@ function startServerFromReadyTorrent (torrent, index, cb) {
   torrent.files.forEach((file) => {
     getSubtitleHash(file).then(checksum => {
       // Getsubtitles from OpenSubtitles
-      OS.search({
+      os.search({
         hash: checksum,
-        filesize: file.length,
-        /* need implement os-locale with ISO 639-2 table: http://www.loc.gov/standards/iso639-2/php/code_list.php
-        sublanguageid: 'pob'  
-        */
+        filesize: file.length
+        // need implement os-locale with ISO 639-2 table: http://www.loc.gov/standards/iso639-2/php/code_list.php
+        // sublanguageid: 'pob'
       }).then(subtitles => {
         ipc.send('wt-subtitles-received', subtitles)
       })
@@ -383,24 +371,24 @@ function onError (err) {
 // Generate hash from file torrent
 function getSubtitleHash (fileTorrent) {
   return new Promise((resolve, reject) => {
-    let chunk_size = 65536, // 1024 * 64
-      file_size = fileTorrent.length,
-      length_bytes = 131072 // chunk_size * 2
+    let chunkSize = 65536 // 1024 * 64
+    let fileSize = fileTorrent.length
+    let lengthBytes = 131072 // chunkSize * 2
 
-    let startStream = fileTorrent.createReadStream({start: 0, end: length_bytes - 1}),
-      endStream = fileTorrent.createReadStream({start: (file_size - chunk_size), end: file_size})
+    let startStream = fileTorrent.createReadStream({start: 0, end: lengthBytes - 1})
+    let endStream = fileTorrent.createReadStream({start: (fileSize - chunkSize), end: fileSize})
 
-    Promise.all([checksumStream(startStream, length_bytes), checksumStream(endStream, length_bytes)])
+    Promise.all([checksumStream(startStream, lengthBytes), checksumStream(endStream, lengthBytes)])
       .then((checksuns) => {
-        let checksum = sumChecksuns(checksuns, file_size)
+        let checksum = sumChecksuns(checksuns, fileSize)
         resolve(checksum)
       }).catch(reject)
   })
 }
 
 // calculate hex sum between checksuns
-function sumChecksuns (checksuns, file_size) {
-  let checksum = sumHex64bits(file_size.toString(16), checksuns[0])
+function sumChecksuns (checksuns, fileSize) {
+  let checksum = sumHex64bits(fileSize.toString(16), checksuns[0])
   checksum = sumHex64bits(checksum, checksuns[1])
   checksum = checksum.substr(-16)
   checksum = padLeft(checksum, '0', 16)
@@ -409,11 +397,11 @@ function sumChecksuns (checksuns, file_size) {
 
 // compute checksum of the buffer splitting by chunk of lengths bits
 function checksumBuffer (buf, length) {
-  let checksum = 0,
-    checksum_hex = 0
+  let checksum = 0
+  let checksumHex = 0
   for (let i = 0; i < (buf.length / length); i++) {
-    checksum_hex = read64LE(buf, i)
-    checksum = sumHex64bits(checksum.toString(), checksum_hex).substr(-16)
+    checksumHex = read64LE(buf, i)
+    checksum = sumHex64bits(checksum.toString(), checksumHex).substr(-16)
   }
   return checksum
 }
@@ -435,10 +423,10 @@ function checksumStream (stream, defaultsize) {
 
 // read 64 bits from buffer starting at offset as LITTLE ENDIAN hex
 function read64LE (buffer, offset) {
-  var ret_64_be = buffer.toString('hex', offset * 8, ((offset + 1) * 8))
+  var ret64be = buffer.toString('hex', offset * 8, ((offset + 1) * 8))
   var array = []
   for (var i = 0; i < 8; i++) {
-    array.push(ret_64_be.substr(i * 2, 2))
+    array.push(ret64be.substr(i * 2, 2))
   }
   array.reverse()
   return array.join('')
@@ -451,25 +439,25 @@ function sumHex64bits (n1, n2) {
   if (n2.length < 16) n2 = padLeft(n2, '0', 16)
 
   // 1st 32 bits
-  let n1_0 = n1.substr(0, 8),
-    n2_0 = n2.substr(0, 8),
-    i_0 = parseInt(n1_0, 16) + parseInt(n2_0, 16)
+  let n10 = n1.substr(0, 8)
+  let n20 = n2.substr(0, 8)
+  let i0 = parseInt(n10, 16) + parseInt(n20, 16)
 
   // 2nd 32 bits
-  let n1_1 = n1.substr(8, 8),
-    n2_1 = n2.substr(8, 8),
-    i_1 = parseInt(n1_1, 16) + parseInt(n2_1, 16)
+  let n11 = n1.substr(8, 8)
+  let n21 = n2.substr(8, 8)
+  let i1 = parseInt(n11, 16) + parseInt(n21, 16)
 
   // back to hex
-  let h_1 = i_1.toString(16),
-    i_1_over = 0
-  if (h_1.length > 8) {
-    i_1_over = parseInt(h_1.substr(0, h_1.length - 8), 16)
+  let h1 = i1.toString(16)
+  let i1Over = 0
+  if (h1.length > 8) {
+    i1Over = parseInt(h1.substr(0, h1.length - 8), 16)
   } else {
-    h_1 = padLeft(h_1, '0', 8)
+    h1 = padLeft(h1, '0', 8)
   }
-  let h_0 = (i_1_over + i_0).toString(16)
-  return h_0 + h_1.substr(-8)
+  let h0 = (i1Over + i0).toString(16)
+  return h0 + h1.substr(-8)
 }
 
 // pad left with c up to length characters
