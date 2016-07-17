@@ -159,12 +159,12 @@ module.exports = class TorrentListController {
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
-      click: dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
+      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
     }))
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove Data File',
-      click: dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
+      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
     }))
 
     menu.append(new electron.remote.MenuItem({
@@ -256,7 +256,7 @@ function moveItemToTrash (torrentSummary) {
 }
 
 function showItemInFolder (torrentSummary) {
-  ipcRenderer.send('showItemInFolder', TorrentSummary.getTorrentPath(torrentSummary))
+  ipcRenderer.send('showItemInFolder', TorrentSummary.getFileOrFolder(torrentSummary))
 }
 
 function saveTorrentFileAs (torrentSummary) {
