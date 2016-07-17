@@ -30,7 +30,13 @@ function init (state) {
   telemetry.system = getSystemInfo()
   telemetry.approxNumTorrents = getApproxNumTorrents(state)
 
-  postToServer(telemetry)
+  if (config.IS_PRODUCTION) {
+    postToServer()
+  } else {
+    // Development: telemetry used only for local debugging
+    // Empty uncaught errors, etc at the start of every run
+    reset()
+  }
 }
 
 function reset () {
@@ -110,13 +116,19 @@ function getApproxNumTorrents (state) {
 
 // An uncaught error happened in the main process or in one of the windows
 function logUncaughtError (procName, err) {
+  console.error('uncaught error', procName, err)
+
+  // Not initialized yet? Ignore.
+  // Hopefully uncaught errors immediately on startup are fixed in dev
+  if (!telemetry) return
+
   var message, stack
-  if (typeof err === 'string') {
-    message = err
-    stack = ''
-  } else {
+  if (err instanceof Error) {
     message = err.message
     stack = err.stack
+  } else {
+    message = String(err)
+    stack = ''
   }
 
   // We need to POST the telemetry object, make sure it stays < 100kb

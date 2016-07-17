@@ -153,7 +153,7 @@ function TorrentList (state) {
         <i.button-round.icon.play
           title=${playTooltip}
           class=${playClass}
-          onclick=${dispatcher('play', infoHash)}>
+          onclick=${dispatcher('playFile', infoHash)}>
           ${playIcon}
         </i>
       `
@@ -172,7 +172,7 @@ function TorrentList (state) {
         <i
           class='icon delete'
           title='Remove torrent'
-          onclick=${dispatcher('deleteTorrent', infoHash)}>
+          onclick=${dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
       </div>
@@ -242,7 +242,7 @@ function TorrentList (state) {
     var handleClick
     if (isPlayable) {
       icon = 'play_arrow' /* playable? add option to play */
-      handleClick = dispatcher('play', infoHash, index)
+      handleClick = dispatcher('playFile', infoHash, index)
     } else {
       icon = 'description' /* file icon, opens in OS default app */
       handleClick = dispatcher('openItem', infoHash, index)

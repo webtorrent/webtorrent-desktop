@@ -13,7 +13,7 @@ Exec=$EXEC_PATH %U
 TryExec=$TRY_EXEC_PATH
 StartupNotify=false
 Categories=Network;FileTransfer;P2P;
-MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;x-scheme-handler/stream-magnet;
 
 Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
 

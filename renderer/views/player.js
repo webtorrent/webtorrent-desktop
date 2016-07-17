@@ -43,7 +43,7 @@ function renderMedia (state) {
       mediaElement.play()
     }
     // When the user clicks or drags on the progress bar, jump to that position
-    if (state.playing.jumpToTime) {
+    if (state.playing.jumpToTime != null) {
       mediaElement.currentTime = state.playing.jumpToTime
       state.playing.jumpToTime = null
     }
@@ -73,6 +73,15 @@ function renderMedia (state) {
     var file = state.getPlayingFileSummary()
     file.currentTime = state.playing.currentTime = mediaElement.currentTime
     file.duration = state.playing.duration = mediaElement.duration
+
+    // Save selected subtitle
+    if (state.playing.subtitles.selectedIndex !== -1) {
+      var index = state.playing.subtitles.selectedIndex
+      file.selectedSubtitle = state.playing.subtitles.tracks[index].filePath
+    } else if (file.selectedSubtitle != null) {
+      delete file.selectedSubtitle
+    }
+
     state.playing.volume = mediaElement.volume
   }
 
@@ -519,7 +528,7 @@ function renderPlayerControls (state) {
     var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
     var position = fraction * state.playing.duration /* seconds */
-    dispatch('playbackJump', position)
+    dispatch('skipTo', position)
   }
 
   // Handles volume muting and Unmuting

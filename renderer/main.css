@@ -326,7 +326,6 @@ table {
 }
 
 .create-torrent input.torrent-is-private {
-  width: initial;
   margin: 0;
 }
 
@@ -404,7 +403,7 @@ button.button-raised:active {
  * OTHER FORM ELEMENT DEFAULTS
  */
 
-input {
+input[type='text'] {
   background: transparent;
   width: 300px;
   padding: 6px;

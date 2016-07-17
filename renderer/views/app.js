@@ -4,7 +4,7 @@ var hx = require('../lib/hx')
 var Header = require('./header')
 
 var Views = {
-  'home': require('./home'),
+  'home': require('./torrent-list'),
   'player': require('./player'),
   'create-torrent': require('./create-torrent'),
   'preferences': require('./preferences')
@@ -12,6 +12,7 @@ var Views = {
 
 var Modals = {
   'open-torrent-address-modal': require('./open-torrent-address-modal'),
+  'remove-torrent-modal': require('./remove-torrent-modal'),
   'update-available-modal': require('./update-available-modal'),
   'unsupported-media-modal': require('./unsupported-media-modal')
 }

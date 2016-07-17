@@ -16,7 +16,6 @@ var config = require('../config')
 var dialog = require('./dialog')
 var shell = require('./shell')
 var windows = require('./windows')
-var thumbnail = require('./thumbnail')
 
 var menu
 
@@ -34,8 +33,6 @@ function onPlayerClose () {
   getMenuItem('Increase Speed').enabled = false
   getMenuItem('Decrease Speed').enabled = false
   getMenuItem('Add Subtitles File...').enabled = false
-
-  thumbnail.showPlayerThumbnailBar()
 }
 
 function onPlayerOpen () {
@@ -47,8 +44,6 @@ function onPlayerOpen () {
   getMenuItem('Increase Speed').enabled = true
   getMenuItem('Decrease Speed').enabled = true
   getMenuItem('Add Subtitles File...').enabled = true
-
-  thumbnail.hidePlayerThumbnailBar()
 }
 
 function onToggleAlwaysOnTop (flag) {
@@ -225,7 +220,7 @@ function getMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Right'
             : 'Alt+Right',
-          click: () => windows.main.dispatch('skip', 1),
+          click: () => windows.main.dispatch('skip', 10),
           enabled: false
         },
         {
@@ -233,7 +228,7 @@ function getMenuTemplate () {
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Left'
             : 'Alt+Left',
-          click: () => windows.main.dispatch('skip', -1),
+          click: () => windows.main.dispatch('skip', -10),
           enabled: false
         },
         {
