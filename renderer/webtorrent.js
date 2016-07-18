@@ -46,19 +46,29 @@ function init () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
 
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) => startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
-  ipc.on('wt-stop-torrenting', (e, infoHash) => stopTorrenting(infoHash))
-  ipc.on('wt-create-torrent', (e, torrentKey, options) => createTorrent(torrentKey, options))
-  ipc.on('wt-save-torrent-file', (e, torrentKey) => saveTorrentFile(torrentKey))
-  ipc.on('wt-generate-torrent-poster', (e, torrentKey) => generateTorrentPoster(torrentKey))
-  ipc.on('wt-get-audio-metadata', (e, infoHash, index) => getAudioMetadata(infoHash, index))
-  ipc.on('wt-start-server', (e, infoHash, index) => startServer(infoHash, index))
-  ipc.on('wt-stop-server', (e) => stopServer())
-  ipc.on('wt-select-files', (e, infoHash, selections) => selectFiles(infoHash, selections))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
+    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
+  ipc.on('wt-stop-torrenting', (e, infoHash) =>
+    stopTorrenting(infoHash))
+  ipc.on('wt-create-torrent', (e, torrentKey, options) =>
+    createTorrent(torrentKey, options))
+  ipc.on('wt-save-torrent-file', (e, torrentKey) =>
+    saveTorrentFile(torrentKey))
+  ipc.on('wt-generate-torrent-poster', (e, torrentKey) =>
+    generateTorrentPoster(torrentKey))
+  ipc.on('wt-get-audio-metadata', (e, infoHash, index) =>
+    getAudioMetadata(infoHash, index))
+  ipc.on('wt-start-server', (e, infoHash, index) =>
+    startServer(infoHash, index))
+  ipc.on('wt-stop-server', (e) =>
+    stopServer())
+  ipc.on('wt-select-files', (e, infoHash, selections) =>
+    selectFiles(infoHash, selections))
 
   ipc.send('ipcReadyWebTorrent')
 
-  window.addEventListener('error', (e) => ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
+  window.addEventListener('error', (e) =>
+    ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
     true)
 
   setInterval(updateTorrentProgress, 1000)
@@ -100,9 +110,12 @@ function createTorrent (torrentKey, options) {
 }
 
 function addTorrentEvents (torrent) {
-  torrent.on('warning', (err) => ipc.send('wt-warning', torrent.key, err.message))
-  torrent.on('error', (err) => ipc.send('wt-error', torrent.key, err.message))
-  torrent.on('infoHash', () => ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+  torrent.on('warning', (err) =>
+    ipc.send('wt-warning', torrent.key, err.message))
+  torrent.on('error', (err) =>
+    ipc.send('wt-error', torrent.key, err.message))
+  torrent.on('infoHash', () =>
+    ipc.send('wt-infohash', torrent.key, torrent.infoHash))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
@@ -271,21 +284,6 @@ function startServer (infoHash, index) {
 function startServerFromReadyTorrent (torrent, index, cb) {
   if (server) return
 
-  // Donwload files subtitles
-  torrent.files.forEach((file) => {
-    getSubtitleHash(file).then(checksum => {
-      // Getsubtitles from OpenSubtitles
-      os.search({
-        hash: checksum,
-        filesize: file.length
-        // need implement os-locale with ISO 639-2 table: http://www.loc.gov/standards/iso639-2/php/code_list.php
-        // sublanguageid: 'pob'
-      }).then(subtitles => {
-        ipc.send('wt-subtitles-received', subtitles)
-      })
-    })
-  })
-
   // start the streaming torrent-to-http server
   server = torrent.createServer()
   server.listen(0, function () {
@@ -296,9 +294,28 @@ function startServerFromReadyTorrent (torrent, index, cb) {
       localURL: 'http://localhost' + urlSuffix,
       networkURL: 'http://' + networkAddress() + urlSuffix
     }
-
+    
     ipc.send('wt-server-running', info)
     ipc.send('wt-server-' + torrent.infoHash, info) // TODO: hack
+
+    // Donwload file subtitles
+    var osLang = window.navigator.language 
+    // Fix Portuguese Brazilian OpenSubtitles code
+    if(osLang === 'pt-BR') osLang = 'pob'
+    // en-US to en
+    osLang = osLang.split('-')[0]
+    var file = torrent.files[index]
+    getSubtitleHash(file).then(checksum => {
+      // Getsubtitles from OpenSubtitles
+      os.search({
+        hash: checksum,
+        filesize: file.length,
+        filename: file.name,
+        sublanguageid: osLang
+      }).then(subtitles => {
+        ipc.send('wt-subtitles-received', subtitles)
+      })
+    })
   })
 }
 

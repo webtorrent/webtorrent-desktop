@@ -6,94 +6,93 @@ const request = require('request')
 
 const {dispatch} = require('../lib/dispatcher')
 
-module.exports =
-  class SubtitlesController {
-    constructor (state) {
-      this.state = state
+module.exports = class SubtitlesController {
+  constructor (state) {
+    this.state = state
+  }
+
+  openSubtitles () {
+    electron.remote.dialog.showOpenDialog({
+      title: 'Select a subtitles file.',
+      filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
+      properties: [ 'openFile' ]
+    }, (filenames) => {
+      if (!Array.isArray(filenames)) return
+      this.addSubtitles(filenames, true)
+    })
+  }
+
+  selectSubtitle (ix) {
+    this.state.playing.subtitles.selectedIndex = ix
+  }
+
+  toggleSubtitlesMenu () {
+    var subtitles = this.state.playing.subtitles
+    subtitles.showMenu = !subtitles.showMenu
+  }
+
+  addSubtitles (files, autoSelect) {
+    var state = this.state
+    // Subtitles are only supported when playing video files
+    if (state.playing.type !== 'video') return
+    if (files.length === 0 && Object.keys(files).length === 0) return
+    var subtitles = state.playing.subtitles
+
+    // Read the files concurrently, then add all resulting subtitle tracks
+    var tasks = []
+    try {
+      tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
+    } catch (err) {
+      for (var key in files) {
+        let file = files[key]
+        tasks.push((cb) => loadSubtitle(file, cb))
+      }
     }
 
-    openSubtitles () {
-      electron.remote.dialog.showOpenDialog({
-        title: 'Select a subtitles file.',
-        filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
-        properties: [ 'openFile' ]
-      }, (filenames) => {
-        if (!Array.isArray(filenames)) return
-        this.addSubtitles(filenames, true)
-      })
-    }
+    parallel(tasks, function (err, tracks) {
+      if (err) return dispatch('error', err)
 
-    selectSubtitle (ix) {
-      this.state.playing.subtitles.selectedIndex = ix
-    }
+      for (var i = 0; i < tracks.length; i++) {
+        // No dupes allowed
+        var track = tracks[i]
+        var trackIndex = state.playing.subtitles.tracks
+          .findIndex((t) => track.filePath === t.filePath)
 
-    toggleSubtitlesMenu () {
-      var subtitles = this.state.playing.subtitles
-      subtitles.showMenu = !subtitles.showMenu
-    }
+        // Add the track
+        if (trackIndex === -1) {
+          trackIndex = state.playing.subtitles.tracks.push(track) - 1
+        }
 
-    addSubtitles (files, autoSelect, startNow) {
-      var state = this.state
-      // Subtitles are only supported when playing video files
-      // if (state.playing.type !== 'video' && !startNow) return
-      if (files.length === 0 && Object.keys(files).length === 0) return
-      var subtitles = state.playing.subtitles
-
-      // Read the files concurrently, then add all resulting subtitle tracks
-      var tasks = []
-      try {
-        tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
-      } catch (err) {
-        for (var key in files) {
-          let file = files[key]
-          tasks.push((cb) => loadSubtitle(file, cb))
+        // If we're auto-selecting a track, try to find one in the user's language
+        if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
+          state.playing.subtitles.selectedIndex = trackIndex
         }
       }
 
-      parallel(tasks, function (err, tracks) {
-        if (err) return dispatch('error', err)
+      // Finally, make sure no two tracks have the same label
+      relabelSubtitles(subtitles)
+    })
+  }
 
-        for (var i = 0; i < tracks.length; i++) {
-          // No dupes allowed
-          var track = tracks[i]
-          var trackIndex = state.playing.subtitles.tracks
-            .findIndex((t) => track.filePath === t.filePath)
+  checkForSubtitles () {
+    if (this.state.playing.type !== 'video') return
+    var torrentSummary = this.state.getPlayingTorrentSummary()
+    if (!torrentSummary || !torrentSummary.progress) return
 
-          // Add the track
-          if (trackIndex === -1) {
-            trackIndex = state.playing.subtitles.tracks.push(track) - 1
-          }
+    torrentSummary.progress.files.forEach((fp, ix) => {
+      if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
+      var file = torrentSummary.files[ix]
+      if (!this.isSubtitle(file.name)) return
+      var filePath = path.join(torrentSummary.path, file.path)
+      this.addSubtitles([filePath], false)
+    })
+  }
 
-          // If we're auto-selecting a track, try to find one in the user's language
-          if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
-            state.playing.subtitles.selectedIndex = trackIndex
-          }
-        }
-
-        // Finally, make sure no two tracks have the same label
-        relabelSubtitles(subtitles)
-      })
-    }
-
-    checkForSubtitles () {
-      if (this.state.playing.type !== 'video') return
-      var torrentSummary = this.state.getPlayingTorrentSummary()
-      if (!torrentSummary || !torrentSummary.progress) return
-
-      torrentSummary.progress.files.forEach((fp, ix) => {
-        if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
-        var file = torrentSummary.files[ix]
-        if (!this.isSubtitle(file.name)) return
-        var filePath = path.join(torrentSummary.path, file.path)
-        this.addSubtitles([filePath], false)
-      })
-    }
-
-    isSubtitle (file) {
-      var name = typeof file === 'string' ? file : file.name
-      var ext = path.extname(name).toLowerCase()
-      return ext === '.srt' || ext === '.vtt'
-    }
+  isSubtitle (file) {
+    var name = typeof file === 'string' ? file : file.name
+    var ext = path.extname(name).toLowerCase()
+    return ext === '.srt' || ext === '.vtt'
+  }
 }
 
 function loadSubtitle (file, cb) {
@@ -114,13 +113,27 @@ function loadSubtitle (file, cb) {
     // Detect what language the subtitles are in
     var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
     var langDetected = (new LanguageDetect()).detect(vttContents, 2)
-    langDetected = langDetected.length ? langDetected[0][0] : (file.langName || 'subtitle')
+    langDetected = langDetected.length ? langDetected[0][0] : (file.lang || 'subtitle')
     langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+
+    // Detect what language the subtitles are in
+    if(!file.lang){
+      var iso639 = require('iso-639-1')
+      var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
+      var langDetected = (new LanguageDetect()).detect(vttContents, 2)
+      langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+      langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+      file.langName = langDetected
+      file.lang = iso639.getCode(langDetected) // eg "de" if language is "German"
+    }
+
+    // Fix Portuguese Brazilian code
+    if(file.lang === 'pb') file.lang = 'pt'
 
     var track = {
       buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
-      language: langDetected,
-      label: langDetected,
+      language: file.lang,
+      label: file.langName,
       filePath: filePath
     }
 
@@ -131,10 +144,8 @@ function loadSubtitle (file, cb) {
 // Checks whether a language name like "English" or "German" matches the system
 // language, aka the current locale
 function isSystemLanguage (language) {
-  var iso639 = require('iso-639-1')
   var osLangISO = window.navigator.language.split('-')[0] // eg "en"
-  var langIso = iso639.getCode(language) // eg "de" if language is "German"
-  return langIso === osLangISO
+  return language === osLangISO
 }
 
 // Make sure we don't have two subtitle tracks with the same label
@@ -142,7 +153,7 @@ function isSystemLanguage (language) {
 function relabelSubtitles (subtitles) {
   var counts = {}
   subtitles.tracks.forEach(function (track) {
-    var lang = track.language
+    var lang = track.label
     counts[lang] = (counts[lang] || 0) + 1
     track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
   })
