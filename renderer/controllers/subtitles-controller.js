@@ -111,13 +111,7 @@ function loadSubtitle (file, cb) {
     if (err) return dispatch('error', "Can't parse subtitles file.")
 
     // Detect what language the subtitles are in
-    var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
-    var langDetected = (new LanguageDetect()).detect(vttContents, 2)
-    langDetected = langDetected.length ? langDetected[0][0] : (file.lang || 'subtitle')
-    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
-
-    // Detect what language the subtitles are in
-    if(!file.lang){
+    if (!file.lang) {
       var iso639 = require('iso-639-1')
       var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
       var langDetected = (new LanguageDetect()).detect(vttContents, 2)
@@ -128,7 +122,7 @@ function loadSubtitle (file, cb) {
     }
 
     // Fix Portuguese Brazilian code
-    if(file.lang === 'pb') file.lang = 'pt'
+    if (file.lang === 'pb') file.lang = 'pt'
 
     var track = {
       buffer: 'data:text/vtt;base64,' + buf.toString('base64'),

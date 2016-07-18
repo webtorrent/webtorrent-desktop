@@ -294,14 +294,14 @@ function startServerFromReadyTorrent (torrent, index, cb) {
       localURL: 'http://localhost' + urlSuffix,
       networkURL: 'http://' + networkAddress() + urlSuffix
     }
-    
+
     ipc.send('wt-server-running', info)
     ipc.send('wt-server-' + torrent.infoHash, info) // TODO: hack
 
     // Donwload file subtitles
-    var osLang = window.navigator.language 
+    var osLang = window.navigator.language
     // Fix Portuguese Brazilian OpenSubtitles code
-    if(osLang === 'pt-BR') osLang = 'pob'
+    if (osLang === 'pt-BR') osLang = 'pob'
     // en-US to en
     osLang = osLang.split('-')[0]
     var file = torrent.files[index]
