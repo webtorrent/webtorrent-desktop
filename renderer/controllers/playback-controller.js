@@ -40,7 +40,7 @@ module.exports = class PlaybackController {
 
   // Show a file in the OS, eg in Finder on a Mac
   openItem (infoHash, index) {
-    var torrentSummary = torrentSummary.getByKey(this.state, infoHash)
+    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     var filePath = path.join(
       torrentSummary.path,
       torrentSummary.files[index].path)
