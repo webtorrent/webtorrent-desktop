@@ -198,7 +198,7 @@ function openPlayer (state, infoHash, index, cb) {
 }
 
 function getOpenInVlc () {
-  return state.saved.prefs.playInVlc
+  return this.state.saved.prefs.playInVlc
 }
 
 function openPlayerFromActiveTorrent (state, torrentSummary, index, timeout, cb) {
