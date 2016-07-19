@@ -148,7 +148,7 @@ function TorrentList (state) {
 
     // Only show the play button for torrents that contain playable media
     var playButton
-    if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
+    if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
       playButton = hx`
         <i.button-round.icon.play
           title=${playTooltip}
