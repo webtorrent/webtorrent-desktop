@@ -12,6 +12,9 @@ function downloadSubtitles (params) {
 
   var total = 0
 
+  // set default language
+  params.lang = params.lang || 'spa'
+
   getSubtitles(params)
     .then(onGetSubtitlesOk, onGetSubtitlesError)
 
