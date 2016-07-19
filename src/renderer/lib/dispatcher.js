@@ -17,7 +17,7 @@ function dispatch (...args) {
 
 // Most DOM event handlers are trivial functions like `() => dispatch(<args>)`.
 // For these, `dispatcher(<args>)` is preferred because it memoizes the handler
-// function. This prevents virtual-dom from updating the listener functions on
+// function. This prevents React from updating the listener functions on
 // each update().
 function dispatcher (...args) {
   var str = JSON.stringify(args)

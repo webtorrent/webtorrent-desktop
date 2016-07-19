@@ -28,7 +28,7 @@ module.exports = class PrefsController {
   }
 
   // Updates a single property in the UNSAVED prefs
-  // For example: updatePreferences("foo.bar", "baz")
+  // For example: updatePreferences('foo.bar', 'baz')
   // Call savePreferences to save to config.json
   update (property, value) {
     var path = property.split('.')

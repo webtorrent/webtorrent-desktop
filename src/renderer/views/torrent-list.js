@@ -1,24 +1,25 @@
 module.exports = TorrentList
 
-var prettyBytes = require('prettier-bytes')
+const React = require('react')
+const prettyBytes = require('prettier-bytes')
 
-var hx = require('../lib/hx')
-var TorrentSummary = require('../lib/torrent-summary')
-var TorrentPlayer = require('../lib/torrent-player')
-var {dispatcher} = require('../lib/dispatcher')
+const TorrentSummary = require('../lib/torrent-summary')
+const TorrentPlayer = require('../lib/torrent-player')
+const {dispatcher} = require('../lib/dispatcher')
 
 function TorrentList (state) {
   var torrentRows = state.saved.torrents.map(
     (torrentSummary) => renderTorrent(torrentSummary)
   )
 
-  return hx`
-    <div class='torrent-list'>
-      ${torrentRows}
-      <div class='torrent-placeholder'>
-        <span class='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+  return (
+    <div className='torrent-list'>
+      {torrentRows}
+      <div className='torrent-placeholder'>
+        <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
       </div>
-    </div>`
+    </div>
+  )
 
   function renderTorrent (torrentSummary) {
     var infoHash = torrentSummary.infoHash
@@ -41,71 +42,70 @@ function TorrentList (state) {
     if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
-    classes = classes.join(' ')
-    return hx`
-      <div style=${style} class=${classes}
-        oncontextmenu=${infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onclick=${infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
-        ${renderTorrentMetadata(torrentSummary)}
-        ${infoHash ? renderTorrentButtons(torrentSummary) : ''}
-        ${isSelected ? renderTorrentDetails(torrentSummary) : ''}
+    return (
+      <div style={style} className={classes.join(' ')}
+        onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        {renderTorrentMetadata(torrentSummary)}
+        {infoHash ? renderTorrentButtons(torrentSummary) : ''}
+        {isSelected ? renderTorrentDetails(torrentSummary) : ''}
       </div>
-    `
+    )
   }
 
   // Show name, download status, % complete
   function renderTorrentMetadata (torrentSummary) {
     var name = torrentSummary.name || 'Loading torrent...'
-    var elements = [hx`
-      <div class='name ellipsis'>${name}</div>
-    `]
+    var elements = [(
+      <div className='name ellipsis'>{name}</div>
+    )]
 
     // If it's downloading/seeding then show progress info
     var prog = torrentSummary.progress
     if (torrentSummary.status !== 'paused' && prog) {
-      elements.push(hx`
-        <div class='ellipsis'>
-          ${renderPercentProgress()}
-          ${renderTotalProgress()}
-          ${renderPeers()}
-          ${renderDownloadSpeed()}
-          ${renderUploadSpeed()}
-          ${renderEta()}
+      elements.push((
+        <div className='ellipsis'>
+          {renderPercentProgress()}
+          {renderTotalProgress()}
+          {renderPeers()}
+          {renderDownloadSpeed()}
+          {renderUploadSpeed()}
+          {renderEta()}
         </div>
-      `)
+      ))
     }
 
-    return hx`<div class='metadata'>${elements}</div>`
+    return (<div className='metadata'>{elements}</div>)
 
     function renderPercentProgress () {
       var progress = Math.floor(100 * prog.progress)
-      return hx`<span>${progress}%</span>`
+      return (<span>{progress}%</span>)
     }
 
     function renderTotalProgress () {
       var downloaded = prettyBytes(prog.downloaded)
       var total = prettyBytes(prog.length || 0)
       if (downloaded === total) {
-        return hx`<span>${downloaded}</span>`
+        return (<span>{downloaded}</span>)
       } else {
-        return hx`<span>${downloaded} / ${total}</span>`
+        return (<span>{downloaded} / {total}</span>)
       }
     }
 
     function renderPeers () {
       if (prog.numPeers === 0) return
       var count = prog.numPeers === 1 ? 'peer' : 'peers'
-      return hx`<span>${prog.numPeers} ${count}</span>`
+      return (<span>{prog.numPeers} {count}</span>)
     }
 
     function renderDownloadSpeed () {
       if (prog.downloadSpeed === 0) return
-      return hx`<span>↓ ${prettyBytes(prog.downloadSpeed)}/s</span>`
+      return (<span>↓ {prettyBytes(prog.downloadSpeed)}/s</span>)
     }
 
     function renderUploadSpeed () {
       if (prog.uploadSpeed === 0) return
-      return hx`<span>↑ ${prettyBytes(prog.uploadSpeed)}/s</span>`
+      return (<span>↑ {prettyBytes(prog.uploadSpeed)}/s</span>)
     }
 
     function renderEta () {
@@ -126,7 +126,7 @@ function TorrentList (state) {
       var minutesStr = (hours || minutes) ? minutes + 'm' : ''
       var secondsStr = seconds + 's'
 
-      return hx`<span>ETA: ${hoursStr} ${minutesStr} ${secondsStr}</span>`
+      return (<span>ETA: {hoursStr} {minutesStr} {secondsStr}</span>)
     }
   }
 
@@ -171,34 +171,34 @@ function TorrentList (state) {
     // Only show the play button for torrents that contain playable media
     var playButton
     if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-      playButton = hx`
-        <i.button-round.icon.play
-          title=${playTooltip}
-          class=${playClass}
-          onclick=${dispatcher('playFile', infoHash)}>
-          ${playIcon}
+      playButton = (
+        <i
+          title={playTooltip}
+          className={'button-round icon play ' + playClass}
+          onClick={dispatcher('playFile', infoHash)}>
+          {playIcon}
         </i>
-      `
+      )
     }
 
-    return hx`
-      <div class='buttons'>
-        ${positionElem}
-        ${playButton}
-        <i.button-round.icon.download
-          class=${torrentSummary.status}
-          title=${downloadTooltip}
-          onclick=${dispatcher('toggleTorrent', infoHash)}>
-          ${downloadIcon}
+    return (
+      <div className='buttons'>
+        {positionElem}
+        {playButton}
+        <i
+          className={'button-round icon download ' + torrentSummary.status}
+          title={downloadTooltip}
+          onClick={dispatcher('toggleTorrent', infoHash)}>
+          {downloadIcon}
         </i>
         <i
-          class='icon delete'
+          className='icon delete'
           title='Remove torrent'
-          onclick=${dispatcher('confirmDeleteTorrent', infoHash, false)}>
+          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
       </div>
-    `
+    )
   }
 
   // Show files, per-file download status and play buttons, and so on
@@ -209,7 +209,7 @@ function TorrentList (state) {
       var message = torrentSummary.status === 'paused'
         ? 'Failed to load torrent info. Click the download button to try again...'
         : 'Downloading torrent info...'
-      filesElement = hx`<div class='files warning'>${message}</div>`
+      filesElement = (<div className='files warning'>{message}</div>)
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files
@@ -221,20 +221,20 @@ function TorrentList (state) {
         })
         .map((object) => renderFileRow(torrentSummary, object.file, object.index))
 
-      filesElement = hx`
-        <div class='files'>
+      filesElement = (
+        <div className='files'>
           <table>
-            ${fileRows}
+            {fileRows}
           </table>
         </div>
-      `
+      )
     }
 
-    return hx`
-      <div class='torrent-details'>
-        ${filesElement}
+    return (
+      <div className='torrent-details'>
+        {filesElement}
       </div>
-    `
+    )
   }
 
   // Show a single torrentSummary file in the details view for a single torrent
@@ -272,27 +272,27 @@ function TorrentList (state) {
     var rowClass = ''
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
-    return hx`
-      <tr onclick=${handleClick}>
-        <td class='col-icon ${rowClass}'>
-          ${positionElem}
-          <i class='icon'>${icon}</i>
+    return (
+      <tr onClick={handleClick}>
+        <td className={'col-icon ' + rowClass}>
+          {positionElem}
+          <i className='icon'>{icon}</i>
         </td>
-        <td class='col-name ${rowClass}'>
-          ${file.name}
+        <td className={'col-name ' + rowClass}>
+          {file.name}
         </td>
-        <td class='col-progress ${rowClass}'>
-          ${isSelected ? progress : ''}
+        <td className={'col-progress ' + rowClass}>
+          {isSelected ? progress : ''}
         </td>
-        <td class='col-size ${rowClass}'>
-          ${prettyBytes(file.length)}
+        <td className={'col-size ' + rowClass}>
+          {prettyBytes(file.length)}
         </td>
-        <td class='col-select'
-            onclick=${dispatcher('toggleTorrentFile', infoHash, index)}>
-          <i class='icon'>${isSelected ? 'close' : 'add'}</i>
+        <td className='col-select'
+          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+          <i className='icon'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>
-    `
+    )
   }
 }
 
@@ -301,18 +301,18 @@ function renderRadialProgressBar (fraction, cssClass) {
   var transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
   var transformFix = {transform: 'rotate(' + rotation + 'deg)'}
 
-  return hx`
-    <div class="radial-progress ${cssClass}">
-      <div class="circle">
-        <div class="mask full" style=${transformFill}>
-          <div class="fill" style=${transformFill}></div>
+  return (
+    <div className={'radial-progress ' + cssClass}>
+      <div className='circle'>
+        <div className='mask full' style={transformFill}>
+          <div className='fill' style={transformFill}></div>
         </div>
-        <div class="mask half">
-          <div class="fill" style=${transformFill}></div>
-          <div class="fill fix" style=${transformFix}></div>
+        <div className='mask half'>
+          <div className='fill' style={transformFill}></div>
+          <div className='fill fix' style={transformFix}></div>
         </div>
       </div>
-      <div class="inset"></div>
+      <div className='inset'></div>
     </div>
-  `
+  )
 }

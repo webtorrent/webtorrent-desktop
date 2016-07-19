@@ -30,9 +30,9 @@ module.exports = class PlaybackController {
       url: 'player',
       onbeforeload: (cb) => {
         this.play()
-        openPlayer(this.state, infoHash, index, cb)
+        this.openPlayer(infoHash, index, cb)
       },
-      onbeforeunload: (cb) => closePlayer(this.state, this.config, cb)
+      onbeforeunload: (cb) => this.closePlayer(cb)
     }, (err) => {
       if (err) dispatch('error', err)
     })
@@ -162,134 +162,136 @@ module.exports = class PlaybackController {
     }
     return false
   }
-}
 
-// Opens the video player to a specific torrent
-function openPlayer (state, infoHash, index, cb) {
-  var torrentSummary = TorrentSummary.getByKey(state, infoHash)
+  // Opens the video player to a specific torrent
+  openPlayer (infoHash, index, cb) {
+    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
 
-  // automatically choose which file in the torrent to play, if necessary
-  if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-  if (index === undefined) index = TorrentPlayer.pickFileToPlay(torrentSummary.files)
-  if (index === undefined) return cb(new errors.UnplayableError())
+    // automatically choose which file in the torrent to play, if necessary
+    if (index === undefined) index = torrentSummary.defaultPlayFileIndex
+    if (index === undefined) index = TorrentPlayer.pickFileToPlay(torrentSummary.files)
+    if (index === undefined) return cb(new errors.UnplayableError())
 
-  // update UI to show pending playback
-  if (torrentSummary.progress !== 1) sound.play('PLAY')
-  // TODO: remove torrentSummary.playStatus
-  torrentSummary.playStatus = 'requested'
-  this.update()
-
-  var timeout = setTimeout(() => {
-    telemetry.logPlayAttempt('timeout')
+    // update UI to show pending playback
+    if (torrentSummary.progress !== 1) sound.play('PLAY')
     // TODO: remove torrentSummary.playStatus
-    torrentSummary.playStatus = 'timeout' /* no seeders available? */
-    sound.play('ERROR')
-    cb(new Error('Playback timed out. Try again.'))
+    torrentSummary.playStatus = 'requested'
     this.update()
-  }, 10000) /* give it a few seconds */
 
-  if (torrentSummary.status === 'paused') {
-    dispatch('startTorrentingSummary', torrentSummary)
-    ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
-      () => openPlayerFromActiveTorrent(state, torrentSummary, index, timeout, cb))
-  } else {
-    openPlayerFromActiveTorrent(state, torrentSummary, index, timeout, cb)
-  }
-}
+    var timeout = setTimeout(() => {
+      telemetry.logPlayAttempt('timeout')
+      // TODO: remove torrentSummary.playStatus
+      torrentSummary.playStatus = 'timeout' /* no seeders available? */
+      sound.play('ERROR')
+      cb(new Error('Playback timed out. Try again.'))
+      this.update()
+    }, 10000) /* give it a few seconds */
 
-function openPlayerFromActiveTorrent (state, torrentSummary, index, timeout, cb) {
-  var fileSummary = torrentSummary.files[index]
-
-  // update state
-  state.playing.infoHash = torrentSummary.infoHash
-  state.playing.fileIndex = index
-  state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-    : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-    : 'other'
-
-  // pick up where we left off
-  if (fileSummary.currentTime) {
-    var fraction = fileSummary.currentTime / fileSummary.duration
-    var secondsLeft = fileSummary.duration - fileSummary.currentTime
-    if (fraction < 0.9 && secondsLeft > 10) {
-      state.playing.jumpToTime = fileSummary.currentTime
+    if (torrentSummary.status === 'paused') {
+      dispatch('startTorrentingSummary', torrentSummary)
+      ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
+        () => this.openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
+    } else {
+      this.openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb)
     }
   }
 
-  // if it's audio, parse out the metadata (artist, title, etc)
-  if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-    ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
-  }
+  openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
+    var fileSummary = torrentSummary.files[index]
 
-  // if it's video, check for subtitles files that are done downloading
-  dispatch('checkForSubtitles')
+    // update state
+    var state = this.state
+    state.playing.infoHash = torrentSummary.infoHash
+    state.playing.fileIndex = index
+    state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
+      : TorrentPlayer.isAudio(fileSummary) ? 'audio'
+      : 'other'
 
-  // enable previously selected subtitle track
-  if (fileSummary.selectedSubtitle) {
-    dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
-  }
-
-  ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
-  ipcRenderer.once('wt-server-' + torrentSummary.infoHash, (e, info) => {
-    clearTimeout(timeout)
-
-    // if we timed out (user clicked play a long time ago), don't autoplay
-    var timedOut = torrentSummary.playStatus === 'timeout'
-    delete torrentSummary.playStatus
-    if (timedOut) {
-      ipcRenderer.send('wt-stop-server')
-      return this.update()
+    // pick up where we left off
+    if (fileSummary.currentTime) {
+      var fraction = fileSummary.currentTime / fileSummary.duration
+      var secondsLeft = fileSummary.duration - fileSummary.currentTime
+      if (fraction < 0.9 && secondsLeft > 10) {
+        state.playing.jumpToTime = fileSummary.currentTime
+      }
     }
 
-    // otherwise, play the video
-    state.window.title = torrentSummary.files[state.playing.fileIndex].name
+    // if it's audio, parse out the metadata (artist, title, etc)
+    if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
+    }
+
+    // if it's video, check for subtitles files that are done downloading
+    dispatch('checkForSubtitles')
+
+    // enable previously selected subtitle track
+    if (fileSummary.selectedSubtitle) {
+      dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
+    }
+
+    ipcRenderer.send('wt-start-server', torrentSummary.infoHash, index)
+    ipcRenderer.once('wt-server-' + torrentSummary.infoHash, (e, info) => {
+      clearTimeout(timeout)
+
+      // if we timed out (user clicked play a long time ago), don't autoplay
+      var timedOut = torrentSummary.playStatus === 'timeout'
+      delete torrentSummary.playStatus
+      if (timedOut) {
+        ipcRenderer.send('wt-stop-server')
+        return this.update()
+      }
+
+      // otherwise, play the video
+      state.window.title = torrentSummary.files[state.playing.fileIndex].name
+      this.update()
+
+      ipcRenderer.send('onPlayerOpen')
+
+      cb()
+    })
+  }
+
+  closePlayer (cb) {
+    console.log('closePlayer')
+
+    // Quit any external players, like Chromecast/Airplay/etc or VLC
+    var state = this.state
+    if (isCasting(state)) {
+      Cast.stop()
+    }
+    if (state.playing.location === 'vlc') {
+      ipcRenderer.send('vlcQuit')
+    }
+
+    // Save volume (this session only, not in state.saved)
+    state.previousVolume = state.playing.volume
+
+    // Telemetry: track what happens after the user clicks play
+    var result = state.playing.result // 'success' or 'error'
+    if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
+    else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
+    else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user exited before first frame
+    else console.error('Unknown state.playing.result', state.playing.result)
+
+    // Reset the window contents back to the home screen
+    state.window.title = this.config.APP_WINDOW_TITLE
+    state.playing = State.getDefaultPlayState()
+    state.server = null
+
+    // Reset the window size and location back to where it was
+    if (state.window.isFullScreen) {
+      dispatch('toggleFullScreen', false)
+    }
+    restoreBounds(state)
+
+    // Tell the WebTorrent process to kill the torrent-to-HTTP server
+    ipcRenderer.send('wt-stop-server')
+
+    ipcRenderer.send('onPlayerClose')
+
     this.update()
-
-    ipcRenderer.send('onPlayerOpen')
-
     cb()
-  })
-}
-
-function closePlayer (state, config, cb) {
-  console.log('closePlayer')
-
-  // Quit any external players, like Chromecast/Airplay/etc or VLC
-  if (isCasting(state)) {
-    Cast.stop()
   }
-  if (state.playing.location === 'vlc') {
-    ipcRenderer.send('vlcQuit')
-  }
-
-  // Save volume (this session only, not in state.saved)
-  state.previousVolume = state.playing.volume
-
-  // Telemetry: track what happens after the user clicks play
-  var result = state.playing.result // 'success' or 'error'
-  if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
-  else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
-  else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user exited before first frame
-  else console.error('Unknown state.playing.result', state.playing.result)
-
-  // Reset the window contents back to the home screen
-  state.window.title = config.APP_WINDOW_TITLE
-  state.playing = State.getDefaultPlayState()
-  state.server = null
-
-  // Reset the window size and location back to where it was
-  if (state.window.isFullScreen) {
-    dispatch('toggleFullScreen', false)
-  }
-  restoreBounds(state)
-
-  // Tell the WebTorrent process to kill the torrent-to-HTTP server
-  ipcRenderer.send('wt-stop-server')
-
-  ipcRenderer.send('onPlayerClose')
-
-  this.update()
-  cb()
 }
 
 // Checks whether we are connected and already casting

@@ -1,17 +1,17 @@
 module.exports = Preferences
 
-var hx = require('../lib/hx')
-var {dispatch} = require('../lib/dispatcher')
+const React = require('react')
+const remote = require('electron').remote
+const dialog = remote.dialog
 
-var remote = require('electron').remote
-var dialog = remote.dialog
+const {dispatch} = require('../lib/dispatcher')
 
 function Preferences (state) {
-  return hx`
-    <div class='preferences'>
-      ${renderGeneralSection(state)}
+  return (
+    <div className='preferences'>
+      {renderGeneralSection(state)}
     </div>
-  `
+  )
 }
 
 function renderGeneralSection (state) {
@@ -44,24 +44,24 @@ function renderDownloadDirSelector (state) {
 // - definition should be {icon, title, description}
 // - controls should be an array of vdom elements
 function renderSection (definition, controls) {
-  var helpElem = !definition.description ? null : hx`
-    <div class='help text'>
-      <i.icon>help_outline</i>${definition.description}
+  var helpElem = !definition.description ? null : (
+    <div className='help text'>
+      <i className='icon'>help_outline</i>{definition.description}
     </div>
-  `
-  return hx`
-    <section class='section preferences-panel'>
-      <div class='section-container'>
-        <div class='section-heading'>
-          <i.icon>${definition.icon}</i>${definition.title}
+  )
+  return (
+    <section className='section preferences-panel'>
+      <div className='section-container'>
+        <div className='section-heading'>
+          <i className='icon'>{definition.icon}</i>{definition.title}
         </div>
-        ${helpElem}
-        <div class='section-body'>
-          ${controls}
+        {helpElem}
+        <div className='section-body'>
+          {controls}
         </div>
       </div>
     </section>
-  `
+  )
 }
 
 // Creates a file chooser
@@ -70,25 +70,25 @@ function renderSection (definition, controls) {
 // - value should be the current pref, a file or folder path
 // - callback takes a new file or folder path
 function renderFileSelector (definition, value, callback) {
-  return hx`
-    <div class='control-group'>
-      <div class='controls'>
-        <label class='control-label'>
-          <div class='preference-title'>${definition.label}</div>
-          <div class='preference-description'>${definition.description}</div>
+  return (
+    <div className='control-group'>
+      <div className='controls'>
+        <label className='control-label'>
+          <div className='preference-title'>{definition.label}</div>
+          <div className='preference-description'>{definition.description}</div>
         </label>
-        <div class='controls'>
-          <input type='text' class='file-picker-text'
-            id=${definition.property}
+        <div className='controls'>
+          <input type='text' className='file-picker-text'
+            id={definition.property}
             disabled='disabled'
-            value=${value} />
-          <button class='btn' onclick=${handleClick}>
-            <i.icon>folder_open</i>
+            value={value} />
+          <button className='btn' onClick={handleClick}>
+            <i className='icon'>folder_open</i>
           </button>
         </div>
       </div>
     </div>
-  `
+  )
   function handleClick () {
     dialog.showOpenDialog(remote.getCurrentWindow(), definition.options, function (filenames) {
       if (!Array.isArray(filenames)) return

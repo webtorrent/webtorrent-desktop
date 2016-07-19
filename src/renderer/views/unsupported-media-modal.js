@@ -1,9 +1,9 @@
 module.exports = UnsupportedMediaModal
 
-var electron = require('electron')
+const React = require('react')
+const electron = require('electron')
 
-var {dispatch, dispatcher} = require('../lib/dispatcher')
-var hx = require('../lib/hx')
+const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 function UnsupportedMediaModal (state) {
   var err = state.modal.error
@@ -11,22 +11,22 @@ function UnsupportedMediaModal (state) {
     ? err.getMessage()
     : err
   var actionButton = state.modal.vlcInstalled
-    ? hx`<button class="button-raised" onclick=${onPlay}>Play in VLC</button>`
-    : hx`<button class="button-raised" onclick=${onInstall}>Install VLC</button>`
+    ? (<button className='button-raised' onClick={onPlay}>Play in VLC</button>)
+    : (<button className='button-raised' onClick={onInstall}>Install VLC</button>)
   var vlcMessage = state.modal.vlcNotFound
     ? 'Couldn\'t run VLC. Please make sure it\'s installed.'
     : ''
-  return hx`
+  return (
     <div>
       <p><strong>Sorry, we can't play that file.</strong></p>
-      <p>${message}</p>
-      <p class='float-right'>
-        <button class="button-flat" onclick=${dispatcher('backToList')}>Cancel</button>
-        ${actionButton}
+      <p>{message}</p>
+      <p className='float-right'>
+        <button className='button-flat' onClick={dispatcher('backToList')}>Cancel</button>
+        {actionButton}
       </p>
-      <p class='error-text'>${vlcMessage}</p>
+      <p className='error-text'>{vlcMessage}</p>
     </div>
-  `
+  )
 
   function onInstall () {
     electron.shell.openExternal('http://www.videolan.org/vlc/')

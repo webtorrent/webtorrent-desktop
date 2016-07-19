@@ -1,27 +1,27 @@
 module.exports = Player
 
-var Bitfield = require('bitfield')
-var prettyBytes = require('prettier-bytes')
-var zeroFill = require('zero-fill')
+const React = require('react')
+const Bitfield = require('bitfield')
+const prettyBytes = require('prettier-bytes')
+const zeroFill = require('zero-fill')
 
-var hx = require('../lib/hx')
-var TorrentSummary = require('../lib/torrent-summary')
-var {dispatch, dispatcher} = require('../lib/dispatcher')
+const TorrentSummary = require('../lib/torrent-summary')
+const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 function Player (state) {
   // Show the video as large as will fit in the window, play immediately
   // If the video is on Chromecast or Airplay, show a title screen instead
   var showVideo = state.playing.location === 'local'
-  return hx`
+  return (
     <div
-      class='player'
-      onwheel=${handleVolumeWheel}
-      onmousemove=${dispatcher('mediaMouseMoved')}>
-      ${showVideo ? renderMedia(state) : renderCastScreen(state)}
-      ${renderPlayerControls(state)}
-      </div>
-  `
+      className='player'
+      onWheel={handleVolumeWheel}
+      onMouseMove={dispatcher('mediaMouseMoved')}>
+      {showVideo ? renderMedia(state) : renderCastScreen(state)}
+      {renderPlayerControls(state)}
+    </div>
+  )
 }
 
 // Handles volume change by wheel
@@ -91,42 +91,42 @@ function renderMedia (state) {
     for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
       var track = state.playing.subtitles.tracks[i]
       var isSelected = state.playing.subtitles.selectedIndex === i
-      trackTags.push(hx`
+      trackTags.push(
         <track
-          ${isSelected ? 'default' : ''}
-          label=${track.label}
+          default={isSelected ? 'default' : ''}
+          label={track.label}
           type='subtitles'
-          src=${track.buffer}>
-      `)
+          src={track.buffer} />
+      )
     }
   }
 
   // Create the <audio> or <video> tag
-  var mediaTag = hx`
-    <div
-      src='${state.server.localURL}'
-      ondblclick=${dispatcher('toggleFullScreen')}
-      onloadedmetadata=${onLoadedMetadata}
-      onended=${onEnded}
-      onstalling=${dispatcher('mediaStalled')}
-      onerror=${dispatcher('mediaError')}
-      ontimeupdate=${dispatcher('mediaTimeUpdate')}
-      onencrypted=${dispatcher('mediaEncrypted')}
-      oncanplay=${onCanPlay}>
-      ${trackTags}
-    </div>
-  `
-  mediaTag.tagName = state.playing.type // conditional tag name
+  var MediaTagName = state.playing.type
+  var mediaTag = (
+    <MediaTagName
+      src={state.server.localURL}
+      onDoubleClick={dispatcher('toggleFullScreen')}
+      onLoadedMetadata={onLoadedMetadata}
+      onEnded={onEnded}
+      onStalling={dispatcher('mediaStalled')}
+      onError={dispatcher('mediaError')}
+      onTimeUpdate={dispatcher('mediaTimeUpdate')}
+      onEncrypted={dispatcher('mediaEncrypted')}
+      onCanPlay={onCanPlay}>
+      {trackTags}
+    </MediaTagName>
+  )
 
   // Show the media.
-  return hx`
+  return (
     <div
-      class='letterbox'
-      onmousemove=${dispatcher('mediaMouseMoved')}>
-      ${mediaTag}
-      ${renderOverlay(state)}
+      className='letterbox'
+      onMouseMove={dispatcher('mediaMouseMoved')}>
+      {mediaTag}
+      {renderOverlay(state)}
     </div>
-  `
+  )
 
   // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
@@ -177,11 +177,11 @@ function renderOverlay (state) {
     return
   }
 
-  return hx`
-    <div class='media-overlay-background' style=${style}>
-      <div class='media-overlay'>${elems}</div>
+  return (
+    <div className='media-overlay-background' style={style}>
+      <div className='media-overlay'>{elems}</div>
     </div>
-  `
+  )
 }
 
 function renderAudioMetadata (state) {
@@ -207,36 +207,36 @@ function renderAudioMetadata (state) {
   // Show a small info box in the middle of the screen with title/album/etc
   var elems = []
   if (artist) {
-    elems.push(hx`
-      <div class='audio-artist'>
-        <label>Artist</label>${artist}
+    elems.push((
+      <div className='audio-artist'>
+        <label>Artist</label>{artist}
       </div>
-    `)
+    ))
   }
   if (album) {
-    elems.push(hx`
-      <div class='audio-album'>
-        <label>Album</label>${album}
+    elems.push((
+      <div className='audio-album'>
+        <label>Album</label>{album}
       </div>
-    `)
+    ))
   }
   if (track) {
-    elems.push(hx`
-      <div class='audio-track'>
-        <label>Track</label>${track}
+    elems.push((
+      <div className='audio-track'>
+        <label>Track</label>{track}
       </div>
-    `)
+    ))
   }
 
   // Align the title with the other info, if available. Otherwise, center title
-  var emptyLabel = hx`<label></label>`
-  elems.unshift(hx`
-    <div class='audio-title'>
-      ${elems.length ? emptyLabel : undefined}${title}
+  var emptyLabel = (<label></label>)
+  elems.unshift((
+    <div className='audio-title'>
+      {elems.length ? emptyLabel : undefined}{title}
     </div>
-  `)
+  ))
 
-  return hx`<div class='audio-metadata'>${elems}</div>`
+  return (<div className='audio-metadata'>{elems}</div>)
 }
 
 function renderLoadingSpinner (state) {
@@ -252,16 +252,16 @@ function renderLoadingSpinner (state) {
     fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
   }
 
-  return hx`
-    <div class='media-stalled'>
-      <div class='loading-spinner'>&nbsp;</div>
-      <div class='loading-status ellipsis'>
-        <span class='progress'>${fileProgress}%</span> downloaded,
-        <span>↓ ${prettyBytes(prog.downloadSpeed || 0)}/s</span>
-        <span>↑ ${prettyBytes(prog.uploadSpeed || 0)}/s</span>
+  return (
+    <div className='media-stalled'>
+      <div className='loading-spinner'>&nbsp;</div>
+      <div className='loading-status ellipsis'>
+        <span className='progress'>{fileProgress}%</span> downloaded,
+        <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
+        <span>↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
     </div>
-  `
+  )
 }
 
 function renderCastScreen (state) {
@@ -300,15 +300,15 @@ function renderCastScreen (state) {
     backgroundImage: cssBackgroundImagePoster(state)
   }
 
-  return hx`
-    <div class='letterbox' style=${style}>
-      <div class='cast-screen'>
-        <i class='icon'>${castIcon}</i>
-        <div class='cast-type'>${castType}</div>
-        <div class='cast-status'>${castStatus}</div>
+  return (
+    <div className='letterbox' style={style}>
+      <div className='cast-screen'>
+        <i className='icon'>{castIcon}</i>
+        <div className='cast-type'>{castType}</div>
+        <div className='cast-status'>{castStatus}</div>
       </div>
     </div>
-  `
+  )
 }
 
 function renderCastOptions (state) {
@@ -320,19 +320,19 @@ function renderCastOptions (state) {
   var items = devices.map(function (device, ix) {
     var isSelected = player.device === device
     var name = device.name
-    return hx`
-      <li onclick=${dispatcher('selectCastDevice', ix)}>
-        <i.icon>${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
-        ${name}
+    return (
+      <li onClick={dispatcher('selectCastDevice', ix)}>
+        <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        {name}
       </li>
-    `
+    )
   })
 
-  return hx`
-    <ul.options-list>
-      ${items}
+  return (
+    <ul className='options-list'>
+      {items}
     </ul>
-  `
+  )
 }
 
 function renderSubtitlesOptions (state) {
@@ -341,25 +341,25 @@ function renderSubtitlesOptions (state) {
 
   var items = subtitles.tracks.map(function (track, ix) {
     var isSelected = state.playing.subtitles.selectedIndex === ix
-    return hx`
-      <li onclick=${dispatcher('selectSubtitle', ix)}>
-        <i.icon>${'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
-        ${track.label}
+    return (
+      <li onClick={dispatcher('selectSubtitle', ix)}>
+        <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
+        {track.label}
       </li>
-    `
+    )
   })
 
   var noneSelected = state.playing.subtitles.selectedIndex === -1
   var noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
-  return hx`
-    <ul.options-list>
-      ${items}
-      <li onclick=${dispatcher('selectSubtitle', -1)}>
-        <i.icon>${noneClass}</i>
+  return (
+    <ul className='options-list'>
+      {items}
+      <li onClick={dispatcher('selectSubtitle', -1)}>
+        <i className='icon'>{noneClass}</i>
         None
       </li>
     </ul>
-  `
+  )
 }
 
 function renderPlayerControls (state) {
@@ -372,45 +372,41 @@ function renderPlayerControls (state) {
       : ''
 
   var elements = [
-    hx`
-      <div class='playback-bar'>
-        ${renderLoadingBar(state)}
-        <div
-          class='playback-cursor'
-          style=${playbackCursorStyle}>
-        </div>
-        <div
-          class='scrub-bar'
-          draggable='true'
-          ondragstart=${handleDragStart}
-          onclick=${handleScrub},
-          ondrag=${handleScrub}>
-        </div>
+    <div className='playback-bar'>
+      {renderLoadingBar(state)}
+      <div
+        className='playback-cursor'
+        style={playbackCursorStyle}>
       </div>
-    `,
-    hx`
-      <i class='icon play-pause float-left' onclick=${dispatcher('playPause')}>
-        ${state.playing.isPaused ? 'play_arrow' : 'pause'}
-      </i>
-    `,
-    hx`
-      <i
-        class='icon fullscreen float-right'
-        onclick=${dispatcher('toggleFullScreen')}>
-        ${state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
-      </i>
-    `
+      <div
+        className='scrub-bar'
+        draggable='true'
+        onDragStart={handleDragStart}
+        onClick={handleScrub}
+        onDrag={handleScrub}>
+      </div>
+    </div>,
+
+    <i className='icon play-pause float-left' onClick={dispatcher('playPause')}>
+      {state.playing.isPaused ? 'play_arrow' : 'pause'}
+    </i>,
+
+    <i
+      className='icon fullscreen float-right'
+      onClick={dispatcher('toggleFullScreen')}>
+      {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
+    </i>
   ]
 
   if (state.playing.type === 'video') {
     // show closed captions icon
-    elements.push(hx`
-      <i.icon.closed-caption.float-right
-        class=${captionsClass}
-        onclick=${handleSubtitles}>
+    elements.push((
+      <i
+        className={'icon closed-caption float-right ' + captionsClass}
+        onClick={handleSubtitles}>
         closed_caption
       </i>
-    `)
+    ))
   }
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
@@ -447,13 +443,13 @@ function renderPlayerControls (state) {
     }
     var buttonIcon = buttonIcons[castType][isCasting]
 
-    elements.push(hx`
-      <i.icon.device.float-right
-        class=${buttonClass}
-        onclick=${buttonHandler}>
-        ${buttonIcon}
+    elements.push((
+      <i
+        className={'icon device float-right ' + buttonClass}
+        onClick={buttonHandler}>
+        {buttonIcon}
       </i>
-    `)
+    ))
   })
 
   // Render volume slider
@@ -469,50 +465,50 @@ function renderPlayerControls (state) {
       'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
-  elements.push(hx`
-    <div class='volume float-left'>
+  elements.push((
+    <div className='volume float-left'>
       <i
-        class='icon volume-icon float-left'
-        onmousedown=${handleVolumeMute}>
-        ${volumeIcon}
+        className='icon volume-icon float-left'
+        onMouseDown={handleVolumeMute}>
+        {volumeIcon}
       </i>
       <input
-        class='volume-slider float-right'
+        className='volume-slider float-right'
         type='range' min='0' max='1' step='0.05'
-        value=${volumeChanging !== false ? volumeChanging : volume}
-        onmousedown=${handleVolumeScrub}
-        onmouseup=${handleVolumeScrub}
-        onmousemove=${handleVolumeScrub}
-        style=${volumeStyle}
+        value={volumeChanging !== false ? volumeChanging : volume}
+        onMouseDown={handleVolumeScrub}
+        onMouseUp={handleVolumeScrub}
+        onMouseMove={handleVolumeScrub}
+        style={volumeStyle}
       />
     </div>
-  `)
+  ))
 
   // Show video playback progress
   var currentTimeStr = formatTime(state.playing.currentTime)
   var durationStr = formatTime(state.playing.duration)
-  elements.push(hx`
-    <span class='time float-left'>
-      ${currentTimeStr} / ${durationStr}
+  elements.push((
+    <span className='time float-left'>
+      {currentTimeStr} / {durationStr}
     </span>
-  `)
+  ))
 
   // render playback rate
   if (state.playing.playbackRate !== 1) {
-    elements.push(hx`
-      <span class='rate float-left'>
-        ${state.playing.playbackRate}x
+    elements.push((
+      <span className='rate float-left'>
+        {state.playing.playbackRate}x
       </span>
-    `)
+    ))
   }
 
-  return hx`
-    <div class='controls'>
-      ${elements}
-      ${renderCastOptions(state)}
-      ${renderSubtitlesOptions(state)}
+  return (
+    <div className='controls'>
+      {elements}
+      {renderCastOptions(state)}
+      {renderSubtitlesOptions(state)}
     </div>
-  `
+  )
 
   function handleDragStart (e) {
     // Prevent the cursor from changing, eg to a green + icon on Mac
@@ -546,7 +542,7 @@ function renderPlayerControls (state) {
     switch (e.type) {
       case 'mouseup':
         volumeChanging = false
-        dispatch('setVolume', e.offsetX / 50)
+        dispatch('setVolume', e.nativeEvent.offsetX / 50)
         break
       case 'mousedown':
         volumeChanging = this.value
@@ -574,7 +570,7 @@ function renderPlayerControls (state) {
 var volumeChanging = false
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
-// can be "spongey" / non-contiguous
+// can be 'spongey' / non-contiguous
 function renderLoadingBar (state) {
   var torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
@@ -597,18 +593,15 @@ function renderLoadingBar (state) {
   }
 
   // Output some bars to show which parts of the file are loaded
-  return hx`
-    <div class='loading-bar'>
-      ${parts.map(function (part) {
-        var style = {
-          left: (100 * part.start / fileProg.numPieces) + '%',
-          width: (100 * part.count / fileProg.numPieces) + '%'
-        }
+  var loadingBarElems = parts.map(function (part) {
+    var style = {
+      left: (100 * part.start / fileProg.numPieces) + '%',
+      width: (100 * part.count / fileProg.numPieces) + '%'
+    }
 
-        return hx`<div class='loading-bar-part' style=${style}></div>`
-      })}
-    </div>
-  `
+    return (<div className='loading-bar-part' style={style}></div>)
+  })
+  return (<div className='loading-bar'>{loadingBarElems}</div>)
 }
 
 // Returns the CSS background-image string for a poster image + dark vignette

@@ -5,11 +5,8 @@ crashReporter.init()
 
 const dragDrop = require('drag-drop')
 const electron = require('electron')
-const mainLoop = require('main-loop')
-
-const createElement = require('virtual-dom/create-element')
-const diff = require('virtual-dom/diff')
-const patch = require('virtual-dom/patch')
+const React = require('react')
+const ReactDOM = require('react-dom')
 
 const config = require('../config')
 const App = require('./views/app')
@@ -43,7 +40,10 @@ var ipcRenderer = electron.ipcRenderer
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
-var state, vdomLoop
+var state
+
+// Root React component
+var app
 
 State.load(onState)
 
@@ -74,17 +74,6 @@ function onState (err, _state) {
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, config.DELAYED_INIT)
 
-  // The UI is built with virtual-dom, a minimalist library extracted from React
-  // The concepts--one way data flow, a pure function that renders state to a
-  // virtual DOM tree, and a diff that applies changes in the vdom to the real
-  // DOM, are all the same. Learn more: https://facebook.github.io/react/
-  vdomLoop = mainLoop(state, render, {
-    create: createElement,
-    diff: diff,
-    patch: patch
-  })
-  document.body.appendChild(vdomLoop.target)
-
   // Listen for messages from the main process
   setupIpc()
 
@@ -92,7 +81,8 @@ function onState (err, _state) {
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
-  requestAnimationFrame(redrawIfNecessary)
+  window.requestAnimationFrame(renderIfNecessary)
+  app = ReactDOM.render(<App state={state} />, document.querySelector('body'))
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
@@ -101,7 +91,7 @@ function onState (err, _state) {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
-  // ...focus and blur. Needed to show correct dock icon text ("badge") in OSX
+  // ...focus and blur. Needed to show correct dock icon text ('badge') in OSX
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
 
@@ -133,33 +123,23 @@ function lazyLoadCast () {
   return Cast
 }
 
-// This is the (mostly) pure function from state -> UI. Returns a virtual DOM
-// tree. Any events, such as button clicks, will turn into calls to dispatch()
-function render (state) {
-  try {
-    return App(state)
-  } catch (e) {
-    console.log('rendering error: %s\n\t%s', e.message, e.stack)
-  }
-}
-
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
 // Runs at 60fps, but only executes when necessary
-var needsRedraw = 0
+var needsRender = 0
 
-function redrawIfNecessary () {
-  if (needsRedraw > 1) console.log('combining %d update() calls into one update', needsRedraw)
-  if (needsRedraw) {
+function renderIfNecessary () {
+  if (needsRender > 1) console.log('combining %d update() calls into one update', needsRender)
+  if (needsRender) {
     controllers.playback.showOrHidePlayerControls()
-    vdomLoop.update(state)
+    app.setState(state)
     updateElectron()
-    needsRedraw = 0
+    needsRender = 0
   }
-  requestAnimationFrame(redrawIfNecessary)
+  window.requestAnimationFrame(renderIfNecessary)
 }
 
 function update () {
-  needsRedraw++
+  needsRender++
 }
 
 // Some state changes can't be reflected in the DOM, instead we have to
@@ -269,7 +249,7 @@ function dispatch (action, ...args) {
   if (handler) handler(...args)
   else console.error('Missing dispatch handler: ' + action)
 
-  // Update the virtual-dom, unless it's just a mouse move event
+  // Update the virtual DOM, unless it's just a mouse move event
   if (action !== 'mediaMouseMoved' ||
       controllers.playback.showOrHidePlayerControls()) {
     update()
@@ -315,6 +295,7 @@ function backToList () {
     var contentTag = document.querySelector('.content')
     if (contentTag) contentTag.scrollTop = 0
 
+    // TODO dcposch: is this still required with React?
     // Work around virtual-dom issue: it doesn't expose its redraw function,
     // and only redraws on requestAnimationFrame(). That means when the user
     // closes the window (hide window / minimize to tray) and we want to pause

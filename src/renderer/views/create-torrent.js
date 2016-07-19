@@ -1,11 +1,11 @@
 module.exports = CreateTorrentPage
 
-var createTorrent = require('create-torrent')
-var path = require('path')
-var prettyBytes = require('prettier-bytes')
+const React = require('react')
+const createTorrent = require('create-torrent')
+const path = require('path')
+const prettyBytes = require('prettier-bytes')
 
-var {dispatch, dispatcher} = require('../lib/dispatcher')
-var hx = require('../lib/hx')
+const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 function CreateTorrentPage (state) {
   var info = state.location.current()
@@ -36,63 +36,63 @@ function CreateTorrentPage (state) {
   // as the default name. Show all files relative to the base folder.
   var defaultName, basePath
   if (files.length === 1) {
-    // Single file torrent: /a/b/foo.jpg -> torrent name "foo.jpg", path "/a/b"
+    // Single file torrent: /a/b/foo.jpg -> torrent name 'foo.jpg', path '/a/b'
     defaultName = files[0].name
     basePath = pathPrefix
   } else {
-    // Multi file torrent: /a/b/{foo, bar}.jpg -> torrent name "b", path "/a"
+    // Multi file torrent: /a/b/{foo, bar}.jpg -> torrent name 'b', path '/a'
     defaultName = path.basename(pathPrefix)
     basePath = path.dirname(pathPrefix)
   }
   var maxFileElems = 100
   var fileElems = files.slice(0, maxFileElems).map(function (file) {
     var relativePath = files.length === 0 ? file.name : path.relative(pathPrefix, file.path)
-    return hx`<div>${relativePath}</div>`
+    return (<div>{relativePath}</div>)
   })
   if (files.length > maxFileElems) {
-    fileElems.push(hx`<div>+ ${maxFileElems - files.length} more</div>`)
+    fileElems.push(<div>+ {maxFileElems - files.length} more</div>)
   }
   var trackers = createTorrent.announceList.join('\n')
   var collapsedClass = info.showAdvanced ? 'expanded' : 'collapsed'
 
-  return hx`
-    <div class='create-torrent'>
-      <h2>Create torrent ${defaultName}</h2>
-      <p class="torrent-info">
-        ${torrentInfo}
+  return (
+    <div className='create-torrent'>
+      <h2>Create torrent {defaultName}</h2>
+      <p className='torrent-info'>
+        {torrentInfo}
       </p>
-      <p class='torrent-attribute'>
+      <p className='torrent-attribute'>
         <label>Path:</label>
-        <div class='torrent-attribute'>${pathPrefix}</div>
+        <div className='torrent-attribute'>{pathPrefix}</div>
       </p>
-      <div class='expand-collapse ${collapsedClass}'
-           onclick=${dispatcher('toggleCreateTorrentAdvanced')}>
-        ${info.showAdvanced ? 'Basic' : 'Advanced'}
+      <div className={'expand-collapse ' + collapsedClass}
+        onClick={dispatcher('toggleCreateTorrentAdvanced')}>
+        {info.showAdvanced ? 'Basic' : 'Advanced'}
       </div>
-      <div class="create-torrent-advanced ${collapsedClass}">
-        <p class='torrent-attribute'>
+      <div className={'create-torrent-advanced ' + collapsedClass}>
+        <p className='torrent-attribute'>
           <label>Comment:</label>
-          <textarea class='torrent-attribute torrent-comment'></textarea>
+          <textarea className='torrent-attribute torrent-comment'></textarea>
         </p>
-        <p class='torrent-attribute'>
+        <p className='torrent-attribute'>
           <label>Trackers:</label>
-          <textarea class='torrent-attribute torrent-trackers'>${trackers}</textarea>
+          <textarea className='torrent-attribute torrent-trackers'>{trackers}</textarea>
         </p>
-        <p class='torrent-attribute'>
+        <p className='torrent-attribute'>
           <label>Private:</label>
-          <input type='checkbox' class='torrent-is-private' value='torrent-is-private'>
+          <input type='checkbox' className='torrent-is-private' value='torrent-is-private' />
         </p>
-        <p class='torrent-attribute'>
+        <p className='torrent-attribute'>
           <label>Files:</label>
-          <div>${fileElems}</div>
+          <div>{fileElems}</div>
         </p>
       </div>
-      <p class="float-right">
-        <button class='button-flat light' onclick=${dispatcher('back')}>Cancel</button>
-        <button class='button-raised' onclick=${handleOK}>Create Torrent</button>
+      <p className='float-right'>
+        <button className='button-flat light' onClick={dispatcher('back')}>Cancel</button>
+        <button className='button-raised' onClick={handleOK}>Create Torrent</button>
       </p>
     </div>
-  `
+  )
 
   function handleOK () {
     var announceList = document.querySelector('.torrent-trackers').value
@@ -118,10 +118,10 @@ function CreateTorrentPage (state) {
 }
 
 function CreateTorrentErrorPage () {
-  return hx`
-    <div class='create-torrent'>
+  return (
+    <div className='create-torrent'>
       <h2>Create torrent</h2>
-      <p class="torrent-info">
+      <p className='torrent-info'>
         <p>
           Sorry, you must select at least one file that is not a hidden file.
         </p>
@@ -129,13 +129,13 @@ function CreateTorrentErrorPage () {
           Hidden files, starting with a . character, are not included.
         </p>
       </p>
-      <p class="float-right">
-        <button class='button-flat light' onclick=${dispatcher('back')}>
+      <p className='float-right'>
+        <button className='button-flat light' onClick={dispatcher('back')}>
           Cancel
         </button>
       </p>
     </div>
-  `
+  )
 }
 
 // Finds the longest common prefix

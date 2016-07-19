@@ -4,7 +4,7 @@ var path = require('path')
 
 var APP_NAME = 'WebTorrent'
 var APP_TEAM = 'WebTorrent, LLC'
-var APP_VERSION = require('./package.json').version
+var APP_VERSION = require('../package.json').version
 
 var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
 
@@ -15,8 +15,8 @@ module.exports = {
   TELEMETRY_URL: 'https://webtorrent.io/desktop/telemetry',
 
   APP_COPYRIGHT: 'Copyright © 2014-2016 ' + APP_TEAM,
-  APP_FILE_ICON: path.join(__dirname, 'static', 'WebTorrentFile'),
-  APP_ICON: path.join(__dirname, 'static', 'WebTorrent'),
+  APP_FILE_ICON: path.join(__dirname, '..', 'static', 'WebTorrentFile'),
+  APP_ICON: path.join(__dirname, '..', 'static', 'WebTorrent'),
   APP_NAME: APP_NAME,
   APP_TEAM: APP_TEAM,
   APP_VERSION: APP_VERSION,
@@ -67,12 +67,12 @@ module.exports = {
 
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: __dirname,
-  STATIC_PATH: path.join(__dirname, 'static'),
+  STATIC_PATH: path.join(__dirname, '..', 'static'),
   TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
 
-  WINDOW_ABOUT: 'file://' + path.join(__dirname, 'renderer', 'about.html'),
-  WINDOW_MAIN: 'file://' + path.join(__dirname, 'renderer', 'main.html'),
-  WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, 'renderer', 'webtorrent.html'),
+  WINDOW_ABOUT: 'file://' + path.join(__dirname, '..', 'static', 'about.html'),
+  WINDOW_MAIN: 'file://' + path.join(__dirname, '..', 'static', 'main.html'),
+  WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, '..', 'static', 'webtorrent.html'),
 
   WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
   WINDOW_MIN_WIDTH: 425

@@ -116,17 +116,17 @@ function loadSubtitle (file, cb) {
   })
 }
 
-// Checks whether a language name like "English" or "German" matches the system
+// Checks whether a language name like 'English' or 'German' matches the system
 // language, aka the current locale
 function isSystemLanguage (language) {
   var iso639 = require('iso-639-1')
-  var osLangISO = window.navigator.language.split('-')[0] // eg "en"
-  var langIso = iso639.getCode(language) // eg "de" if language is "German"
+  var osLangISO = window.navigator.language.split('-')[0] // eg 'en'
+  var langIso = iso639.getCode(language) // eg 'de' if language is 'German'
   return langIso === osLangISO
 }
 
 // Make sure we don't have two subtitle tracks with the same label
-// Labels each track by language, eg "German", "English", "English 2", ...
+// Labels each track by language, eg 'German', 'English', 'English 2', ...
 function relabelSubtitles (subtitles) {
   var counts = {}
   subtitles.tracks.forEach(function (track) {

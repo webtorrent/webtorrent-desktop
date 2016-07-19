@@ -1,22 +1,23 @@
 module.exports = OpenTorrentAddressModal
 
-var {dispatch, dispatcher} = require('../lib/dispatcher')
-var hx = require('../lib/hx')
+const React = require('react')
+
+const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 function OpenTorrentAddressModal (state) {
-  return hx`
-    <div class='open-torrent-address-modal'>
+  return (
+    <div className='open-torrent-address-modal'>
       <p><label>Enter torrent address or magnet link</label></p>
       <p>
-        <input id='add-torrent-url' type='text' onkeypress=${handleKeyPress} />
+        <input id='add-torrent-url' type='text' onKeyPress={handleKeyPress} />
       </p>
-      <p class='float-right'>
-        <button class='button button-flat' onclick=${dispatcher('exitModal')}>Cancel</button>
-        <button class='button button-raised' onclick=${handleOK}>OK</button>
+      <p className='float-right'>
+        <button className='button button-flat' onClick={dispatcher('exitModal')}>Cancel</button>
+        <button className='button button-raised' onClick={handleOK}>OK</button>
       </p>
       <script>document.querySelector('#add-torrent-url').focus()</script>
     </div>
-  `
+  )
 }
 
 function handleKeyPress (e) {

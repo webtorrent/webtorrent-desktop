@@ -140,7 +140,7 @@ function logUncaughtError (procName, err) {
 }
 
 // The user pressed play. It either worked, timed out, or showed the
-// "Play in VLC" codec error
+// 'Play in VLC' codec error
 function logPlayAttempt (result) {
   if (!['success', 'timeout', 'error', 'abandoned'].includes(result)) {
     return console.error('Unknown play attempt result', result)

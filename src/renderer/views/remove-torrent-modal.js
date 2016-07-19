@@ -1,7 +1,8 @@
 module.exports = RemoveTorrentModal
 
-var {dispatch, dispatcher} = require('../lib/dispatcher')
-var hx = require('../lib/hx')
+const React = require('react')
+
+const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 function RemoveTorrentModal (state) {
   var message = state.modal.deleteData
@@ -9,15 +10,15 @@ function RemoveTorrentModal (state) {
     : 'Are you sure you want to remove this torrent from the list?'
   var buttonText = state.modal.deleteData ? 'Remove Data' : 'Remove'
 
-  return hx`
+  return (
     <div>
-      <p><strong>${message}</strong></p>
-      <p class='float-right'>
-        <button class='button button-flat' onclick=${dispatcher('exitModal')}>Cancel</button>
-        <button class='button button-raised' onclick=${handleRemove}>${buttonText}</button>
+      <p><strong>{message}</strong></p>
+      <p className='float-right'>
+        <button className='button button-flat' onClick={dispatcher('exitModal')}>Cancel</button>
+        <button className='button button-raised' onClick={handleRemove}>{buttonText}</button>
       </p>
     </div>
-  `
+  )
 
   function handleRemove () {
     dispatch('deleteTorrent', state.modal.infoHash, state.modal.deleteData)
