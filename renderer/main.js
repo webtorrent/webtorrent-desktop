@@ -92,6 +92,7 @@ function onState (err, _state) {
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
+  requestAnimationFrame(redrawIfNecessary)
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
@@ -143,10 +144,22 @@ function render (state) {
 }
 
 // Calls render() to go from state -> UI, then applies to vdom to the real DOM.
+// Runs at 60fps, but only executes when necessary
+var needsRedraw = 0
+
+function redrawIfNecessary () {
+  if (needsRedraw > 1) console.log('combining %d update() calls into one update', needsRedraw)
+  if (needsRedraw) {
+    controllers.playback.showOrHidePlayerControls()
+    vdomLoop.update(state)
+    updateElectron()
+    needsRedraw = 0
+  }
+  requestAnimationFrame(redrawIfNecessary)
+}
+
 function update () {
-  controllers.playback.showOrHidePlayerControls()
-  vdomLoop.update(state)
-  updateElectron()
+  needsRedraw++
 }
 
 // Some state changes can't be reflected in the DOM, instead we have to

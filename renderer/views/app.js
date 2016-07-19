@@ -18,6 +18,7 @@ var Modals = {
 }
 
 function App (state) {
+  console.time('render app')
   // Hide player controls while playing video, if the mouse stays still for a while
   // Never hide the controls when:
   // * The mouse is over the controls or we're scrubbing (see CSS)
@@ -38,7 +39,7 @@ function App (state) {
   if (state.window.isFocused) cls.push('is-focused')
   if (hideControls) cls.push('hide-video-controls')
 
-  return hx`
+  var vdom = hx`
     <div class='app ${cls.join(' ')}'>
       ${Header(state)}
       ${getErrorPopover(state)}
@@ -46,6 +47,8 @@ function App (state) {
       ${getModal(state)}
     </div>
   `
+  console.timeEnd('render app')
+  return vdom
 }
 
 function getErrorPopover (state) {
