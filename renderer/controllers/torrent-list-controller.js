@@ -112,6 +112,14 @@ module.exports = class TorrentListController {
     ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
   }
 
+  confirmDeleteTorrent (infoHash, deleteData) {
+    this.state.modal = {
+      id: 'remove-torrent-modal',
+      infoHash,
+      deleteData
+    }
+  }
+
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
     ipcRenderer.send('wt-stop-torrenting', infoHash)
@@ -151,14 +159,12 @@ module.exports = class TorrentListController {
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
-      click: () => this.deleteTorrent(
-        torrentSummary.infoHash, false)
+      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
     }))
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove Data File',
-      click: () => this.deleteTorrent(
-        torrentSummary.infoHash, true)
+      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
     }))
 
     menu.append(new electron.remote.MenuItem({
@@ -239,27 +245,23 @@ function findFilesRecursive (paths, cb) {
 function deleteFile (path) {
   if (!path) return
   fs.unlink(path, function (err) {
-    if (err) dispatch('onError', err)
+    if (err) dispatch('error', err)
   })
 }
 
-// Delete all files in a torren
+// Delete all files in a torrent
 function moveItemToTrash (torrentSummary) {
-  // TODO: delete directories, not just files
-  torrentSummary.files.forEach(function (file) {
-    var filePath = path.join(torrentSummary.path, file.path)
-    console.log('DEBUG DELETING ' + filePath)
-    ipcRenderer.send('moveItemToTrash', filePath)
-  })
+  var filePath = TorrentSummary.getFileOrFolder(torrentSummary)
+  ipcRenderer.send('moveItemToTrash', filePath)
 }
 
 function showItemInFolder (torrentSummary) {
-  ipcRenderer.send('showItemInFolder', TorrentSummary.getTorrentPath(torrentSummary))
+  ipcRenderer.send('showItemInFolder', TorrentSummary.getFileOrFolder(torrentSummary))
 }
 
 function saveTorrentFileAs (torrentSummary) {
   var downloadPath = this.state.saved.prefs.downloadPath
-  var newFileName = `${path.parse(torrentSummary.name).name}.torrent`
+  var newFileName = path.parse(torrentSummary.name).name + '.torrent'
   var opts = {
     title: 'Save Torrent File',
     defaultPath: path.join(downloadPath, newFileName),

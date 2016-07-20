@@ -148,7 +148,7 @@ function TorrentList (state) {
 
     // Only show the play button for torrents that contain playable media
     var playButton
-    if (TorrentPlayer.isPlayableTorrent(torrentSummary)) {
+    if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
       playButton = hx`
         <i.button-round.icon.play
           title=${playTooltip}
@@ -172,7 +172,7 @@ function TorrentList (state) {
         <i
           class='icon delete'
           title='Remove torrent'
-          onclick=${dispatcher('deleteTorrent', infoHash)}>
+          onclick=${dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
       </div>

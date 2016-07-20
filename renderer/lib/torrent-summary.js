@@ -2,7 +2,8 @@ module.exports = {
   getPosterPath,
   getTorrentPath,
   getByKey,
-  getTorrentID
+  getTorrentID,
+  getFileOrFolder
 }
 
 var path = require('path')
@@ -42,4 +43,14 @@ function getByKey (state, torrentKey) {
   if (!torrentKey) return undefined
   return state.saved.torrents.find((x) =>
     x.torrentKey === torrentKey || x.infoHash === torrentKey)
+}
+
+// Returns the path to either the file (in a single-file torrent) or the root
+// folder (in  multi-file torrent)
+// WARNING: assumes that multi-file torrents consist of a SINGLE folder.
+// TODO: make this assumption explicit, enforce it in the `create-torrent`
+// module. Store root folder explicitly to avoid hacky path processing below.
+function getFileOrFolder (torrentSummary) {
+  var ts = torrentSummary
+  return path.join(ts.path, ts.files[0].path.split('/')[0])
 }
