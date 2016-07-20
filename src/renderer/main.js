@@ -82,7 +82,7 @@ function onState (err, _state) {
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
   window.requestAnimationFrame(renderIfNecessary)
-  app = ReactDOM.render(<App state={state} />, document.querySelector('body'))
+  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
 
   // OS integrations:
   // ...drag and drop a torrent or video file to play or seed
@@ -240,8 +240,8 @@ const dispatchHandlers = {
 
 // Events from the UI never modify state directly. Instead they call dispatch()
 function dispatch (action, ...args) {
-  // Log dispatch calls, for debugging
-  if (!['mediaMouseMoved', 'mediaTimeUpdate'].includes(action)) {
+  // Log dispatch calls, for debugging, but don't spam
+  if (!['mediaMouseMoved', 'mediaTimeUpdate', 'update'].includes(action)) {
     console.log('dispatch: %s %o', action, args)
   }
 

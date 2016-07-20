@@ -24,7 +24,6 @@ module.exports = class App extends React.Component {
   }
 
   render () {
-    console.time('render app')
     var state = this.state
 
     // Hide player controls while playing video, if the mouse stays still for a while
@@ -55,7 +54,7 @@ module.exports = class App extends React.Component {
         {getModal(state)}
       </div>
     )
-    console.timeEnd('render app')
+
     return vdom
   }
 }

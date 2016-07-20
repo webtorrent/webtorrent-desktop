@@ -13,9 +13,9 @@ module.exports = class TorrentList extends React.Component {
     )
 
     return (
-      <div className='torrent-list'>
+      <div key='torrent-list' className='torrent-list'>
         {torrentRows}
-        <div className='torrent-placeholder'>
+        <div key='torrent-placeholder' className='torrent-placeholder'>
           <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
         </div>
       </div>
@@ -45,7 +45,10 @@ module.exports = class TorrentList extends React.Component {
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     return (
-      <div style={style} className={classes.join(' ')}
+      <div
+        key={torrentSummary.torrentKey}
+        style={style}
+        className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
         onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
         {this.renderTorrentMetadata(torrentSummary)}
@@ -59,14 +62,14 @@ module.exports = class TorrentList extends React.Component {
   renderTorrentMetadata (torrentSummary) {
     var name = torrentSummary.name || 'Loading torrent...'
     var elements = [(
-      <div className='name ellipsis'>{name}</div>
+      <div key='name' className='name ellipsis'>{name}</div>
     )]
 
     // If it's downloading/seeding then show progress info
     var prog = torrentSummary.progress
     if (torrentSummary.status !== 'paused' && prog) {
       elements.push((
-        <div className='ellipsis'>
+        <div key='progress-info' className='ellipsis'>
           {renderPercentProgress()}
           {renderTotalProgress()}
           {renderPeers()}
@@ -77,37 +80,37 @@ module.exports = class TorrentList extends React.Component {
       ))
     }
 
-    return (<div className='metadata'>{elements}</div>)
+    return (<div key='metadata' className='metadata'>{elements}</div>)
 
     function renderPercentProgress () {
       var progress = Math.floor(100 * prog.progress)
-      return (<span>{progress}%</span>)
+      return (<span key='percent-progress'>{progress}%</span>)
     }
 
     function renderTotalProgress () {
       var downloaded = prettyBytes(prog.downloaded)
       var total = prettyBytes(prog.length || 0)
       if (downloaded === total) {
-        return (<span>{downloaded}</span>)
+        return (<span key='total-progress'>{downloaded}</span>)
       } else {
-        return (<span>{downloaded} / {total}</span>)
+        return (<span key='total-progress'>{downloaded} / {total}</span>)
       }
     }
 
     function renderPeers () {
       if (prog.numPeers === 0) return
       var count = prog.numPeers === 1 ? 'peer' : 'peers'
-      return (<span>{prog.numPeers} {count}</span>)
+      return (<span key='peers'>{prog.numPeers} {count}</span>)
     }
 
     function renderDownloadSpeed () {
       if (prog.downloadSpeed === 0) return
-      return (<span>↓ {prettyBytes(prog.downloadSpeed)}/s</span>)
+      return (<span key='download'>↓ {prettyBytes(prog.downloadSpeed)}/s</span>)
     }
 
     function renderUploadSpeed () {
       if (prog.uploadSpeed === 0) return
-      return (<span>↑ {prettyBytes(prog.uploadSpeed)}/s</span>)
+      return (<span key='upload'>↑ {prettyBytes(prog.uploadSpeed)}/s</span>)
     }
 
     function renderEta () {
@@ -175,6 +178,7 @@ module.exports = class TorrentList extends React.Component {
     if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
       playButton = (
         <i
+          key='play-button'
           title={playTooltip}
           className={'button-round icon play ' + playClass}
           onClick={dispatcher('playFile', infoHash)}>
@@ -184,16 +188,18 @@ module.exports = class TorrentList extends React.Component {
     }
 
     return (
-      <div className='buttons'>
+      <div key='buttons' className='buttons'>
         {positionElem}
         {playButton}
         <i
+          key='download-button'
           className={'button-round icon download ' + torrentSummary.status}
           title={downloadTooltip}
           onClick={dispatcher('toggleTorrent', infoHash)}>
           {downloadIcon}
         </i>
         <i
+          key='delete-button'
           className='icon delete'
           title='Remove torrent'
           onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
@@ -211,7 +217,7 @@ module.exports = class TorrentList extends React.Component {
       var message = torrentSummary.status === 'paused'
         ? 'Failed to load torrent info. Click the download button to try again...'
         : 'Downloading torrent info...'
-      filesElement = (<div className='files warning'>{message}</div>)
+      filesElement = (<div key='files' className='files warning'>{message}</div>)
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files
@@ -224,16 +230,18 @@ module.exports = class TorrentList extends React.Component {
         .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (
-        <div className='files'>
+        <div key='files' className='files'>
           <table>
-            {fileRows}
+            <tbody>
+              {fileRows}
+            </tbody>
           </table>
         </div>
       )
     }
 
     return (
-      <div className='torrent-details'>
+      <div key='details' className='torrent-details'>
         {filesElement}
       </div>
     )
@@ -275,7 +283,7 @@ module.exports = class TorrentList extends React.Component {
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return (
-      <tr onClick={handleClick}>
+      <tr key={index} onClick={handleClick}>
         <td className={'col-icon ' + rowClass}>
           {positionElem}
           <i className='icon'>{icon}</i>
@@ -303,17 +311,17 @@ module.exports = class TorrentList extends React.Component {
     var transformFix = {transform: 'rotate(' + rotation + 'deg)'}
 
     return (
-      <div className={'radial-progress ' + cssClass}>
-        <div className='circle'>
-          <div className='mask full' style={transformFill}>
-            <div className='fill' style={transformFill}></div>
+      <div key='radial-progress' className={'radial-progress ' + cssClass}>
+        <div key='circle' className='circle'>
+          <div key='mask-full' className='mask full' style={transformFill}>
+            <div key='fill' className='fill' style={transformFill}></div>
           </div>
-          <div className='mask half'>
-            <div className='fill' style={transformFill}></div>
-            <div className='fill fix' style={transformFix}></div>
+          <div key='mask-half' className='mask half'>
+            <div key='fill' className='fill' style={transformFill}></div>
+            <div key='fill-fix' className='fill fix' style={transformFix}></div>
           </div>
         </div>
-        <div className='inset'></div>
+        <div key='inset' className='inset'></div>
       </div>
     )
   }

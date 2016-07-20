@@ -94,6 +94,7 @@ function renderMedia (state) {
       var isSelected = state.playing.subtitles.selectedIndex === i
       trackTags.push(
         <track
+          key={i}
           default={isSelected ? 'default' : ''}
           label={track.label}
           type='subtitles'
@@ -110,7 +111,7 @@ function renderMedia (state) {
       onDoubleClick={dispatcher('toggleFullScreen')}
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
-      onStalling={dispatcher('mediaStalled')}
+      onStalled={dispatcher('mediaStalled')}
       onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
@@ -122,6 +123,7 @@ function renderMedia (state) {
   // Show the media.
   return (
     <div
+      key='letterbox'
       className='letterbox'
       onMouseMove={dispatcher('mediaMouseMoved')}>
       {mediaTag}
@@ -179,7 +181,7 @@ function renderOverlay (state) {
   }
 
   return (
-    <div className='media-overlay-background' style={style}>
+    <div key='overlay' className='media-overlay-background' style={style}>
       <div className='media-overlay'>{elems}</div>
     </div>
   )
@@ -209,21 +211,21 @@ function renderAudioMetadata (state) {
   var elems = []
   if (artist) {
     elems.push((
-      <div className='audio-artist'>
+      <div key='artist' className='audio-artist'>
         <label>Artist</label>{artist}
       </div>
     ))
   }
   if (album) {
     elems.push((
-      <div className='audio-album'>
+      <div key='album' className='audio-album'>
         <label>Album</label>{album}
       </div>
     ))
   }
   if (track) {
     elems.push((
-      <div className='audio-track'>
+      <div key='track' className='audio-track'>
         <label>Track</label>{track}
       </div>
     ))
@@ -232,12 +234,12 @@ function renderAudioMetadata (state) {
   // Align the title with the other info, if available. Otherwise, center title
   var emptyLabel = (<label></label>)
   elems.unshift((
-    <div className='audio-title'>
+    <div key='title' className='audio-title'>
       {elems.length ? emptyLabel : undefined}{title}
     </div>
   ))
 
-  return (<div className='audio-metadata'>{elems}</div>)
+  return (<div key='audio-metadata' className='audio-metadata'>{elems}</div>)
 }
 
 function renderLoadingSpinner (state) {
@@ -254,9 +256,9 @@ function renderLoadingSpinner (state) {
   }
 
   return (
-    <div className='media-stalled'>
-      <div className='loading-spinner'>&nbsp;</div>
-      <div className='loading-status ellipsis'>
+    <div key='loading' className='media-stalled'>
+      <div key='loading-spinner' className='loading-spinner'>&nbsp;</div>
+      <div key='loading-progress' className='loading-status ellipsis'>
         <span className='progress'>{fileProgress}%</span> downloaded,
         <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
         <span>↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
@@ -302,11 +304,11 @@ function renderCastScreen (state) {
   }
 
   return (
-    <div className='letterbox' style={style}>
+    <div key='cast' className='letterbox' style={style}>
       <div className='cast-screen'>
         <i className='icon'>{castIcon}</i>
-        <div className='cast-type'>{castType}</div>
-        <div className='cast-status'>{castStatus}</div>
+        <div key='type' className='cast-type'>{castType}</div>
+        <div key='status' className='cast-status'>{castStatus}</div>
       </div>
     </div>
   )
@@ -322,7 +324,7 @@ function renderCastOptions (state) {
     var isSelected = player.device === device
     var name = device.name
     return (
-      <li onClick={dispatcher('selectCastDevice', ix)}>
+      <li key={ix} onClick={dispatcher('selectCastDevice', ix)}>
         <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
         {name}
       </li>
@@ -330,20 +332,20 @@ function renderCastOptions (state) {
   })
 
   return (
-    <ul className='options-list'>
+    <ul key='cast-options' className='options-list'>
       {items}
     </ul>
   )
 }
 
-function renderSubtitlesOptions (state) {
+function renderSubtitleOptions (state) {
   var subtitles = state.playing.subtitles
   if (!subtitles.tracks.length || !subtitles.showMenu) return
 
   var items = subtitles.tracks.map(function (track, ix) {
     var isSelected = state.playing.subtitles.selectedIndex === ix
     return (
-      <li onClick={dispatcher('selectSubtitle', ix)}>
+      <li key={ix} onClick={dispatcher('selectSubtitle', ix)}>
         <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
         {track.label}
       </li>
@@ -353,7 +355,7 @@ function renderSubtitlesOptions (state) {
   var noneSelected = state.playing.subtitles.selectedIndex === -1
   var noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
   return (
-    <ul className='options-list'>
+    <ul key='subtitle-options' className='options-list'>
       {items}
       <li onClick={dispatcher('selectSubtitle', -1)}>
         <i className='icon'>{noneClass}</i>
@@ -373,13 +375,15 @@ function renderPlayerControls (state) {
       : ''
 
   var elements = [
-    <div className='playback-bar'>
+    <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
+        key='cursor'
         className='playback-cursor'
         style={playbackCursorStyle}>
       </div>
       <div
+        key='scrub-bar'
         className='scrub-bar'
         draggable='true'
         onDragStart={handleDragStart}
@@ -388,11 +392,15 @@ function renderPlayerControls (state) {
       </div>
     </div>,
 
-    <i className='icon play-pause float-left' onClick={dispatcher('playPause')}>
+    <i
+      key='play'
+      className='icon play-pause float-left'
+      onClick={dispatcher('playPause')}>
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>,
 
     <i
+      key='fullscreen'
       className='icon fullscreen float-right'
       onClick={dispatcher('toggleFullScreen')}>
       {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
@@ -403,6 +411,7 @@ function renderPlayerControls (state) {
     // show closed captions icon
     elements.push((
       <i
+        key='subtitles'
         className={'icon closed-caption float-right ' + captionsClass}
         onClick={handleSubtitles}>
         closed_caption
@@ -446,6 +455,7 @@ function renderPlayerControls (state) {
 
     elements.push((
       <i
+        key={castType}
         className={'icon device float-right ' + buttonClass}
         onClick={buttonHandler}>
         {buttonIcon}
@@ -466,8 +476,10 @@ function renderPlayerControls (state) {
       'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
+  //TODO: dcposch change the range input to use value / onChanged instead of
+  // "readonly" / onMouse[Down,Move,Up]
   elements.push((
-    <div className='volume float-left'>
+    <div key='volume' className='volume float-left'>
       <i
         className='icon volume-icon float-left'
         onMouseDown={handleVolumeMute}>
@@ -476,10 +488,8 @@ function renderPlayerControls (state) {
       <input
         className='volume-slider float-right'
         type='range' min='0' max='1' step='0.05'
-        value={volumeChanging !== false ? volumeChanging : volume}
-        onMouseDown={handleVolumeScrub}
-        onMouseUp={handleVolumeScrub}
-        onMouseMove={handleVolumeScrub}
+        value={volume}
+        onChange={handleVolumeScrub}
         style={volumeStyle}
       />
     </div>
@@ -489,7 +499,7 @@ function renderPlayerControls (state) {
   var currentTimeStr = formatTime(state.playing.currentTime)
   var durationStr = formatTime(state.playing.duration)
   elements.push((
-    <span className='time float-left'>
+    <span key='time' className='time float-left'>
       {currentTimeStr} / {durationStr}
     </span>
   ))
@@ -497,17 +507,17 @@ function renderPlayerControls (state) {
   // render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push((
-      <span className='rate float-left'>
+      <span key='rate' className='rate float-left'>
         {state.playing.playbackRate}x
       </span>
     ))
   }
 
   return (
-    <div className='controls'>
+    <div key='controls' className='controls'>
       {elements}
       {renderCastOptions(state)}
-      {renderSubtitlesOptions(state)}
+      {renderSubtitleOptions(state)}
     </div>
   )
 
@@ -540,21 +550,7 @@ function renderPlayerControls (state) {
 
   // Handles volume slider scrub
   function handleVolumeScrub (e) {
-    switch (e.type) {
-      case 'mouseup':
-        volumeChanging = false
-        dispatch('setVolume', e.nativeEvent.offsetX / 50)
-        break
-      case 'mousedown':
-        volumeChanging = this.value
-        break
-      case 'mousemove':
-        // only change if move was started by click
-        if (volumeChanging !== false) {
-          volumeChanging = this.value
-        }
-        break
-    }
+    dispatch('setVolume', e.target.value)
   }
 
   function handleSubtitles (e) {
@@ -566,9 +562,6 @@ function renderPlayerControls (state) {
     }
   }
 }
-
-// lets scrub without sending to volume backend
-var volumeChanging = false
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be 'spongey' / non-contiguous
@@ -594,15 +587,15 @@ function renderLoadingBar (state) {
   }
 
   // Output some bars to show which parts of the file are loaded
-  var loadingBarElems = parts.map(function (part) {
+  var loadingBarElems = parts.map(function (part, i) {
     var style = {
       left: (100 * part.start / fileProg.numPieces) + '%',
       width: (100 * part.count / fileProg.numPieces) + '%'
     }
 
-    return (<div className='loading-bar-part' style={style}></div>)
+    return (<div key={i} className='loading-bar-part' style={style}></div>)
   })
-  return (<div className='loading-bar'>{loadingBarElems}</div>)
+  return (<div key='loading-bar' className='loading-bar'>{loadingBarElems}</div>)
 }
 
 // Returns the CSS background-image string for a poster image + dark vignette

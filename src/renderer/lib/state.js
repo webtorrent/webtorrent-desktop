@@ -82,6 +82,7 @@ function getDefaultPlayState () {
     lastTimeUpdate: 0, /* Unix time in ms */
     mouseStationarySince: 0, /* Unix time in ms */
     playbackRate: 1,
+    volume: 1,
     subtitles: {
       tracks: [], /* subtitle tracks, each {label, language, ...} */
       selectedIndex: -1, /* current subtitle track */

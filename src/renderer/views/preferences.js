@@ -17,6 +17,7 @@ module.exports = class Preferences extends React.Component {
 
 function renderGeneralSection (state) {
   return renderSection({
+    key: 'general',
     title: 'General',
     description: '',
     icon: 'settings'
@@ -27,6 +28,7 @@ function renderGeneralSection (state) {
 
 function renderDownloadDirSelector (state) {
   return renderFileSelector({
+    key: 'download-path',
     label: 'Download Path',
     description: 'Data from torrents will be saved here',
     property: 'downloadPath',
@@ -46,18 +48,18 @@ function renderDownloadDirSelector (state) {
 // - controls should be an array of vdom elements
 function renderSection (definition, controls) {
   var helpElem = !definition.description ? null : (
-    <div className='help text'>
+    <div key='help' className='help text'>
       <i className='icon'>help_outline</i>{definition.description}
     </div>
   )
   return (
-    <section className='section preferences-panel'>
+    <section key={definition.key} className='section preferences-panel'>
       <div className='section-container'>
-        <div className='section-heading'>
+        <div key='heading' className='section-heading'>
           <i className='icon'>{definition.icon}</i>{definition.title}
         </div>
         {helpElem}
-        <div className='section-body'>
+        <div key='body' className='section-body'>
           {controls}
         </div>
       </div>
@@ -72,7 +74,7 @@ function renderSection (definition, controls) {
 // - callback takes a new file or folder path
 function renderFileSelector (definition, value, callback) {
   return (
-    <div className='control-group'>
+    <div key={definition.key} className='control-group'>
       <div className='controls'>
         <label className='control-label'>
           <div className='preference-title'>{definition.label}</div>

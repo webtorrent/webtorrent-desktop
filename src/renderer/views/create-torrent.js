@@ -46,12 +46,12 @@ module.exports = class CreateTorrentPage extends React.Component {
       basePath = path.dirname(pathPrefix)
     }
     var maxFileElems = 100
-    var fileElems = files.slice(0, maxFileElems).map(function (file) {
+    var fileElems = files.slice(0, maxFileElems).map(function (file, i) {
       var relativePath = files.length === 0 ? file.name : path.relative(pathPrefix, file.path)
-      return (<div>{relativePath}</div>)
+      return (<div key={i}>{relativePath}</div>)
     })
     if (files.length > maxFileElems) {
-      fileElems.push(<div>+ {maxFileElems - files.length} more</div>)
+      fileElems.push(<div key='more'>+ {maxFileElems - files.length} more</div>)
     }
     var trackers = createTorrent.announceList.join('\n')
     var collapsedClass = info.showAdvanced ? 'expanded' : 'collapsed'
@@ -59,39 +59,39 @@ module.exports = class CreateTorrentPage extends React.Component {
     return (
       <div className='create-torrent'>
         <h2>Create torrent {defaultName}</h2>
-        <p className='torrent-info'>
+        <div key='info' className='torrent-info'>
           {torrentInfo}
-        </p>
-        <p className='torrent-attribute'>
+        </div>
+        <div key='path-prefix' className='torrent-attribute'>
           <label>Path:</label>
           <div className='torrent-attribute'>{pathPrefix}</div>
-        </p>
-        <div className={'expand-collapse ' + collapsedClass}
+        </div>
+        <div key='toggle' className={'expand-collapse ' + collapsedClass}
           onClick={dispatcher('toggleCreateTorrentAdvanced')}>
           {info.showAdvanced ? 'Basic' : 'Advanced'}
         </div>
-        <div className={'create-torrent-advanced ' + collapsedClass}>
-          <p className='torrent-attribute'>
+        <div key='advanced' className={'create-torrent-advanced ' + collapsedClass}>
+          <div key='comment' className='torrent-attribute'>
             <label>Comment:</label>
             <textarea className='torrent-attribute torrent-comment'></textarea>
-          </p>
-          <p className='torrent-attribute'>
+          </div>
+          <div key='trackers' className='torrent-attribute'>
             <label>Trackers:</label>
-            <textarea className='torrent-attribute torrent-trackers'>{trackers}</textarea>
-          </p>
-          <p className='torrent-attribute'>
+            <textarea className='torrent-attribute torrent-trackers' value={trackers}></textarea>
+          </div>
+          <div key='private' className='torrent-attribute'>
             <label>Private:</label>
             <input type='checkbox' className='torrent-is-private' value='torrent-is-private' />
-          </p>
-          <p className='torrent-attribute'>
+          </div>
+          <div key='files' className='torrent-attribute'>
             <label>Files:</label>
             <div>{fileElems}</div>
-          </p>
+          </div>
         </div>
-        <p className='float-right'>
-          <button className='button-flat light' onClick={dispatcher('back')}>Cancel</button>
-          <button className='button-raised' onClick={handleOK}>Create Torrent</button>
-        </p>
+        <div key='buttons' className='float-right'>
+          <button key='cancel' className='button-flat light' onClick={dispatcher('back')}>Cancel</button>
+          <button key='create' className='button-raised' onClick={handleOK}>Create Torrent</button>
+        </div>
       </div>
     )
 
