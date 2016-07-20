@@ -1,17 +1,18 @@
-module.exports = Preferences
-
 const React = require('react')
 const remote = require('electron').remote
 const dialog = remote.dialog
 
 const {dispatch} = require('../lib/dispatcher')
 
-function Preferences (state) {
-  return (
-    <div className='preferences'>
-      {renderGeneralSection(state)}
-    </div>
-  )
+module.exports = class Preferences extends React.Component {
+  render () {
+    var state = this.props.state
+    return (
+      <div className='preferences'>
+        {renderGeneralSection(state)}
+      </div>
+    )
+  }
 }
 
 function renderGeneralSection (state) {

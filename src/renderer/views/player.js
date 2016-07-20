@@ -1,5 +1,3 @@
-module.exports = Player
-
 const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
@@ -9,19 +7,22 @@ const TorrentSummary = require('../lib/torrent-summary')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
-function Player (state) {
-  // Show the video as large as will fit in the window, play immediately
-  // If the video is on Chromecast or Airplay, show a title screen instead
-  var showVideo = state.playing.location === 'local'
-  return (
-    <div
-      className='player'
-      onWheel={handleVolumeWheel}
-      onMouseMove={dispatcher('mediaMouseMoved')}>
-      {showVideo ? renderMedia(state) : renderCastScreen(state)}
-      {renderPlayerControls(state)}
-    </div>
-  )
+module.exports = class Player extends React.Component {
+  render () {
+    // Show the video as large as will fit in the window, play immediately
+    // If the video is on Chromecast or Airplay, show a title screen instead
+    var state = this.props.state
+    var showVideo = state.playing.location === 'local'
+    return (
+      <div
+        className='player'
+        onWheel={handleVolumeWheel}
+        onMouseMove={dispatcher('mediaMouseMoved')}>
+        {showVideo ? renderMedia(state) : renderCastScreen(state)}
+        {renderPlayerControls(state)}
+      </div>
+    )
+  }
 }
 
 // Handles volume change by wheel

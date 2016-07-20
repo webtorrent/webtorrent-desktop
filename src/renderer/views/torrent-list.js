@@ -1,5 +1,3 @@
-module.exports = TorrentList
-
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
 
@@ -7,21 +5,25 @@ const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const {dispatcher} = require('../lib/dispatcher')
 
-function TorrentList (state) {
-  var torrentRows = state.saved.torrents.map(
-    (torrentSummary) => renderTorrent(torrentSummary)
-  )
+module.exports = class TorrentList extends React.Component {
+  render () {
+    var state = this.props.state
+    var torrentRows = state.saved.torrents.map(
+      (torrentSummary) => this.renderTorrent(torrentSummary)
+    )
 
-  return (
-    <div className='torrent-list'>
-      {torrentRows}
-      <div className='torrent-placeholder'>
-        <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+    return (
+      <div className='torrent-list'>
+        {torrentRows}
+        <div className='torrent-placeholder'>
+          <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
-  function renderTorrent (torrentSummary) {
+  renderTorrent (torrentSummary) {
+    var state = this.props.state
     var infoHash = torrentSummary.infoHash
     var isSelected = infoHash && state.selectedInfoHash === infoHash
 
@@ -46,15 +48,15 @@ function TorrentList (state) {
       <div style={style} className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
         onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
-        {renderTorrentMetadata(torrentSummary)}
-        {infoHash ? renderTorrentButtons(torrentSummary) : ''}
-        {isSelected ? renderTorrentDetails(torrentSummary) : ''}
+        {this.renderTorrentMetadata(torrentSummary)}
+        {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
+        {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
       </div>
     )
   }
 
   // Show name, download status, % complete
-  function renderTorrentMetadata (torrentSummary) {
+  renderTorrentMetadata (torrentSummary) {
     var name = torrentSummary.name || 'Loading torrent...'
     var elements = [(
       <div className='name ellipsis'>{name}</div>
@@ -132,7 +134,7 @@ function TorrentList (state) {
 
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
-  function renderTorrentButtons (torrentSummary) {
+  renderTorrentButtons (torrentSummary) {
     var infoHash = torrentSummary.infoHash
 
     var playIcon, playTooltip, playClass
@@ -164,7 +166,7 @@ function TorrentList (state) {
       torrentSummary.files[torrentSummary.defaultPlayFileIndex]
     if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
       var fraction = defaultFile.currentTime / defaultFile.duration
-      positionElem = renderRadialProgressBar(fraction, 'radial-progress-large')
+      positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
       playClass = 'resume-position'
     }
 
@@ -202,7 +204,7 @@ function TorrentList (state) {
   }
 
   // Show files, per-file download status and play buttons, and so on
-  function renderTorrentDetails (torrentSummary) {
+  renderTorrentDetails (torrentSummary) {
     var filesElement
     if (!torrentSummary.files) {
       // We don't know what files this torrent contains
@@ -219,7 +221,7 @@ function TorrentList (state) {
           if (b.file.name < a.file.name) return 1
           return 0
         })
-        .map((object) => renderFileRow(torrentSummary, object.file, object.index))
+        .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (
         <div className='files'>
@@ -238,7 +240,7 @@ function TorrentList (state) {
   }
 
   // Show a single torrentSummary file in the details view for a single torrent
-  function renderFileRow (torrentSummary, file, index) {
+  renderFileRow (torrentSummary, file, index) {
     // First, find out how much of the file we've downloaded
     // Are we even torrenting it?
     var isSelected = torrentSummary.selections && torrentSummary.selections[index]
@@ -254,7 +256,7 @@ function TorrentList (state) {
     var positionElem
     if (file.currentTime) {
       // Radial progress bar. 0% = start from 0:00, 270% = 3/4 of the way thru
-      positionElem = renderRadialProgressBar(file.currentTime / file.duration)
+      positionElem = this.renderRadialProgressBar(file.currentTime / file.duration)
     }
 
     // Finally, render the file as a table row
@@ -294,25 +296,25 @@ function TorrentList (state) {
       </tr>
     )
   }
-}
 
-function renderRadialProgressBar (fraction, cssClass) {
-  var rotation = 360 * fraction
-  var transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
-  var transformFix = {transform: 'rotate(' + rotation + 'deg)'}
+  renderRadialProgressBar (fraction, cssClass) {
+    var rotation = 360 * fraction
+    var transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
+    var transformFix = {transform: 'rotate(' + rotation + 'deg)'}
 
-  return (
-    <div className={'radial-progress ' + cssClass}>
-      <div className='circle'>
-        <div className='mask full' style={transformFill}>
-          <div className='fill' style={transformFill}></div>
+    return (
+      <div className={'radial-progress ' + cssClass}>
+        <div className='circle'>
+          <div className='mask full' style={transformFill}>
+            <div className='fill' style={transformFill}></div>
+          </div>
+          <div className='mask half'>
+            <div className='fill' style={transformFill}></div>
+            <div className='fill fix' style={transformFix}></div>
+          </div>
         </div>
-        <div className='mask half'>
-          <div className='fill' style={transformFill}></div>
-          <div className='fill fix' style={transformFix}></div>
-        </div>
+        <div className='inset'></div>
       </div>
-      <div className='inset'></div>
-    </div>
-  )
+    )
+  }
 }

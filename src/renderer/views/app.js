@@ -49,9 +49,9 @@ module.exports = class App extends React.Component {
 
     var vdom = (
       <div className={'app ' + cls.join(' ')}>
-        {Header(state)}
+        <Header state={state} />
         {getErrorPopover(state)}
-        <div className='content'>{getView(state)}</div>
+        <div key='content' className='content'>{getView(state)}</div>
         {getModal(state)}
       </div>
     )
@@ -65,12 +65,13 @@ function getErrorPopover (state) {
   var recentErrors = state.errors.filter((x) => now - x.time < 5000)
   var hasErrors = recentErrors.length > 0
 
-  var errorElems = recentErrors.map(function (error) {
-    return (<div className='error'>{error.message}</div>)
+  var errorElems = recentErrors.map(function (error, i) {
+    return (<div key={i} className='error'>{error.message}</div>)
   })
   return (
-    <div className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
-      <div className='title'>Error</div>
+    <div key='errors'
+      className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
+      <div key='title' className='title'>Error</div>
       {errorElems}
     </div>
   )
@@ -78,18 +79,18 @@ function getErrorPopover (state) {
 
 function getModal (state) {
   if (!state.modal) return
-  var contents = Modals[state.modal.id](state)
+  var ModalContents = Modals[state.modal.id]
   return (
-    <div className='modal'>
-      <div className='modal-background'></div>
-      <div className='modal-content'>
-        {contents}
+    <div key='modal' className='modal'>
+      <div key='modal-background' className='modal-background'></div>
+      <div key='modal-content' className='modal-content'>
+        <ModalContents state={state} />
       </div>
     </div>
   )
 }
 
 function getView (state) {
-  var url = state.location.url()
-  return Views[url](state)
+  var View = Views[state.location.url()]
+  return (<View state={state} />)
 }
