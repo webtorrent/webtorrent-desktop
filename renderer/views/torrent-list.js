@@ -126,7 +126,7 @@ function TorrentList (state) {
       var minutesStr = (hours || minutes) ? minutes + 'm' : ''
       var secondsStr = seconds + 's'
 
-      return hx`<span>ETA: ${hoursStr} ${minutesStr} ${secondsStr}s</span>`
+      return hx`<span>ETA: ${hoursStr} ${minutesStr} ${secondsStr}</span>`
     }
   }
 
