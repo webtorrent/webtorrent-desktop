@@ -122,11 +122,11 @@ function TorrentList (state) {
 
       // Only display hours and minutes if they are greater than 0 but always
       // display minutes if hours is being displayed
-      hours = hours ? hours + 'h' : ''
-      if (!hours) minutes = minutes ? minutes + 'm' : ''
-      else minutes = minutes + 'm'
+      var hoursStr = hours ? hours + 'h' : ''
+      var minutesStr = (hours || minutes) ? minutes + 'm' : ''
+      var secondsStr = seconds + 's'
 
-      return hx`<span>ETA: ${hours} ${minutes} ${seconds}s</span>`
+      return hx`<span>ETA: ${hoursStr} ${minutesStr} ${secondsStr}s</span>`
     }
   }
 
