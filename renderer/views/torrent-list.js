@@ -70,6 +70,7 @@ function TorrentList (state) {
           ${renderPeers()}
           ${renderDownloadSpeed()}
           ${renderUploadSpeed()}
+          ${renderEta()}
         </div>
       `)
     }
@@ -105,6 +106,27 @@ function TorrentList (state) {
     function renderUploadSpeed () {
       if (prog.uploadSpeed === 0) return
       return hx`<span>↑ ${prettyBytes(prog.uploadSpeed)}/s</span>`
+    }
+
+    function renderEta () {
+      var downloaded = prog.downloaded
+      var total = prog.length || 0
+      var missing = total - downloaded
+      var downloadSpeed = prog.downloadSpeed
+      if (downloadSpeed === 0 || missing === 0) return
+
+      var rawEta = missing / downloadSpeed
+      var hours = Math.floor(rawEta / 3600) % 24
+      var minutes = Math.floor(rawEta / 60) % 60
+      var seconds = Math.floor(rawEta % 60)
+
+      // Only display hours and minutes if they are greater than 0 but always
+      // display minutes if hours is being displayed
+      var hoursStr = hours ? hours + 'h' : ''
+      var minutesStr = (hours || minutes) ? minutes + 'm' : ''
+      var secondsStr = seconds + 's'
+
+      return hx`<span>ETA: ${hoursStr} ${minutesStr} ${secondsStr}</span>`
     }
   }
 
