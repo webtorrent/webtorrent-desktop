@@ -2,7 +2,7 @@ const electron = require('electron')
 const fs = require('fs-extra')
 const path = require('path')
 const parallel = require('run-parallel')
-const request = require('request')
+const get = require('simple-get')
 
 const {dispatch} = require('../lib/dispatcher')
 
@@ -95,43 +95,63 @@ module.exports = class SubtitlesController {
   }
 }
 
-function loadSubtitle (file, cb) {
+function streamSubtitle (file, cb) {
+  // From local file
+  if (file.path) return cb(fs.createReadStream(file.path))
+
+  // From URL
+  if (file.url) {
+    get(file, (err, res) => {
+      if (err) throw err
+      cb(res)
+    })
+  }
+}
+
+function loadSubtitle (subtitle, cb) {
   // Lazy load to keep startup fast
   var concat = require('simple-concat')
   var LanguageDetect = require('languagedetect')
   var srtToVtt = require('srt-to-vtt')
 
-  // Read the .SRT or .VTT file, parse it, add subtitle track
-  var filePath = file.path || file.url
-  if (!filePath) return
+  // Get torrent info
+  var torrentSummary = this.state.getPlayingTorrentSummary()
+  var fileSummary = this.state.getPlayingFileSummary()
 
-  var vttStream = filePath.startsWith('http') ? request(filePath).pipe(srtToVtt()) : fs.createReadStream(filePath).pipe(srtToVtt())
+  // Get stream
+  streamSubtitle(subtitle, stream => {
+    var vttStream = stream.pipe(srtToVtt())
 
-  concat(vttStream, function (err, buf) {
-    if (err) return dispatch('error', "Can't parse subtitles file.")
+    concat(vttStream, function (err, buf) {
+      if (err) return dispatch('error', "Can't parse subtitles file.")
 
-    // Detect what language the subtitles are in
-    if (!file.lang) {
-      var iso639 = require('iso-639-1')
-      var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
-      var langDetected = (new LanguageDetect()).detect(vttContents, 2)
-      langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
-      langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
-      file.langName = langDetected
-      file.lang = iso639.getCode(langDetected) // eg "de" if language is "German"
-    }
+      // Detect what language the subtitles are in
+      if (!subtitle.lang) {
+        var iso639 = require('iso-639-1')
+        var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
+        var langDetected = (new LanguageDetect()).detect(vttContents, 2)
+        langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+        langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+        subtitle.langName = langDetected
+        subtitle.lang = iso639.getCode(langDetected) // eg "de" if language is "German"
+      }
+      // Fix Portuguese Brazilian code
+      if (subtitle.lang === 'pb') subtitle.lang = 'pt'
 
-    // Fix Portuguese Brazilian code
-    if (file.lang === 'pb') file.lang = 'pt'
+      // Save subtitle
+      if (subtitle.url) {
+        var subtitlePath = `${torrentSummary.path}/${fileSummary.path}.${subtitle.lang}.srt`
+        stream.pipe(fs.createWriteStream(subtitlePath))
+      }
 
-    var track = {
-      buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
-      language: file.lang,
-      label: file.langName,
-      filePath: filePath
-    }
-
-    cb(null, track)
+      var track = {
+        buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
+        language: subtitle.lang,
+        label: subtitle.langName,
+        filePath: subtitlePath
+      }
+      cb(null, track)
+    })
   })
 }
 
