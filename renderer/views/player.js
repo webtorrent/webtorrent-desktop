@@ -524,6 +524,7 @@ function renderPlayerControls (state) {
 
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
+    if (!e.clientX) return
     dispatch('mediaMouseMoved')
     var windowWidth = document.querySelector('body').clientWidth
     var fraction = e.clientX / windowWidth
