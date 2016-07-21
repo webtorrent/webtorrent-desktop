@@ -476,7 +476,7 @@ function renderPlayerControls (state) {
       'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
-  //TODO: dcposch change the range input to use value / onChanged instead of
+  // TODO: dcposch change the range input to use value / onChanged instead of
   // "readonly" / onMouse[Down,Move,Up]
   elements.push((
     <div key='volume' className='volume float-left'>

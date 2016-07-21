@@ -52,7 +52,7 @@ State.load(onState)
 // the dock icon and drag+drop.
 function onState (err, _state) {
   if (err) return onError(err)
-  state = _state
+  state = window.state = _state // Make available for easier debugging
 
   // Create controllers
   controllers = {

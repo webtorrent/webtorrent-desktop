@@ -221,6 +221,7 @@ module.exports = class TorrentList extends React.Component {
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files
+        .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
         .sort(function (a, b) {
           if (a.file.name < b.file.name) return -1
