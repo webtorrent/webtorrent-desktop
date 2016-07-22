@@ -4,6 +4,7 @@ const path = require('path')
 const parallel = require('run-parallel')
 
 const {dispatch} = require('../lib/dispatcher')
+var subtitlesDownloader = require('../lib/subtitles-downloader')
 
 module.exports = class SubtitlesController {
   constructor (state) {
@@ -64,10 +65,32 @@ module.exports = class SubtitlesController {
     })
   }
 
+  autoDownloadSubtitles (torrentSummary) {
+    var language = this.state.saved.prefs.subtitlesLanguage
+    subtitlesDownloader.downloadSubtitles(torrentSummary, language, onSubtitlesDownloaded)
+
+    var that = this
+    function onSubtitlesDownloaded (subtitles) {
+      console.log('--- autoDownloadSubtitles: GOT SUBTITLES!', subtitles)
+
+      // auto select first loaded subtitle
+      var select = false
+      if (that.state.playing.subtitles.tracks.length === 0) select = true
+
+      that.addSubtitles([subtitles.file], select)
+    }
+  }
+
   checkForSubtitles () {
     if (this.state.playing.type !== 'video') return
     var torrentSummary = this.state.getPlayingTorrentSummary()
     if (!torrentSummary || !torrentSummary.progress) return
+
+    // search for subtitles matching current video file
+    // and automatically load them selecting the first one available
+    if (this.state.saved.prefs.autoDownloadSubtitles) {
+      this.autoDownloadSubtitles(torrentSummary)
+    }
 
     torrentSummary.progress.files.forEach((fp, ix) => {
       if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
