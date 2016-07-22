@@ -626,10 +626,6 @@ body.drag .app::after {
   height: 28px;
 }
 
-.torrent-details td {
-  vertical-align: center;
-}
-
 .torrent-details tr:hover {
   background-color: rgba(200, 200, 200, 0.3);
 }
@@ -647,7 +643,7 @@ body.drag .app::after {
 }
 
 .torrent-details td.col-icon {
-  width: 3em;
+  width: 45px;
   padding-left: 16px;
 }
 
@@ -663,17 +659,17 @@ body.drag .app::after {
 }
 
 .torrent-details td.col-progress {
-  width: 4em;
+  width: 60px;
   text-align: right;
 }
 
 .torrent-details td.col-size {
-  width: 4em;
+  width: 60px;
   text-align: right;
 }
 
 .torrent-details td.col-select {
-  width: 3em;
+  width: 45px;
   padding-right: 13px;
   text-align: right;
 }
