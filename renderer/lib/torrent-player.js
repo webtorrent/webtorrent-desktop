@@ -62,14 +62,11 @@ function isPlayableTorrentSummary (torrentSummary) {
 
 // Picks the default file to play from a list of torrent or torrentSummary files
 // Returns an index or undefined, if no files are playable
+// Play the first video file
 function pickFileToPlay (files) {
-  // first, try to find the biggest video file
   var videoFiles = files.filter(isVideo)
   if (videoFiles.length > 0) {
-    var largestVideoFile = videoFiles.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    return files.indexOf(largestVideoFile)
+    return files.indexOf(videoFiles[0])
   }
 
   // if there are no videos, play the first audio file
