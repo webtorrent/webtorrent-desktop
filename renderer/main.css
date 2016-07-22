@@ -1067,6 +1067,11 @@ video::-webkit-media-text-track-container {
   margin-top: 0.2em;
 }
 
+.preferences .control-group input.has-button {
+  display: inline-block;
+  width: calc( 100% - 40px );
+}
+
 .preferences .control-group input.file-picker-text {
   width: calc(100% - 40px);
 }
@@ -1236,3 +1241,29 @@ video::-webkit-media-text-track-container {
   height: 32px;
   margin: 4px 0 0 4px;
 }
+
+/* padding helpers */
+.p {
+  padding: 10px;
+}
+
+.p-sm {
+  padding: 5px;
+}
+
+.pt {
+  padding-top: 10px;
+}
+
+.pt-sm {
+  padding-top: 5px;
+}
+
+.pb {
+  padding-bottom: 10px;
+}
+
+.pb-sm {
+  padding-bottom: 5px;
+}
+
