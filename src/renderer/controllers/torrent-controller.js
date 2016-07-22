@@ -129,8 +129,6 @@ module.exports = class TorrentController {
     //       files which are completed after a video starts to play to be added
     //       dynamically to the list of subtitles.
     // checkForSubtitles()
-
-    dispatch('update')
   }
 
   torrentFileModtimes (torrentKey, fileModtimes) {
