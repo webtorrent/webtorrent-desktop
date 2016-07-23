@@ -492,21 +492,7 @@ input[type='text'] {
 }
 
 .torrent .buttons .download.downloading {
-  animation-name: greenpulse;
-  animation-duration: 0.8s;
-  animation-direction: alternate;
-  animation-iteration-count: infinite;
-}
-
-@keyframes greenpulse {
-  0% {
-    color: #ffffff;
-    padding-top: 4px;
-  }
-  100% {
-    color: #44dd44;
-    padding-top: 6px;
-  }
+  color: #44dd44;
 }
 
 .torrent .buttons .download.seeding {
