@@ -28,7 +28,7 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = new WebTorrent()
+var client = window.client = new WebTorrent()
 
 // WebTorrent-to-HTTP streaming sever
 var server = null
