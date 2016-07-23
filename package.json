@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "airplayer": "^2.0.0",
-    "application-config": "^0.2.1",
+    "application-config": "^1.0.0",
     "bitfield": "^1.0.2",
     "chromecasts": "^1.8.0",
     "create-torrent": "^3.24.5",
