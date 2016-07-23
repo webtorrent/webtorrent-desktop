@@ -49,47 +49,49 @@ module.exports = class App extends React.Component {
     var vdom = (
       <div className={'app ' + cls.join(' ')}>
         <Header state={state} />
-        {getErrorPopover(state)}
-        <div key='content' className='content'>{getView(state)}</div>
-        {getModal(state)}
+        {this.getErrorPopover()}
+        <div key='content' className='content'>{this.getView()}</div>
+        {this.getModal()}
       </div>
     )
 
     return vdom
   }
-}
 
-function getErrorPopover (state) {
-  var now = new Date().getTime()
-  var recentErrors = state.errors.filter((x) => now - x.time < 5000)
-  var hasErrors = recentErrors.length > 0
+  getErrorPopover () {
+    var now = new Date().getTime()
+    var recentErrors = this.state.errors.filter((x) => now - x.time < 5000)
+    var hasErrors = recentErrors.length > 0
 
-  var errorElems = recentErrors.map(function (error, i) {
-    return (<div key={i} className='error'>{error.message}</div>)
-  })
-  return (
-    <div key='errors'
-      className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
-      <div key='title' className='title'>Error</div>
-      {errorElems}
-    </div>
-  )
-}
-
-function getModal (state) {
-  if (!state.modal) return
-  var ModalContents = Modals[state.modal.id]
-  return (
-    <div key='modal' className='modal'>
-      <div key='modal-background' className='modal-background'></div>
-      <div key='modal-content' className='modal-content'>
-        <ModalContents state={state} />
+    var errorElems = recentErrors.map(function (error, i) {
+      return (<div key={i} className='error'>{error.message}</div>)
+    })
+    return (
+      <div key='errors'
+        className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
+        <div key='title' className='title'>Error</div>
+        {errorElems}
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-function getView (state) {
-  var View = Views[state.location.url()]
-  return (<View state={state} />)
+  getModal () {
+    var state = this.state
+    if (!state.modal) return
+    var ModalContents = Modals[state.modal.id]
+    return (
+      <div key='modal' className='modal'>
+        <div key='modal-background' className='modal-background'></div>
+        <div key='modal-content' className='modal-content'>
+          <ModalContents state={state} />
+        </div>
+      </div>
+    )
+  }
+
+  getView () {
+    var state = this.state
+    var View = Views[state.location.url()]
+    return (<View state={state} />)
+  }
 }
