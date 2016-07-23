@@ -82,7 +82,7 @@
   "scripts": {
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
-    "package": "node ./bin/package.js",
+    "package": "rm -rf build/ && jsx --es6module src/ build/ && node ./bin/package.js",
     "start": "jsx --es6module src/ build/ && electron .",
     "test": "standard && node ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"

@@ -66,7 +66,7 @@ module.exports = {
   IS_PRODUCTION: isProduction(),
 
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
-  ROOT_PATH: __dirname,
+  ROOT_PATH: path.join(__dirname, '..'),
   STATIC_PATH: path.join(__dirname, '..', 'static'),
   TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
 

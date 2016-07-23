@@ -22,9 +22,11 @@ var windows = require('./windows')
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
 
+if (!argv.includes('--dev')) process.env.NODE_ENV = 'production'
+
 if (process.platform === 'win32') {
   shouldQuit = squirrelWin32.handleEvent(argv[0])
-  argv = argv.filter((arg) => arg.indexOf('--squirrel') === -1)
+  argv = argv.filter((arg) => !arg.includes('--squirrel'))
 }
 
 if (!shouldQuit) {
