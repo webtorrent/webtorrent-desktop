@@ -19,7 +19,6 @@ var config = require('../src/config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
-var BUILD_PATH = path.join(config.ROOT_PATH, 'build')
 var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
 
 var argv = minimist(process.argv.slice(2), {

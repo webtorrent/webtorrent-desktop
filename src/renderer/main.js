@@ -81,7 +81,6 @@ function onState (err, _state) {
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
-  window.requestAnimationFrame(renderIfNecessary)
   app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
 
   // OS integrations:
@@ -123,23 +122,15 @@ function lazyLoadCast () {
   return Cast
 }
 
-// Calls render() to go from state -> UI, then applies to vdom to the real DOM.
-// Runs at 60fps, but only executes when necessary
-var needsRender = 0
-
-function renderIfNecessary () {
-  if (needsRender > 1) console.log('combining %d update() calls into one update', needsRender)
-  if (needsRender) {
-    controllers.playback.showOrHidePlayerControls()
-    app.setState(state)
-    updateElectron()
-    needsRender = 0
-  }
-  window.requestAnimationFrame(renderIfNecessary)
-}
-
+// React loop:
+// 1. update() - recompute the virtual DOM, diff, apply to the real DOM
+// 2. event - might be a click or other DOM event, or something external
+// 3. dispatch - the event handler calls dispatch(), main.js sends it to a controller
+// 4. controller - the controller handles the event, changing the state object
 function update () {
-  needsRender++
+  controllers.playback.showOrHidePlayerControls()
+  app.setState(state)
+  updateElectron()
 }
 
 // Some state changes can't be reflected in the DOM, instead we have to
@@ -294,14 +285,6 @@ function backToList () {
     // If we were already on the torrent list, scroll to the top
     var contentTag = document.querySelector('.content')
     if (contentTag) contentTag.scrollTop = 0
-
-    // TODO dcposch: is this still required with React?
-    // Work around virtual-dom issue: it doesn't expose its redraw function,
-    // and only redraws on requestAnimationFrame(). That means when the user
-    // closes the window (hide window / minimize to tray) and we want to pause
-    // the video, we update the vdom but it keeps playing until you reopen!
-    var mediaTag = document.querySelector('video,audio')
-    if (mediaTag) mediaTag.pause()
   })
 }
 
@@ -376,7 +359,7 @@ function onOpen (files) {
   if (state.location.url() === 'home' || subtitles.length === 0) {
     if (files.every(TorrentPlayer.isTorrent)) {
       if (state.location.url() !== 'home') {
-        backToList()
+        dispatch('backToList')
       }
       // All .torrent files? Add them.
       files.forEach((file) => controllers.torrentList.addTorrent(file))
