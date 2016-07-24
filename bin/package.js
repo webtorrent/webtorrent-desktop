@@ -15,7 +15,7 @@ var rimraf = require('rimraf')
 var series = require('run-series')
 var zip = require('cross-zip')
 
-var config = require('../config')
+var config = require('../src/config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION

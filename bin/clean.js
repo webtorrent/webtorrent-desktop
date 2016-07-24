@@ -13,8 +13,14 @@ var rimraf = require('rimraf')
 var config = require('../config')
 var handlers = require('../main/handlers')
 
+// First, remove generated files
+rimraf.sync('build/')
+rimraf.sync('dist/')
+
+// Remove any saved configuration
 rimraf.sync(config.CONFIG_PATH)
 
+// Remove any temporary files
 var tmpPath
 try {
   tmpPath = path.join(fs.statSync('/tmp') && '/tmp', 'webtorrent')
