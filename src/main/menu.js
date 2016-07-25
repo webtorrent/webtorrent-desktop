@@ -319,9 +319,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Quit',
-          accelerator: 'Command+Q',
-          click: () => app.quit()
+          role: 'quit'
         }
       ]
     })
