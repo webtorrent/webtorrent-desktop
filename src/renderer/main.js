@@ -146,7 +146,7 @@ function updateElectron () {
   }
   if (state.dock.badge !== state.prev.badge) {
     state.prev.badge = state.dock.badge
-    ipcRenderer.send('setBadge', state.dock.badge || '')
+    ipcRenderer.send('setBadge', state.dock.badge || 0)
   }
 }
 

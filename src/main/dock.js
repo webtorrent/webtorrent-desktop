@@ -30,12 +30,11 @@ function downloadFinished (path) {
 }
 
 /**
- * Display string in dock badging area. (OS X)
+ * Display a counter badge for the app. (OS X, Linux)
  */
-function setBadge (text) {
-  if (!app.dock) return
-  log(`setBadge: ${text}`)
-  app.dock.setBadge(String(text))
+function setBadge (count) {
+  log(`setBadge: ${count}`)
+  app.setBadgeCount(Number(count))
 }
 
 function getMenuTemplate () {
