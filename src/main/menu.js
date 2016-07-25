@@ -99,10 +99,6 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: process.platform === 'win32'
-            ? 'Close'
-            : 'Close Window',
-          accelerator: 'CmdOrCtrl+W',
           role: 'close'
         }
       ]
@@ -111,23 +107,28 @@ function getMenuTemplate () {
       label: 'Edit',
       submenu: [
         {
-          label: 'Cut',
-          accelerator: 'CmdOrCtrl+X',
+          role: 'undo'
+        },
+        {
+          role: 'redo'
+        },
+        {
+          type: 'separator'
+        },
+        {
           role: 'cut'
         },
         {
-          label: 'Copy',
-          accelerator: 'CmdOrCtrl+C',
           role: 'copy'
         },
         {
           label: 'Paste Torrent Address',
-          accelerator: 'CmdOrCtrl+V',
           role: 'paste'
         },
         {
-          label: 'Select All',
-          accelerator: 'CmdOrCtrl+A',
+          role: 'delete'
+        },
+        {
           role: 'selectall'
         },
         {
@@ -285,7 +286,6 @@ function getMenuTemplate () {
       label: config.APP_NAME,
       submenu: [
         {
-          label: 'About ' + config.APP_NAME,
           role: 'about'
         },
         {
@@ -300,7 +300,6 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Services',
           role: 'services',
           submenu: []
         },
@@ -308,45 +307,34 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Hide ' + config.APP_NAME,
-          accelerator: 'Command+H',
           role: 'hide'
         },
         {
-          label: 'Hide Others',
-          accelerator: 'Command+Alt+H',
           role: 'hideothers'
         },
         {
-          label: 'Show All',
           role: 'unhide'
         },
         {
           type: 'separator'
         },
         {
-          label: 'Quit',
-          accelerator: 'Command+Q',
-          click: () => app.quit()
+          role: 'quit'
         }
       ]
     })
 
     // Add Window menu (OS X)
     template.splice(5, 0, {
-      label: 'Window',
       role: 'window',
       submenu: [
         {
-          label: 'Minimize',
-          accelerator: 'CmdOrCtrl+M',
           role: 'minimize'
         },
         {
           type: 'separator'
         },
         {
-          label: 'Bring All to Front',
           role: 'front'
         }
       ]
