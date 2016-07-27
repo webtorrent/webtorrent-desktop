@@ -8,7 +8,6 @@ module.exports = {
 
 var electron = require('electron')
 
-var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
