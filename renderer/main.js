@@ -25,6 +25,7 @@ const PlaybackController = require('./controllers/playback-controller')
 const SubtitlesController = require('./controllers/subtitles-controller')
 const TorrentListController = require('./controllers/torrent-list-controller')
 const TorrentController = require('./controllers/torrent-controller')
+const ChannelsController = require('./controllers/channels-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -62,7 +63,8 @@ function onState (err, _state) {
     playback: new PlaybackController(state, config, update),
     subtitles: new SubtitlesController(state),
     torrentList: new TorrentListController(state),
-    torrent: new TorrentController(state)
+    torrent: new TorrentController(state),
+    channels: new ChannelsController(state)
   }
 
   // Add first page to location history
@@ -121,6 +123,12 @@ function delayedInit () {
   lazyLoadCast()
   sound.preload()
   telemetry.init(state)
+  initChannels()
+}
+
+function initChannels () {
+  // load torrents from enabled channels
+  controllers.channels.init()
 }
 
 // Lazily loads Chromecast and Airplay support
@@ -219,6 +227,7 @@ const dispatchHandlers = {
   // Preferences screen
   'preferences': () => controllers.prefs.show(),
   'updatePreferences': (key, value) => controllers.prefs.update(key, value),
+  'addChannel': (channel) => controllers.channels.addChannel(channel),
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update.updateAvailable(version),

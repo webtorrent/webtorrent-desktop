@@ -947,11 +947,21 @@ video::-webkit-media-text-track-container {
   font-size: 0.889em;
   line-height: 1;
   padding: 0.5em 0.75em;
+  cursor: pointer;
 }
 
 .preferences .btn .icon {
   margin: 0;
   color: #a8a8a8;
+  cursor: pointer;
+}
+
+.preferences .btn.btn-enabled .icon {
+  color: greenyellow;
+}
+
+.preferences .btn.btn-disabled .icon {
+  
 }
 
 .preferences .help .icon {

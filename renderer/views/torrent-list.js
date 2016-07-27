@@ -12,6 +12,10 @@ function TorrentList (state) {
     (torrentSummary) => renderTorrent(torrentSummary)
   )
 
+  // add torrents from active channels
+  var torrentsFromEnabledChannels = state.saved.torrentsFromEnabledChannels || []
+  console.log('torrentsFromEnabledChannels:', torrentsFromEnabledChannels)
+
   return hx`
     <div class='torrent-list'>
       ${torrentRows}

@@ -40,43 +40,103 @@ function renderAddChannelInput (state) {
   return renderInput({
     label: 'Add Channel',
     description: 'Channels provide easy access to categorized and curated video content',
-    property: 'channels'
+    property: 'channels',
+    placeholder: 'http://channel-url-here',
+    onValueChange: onValueChange
   },
-  'http://channel-url-here',
-  function (channel) {
-    if (!channel || !channel.trim()) return
-    var channels = state.saved.prefs.channels || []
-    channels.push(channel)
-    setStateValue('channels', channels)
+  state.temp_addChannel || '',
+  function (channelUrl) {
+    if (!channelUrl || !channelUrl.trim()) return
+    // var channels = state.saved.prefs.channels || []
+
+    dispatch('addChannel', channelUrl)
+    // channels.push(channelUrl)
+    // setStateValue('channels', channels)
   })
+
+  function onValueChange(value) {
+    // update value so it persists between view refreshes
+    state.temp_addChannel = value
+  }
 }
 
 function renderChannelsList (state) {
+  var channels = state.saved.prefs.channels
+
   return renderButtonList({
     label: 'Existing Channels',
     description: 'List of already available channels.',
-    button: 'remove_circle',
-    channels: [
+    buttons: [
+      {type: 'remove_circle', click: removeChannel}
+    ],
+    conditionalButtons: [
       {
-        url: 'http://test.torrent-channels.org',
-        name: 'Test Channel',
-        description: 'This is a test channel.'
+        type: 'check_circle', 
+        property: 'enabled', 
+        enabledClick: disableChannel, 
+        disabledClick: enableChannel
       }
-    ]
-  },
-  'http://channel-url-here',
-  function (channelIndex) {
-    if (!channelIndex) return
+    ],
+    list: channels
+  })
+
+  function isChannelEnabled (channelIndex) {
+    var enabledChannels = state.saved.prefs.enabledChannels || []
+    return (enabledChannels.indexOf(channelIndex) !== -1)
+  }
+
+  function removeChannel (channel, channelIndex) {
+    // remove from channels
     var channels = state.saved.prefs.channels
     channels.splice(channelIndex, 1)
     setStateValue('channels', channels)
-  })
+
+    // remove from enabled channels if enabled
+    var enabledChannels = state.saved.prefs.enabledChannels
+    var enabledChannelIndex = enabledChannels.indexOf(channelIndex)
+    if (enabledChannelIndex === -1) return
+    enabledChannels.splice(enabledChannelIndex, 1)
+  }
+
+  function enableChannel (channel, channelIndex) {
+    console.log('[enableChannel]: index:', channelIndex)
+    var enabledChannels = state.saved.prefs.enabledChannels || []
+    if (isChannelEnabled(channelIndex)) return // already enabled!
+
+    // save channel
+    var channels = state.saved.prefs.channels
+    channels[channelIndex].enabled = true
+    setStateValue('channels', channels)
+
+    // update enabled channels
+    enabledChannels.push(channelIndex)
+    setStateValue('enabledChannels', enabledChannels)
+  }
+
+  function disableChannel (channel, channelIndex) {
+    console.log('[disableChannel]: index:', channelIndex)
+    if (!isChannelEnabled(channelIndex)) {
+      console.log('[disableChannel]: ALREADY DISABLED: index:', channelIndex)
+      return // already disabled!
+    } 
+
+    // update enabled channels
+    var enabledChannels = state.saved.prefs.enabledChannels || []
+    var enabledIndex = enabledChannels.indexOf(channelIndex)
+    enabledChannels.splice(enabledIndex, 1)
+    setStateValue('enabledChannels', enabledChannels)
+
+    // update channels
+    var channels = state.saved.prefs.channels
+    channels[channelIndex].enabled = false
+    setStateValue('channels', channels)
+  }
 }
 
-function renderButtonList (definition, value, callback) {
-  var channels = definition.channels
+function renderButtonList (definition) {
+  var {list, buttons, conditionalButtons} = definition
 
-  // iterate channels and generate the html for the list
+  // iterate items and generate the html for the list
   return hx`
     <div class='control-group'>
       <div class='controls pb-sm'>
@@ -86,17 +146,39 @@ function renderButtonList (definition, value, callback) {
         </label>
       </div>
 
-      ${channels.map(function (channel, i) {
+      ${list.map(function (item, i) {
         return hx`
           <div class='controls'>
             <div class='controls'>
-              <button class='btn' index='${i}' onclick=${handleClick}>
-                <i.icon>${definition.button}</i>
-              </button>
+              ${buttons.map(function (button) {
+                return hx`
+                  <button class='btn' index='${i}' onclick=${() => button.click(item, i)}>
+                    <i.icon>${button.type}</i>
+                  </button>
+                `
+              })}
+
+              ${conditionalButtons.map(function (button) {
+                // enabled
+                if (item[button.property]) {
+                  return hx`
+                    <button class='btn btn-enabled' index='${i}' onclick=${() => button.enabledClick(item, i)}>
+                      <i.icon>${button.type}</i>
+                    </button>
+                  `
+                }
+                
+                // disabled
+                return hx`
+                  <button class='btn btn-disabled' index='${i}' onclick=${() => button.disabledClick(item, i)}>
+                    <i.icon>${button.type}</i>
+                  </button>
+                `
+              })}
 
               <label class='control-label'>
-                <span class='preference-title' title='${channel.description}'>${channel.name}, </span>
-                <span class='preference-description' title='${channel.url}'>${channel.url}</span>
+                <span class='preference-title' title='${item.description}'>${item.name}, </span>
+                <span class='preference-description' title='${item.url}'>${item.url}</span>
               </label>
             </div>
           </div>
@@ -105,10 +187,6 @@ function renderButtonList (definition, value, callback) {
 
     </div>
   `
-
-  function handleClick (e) {
-    callback(this.index)
-  }
 }
 
 function renderInput (definition, value, callback) {
@@ -122,7 +200,9 @@ function renderInput (definition, value, callback) {
         <div class='controls'>
           <input type='text' class='has-button'
             id=${definition.property}
-            value=${value} />
+            value=${value}
+            placeholder=${definition.placeholder}
+            onkeyup=${handleChange} />
           <button class='btn' onclick=${handleClick}>
             <i.icon>add_to_queue</i>
           </button>
@@ -133,6 +213,12 @@ function renderInput (definition, value, callback) {
   function handleClick () {
     var channel = document.getElementById(definition.property).value
     callback(channel)
+  }
+
+  function handleChange() {
+    console.log('--- value changed', this)
+    var channel = document.getElementById(definition.property).value
+    definition.onValueChange(channel)
   }
 }
 
