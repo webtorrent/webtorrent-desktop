@@ -21,7 +21,7 @@ function init () {
   if (process.platform === 'win32') {
     initWin32()
   }
-  // OS X apps generally do not have menu bar icons
+  // Mac apps generally do not have menu bar icons
 }
 
 /**

@@ -12,7 +12,7 @@ var dialog = require('./dialog')
 var log = require('./log')
 
 /**
- * Add a right-click menu to the dock icon. (OS X)
+ * Add a right-click menu to the dock icon. (Mac)
  */
 function init () {
   if (!app.dock) return
@@ -21,7 +21,7 @@ function init () {
 }
 
 /**
- * Bounce the Downloads stack if `path` is inside the Downloads folder. (OS X)
+ * Bounce the Downloads stack if `path` is inside the Downloads folder. (Mac)
  */
 function downloadFinished (path) {
   if (!app.dock) return
@@ -30,7 +30,7 @@ function downloadFinished (path) {
 }
 
 /**
- * Display a counter badge for the app. (OS X, Linux)
+ * Display a counter badge for the app. (Mac, Linux)
  */
 function setBadge (count) {
   log(`setBadge: ${count}`)

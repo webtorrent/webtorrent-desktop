@@ -34,7 +34,7 @@ function installDarwin () {
   var electron = require('electron')
   var app = electron.app
 
-  // On OS X, only protocols that are listed in `Info.plist` can be set as the
+  // On Mac, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.
   app.setAsDefaultProtocolClient('magnet')
   app.setAsDefaultProtocolClient('stream-magnet')
