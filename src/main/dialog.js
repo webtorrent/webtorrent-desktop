@@ -117,5 +117,5 @@ function setTitle (title) {
 }
 
 function resetTitle () {
-  window.main.dispatch('resetTitle')
+  windows.main.dispatch('resetTitle')
 }
