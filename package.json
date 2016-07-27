@@ -59,6 +59,9 @@
     "run-series": "^1.1.4",
     "standard": "^7.0.0"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "homepage": "https://webtorrent.io",
   "keywords": [
     "desktop",
@@ -66,8 +69,8 @@
     "electron-app",
     "hybrid webtorrent client",
     "mad science",
-    "torrent client",
     "torrent",
+    "torrent client",
     "webtorrent"
   ],
   "license": "MIT",
