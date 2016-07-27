@@ -115,8 +115,8 @@ function init () {
     })
   })
 
-  ipc.on('vlcPlay', function (e, url) {
-    var args = ['--play-and-exit', '--video-on-top', '--no-video-title-show', '--quiet', url]
+  ipc.on('vlcPlay', function (e, url, title) {
+    var args = ['--play-and-exit', '--video-on-top', '--no-video-title-show', '--quiet', `--meta-title=${title}`, url]
     log('Running vlc ' + args.join(' '))
 
     vlc.spawn(args, function (err, proc) {

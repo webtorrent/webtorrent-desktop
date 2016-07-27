@@ -43,7 +43,7 @@ module.exports = class MediaController {
   }
 
   vlcPlay () {
-    ipcRenderer.send('vlcPlay', this.state.server.localURL)
+    ipcRenderer.send('vlcPlay', this.state.server.localURL, this.state.window.title)
     this.state.playing.location = 'vlc'
   }
 

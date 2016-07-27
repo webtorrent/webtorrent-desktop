@@ -8,7 +8,6 @@ module.exports = {
 
 var electron = require('electron')
 
-var config = require('../config')
 var log = require('./log')
 var windows = require('./windows')
 
@@ -118,5 +117,5 @@ function setTitle (title) {
 }
 
 function resetTitle () {
-  setTitle(config.APP_WINDOW_TITLE)
+  windows.main.dispatch('resetTitle')
 }
