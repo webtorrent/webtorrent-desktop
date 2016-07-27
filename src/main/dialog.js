@@ -118,5 +118,5 @@ function setTitle (title) {
 }
 
 function resetTitle () {
-  setTitle(config.APP_WINDOW_TITLE)
+  window.main.dispatch('resetTitle')
 }

@@ -242,7 +242,7 @@ module.exports = class PlaybackController {
       }
 
       // otherwise, play the video
-      state.window.title = torrentSummary.files[state.playing.fileIndex].name
+      dispatch('setTitle', torrentSummary.files[state.playing.fileIndex].name)
       this.update()
 
       ipcRenderer.send('onPlayerOpen')
@@ -274,7 +274,7 @@ module.exports = class PlaybackController {
     else console.error('Unknown state.playing.result', state.playing.result)
 
     // Reset the window contents back to the home screen
-    state.window.title = this.config.APP_WINDOW_TITLE
+    dispatch('resetTitle')
     state.playing = State.getDefaultPlayState()
     state.server = null
 

@@ -219,6 +219,7 @@ const dispatchHandlers = {
   'setDimensions': setDimensions,
   'toggleFullScreen': (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
   'setTitle': (title) => { state.window.title = title },
+  'resetTitle': () => { state.window.title = config.APP_WINDOW_TITLE },
 
   // Everything else
   'onOpen': onOpen,

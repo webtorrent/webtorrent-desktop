@@ -1,3 +1,4 @@
+const {dispatch} = require('../lib/dispatcher')
 const State = require('../lib/state')
 
 // Controls the Preferences screen
@@ -14,14 +15,14 @@ module.exports = class PrefsController {
       url: 'preferences',
       onbeforeload: function (cb) {
         // initialize preferences
-        state.window.title = 'Preferences'
+        dispatch('setTitle', 'Preferences')
         state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
         cb()
       },
       onbeforeunload: (cb) => {
         // save state after preferences
         this.save()
-        state.window.title = this.config.APP_WINDOW_TITLE
+        dispatch('resetTitle')
         cb()
       }
     })
