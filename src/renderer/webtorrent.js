@@ -2,14 +2,16 @@
 // process from the main window.
 console.time('init')
 
-var WebTorrent = require('webtorrent')
-var defaultAnnounceList = require('create-torrent').announceList
 var deepEqual = require('deep-equal')
+var defaultAnnounceList = require('create-torrent').announceList
 var electron = require('electron')
 var fs = require('fs-extra')
+var hat = require('hat')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
+var WebTorrent = require('webtorrent')
+var zeroFill = require('zero-fill')
 
 var crashReporter = require('../crash-reporter')
 var config = require('../config')
@@ -26,9 +28,36 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
   .map((arr) => arr[0])
   .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
+/**
+ * WebTorrent version.
+ */
+var VERSION = require('../../package.json').version
+
+/**
+ * Version number in Azureus-style. Generated from major and minor semver version.
+ * For example:
+ *   '0.16.1' -> '0016'
+ *   '1.2.5' -> '0102'
+ */
+var VERSION_STR = VERSION.match(/([0-9]+)/g)
+  .slice(0, 2)
+  .map(function (v) { return zeroFill(2, v) })
+  .join('')
+
+/**
+ * Version prefix string (used in peer ID). WebTorrent uses the Azureus-style
+ * encoding: '-', two characters for client id ('WW'), four ascii digits for version
+ * number, '-', followed by random numbers.
+ * For example:
+ *   '-WW0102-'...
+ */
+var VERSION_PREFIX = '-WD' + VERSION_STR + '-'
+
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = window.client = new WebTorrent()
+var client = window.client = new WebTorrent({
+  peerId: Buffer.from(VERSION_PREFIX + hat(48))
+})
 
 // WebTorrent-to-HTTP streaming sever
 var server = null
