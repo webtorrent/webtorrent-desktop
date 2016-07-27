@@ -153,7 +153,7 @@ function processArgv (argv) {
     } else if (arg === '-u') {
       dialog.openTorrentAddress()
     } else if (arg.startsWith('-psn')) {
-      // Ignore OS X launchd "process serial number" argument
+      // Ignore Mac launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
     } else {
       torrentIds.push(arg)

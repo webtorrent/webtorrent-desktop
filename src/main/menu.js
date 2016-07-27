@@ -281,7 +281,7 @@ function getMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    // Add WebTorrent app menu (OS X)
+    // Add WebTorrent app menu (Mac)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -324,7 +324,7 @@ function getMenuTemplate () {
       ]
     })
 
-    // Add Window menu (OS X)
+    // Add Window menu (Mac)
     template.splice(5, 0, {
       role: 'window',
       submenu: [

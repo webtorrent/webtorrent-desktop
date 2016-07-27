@@ -37,7 +37,7 @@ function init () {
     minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
     title: config.APP_WINDOW_TITLE,
-    titleBarStyle: 'hidden-inset', // Hide title bar (OS X)
+    titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
     height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
@@ -95,7 +95,7 @@ function send (...args) {
 }
 
 /**
- * Enforce window aspect ratio. Remove with 0. (OS X)
+ * Enforce window aspect ratio. Remove with 0. (Mac)
  */
 function setAspectRatio (aspectRatio) {
   if (!main.win) return
@@ -196,7 +196,7 @@ function toggleFullScreen (flag) {
   log(`toggleFullScreen ${flag}`)
 
   if (flag) {
-    // Fullscreen and aspect ratio do not play well together. (OS X)
+    // Fullscreen and aspect ratio do not play well together. (Mac)
     main.win.setAspectRatio(0)
   }
 
