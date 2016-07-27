@@ -10,6 +10,7 @@ var fs = require('fs-extra')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
+var Opensubtitles = require('opensubtitles-api')
 
 var crashReporter = require('../crash-reporter')
 var config = require('../config')
@@ -20,6 +21,9 @@ crashReporter.init()
 
 // Send & receive messages from the main window
 var ipc = electron.ipcRenderer
+
+// OpenSubtitles Api
+var os = new Opensubtitles('OSTestUserAgent')
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
@@ -293,6 +297,25 @@ function startServerFromReadyTorrent (torrent, index, cb) {
 
     ipc.send('wt-server-running', info)
     ipc.send('wt-server-' + torrent.infoHash, info) // TODO: hack
+
+    // Donwload file subtitles
+    var osLang = window.navigator.language
+    // Fix Portuguese Brazilian OpenSubtitles code
+    if (osLang === 'pt-BR') osLang = 'pob'
+    // en-US to en
+    osLang = osLang.split('-')[0]
+    var file = torrent.files[index]
+    getSubtitleHash(file).then(checksum => {
+      // Getsubtitles from OpenSubtitles
+      os.search({
+        hash: checksum,
+        filesize: file.length,
+        filename: file.name,
+        sublanguageid: osLang
+      }).then(subtitles => {
+        ipc.send('wt-subtitles-received', subtitles)
+      })
+    })
   })
 }
 
@@ -360,4 +383,102 @@ function getTorrent (torrentKey) {
 
 function onError (err) {
   console.log(err)
+}
+
+// Generate hash from file torrent
+function getSubtitleHash (fileTorrent) {
+  return new Promise((resolve, reject) => {
+    let chunkSize = 65536 // 1024 * 64
+    let fileSize = fileTorrent.length
+    let lengthBytes = 131072 // chunkSize * 2
+
+    let startStream = fileTorrent.createReadStream({start: 0, end: lengthBytes - 1})
+    let endStream = fileTorrent.createReadStream({start: (fileSize - chunkSize), end: fileSize})
+
+    Promise.all([checksumStream(startStream, lengthBytes), checksumStream(endStream, lengthBytes)])
+      .then((checksuns) => {
+        let checksum = sumChecksuns(checksuns, fileSize)
+        resolve(checksum)
+      }).catch(reject)
+  })
+}
+
+// calculate hex sum between checksuns
+function sumChecksuns (checksuns, fileSize) {
+  let checksum = sumHex64bits(fileSize.toString(16), checksuns[0])
+  checksum = sumHex64bits(checksum, checksuns[1])
+  checksum = checksum.substr(-16)
+  checksum = padLeft(checksum, '0', 16)
+  return checksum
+}
+
+// compute checksum of the buffer splitting by chunk of lengths bits
+function checksumBuffer (buf, length) {
+  let checksum = 0
+  let checksumHex = 0
+  for (let i = 0; i < (buf.length / length); i++) {
+    checksumHex = read64LE(buf, i)
+    checksum = sumHex64bits(checksum.toString(), checksumHex).substr(-16)
+  }
+  return checksum
+}
+
+// get checksum from readable stream
+function checksumStream (stream, defaultsize) {
+  return new Promise(function (resolve, reject) {
+    let bufs = []
+    stream.on('data', function (data) {
+      bufs.push(data)
+    }).on('end', function () {
+      let buffer = new Buffer(defaultsize)
+      Buffer.concat(bufs).copy(buffer)
+      let checksum = checksumBuffer(buffer, 16)
+      resolve(checksum)
+    }).on('error', reject)
+  })
+}
+
+// read 64 bits from buffer starting at offset as LITTLE ENDIAN hex
+function read64LE (buffer, offset) {
+  var ret64be = buffer.toString('hex', offset * 8, ((offset + 1) * 8))
+  var array = []
+  for (var i = 0; i < 8; i++) {
+    array.push(ret64be.substr(i * 2, 2))
+  }
+  array.reverse()
+  return array.join('')
+}
+
+// calculate hex sum between 2 64bits hex numbers
+function sumHex64bits (n1, n2) {
+  if (n1.length < 16) n1 = padLeft(n1, '0', 16)
+
+  if (n2.length < 16) n2 = padLeft(n2, '0', 16)
+
+  // 1st 32 bits
+  let n10 = n1.substr(0, 8)
+  let n20 = n2.substr(0, 8)
+  let i0 = parseInt(n10, 16) + parseInt(n20, 16)
+
+  // 2nd 32 bits
+  let n11 = n1.substr(8, 8)
+  let n21 = n2.substr(8, 8)
+  let i1 = parseInt(n11, 16) + parseInt(n21, 16)
+
+  // back to hex
+  let h1 = i1.toString(16)
+  let i1Over = 0
+  if (h1.length > 8) {
+    i1Over = parseInt(h1.substr(0, h1.length - 8), 16)
+  } else {
+    h1 = padLeft(h1, '0', 8)
+  }
+  let h0 = (i1Over + i0).toString(16)
+  return h0 + h1.substr(-8)
+}
+
+// pad left with c up to length characters
+function padLeft (str, c, length) {
+  while (str.length < length) str = c.toString() + str
+  return str
 }
