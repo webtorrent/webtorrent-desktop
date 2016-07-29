@@ -2,14 +2,18 @@ const electron = require('electron')
 const {dispatch} = require('../lib/dispatcher')
 const request = require('request');
 
-module.exports = class ChannelsController {
+module.exports = class ChannelController {
   constructor (state) {
     this.state = state
   }
 
-  init () {
+  init (torrentList) {
+    this.torrentList = torrentList
+    console.log('--- TORRENT LIST:', this.torrentList)
+
     var torrents = this.getTorrentsFromEnabledChannels()
     console.log('-- GOT TORRENTS from ENABLED CHANNELS:', torrents)
+    if (!torrents.length) return
     this.state.saved.torrentsFromEnabledChannels = torrents
   }
 
@@ -42,9 +46,14 @@ module.exports = class ChannelsController {
     var channels = this.state.saved.prefs.channels
     var torrents = []
     var that = this
+
+    console.log('--- enabledChannels:', enabledChannels)
+    console.log('--- channels:', channels)
     enabledChannels.forEach(function (channelIndex) {
       var channel = channels[channelIndex]
-      torrents.push(channel.torrents)
+      torrents = torrents.concat(channel.torrents)
+      console.log(`--- current CHANNEL for index ${channelIndex}:`, channel)
+      console.log('--- channel TORRENTS:', channel.torrents)
     })
 
     return torrents
@@ -105,5 +114,25 @@ module.exports = class ChannelsController {
     function onGetChannelError (response) {
       console.log('--- onGetChannelError:', response)
     }
+  }
+
+  addTorrentsFromChannel (channel) {
+    console.log('--- ADD TORRENTS FROM CHANNEL:', channel)
+
+    var torrents = channel.torrents
+    if (!torrents || !torrents.length) return
+
+    // add torrents
+    torrents.map((torrent) => this.torrentList.addTorrent(torrent))
+  }
+
+  removeTorrentsFromChannel (channel) {
+    console.log('--- REMOVE TORRENTS FROM CHANNEL:', channel)
+
+    var torrents = channel.torrents
+    if (!torrents || !torrents.length) return
+
+    // add torrents
+    torrents.map((torrent) => this.torrentList.addTorrent(torrent))
   }
 }

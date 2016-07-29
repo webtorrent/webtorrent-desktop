@@ -5,6 +5,7 @@ var Header = require('./header')
 
 var Views = {
   'home': require('./torrent-list'),
+  'channel-list': require('./channel-list'),
   'player': require('./player'),
   'create-torrent': require('./create-torrent'),
   'preferences': require('./preferences')

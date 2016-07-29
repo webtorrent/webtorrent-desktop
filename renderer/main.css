@@ -431,6 +431,20 @@ input[type='text'] {
   height: 100px;
 }
 
+.torrent-menu-item span {
+  color: #eee;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.torrent-menu-item:hover {
+  cursor: pointer;
+  -webkit-filter: brightness(1.4);
+}
+
 .torrent:not(:last-child) {
   border-bottom: 1px solid rgb(20, 20, 20);
 }

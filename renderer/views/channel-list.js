@@ -1,13 +1,10 @@
-module.exports = TorrentList
-
-var prettyBytes = require('prettier-bytes')
+module.exports = ChannelList
 
 var hx = require('../lib/hx')
-var TorrentSummary = require('../lib/torrent-summary')
-var TorrentPlayer = require('../lib/torrent-player')
+var TorrentList = require('../controllers/torrent-list-controller')
 var {dispatcher} = require('../lib/dispatcher')
 
-function TorrentList (state, torrents) {
+function ChannelList (state) {
   var torrentRows = torrents.map(
     (torrentSummary) => renderTorrent(torrentSummary)
   )

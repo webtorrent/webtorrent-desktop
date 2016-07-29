@@ -111,6 +111,9 @@ function renderChannelsList (state) {
     // update enabled channels
     enabledChannels.push(channelIndex)
     setStateValue('enabledChannels', enabledChannels)
+
+    // add torrents from channel to main torrents list
+    dispatch('addTorrentsFromChannel', channels[channelIndex])
   }
 
   function disableChannel (channel, channelIndex) {
@@ -130,6 +133,9 @@ function renderChannelsList (state) {
     var channels = state.saved.prefs.channels
     channels[channelIndex].enabled = false
     setStateValue('channels', channels)
+
+    // remove torrents from channel from torrents list
+    dispatch('removeTorrentsFromChannel', channels[channelIndex])
   }
 }
 
