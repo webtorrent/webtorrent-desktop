@@ -69,7 +69,7 @@ function onState (err, _state) {
   state.location.go({
     url: 'home',
     setup: (cb) => {
-      dispatch('resetTitle')
+      state.window.title = config.APP_WINDOW_TITLE
       cb(null)
     }
   })
