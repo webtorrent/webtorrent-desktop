@@ -1,5 +1,20 @@
 # WebTorrent Desktop Version History
 
+## v0.9.0 - 2016-07-20
+
+### Added
+- Save selected subtitles
+- Ask for confirmation before deleting torrents
+- Support Debian Jessie
+
+### Changed
+- Only send telemetry in production
+- Clean up the code. Split main.js, refactor lots of things
+
+### Fixed
+- Fix state.playing.jumpToTime behavior
+- Remove torrent file and poster image when deleting a torrent
+
 ## v0.8.1 - 2016-06-24
 
 ### Added
