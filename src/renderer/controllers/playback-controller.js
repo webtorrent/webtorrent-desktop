@@ -274,7 +274,6 @@ module.exports = class PlaybackController {
     else console.error('Unknown state.playing.result', state.playing.result)
 
     // Reset the window contents back to the home screen
-    dispatch('resetTitle')
     state.playing = State.getDefaultPlayState()
     state.server = null
 
