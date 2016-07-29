@@ -66,7 +66,13 @@ function onState (err, _state) {
   }
 
   // Add first page to location history
-  state.location.go({ url: 'home' })
+  state.location.go({
+    url: 'home',
+    setup: (cb) => {
+      dispatch('resetTitle')
+      cb(null)
+    }
+  })
 
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
