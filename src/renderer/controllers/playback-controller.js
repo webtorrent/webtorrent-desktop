@@ -28,11 +28,11 @@ module.exports = class PlaybackController {
   playFile (infoHash, index /* optional */) {
     this.state.location.go({
       url: 'player',
-      onbeforeload: (cb) => {
+      setup: (cb) => {
         this.play()
         this.openPlayer(infoHash, index, cb)
       },
-      onbeforeunload: (cb) => this.closePlayer(cb)
+      destroy: () => this.closePlayer()
     }, (err) => {
       if (err) dispatch('error', err)
     })
@@ -251,7 +251,7 @@ module.exports = class PlaybackController {
     })
   }
 
-  closePlayer (cb) {
+  closePlayer () {
     console.log('closePlayer')
 
     // Quit any external players, like Chromecast/Airplay/etc or VLC
@@ -274,7 +274,6 @@ module.exports = class PlaybackController {
     else console.error('Unknown state.playing.result', state.playing.result)
 
     // Reset the window contents back to the home screen
-    dispatch('resetTitle')
     state.playing = State.getDefaultPlayState()
     state.server = null
 
@@ -290,7 +289,6 @@ module.exports = class PlaybackController {
     ipcRenderer.send('onPlayerClose')
 
     this.update()
-    cb()
   }
 }
 

@@ -15,7 +15,7 @@ var State = module.exports = Object.assign(new EventEmitter(), {
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
 function getDefaultState () {
-  var LocationHistory = require('./location-history')
+  var LocationHistory = require('location-history')
 
   return {
     /*

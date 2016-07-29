@@ -13,24 +13,19 @@ module.exports = class PrefsController {
     var state = this.state
     state.location.go({
       url: 'preferences',
-      onbeforeload: function (cb) {
+      setup: function (cb) {
         // initialize preferences
         dispatch('setTitle', 'Preferences')
         state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
         cb()
       },
-      onbeforeunload: (cb) => {
-        // save state after preferences
-        this.save()
-        dispatch('resetTitle')
-        cb()
-      }
+      destroy: () => this.save()
     })
   }
 
   // Updates a single property in the UNSAVED prefs
   // For example: updatePreferences('foo.bar', 'baz')
-  // Call savePreferences to save to config.json
+  // Call save() to save to config.json
   update (property, value) {
     var path = property.split('.')
     var key = this.state.unsaved.prefs
