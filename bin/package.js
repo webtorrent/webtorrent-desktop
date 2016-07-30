@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Builds app binaries for OS X, Linux, and Windows.
+ * Builds app binaries for Mac, Linux, and Windows.
  */
 
 var cp = require('child_process')
@@ -15,7 +15,7 @@ var rimraf = require('rimraf')
 var series = require('run-series')
 var zip = require('cross-zip')
 
-var config = require('../config')
+var config = require('../src/config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
@@ -56,11 +56,11 @@ function build () {
 
 var all = {
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
-  // property on Windows, and `NSHumanReadableCopyright` on OS X.
+  // property on Windows, and `NSHumanReadableCopyright` on Mac.
   'app-copyright': config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
-  // property on Windows, and `CFBundleShortVersionString` on OS X.
+  // property on Windows, and `CFBundleShortVersionString` on Mac.
   'app-version': pkg.version,
 
   // Package the application's source code into an archive, using Electron's archive
@@ -73,7 +73,7 @@ var all = {
   'asar-unpack': 'WebTorrent*',
 
   // The build version of the application. Maps to the FileVersion metadata property on
-  // Windows, and CFBundleVersion on OS X. Note: Windows requires the build version to
+  // Windows, and CFBundleVersion on Mac. Note: Windows requires the build version to
   // start with a number. We're using the version of the underlying WebTorrent library.
   'build-version': require('webtorrent/package.json').version,
 
@@ -102,20 +102,20 @@ var all = {
 }
 
 var darwin = {
-  // Build for OS X
+  // Build for Mac
   platform: 'darwin',
 
   // Build 64 bit binaries only.
   arch: 'x64',
 
-  // The bundle identifier to use in the application's plist (OS X only).
+  // The bundle identifier to use in the application's plist (Mac only).
   'app-bundle-id': 'io.webtorrent.webtorrent',
 
   // The application category type, as shown in the Finder via "View" -> "Arrange by
-  // Application Category" when viewing the Applications directory (OS X only).
+  // Application Category" when viewing the Applications directory (Mac only).
   'app-category-type': 'public.app-category.utilities',
 
-  // The bundle identifier to use in the application helper's plist (OS X only).
+  // The bundle identifier to use in the application helper's plist (Mac only).
   'helper-bundle-id': 'io.webtorrent.webtorrent-helper',
 
   // Application icon.
@@ -171,10 +171,10 @@ build()
 function buildDarwin (cb) {
   var plist = require('plist')
 
-  console.log('OS X: Packaging electron...')
+  console.log('Mac: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
-    console.log('OS X: Packaged electron. ' + buildPath)
+    console.log('Mac: Packaged electron. ' + buildPath)
 
     var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
     var contentsPath = path.join(appPath, 'Contents')
@@ -261,9 +261,9 @@ function buildDarwin (cb) {
        *   - So the auto-updater (Squirrrel.Mac) can check that app updates are signed by
        *     the same author as the current version.
        *   - So users will not a see a warning about the app coming from an "Unidentified
-       *     Developer" when they open it for the first time (OS X Gatekeeper).
+       *     Developer" when they open it for the first time (Mac Gatekeeper).
        *
-       * To sign an OS X app for distribution outside the App Store, the following are
+       * To sign an Mac app for distribution outside the App Store, the following are
        * required:
        *   - Xcode
        *   - Xcode Command Line Tools (xcode-select --install)
@@ -275,10 +275,10 @@ function buildDarwin (cb) {
         verbose: true
       }
 
-      console.log('OS X: Signing app...')
+      console.log('Mac: Signing app...')
       sign(signOpts, function (err) {
         if (err) return cb(err)
-        console.log('OS X: Signed app.')
+        console.log('Mac: Signed app.')
         cb(null)
       })
     }
@@ -293,24 +293,24 @@ function buildDarwin (cb) {
 
     function packageZip () {
       // Create .zip file (used by the auto-updater)
-      console.log('OS X: Creating zip...')
+      console.log('Mac: Creating zip...')
 
       var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
       var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log('OS X: Created zip.')
+      console.log('Mac: Created zip.')
     }
 
     function packageDmg (cb) {
-      console.log('OS X: Creating dmg...')
+      console.log('Mac: Creating dmg...')
 
       var appDmg = require('appdmg')
 
       var targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
       rimraf.sync(targetPath)
 
-      // Create a .dmg (OS X disk image) file, for easy user installation.
+      // Create a .dmg (Mac disk image) file, for easy user installation.
       var dmgOpts = {
         basepath: config.ROOT_PATH,
         target: targetPath,
@@ -338,7 +338,7 @@ function buildDarwin (cb) {
         if (info.type === 'step-begin') console.log(info.title + '...')
       })
       dmg.once('finish', function (info) {
-        console.log('OS X: Created dmg.')
+        console.log('Mac: Created dmg.')
         cb(null)
       })
     }

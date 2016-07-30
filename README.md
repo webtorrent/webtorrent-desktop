@@ -7,7 +7,7 @@
   <br>
 </h1>
 
-<h4 align="center">The streaming torrent client. For OS X, Windows, and Linux.</h4>
+<h4 align="center">The streaming torrent client. For Mac, Windows, and Linux.</h4>
 
 <p align="center">
   <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter"></a>
@@ -22,7 +22,7 @@
 ## Screenshot
 
 <p align="center">
-  <img src="https://webtorrent.io/img/screenshot-main.png" width="562" height="630" alt="screenshot" align="center">
+  <img src="https://webtorrent.io/img/screenshot-main.png" width="612" height="749" alt="screenshot" align="center">
 </p>
 
 ## How to Contribute
@@ -41,7 +41,7 @@ $ npm start
 
 ### Package app
 
-Builds app binaries for OS X, Linux, and Windows.
+Builds app binaries for Mac, Linux, and Windows.
 
 ```
 $ npm run package
@@ -57,23 +57,23 @@ Where `[platform]` is `darwin`, `linux`, `win32`, or `all` (default).
 
 The following optional arguments are available:
 
-- `--sign` - Sign the application (OS X, Windows)
+- `--sign` - Sign the application (Mac, Windows)
 - `--package=[type]` - Package single output type.
    - `deb` - Debian package
    - `zip` - Linux zip file
-   - `dmg` - OS X disk image
+   - `dmg` - Mac disk image
    - `exe` - Windows installer
    - `portable` - Windows portable app
    - `all` - All platforms (default)
 
-Note: Even with the `--package` option, the auto-update files (.nupkg for Windows, *-darwin.zip for OS X) will always be produced.
+Note: Even with the `--package` option, the auto-update files (.nupkg for Windows, *-darwin.zip for Mac) will always be produced.
 
 #### Windows build notes
 
 To package the Windows app from non-Windows platforms, [Wine](https://www.winehq.org/) needs
 to be installed.
 
-On OS X, first install [XQuartz](http://www.xquartz.org/), then run:
+On Mac, first install [XQuartz](http://www.xquartz.org/), then run:
 
 ```
 brew install wine
