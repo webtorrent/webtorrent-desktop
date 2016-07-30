@@ -122,6 +122,10 @@ table {
  * UTILITY CLASSES
  */
 
+.clickable {
+  cursor: pointer;
+}
+
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -919,6 +923,10 @@ video::-webkit-media-text-track-container {
   margin-right: 0.2em;
 }
 
+.preferences .icon.enabled {
+  color: yellow;
+}
+
 .preferences .btn {
   display: inline-block;
   -webkit-appearance: button;
@@ -1071,7 +1079,7 @@ video::-webkit-media-text-track-container {
 }
 
 .checkbox-label {
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 

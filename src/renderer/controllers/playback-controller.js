@@ -196,13 +196,8 @@ module.exports = class PlaybackController {
     }
   }
 
-function getOpenInVlc () {
-  return this.state.saved.prefs.playInVlc
-}
-
   openPlayerFromActiveTorrent (torrentSummary, index, timeout, cb) {
     var fileSummary = torrentSummary.files[index]
-}
 
     // update state
     var state = this.state
@@ -246,6 +241,14 @@ function getOpenInVlc () {
         return this.update()
       }
 
+      // play in VLC if set as default player (Preferences / Playback / Play in VLC)
+      if (this.state.saved.prefs.playInVlc) {
+        dispatch('vlcPlay')
+        this.update()
+        cb()
+        return
+      }
+
       // otherwise, play the video
       dispatch('setTitle', torrentSummary.files[state.playing.fileIndex].name)
       this.update()
@@ -254,14 +257,6 @@ function getOpenInVlc () {
       cb()
     })
   }
-
-    // play in VLC if set as default player (Preferences / Playback / Play in VLC)
-    if (getOpenInVlc()) {
-      dispatch('vlcPlay')
-      this.update()
-      cb()
-      return  
-    }
 
   closePlayer () {
     console.log('closePlayer')

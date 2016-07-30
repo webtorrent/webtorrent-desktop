@@ -46,6 +46,7 @@ function renderPlayInVlcSelector (state) {
   },
   state.unsaved.prefs.playInVlc,
   function (value) {
+    console.log('-- VALUE:', value)
     setStateValue('playInVlc', value)
   })
 }
@@ -92,30 +93,31 @@ function renderSection (definition, controls) {
 }
 
 function renderCheckbox (definition, value, callback) {
-  var checked = ''
-  if (value) checked = 'checked'
+  var iconClass = 'icon clickable'
+  if (value) iconClass += ' enabled'
 
-  return hx`
-    <div class='control-group'>
-      <div class='controls'>
-        <label class='control-label'>
-          <div class='preference-title'>${definition.label}</div>
+  return (
+    <div className='control-group'>
+      <div className='controls'>
+        <label className='control-label'>
+          <div className='preference-title'>{definition.label}</div>
         </label>
-        <div class='controls'>
-          <label>
-            <input type='checkbox' class='checkbox'
-              onclick=${handleClick}
-              id=${definition.property}
-              ${checked} />
-
-            <span class="checkbox-label">${definition.description}</span>
+        <div className='controls'>
+          <label className='clickable' onClick={handleClick}>
+            <i
+              className={iconClass}
+              id='{definition.property}'
+            >
+              check_circle
+            </i>
+            <span className='checkbox-label'>{definition.description}</span>
           </label>
         </div>
       </div>
     </div>
-  `
+  )
   function handleClick () {
-    callback(this.checked)
+    callback(!value)
   }
 }
 
