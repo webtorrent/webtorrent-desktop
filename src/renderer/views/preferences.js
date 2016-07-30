@@ -46,7 +46,6 @@ function renderPlayInVlcSelector (state) {
   },
   state.unsaved.prefs.playInVlc,
   function (value) {
-    console.log('-- VALUE:', value)
     setStateValue('playInVlc', value)
   })
 }
