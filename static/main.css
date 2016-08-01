@@ -1060,6 +1060,7 @@ video::-webkit-media-text-track-container {
   font-size: 1.2em;
   -webkit-user-select: none;
   display: inline-block;
+  margin-right: 5px;
 }
 
 .preferences .preference-description {

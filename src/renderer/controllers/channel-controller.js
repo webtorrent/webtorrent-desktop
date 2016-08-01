@@ -11,56 +11,56 @@ module.exports = class ChannelController {
     this.torrentList = torrentList
     console.log('--- TORRENT LIST:', this.torrentList)
 
-    var torrents = this.getTorrentsFromEnabledChannels()
-    console.log('-- GOT TORRENTS from ENABLED CHANNELS:', torrents)
-    if (!torrents.length) return
-    this.state.saved.torrentsFromEnabledChannels = torrents
+    // var torrents = this.getTorrentsFromEnabledChannels()
+    // console.log('-- GOT TORRENTS from ENABLED CHANNELS:', torrents)
+    // if (!torrents.length) return
+    // this.state.saved.torrentsFromEnabledChannels = torrents
   }
 
   getChannels () {
-    return this.state.saved.prefs.channels
+    return this.state.saved.prefs.channels || {}
   }
 
-  updateChannel (channelIndex, successCallback, errorCallback) {
-    var channels = this.state.saved.prefs.channels
-    if (!channels[channelIndex]) {
-      return []
-  	}
+  // updateChannel (channelIndex, successCallback, errorCallback) {
+  //   var channels = this.state.saved.prefs.channels
+  //   if (!channels[channelIndex]) {
+  //     return []
+  // 	}
 
-    var channel = channels[channelIndex]
-    var torrents = []
+  //   var channel = channels[channelIndex]
+  //   var torrents = []
 
-    request
-      .get(channel.url)
-      .on('response', onResponse)
+  //   request
+  //     .get(channel.url)
+  //     .on('response', onResponse)
 
-    function onResponse (response) {
-      response.channel = channel
-      if (response.statusCode === 200) return successCallback(response)
-      return errorCallback(response)
-    }
-  }
+  //   function onResponse (response) {
+  //     response.channel = channel
+  //     if (response.statusCode === 200) return successCallback(response)
+  //     return errorCallback(response)
+  //   }
+  // }
 
-  getTorrentsFromEnabledChannels () {
-    var enabledChannels = this.getEnabledChannels()
-    var channels = this.state.saved.prefs.channels
-    var torrents = []
-    var that = this
+  // getTorrentsFromEnabledChannels () {
+  //   var enabledChannels = this.getEnabledChannels()
+  //   var channels = this.state.saved.prefs.channels
+  //   var torrents = []
+  //   var that = this
 
-    console.log('--- enabledChannels:', enabledChannels)
-    console.log('--- channels:', channels)
-    enabledChannels.forEach(function (channelIndex) {
-      var channel = channels[channelIndex]
-      torrents = torrents.concat(channel.torrents)
-      console.log(`--- current CHANNEL for index ${channelIndex}:`, channel)
-      console.log('--- channel TORRENTS:', channel.torrents)
-    })
+  //   console.log('--- enabledChannels:', enabledChannels)
+  //   console.log('--- channels:', channels)
+  //   enabledChannels.forEach(function (channelIndex) {
+  //     var channel = channels[channelIndex]
+  //     torrents = torrents.concat(channel.torrents)
+  //     console.log(`--- current CHANNEL for index ${channelIndex}:`, channel)
+  //     console.log('--- channel TORRENTS:', channel.torrents)
+  //   })
 
-    return torrents
-  }
+  //   return torrents
+  // }
 
   getEnabledChannels () {
-    return this.state.saved.prefs.enabledChannels || []
+    return this.state.saved.prefs.enabledChannels || {}
   }
 
   /**
@@ -90,10 +90,8 @@ module.exports = class ChannelController {
 
   channelExists (channelUrl) {
     var channels = this.getChannels()
-    var exists = channels.some(function (currentChannel) {
-      return (channelUrl === currentChannel.url)
-    })
-    return exists
+    if (channels[channelUrl]) return true
+    return false
   }
 
   addChannel (channelUrl) {
@@ -108,33 +106,12 @@ module.exports = class ChannelController {
     function onGetChannelOk (response) {
       response.url = channelUrl
       console.log('--- onGetChannelOk:', response)
-      that.state.unsaved.prefs.channels.push(response)
+      that.state.unsaved.prefs.channels = that.state.unsaved.prefs.channels || {}
+      that.state.unsaved.prefs.channels[channelUrl] = response
     }
 
     function onGetChannelError (response) {
       console.log('--- onGetChannelError:', response)
     }
   }
-
-  // TODO: REMOVE
-  // addTorrentsFromChannel (channel) {
-  //   console.log('--- ADD TORRENTS FROM CHANNEL:', channel)
-
-  //   var torrents = channel.torrents
-  //   if (!torrents || !torrents.length) return
-
-  //   // add torrents
-  //   torrents.map((torrent) => this.torrentList.addTorrent(torrent))
-  // }
-
-  // TODO: REMOVE
-  // removeTorrentsFromChannel (channel) {
-  //   console.log('--- REMOVE TORRENTS FROM CHANNEL:', channel)
-
-  //   var torrents = channel.torrents
-  //   if (!torrents || !torrents.length) return
-
-  //   // add torrents
-  //   torrents.map((torrent) => this.torrentList.addTorrent(torrent))
-  // }
 }

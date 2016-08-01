@@ -11,11 +11,16 @@ module.exports = class TorrentController {
     this.state = state
   }
 
-  torrentInfoHash (torrentKey, infoHash, channelUrl) {
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+  torrentInfoHash (torrent) {
+    console.log('--- TORRENT INFOHASH: TORRENT:', torrent)
+    var {infoHash, channel} = torrent
+    var torrentSummary = this.getTorrentSummary(torrent.key)
     console.log('got infohash for %s torrent %s',
-      torrentSummary ? 'existing' : 'new', torrentKey)
+      torrentSummary ? 'existing' : 'new', torrent.key)
     console.log('--- TORRENT INFO HASH:', infoHash)
+    console.log('--- TORRENT INFO HASH, CHANNEL:', channel)
+    console.log('--- TORRENT INFO HASH, KEY:', torrent.key)
+    console.log('--- TORRENT INFO HASH, SUMMARY:', torrentSummary)
 
     if (!torrentSummary) {
       var torrents = this.state.saved.torrents
@@ -27,13 +32,23 @@ module.exports = class TorrentController {
       }
 
       torrentSummary = {
-        torrentKey: torrentKey,
+        torrentKey: torrent.key,
         status: 'new'
       }
 
       // if we have a channel url add it
       // this is the case for torrents added from channels
-      if (channelUrl) torrentSummary.channelUrl = channelUrl
+      if (channel && channel.url) {
+        torrentSummary.channelUrl = channel.url
+
+        // update channel adding the infohash we just got for current torrent
+        // this will allow skipping it when refreshing channel torrents
+        var channels = this.state.saved.prefs.channels
+        channels[channel.url].loadedTorrents = channels[channel.url].loadedTorrents || {}
+        channels[channel.url].loadedTorrents[torrent.id] = infoHash
+        console.log('--- ADDED INFOHASH FOR CHANNEL TORRENT: ID:', torrent.id)
+        console.log('--- ADDED INFOHASH FOR CHANNEL TORRENT: infoHash:', infoHash)
+      }
 
       torrents.unshift(torrentSummary)
       sound.play('ADD')

@@ -71,8 +71,8 @@ function init () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
 
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections, channelUrl) =>
-    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections, channelUrl))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections, channel) =>
+    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections, channel))
   ipc.on('wt-stop-torrenting', (e, infoHash) =>
     stopTorrenting(infoHash))
   ipc.on('wt-create-torrent', (e, torrentKey, options) =>
@@ -101,17 +101,17 @@ function init () {
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
 // See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
-function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections, channelUrl) {
+function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections, channel) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-  console.log('--- startTorrenting: channel URL:', channelUrl)
+  console.log('--- startTorrenting: channel:', channel)
 
   var torrent = client.add(torrentID, {
     path: path,
-    fileModtimes: fileModtimes,
-    channelUrl: channelUrl
+    fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
-  torrent.channelUrl = channelUrl
+  torrent.id = torrentID
+  torrent.channel = channel
 
   // Listen for ready event, progress notifications, etc
   addTorrentEvents(torrent)
@@ -144,7 +144,7 @@ function addTorrentEvents (torrent) {
   torrent.on('error', (err) =>
     ipc.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
-    ipc.send('wt-infohash', torrent.key, torrent.infoHash, torrent.channelUrl))
+    ipc.send('wt-infohash', torrent))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
@@ -180,15 +180,21 @@ function addTorrentEvents (torrent) {
 // Produces a JSON saveable summary of a torrent
 function getTorrentInfo (torrent) {
   console.log('--- GET TORRENT INFO:', torrent)
-  return {
+  var torrentInfo = {
     infoHash: torrent.infoHash,
     magnetURI: torrent.magnetURI,
     name: torrent.name,
     path: torrent.path,
     files: torrent.files.map(getTorrentFileInfo),
-    bytesReceived: torrent.received,
-    channelUrl: torrent.channelUrl
+    bytesReceived: torrent.received
   }
+
+  // add channel url if available
+  if (torrent.channel && torrent.channel.url) {
+    torrentInfo.channelUrl = torrent.channel.url
+  }
+
+  return torrentInfo
 }
 
 // Produces a JSON saveable summary of a file in a torrent

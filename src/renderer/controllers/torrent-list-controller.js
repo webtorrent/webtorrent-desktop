@@ -34,7 +34,7 @@ module.exports = class TorrentListController {
     var path = this.state.saved.prefs.downloadPath
 
     // ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections)
-    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path, null, null, channel.url)
+    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path, null, null, channel)
 
     // if adding channel torrents stay on current view
     // channel list controller already displays torrent list

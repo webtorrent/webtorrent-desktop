@@ -63,7 +63,8 @@ function renderAddChannelInput (state) {
 }
 
 function renderChannelsList (state) {
-  var channels = state.saved.prefs.channels
+  var channels = state.saved.prefs.channels || {}
+  var channelsArray = Object.keys(channels).map((key) => channels[key])
 
   return renderButtonList({
     label: 'Existing Channels',
@@ -79,65 +80,56 @@ function renderChannelsList (state) {
         disabledClick: enableChannel
       }
     ],
-    list: channels
+    list: channelsArray
   })
 
-  function isChannelEnabled (channelIndex) {
-    var enabledChannels = state.saved.prefs.enabledChannels || []
-    return (enabledChannels.indexOf(channelIndex) !== -1)
+  function isChannelEnabled (channel) {
+    var enabledChannels = state.saved.prefs.enabledChannels || {}
+    if (enabledChannels[channel.url]) return true
+    return false
   }
 
-  function removeChannel (channel, channelIndex) {
+  function removeChannel (channel) {
     // remove from channels
     var channels = state.saved.prefs.channels
-    channels.splice(channelIndex, 1)
+    delete channels[channel.url]
     setStateValue('channels', channels)
 
     // remove from enabled channels if enabled
-    var enabledChannels = state.saved.prefs.enabledChannels
-    var enabledChannelIndex = enabledChannels.indexOf(channelIndex)
-    if (enabledChannelIndex === -1) return
-    enabledChannels.splice(enabledChannelIndex, 1)
+    var enabledChannels = state.saved.prefs.enabledChannels || {}
+    delete enabledChannels[channel.url]
   }
 
-  function enableChannel (channel, channelIndex) {
-    console.log('[enableChannel]: index:', channelIndex)
-    var enabledChannels = state.saved.prefs.enabledChannels || []
-    if (isChannelEnabled(channelIndex)) return // already enabled!
+  function enableChannel (channel) {
+    console.log('[enableChannel]: channel:', channel)
 
     // save channel
     var channels = state.saved.prefs.channels
-    channels[channelIndex].enabled = true
+    channels[channel.url].enabled = true
     setStateValue('channels', channels)
 
     // update enabled channels
-    enabledChannels.push(channelIndex)
+    var enabledChannels = state.saved.prefs.enabledChannels || {}
+    enabledChannels[channel.url] = true
     setStateValue('enabledChannels', enabledChannels)
-
-    // add torrents from channel to main torrents list
-    dispatch('addTorrentsFromChannel', channels[channelIndex])
   }
 
-  function disableChannel (channel, channelIndex) {
-    console.log('[disableChannel]: index:', channelIndex)
-    if (!isChannelEnabled(channelIndex)) {
-      console.log('[disableChannel]: ALREADY DISABLED: index:', channelIndex)
+  function disableChannel (channel) {
+    console.log('[disableChannel]: channel:', channel)
+    if (!isChannelEnabled(channel)) {
+      console.log('[disableChannel]: ALREADY DISABLED: channel:', channel)
       return // already disabled!
     } 
 
     // update enabled channels
-    var enabledChannels = state.saved.prefs.enabledChannels || []
-    var enabledIndex = enabledChannels.indexOf(channelIndex)
-    enabledChannels.splice(enabledIndex, 1)
+    var enabledChannels = state.saved.prefs.enabledChannels || {}
+    delete enabledChannels[channel.url]
     setStateValue('enabledChannels', enabledChannels)
 
     // update channels
     var channels = state.saved.prefs.channels
-    channels[channelIndex].enabled = false
+    channels[channel.url].enabled = false
     setStateValue('channels', channels)
-
-    // remove torrents from channel from torrents list
-    dispatch('removeTorrentsFromChannel', channels[channelIndex])
   }
 }
 
@@ -185,7 +177,7 @@ function renderButtonList (definition) {
               })}
 
               <label className='control-label'>
-                <span className='preference-title' title='{item.description}'>{item.name}, </span>
+                <span className='preference-title' title='{item.description}'>{item.name},</span>
                 <span className='preference-description' title='{item.url}'>{item.url}</span>
               </label>
             </div>

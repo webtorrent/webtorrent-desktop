@@ -224,10 +224,6 @@ const dispatchHandlers = {
   // Channels screen
   'channels': () => controllers.channelList.show(),
 
-  // TODO: remove
-  // 'addTorrentsFromChannel': (channel) => controllers.channel.addTorrentsFromChannel(channel),
-  // 'removeTorrentsFromChannel': (channel) => controllers.channel.removeTorrentsFromChannel(channel),
-
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update.updateAvailable(version),
   'skipVersion': (version) => controllers.update.skipVersion(version),
