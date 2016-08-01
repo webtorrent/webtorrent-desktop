@@ -1,4 +1,5 @@
 const State = require('../lib/state')
+const {dispatch} = require('../lib/dispatcher')
 
 // Controls the Channel List screen
 module.exports = class ChannelListController {
@@ -12,13 +13,9 @@ module.exports = class ChannelListController {
     var state = this.state
     state.location.go({
       url: 'channel-list',
-      onbeforeload: function (cb) {
+      setup: function (cb) {
         // initialize preferences
-        state.window.title = 'Channels'
-        cb()
-      },
-      onbeforeunload: (cb) => {
-        state.window.title = this.config.APP_WINDOW_TITLE
+        dispatch('setTitle', 'Channels')
         cb()
       }
     })

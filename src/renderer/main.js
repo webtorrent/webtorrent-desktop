@@ -23,6 +23,7 @@ const SubtitlesController = require('./controllers/subtitles-controller')
 const TorrentListController = require('./controllers/torrent-list-controller')
 const TorrentController = require('./controllers/torrent-controller')
 const ChannelController = require('./controllers/channel-controller')
+const ChannelListController = require('./controllers/channel-list-controller')
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
@@ -64,7 +65,8 @@ function onState (err, _state) {
     subtitles: new SubtitlesController(state),
     torrentList: new TorrentListController(state),
     torrent: new TorrentController(state),
-    channel: new ChannelController(state)
+    channel: new ChannelController(state),
+    channelList: new ChannelListController(state)
   }
 
   // Add first page to location history
@@ -170,7 +172,7 @@ const dispatchHandlers = {
   'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
   'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
 
-  'addTorrent': (torrentId) => controllers.torrentList.addTorrent(torrentId),
+  'addTorrent': (torrentId, channel) => controllers.torrentList.addTorrent(torrentId, channel),
   'showCreateTorrent': (paths) => controllers.torrentList.showCreateTorrent(paths),
   'toggleCreateTorrentAdvanced': () => controllers.torrentList.toggleCreateTorrentAdvanced(),
   'createTorrent': (options) => controllers.torrentList.createTorrent(options),
@@ -217,9 +219,14 @@ const dispatchHandlers = {
   // Preferences screen
   'preferences': () => controllers.prefs.show(),
   'updatePreferences': (key, value) => controllers.prefs.update(key, value),
-  'addChannel': (channel) => controllers.channels.addChannel(channel),
-  'addTorrentsFromChannel': (channel) => controllers.channels.addTorrentsFromChannel(channel),
-  'removeTorrentsFromChannel': (channel) => controllers.channels.removeTorrentsFromChannel(channel),
+  'addChannel': (channel) => controllers.channel.addChannel(channel),
+
+  // Channels screen
+  'channels': () => controllers.channelList.show(),
+
+  // TODO: remove
+  // 'addTorrentsFromChannel': (channel) => controllers.channel.addTorrentsFromChannel(channel),
+  // 'removeTorrentsFromChannel': (channel) => controllers.channel.removeTorrentsFromChannel(channel),
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update.updateAvailable(version),

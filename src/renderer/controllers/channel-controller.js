@@ -116,23 +116,25 @@ module.exports = class ChannelController {
     }
   }
 
-  addTorrentsFromChannel (channel) {
-    console.log('--- ADD TORRENTS FROM CHANNEL:', channel)
+  // TODO: REMOVE
+  // addTorrentsFromChannel (channel) {
+  //   console.log('--- ADD TORRENTS FROM CHANNEL:', channel)
 
-    var torrents = channel.torrents
-    if (!torrents || !torrents.length) return
+  //   var torrents = channel.torrents
+  //   if (!torrents || !torrents.length) return
 
-    // add torrents
-    torrents.map((torrent) => this.torrentList.addTorrent(torrent))
-  }
+  //   // add torrents
+  //   torrents.map((torrent) => this.torrentList.addTorrent(torrent))
+  // }
 
-  removeTorrentsFromChannel (channel) {
-    console.log('--- REMOVE TORRENTS FROM CHANNEL:', channel)
+  // TODO: REMOVE
+  // removeTorrentsFromChannel (channel) {
+  //   console.log('--- REMOVE TORRENTS FROM CHANNEL:', channel)
 
-    var torrents = channel.torrents
-    if (!torrents || !torrents.length) return
+  //   var torrents = channel.torrents
+  //   if (!torrents || !torrents.length) return
 
-    // add torrents
-    torrents.map((torrent) => this.torrentList.addTorrent(torrent))
-  }
+  //   // add torrents
+  //   torrents.map((torrent) => this.torrentList.addTorrent(torrent))
+  // }
 }

@@ -19,8 +19,7 @@ module.exports = class TorrentListController {
 
   // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
   // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
-  addTorrent (torrentId) {
-    console.log('--- ADD TORRENT:', torrentId)
+  addTorrent (torrentId, channel) {
     if (torrentId.path) {
       // Use path string instead of W3C File object
       torrentId = torrentId.path
@@ -34,7 +33,12 @@ module.exports = class TorrentListController {
     var torrentKey = this.state.nextTorrentKey++
     var path = this.state.saved.prefs.downloadPath
 
-    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+    // ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections)
+    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path, null, null, channel.url)
+
+    // if adding channel torrents stay on current view
+    // channel list controller already displays torrent list
+    if (channel) return
 
     dispatch('backToList')
   }

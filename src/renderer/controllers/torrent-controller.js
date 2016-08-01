@@ -11,10 +11,11 @@ module.exports = class TorrentController {
     this.state = state
   }
 
-  torrentInfoHash (torrentKey, infoHash) {
+  torrentInfoHash (torrentKey, infoHash, channelUrl) {
     var torrentSummary = this.getTorrentSummary(torrentKey)
     console.log('got infohash for %s torrent %s',
       torrentSummary ? 'existing' : 'new', torrentKey)
+    console.log('--- TORRENT INFO HASH:', infoHash)
 
     if (!torrentSummary) {
       var torrents = this.state.saved.torrents
@@ -29,6 +30,11 @@ module.exports = class TorrentController {
         torrentKey: torrentKey,
         status: 'new'
       }
+
+      // if we have a channel url add it
+      // this is the case for torrents added from channels
+      if (channelUrl) torrentSummary.channelUrl = channelUrl
+
       torrents.unshift(torrentSummary)
       sound.play('ADD')
     }

@@ -447,7 +447,7 @@ input[type='text'] {
   font-size: 24px;
 }
 
-.torrent-menu-item:hover {
+.torrent .torrent-menu-item:hover {
   cursor: pointer;
   -webkit-filter: brightness(1.4);
 }
@@ -471,6 +471,14 @@ input[type='text'] {
 
 .torrent:hover .metadata {
   width: calc(100% - 150px);
+}
+
+.torrent .channel.metadata {
+  width: calc(100% - 20px);
+}
+
+.torrent:hover .channel.metadata {
+  width: calc(100% - 20px);
 }
 
 .torrent .metadata span:not(:last-child)::after {
@@ -1093,6 +1101,14 @@ video::-webkit-media-text-track-container {
   font-size: 1.5em;
   margin: 0;
   vertical-align: text-bottom;
+}
+
+.preferences .btn + .control-label {
+  padding-left: 5px;
+}
+
+.preferences .control-label {
+  vertical-align: middle;
 }
 
 

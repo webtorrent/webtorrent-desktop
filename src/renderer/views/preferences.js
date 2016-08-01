@@ -145,79 +145,80 @@ function renderButtonList (definition) {
   var {list, buttons, conditionalButtons} = definition
 
   // iterate items and generate the html for the list
-  return hx`
-    <div class='control-group'>
-      <div class='controls pb-sm'>
-        <label class='control-label'>
-          <div class='preference-title'>${definition.label}</div>
-          <div class='preference-description'>${definition.description}</div>
+  return (
+    <div className='control-group'>
+      <div className='controls pb-sm'>
+        <label className='control-label'>
+          <div className='preference-title'>{definition.label}</div>
+          <div className='preference-description'>{definition.description}</div>
         </label>
       </div>
 
-      ${list.map(function (item, i) {
-        return hx`
-          <div class='controls'>
-            <div class='controls'>
-              ${buttons.map(function (button) {
-                return hx`
-                  <button class='btn' index='${i}' onclick=${() => button.click(item, i)}>
-                    <i.icon>${button.type}</i>
+      {list.map(function (item, i) {
+        return (
+          <div className='controls'>
+            <div className='controls'>
+              {buttons.map(function (button) {
+                return (
+                  <button className='btn' index='{i}' onClick={() => button.click(item, i)}>
+                    <i className='icon'>{button.type}</i>
                   </button>
-                `
+                )
               })}
 
-              ${conditionalButtons.map(function (button) {
+              {conditionalButtons.map(function (button) {
                 // enabled
                 if (item[button.property]) {
-                  return hx`
-                    <button class='btn btn-enabled' index='${i}' onclick=${() => button.enabledClick(item, i)}>
-                      <i.icon>${button.type}</i>
+                  return (
+                    <button className='btn btn-enabled' index='{i}' onClick={() => button.enabledClick(item, i)}>
+                      <i className='icon'>{button.type}</i>
                     </button>
-                  `
+                  )
                 }
                 
                 // disabled
-                return hx`
-                  <button class='btn btn-disabled' index='${i}' onclick=${() => button.disabledClick(item, i)}>
-                    <i.icon>${button.type}</i>
+                return (
+                  <button className='btn btn-disabled' index='{i}' onClick={() => button.disabledClick(item, i)}>
+                    <i className='icon'>{button.type}</i>
                   </button>
-                `
+                )
               })}
 
-              <label class='control-label'>
-                <span class='preference-title' title='${item.description}'>${item.name}, </span>
-                <span class='preference-description' title='${item.url}'>${item.url}</span>
+              <label className='control-label'>
+                <span className='preference-title' title='{item.description}'>{item.name}, </span>
+                <span className='preference-description' title='{item.url}'>{item.url}</span>
               </label>
             </div>
           </div>
-        `
+        )
       })}
 
     </div>
-  `
+  )
 }
 
 function renderInput (definition, value, callback) {
-  return hx`
-    <div class='control-group'>
-      <div class='controls'>
-        <label class='control-label'>
-          <div class='preference-title'>${definition.label}</div>
-          <div class='preference-description'>${definition.description}</div>
+  return (
+    <div className='control-group'>
+      <div className='controls'>
+        <label className='control-label'>
+          <div className='preference-title'>{definition.label}</div>
+          <div className='preference-description'>{definition.description}</div>
         </label>
-        <div class='controls'>
-          <input type='text' class='has-button'
-            id=${definition.property}
-            value=${value}
-            placeholder=${definition.placeholder}
-            onkeyup=${handleChange} />
-          <button class='btn' onclick=${handleClick}>
-            <i.icon>add_to_queue</i>
+        <div className='controls'>
+          <input type='text' className='has-button'
+            id={definition.property}
+            placeholder={definition.placeholder}
+            onkeyup={handleChange} />
+
+          <button className='btn' onClick={handleClick}>
+            <i className='icon'>add_to_queue</i>
           </button>
         </div>
       </div>
     </div>
-  `
+  )
+
   function handleClick () {
     var channel = document.getElementById(definition.property).value
     callback(channel)
