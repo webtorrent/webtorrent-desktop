@@ -22,7 +22,7 @@
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^2.11.0",
-    "electron-prebuilt": "1.3.1",
+    "electron-prebuilt": "1.3.2",
     "fs-extra": "^0.30.0",
     "hat": "0.0.3",
     "iso-639-1": "^1.2.1",
@@ -87,7 +87,7 @@
   "scripts": {
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
-    "package": "rm -rf build/ && jsx --es6module src/ build/ && node ./bin/package.js",
+    "package": "rimraf build/ && jsx --es6module src/ build/ && node ./bin/package.js",
     "start": "jsx --es6module src/ build/ && electron .",
     "test": "standard && node ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"
