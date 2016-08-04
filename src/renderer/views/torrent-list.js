@@ -255,7 +255,8 @@ module.exports = class TorrentList extends React.Component {
     var isSelected = torrentSummary.selections && torrentSummary.selections[index]
     var isDone = false // Are we finished torrenting it?
     var progress = ''
-    if (torrentSummary.progress && torrentSummary.progress.files) {
+    if (torrentSummary.progress && torrentSummary.progress.files &&
+        torrentSummary.progress.files[index]) {
       var fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
       progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
