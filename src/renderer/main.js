@@ -90,8 +90,11 @@ function onState (err, _state) {
   app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
 
   // OS integrations:
-  // ...drag and drop a torrent or video file to play or seed
-  dragDrop('body', onOpen)
+  // ...drag and drop files/text to start torrenting or seeding
+  dragDrop('body', {
+    onDrop: onOpen,
+    onDropText: onOpen
+  })
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
