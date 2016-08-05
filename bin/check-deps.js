@@ -45,7 +45,7 @@ var BUILT_IN_ELECTRON_MODULES = [ 'electron' ]
 
 var BUILT_IN_DEPS = [].concat(BUILT_IN_NODE_MODULES, BUILT_IN_ELECTRON_MODULES)
 
-var EXECUTABLE_DEPS = ['gh-release', 'standard', 'react-tools']
+var EXECUTABLE_DEPS = ['gh-release', 'standard', 'babel-cli', 'babel-preset-react']
 
 main()
 

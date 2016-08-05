@@ -45,6 +45,8 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-react": "^6.11.1",
     "cross-zip": "^2.0.1",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^7.0.0",
@@ -55,7 +57,6 @@
     "nobin-debian-installer": "^0.0.10",
     "open": "0.0.5",
     "plist": "^1.2.0",
-    "react-tools": "^0.13.3",
     "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
     "standard": "^7.0.0"
@@ -85,10 +86,11 @@
     "url": "git://github.com/feross/webtorrent-desktop.git"
   },
   "scripts": {
+    "build": "babel src -d build",
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
-    "package": "rimraf build/ && jsx --es6module src/ build/ && node ./bin/package.js",
-    "start": "jsx --es6module src/ build/ && electron .",
+    "package": "node ./bin/package.js",
+    "start": "npm run build && electron .",
     "test": "standard && node ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"
   }

@@ -19,6 +19,7 @@ var config = require('../src/config')
 var pkg = require('../package.json')
 
 var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
+var BUILD_PATH = path.join(config.ROOT_PATH, 'build')
 var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
 
 var argv = minimist(process.argv.slice(2), {
@@ -36,6 +37,12 @@ var argv = minimist(process.argv.slice(2), {
 
 function build () {
   rimraf.sync(DIST_PATH)
+  rimraf.sync(BUILD_PATH)
+
+  console.log('Babel: Building JSX...')
+  cp.execSync('npm run build', { NODE_ENV: 'production', stdio: 'inherit' })
+  console.log('Babel: Built JSX.')
+
   var platform = argv._[0]
   if (platform === 'darwin') {
     buildDarwin(printDone)
