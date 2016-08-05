@@ -87,7 +87,7 @@
     "url": "git://github.com/feross/webtorrent-desktop.git"
   },
   "scripts": {
-    "build": "babel src -d build",
+    "build": "babel --quiet src --out-dir build",
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
