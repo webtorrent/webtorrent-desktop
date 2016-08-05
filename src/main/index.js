@@ -23,7 +23,11 @@ var windows = require('./windows')
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
 
-if (!argv.includes('--dev')) process.env.NODE_ENV = 'production'
+if (config.IS_PRODUCTION) {
+  // When Electron is running in produdtion mode (packaged app), then run React
+  // in production mode too.
+  process.env.NODE_ENV = 'production'
+}
 
 if (process.platform === 'win32') {
   shouldQuit = squirrelWin32.handleEvent(argv[0])
