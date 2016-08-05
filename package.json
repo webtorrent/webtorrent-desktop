@@ -90,6 +90,7 @@
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
+    "prepublish": "npm run build",
     "start": "npm run build && electron .",
     "test": "standard && node ./bin/check-deps.js",
     "update-authors": "./bin/update-authors.sh"
