@@ -24,7 +24,7 @@ var shouldQuit = false
 var argv = sliceArgv(process.argv)
 
 if (config.IS_PRODUCTION) {
-  // When Electron is running in produdtion mode (packaged app), then run React
+  // When Electron is running in production mode (packaged app), then run React
   // in production mode too.
   process.env.NODE_ENV = 'production'
 }
