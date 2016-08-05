@@ -46,7 +46,8 @@
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
-    "babel-preset-react": "^6.11.1",
+    "babel-plugin-syntax-jsx": "^6.13.0",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
     "cross-zip": "^2.0.1",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^7.0.0",
