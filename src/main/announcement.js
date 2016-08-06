@@ -32,7 +32,7 @@ function init () {
 
 function onResponse (err, res, data) {
   if (err) return log(`Failed to retrieve announcement: ${err.message}`)
-  if (res.statusCode !== 200) return log('No announcement exists')
+  if (res.statusCode !== 200) return log('No announcement available')
 
   try {
     data = JSON.parse(data.toString())
