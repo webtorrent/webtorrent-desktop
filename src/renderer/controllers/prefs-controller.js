@@ -1,5 +1,6 @@
 const {dispatch} = require('../lib/dispatcher')
 const State = require('../lib/state')
+const ipcRenderer = require('electron').ipcRenderer
 
 // Controls the Preferences screen
 module.exports = class PrefsController {
@@ -41,6 +42,9 @@ module.exports = class PrefsController {
   // All unsaved prefs take effect atomically, and are saved to config.json
   save () {
     var state = this.state
+    if (state.unsaved.prefs.isFileHandler !== state.saved.prefs.isFileHandler) {
+      ipcRenderer.send('setDefaultFileHandler', state.unsaved.prefs.isFileHandler)
+    }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
     State.save(state)
   }

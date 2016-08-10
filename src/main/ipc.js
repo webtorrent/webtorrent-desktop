@@ -8,6 +8,7 @@ var app = electron.app
 
 var dialog = require('./dialog')
 var dock = require('./dock')
+var handlers = require('./handlers')
 var log = require('./log')
 var menu = require('./menu')
 var powerSaveBlocker = require('./power-save-blocker')
@@ -90,6 +91,14 @@ function init () {
   ipc.on('openItem', (e, ...args) => shell.openItem(...args))
   ipc.on('showItemInFolder', (e, ...args) => shell.showItemInFolder(...args))
   ipc.on('moveItemToTrash', (e, ...args) => shell.moveItemToTrash(...args))
+
+  /**
+   * File handlers
+   */
+  ipc.on('setDefaultFileHandler', (e, flag) => {
+    if (flag) handlers.install()
+    else handlers.uninstall()
+  })
 
   /**
    * Windows: Main
