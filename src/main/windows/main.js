@@ -141,7 +141,9 @@ function setBounds (bounds, maximize) {
       bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
       log('setBounds: centered to ' + JSON.stringify(bounds))
     }
-    main.win.setBounds(bounds, true)
+    // Resize the window's content area (so window border doesn't need to be taken
+    // into account)
+    main.win.setContentBounds(bounds, true)
   } else {
     log('setBounds: not setting bounds because of window maximization')
   }
