@@ -40,6 +40,11 @@ module.exports = class TorrentListController {
 
   // Shows the Create Torrent page with options to seed a given file or folder
   showCreateTorrent (files) {
+    // You can only create torrents from the home screen.
+    if (this.state.location.url() !== 'home') {
+      return dispatch('error', 'Please go back to the torrent list before creating a new torrent.')
+    }
+
     // Files will either be an array of file objects, which we can send directly
     // to the create-torrent screen
     if (files.length === 0 || typeof files[0] !== 'string') {
@@ -67,9 +72,7 @@ module.exports = class TorrentListController {
     var state = this.state
     var torrentKey = state.nextTorrentKey++
     ipcRenderer.send('wt-create-torrent', torrentKey, options)
-    state.location.backToFirst(function () {
-      state.location.clearForward('create-torrent')
-    })
+    state.location.cancel()
   }
 
   // Starts downloading and/or seeding a given torrentSummary.

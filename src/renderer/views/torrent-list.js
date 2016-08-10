@@ -44,6 +44,7 @@ module.exports = class TorrentList extends React.Component {
     if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
+    if (torrentSummary.torrrentKey) console.error('Missing torrentKey', torrentSummary)
     return (
       <div
         key={torrentSummary.torrentKey}

@@ -40,7 +40,7 @@ function renderDownloadDirSelector (state) {
   },
   state.unsaved.prefs.downloadPath,
   function (filePath) {
-    setStateValue('downloadPath', filePath)
+    dispatch('updatePreferences', 'downloadPath', filePath)
   })
 }
 
@@ -98,12 +98,18 @@ function renderSection (definition, controls) {
 // - callback takes a new file or folder path
 function renderFileSelector (definition, value, callback) {
   var controls = [(
-    <input type='text' className='file-picker-text'
+    <input
+      type='text'
+      className='file-picker-text'
+      key={definition.property}
       id={definition.property}
       disabled='disabled'
       value={value} />
   ), (
-    <button className='btn' onClick={handleClick}>
+    <button
+      key={definition.property + '-btn'}
+      className='btn'
+      onClick={handleClick}>
       <i className='icon'>folder_open</i>
     </button>
   )]
@@ -131,8 +137,4 @@ function renderControlGroup (definition, controls) {
       </div>
     </div>
   )
-}
-
-function setStateValue (property, value) {
-  dispatch('updatePreferences', property, value)
 }

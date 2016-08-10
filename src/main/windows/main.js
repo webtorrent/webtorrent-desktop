@@ -206,13 +206,13 @@ function toggleFullScreen (flag) {
 }
 
 function onWindowBlur () {
-  menu.onWindowBlur()
-  tray.onWindowBlur()
+  menu.setWindowFocus(false)
+  tray.setWindowFocus(false)
 }
 
 function onWindowFocus () {
-  menu.onWindowFocus()
-  tray.onWindowFocus()
+  menu.setWindowFocus(true)
+  tray.setWindowFocus(true)
 }
 
 function getIconPath () {

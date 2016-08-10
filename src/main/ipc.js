@@ -61,14 +61,14 @@ function init () {
    */
 
   ipc.on('onPlayerOpen', function () {
-    menu.onPlayerOpen()
+    menu.setPlayerOpen(true)
     powerSaveBlocker.enable()
     shortcuts.enable()
     thumbar.enable()
   })
 
   ipc.on('onPlayerClose', function () {
-    menu.onPlayerClose()
+    menu.setPlayerOpen(false)
     powerSaveBlocker.disable()
     shortcuts.disable()
     thumbar.disable()
@@ -112,6 +112,7 @@ function init () {
   ipc.on('setTitle', (e, ...args) => main.setTitle(...args))
   ipc.on('show', () => main.show())
   ipc.on('toggleFullScreen', (e, ...args) => main.toggleFullScreen(...args))
+  ipc.on('setAllowNav', (e, ...args) => menu.setAllowNav(...args))
 
   /**
    * VLC

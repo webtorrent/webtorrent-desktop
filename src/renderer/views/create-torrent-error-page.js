@@ -16,7 +16,7 @@ module.exports = class CreateTorrentErrorPage extends React.Component {
           </p>
         </p>
         <p className='float-right'>
-          <button className='button-flat light' onClick={dispatcher('back')}>
+          <button className='button-flat light' onClick={dispatcher('cancel')}>
             Cancel
           </button>
         </p>

@@ -1,4 +1,3 @@
-const {dispatch} = require('../lib/dispatcher')
 const State = require('../lib/state')
 const ipcRenderer = require('electron').ipcRenderer
 
@@ -16,11 +15,15 @@ module.exports = class PrefsController {
       url: 'preferences',
       setup: function (cb) {
         // initialize preferences
-        dispatch('setTitle', 'Preferences')
+        state.window.title = 'Preferences'
         state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
+        ipcRenderer.send('setAllowNav', false)
         cb()
       },
-      destroy: () => this.save()
+      destroy: () => {
+        ipcRenderer.send('setAllowNav', true)
+        this.save()
+      }
     })
   }
 

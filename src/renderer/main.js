@@ -223,6 +223,7 @@ const dispatchHandlers = {
   'escapeBack': escapeBack,
   'back': () => state.location.back(),
   'forward': () => state.location.forward(),
+  'cancel': () => state.location.cancel(),
 
   // Controlling the window
   'setDimensions': setDimensions,
@@ -360,25 +361,25 @@ function setDimensions (dimensions) {
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  if (state.modal) {
+  var url = state.location.url()
+  var allTorrents = files.every(TorrentPlayer.isTorrent)
+  var allSubtitles = files.every(controllers.subtitles.isSubtitle)
+
+  if (allTorrents) {
+    // Drop torrents onto the app: go to home screen, add torrents, no matter what
+    dispatch('backToList')
+    // All .torrent files? Add them.
+    files.forEach((file) => controllers.torrentList.addTorrent(file))
+  } else if (url === 'player' && allSubtitles) {
+    // Drop subtitles onto a playing video: add subtitles
+    controllers.subtitles.addSubtitles(files, true)
+  } else if (url === 'home') {
+    // Drop files onto home screen: show Create Torrent
     state.modal = null
-  }
-
-  var subtitles = files.filter(controllers.subtitles.isSubtitle)
-
-  if (state.location.url() === 'home' || subtitles.length === 0) {
-    if (files.every(TorrentPlayer.isTorrent)) {
-      if (state.location.url() !== 'home') {
-        dispatch('backToList')
-      }
-      // All .torrent files? Add them.
-      files.forEach((file) => controllers.torrentList.addTorrent(file))
-    } else {
-      // Show the Create Torrent screen. Let's seed those files.
-      controllers.torrentList.showCreateTorrent(files)
-    }
-  } else if (state.location.url() === 'player') {
-    controllers.subtitles.addSubtitles(subtitles, true)
+    controllers.torrentList.showCreateTorrent(files)
+  } else {
+    // Drop files onto any other screen: show error
+    return onError('Please go back to the torrent list before creating a new torrent.')
   }
 
   update()
