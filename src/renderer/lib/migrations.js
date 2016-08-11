@@ -25,6 +25,10 @@ function run (state) {
     migrate_0_7_2(state.saved)
   }
 
+  if (semver.lt(version, '0.11.0')) {
+    migrate_0_11_0(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
@@ -91,5 +95,12 @@ function migrate_0_7_2 (saved) {
     saved.prefs = {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH
     }
+  }
+}
+
+function migrate_0_11_0 (saved) {
+  if (saved.prefs.isFileHandler === undefined) {
+    // The app used to make itself the default torrent file handler automatically
+    saved.prefs.isFileHandler = true
   }
 }

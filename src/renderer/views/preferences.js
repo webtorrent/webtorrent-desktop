@@ -22,7 +22,8 @@ function renderGeneralSection (state) {
     description: '',
     icon: 'settings'
   }, [
-    renderDownloadDirSelector(state)
+    renderDownloadDirSelector(state),
+    renderFileHandlers(state)
   ])
 }
 
@@ -41,6 +42,29 @@ function renderDownloadDirSelector (state) {
   function (filePath) {
     setStateValue('downloadPath', filePath)
   })
+}
+
+function renderFileHandlers (state) {
+  var definition = {
+    key: 'file-handlers',
+    label: 'Handle Torrent Files'
+  }
+  var buttonText = state.unsaved.prefs.isFileHandler
+    ? 'Remove default app for torrent files'
+    : 'Make WebTorrent the default app for torrent files'
+  var controls = [(
+    <button key='toggle-handlers'
+      className='btn'
+      onClick={toggleFileHandlers}>
+      {buttonText}
+    </button>
+  )]
+  return renderControlGroup(definition, controls)
+
+  function toggleFileHandlers () {
+    var isFileHandler = state.unsaved.prefs.isFileHandler
+    dispatch('updatePreferences', 'isFileHandler', !isFileHandler)
+  }
 }
 
 // Renders a prefs section.
@@ -73,6 +97,27 @@ function renderSection (definition, controls) {
 // - value should be the current pref, a file or folder path
 // - callback takes a new file or folder path
 function renderFileSelector (definition, value, callback) {
+  var controls = [(
+    <input type='text' className='file-picker-text'
+      id={definition.property}
+      disabled='disabled'
+      value={value} />
+  ), (
+    <button className='btn' onClick={handleClick}>
+      <i className='icon'>folder_open</i>
+    </button>
+  )]
+  return renderControlGroup(definition, controls)
+
+  function handleClick () {
+    dialog.showOpenDialog(remote.getCurrentWindow(), definition.options, function (filenames) {
+      if (!Array.isArray(filenames)) return
+      callback(filenames[0])
+    })
+  }
+}
+
+function renderControlGroup (definition, controls) {
   return (
     <div key={definition.key} className='control-group'>
       <div className='controls'>
@@ -81,23 +126,11 @@ function renderFileSelector (definition, value, callback) {
           <div className='preference-description'>{definition.description}</div>
         </label>
         <div className='controls'>
-          <input type='text' className='file-picker-text'
-            id={definition.property}
-            disabled='disabled'
-            value={value} />
-          <button className='btn' onClick={handleClick}>
-            <i className='icon'>folder_open</i>
-          </button>
+          {controls}
         </div>
       </div>
     </div>
   )
-  function handleClick () {
-    dialog.showOpenDialog(remote.getCurrentWindow(), definition.options, function (filenames) {
-      if (!Array.isArray(filenames)) return
-      callback(filenames[0])
-    })
-  }
 }
 
 function setStateValue (property, value) {
