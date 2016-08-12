@@ -242,7 +242,7 @@ module.exports = class PlaybackController {
       }
 
       // otherwise, play the video
-      dispatch('setTitle', torrentSummary.files[state.playing.fileIndex].name)
+      state.window.title = torrentSummary.files[state.playing.fileIndex].name
       this.update()
 
       ipcRenderer.send('onPlayerOpen')

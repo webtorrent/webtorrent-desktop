@@ -50,7 +50,11 @@ module.exports = class TorrentListController {
     if (files.length === 0 || typeof files[0] !== 'string') {
       this.state.location.go({
         url: 'create-torrent',
-        files: files
+        files: files,
+        setup: (cb) => {
+          this.state.window.title = 'Create New Torrent'
+          cb(null)
+        }
       })
       return
     }
