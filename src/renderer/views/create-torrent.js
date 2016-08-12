@@ -77,7 +77,7 @@ module.exports = class CreateTorrentPage extends React.Component {
           </div>
           <div key='trackers' className='torrent-attribute'>
             <label>Trackers:</label>
-            <textarea className='torrent-attribute torrent-trackers' value={trackers}></textarea>
+            <textarea className='torrent-attribute torrent-trackers' defaultValue={trackers}></textarea>
           </div>
           <div key='private' className='torrent-attribute'>
             <label>Private:</label>
