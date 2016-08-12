@@ -274,6 +274,7 @@ function saveTorrentFileAs (torrentSummary) {
     ]
   }
   electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
+    if (!savePath) return // They clicked Cancel
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return dispatch('error', err)
