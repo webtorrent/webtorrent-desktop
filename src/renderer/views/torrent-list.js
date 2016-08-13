@@ -8,16 +8,36 @@ const {dispatcher} = require('../lib/dispatcher')
 module.exports = class TorrentList extends React.Component {
   render () {
     var state = this.props.state
-    var torrentRows = state.saved.torrents.map(
-      (torrentSummary) => this.renderTorrent(torrentSummary)
-    )
 
-    return (
-      <div key='torrent-list' className='torrent-list'>
-        {torrentRows}
+    var contents
+    if (!state.downloadPathStatus) {
+      contents = ''
+    } else if (state.downloadPathStatus === 'missing') {
+      contents = (
+        <div>
+          <p>Download path missing: {state.saved.prefs.downloadPath}</p>
+          <p>Check that all drives are connected?</p>
+          <p>Alternatively, choose a new download path in
+            <a href='#' onClick={dispatcher('preferences')}>Preferences</a>
+          </p>
+        </div>
+      )
+    } else if (state.downloadPathStatus === 'ok') {
+      contents = state.saved.torrents.map(
+        (torrentSummary) => this.renderTorrent(torrentSummary)
+      )
+      contents.push(
         <div key='torrent-placeholder' className='torrent-placeholder'>
           <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
         </div>
+      )
+    } else {
+      throw new Error('Unhandled downloadPathStatus ' + state.downloadPathStatus)
+    }
+
+    return (
+      <div key='torrent-list' className='torrent-list'>
+        {contents}
       </div>
     )
   }

@@ -552,6 +552,13 @@ input[type='text'] {
 }
 
 /*
+ * TORRENT LIST: ERRORS
+ */
+.torrent-list p {
+  padding: 5px 20px;
+}
+
+/*
  * TORRENT LIST: DRAG-DROP TARGET
  */
 

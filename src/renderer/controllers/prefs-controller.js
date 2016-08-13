@@ -1,4 +1,5 @@
 const State = require('../lib/state')
+const {dispatch} = require('../lib/dispatcher')
 const ipcRenderer = require('electron').ipcRenderer
 
 // Controls the Preferences screen
@@ -50,5 +51,6 @@ module.exports = class PrefsController {
     }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
     State.save(state)
+    dispatch('checkDownloadPath')
   }
 }

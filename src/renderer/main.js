@@ -7,6 +7,7 @@ const dragDrop = require('drag-drop')
 const electron = require('electron')
 const React = require('react')
 const ReactDOM = require('react-dom')
+const fs = require('fs')
 
 const config = require('../config')
 const App = require('./views/app')
@@ -74,6 +75,12 @@ function onState (err, _state) {
     }
   })
 
+  // Calling update() updates the UI given the current state
+  // Do this at least once a second to give every file in every torrentSummary
+  // a progress bar and to keep the cursor in sync when playing a video
+  setInterval(update, 1000)
+  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
@@ -83,11 +90,8 @@ function onState (err, _state) {
   // Listen for messages from the main process
   setupIpc()
 
-  // Calling update() updates the UI given the current state
-  // Do this at least once a second to give every file in every torrentSummary
-  // a progress bar and to keep the cursor in sync when playing a video
-  setInterval(update, 1000)
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  // Warn if the download dir is gone, eg b/c an external drive is unplugged
+  checkDownloadPath()
 
   // OS integrations:
   // ...drag and drop files/text to start torrenting or seeding
@@ -212,6 +216,7 @@ const dispatchHandlers = {
   // Preferences screen
   'preferences': () => controllers.prefs.show(),
   'updatePreferences': (key, value) => controllers.prefs.update(key, value),
+  'checkDownloadPath': checkDownloadPath,
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update.updateAvailable(version),
@@ -432,4 +437,16 @@ function onFullscreenChanged (e, isFullScreen) {
   }
 
   update()
+}
+
+function checkDownloadPath () {
+  state.downloadPathStatus = undefined
+  fs.stat(state.saved.prefs.downloadPath, function (err, stat) {
+    if (err) {
+      state.downloadPathStatus = 'missing'
+      return console.error(err)
+    }
+    if (stat.isDirectory()) state.downloadPathStatus = 'ok'
+    else state.downloadPathStatus = 'missing'
+  })
 }
