@@ -7,6 +7,7 @@ const dragDrop = require('drag-drop')
 const electron = require('electron')
 const React = require('react')
 const ReactDOM = require('react-dom')
+const fs = require('fs')
 
 const config = require('../config')
 const App = require('./views/app')
@@ -77,17 +78,20 @@ function onState (err, _state) {
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
+  // Calling update() updates the UI given the current state
+  // Do this at least once a second to give every file in every torrentSummary
+  // a progress bar and to keep the cursor in sync when playing a video
+  setInterval(update, 1000)
+  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, config.DELAYED_INIT)
 
   // Listen for messages from the main process
   setupIpc()
 
-  // Calling update() updates the UI given the current state
-  // Do this at least once a second to give every file in every torrentSummary
-  // a progress bar and to keep the cursor in sync when playing a video
-  setInterval(update, 1000)
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  // Warn if the download dir is gone, eg b/c an external drive is unplugged
+  checkDownloadPath()
 
   // OS integrations:
   // ...drag and drop files/text to start torrenting or seeding
@@ -175,8 +179,7 @@ const dispatchHandlers = {
   'deleteTorrent': (infoHash, deleteData) => controllers.torrentList.deleteTorrent(infoHash, deleteData),
   'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
   'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
-  'startTorrentingSummary': (torrentSummary) =>
-    controllers.torrentList.startTorrentingSummary(torrentSummary),
+  'startTorrentingSummary': (torrentKey) => controllers.torrentList.startTorrentingSummary(torrentKey),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
@@ -212,6 +215,7 @@ const dispatchHandlers = {
   // Preferences screen
   'preferences': () => controllers.prefs.show(),
   'updatePreferences': (key, value) => controllers.prefs.update(key, value),
+  'checkDownloadPath': checkDownloadPath,
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update.updateAvailable(version),
@@ -313,8 +317,14 @@ function escapeBack () {
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
-    .filter((torrentSummary) => torrentSummary.status !== 'paused')
-    .forEach((torrentSummary) => controllers.torrentList.startTorrentingSummary(torrentSummary))
+    .map((torrentSummary) => {
+      // Torrent keys are ephemeral, reassigned each time the app runs.
+      // On startup, give all torrents a key, even the ones that are paused.
+      torrentSummary.torrentKey = state.nextTorrentKey++
+      return torrentSummary
+    })
+    .filter((s) => s.status !== 'paused')
+    .forEach((s) => controllers.torrentList.startTorrentingSummary(s.torrentKey))
 }
 
 // Set window dimensions to match video dimensions or fill the screen
@@ -432,4 +442,15 @@ function onFullscreenChanged (e, isFullScreen) {
   }
 
   update()
+}
+
+function checkDownloadPath () {
+  fs.stat(state.saved.prefs.downloadPath, function (err, stat) {
+    if (err) {
+      state.downloadPathStatus = 'missing'
+      return console.error(err)
+    }
+    if (stat.isDirectory()) state.downloadPathStatus = 'ok'
+    else state.downloadPathStatus = 'missing'
+  })
 }

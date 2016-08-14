@@ -22,12 +22,12 @@ function renderGeneralSection (state) {
     description: '',
     icon: 'settings'
   }, [
-    renderDownloadDirSelector(state),
+    renderDownloadPathSelector(state),
     renderFileHandlers(state)
   ])
 }
 
-function renderDownloadDirSelector (state) {
+function renderDownloadPathSelector (state) {
   return renderFileSelector({
     key: 'download-path',
     label: 'Download Path',

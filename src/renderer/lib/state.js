@@ -200,6 +200,9 @@ function save (state, cb) {
         if (key === 'playStatus') {
           continue // Don't save whether a torrent is playing / pending
         }
+        if (key === 'error') {
+          continue // Don't save error states
+        }
         torrent[key] = x[key]
       }
       return torrent

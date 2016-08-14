@@ -80,21 +80,25 @@ module.exports = class TorrentListController {
   }
 
   // Starts downloading and/or seeding a given torrentSummary.
-  startTorrentingSummary (torrentSummary) {
-    var s = torrentSummary
-
-    // Backward compatibility for config files save before we had torrentKey
-    if (!s.torrentKey) s.torrentKey = this.state.nextTorrentKey++
+  startTorrentingSummary (torrentKey) {
+    var s = TorrentSummary.getByKey(this.state, torrentKey)
+    if (!s) throw new Error('Missing key: ' + torrentKey)
 
     // Use Downloads folder by default
     if (!s.path) s.path = this.state.saved.prefs.downloadPath
 
-    ipcRenderer.send('wt-start-torrenting',
-                      s.torrentKey,
-                      TorrentSummary.getTorrentID(s),
-                      s.path,
-                      s.fileModtimes,
-                      s.selections)
+    fs.stat(TorrentSummary.getFileOrFolder(s), function (err) {
+      if (err) {
+        s.error = 'path-missing'
+        return
+      }
+      ipcRenderer.send('wt-start-torrenting',
+        s.torrentKey,
+        TorrentSummary.getTorrentID(s),
+        s.path,
+        s.fileModtimes,
+        s.selections)
+    })
   }
 
   // TODO: use torrentKey, not infoHash
@@ -102,7 +106,7 @@ module.exports = class TorrentListController {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     if (torrentSummary.status === 'paused') {
       torrentSummary.status = 'new'
-      this.startTorrentingSummary(torrentSummary)
+      this.startTorrentingSummary(torrentSummary.torrentKey)
       sound.play('ENABLE')
     } else {
       torrentSummary.status = 'paused'
@@ -278,6 +282,7 @@ function saveTorrentFileAs (torrentSummary) {
     ]
   }
   electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
+    if (!savePath) return // They clicked Cancel
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return dispatch('error', err)

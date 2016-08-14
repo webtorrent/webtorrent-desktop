@@ -552,6 +552,19 @@ input[type='text'] {
 }
 
 /*
+ * TORRENT LIST: ERRORS
+ */
+
+.torrent-list p {
+  margin: 10px 20px;
+}
+
+.torrent-list a {
+  color: #99f;
+  text-decoration: none;
+}
+
+/*
  * TORRENT LIST: DRAG-DROP TARGET
  */
 
