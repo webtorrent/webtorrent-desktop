@@ -75,14 +75,14 @@ function onState (err, _state) {
     }
   })
 
+  // Restart everything we were torrenting last time the app ran
+  resumeTorrents()
+
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
   app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
-
-  // Restart everything we were torrenting last time the app ran
-  resumeTorrents()
 
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, config.DELAYED_INIT)
@@ -179,8 +179,7 @@ const dispatchHandlers = {
   'deleteTorrent': (infoHash, deleteData) => controllers.torrentList.deleteTorrent(infoHash, deleteData),
   'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
   'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
-  'startTorrentingSummary': (torrentSummary) =>
-    controllers.torrentList.startTorrentingSummary(torrentSummary),
+  'startTorrentingSummary': (torrentKey) => controllers.torrentList.startTorrentingSummary(torrentKey),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
@@ -318,8 +317,14 @@ function escapeBack () {
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
-    .filter((torrentSummary) => torrentSummary.status !== 'paused')
-    .forEach((torrentSummary) => controllers.torrentList.startTorrentingSummary(torrentSummary))
+    .map((torrentSummary) => {
+      // Torrent keys are ephemeral, reassigned each time the app runs.
+      // On startup, give all torrents a key, even the ones that are paused.
+      torrentSummary.torrentKey = state.nextTorrentKey++
+      return torrentSummary
+    })
+    .filter((s) => s.status !== 'paused')
+    .forEach((s) => controllers.torrentList.startTorrentingSummary(s.torrentKey))
 }
 
 // Set window dimensions to match video dimensions or fill the screen
@@ -440,7 +445,6 @@ function onFullscreenChanged (e, isFullScreen) {
 }
 
 function checkDownloadPath () {
-  state.downloadPathStatus = undefined
   fs.stat(state.saved.prefs.downloadPath, function (err, stat) {
     if (err) {
       state.downloadPathStatus = 'missing'

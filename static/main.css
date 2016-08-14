@@ -554,8 +554,14 @@ input[type='text'] {
 /*
  * TORRENT LIST: ERRORS
  */
+
 .torrent-list p {
-  padding: 5px 20px;
+  margin: 10px 20px;
+}
+
+.torrent-list a {
+  color: #99f;
+  text-decoration: none;
 }
 
 /*

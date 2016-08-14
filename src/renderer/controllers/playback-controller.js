@@ -188,7 +188,7 @@ module.exports = class PlaybackController {
     }, 10000) /* give it a few seconds */
 
     if (torrentSummary.status === 'paused') {
-      dispatch('startTorrentingSummary', torrentSummary)
+      dispatch('startTorrentingSummary', torrentSummary.torrentKey)
       ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
         () => this.openPlayerFromActiveTorrent(torrentSummary, index, timeout, cb))
     } else {
