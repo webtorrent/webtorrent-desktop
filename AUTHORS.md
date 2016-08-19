@@ -24,6 +24,7 @@
 - Thomas Watson Steen (w@tson.dk)
 - anonymlol (anonymlol7@gmail.com)
 - Gediminas Petrikas (gedas18@gmail.com)
+- Alberto Miranda (codealchemist@gmail.com)
 - Adam Gotlib (gotlib.adam+dev@gmail.com)
 - Rémi Jouannet (remijouannet@gmail.com)
 - Andrea Tupini (tupini07@gmail.com)
