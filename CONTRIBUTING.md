@@ -73,3 +73,23 @@ By making a contribution to this project, I certify that:
   record of the contribution (including all personal information I submit with it,
   including my sign-off) is maintained indefinitely and may be redistributed consistent
   with this project or the open source license(s) involved.
+
+## Smoke Tests
+
+Before a release, check that the following basic use cases work correctly:
+
+1. Click "Play" to stream a built-in torrent (e.g. Sintel)
+  - Ensure that seeking to undownloaded region works and plays immediately.
+  - Ensure that sintel.mp4 gets downloaded to `~/Downloads`.
+
+2. Check that the auto-updater works
+  - Open the console and check for the line "No update available" to indicate
+
+3. Add a new .torrent file via drag-and-drop.
+  - Ensure that it gets added to the list and starts downloading
+
+4. Remove a torrent from the client
+  - Ensure that the file is removed from `~/Downloads`
+
+5. Create and seed a new a torrent via drag-and-drop.
+  - Ensure that the torrent gets created and seeding begins.

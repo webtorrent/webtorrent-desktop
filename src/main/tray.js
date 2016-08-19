@@ -1,8 +1,7 @@
 module.exports = {
   hasTray,
   init,
-  onWindowBlur,
-  onWindowFocus
+  setWindowFocus
 }
 
 var electron = require('electron')
@@ -31,12 +30,7 @@ function hasTray () {
   return !!tray
 }
 
-function onWindowBlur () {
-  if (!tray) return
-  updateTrayMenu()
-}
-
-function onWindowFocus () {
+function setWindowFocus (flag) {
   if (!tray) return
   updateTrayMenu()
 }
