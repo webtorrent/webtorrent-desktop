@@ -1,5 +1,26 @@
 # WebTorrent Desktop Version History
 
+## v0.11.0 - 2016-08-19
+
+### Added
+
+- New Preference to "Set WebTorrent as default handler for torrents and magnet links" (#771)
+- New Preference to "Always play in VLC" (#674)
+- Check for missing default download path and torrent folders on start up (#776)
+
+### Changed
+
+- Do not automatically set WebTorrent as the default handler for torrents (#771)
+- Torrents can only be created from the home screen (#770)
+- Update Electron to 1.3.3 (#772)
+
+### Fixed
+
+- Allow modifying the default tracker list on the Create Torrent page (#775)
+- Prevent opening multiple stacked Preference windows or Create Torrent windows (#770)
+- Windows: Player window auto-resize does not match video aspect ratio (#565)
+- Missing page title on Create Torrent page
+
 ## v0.10.0 - 2016-08-05
 
 ### Added
