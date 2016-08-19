@@ -57,7 +57,7 @@
     "mkdirp": "^0.5.1",
     "nobin-debian-installer": "^0.0.10",
     "open": "0.0.5",
-    "plist": "^1.2.0",
+    "plist": "^2.0.1",
     "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
     "standard": "^8.0.0-beta.5"
