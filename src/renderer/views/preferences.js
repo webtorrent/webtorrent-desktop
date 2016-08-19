@@ -40,6 +40,7 @@ function renderPlaybackSection (state) {
 
 function renderPlayInVlcSelector (state) {
   return renderCheckbox({
+    key: 'play-in-vlc',
     label: 'Play in VLC',
     description: 'Media will play in VLC',
     property: 'playInVlc',
@@ -47,7 +48,7 @@ function renderPlayInVlcSelector (state) {
   },
   state.unsaved.prefs.playInVlc,
   function (value) {
-    setStateValue('playInVlc', value)
+    dispatch('updatePreferences', 'playInVlc', value)
   })
 }
 
@@ -120,7 +121,7 @@ function renderCheckbox (definition, value, callback) {
   if (value) iconClass += ' enabled'
 
   return (
-    <div className='control-group'>
+    <div key='{definition.key}' className='control-group'>
       <div className='controls'>
         <label className='control-label'>
           <div className='preference-title'>{definition.label}</div>
