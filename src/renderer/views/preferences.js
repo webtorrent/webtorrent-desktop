@@ -10,6 +10,7 @@ module.exports = class Preferences extends React.Component {
     return (
       <div className='preferences'>
         {renderGeneralSection(state)}
+        {renderPlaybackSection(state)}
       </div>
     )
   }
@@ -25,6 +26,30 @@ function renderGeneralSection (state) {
     renderDownloadPathSelector(state),
     renderFileHandlers(state)
   ])
+}
+
+function renderPlaybackSection (state) {
+  return renderSection({
+    title: 'Playback',
+    description: '',
+    icon: 'settings'
+  }, [
+    renderPlayInVlcSelector(state)
+  ])
+}
+
+function renderPlayInVlcSelector (state) {
+  return renderCheckbox({
+    key: 'play-in-vlc',
+    label: 'Play in VLC',
+    description: 'Media will play in VLC',
+    property: 'playInVlc',
+    value: state.saved.prefs.playInVlc
+  },
+  state.unsaved.prefs.playInVlc,
+  function (value) {
+    dispatch('updatePreferences', 'playInVlc', value)
+  })
 }
 
 function renderDownloadPathSelector (state) {
@@ -89,6 +114,35 @@ function renderSection (definition, controls) {
       </div>
     </section>
   )
+}
+
+function renderCheckbox (definition, value, callback) {
+  var iconClass = 'icon clickable'
+  if (value) iconClass += ' enabled'
+
+  return (
+    <div key='{definition.key}' className='control-group'>
+      <div className='controls'>
+        <label className='control-label'>
+          <div className='preference-title'>{definition.label}</div>
+        </label>
+        <div className='controls'>
+          <label className='clickable' onClick={handleClick}>
+            <i
+              className={iconClass}
+              id='{definition.property}'
+            >
+              check_circle
+            </i>
+            <span className='checkbox-label'>{definition.description}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
+  function handleClick () {
+    callback(!value)
+  }
 }
 
 // Creates a file chooser

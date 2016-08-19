@@ -241,12 +241,19 @@ module.exports = class PlaybackController {
         return this.update()
       }
 
+      // play in VLC if set as default player (Preferences / Playback / Play in VLC)
+      if (this.state.saved.prefs.playInVlc) {
+        dispatch('vlcPlay')
+        this.update()
+        cb()
+        return
+      }
+
       // otherwise, play the video
       state.window.title = torrentSummary.files[state.playing.fileIndex].name
       this.update()
 
       ipcRenderer.send('onPlayerOpen')
-
       cb()
     })
   }
