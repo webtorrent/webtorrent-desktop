@@ -63,7 +63,7 @@ function initDarwinWin32 () {
 
   electron.autoUpdater.on(
     'update-not-available',
-    () => log('Update not available')
+    () => log('No update available')
   )
 
   electron.autoUpdater.on(

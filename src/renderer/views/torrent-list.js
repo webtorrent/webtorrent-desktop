@@ -8,16 +8,32 @@ const {dispatcher} = require('../lib/dispatcher')
 module.exports = class TorrentList extends React.Component {
   render () {
     var state = this.props.state
-    var torrentRows = state.saved.torrents.map(
+
+    var contents = []
+    if (state.downloadPathStatus === 'missing') {
+      contents.push(
+        <div key='torrent-missing-path'>
+          <p>Download path missing: {state.saved.prefs.downloadPath}</p>
+          <p>Check that all drives are connected?</p>
+          <p>Alternatively, choose a new download path
+            in <a href='#' onClick={dispatcher('preferences')}>Preferences</a>
+          </p>
+        </div>
+      )
+    }
+    var torrentElems = state.saved.torrents.map(
       (torrentSummary) => this.renderTorrent(torrentSummary)
+    )
+    contents.push(...torrentElems)
+    contents.push(
+      <div key='torrent-placeholder' className='torrent-placeholder'>
+        <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+      </div>
     )
 
     return (
       <div key='torrent-list' className='torrent-list'>
-        {torrentRows}
-        <div key='torrent-placeholder' className='torrent-placeholder'>
-          <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
-        </div>
+        {contents}
       </div>
     )
   }
@@ -44,6 +60,7 @@ module.exports = class TorrentList extends React.Component {
     if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
+    if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
     return (
       <div
         key={torrentSummary.torrentKey}
@@ -67,8 +84,14 @@ module.exports = class TorrentList extends React.Component {
 
     // If it's downloading/seeding then show progress info
     var prog = torrentSummary.progress
-    if (torrentSummary.status !== 'paused' && prog) {
-      elements.push((
+    if (torrentSummary.error) {
+      elements.push(
+        <div key='progress-info' className='ellipsis'>
+          {getErrorMessage(torrentSummary)}
+        </div>
+      )
+    } else if (torrentSummary.status !== 'paused' && prog) {
+      elements.push(
         <div key='progress-info' className='ellipsis'>
           {renderPercentProgress()}
           {renderTotalProgress()}
@@ -77,7 +100,7 @@ module.exports = class TorrentList extends React.Component {
           {renderUploadSpeed()}
           {renderEta()}
         </div>
-      ))
+      )
     }
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
@@ -174,8 +197,9 @@ module.exports = class TorrentList extends React.Component {
     }
 
     // Only show the play button for torrents that contain playable media
-    var playButton
-    if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
+    var playButton, downloadButton
+    var noErrors = !torrentSummary.error
+    if (noErrors && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
       playButton = (
         <i
           key='play-button'
@@ -186,11 +210,8 @@ module.exports = class TorrentList extends React.Component {
         </i>
       )
     }
-
-    return (
-      <div key='buttons' className='buttons'>
-        {positionElem}
-        {playButton}
+    if (noErrors) {
+      downloadButton = (
         <i
           key='download-button'
           className={'button-round icon download ' + torrentSummary.status}
@@ -198,6 +219,14 @@ module.exports = class TorrentList extends React.Component {
           onClick={dispatcher('toggleTorrent', infoHash)}>
           {downloadIcon}
         </i>
+      )
+    }
+
+    return (
+      <div key='buttons' className='buttons'>
+        {positionElem}
+        {playButton}
+        {downloadButton}
         <i
           key='delete-button'
           className='icon delete'
@@ -212,12 +241,26 @@ module.exports = class TorrentList extends React.Component {
   // Show files, per-file download status and play buttons, and so on
   renderTorrentDetails (torrentSummary) {
     var filesElement
-    if (!torrentSummary.files) {
-      // We don't know what files this torrent contains
-      var message = torrentSummary.status === 'paused'
-        ? 'Failed to load torrent info. Click the download button to try again...'
-        : 'Downloading torrent info...'
-      filesElement = (<div key='files' className='files warning'>{message}</div>)
+    if (torrentSummary.error || !torrentSummary.files) {
+      var message = ''
+      if (torrentSummary.error === 'path-missing') {
+        // Special case error: this torrent's download dir or file is missing
+        message = 'Missing path: ' + TorrentSummary.getFileOrFolder(torrentSummary)
+      } else if (torrentSummary.error) {
+        // General error for this torrent: just show the message
+        message = torrentSummary.error.message || torrentSummary.error
+      } else if (torrentSummary.status === 'paused') {
+        // No file info, no infohash, and we're not trying to download from the DHT
+        message = 'Failed to load torrent info. Click the download button to try again...'
+      } else {
+        // No file info, no infohash, trying to load from the DHT
+        message = 'Downloading torrent info...'
+      }
+      filesElement = (
+        <div key='files' className='files warning'>
+          {message}
+        </div>
+      )
     } else {
       // We do know the files. List them and show download stats for each one
       var fileRows = torrentSummary.files
@@ -255,7 +298,8 @@ module.exports = class TorrentList extends React.Component {
     var isSelected = torrentSummary.selections && torrentSummary.selections[index]
     var isDone = false // Are we finished torrenting it?
     var progress = ''
-    if (torrentSummary.progress && torrentSummary.progress.files) {
+    if (torrentSummary.progress && torrentSummary.progress.files &&
+        torrentSummary.progress.files[index]) {
       var fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
       progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
@@ -326,4 +370,17 @@ module.exports = class TorrentList extends React.Component {
       </div>
     )
   }
+}
+
+function getErrorMessage (torrentSummary) {
+  var err = torrentSummary.error
+  if (err === 'path-missing') {
+    return (
+      <span>
+        Path missing.<br />
+        Fix and restart the app, or delete the torrent.
+      </span>
+    )
+  }
+  return 'Error'
 }

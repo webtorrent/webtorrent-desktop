@@ -1,17 +1,51 @@
 # WebTorrent Desktop Version History
 
+## v0.10.0 - 2016-08-05
+
+### Added
+
+- Drag-and-drop magnet links (selected text) is now supported (#284)
+- Windows: Add "User Tasks" shortcuts to app icon in Start Menu (#114)
+- Linux: Show badge count for completed torrent downloads
+
+### Changed
+
+- Change WebTorrent Desktop peer ID prefix to 'WD' to distinguish from WebTorrent in the browser, 'WW' (#688)
+- Switch UI to React to improve UI rendering speed (#729)
+  - The primary bottleneck was actually `hyperx`, not `virtual-dom`.
+- Update Electron to 1.3.2 (#738) (#739) (#740) (#747) (#756)
+  - Mac 10.9: Fix the fullscreen button showing
+  - Mac 10.9: Fix window having border
+  - Mac 10.9: Fix occasional crash
+  - Mac: Update Squirrel.Mac to 0.2.1 (fixes situations in which updates would not get applied)
+  - Mac: Fix window not showing in Window menu
+  - Mac: Fix context menu always choosing first item by default
+  - Linux: Fix startup crashes (some Linux distros)
+  - Linux: Fix menubar not hiding after entering fullscreen (some Linux distros)
+- Improved location history (back/forward buttons) to fix rare exceptions (#687) (#748)
+  - Location history abstraction released independently as [`location-history`](https://www.npmjs.com/package/location-history)
+
+### Fixed
+
+- When streaming to VLC, set VLC window title to torrent file name (#746)
+- Fix "Cannot read property 'numPiecesPresent' of undefined" exception (#695)
+- Fix rare case where config file could not be completely written (#733)
+
 ## v0.9.0 - 2016-07-20
 
 ### Added
+
 - Save selected subtitles
 - Ask for confirmation before deleting torrents
 - Support Debian Jessie
 
 ### Changed
+
 - Only send telemetry in production
 - Clean up the code. Split main.js, refactor lots of things
 
 ### Fixed
+
 - Fix state.playing.jumpToTime behavior
 - Remove torrent file and poster image when deleting a torrent
 

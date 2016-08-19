@@ -10,7 +10,6 @@ var config = require('../config')
 var crashReporter = require('../crash-reporter')
 var dialog = require('./dialog')
 var dock = require('./dock')
-var handlers = require('./handlers')
 var ipc = require('./ipc')
 var log = require('./log')
 var menu = require('./menu')
@@ -23,7 +22,11 @@ var windows = require('./windows')
 var shouldQuit = false
 var argv = sliceArgv(process.argv)
 
-if (!argv.includes('--dev')) process.env.NODE_ENV = 'production'
+if (config.IS_PRODUCTION) {
+  // When Electron is running in production mode (packaged app), then run React
+  // in production mode too.
+  process.env.NODE_ENV = 'production'
+}
 
 if (process.platform === 'win32') {
   shouldQuit = squirrelWin32.handleEvent(argv[0])
@@ -107,7 +110,6 @@ function init () {
 function delayedInit () {
   announcement.init()
   dock.init()
-  handlers.install()
   tray.init()
   updater.init()
   userTasks.init()

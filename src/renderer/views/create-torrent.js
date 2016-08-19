@@ -77,7 +77,7 @@ module.exports = class CreateTorrentPage extends React.Component {
           </div>
           <div key='trackers' className='torrent-attribute'>
             <label>Trackers:</label>
-            <textarea className='torrent-attribute torrent-trackers' value={trackers}></textarea>
+            <textarea className='torrent-attribute torrent-trackers' defaultValue={trackers}></textarea>
           </div>
           <div key='private' className='torrent-attribute'>
             <label>Private:</label>
@@ -89,7 +89,7 @@ module.exports = class CreateTorrentPage extends React.Component {
           </div>
         </div>
         <div key='buttons' className='float-right'>
-          <button key='cancel' className='button-flat light' onClick={dispatcher('back')}>Cancel</button>
+          <button key='cancel' className='button-flat light' onClick={dispatcher('cancel')}>Cancel</button>
           <button key='create' className='button-raised' onClick={handleOK}>Create Torrent</button>
         </div>
       </div>

@@ -1,11 +1,10 @@
 module.exports = {
   init,
-  onPlayerClose,
-  onPlayerOpen,
+  setPlayerOpen,
+  setWindowFocus,
+  setAllowNav,
   onToggleAlwaysOnTop,
-  onToggleFullScreen,
-  onWindowBlur,
-  onWindowFocus
+  onToggleFullScreen
 }
 
 var electron = require('electron')
@@ -24,26 +23,28 @@ function init () {
   electron.Menu.setApplicationMenu(menu)
 }
 
-function onPlayerClose () {
-  getMenuItem('Play/Pause').enabled = false
-  getMenuItem('Increase Volume').enabled = false
-  getMenuItem('Decrease Volume').enabled = false
-  getMenuItem('Step Forward').enabled = false
-  getMenuItem('Step Backward').enabled = false
-  getMenuItem('Increase Speed').enabled = false
-  getMenuItem('Decrease Speed').enabled = false
-  getMenuItem('Add Subtitles File...').enabled = false
+function setPlayerOpen (flag) {
+  getMenuItem('Play/Pause').enabled = flag
+  getMenuItem('Increase Volume').enabled = flag
+  getMenuItem('Decrease Volume').enabled = flag
+  getMenuItem('Step Forward').enabled = flag
+  getMenuItem('Step Backward').enabled = flag
+  getMenuItem('Increase Speed').enabled = flag
+  getMenuItem('Decrease Speed').enabled = flag
+  getMenuItem('Add Subtitles File...').enabled = flag
 }
 
-function onPlayerOpen () {
-  getMenuItem('Play/Pause').enabled = true
-  getMenuItem('Increase Volume').enabled = true
-  getMenuItem('Decrease Volume').enabled = true
-  getMenuItem('Step Forward').enabled = true
-  getMenuItem('Step Backward').enabled = true
-  getMenuItem('Increase Speed').enabled = true
-  getMenuItem('Decrease Speed').enabled = true
-  getMenuItem('Add Subtitles File...').enabled = true
+function setWindowFocus (flag) {
+  getMenuItem('Full Screen').enabled = flag
+  getMenuItem('Float on Top').enabled = flag
+}
+
+// Disallow opening more screens on top of the current one.
+function setAllowNav (flag) {
+  getMenuItem('Preferences').enabled = flag
+  getMenuItem('Create New Torrent...').enabled = flag
+  var item = getMenuItem('Create New Torrent from File...')
+  if (item) item.enabled = flag
 }
 
 function onToggleAlwaysOnTop (flag) {
@@ -52,16 +53,6 @@ function onToggleAlwaysOnTop (flag) {
 
 function onToggleFullScreen (flag) {
   getMenuItem('Full Screen').checked = flag
-}
-
-function onWindowBlur () {
-  getMenuItem('Full Screen').enabled = false
-  getMenuItem('Float on Top').enabled = false
-}
-
-function onWindowFocus () {
-  getMenuItem('Full Screen').enabled = true
-  getMenuItem('Float on Top').enabled = true
 }
 
 function getMenuItem (label) {
@@ -130,14 +121,6 @@ function getMenuTemplate () {
         },
         {
           role: 'selectall'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Preferences',
-          accelerator: 'CmdOrCtrl+,',
-          click: () => windows.main.dispatch('preferences')
         }
       ]
     },
@@ -349,6 +332,17 @@ function getMenuTemplate () {
       label: 'Create New Torrent from File...',
       click: () => dialog.openSeedFile()
     })
+
+    // Edit menu (Windows, Linux)
+    template[1].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Preferences',
+        accelerator: 'CmdOrCtrl+,',
+        click: () => windows.main.dispatch('preferences')
+      })
 
     // Help menu (Windows, Linux)
     template[4].submenu.push(
