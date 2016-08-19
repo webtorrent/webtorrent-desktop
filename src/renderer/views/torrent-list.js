@@ -359,14 +359,14 @@ module.exports = class TorrentList extends React.Component {
       <div key='radial-progress' className={'radial-progress ' + cssClass}>
         <div key='circle' className='circle'>
           <div key='mask-full' className='mask full' style={transformFill}>
-            <div key='fill' className='fill' style={transformFill}></div>
+            <div key='fill' className='fill' style={transformFill} />
           </div>
           <div key='mask-half' className='mask half'>
-            <div key='fill' className='fill' style={transformFill}></div>
-            <div key='fill-fix' className='fill fix' style={transformFix}></div>
+            <div key='fill' className='fill' style={transformFill} />
+            <div key='fill-fix' className='fill fix' style={transformFix} />
           </div>
         </div>
-        <div key='inset' className='inset'></div>
+        <div key='inset' className='inset' />
       </div>
     )
   }

@@ -232,7 +232,7 @@ function renderAudioMetadata (state) {
   }
 
   // Align the title with the other info, if available. Otherwise, center title
-  var emptyLabel = (<label></label>)
+  var emptyLabel = (<label />)
   elems.unshift((
     <div key='title' className='audio-title'>
       {elems.length ? emptyLabel : undefined}{title}
@@ -380,16 +380,16 @@ function renderPlayerControls (state) {
       <div
         key='cursor'
         className='playback-cursor'
-        style={playbackCursorStyle}>
-      </div>
+        style={playbackCursorStyle}
+      />
       <div
         key='scrub-bar'
         className='scrub-bar'
         draggable='true'
         onDragStart={handleDragStart}
         onClick={handleScrub}
-        onDrag={handleScrub}>
-      </div>
+        onDrag={handleScrub}
+      />
     </div>,
 
     <i
@@ -593,7 +593,7 @@ function renderLoadingBar (state) {
       width: (100 * part.count / fileProg.numPieces) + '%'
     }
 
-    return (<div key={i} className='loading-bar-part' style={style}></div>)
+    return (<div key={i} className='loading-bar-part' style={style} />)
   })
   return (<div key='loading-bar' className='loading-bar'>{loadingBarElems}</div>)
 }

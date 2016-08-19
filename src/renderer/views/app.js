@@ -81,7 +81,7 @@ module.exports = class App extends React.Component {
     var ModalContents = Modals[state.modal.id]
     return (
       <div key='modal' className='modal'>
-        <div key='modal-background' className='modal-background'></div>
+        <div key='modal-background' className='modal-background' />
         <div key='modal-content' className='modal-content'>
           <ModalContents state={state} />
         </div>
