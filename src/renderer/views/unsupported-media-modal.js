@@ -1,5 +1,6 @@
 const React = require('react')
 const electron = require('electron')
+const path = require('path')
 
 const {dispatcher} = require('../lib/dispatcher')
 
@@ -10,11 +11,15 @@ module.exports = class UnsupportedMediaModal extends React.Component {
     var message = (err && err.getMessage)
       ? err.getMessage()
       : err
-    var actionButton = state.modal.vlcInstalled
-      ? (<button className='button-raised' onClick={dispatcher('vlcPlay')}>Play in VLC</button>)
+    var playerPath = state.saved.prefs.externalPlayerPath
+    var playerName = playerPath
+      ? path.basename(playerPath).split('.')[0]
+      : 'VLC'
+    var actionButton = state.modal.externalPlayerInstalled
+      ? (<button className='button-raised' onClick={dispatcher('openExternalPlayer')}>Play in {playerName}</button>)
       : (<button className='button-raised' onClick={() => this.onInstall}>Install VLC</button>)
-    var vlcMessage = state.modal.vlcNotFound
-      ? 'Couldn\'t run VLC. Please make sure it\'s installed.'
+    var playerMessage = state.modal.externalPlayerNotFound
+      ? 'Couldn\'t run external player. Please make sure it\'s installed.'
       : ''
     return (
       <div>
@@ -24,7 +29,7 @@ module.exports = class UnsupportedMediaModal extends React.Component {
           <button className='button-flat' onClick={dispatcher('backToList')}>Cancel</button>
           {actionButton}
         </p>
-        <p className='error-text'>{vlcMessage}</p>
+        <p className='error-text'>{playerMessage}</p>
       </div>
     )
   }
@@ -34,6 +39,6 @@ module.exports = class UnsupportedMediaModal extends React.Component {
 
     // TODO: dcposch send a dispatch rather than modifying state directly
     var state = this.props.state
-    state.modal.vlcInstalled = true // Assume they'll install it successfully
+    state.modal.externalPlayerInstalled = true // Assume they'll install it successfully
   }
 }
