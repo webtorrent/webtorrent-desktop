@@ -198,14 +198,14 @@ const dispatchHandlers = {
   'checkForSubtitles': () => controllers.subtitles.checkForSubtitles(),
   'addSubtitles': (files, autoSelect) => controllers.subtitles.addSubtitles(files, autoSelect),
 
-  // Local media: <video>, <audio>, VLC
+  // Local media: <video>, <audio>, external players
   'mediaStalled': () => controllers.media.mediaStalled(),
   'mediaError': (err) => controllers.media.mediaError(err),
   'mediaSuccess': () => controllers.media.mediaSuccess(),
   'mediaTimeUpdate': () => controllers.media.mediaTimeUpdate(),
   'mediaMouseMoved': () => controllers.media.mediaMouseMoved(),
-  'vlcPlay': () => controllers.media.vlcPlay(),
-  'vlcNotFound': () => controllers.media.vlcNotFound(),
+  'openExternalPlayer': () => controllers.media.openExternalPlayer(),
+  'externalPlayerNotFound': () => controllers.media.externalPlayerNotFound(),
 
   // Remote casting: Chromecast, Airplay, etc
   'toggleCastMenu': (deviceType) => lazyLoadCast().toggleMenu(deviceType),

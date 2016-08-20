@@ -29,6 +29,10 @@ function run (state) {
     migrate_0_11_0(state.saved)
   }
 
+  if (semver.lt(version, '0.12.0')) {
+    migrate_0_12_0(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
@@ -103,4 +107,11 @@ function migrate_0_11_0 (saved) {
     // The app used to make itself the default torrent file handler automatically
     saved.prefs.isFileHandler = true
   }
+}
+
+function migrate_0_12_0 (saved) {
+  if (saved.prefs.openExternalPlayer == null && saved.prefs.playInVlc != null) {
+    saved.prefs.openExternalPlayer = saved.prefs.playInVlc
+  }
+  delete saved.prefs.playInVlc
 }

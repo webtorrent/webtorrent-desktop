@@ -2,6 +2,7 @@ const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
 const zeroFill = require('zero-fill')
+const path = require('path')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
@@ -281,9 +282,12 @@ function renderCastScreen (state) {
     castIcon = 'tv'
     castType = 'DLNA'
     isCast = true
-  } else if (state.playing.location === 'vlc') {
+  } else if (state.playing.location === 'external') {
+    // TODO: get the player name in a more reliable way
+    var playerPath = state.saved.prefs.externalPlayerPath
+    var playerName = playerPath ? path.basename(playerPath).split('.')[0] : 'VLC'
     castIcon = 'tv'
-    castType = 'VLC'
+    castType = playerName
     isCast = false
   } else if (state.playing.location === 'error') {
     castIcon = 'error_outline'

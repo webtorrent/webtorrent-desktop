@@ -1,6 +1,7 @@
 const React = require('react')
 const remote = require('electron').remote
 const dialog = remote.dialog
+const path = require('path')
 
 const {dispatch} = require('../lib/dispatcher')
 
@@ -34,22 +35,9 @@ function renderPlaybackSection (state) {
     description: '',
     icon: 'settings'
   }, [
-    renderPlayInVlcSelector(state)
+    renderOpenExternalPlayerSelector(state),
+    renderExternalPlayerSelector(state)
   ])
-}
-
-function renderPlayInVlcSelector (state) {
-  return renderCheckbox({
-    key: 'play-in-vlc',
-    label: 'Play in VLC',
-    description: 'Media will play in VLC',
-    property: 'playInVlc',
-    value: state.saved.prefs.playInVlc
-  },
-  state.unsaved.prefs.playInVlc,
-  function (value) {
-    dispatch('updatePreferences', 'playInVlc', value)
-  })
 }
 
 function renderDownloadPathSelector (state) {
@@ -90,6 +78,41 @@ function renderFileHandlers (state) {
     var isFileHandler = state.unsaved.prefs.isFileHandler
     dispatch('updatePreferences', 'isFileHandler', !isFileHandler)
   }
+}
+
+function renderExternalPlayerSelector (state) {
+  return renderFileSelector({
+    label: 'External Media Player',
+    description: 'Progam that will be used to play media externally',
+    property: 'externalPlayerPath',
+    options: {
+      title: 'Select media player executable',
+      properties: [ 'openFile' ]
+    }
+  },
+  state.unsaved.prefs.externalPlayerPath || '<VLC>',
+  function (filePath) {
+    if (path.extname(filePath) === '.app') {
+      // Get executable in packaged mac app
+      var name = path.basename(filePath, '.app')
+      filePath += '/Contents/MacOS/' + name
+    }
+    dispatch('updatePreferences', 'externalPlayerPath', filePath)
+  })
+}
+
+function renderOpenExternalPlayerSelector (state) {
+  return renderCheckbox({
+    key: 'open-external-player',
+    label: 'Play in External Player',
+    description: 'Media will play in external player',
+    property: 'openExternalPlayer',
+    value: state.saved.prefs.openExternalPlayer
+  },
+  state.unsaved.prefs.openExternalPlayer,
+  function (value) {
+    dispatch('updatePreferences', 'openExternalPlayer', value)
+  })
 }
 
 // Renders a prefs section.
