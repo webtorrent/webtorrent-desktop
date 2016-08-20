@@ -13,7 +13,10 @@ var blockId = 0
  * display.
  */
 function enable () {
-  disable() // Stop the previous power saver block, if one exists.
+  if (electron.powerSaveBlocker.isStarted(blockId)) {
+    // If a power saver block already exists, do nothing.
+    return
+  }
   blockId = electron.powerSaveBlocker.start('prevent-display-sleep')
   log(`powerSaveBlocker.enable: ${blockId}`)
 }
@@ -23,6 +26,7 @@ function enable () {
  */
 function disable () {
   if (!electron.powerSaveBlocker.isStarted(blockId)) {
+    // If a power saver block does not exist, do nothing.
     return
   }
   electron.powerSaveBlocker.stop(blockId)
