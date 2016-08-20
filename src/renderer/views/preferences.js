@@ -25,8 +25,7 @@ function renderGeneralSection (state) {
     icon: 'settings'
   }, [
     renderDownloadPathSelector(state),
-    renderFileHandlers(state),
-    renderExternalPlayerSelector(state)
+    renderFileHandlers(state)
   ])
 }
 
@@ -36,22 +35,9 @@ function renderPlaybackSection (state) {
     description: '',
     icon: 'settings'
   }, [
-    renderPlayInVlcSelector(state)
+    renderOpenExternalPlayerSelector(state),
+    renderExternalPlayerSelector(state)
   ])
-}
-
-function renderPlayInVlcSelector (state) {
-  return renderCheckbox({
-    key: 'play-in-vlc',
-    label: 'Play in VLC',
-    description: 'Media will play in VLC',
-    property: 'playInVlc',
-    value: state.saved.prefs.playInVlc
-  },
-  state.unsaved.prefs.playInVlc,
-  function (value) {
-    dispatch('updatePreferences', 'playInVlc', value)
-  })
 }
 
 function renderDownloadPathSelector (state) {
@@ -104,7 +90,7 @@ function renderExternalPlayerSelector (state) {
       properties: [ 'openFile' ]
     }
   },
-  state.unsaved.prefs.externalPlayerPath || '<VLC>', // TODO: should we get/store vlc path instead?
+  state.unsaved.prefs.externalPlayerPath || '<VLC>',
   function (filePath) {
     if (path.extname(filePath) === '.app') {
       // Get executable in packaged mac app
@@ -112,6 +98,20 @@ function renderExternalPlayerSelector (state) {
       filePath += '/Contents/MacOS/' + name
     }
     dispatch('updatePreferences', 'externalPlayerPath', filePath)
+  })
+}
+
+function renderOpenExternalPlayerSelector (state) {
+  return renderCheckbox({
+    key: 'open-external-player',
+    label: 'Play in External Player',
+    description: 'Media will play in external player',
+    property: 'openExternalPlayer',
+    value: state.saved.prefs.openExternalPlayer
+  },
+  state.unsaved.prefs.openExternalPlayer,
+  function (value) {
+    dispatch('updatePreferences', 'openExternalPlayer', value)
   })
 }
 

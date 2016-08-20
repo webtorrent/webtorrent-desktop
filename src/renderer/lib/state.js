@@ -100,7 +100,10 @@ function setupSavedState (cb) {
 
   var saved = {
     prefs: {
-      downloadPath: config.DEFAULT_DOWNLOAD_PATH
+      downloadPath: config.DEFAULT_DOWNLOAD_PATH,
+      isFileHandler: false,
+      openExternalPlayer: false,
+      externalPlayerPath: null
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */

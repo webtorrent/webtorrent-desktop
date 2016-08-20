@@ -13,7 +13,7 @@ const State = require('../lib/state')
 const ipcRenderer = electron.ipcRenderer
 
 // Controls playback of torrents and files within torrents
-// both local (<video>,<audio>,VLC) and remote (cast)
+// both local (<video>,<audio>,external player) and remote (cast)
 module.exports = class PlaybackController {
   constructor (state, config, update) {
     this.state = state
@@ -242,8 +242,8 @@ module.exports = class PlaybackController {
       }
 
       // play in VLC if set as default player (Preferences / Playback / Play in VLC)
-      if (this.state.saved.prefs.playInVlc) {
-        dispatch('vlcPlay')
+      if (this.state.saved.prefs.openExternalPlayer) {
+        dispatch('openExternalPlayer')
         this.update()
         cb()
         return

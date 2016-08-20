@@ -198,7 +198,7 @@ const dispatchHandlers = {
   'checkForSubtitles': () => controllers.subtitles.checkForSubtitles(),
   'addSubtitles': (files, autoSelect) => controllers.subtitles.addSubtitles(files, autoSelect),
 
-  // Local media: <video>, <audio>, VLC
+  // Local media: <video>, <audio>, external players
   'mediaStalled': () => controllers.media.mediaStalled(),
   'mediaError': (err) => controllers.media.mediaError(err),
   'mediaSuccess': () => controllers.media.mediaSuccess(),
