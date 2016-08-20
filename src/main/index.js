@@ -34,8 +34,8 @@ if (process.platform === 'win32') {
 }
 
 if (!shouldQuit) {
-  // Prevent multiple instances of app from running at same time. New instances signal
-  // this instance and quit.
+  // Prevent multiple instances of app from running at same time. New instances
+  // signal this instance and quit.
   shouldQuit = app.makeSingleInstance(onAppOpen)
   if (shouldQuit) {
     app.quit()
@@ -159,7 +159,10 @@ function processArgv (argv) {
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
-    } else {
+    } else if (arg !== '.') {
+      // Ignore '.' argument, which gets misinterpreted as a torrent id, when a
+      // development copy of WebTorrent is started while a production version is
+      // running.
       torrentIds.push(arg)
     }
   })
