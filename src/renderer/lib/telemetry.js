@@ -32,6 +32,8 @@ function init (state) {
 
   if (config.IS_PRODUCTION) {
     postToServer()
+    // If the user keeps WebTorrent running for a long time, post every 24h
+    setInterval(postToServer, 24 * 3600 * 1000)
   } else {
     // Development: telemetry used only for local debugging
     // Empty uncaught errors, etc at the start of every run
