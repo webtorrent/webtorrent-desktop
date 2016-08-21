@@ -26,7 +26,7 @@ function spawn (path, url, title) {
   // Try to find and use VLC if external player is not specified
   vlcCommand(function (err, vlcPath) {
     if (err) return windows.main.dispatch('externalPlayerNotFound')
-    var args = ['--play-and-exit', '--video-on-top', '--no-video-title-show', '--quiet', `--meta-title=${title}`, url]
+    var args = ['--play-and-exit', '--video-on-top', '--quiet', `--meta-title=${JSON.stringify(title)}`, url]
     spawnExternal(vlcPath, args)
   })
 }
