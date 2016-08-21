@@ -41,7 +41,7 @@ function kill () {
 function spawnExternal (path, args) {
   log('Running external media player:', path + ' ' + args.join(' '))
 
-  proc = cp.spawn(path, args)
+  proc = cp.spawn(path, args, {stdio: 'ignore'})
 
   // If it works, close the modal after a second
   var closeModalTimeout = setTimeout(() =>
