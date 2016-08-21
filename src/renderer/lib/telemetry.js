@@ -118,8 +118,6 @@ function getApproxNumTorrents (state) {
 
 // An uncaught error happened in the main process or in one of the windows
 function logUncaughtError (procName, err) {
-  console.error('uncaught error', procName, err)
-
   // Not initialized yet? Ignore.
   // Hopefully uncaught errors immediately on startup are fixed in dev
   if (!telemetry) return
