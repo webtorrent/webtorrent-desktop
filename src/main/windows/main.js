@@ -143,7 +143,11 @@ function setBounds (bounds, maximize) {
     }
     // Resize the window's content area (so window border doesn't need to be taken
     // into account)
-    main.win.setContentBounds(bounds, true)
+    if (bounds.contentBounds) {
+      main.win.setContentBounds(bounds, true)
+    } else {
+      main.win.setBounds(bounds, true)
+    }
   } else {
     log('setBounds: not setting bounds because of window maximization')
   }
