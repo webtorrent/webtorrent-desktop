@@ -52,5 +52,6 @@ function getByKey (state, torrentKey) {
 // module. Store root folder explicitly to avoid hacky path processing below.
 function getFileOrFolder (torrentSummary) {
   var ts = torrentSummary
+  if (!ts.path || !ts.files || ts.files.length === 0) return null
   return path.join(ts.path, ts.files[0].path.split('/')[0])
 }
