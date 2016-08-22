@@ -93,6 +93,10 @@ module.exports = class PlaybackController {
 
   // Skip (aka seek) to a specific point, in seconds
   skipTo (time) {
+    if (!Number.isFinite(time)) {
+      console.error('Tried to skip to a non-finite time ' + time)
+      return console.trace()
+    }
     if (isCasting(this.state)) Cast.seek(time)
     else this.state.playing.jumpToTime = time
   }
