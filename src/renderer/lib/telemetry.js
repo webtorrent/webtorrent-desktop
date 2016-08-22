@@ -125,7 +125,10 @@ function logUncaughtError (procName, err) {
   var message, stack
   if (err instanceof Error) {
     message = err.message
-    stack = err.stack
+    // Remove the first part of each file path in the stack trace.
+    // - Privacy: remove personal info like C:\Users\<full name>
+    // - Aggregation: this lets us find which stacktraces occur often
+    stack = err.stack.replace(/\(.*app.asar/g, '(...')
   } else {
     message = String(err)
     stack = ''
