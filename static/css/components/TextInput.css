@@ -1,0 +1,18 @@
+.TextInput {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  font-size: 14px;
+  outline: none;
+  padding: 3px 6px;
+  width: 200px;
+  -webkit-app-region: no-drag;
+  cursor: default;
+}
+
+.TextInput.light {
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.TextInput.dark {
+  border: 1px solid rgba(0, 0, 0, 0.8);
+}
