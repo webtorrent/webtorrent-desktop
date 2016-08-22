@@ -280,6 +280,9 @@ function installLinux () {
   var config = require('../config')
   var log = require('./log')
 
+  // Do not install in user dir if running on system
+  if (/^\/opt/.test(process.execPath)) return
+
   installDesktopFile()
   installIconFile()
 
