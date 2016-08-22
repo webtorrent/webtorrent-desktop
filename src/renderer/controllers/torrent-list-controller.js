@@ -263,7 +263,7 @@ function deleteFile (path) {
 // Delete all files in a torrent
 function moveItemToTrash (torrentSummary) {
   var filePath = TorrentSummary.getFileOrFolder(torrentSummary)
-  ipcRenderer.send('moveItemToTrash', filePath)
+  if (filePath) ipcRenderer.send('moveItemToTrash', filePath)
 }
 
 function showItemInFolder (torrentSummary) {

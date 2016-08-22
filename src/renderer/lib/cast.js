@@ -396,7 +396,9 @@ function stop () {
 
 function stoppedCasting () {
   state.playing.location = 'local'
-  state.playing.jumpToTime = state.playing.currentTime
+  state.playing.jumpToTime = Number.isFinite(state.playing.currentTime)
+    ? state.playing.currentTime
+    : 0
   update()
 }
 
