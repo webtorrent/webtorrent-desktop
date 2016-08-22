@@ -38,8 +38,6 @@ function run (state) {
 }
 
 function migrate_0_7_0 (saved) {
-  console.log('migrate to 0.7.0')
-
   var fs = require('fs-extra')
   var path = require('path')
 
@@ -54,7 +52,6 @@ function migrate_0_7_0 (saved) {
     // * Finally, now we're getting rid of torrentPath altogether
     var src, dst
     if (ts.torrentPath) {
-      console.log('replacing torrentPath %s', ts.torrentPath)
       if (path.isAbsolute(ts.torrentPath) || ts.torrentPath.startsWith('..')) {
         src = ts.torrentPath
       } else {
@@ -71,7 +68,6 @@ function migrate_0_7_0 (saved) {
 
     // Replace posterURL with posterFileName
     if (ts.posterURL) {
-      console.log('replacing posterURL %s', ts.posterURL)
       var extension = path.extname(ts.posterURL)
       src = path.isAbsolute(ts.posterURL)
         ? ts.posterURL
@@ -95,7 +91,7 @@ function migrate_0_7_0 (saved) {
 }
 
 function migrate_0_7_2 (saved) {
-  if (!saved.prefs) {
+  if (saved.prefs == null) {
     saved.prefs = {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH
     }
@@ -103,7 +99,7 @@ function migrate_0_7_2 (saved) {
 }
 
 function migrate_0_11_0 (saved) {
-  if (saved.prefs.isFileHandler === undefined) {
+  if (saved.prefs.isFileHandler == null) {
     // The app used to make itself the default torrent file handler automatically
     saved.prefs.isFileHandler = true
   }

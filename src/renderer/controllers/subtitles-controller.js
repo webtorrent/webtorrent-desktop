@@ -3,6 +3,8 @@ const fs = require('fs-extra')
 const path = require('path')
 const parallel = require('run-parallel')
 
+const remote = electron.remote
+
 const {dispatch} = require('../lib/dispatcher')
 
 module.exports = class SubtitlesController {
@@ -11,7 +13,7 @@ module.exports = class SubtitlesController {
   }
 
   openSubtitles () {
-    electron.remote.dialog.showOpenDialog({
+    remote.dialog.showOpenDialog({
       title: 'Select a subtitles file.',
       filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
       properties: [ 'openFile' ]
