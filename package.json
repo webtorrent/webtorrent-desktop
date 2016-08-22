@@ -56,6 +56,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "nobin-debian-installer": "^0.0.10",
+    "nodemon": "^1.10.2",
     "open": "0.0.5",
     "plist": "^2.0.1",
     "rimraf": "^2.5.2",
@@ -94,6 +95,7 @@
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
     "test": "standard && node ./bin/check-deps.js",
-    "update-authors": "./bin/update-authors.sh"
+    "update-authors": "./bin/update-authors.sh",
+    "watch": "nodemon --exec 'npm run start' --ext js,pug,css"
   }
 }
