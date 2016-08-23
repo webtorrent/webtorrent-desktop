@@ -4,9 +4,31 @@ const path = require('path')
 const prettyBytes = require('prettier-bytes')
 
 const {dispatch, dispatcher} = require('../lib/dispatcher')
-const CreateTorrentErrorPage = require('./create-torrent-error-page')
+const CreateTorrentErrorPage = require('../components/create-torrent-error-page')
 
 class CreateTorrentPage extends React.Component {
+  handleSubmit () {
+    var announceList = document.querySelector('.torrent-trackers').value
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s !== '')
+    var isPrivate = document.querySelector('.torrent-is-private').checked
+    var comment = document.querySelector('.torrent-comment').value.trim()
+    var options = {
+      // We can't let the user choose their own name if we want WebTorrent
+      // to use the files in place rather than creating a new folder.
+      // If we ever want to add support for that:
+      // name: document.querySelector('.torrent-name').value
+      name: defaultName,
+      path: basePath,
+      files: files,
+      announce: announceList,
+      private: isPrivate,
+      comment: comment
+    }
+    dispatch('createTorrent', options)
+  }
+
   render () {
     var state = this.props.state
     var info = state.location.current()
@@ -58,7 +80,7 @@ class CreateTorrentPage extends React.Component {
 
     return (
       <div className='create-torrent'>
-        <h2>Create torrent {defaultName}</h2>
+        <PageHeading>Create torrent {defaultName}</PageHeading>
         <div key='info' className='torrent-info'>
           {torrentInfo}
         </div>
@@ -90,33 +112,10 @@ class CreateTorrentPage extends React.Component {
         </div>
         <div key='buttons' className='float-right'>
           <button key='cancel' className='button-flat light' onClick={dispatcher('cancel')}>Cancel</button>
-          <button key='create' className='button-raised' onClick={handleOK}>Create Torrent</button>
+          <button key='create' className='button-raised' onClick={this.handleSubmit}>Create Torrent</button>
         </div>
       </div>
     )
-
-    function handleOK () {
-      // TODO: dcposch use React refs instead
-      var announceList = document.querySelector('.torrent-trackers').value
-        .split('\n')
-        .map((s) => s.trim())
-        .filter((s) => s !== '')
-      var isPrivate = document.querySelector('.torrent-is-private').checked
-      var comment = document.querySelector('.torrent-comment').value.trim()
-      var options = {
-        // We can't let the user choose their own name if we want WebTorrent
-        // to use the files in place rather than creating a new folder.
-        // If we ever want to add support for that:
-        // name: document.querySelector('.torrent-name').value
-        name: defaultName,
-        path: basePath,
-        files: files,
-        announce: announceList,
-        private: isPrivate,
-        comment: comment
-      }
-      dispatch('createTorrent', options)
-    }
   }
 }
 

@@ -6,7 +6,7 @@ const colors = require('material-ui/styles/colors')
 const RaisedButton = require('material-ui/RaisedButton').default
 
 const PageHeading = require('../components/PageHeading')
-const PathSelector = require('../componets/PathSelector')
+const PathSelector = require('../components/PathSelector')
 
 const {dispatch} = require('../lib/dispatcher')
 

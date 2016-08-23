@@ -2,11 +2,11 @@ const React = require('react')
 
 const {dispatcher} = require('../lib/dispatcher')
 
-module.exports = class Header extends React.Component {
+class Header extends React.Component {
   render () {
     var loc = this.props.state.location
     return (
-      <div key='header' className='header'>
+      <div className='header'>
         {this.getTitle()}
         <div className='nav left float-left'>
           <i
@@ -48,3 +48,5 @@ module.exports = class Header extends React.Component {
     )
   }
 }
+
+module.exports = Header

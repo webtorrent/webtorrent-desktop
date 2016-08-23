@@ -4,7 +4,7 @@ const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').def
 const getMuiTheme = require('material-ui/styles/getMuiTheme').default
 const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 
-const Header = require('./header')
+const Header = require('../components/Header')
 
 const Views = {
   'home': require('./TorrentListPage'),
@@ -14,24 +14,19 @@ const Views = {
 }
 
 const Modals = {
-  'open-torrent-address-modal': require('./open-torrent-address-modal'),
-  'remove-torrent-modal': require('./remove-torrent-modal'),
-  'update-available-modal': require('./update-available-modal'),
-  'unsupported-media-modal': require('./unsupported-media-modal')
+  'open-torrent-address-modal': require('../components/open-torrent-address-modal'),
+  'remove-torrent-modal': require('../components/remove-torrent-modal'),
+  'update-available-modal': require('../components/update-available-modal'),
+  'unsupported-media-modal': require('../components/unsupported-media-modal')
 }
 
-var muiTheme = getMuiTheme(Object.assign(darkBaseTheme, {
+const MUI_THEME = getMuiTheme(Object.assign(darkBaseTheme, {
   fontFamily: 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
 }))
 
 class App extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = props.state
-  }
-
   render () {
-    var state = this.state
+    var state = this.props.state
 
     // Hide player controls while playing video, if the mouse stays still for a while
     // Never hide the controls when:
@@ -54,7 +49,7 @@ class App extends React.Component {
     if (hideControls) cls.push('hide-video-controls')
 
     var vdom = (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider muiTheme={MUI_THEME}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
           {this.getErrorPopover()}
@@ -68,8 +63,9 @@ class App extends React.Component {
   }
 
   getErrorPopover () {
+    var state = this.props.state
     var now = new Date().getTime()
-    var recentErrors = this.state.errors.filter((x) => now - x.time < 5000)
+    var recentErrors = state.errors.filter((x) => now - x.time < 5000)
     var hasErrors = recentErrors.length > 0
 
     var errorElems = recentErrors.map(function (error, i) {
@@ -85,7 +81,7 @@ class App extends React.Component {
   }
 
   getModal () {
-    var state = this.state
+    var state = this.props.state
     if (!state.modal) return
     var ModalContents = Modals[state.modal.id]
     return (
@@ -99,7 +95,7 @@ class App extends React.Component {
   }
 
   getView () {
-    var state = this.state
+    var state = this.props.state
     var View = Views[state.location.url()]
     return (<View state={state} />)
   }
