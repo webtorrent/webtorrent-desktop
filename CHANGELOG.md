@@ -1,9 +1,25 @@
 # WebTorrent Desktop Version History
 
-## v0.11.0 - 2016-08-19
+## v0.12.0 - 2016-08-23
 
 ### Added
 
+- Custom external media player
+- Linux: add system-wide launcher and icons for Debian, including Ubuntu
+
+### Changed
+
+- Telemetry improvements: redact stacktraces, log app version
+
+### Fixed
+
+- Fix playback and download of default torrents ("missing path" error) (#804)
+- Fix Delete Torrent + Data for newly added magnet links
+- Fix jumpToTime error (#804)
+
+## v0.11.0 - 2016-08-19
+
+### Added
 - New Preference to "Set WebTorrent as default handler for torrents and magnet links" (#771)
 - New Preference to "Always play in VLC" (#674)
 - Check for missing default download path and torrent folders on start up (#776)
