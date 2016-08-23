@@ -1,3 +1,4 @@
+const colors = require('material-ui/styles/colors')
 const React = require('react')
 
 const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
@@ -20,11 +21,15 @@ const Modals = {
   'unsupported-media-modal': require('../components/unsupported-media-modal')
 }
 
-const MUI_THEME = getMuiTheme(Object.assign(darkBaseTheme, {
-  fontFamily: process.platform === 'win32'
-    ? '\'Segoe UI\', sans-serif'
-    : 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
-}))
+darkBaseTheme.fontFamily = process.platform === 'win32'
+  ? '"Segoe UI", sans-serif'
+  : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
+darkBaseTheme.palette.primary1Color = colors.cyan500
+darkBaseTheme.palette.primary2Color = colors.cyan500
+darkBaseTheme.palette.primary3Color = colors.grey600
+darkBaseTheme.palette.accent1Color = colors.redA200
+darkBaseTheme.palette.accent2Color = colors.redA400
+darkBaseTheme.palette.accent3Color = colors.redA100
 
 class App extends React.Component {
   render () {
@@ -51,7 +56,7 @@ class App extends React.Component {
     if (hideControls) cls.push('hide-video-controls')
 
     var vdom = (
-      <MuiThemeProvider muiTheme={MUI_THEME}>
+      <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
           {this.getErrorPopover()}

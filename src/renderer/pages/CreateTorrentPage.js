@@ -5,6 +5,8 @@ const React = require('react')
 
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 
+const FlatButton = require('material-ui/FlatButton').default
+const RaisedButton = require('material-ui/RaisedButton').default
 const TextField = require('material-ui/TextField').default
 
 const CreateTorrentErrorPage = require('../components/create-torrent-error-page')
@@ -107,6 +109,9 @@ class CreateTorrentPage extends React.Component {
           <div className='torrent-attribute'>{this.state.pathPrefix}</div>
         </div>
         <ShowMore
+          style={{
+            marginBottom: 10
+          }}
           hideLabel='Hide advanced settings...'
           showLabel='Show advanced settings...'
         >
@@ -134,9 +139,19 @@ class CreateTorrentPage extends React.Component {
             </div>
           </div>
         </ShowMore>
-        <div key='buttons' className='float-right'>
-          <button key='cancel' className='button-flat light' onClick={dispatcher('cancel')}>Cancel</button>
-          <button key='create' className='button-raised' onClick={this.handleSubmit}>Create Torrent</button>
+        <div className='float-right'>
+          <FlatButton
+            label='Cancel'
+            style={{
+              marginRight: 10
+            }}
+            onClick={dispatcher('cancel')}
+          />
+          <RaisedButton
+            label='Create Torrent'
+            primary
+            onClick={this.handleSubmit}
+          />
         </div>
       </div>
     )

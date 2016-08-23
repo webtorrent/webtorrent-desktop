@@ -39,7 +39,9 @@ class ShowMore extends React.Component {
       ? this.props.hideLabel
       : this.props.showLabel
     return (
-      <div>
+      <div
+        style={this.props.style}
+      >
         {this.state.expanded ? this.props.children : null}
         <FlatButton
           onClick={this.handleClick}

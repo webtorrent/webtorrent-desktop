@@ -124,10 +124,6 @@ table {
  * UTILITY CLASSES
  */
 
-.clickable {
-  cursor: pointer;
-}
-
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -140,26 +136,6 @@ table {
 
 .float-right {
   float: right;
-}
-
-.expand-collapse.expanded::before {
-  content: '▲'
-}
-
-.expand-collapse.collapsed::before {
-  content: '▼'
-}
-
-.expand-collapse::before {
-  margin-right: 5px;
-}
-
-.expand-collapse.collapsed {
-  display: block;
-}
-
-.collapsed {
-  display: none;
 }
 
 /*
