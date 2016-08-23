@@ -31,7 +31,7 @@ function init () {
     return main.win.show()
   }
   var win = main.win = new electron.BrowserWindow({
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: getIconPath(), // Window icon (Windows, Linux)
     minWidth: config.WINDOW_MIN_WIDTH,
