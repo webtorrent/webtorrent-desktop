@@ -65,6 +65,8 @@ module.exports = {
   IS_PORTABLE: isPortable(),
   IS_PRODUCTION: isProduction(),
 
+  LOCALES_PATH: path.join(__dirname, '..', 'static', 'lang'),
+
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: path.join(__dirname, '..'),
   STATIC_PATH: path.join(__dirname, '..', 'static'),

@@ -1,4 +1,5 @@
 const React = require('react')
+const FormattedMessage = require('react-intl').FormattedMessage
 const prettyBytes = require('prettier-bytes')
 
 const TorrentSummary = require('../lib/torrent-summary')
@@ -27,7 +28,8 @@ module.exports = class TorrentList extends React.Component {
     contents.push(...torrentElems)
     contents.push(
       <div key='torrent-placeholder' className='torrent-placeholder'>
-        <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+        <FormattedMessage id='torrent-placeholder' className='ellipsis'
+          defaultMessage={`Drop a torrent file here or paste a magnet link`} />
       </div>
     )
 
