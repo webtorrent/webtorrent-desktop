@@ -4,8 +4,10 @@ module.exports = {
   run
 }
 
-var semver = require('semver')
-var config = require('../../config')
+const semver = require('semver')
+const config = require('../../config')
+const TorrentSummary = require('./torrent-summary')
+const fs = require('fs')
 
 // Change `state.saved` (which will be saved back to config.json on exit) as
 // needed, for example to deal with config.json format changes across versions
@@ -110,4 +112,26 @@ function migrate_0_12_0 (saved) {
     saved.prefs.openExternalPlayer = saved.prefs.playInVlc
   }
   delete saved.prefs.playInVlc
+
+  // Undo a terrible bug where clicking Play on a default torrent on a fresh
+  // install results in a "path missing" error
+  // See https://github.com/feross/webtorrent-desktop/pull/806
+  var defaultTorrentFiles = [
+    '6a9759bffd5c0af65319979fb7832189f4f3c35d.torrent',
+    '88594aaacbde40ef3e2510c47374ec0aa396c08e.torrent',
+    '6a02592d2bbc069628cd5ed8a54f88ee06ac0ba5.torrent',
+    '02767050e0be2fd4db9a2ad6c12416ac806ed6ed.torrent',
+    '3ba219a8634bf7bae3d848192b2da75ae995589d.torrent'
+  ]
+  saved.torrents.forEach(function (torrentSummary) {
+    if (!defaultTorrentFiles.includes(torrentSummary.torrentFileName)) return
+    var fileOrFolder = TorrentSummary.getFileOrFolder(torrentSummary)
+    if (!fileOrFolder) return
+    try {
+      fs.statSync(fileOrFolder)
+    } catch (e) {
+      // Default torrent with "missing path" error. Clear path.
+      delete torrentSummary.path
+    }
+  })
 }

@@ -84,21 +84,30 @@ module.exports = class TorrentListController {
     var s = TorrentSummary.getByKey(this.state, torrentKey)
     if (!s) throw new Error('Missing key: ' + torrentKey)
 
-    // Use Downloads folder by default
-    if (!s.path) s.path = this.state.saved.prefs.downloadPath
+    // New torrent: give it a path
+    if (!s.path) {
+      // Use Downloads folder by default
+      s.path = this.state.saved.prefs.downloadPath
+      return start()
+    }
 
+    // Existing torrent: check that the path is still there
     fs.stat(TorrentSummary.getFileOrFolder(s), function (err) {
       if (err) {
         s.error = 'path-missing'
         return
       }
+      start()
+    })
+
+    function start () {
       ipcRenderer.send('wt-start-torrenting',
         s.torrentKey,
         TorrentSummary.getTorrentID(s),
         s.path,
         s.fileModtimes,
         s.selections)
-    })
+    }
   }
 
   // TODO: use torrentKey, not infoHash
