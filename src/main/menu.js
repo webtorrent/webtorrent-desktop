@@ -42,7 +42,11 @@ function setWindowFocus (flag) {
 // Disallow opening more screens on top of the current one.
 function setAllowNav (flag) {
   getMenuItem('Preferences').enabled = flag
-  getMenuItem('Create New Torrent...').enabled = flag
+  getMenuItem(
+    process.platform === 'darwin'
+      ? 'Create New Torrent...'
+      : 'Create New Torrent from Folder...'
+  ).enabled = flag
   var item = getMenuItem('Create New Torrent from File...')
   if (item) item.enabled = flag
 }
