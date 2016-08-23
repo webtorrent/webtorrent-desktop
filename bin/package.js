@@ -105,7 +105,7 @@ var all = {
   prune: true,
 
   // The Electron version with which the app is built (without the leading 'v')
-  version: require('electron-prebuilt/package.json').version
+  version: require('electron/package.json').version
 }
 
 var darwin = {
