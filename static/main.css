@@ -20,7 +20,7 @@ body {
 }
 
 .app {
-  color: #FFF;
+  color: #FAFAFA; /* grey50 */
   font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.5em;
@@ -91,9 +91,7 @@ table {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: local('Material Icons'),
-       local('MaterialIcons-Regular'),
-       url('../MaterialIcons-Regular.woff2') format('woff2');
+  src: url('MaterialIcons-Regular.woff2') format('woff2');
 }
 
 .icon {
@@ -1024,4 +1022,20 @@ video::-webkit-media-text-track-container {
   width: 32px;
   height: 32px;
   margin: 4px 0 0 4px;
+}
+
+/**
+ * Use this class on Material UI components to get correct native app behavior:
+ *
+ * - Dragging the button should NOT drag the entire app window
+ * - The cursor should be default, not a pointer (hand) like on the web
+ */
+
+.control {
+  -webkit-app-region: no-drag;
+  cursor: default !important;
+}
+
+.control * {
+  cursor: default !important;
 }

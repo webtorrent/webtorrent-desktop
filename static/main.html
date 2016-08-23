@@ -3,22 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>WebTorrent Desktop</title>
-
-    <link rel="stylesheet" href="css/components/Button.css">
-    <link rel="stylesheet" href="css/components/PathSelector.css">
-    <link rel="stylesheet" href="css/components/TextInput.css">
-    <link rel="stylesheet" href="css/pages/PreferencesPage.css">
-
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="main.css">
   </head>
   <body>
-    <!-- React prints a warning if you render to <body> directly -->
     <div id='body'></div>
-    <!-- We can't just say src='...main.js', that breaks require()s -->
-    <script>
-      require('../build/renderer/main.js')
-    </script>
+    <script>require('../build/renderer/main.js')</script>
   </body>
 </html>

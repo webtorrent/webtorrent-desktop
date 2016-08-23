@@ -46,11 +46,14 @@ var BUILT_IN_ELECTRON_MODULES = [ 'electron' ]
 var BUILT_IN_DEPS = [].concat(BUILT_IN_NODE_MODULES, BUILT_IN_ELECTRON_MODULES)
 
 var EXECUTABLE_DEPS = [
-  'gh-release',
-  'standard',
   'babel-cli',
   'babel-plugin-syntax-jsx',
-  'babel-plugin-transform-react-jsx'
+  'babel-plugin-transform-es2015-destructuring',
+  'babel-plugin-transform-object-rest-spread',
+  'babel-plugin-transform-react-jsx',
+  'gh-release',
+  'nodemon',
+  'standard'
 ]
 
 main()

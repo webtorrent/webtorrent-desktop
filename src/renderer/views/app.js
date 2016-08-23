@@ -1,5 +1,9 @@
 const React = require('react')
 
+const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
+const getMuiTheme = require('material-ui/styles/getMuiTheme').default
+const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
+
 const Header = require('./header')
 
 const Views = {
@@ -16,8 +20,11 @@ const Modals = {
   'unsupported-media-modal': require('./unsupported-media-modal')
 }
 
-module.exports = class App extends React.Component {
+var muiTheme = getMuiTheme(Object.assign(darkBaseTheme, {
+  fontFamily: 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
+}))
 
+module.exports = class App extends React.Component {
   constructor (props) {
     super(props)
     this.state = props.state
@@ -47,12 +54,14 @@ module.exports = class App extends React.Component {
     if (hideControls) cls.push('hide-video-controls')
 
     var vdom = (
-      <div className={'app ' + cls.join(' ')}>
-        <Header state={state} />
-        {this.getErrorPopover()}
-        <div key='content' className='content'>{this.getView()}</div>
-        {this.getModal()}
-      </div>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <div className={'app ' + cls.join(' ')}>
+          <Header state={state} />
+          {this.getErrorPopover()}
+          <div key='content' className='content'>{this.getView()}</div>
+          {this.getModal()}
+        </div>
+      </MuiThemeProvider>
     )
 
     return vdom

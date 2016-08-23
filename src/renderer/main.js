@@ -5,9 +5,12 @@ crashReporter.init()
 
 const dragDrop = require('drag-drop')
 const electron = require('electron')
+const fs = require('fs')
 const React = require('react')
 const ReactDOM = require('react-dom')
-const fs = require('fs')
+
+// Required by Material UI -- adds `onTouchTap` event
+require('react-tap-event-plugin')()
 
 const config = require('../config')
 const App = require('./views/app')

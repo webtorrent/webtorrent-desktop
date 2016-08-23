@@ -1,38 +1,33 @@
-const c = require('classnames')
 const electron = require('electron')
 const React = require('react')
 
 const remote = electron.remote
 
-const Button = require('./Button')
-const TextInput = require('./TextInput')
+const RaisedButton = require('material-ui/RaisedButton').default
+const TextField = require('material-ui/TextField').default
 
 class PathSelector extends React.Component {
   static get propTypes () {
     return {
       className: React.PropTypes.string,
-      defaultValue: React.PropTypes.string.isRequired,
       dialog: React.PropTypes.object,
-      label: React.PropTypes.string.isRequired,
-      onChange: React.PropTypes.func
+      displayValue: React.PropTypes.string,
+      id: React.PropTypes.string,
+      onChange: React.PropTypes.func,
+      title: React.PropTypes.string.isRequired,
+      value: React.PropTypes.string.isRequired
     }
   }
 
   constructor (props) {
     super(props)
-
-    this.state = {
-      value: props.defaultValue
-    }
-
     this.handleClick = this.handleClick.bind(this)
   }
 
   handleClick () {
     var opts = Object.assign({
-      defaultPath: this.state.value,
-      properties: [ 'openFile', 'openDirectory' ],
-      title: this.props.label
+      defaultPath: this.props.value,
+      properties: [ 'openFile', 'openDirectory' ]
     }, this.props.dialog)
 
     remote.dialog.showOpenDialog(
@@ -40,28 +35,52 @@ class PathSelector extends React.Component {
       opts,
       (filenames) => {
         if (!Array.isArray(filenames)) return
-        this.setState({value: filenames[0]})
         this.props.onChange && this.props.onChange(filenames[0])
       }
     )
   }
 
   render () {
+    const id = this.props.title.replace(' ', '-').toLowerCase()
     return (
-      <div className={c('PathSelector', this.props.className)}>
-        <div className='label'>{this.props.label}:</div>
-        <TextInput
-          className='input'
-          disabled
-          value={this.state.value}
-        />
-        <Button
-          className='button'
-          theme='dark'
-          onClick={this.handleClick}
+      <div
+        className={this.props.className}
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          width: '100%'
+        }}
+      >
+        <div
+          className='label'
+          style={{
+            flex: '0 auto',
+            marginRight: 10,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
         >
-          Change…
-        </Button>
+          {this.props.title}:
+        </div>
+        <TextField
+          className='control'
+          disabled
+          id={id}
+          style={{
+            flex: '1',
+            fontSize: 14
+          }}
+          value={this.props.displayValue || this.props.value}
+        />
+        <RaisedButton
+          className='control'
+          label='Change'
+          onClick={this.handleClick}
+          style={{
+            marginLeft: 10
+          }}
+        />
       </div>
     )
   }
