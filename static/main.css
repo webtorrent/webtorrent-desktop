@@ -19,11 +19,15 @@ body {
   overflow: hidden;
 }
 
-body {
+.app {
   color: #FFF;
-  font-family: BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.5em;
+}
+
+.app.is-win32 {
+  font-family: 'Segoe UI', sans-serif;
 }
 
 #body {
