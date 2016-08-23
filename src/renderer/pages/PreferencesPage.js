@@ -1,18 +1,17 @@
-const React = require('react')
+const colors = require('material-ui/styles/colors')
 const path = require('path')
+const React = require('react')
 
 const Checkbox = require('material-ui/Checkbox').default
-const colors = require('material-ui/styles/colors')
-const RaisedButton = require('material-ui/RaisedButton').default
-
-const PageHeading = require('../components/PageHeading')
+const Heading = require('../components/Heading')
 const PathSelector = require('../components/PathSelector')
+const RaisedButton = require('material-ui/RaisedButton').default
 
 const {dispatch} = require('../lib/dispatcher')
 
 class PreferencesPage extends React.Component {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
 
     this.handleDownloadPathChange =
       this.handleDownloadPathChange.bind(this)
@@ -154,7 +153,7 @@ class PreferencesSection extends React.Component {
           marginTop: 25
         }}
       >
-        <PageHeading>{this.props.title}</PageHeading>
+        <Heading level={2}>{this.props.title}</Heading>
         {this.props.children}
       </div>
     )

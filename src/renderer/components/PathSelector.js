@@ -1,3 +1,4 @@
+const colors = require('material-ui/styles/colors')
 const electron = require('electron')
 const React = require('react')
 
@@ -15,7 +16,7 @@ class PathSelector extends React.Component {
       id: React.PropTypes.string,
       onChange: React.PropTypes.func,
       title: React.PropTypes.string.isRequired,
-      value: React.PropTypes.string.isRequired
+      value: React.PropTypes.string
     }
   }
 
@@ -67,6 +68,9 @@ class PathSelector extends React.Component {
           className='control'
           disabled
           id={id}
+          inputStyle={{
+            color: colors.grey50
+          }}
           style={{
             flex: '1',
             fontSize: 14

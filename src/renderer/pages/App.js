@@ -21,7 +21,9 @@ const Modals = {
 }
 
 const MUI_THEME = getMuiTheme(Object.assign(darkBaseTheme, {
-  fontFamily: 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
+  fontFamily: process.platform === 'win32'
+    ? '\'Segoe UI\', sans-serif'
+    : 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
 }))
 
 class App extends React.Component {

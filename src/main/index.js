@@ -68,6 +68,8 @@ function init () {
   app.on('ready', function () {
     isReady = true
 
+    // require('electron').BrowserWindow.addDevToolsExtension('/Users/feross/Library/Application Support/Google/Chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/0.15.3_0/')
+
     windows.main.init()
     windows.webtorrent.init()
     menu.init()

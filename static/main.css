@@ -334,17 +334,8 @@ table {
   padding: 4px 6px;
 }
 
-.create-torrent textarea.torrent-trackers {
-  height: 200px;
-}
-
-.create-torrent input.torrent-is-private {
-  margin: 0;
-}
-
 /*
  * BUTTONS
- * See https://www.google.com/design/spec/components/buttons.html
  */
 
 a,
@@ -366,10 +357,6 @@ i:not(.disabled):hover { /* Show they're clickable without pointer: cursor */
   transition: all 0.1s ease-out;
   text-align: center;
 }
-
-/*
- * OTHER FORM ELEMENT DEFAULTS
- */
 
 /*
  * TORRENT LIST

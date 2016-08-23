@@ -1,35 +1,20 @@
-const React = require('react')
 const createTorrent = require('create-torrent')
 const path = require('path')
 const prettyBytes = require('prettier-bytes')
+const React = require('react')
 
 const {dispatch, dispatcher} = require('../lib/dispatcher')
+
+const TextField = require('material-ui/TextField').default
+
 const CreateTorrentErrorPage = require('../components/create-torrent-error-page')
+const Heading = require('../components/Heading')
+const ShowMore = require('../components/ShowMore')
 
 class CreateTorrentPage extends React.Component {
-  handleSubmit () {
-    var announceList = document.querySelector('.torrent-trackers').value
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((s) => s !== '')
-    var isPrivate = document.querySelector('.torrent-is-private').checked
-    var comment = document.querySelector('.torrent-comment').value.trim()
-    var options = {
-      // We can't let the user choose their own name if we want WebTorrent
-      // to use the files in place rather than creating a new folder.
-      // If we ever want to add support for that:
-      // name: document.querySelector('.torrent-name').value
-      name: defaultName,
-      path: basePath,
-      files: files,
-      announce: announceList,
-      private: isPrivate,
-      comment: comment
-    }
-    dispatch('createTorrent', options)
-  }
+  constructor (props) {
+    super(props)
 
-  render () {
     var state = this.props.state
     var info = state.location.current()
 
@@ -76,40 +61,79 @@ class CreateTorrentPage extends React.Component {
       fileElems.push(<div key='more'>+ {maxFileElems - files.length} more</div>)
     }
     var trackers = createTorrent.announceList.join('\n')
-    var collapsedClass = info.showAdvanced ? 'expanded' : 'collapsed'
 
+    this.state = {
+      basePath,
+      defaultName,
+      fileElems,
+      torrentInfo,
+      trackers
+    }
+  }
+
+  handleSubmit () {
+    var announceList = document.querySelector('.torrent-trackers').value
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s !== '')
+    var isPrivate = document.querySelector('.torrent-is-private').checked
+    var comment = document.querySelector('.torrent-comment').value.trim()
+    var options = {
+      // We can't let the user choose their own name if we want WebTorrent
+      // to use the files in place rather than creating a new folder.
+      // If we ever want to add support for that:
+      // name: document.querySelector('.torrent-name').value
+      name: this.state.defaultName,
+      path: this.state.basePath,
+      files: this.state.files,
+      announce: announceList,
+      private: isPrivate,
+      comment: comment
+    }
+    dispatch('createTorrent', options)
+  }
+
+  render () {
     return (
       <div className='create-torrent'>
-        <PageHeading>Create torrent {defaultName}</PageHeading>
-        <div key='info' className='torrent-info'>
-          {torrentInfo}
+        <Heading level={1}>
+          Create torrent "{this.state.defaultName}"
+        </Heading>
+        <div className='torrent-info'>
+          {this.state.torrentInfo}
         </div>
-        <div key='path-prefix' className='torrent-attribute'>
+        <div className='torrent-attribute'>
           <label>Path:</label>
-          <div className='torrent-attribute'>{pathPrefix}</div>
+          <div className='torrent-attribute'>{this.state.pathPrefix}</div>
         </div>
-        <div key='toggle' className={'expand-collapse ' + collapsedClass}
-          onClick={dispatcher('toggleCreateTorrentAdvanced')}>
-          {info.showAdvanced ? 'Basic' : 'Advanced'}
-        </div>
-        <div key='advanced' className={'create-torrent-advanced ' + collapsedClass}>
-          <div key='comment' className='torrent-attribute'>
-            <label>Comment:</label>
-            <textarea className='torrent-attribute torrent-comment' />
+        <ShowMore
+          hideLabel='Hide advanced settings...'
+          showLabel='Show advanced settings...'
+        >
+          <div key='advanced' className='create-torrent-advanced'>
+            <div key='private' className='torrent-attribute'>
+              <label>Private:</label>
+              <input type='checkbox' className='torrent-is-private' value='torrent-is-private' />
+            </div>
+            <Heading level={2}>Trackers:</Heading>
+            <TextField
+              className='torrent-trackers'
+              hintText='Tracker'
+              multiLine
+              rows={2}
+              rowsMax={10}
+              defaultValue={this.state.trackers}
+            />
+            <div key='comment' className='torrent-attribute'>
+              <label>Comment:</label>
+              <textarea className='torrent-attribute torrent-comment' />
+            </div>
+            <div key='files' className='torrent-attribute'>
+              <label>Files:</label>
+              <div>{this.state.fileElems}</div>
+            </div>
           </div>
-          <div key='trackers' className='torrent-attribute'>
-            <label>Trackers:</label>
-            <textarea className='torrent-attribute torrent-trackers' defaultValue={trackers} />
-          </div>
-          <div key='private' className='torrent-attribute'>
-            <label>Private:</label>
-            <input type='checkbox' className='torrent-is-private' value='torrent-is-private' />
-          </div>
-          <div key='files' className='torrent-attribute'>
-            <label>Files:</label>
-            <div>{fileElems}</div>
-          </div>
-        </div>
+        </ShowMore>
         <div key='buttons' className='float-right'>
           <button key='cancel' className='button-flat light' onClick={dispatcher('cancel')}>Cancel</button>
           <button key='create' className='button-raised' onClick={this.handleSubmit}>Create Torrent</button>
