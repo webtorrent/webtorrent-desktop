@@ -7,9 +7,9 @@ const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 const Header = require('./header')
 
 const Views = {
-  'home': require('./torrent-list'),
-  'player': require('./player'),
-  'create-torrent': require('./create-torrent'),
+  'home': require('./TorrentListPage'),
+  'player': require('./PlayerPage'),
+  'create-torrent': require('./CreateTorrentPage'),
   'preferences': require('./PreferencesPage')
 }
 
@@ -24,7 +24,7 @@ var muiTheme = getMuiTheme(Object.assign(darkBaseTheme, {
   fontFamily: 'BlinkMacSystemFont, \'Helvetica Neue\', Helvetica, sans-serif'
 }))
 
-module.exports = class App extends React.Component {
+class App extends React.Component {
   constructor (props) {
     super(props)
     this.state = props.state
@@ -104,3 +104,5 @@ module.exports = class App extends React.Component {
     return (<View state={state} />)
   }
 }
+
+module.exports = App

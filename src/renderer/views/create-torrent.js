@@ -6,7 +6,7 @@ const prettyBytes = require('prettier-bytes')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 const CreateTorrentErrorPage = require('./create-torrent-error-page')
 
-module.exports = class CreateTorrentPage extends React.Component {
+class CreateTorrentPage extends React.Component {
   render () {
     var state = this.props.state
     var info = state.location.current()
@@ -129,3 +129,5 @@ function findCommonPrefix (a, b) {
   if (i === b.length) return b
   return a.substring(0, i)
 }
+
+module.exports = CreateTorrentPage

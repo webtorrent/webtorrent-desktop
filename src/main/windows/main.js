@@ -23,7 +23,7 @@ var log = require('../log')
 var menu = require('../menu')
 var tray = require('../tray')
 
-var HEADER_HEIGHT = 37
+var HEADER_HEIGHT = 38
 var TORRENT_HEIGHT = 100
 
 function init () {

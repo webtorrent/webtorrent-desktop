@@ -9,15 +9,16 @@ const fs = require('fs')
 const React = require('react')
 const ReactDOM = require('react-dom')
 
-// Required by Material UI -- adds `onTouchTap` event
-require('react-tap-event-plugin')()
-
 const config = require('../config')
-const App = require('./views/app')
 const telemetry = require('./lib/telemetry')
 const sound = require('./lib/sound')
 const State = require('./lib/state')
 const TorrentPlayer = require('./lib/torrent-player')
+
+// Required by Material UI -- adds `onTouchTap` event
+require('react-tap-event-plugin')()
+
+const App = require('./components/App')
 
 const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')

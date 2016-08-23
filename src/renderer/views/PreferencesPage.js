@@ -5,7 +5,9 @@ const Checkbox = require('material-ui/Checkbox').default
 const colors = require('material-ui/styles/colors')
 const RaisedButton = require('material-ui/RaisedButton').default
 
-const PathSelector = require('./PathSelector')
+const PageHeading = require('../components/PageHeading')
+const PathSelector = require('../componets/PathSelector')
+
 const {dispatch} = require('../lib/dispatcher')
 
 class PreferencesPage extends React.Component {
@@ -118,8 +120,8 @@ class PreferencesPage extends React.Component {
       <div
         style={{
           color: colors.grey400,
-          marginLeft: 20,
-          marginRight: 20
+          marginLeft: 25,
+          marginRight: 25
         }}
       >
         <PreferencesSection title='Downloads'>
@@ -148,16 +150,11 @@ class PreferencesSection extends React.Component {
     return (
       <div
         style={{
-          marginBottom: 30,
-          marginTop: 30
+          marginBottom: 25,
+          marginTop: 25
         }}
       >
-        <h2
-          style={{
-            color: colors.grey50,
-            fontSize: 22
-          }}
-        >{this.props.title}</h2>
+        <PageHeading>{this.props.title}</PageHeading>
         {this.props.children}
       </div>
     )
