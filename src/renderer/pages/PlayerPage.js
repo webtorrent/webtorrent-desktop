@@ -607,7 +607,7 @@ function cssBackgroundImagePoster (state) {
   var torrentSummary = state.getPlayingTorrentSummary()
   var posterPath = TorrentSummary.getPosterPath(torrentSummary)
   if (!posterPath) return ''
-  return cssBackgroundImageDarkGradient() + `, url(${posterPath})`
+  return cssBackgroundImageDarkGradient() + `, url('${posterPath}')`
 }
 
 function cssBackgroundImageDarkGradient () {
