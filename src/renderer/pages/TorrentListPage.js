@@ -192,22 +192,11 @@ module.exports = class TorrentList extends React.Component {
           key='download-button'
           className={'button-round icon download ' + torrentSummary.status}
           title={downloadTooltip}
-          onClick={dispatcher('toggleTorrent', infoHash)}>
+          onClick={dispatcher('toggleTorrent', infoHash)}
+        >
           {downloadIcon}
         </i>
       )
-
-      if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-        playButton = (
-          <i
-            key='play-button'
-            title={playTooltip}
-            className={'button-round icon play ' + playClass}
-            onClick={dispatcher('playFile', infoHash)}>
-            {playIcon}
-          </i>
-        )
-      }
 
       // Do we have a saved position? Show it using a radial progress bar on top
       // of the play button, unless already showing a spinner there:
@@ -218,6 +207,19 @@ module.exports = class TorrentList extends React.Component {
         var fraction = defaultFile.currentTime / defaultFile.duration
         positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
         playClass = 'resume-position'
+      }
+
+      if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
+        playButton = (
+          <i
+            key='play-button'
+            title={playTooltip}
+            className={'button-round icon play ' + playClass}
+            onClick={dispatcher('playFile', infoHash)}
+          >
+            {playIcon}
+          </i>
+        )
       }
     }
 
