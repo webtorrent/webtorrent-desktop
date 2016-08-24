@@ -18,7 +18,7 @@ console.log('Production: %s portable: %s test: %s',
   IS_PRODUCTION, IS_PORTABLE, IS_TEST)
 if (IS_PORTABLE) console.log('Portable path: %s', PORTABLE_PATH)
 
-module.exports = {
+let cfg = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
@@ -93,8 +93,18 @@ module.exports = {
   WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, '..', 'static', 'webtorrent.html'),
 
   WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
-  WINDOW_MIN_WIDTH: 425
+  WINDOW_MIN_WIDTH: 425,
+
+  UI_HEADER_HEIGHT: 38,
+  UI_TORRENT_HEIGHT: 100
 }
+
+cfg.DEFAULT_BOUNDS = {
+  width: 500,
+  height: cfg.UI_HEADER_HEIGHT + (cfg.UI_TORRENT_HEIGHT * (cfg.DEFAULT_TORRENTS.length + 1))
+}
+
+module.exports = cfg
 
 function getConfigPath () {
   if (IS_PORTABLE) {

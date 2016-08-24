@@ -13,6 +13,7 @@ const ipc = require('./ipc')
 const log = require('./log')
 const menu = require('./menu')
 const squirrelWin32 = require('./squirrel-win32')
+const State = require('../renderer/lib/state')
 const tray = require('./tray')
 const updater = require('./updater')
 const userTasks = require('./user-tasks')
@@ -72,7 +73,10 @@ function init () {
   app.on('ready', function () {
     isReady = true
 
-    windows.main.init({hidden: hidden})
+    State.load(function (err, state) {
+      if (err) throw err
+      windows.main.init(state, {hidden: hidden})
+    })
     windows.webtorrent.init()
     menu.init()
 
