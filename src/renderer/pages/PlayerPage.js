@@ -14,13 +14,14 @@ module.exports = class Player extends React.Component {
     // If the video is on Chromecast or Airplay, show a title screen instead
     var state = this.props.state
     var showVideo = state.playing.location === 'local'
+    var showControls = state.playing.location !== 'external'
     return (
       <div
         className='player'
         onWheel={handleVolumeWheel}
         onMouseMove={dispatcher('mediaMouseMoved')}>
         {showVideo ? renderMedia(state) : renderCastScreen(state)}
-        {renderPlayerControls(state)}
+        {showControls ? renderPlayerControls(state) : null}
       </div>
     )
   }
