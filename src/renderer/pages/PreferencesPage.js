@@ -21,6 +21,9 @@ class PreferencesPage extends React.Component {
 
     this.handleExternalPlayerPathChange =
       this.handleExternalPlayerPathChange.bind(this)
+
+    this.handleOptInTelemetryChange =
+      this.handleOptInTelemetryChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -114,6 +117,23 @@ class PreferencesPage extends React.Component {
     // dispatch('updatePreferences', 'isFileHandler', !isFileHandler)
   }
 
+  optInTelemetryCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.optInTelemetry}
+          label={'Opt in to telemetry'}
+          onCheck={this.handleOptInTelemetryChange}
+        />
+      </Preference>
+    )
+  }
+
+  handleOptInTelemetryChange (e, isChecked) {
+    dispatch('updatePreferences', 'optInTelemetry', isChecked)
+  }
+
   render () {
     return (
       <div
@@ -132,6 +152,9 @@ class PreferencesPage extends React.Component {
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
+        </PreferencesSection>
+        <PreferencesSection title='Telemetry'>
+          {this.optInTelemetryCheckbox()}
         </PreferencesSection>
       </div>
     )
