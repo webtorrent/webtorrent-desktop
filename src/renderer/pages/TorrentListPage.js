@@ -1,23 +1,33 @@
 const React = require('react')
-const FormattedMessage = require('react-intl').FormattedMessage
+const {injectIntl, FormattedMessage} = require('react-intl')
 const prettyBytes = require('prettier-bytes')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const {dispatcher} = require('../lib/dispatcher')
 
-module.exports = class TorrentList extends React.Component {
+module.exports = injectIntl(class TorrentList extends React.Component {
   render () {
     var state = this.props.state
 
     var contents = []
     if (state.downloadPathStatus === 'missing') {
+      var prefsLink = (<a key='prefsLink' href='#' onClick={dispatcher('preferences')}><FormattedMessage id='preferences' defaultMessage='Preferences' /></a>)
       contents.push(
-        <div key='torrent-missing-path'>
-          <p>Download path missing: {state.saved.prefs.downloadPath}</p>
-          <p>Check that all drives are connected?</p>
-          <p>Alternatively, choose a new download path
-            in <a href='#' onClick={dispatcher('preferences')}>Preferences</a>
+        <div key='global-missing-path'>
+          <p>
+            <FormattedMessage id='global-missing-path'
+              defaultMessage={
+                'Download path missing: {downloadPath}\n' +
+                'Check that all drives are connected?\n' +
+                'Alternatively, choose a new download path in {prefsLink}'
+              }
+              values={{
+                downloadPath: state.saved.prefs.downloadPath,
+                prefsLink: prefsLink
+              }}>
+              {nl2br}
+            </FormattedMessage>
           </p>
         </div>
       )
@@ -79,7 +89,7 @@ module.exports = class TorrentList extends React.Component {
 
   // Show name, download status, % complete
   renderTorrentMetadata (torrentSummary) {
-    var name = torrentSummary.name || 'Loading torrent...'
+    var name = torrentSummary.name || (<FormattedMessage id='torrent-loading' defaultMessage={'Loading torrent...'}/>)
     var elements = [(
       <div key='name' className='name ellipsis'>{name}</div>
     )]
@@ -124,8 +134,9 @@ module.exports = class TorrentList extends React.Component {
 
     function renderPeers () {
       if (prog.numPeers === 0) return
-      var count = prog.numPeers === 1 ? 'peer' : 'peers'
-      return (<span key='peers'>{prog.numPeers} {count}</span>)
+      return (<FormattedMessage key='peers' id='torrent-peers'
+        defaultMessage={'{numPeers, plural, one {# peer} other {# peers}}'}
+        values={{numPeers: prog.numPeers}} />)
     }
 
     function renderDownloadSpeed () {
@@ -156,7 +167,13 @@ module.exports = class TorrentList extends React.Component {
       var minutesStr = (hours || minutes) ? minutes + 'm' : ''
       var secondsStr = seconds + 's'
 
-      return (<span>ETA: {hoursStr} {minutesStr} {secondsStr}</span>)
+      return (<FormattedMessage id='torrent-eta'
+        defaultMessage={'ETA: {hours} {minutes} {seconds}'}
+        values={{
+          hours: hoursStr,
+          minutes: minutesStr,
+          seconds: secondsStr
+        }} />)
     }
   }
 
@@ -168,22 +185,22 @@ module.exports = class TorrentList extends React.Component {
     var playIcon, playTooltip, playClass
     if (torrentSummary.playStatus === 'timeout') {
       playIcon = 'warning'
-      playTooltip = 'Playback timed out. No seeds? No internet? Click to try again.'
+      playTooltip = this.props.intl.formatMessage({id: 'play-timeout-tooltip', defaultMessage: 'Playback timed out. No seeds? No internet? Click to try again.'})
     } else {
       playIcon = 'play_arrow'
-      playTooltip = 'Start streaming'
+      playTooltip = this.props.intl.formatMessage({id: 'play-streaming-tooltip', defaultMessage: 'Start streaming'})
     }
 
     var downloadIcon, downloadTooltip
     if (torrentSummary.status === 'seeding') {
       downloadIcon = 'file_upload'
-      downloadTooltip = 'Seeding. Click to stop.'
+      downloadTooltip = this.props.intl.formatMessage({id: 'download-seeding-tooltip', defaultMessage: 'Seeding. Click to stop.'})
     } else if (torrentSummary.status === 'downloading') {
       downloadIcon = 'file_download'
-      downloadTooltip = 'Torrenting. Click to stop.'
+      downloadTooltip = this.props.intl.formatMessage({id: 'download-torrenting-tooltip', defaultMessage: 'Torrenting. Click to stop.'})
     } else {
       downloadIcon = 'file_download'
-      downloadTooltip = 'Click to start torrenting.'
+      downloadTooltip = this.props.intl.formatMessage({id: 'download-start-tooltip', defaultMessage: 'Click to start torrenting.'})
     }
 
     // Only show the play/dowload buttons for torrents that contain playable media
@@ -233,7 +250,7 @@ module.exports = class TorrentList extends React.Component {
         <i
           key='delete-button'
           className='icon delete'
-          title='Remove torrent'
+          title={this.props.intl.formatMessage({id: 'delete-tooltip', defaultMessage: 'Remove torrent'})}
           onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
@@ -248,16 +265,20 @@ module.exports = class TorrentList extends React.Component {
       var message = ''
       if (torrentSummary.error === 'path-missing') {
         // Special case error: this torrent's download dir or file is missing
-        message = 'Missing path: ' + TorrentSummary.getFileOrFolder(torrentSummary)
+        message = (<FormattedMessage id='torrent-missing-path'
+          defaultMessage={'Missing path: {path}'}
+          values={{path: TorrentSummary.getFileOrFolder(torrentSummary)}}/>)
       } else if (torrentSummary.error) {
         // General error for this torrent: just show the message
         message = torrentSummary.error.message || torrentSummary.error
       } else if (torrentSummary.status === 'paused') {
         // No file info, no infohash, and we're not trying to download from the DHT
-        message = 'Failed to load torrent info. Click the download button to try again...'
+        message = (<FormattedMessage id='torrent-info-failed'
+          defaultMessage={'Failed to load torrent info. Click the download button to try again...'}/>)
       } else {
         // No file info, no infohash, trying to load from the DHT
-        message = 'Downloading torrent info...'
+        message = (<FormattedMessage id='torrent-info-downloading'
+          defaultMessage={'Downloading torrent info...'}/>)
       }
       filesElement = (
         <div key='files' className='files warning'>
@@ -376,17 +397,41 @@ module.exports = class TorrentList extends React.Component {
       </div>
     )
   }
-}
+})
 
 function getErrorMessage (torrentSummary) {
   var err = torrentSummary.error
   if (err === 'path-missing') {
     return (
-      <span>
-        Path missing.<br />
-        Fix and restart the app, or delete the torrent.
-      </span>
+      <FormattedMessage id='torrent-error-path-missing'
+        defaultMessage={`
+          Path missing.
+          Fix and restart the app, or delete the torrent.
+        `}>
+        {nl2br}
+      </FormattedMessage>
     )
   }
-  return 'Error'
+  return (<FormattedMessage id='torrent-error'
+    defaultMessage={'Error'} />)
+}
+
+function nl2br (...nodes) {
+  const children = nodes.reduce(function (result, node) {
+    if (typeof node === 'string') {
+      var tokens = node.split('\n')
+      for (var i=0; i<tokens.length; i++) {
+        result = result.concat(tokens[i])
+        if (i<tokens.length-1) {
+          result = result.concat(<br/>)
+        }
+      }
+    } else {
+      result = result.concat(node)
+    }
+
+    return result
+  }, [])
+
+  return <span>{children}</span>
 }
