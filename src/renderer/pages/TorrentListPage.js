@@ -184,33 +184,9 @@ module.exports = class TorrentList extends React.Component {
       downloadTooltip = 'Click to start torrenting.'
     }
 
-    // Do we have a saved position? Show it using a radial progress bar on top
-    // of the play button, unless already showing a spinner there:
-    var positionElem
-    var willShowSpinner = torrentSummary.playStatus === 'requested'
-    var defaultFile = torrentSummary.files &&
-      torrentSummary.files[torrentSummary.defaultPlayFileIndex]
-    if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
-      var fraction = defaultFile.currentTime / defaultFile.duration
-      positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
-      playClass = 'resume-position'
-    }
-
-    // Only show the play button for torrents that contain playable media
-    var playButton, downloadButton
-    var noErrors = !torrentSummary.error
-    if (noErrors && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-      playButton = (
-        <i
-          key='play-button'
-          title={playTooltip}
-          className={'button-round icon play ' + playClass}
-          onClick={dispatcher('playFile', infoHash)}>
-          {playIcon}
-        </i>
-      )
-    }
-    if (noErrors) {
+    // Only show the play/dowload buttons for torrents that contain playable media
+    var playButton, downloadButton, positionElem
+    if (!torrentSummary.error) {
       downloadButton = (
         <i
           key='download-button'
@@ -220,6 +196,29 @@ module.exports = class TorrentList extends React.Component {
           {downloadIcon}
         </i>
       )
+
+      if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
+        playButton = (
+          <i
+            key='play-button'
+            title={playTooltip}
+            className={'button-round icon play ' + playClass}
+            onClick={dispatcher('playFile', infoHash)}>
+            {playIcon}
+          </i>
+        )
+      }
+
+      // Do we have a saved position? Show it using a radial progress bar on top
+      // of the play button, unless already showing a spinner there:
+      var willShowSpinner = torrentSummary.playStatus === 'requested'
+      var defaultFile = torrentSummary.files &&
+        torrentSummary.files[torrentSummary.defaultPlayFileIndex]
+      if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
+        var fraction = defaultFile.currentTime / defaultFile.duration
+        positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
+        playClass = 'resume-position'
+      }
     }
 
     return (
