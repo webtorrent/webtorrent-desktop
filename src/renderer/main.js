@@ -90,9 +90,9 @@ function onState (err, _state) {
   setInterval(update, 1000)
 
   // Setup locale
-  var lang = navigator.language.split('-')[0] || 'en'
+  var lang = electron.remote.app.getLocale().split('-')[0] || 'en'
   try {
-    ReactIntl.addLocaleData(require('react-intl/locale-data/' + navigator.language))
+    ReactIntl.addLocaleData(require('react-intl/locale-data/' + lang))
   } catch (e) {
     ReactIntl.addLocaleData(require('react-intl/locale-data/en'))
   }
@@ -108,7 +108,7 @@ function onState (err, _state) {
     }
 
     app = ReactDOM.render(
-      <ReactIntl.IntlProvider locale={navigator.language} messages={messages}>
+      <ReactIntl.IntlProvider locale={lang} messages={messages}>
         <App state={state} />
       </ReactIntl.IntlProvider>, document.querySelector('#body'))
   })
