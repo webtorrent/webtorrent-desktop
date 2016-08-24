@@ -38,7 +38,7 @@ module.exports = class PlaybackController {
     })
   }
 
-  // Show a file in the OS, eg in Finder on a Mac
+  // Open a file in OS default app.
   openItem (infoHash, index) {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     var filePath = path.join(
