@@ -186,5 +186,6 @@ function showDoneNotification (torrent) {
     ipcRenderer.send('show')
   }
 
-  sound.play('DONE')
+  // Only play notification sound if player is inactive
+  if (this.state.playing.isPaused) sound.play('DONE')
 }
