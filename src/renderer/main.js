@@ -116,7 +116,8 @@ function onState (err, _state) {
 
   // Log uncaught JS errors
   window.addEventListener('error',
-    (e) => telemetry.logUncaughtError('window', e.error || e.target), true)
+    (e) => telemetry.logUncaughtError('window', e),
+    true /* capture */)
 
   // Done! Ideally we want to get here < 500ms after the user clicks the app
   sound.play('STARTUP')

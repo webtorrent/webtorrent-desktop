@@ -78,8 +78,8 @@ function init () {
     // Report uncaught exceptions
     process.on('uncaughtException', (err) => {
       console.error(err)
-      var errJSON = {message: err.message, stack: err.stack}
-      windows.main.dispatch('uncaughtError', 'main', errJSON)
+      var error = {message: err.message, stack: err.stack}
+      windows.main.dispatch('uncaughtError', 'main', error)
     })
   })
 
