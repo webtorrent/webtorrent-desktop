@@ -33,7 +33,7 @@ function init (state) {
 
   if (config.IS_PRODUCTION) {
     postToServer()
-    // If the user keeps WebTorrent running for a long time, post every 24h
+    // If the user keeps WebTorrent running for a long time, post every 12h
     setInterval(postToServer, 12 * 3600 * 1000)
   } else {
     // Development: telemetry used only for local debugging
@@ -45,6 +45,7 @@ function init (state) {
 function reset () {
   telemetry.uncaughtErrors = []
   telemetry.playAttempts = {
+    minVersion: config.APP_VERSION,
     total: 0,
     success: 0,
     timeout: 0,
@@ -140,7 +141,10 @@ function logUncaughtError (procName, err) {
   if (message.length > 1000) message = message.substring(0, 1000)
   if (stack.length > 1000) stack = stack.substring(0, 1000)
 
-  telemetry.uncaughtErrors.push({process: procName, message, stack})
+  // Log the app version *at the time of the error*
+  var version = config.APP_VERSION
+
+  telemetry.uncaughtErrors.push({process: procName, message, stack, version})
 }
 
 // The user pressed play. It either worked, timed out, or showed the
