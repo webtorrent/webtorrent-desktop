@@ -10,6 +10,12 @@
   "download-torrenting-tooltip": "En téléchargement. Cliquez pour arrêter.",
   "download-start-tooltip": "Cliquez pour lancer le téléchargement",
 
+  "player-album": "Album",
+  "player-artist": "Artiste",
+  "player-downloaded": "téléchargé",
+  "player-track": "Piste",
+  "player-track": "{number} sur {total}",
+
   "preferences": "Préférences",
 
   "torrent-eta": "HPA: {hours} {minutes} {seconds}",

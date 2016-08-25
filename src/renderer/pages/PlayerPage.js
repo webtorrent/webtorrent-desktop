@@ -1,4 +1,5 @@
 const React = require('react')
+const {FormattedMessage} = require('react-intl')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
 const zeroFill = require('zero-fill')
@@ -206,7 +207,8 @@ function renderAudioMetadata (state) {
   }
   var track
   if (info.track && info.track.no && info.track.of) {
-    track = info.track.no + ' of ' + info.track.of
+    track = <FormattedMessage id='player-tracknumber' defaultMessage='{number} of {total}'
+      values={{number: info.track.no, total: info.track.of}} />
   }
 
   // Show a small info box in the middle of the screen with title/album/etc
@@ -214,21 +216,21 @@ function renderAudioMetadata (state) {
   if (artist) {
     elems.push((
       <div key='artist' className='audio-artist'>
-        <label>Artist</label>{artist}
+        <label><FormattedMessage id='player-artist' defaultMessage='Artist'/></label>{artist}
       </div>
     ))
   }
   if (album) {
     elems.push((
       <div key='album' className='audio-album'>
-        <label>Album</label>{album}
+        <label><FormattedMessage id='player-album' defaultMessage='Album'/></label>{album}
       </div>
     ))
   }
   if (track) {
     elems.push((
       <div key='track' className='audio-track'>
-        <label>Track</label>{track}
+        <label><FormattedMessage id='player-track' defaultMessage='Track'/></label>{track}
       </div>
     ))
   }
@@ -261,7 +263,7 @@ function renderLoadingSpinner (state) {
     <div key='loading' className='media-stalled'>
       <div key='loading-spinner' className='loading-spinner'>&nbsp;</div>
       <div key='loading-progress' className='loading-status ellipsis'>
-        <span className='progress'>{fileProgress}%</span> downloaded,
+        <span className='progress'>{fileProgress}%</span> <FormattedMessage id='player-downloaded' defaultMessage='downloaded'/>,
         <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
         <span>↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
