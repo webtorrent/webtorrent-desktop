@@ -33,7 +33,7 @@ function init (state) {
 
   if (config.IS_PRODUCTION) {
     postToServer()
-    // If the user keeps WebTorrent running for a long time, post every 24h
+    // If the user keeps WebTorrent running for a long time, post every 12h
     setInterval(postToServer, 12 * 3600 * 1000)
   } else {
     // Development: telemetry used only for local debugging
@@ -45,6 +45,7 @@ function init (state) {
 function reset () {
   telemetry.uncaughtErrors = []
   telemetry.playAttempts = {
+    minVersion: config.APP_VERSION,
     total: 0,
     success: 0,
     timeout: 0,
@@ -118,29 +119,60 @@ function getApproxNumTorrents (state) {
 }
 
 // An uncaught error happened in the main process or in one of the windows
-function logUncaughtError (procName, err) {
+function logUncaughtError (procName, e) {
   // Not initialized yet? Ignore.
   // Hopefully uncaught errors immediately on startup are fixed in dev
   if (!telemetry) return
 
-  var message, stack
-  if (err instanceof Error) {
-    message = err.message
-    // Remove the first part of each file path in the stack trace.
-    // - Privacy: remove personal info like C:\Users\<full name>
-    // - Aggregation: this lets us find which stacktraces occur often
-    stack = err.stack.replace(/\(.*app.asar/g, '(...')
+  var message
+  var stack = ''
+  if (e.message) {
+    // err is either an Error or a plain object {message, stack}
+    message = e.message
+    stack = e.stack
+  } else if (e.error) {
+    // Uncaught Javascript errors (window.onerror), err is an ErrorEvent
+    if (!e.error.message) {
+      message = 'Unexpected ErrorEvent.error: ' + Object.keys(e.error).join(' ')
+    } else {
+      message = e.error.message
+      stack = e.error.stack
+    }
   } else {
-    message = String(err)
-    stack = ''
+    // Resource errors (captured element.onerror), err is an Event
+    if (!e.target) {
+      message = 'Unexpected unknown error'
+    } else if (!e.target.error) {
+      message = 'Unexpected resource loading error: ' + getElemString(e.target)
+    } else {
+      message = 'Resource error ' + getElemString(e.target) + ': ' + e.target.error.code
+    }
   }
+
+  // Remove the first part of each file path in the stack trace.
+  // - Privacy: remove personal info like C:\Users\<full name>
+  // - Aggregation: this lets us find which stacktraces occur often
+  if (stack && typeof stack === 'string') stack = stack.replace(/\(.*app.asar/g, '(...')
+  else if (stack) stack = 'Unexpected stack: ' + stack
 
   // We need to POST the telemetry object, make sure it stays < 100kb
   if (telemetry.uncaughtErrors.length > 20) return
   if (message.length > 1000) message = message.substring(0, 1000)
   if (stack.length > 1000) stack = stack.substring(0, 1000)
 
-  telemetry.uncaughtErrors.push({process: procName, message, stack})
+  // Log the app version *at the time of the error*
+  var version = config.APP_VERSION
+
+  telemetry.uncaughtErrors.push({process: procName, message, stack, version})
+}
+
+// Turns a DOM element into a string, eg "DIV.my-class.visible"
+function getElemString (elem) {
+  var ret = elem.tagName
+  try {
+    ret += '.' + Array.from(elem.classList).join('.')
+  } catch (e) {}
+  return ret
 }
 
 // The user pressed play. It either worked, timed out, or showed the
