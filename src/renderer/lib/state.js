@@ -24,7 +24,11 @@ function getDefaultState () {
      */
     client: null, /* the WebTorrent client */
     server: null, /* local WebTorrent-to-HTTP server */
-    prev: {}, /* used for state diffing in updateElectron() */
+    prev: { /* used for state diffing in updateElectron() */
+      title: null,
+      progress: -1,
+      badge: null
+    },
     location: new LocationHistory(),
     window: {
       bounds: null, /* {x, y, width, height } */
