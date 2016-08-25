@@ -24,7 +24,6 @@
     "drag-drop": "^2.12.1",
     "electron": "1.3.3",
     "fs-extra": "^0.30.0",
-    "hat": "0.0.3",
     "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",

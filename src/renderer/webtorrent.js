@@ -2,11 +2,11 @@
 // process from the main window.
 console.time('init')
 
+var crypto = require('crypto')
 var deepEqual = require('deep-equal')
 var defaultAnnounceList = require('create-torrent').announceList
 var electron = require('electron')
 var fs = require('fs-extra')
-var hat = require('hat')
 var musicmetadata = require('musicmetadata')
 var networkAddress = require('network-address')
 var path = require('path')
@@ -56,7 +56,7 @@ var VERSION_PREFIX = '-WD' + VERSION_STR + '-'
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
 var client = window.client = new WebTorrent({
-  peerId: Buffer.from(VERSION_PREFIX + hat(48))
+  peerId: Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
 })
 
 // WebTorrent-to-HTTP streaming sever
