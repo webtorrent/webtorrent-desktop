@@ -97,6 +97,7 @@ function init () {
     true)
 
   setInterval(updateTorrentProgress, 1000)
+  console.timeEnd('init')
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
