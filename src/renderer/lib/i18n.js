@@ -22,7 +22,6 @@ function getLocaleMessages() {
     fs.accessSync(langFilePath, fs.constants.F_OK | fs.constants.R_OK)
     return JSON.parse(fs.readFileSync(langFilePath, 'utf8'))
   } catch (err) {
-    console.log(err)
     // Use default english messages
     return {}
   }
