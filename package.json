@@ -28,6 +28,7 @@
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",
     "material-ui": "^0.15.4",
+    "matroska-subtitles": "^2.0.0",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
     "parse-torrent": "^5.7.3",

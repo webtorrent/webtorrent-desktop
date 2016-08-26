@@ -2,8 +2,10 @@ const electron = require('electron')
 const fs = require('fs-extra')
 const path = require('path')
 const parallel = require('run-parallel')
+const zeroFill = require('zero-fill')
 
 const remote = electron.remote
+const ipcRenderer = electron.ipcRenderer
 
 const {dispatch} = require('../lib/dispatcher')
 
@@ -74,6 +76,7 @@ module.exports = class SubtitlesController {
     torrentSummary.progress.files.forEach((fp, ix) => {
       if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
       var file = torrentSummary.files[ix]
+      if (this.state.playing.fileIndex === ix) return this.checkForEmbeddedMKVSubtitles(file)
       if (!this.isSubtitle(file.name)) return
       var filePath = path.join(torrentSummary.path, file.path)
       this.addSubtitles([filePath], false)
@@ -85,12 +88,31 @@ module.exports = class SubtitlesController {
     var ext = path.extname(name).toLowerCase()
     return ext === '.srt' || ext === '.vtt'
   }
+
+  checkForEmbeddedMKVSubtitles (file) {
+    var playing = this.state.playing
+    // var playingFile = this.state.getPlayingFileSummary()
+    // var playingPath = path.join(torrentSummary.path, playingFile.path)
+
+    if (path.extname(file.name).toLowerCase() === '.mkv') {
+      ipcRenderer.send('wt-get-mkv-subtitles', playing.infoHash, playing.fileIndex)
+
+      ipcRenderer.once('wt-mkv-subtitles', function (e, tracks) {
+        tracks.forEach(function (trackEntry) {
+          var track = loadEmbeddedSubtitle(trackEntry)
+          console.log('loaded emb subs', track)
+          playing.subtitles.tracks.push(track)
+        })
+
+        if (tracks.length > 0) relabelSubtitles(playing.subtitles)
+      })
+    }
+  }
 }
 
 function loadSubtitle (file, cb) {
   // Lazy load to keep startup fast
   var concat = require('simple-concat')
-  var LanguageDetect = require('languagedetect')
   var srtToVtt = require('srt-to-vtt')
 
   // Read the .SRT or .VTT file, parse it, add subtitle track
@@ -101,11 +123,7 @@ function loadSubtitle (file, cb) {
   concat(vttStream, function (err, buf) {
     if (err) return dispatch('error', 'Can\'t parse subtitles file.')
 
-    // Detect what language the subtitles are in
-    var vttContents = buf.toString().replace(/(.*-->.*)/g, '')
-    var langDetected = (new LanguageDetect()).detect(vttContents, 2)
-    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
-    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+    var langDetected = detectVTTLanguage(buf)
 
     var track = {
       buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
@@ -136,4 +154,50 @@ function relabelSubtitles (subtitles) {
     counts[lang] = (counts[lang] || 0) + 1
     track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
   })
+}
+
+function detectVTTLanguage (buffer) {
+  var LanguageDetect = require('languagedetect')
+
+  // Detect what language the subtitles are in
+  var vttContents = buffer.toString().replace(/(.*-->.*)/g, '') // remove numbers?
+  var langDetected = (new LanguageDetect()).detect(vttContents, 2)
+  langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+  langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+
+  return langDetected
+}
+
+function loadEmbeddedSubtitle (trackEntry) {
+  // convert to .vtt format
+  var vtt = 'WEBVTT FILE\r\n\r\n'
+  trackEntry.subtitles.forEach(function (sub, i) {
+    vtt += `${i + 1}\r\n`
+    vtt += `${msToTime(sub.time)} --> ${msToTime(sub.time + sub.duration)}\r\n`
+    vtt += `${sub.text}\r\n\r\n`
+  })
+
+  function msToTime (s) {
+    var ms = s % 1000
+    s = (s - ms) / 1000
+    var secs = s % 60
+    s = (s - secs) / 60
+    var mins = s % 60
+    var hrs = (s - mins) / 60
+
+    var z = zeroFill
+    return z(2, hrs) + ':' + z(2, mins) + ':' + z(2, secs) + '.' + z(3, ms)
+  }
+
+  var buf = new Buffer(vtt)
+  var langDetected = detectVTTLanguage(buf)
+
+  var track = {
+    buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
+    language: langDetected,
+    label: langDetected,
+    filePath: null
+  }
+
+  return track
 }

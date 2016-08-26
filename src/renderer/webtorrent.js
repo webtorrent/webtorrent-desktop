@@ -83,6 +83,8 @@ function init () {
     generateTorrentPoster(torrentKey))
   ipc.on('wt-get-audio-metadata', (e, infoHash, index) =>
     getAudioMetadata(infoHash, index))
+  ipc.on('wt-get-mkv-subtitles', (e, infoHash, index) =>
+    getMKVSubtitles(infoHash, index))
   ipc.on('wt-start-server', (e, infoHash, index) =>
     startServer(infoHash, index))
   ipc.on('wt-stop-server', (e) =>
@@ -340,6 +342,32 @@ function getAudioMetadata (infoHash, index) {
     console.log('got audio metadata for %s: %o', file.name, info)
     ipc.send('wt-audio-metadata', infoHash, index, info)
   })
+}
+
+function getMKVSubtitles (infoHash, index) {
+  var torrent = client.get(infoHash)
+  var file = torrent.files[index]
+
+  var MatroskaSubtitles = require('matroska-subtitles')
+  var subtitleParser = new MatroskaSubtitles()
+
+  var textTracks = new Map()
+
+  subtitleParser.once('tracks', function (tracks) {
+    tracks.forEach(function (track) {
+      textTracks.set(track.number, { track: track, subtitles: [] })
+    })
+  })
+
+  subtitleParser.on('subtitle', function (subtitle, trackNumber) {
+    textTracks.get(trackNumber).subtitles.push(subtitle)
+  })
+
+  subtitleParser.on('finish', function () {
+    ipc.send('wt-mkv-subtitles', Array.from(textTracks.values()))
+  })
+
+  file.createReadStream().pipe(subtitleParser)
 }
 
 function selectFiles (torrentOrInfoHash, selections) {
