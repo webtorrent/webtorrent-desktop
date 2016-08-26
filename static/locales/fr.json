@@ -18,13 +18,20 @@
 
   "preferences": "Préférences",
 
+  "torrent-copy-magnet": "Copier le lien Magnet",
+  "torrent-copy-magnet": "Copier le lien Instant.io",
+  "torrent-delete-torrent": "Effacer de la liste",
+  "torrent-delete-data": "Effacer les données",
   "torrent-eta": "HPA: {hours} {minutes} {seconds}",
   "torrent-error": "Erreur",
   "torrent-error-path-missing": "Chemin manquant.\nCorrigez et relancez l'appli, ou effacez le torrent.",
+  "torrent-finder-show": "Afficher dans Finder",
+  "torrent-folder-show": "Afficher dans l'explorateur",
   "torrent-info-downloading": "Téléchargement des infos du torrent...",
   "torrent-info-failed": "Le chargement des infos du torrent a échoué. Cliquez sur le bouton de téléchargement pour réessayer...",
   "torrent-loading": "Chargement du torrent...",
   "torrent-missing-path": "Chemin manquant: {path}",
   "torrent-peers": "{numPeers, plural, one {# pair} other {# pairs}}",
-  "torrent-placeholder": "Déposez un fichier torrent ici ou collez un lien magnet"
+  "torrent-placeholder": "Déposez un fichier torrent ici ou collez un lien magnet",
+  "torrent-save-torrent": "Enregistrer le fichier Torrent sous..."
 }

@@ -12,6 +12,7 @@ const ReactDOM = require('react-dom')
 const ReactIntl = require('react-intl')
 
 const config = require('../config')
+const i18n = require('./lib/i18n')
 const telemetry = require('./lib/telemetry')
 const sound = require('./lib/sound')
 const State = require('./lib/state')
@@ -90,28 +91,16 @@ function onState (err, _state) {
   setInterval(update, 1000)
 
   // Setup locale
-  var lang = electron.remote.app.getLocale().split('-')[0] || 'en'
   try {
-    ReactIntl.addLocaleData(require('react-intl/locale-data/' + lang))
+    ReactIntl.addLocaleData(require('react-intl/locale-data/' + i18n.LANGUAGE))
   } catch (e) {
     ReactIntl.addLocaleData(require('react-intl/locale-data/en'))
   }
 
-  var langFilePath = path.join(config.LOCALES_PATH, lang + '.json')
-  var messages
-  fs.access(langFilePath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
-    if (!err) {
-      messages = JSON.parse(fs.readFileSync(langFilePath, 'utf8'))
-    } else {
-      // Use default english messages
-      messages = {}
-    }
-
-    app = ReactDOM.render(
-      <ReactIntl.IntlProvider locale={lang} messages={messages}>
-        <App state={state} />
-      </ReactIntl.IntlProvider>, document.querySelector('#body'))
-  })
+  app = ReactDOM.render(
+    <ReactIntl.IntlProvider locale={i18n.LANGUAGE} messages={i18n.LOCALE_MESSAGES}>
+      <App state={state} />
+    </ReactIntl.IntlProvider>, document.querySelector('#body'))
 
   // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
   window.setTimeout(delayedInit, config.DELAYED_INIT)

@@ -1,8 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
+const IntlMessageFormat = require('intl-messageformat')
 
 const {dispatch} = require('../lib/dispatcher')
+const i18n = require('../lib/i18n')
 const State = require('../lib/state')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -169,14 +171,19 @@ module.exports = class TorrentListController {
   openTorrentContextMenu (infoHash) {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     var menu = new electron.remote.Menu()
+    
+    var msg = new IntlMessageFormat(
+      i18n.LOCALE_MESSAGES['torrent-delete-torrent'] || 'Remove From List', i18n.LANGUAGE)
 
     menu.append(new electron.remote.MenuItem({
-      label: 'Remove From List',
+      label: msg.format(),
       click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
     }))
 
+    msg = new IntlMessageFormat(
+      i18n.LOCALE_MESSAGES['torrent-delete-data'] || 'Remove Data File', i18n.LANGUAGE)
     menu.append(new electron.remote.MenuItem({
-      label: 'Remove Data File',
+      label: msg.format(),
       click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
     }))
 
@@ -185,8 +192,12 @@ module.exports = class TorrentListController {
     }))
 
     if (torrentSummary.files) {
+      var finderMsg = new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['torrent-finder-show'] || 'Show in Finder', i18n.LANGUAGE)
+      var folderMsg = new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['torrent-folder-show'] || 'Show in Folder', i18n.LANGUAGE)
       menu.append(new electron.remote.MenuItem({
-        label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
+        label: process.platform === 'darwin' ? finderMsg.format() : folderMsg.format(),
         click: () => showItemInFolder(torrentSummary)
       }))
       menu.append(new electron.remote.MenuItem({
@@ -194,18 +205,21 @@ module.exports = class TorrentListController {
       }))
     }
 
+    msg = new IntlMessageFormat(i18n.LOCALE_MESSAGES['torrent-copy-magnet'] || 'Copy Magnet Link to Clipboard', i18n.LANGUAGE)
     menu.append(new electron.remote.MenuItem({
-      label: 'Copy Magnet Link to Clipboard',
+      label: msg.format(),
       click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
     }))
 
+    msg = new IntlMessageFormat(i18n.LOCALE_MESSAGES['torrent-copy-instant'] || 'Copy Instant.io Link to Clipboard', i18n.LANGUAGE)
     menu.append(new electron.remote.MenuItem({
-      label: 'Copy Instant.io Link to Clipboard',
+      label: msg.format(),
       click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
     }))
 
+    msg = new IntlMessageFormat(i18n.LOCALE_MESSAGES['torrent-save-torrent'] || 'Save Torrent File As...', i18n.LANGUAGE)
     menu.append(new electron.remote.MenuItem({
-      label: 'Save Torrent File As...',
+      label: msg.format(),
       click: () => saveTorrentFileAs(torrentSummary)
     }))
 
