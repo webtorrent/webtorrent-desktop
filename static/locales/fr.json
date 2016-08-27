@@ -6,6 +6,14 @@
 
   "delete-tooltip": "Effacer le torrent",
 
+  "dialog-open": "Sélectionnez un fichier ou un dossier à ajouter.",
+  "dialog-open-file": "Sélectionnez un fichier à ajouter.",
+  "dialog-open-folder": "Sélectionnez un dossier à ajouter.",
+  "dialog-open-torrent": "Sélectionnez un fichier .torrent",
+  "dialog-seed": "Sélectionnez un fichier ou un dossier pour le torrent.",
+  "dialog-seed-file": "Sélectionnez un fichier pour le torent.",
+  "dialog-torrent-filter": "Fichiers Torrent",
+
   "download-seeding-tooltip": "En partage. Cliquez pour arrêter.",
   "download-torrenting-tooltip": "En téléchargement. Cliquez pour arrêter.",
   "download-start-tooltip": "Cliquez pour lancer le téléchargement",

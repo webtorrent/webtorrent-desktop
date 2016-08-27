@@ -7,6 +7,7 @@ module.exports = {
 }
 
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 var log = require('./log')
 var windows = require('./windows')
@@ -17,8 +18,12 @@ var windows = require('./windows')
 function openSeedFile () {
   if (!windows.main.win) return
   log('openSeedFile')
+
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
   var opts = {
-    title: 'Select a file for the torrent.',
+    title: new IntlMessageFormat(
+      i18n.LOCALE_MESSAGES['dialog-seed-file'] || 'Select a file for the torrent.', i18n.LANGUAGE).format(),
     properties: [ 'openFile' ]
   }
   setTitle(opts.title)
@@ -37,13 +42,18 @@ function openSeedFile () {
 function openSeedDirectory () {
   if (!windows.main.win) return
   log('openSeedDirectory')
+
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
   var opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder for the torrent.',
+      title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-seed'] || 'Select a file or folder for the torrent.', i18n.LANGUAGE).format(),
       properties: [ 'openFile', 'openDirectory' ]
     }
     : {
-      title: 'Select a folder for the torrent.',
+      title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-seed-folder'] || 'Select a folder for the torrent.', i18n.LANGUAGE).format(),
       properties: [ 'openDirectory' ]
     }
   setTitle(opts.title)
@@ -61,13 +71,18 @@ function openSeedDirectory () {
 function openFiles () {
   if (!windows.main.win) return
   log('openFiles')
+
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
   var opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder to add.',
+      title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-open'] || 'Select a file or folder to add.', i18n.LANGUAGE).format(),
       properties: [ 'openFile', 'openDirectory' ]
     }
     : {
-      title: 'Select a file to add.',
+      title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-open-file'] || 'Select a file to add.', i18n.LANGUAGE).format(),
       properties: [ 'openFile' ]
     }
   setTitle(opts.title)
@@ -84,9 +99,15 @@ function openFiles () {
 function openTorrentFile () {
   if (!windows.main.win) return
   log('openTorrentFile')
+
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
   var opts = {
-    title: 'Select a .torrent file.',
-    filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
+    title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-open-torrent'] || 'Select a .torrent file.', i18n.LANGUAGE).format(),
+    filters: [{ name: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-torrent-filter'] || 'Torrent Files', i18n.LANGUAGE).format(),
+        extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
   }
   setTitle(opts.title)
