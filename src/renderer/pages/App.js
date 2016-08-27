@@ -5,7 +5,7 @@ const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').def
 const getMuiTheme = require('material-ui/styles/getMuiTheme').default
 const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 
-const Header = require('../components/Header')
+const Header = require('../components/header')
 
 const Views = {
   'home': require('./TorrentListPage'),
