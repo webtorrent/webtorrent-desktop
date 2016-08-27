@@ -5,6 +5,7 @@ module.exports = {
 }
 
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 var app = electron.app
 
@@ -79,10 +80,14 @@ function updateTrayMenu () {
 }
 
 function getMenuTemplate () {
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
+
   return [
     getToggleItem(),
     {
-      label: 'Quit',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-quit'] || 'Quit', i18n.LANGUAGE).format(),
       click: () => app.quit()
     }
   ]
@@ -90,12 +95,14 @@ function getMenuTemplate () {
   function getToggleItem () {
     if (windows.main.win.isVisible()) {
       return {
-        label: 'Hide to tray',
+        label: new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['tray-hide'] || 'Hide to tray', i18n.LANGUAGE).format(),
         click: () => windows.main.hide()
       }
     } else {
       return {
-        label: 'Show WebTorrent',
+        label: new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['tray-show'] || 'Show WebTorrent', i18n.LANGUAGE).format(),
         click: () => windows.main.show()
       }
     }

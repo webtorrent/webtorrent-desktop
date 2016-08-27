@@ -77,5 +77,8 @@
   "torrent-missing-path": "Chemin manquant: {path}",
   "torrent-peers": "{numPeers, plural, one {# pair} other {# pairs}}",
   "torrent-placeholder": "Déposez un fichier torrent ici ou collez un lien magnet",
-  "torrent-save-torrent": "Enregistrer le fichier Torrent sous..."
+  "torrent-save-torrent": "Enregistrer le fichier Torrent sous...",
+
+  "tray-hide": "Réduire dans le systray",
+  "tray-show": "Afficher WebTorrent"
 }
