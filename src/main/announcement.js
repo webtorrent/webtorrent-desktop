@@ -3,13 +3,13 @@ module.exports = {
 }
 
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 var config = require('../config')
 var log = require('./log')
 
-var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
-  '?version=' + config.APP_VERSION +
-  '&platform=' + process.platform
+var ANNOUNCEMENT_URL
+var i18n
 
 /**
  * In certain situations, the WebTorrent team may need to show an announcement to
@@ -27,6 +27,14 @@ var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
  */
 function init () {
   var get = require('simple-get')
+
+  // Defer i18n loading to access electron locale
+  i18n = require('../i18n')
+
+  ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
+    '?version=' + config.APP_VERSION +
+    '&platform=' + process.platform +
+    '&lang=' + i18n.LANGUAGE
   get.concat(ANNOUNCEMENT_URL, onResponse)
 }
 
@@ -39,7 +47,8 @@ function onResponse (err, res, data) {
   } catch (err) {
     // Support plaintext announcement messages, using a default title.
     data = {
-      title: 'WebTorrent Desktop Announcement',
+      title: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['dialog-announcement'] || 'WebTorrent Desktop Announcement', i18n.LANGUAGE).format(),
       message: data.toString(),
       detail: data.toString()
     }

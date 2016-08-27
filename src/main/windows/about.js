@@ -5,11 +5,15 @@ var about = module.exports = {
 
 var config = require('../../config')
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 function init () {
   if (about.win) {
     return about.win.show()
   }
+
+  // Defer i18n loading to access electron locale
+  var i18n = require('../../i18n')
 
   var win = about.win = new electron.BrowserWindow({
     backgroundColor: '#ECECEC',
@@ -22,7 +26,10 @@ function init () {
     resizable: false,
     show: false,
     skipTaskbar: true,
-    title: 'About ' + config.APP_WINDOW_TITLE,
+    title: new IntlMessageFormat(
+      i18n.LOCALE_MESSAGES['about'] || 'About {appName}', i18n.LANGUAGE).format({
+        appName: config.APP_WINDOW_TITLE
+      }),
     useContentSize: true,
     width: 300
   })

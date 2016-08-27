@@ -5,6 +5,7 @@ module.exports = {
 }
 
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 var app = electron.app
 
@@ -38,19 +39,25 @@ function setBadge (count) {
 }
 
 function getMenuTemplate () {
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
+
   return [
     {
-      label: 'Create New Torrent...',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format(),
       accelerator: 'CmdOrCtrl+N',
       click: () => dialog.openSeedDirectory()
     },
     {
-      label: 'Open Torrent File...',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-open-torrent-file'] || 'Open Torrent File...', i18n.LANGUAGE).format(),
       accelerator: 'CmdOrCtrl+O',
       click: () => dialog.openTorrentFile()
     },
     {
-      label: 'Open Torrent Address...',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-open-torrent-address'] || 'Open Torrent Address...', i18n.LANGUAGE).format(),
       accelerator: 'CmdOrCtrl+U',
       click: () => dialog.openTorrentAddress()
     }

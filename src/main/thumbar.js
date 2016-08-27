@@ -11,15 +11,20 @@ module.exports = {
  * or activating the window.
  */
 
+var IntlMessageFormat = require('intl-messageformat')
 var path = require('path')
 var config = require('../config')
 
 var windows = require('./windows')
 
+var i18n
+
 /**
  * Show the Windows thumbnail toolbar buttons.
  */
 function enable () {
+  // Defer i18n loading to access electron locale
+  i18n = require('../i18n')
   update(false)
 }
 
@@ -45,7 +50,11 @@ function update (isPaused) {
 
   var buttons = [
     {
-      tooltip: isPaused ? 'Play' : 'Pause',
+      tooltip: isPaused
+        ? new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['play'] || 'Play', i18n.LANGUAGE).format()
+        : new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['pause'] || 'Pause', i18n.LANGUAGE).format(),
       icon: path.join(config.STATIC_PATH, icon),
       click: () => windows.main.dispatch('playPause')
     }

@@ -1,4 +1,6 @@
 {
+  "about": "À propos de {appName}",
+
   "global-missing-path": "Chemin des téléchargements manquants: {downloadPath}\nVérifiez que vos disques sont bien connectés?\nSinon, choisissez un nouveau chemin de téléchargement dans les {prefsLink}",
 
   "play-timeout-tooltip": "Le temps d'attente pour la lecture a été dépassé. Pas de seed? Pas d'internet? Cliquez pour essayer à nouveau.",
@@ -6,6 +8,7 @@
 
   "delete-tooltip": "Effacer le torrent",
 
+  "dialog-announcement": "Announce WebTorrent Desktop",
   "dialog-open": "Sélectionnez un fichier ou un dossier à ajouter.",
   "dialog-open-file": "Sélectionnez un fichier à ajouter.",
   "dialog-open-folder": "Sélectionnez un dossier à ajouter.",
@@ -18,7 +21,6 @@
   "download-torrenting-tooltip": "En téléchargement. Cliquez pour arrêter.",
   "download-start-tooltip": "Cliquez pour lancer le téléchargement",
 
-  "menu-about": "À propos de {appName}",
   "menu-back": "Précédent",
   "menu-backward": "Reculer d'un pas",
   "menu-copy": "Copier",
@@ -26,6 +28,7 @@
   "menu-contribute": "Contribuer sur Github",
   "menu-cut": "Couper",
   "menu-create-torrent": "Créer un nouveau Torrent",
+  "menu-create-torrent-desc": "Créér un nouveau Torrent",
   "menu-create-torrent-file": "Créer un fichier Torrent depuis un fichier...",
   "menu-create-torrent-folder": "Créer un fichier Torrent depuis un dossier...",
   "menu-delete": "Supprimer",
@@ -40,12 +43,14 @@
   "menu-help": "Aide",
   "menu-hide": "Masquer",
   "menu-hideothers": "Masquer les autres",
-  "menu-open-torrent-address": "Ouvrir un fichier Torrent...",
-  "menu-open-torrent-file": "Ouvrir une adresse de Torrent...",
+  "menu-open-torrent-address": "Ouvrir une adresse Torrent...",
+  "menu-open-torrent-address-desc": "Ouvrir un Torrent depuis une URL",
+  "menu-open-torrent-file": "Ouvrir un fichier de Torrent...",
+  "menu-open-torrent-file-desc": "Ouvrir un fichier .torrent",
+  "menu-playback": "Lecture",
   "menu-learn-more": "En savoir plus sur {appName}",
   "menu-minimize": "Minimiser",
   "menu-paste": "Coller une adresse Torrent",
-  "menu-playback": "Lecture",
   "menu-play-pause": "Lecture/Pause",
   "menu-process-show": "Afficher le processus WebTorrent",
   "menu-quit": "Quitter",
@@ -61,6 +66,9 @@
   "menu-volume-up": "Augmenter le volume",
   "menu-volume-down": "Diminuer le volume",
   "menu-view": "Affichage",
+
+  "pause": "Pause",
+  "play": "Lire",
 
   "player-album": "Album",
   "player-artist": "Artiste",

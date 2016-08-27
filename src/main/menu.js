@@ -351,7 +351,7 @@ function getMenuTemplate () {
         {
           id: 'menu-about',
           label: new IntlMessageFormat(
-            i18n.LOCALE_MESSAGES['menu-about'] || 'About {appName}', i18n.LANGUAGE).format({
+            i18n.LOCALE_MESSAGES['about'] || 'About {appName}', i18n.LANGUAGE).format({
               appName: config.APP_NAME
             }),
           role: 'about'
@@ -464,7 +464,7 @@ function getMenuTemplate () {
       {
         id: 'menu-about',
         label: new IntlMessageFormat(
-          i18n.LOCALE_MESSAGES['menu-about'] || 'About {appName}', i18n.LANGUAGE).format({
+          i18n.LOCALE_MESSAGES['about'] || 'About {appName}', i18n.LANGUAGE).format({
             appName: config.APP_NAME
           }),
         click: () => windows.about.init()
