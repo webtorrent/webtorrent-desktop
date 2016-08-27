@@ -26,14 +26,7 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, pick the default file to play
   playFile (infoHash, index /* optional */) {
-    // playback priority: pause all active torrents
-    if (this.state.saved.prefs.highestPlaybackPriority) {
-      var params = {
-        filter: {status: /downloading|seeding/},
-        excluded: [infoHash]
-      }
-      dispatch('pauseAllTorrents', params)
-    }
+    this.pauseActiveTorrents(infoHash)
 
     this.state.location.go({
       url: 'player',
@@ -45,6 +38,24 @@ module.exports = class PlaybackController {
     }, (err) => {
       if (err) dispatch('error', err)
     })
+  }
+
+  pauseActiveTorrents (infoHash) {
+    // playback priority: pause all active torrents if needed
+    if (this.state.saved.prefs.highestPlaybackPriority) {
+      // do not pause active torrents if playing a fully downloaded torrent
+      var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+      if (torrentSummary.status === 'seeding') {
+        console.log('--- NOT PAUSING active torrents for already downloaded torrent!')
+        return
+      }
+
+      var params = {
+        filter: {status: /downloading|seeding/},
+        excluded: [infoHash]
+      }
+      dispatch('pauseAllTorrents', params)
+    }
   }
 
   // Open a file in OS default app.
