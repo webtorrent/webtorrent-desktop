@@ -104,7 +104,6 @@ module.exports = class TorrentListController {
   }
 
   pauseAll ({filter, excluded}) {
-    console.log('--- pause all')
     this.state.saved.torrents.map((torrent) => {
       // "excluded" is an array of torrents that should not be paused
       if (excluded) {
@@ -124,7 +123,6 @@ module.exports = class TorrentListController {
   }
 
   resumePausedTorrents () {
-    console.log('--- resume paused torrents')
     this.state.saved.pausedTorrents.map((infoHash) => {
       var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
       this.startTorrent(torrentSummary)
