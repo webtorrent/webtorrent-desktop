@@ -60,6 +60,24 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'openExternalPlayer', !isChecked)
   }
 
+  highestPlaybackPriorityCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.highestPlaybackPriority}
+          label={'Highest Playback Priority'}
+          onCheck={this.handleHighestPlaybackPriorityChange}
+        />
+        <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
+      </Preference>
+    )
+  }
+
+  handleHighestPlaybackPriorityChange (e, isChecked) {
+    dispatch('updatePreferences', 'highestPlaybackPriority', isChecked)
+  }
+
   externalPlayerPathSelector () {
     const playerName = path.basename(
       this.props.state.unsaved.prefs.externalPlayerPath || 'VLC'
@@ -129,6 +147,7 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='Playback'>
           {this.openExternalPlayerCheckbox()}
           {this.externalPlayerPathSelector()}
+          {this.highestPlaybackPriorityCheckbox()}
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}

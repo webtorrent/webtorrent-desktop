@@ -26,6 +26,15 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, pick the default file to play
   playFile (infoHash, index /* optional */) {
+    // playback priority: pause all active torrents
+    if (this.state.saved.prefs.highestPlaybackPriority) {
+      var params = {
+        filter: {status: /downloading|seeding/},
+        excluded: [infoHash]
+      }
+      dispatch('pauseAllTorrents', params)
+    }
+
     this.state.location.go({
       url: 'player',
       setup: (cb) => {
@@ -299,6 +308,11 @@ module.exports = class PlaybackController {
     ipcRenderer.send('wt-stop-server')
 
     ipcRenderer.send('onPlayerClose')
+
+    // playback priority: resume previously paused downloads
+    if (this.state.saved.prefs.highestPlaybackPriority) {
+      dispatch('resumePausedTorrents')
+    }
 
     this.update()
   }

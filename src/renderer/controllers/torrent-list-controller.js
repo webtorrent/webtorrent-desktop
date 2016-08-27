@@ -103,18 +103,75 @@ module.exports = class TorrentListController {
     }
   }
 
+  pauseAll ({filter, excluded}) {
+    console.log('--- pause all')
+    this.state.saved.torrents.map((torrent) => {
+      // "excluded" is an array of torrents that should not be paused
+      if (excluded) {
+        var isExcluded = excluded.some((excludeInfoHash) => {
+          if (excludeInfoHash === torrent.infoHash) return true
+        })
+        if (isExcluded) return
+      }
+
+      // don't play sounds when pausing all
+      var wasPaused = this.pauseTorrent(torrent, false, filter)
+
+      // if torrent was paused add it to paused torrents collection
+      // we will use this collection to resume downloading when playback stops
+      if (wasPaused) this.state.saved.pausedTorrents.push(torrent.infoHash)
+    })
+  }
+
+  resumePausedTorrents () {
+    console.log('--- resume paused torrents')
+    this.state.saved.pausedTorrents.map((infoHash) => {
+      var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+      this.startTorrent(torrentSummary)
+    })
+
+    // reset paused torrents
+    this.state.saved.pausedTorrents = []
+  }
+
   // TODO: use torrentKey, not infoHash
   toggleTorrent (infoHash) {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+
+    // start
     if (torrentSummary.status === 'paused') {
-      torrentSummary.status = 'new'
-      this.startTorrentingSummary(torrentSummary.torrentKey)
-      sound.play('ENABLE')
-    } else {
-      torrentSummary.status = 'paused'
-      ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-      sound.play('DISABLE')
+      this.startTorrent(torrentSummary, true)
+      return
     }
+
+    // pause
+    this.pauseTorrent(torrentSummary, true)
+  }
+
+  startTorrent (torrentSummary, playSound) {
+    torrentSummary.status = 'new'
+    this.startTorrentingSummary(torrentSummary.torrentKey)
+
+    if (playSound) sound.play('ENABLE')
+  }
+
+  pauseTorrent (torrentSummary, playSound, filter) {
+    if (filter && !this.matchesFilter(torrentSummary, filter)) return false
+
+    torrentSummary.status = 'paused'
+    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+
+    if (playSound) sound.play('DISABLE')
+    return true
+  }
+
+  matchesFilter (torrentSummary, filter) {
+    var keys = Object.keys(filter)
+    var matches = keys.some((key) => {
+      if (!torrentSummary[key].match(filter[key])) return false
+      return true
+    })
+    return matches
   }
 
   toggleTorrentFile (infoHash, index) {

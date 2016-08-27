@@ -184,6 +184,8 @@ const dispatchHandlers = {
   'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
   'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
   'startTorrentingSummary': (torrentKey) => controllers.torrentList.startTorrentingSummary(torrentKey),
+  'pauseAllTorrents': (params) => controllers.torrentList.pauseAll(params),
+  'resumePausedTorrents': () => controllers.torrentList.resumePausedTorrents(),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),
