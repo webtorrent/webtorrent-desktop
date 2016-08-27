@@ -52,6 +52,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-react-jsx": "^6.8.0",
     "cross-zip": "^2.0.1",
+    "depcheck": "^0.6.4",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "^7.0.0",
     "electron-winstaller": "^2.3.0",
@@ -97,7 +98,8 @@
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
-    "test": "standard && node ./bin/check-deps.js",
+    "test": "standard && depcheck",
+    "gh-release": "gh-release",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec 'npm run start' --ext js,pug,css"
   }
