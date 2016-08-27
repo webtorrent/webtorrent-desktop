@@ -4,7 +4,7 @@ const electron = require('electron')
 const IntlMessageFormat = require('intl-messageformat')
 
 const {dispatch} = require('../lib/dispatcher')
-const i18n = require('../lib/i18n')
+const i18n = require('../../i18n')
 const State = require('../lib/state')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -171,7 +171,7 @@ module.exports = class TorrentListController {
   openTorrentContextMenu (infoHash) {
     var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     var menu = new electron.remote.Menu()
-    
+
     var msg = new IntlMessageFormat(
       i18n.LOCALE_MESSAGES['torrent-delete-torrent'] || 'Remove From List', i18n.LANGUAGE)
 

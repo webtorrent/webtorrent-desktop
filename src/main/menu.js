@@ -8,6 +8,7 @@ module.exports = {
 }
 
 var electron = require('electron')
+var IntlMessageFormat = require('intl-messageformat')
 
 var app = electron.app
 
@@ -24,68 +25,77 @@ function init () {
 }
 
 function setPlayerOpen (flag) {
-  getMenuItem('Play/Pause').enabled = flag
-  getMenuItem('Increase Volume').enabled = flag
-  getMenuItem('Decrease Volume').enabled = flag
-  getMenuItem('Step Forward').enabled = flag
-  getMenuItem('Step Backward').enabled = flag
-  getMenuItem('Increase Speed').enabled = flag
-  getMenuItem('Decrease Speed').enabled = flag
-  getMenuItem('Add Subtitles File...').enabled = flag
+  getMenuItem('menu-play-pause').enabled = flag
+  getMenuItem('menu-volume-up').enabled = flag
+  getMenuItem('menu-volume-down').enabled = flag
+  getMenuItem('menu-forward').enabled = flag
+  getMenuItem('menu-backward').enabled = flag
+  getMenuItem('menu-speed-up').enabled = flag
+  getMenuItem('menu-speed-down').enabled = flag
+  getMenuItem('menu-subtitles-add').enabled = flag
 }
 
 function setWindowFocus (flag) {
-  getMenuItem('Full Screen').enabled = flag
-  getMenuItem('Float on Top').enabled = flag
+  getMenuItem('menu-full-screen').enabled = flag
+  getMenuItem('menu-float-top').enabled = flag
 }
 
 // Disallow opening more screens on top of the current one.
 function setAllowNav (flag) {
-  getMenuItem('Preferences').enabled = flag
-  if (process.platform === 'darwin') {
-    getMenuItem('Create New Torrent...').enabled = flag
-  } else {
-    getMenuItem('Create New Torrent from Folder...').enabled = flag
-    getMenuItem('Create New Torrent from File...').enabled = flag
+  getMenuItem('preferences').enabled = flag
+  getMenuItem('menu-create-torrent').enabled = flag
+  if (process.platform !== 'darwin') {
+    getMenuItem('menu-create-torrent-file').enabled = flag
   }
 }
 
 function onToggleAlwaysOnTop (flag) {
-  getMenuItem('Float on Top').checked = flag
+  getMenuItem('menu-float-top').checked = flag
 }
 
 function onToggleFullScreen (flag) {
-  getMenuItem('Full Screen').checked = flag
+  getMenuItem('menu-full-screen').checked = flag
 }
 
-function getMenuItem (label) {
+function getMenuItem (id) {
   for (var i = 0; i < menu.items.length; i++) {
     var menuItem = menu.items[i].submenu.items.find(function (item) {
-      return item.label === label
+      return item.id === id
     })
     if (menuItem) return menuItem
   }
 }
 
 function getMenuTemplate () {
+  // Defer i18n loading to access electron locale
+  var i18n = require('../i18n')
   var template = [
     {
-      label: 'File',
+      id: 'menu-file',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-file'] || 'File', i18n.LANGUAGE).format(),
       submenu: [
         {
+          id: 'menu-create-torrent',
           label: process.platform === 'darwin'
-            ? 'Create New Torrent...'
-            : 'Create New Torrent from Folder...',
+            ? new IntlMessageFormat(
+              i18n.LOCALE_MESSAGES['menu-create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format()
+            : new IntlMessageFormat(
+              i18n.LOCALE_MESSAGES['menu-create-torrent-folder'] || 'Create New Torrent from Folder...', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+N',
           click: () => dialog.openSeedDirectory()
         },
         {
-          label: 'Open Torrent File...',
+          id: 'menu-open-torrent-file',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-open-torrent-file'] || 'Open Torrent File...', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+O',
           click: () => dialog.openTorrentFile()
         },
         {
-          label: 'Open Torrent Address...',
+          id: 'menu-open-torrent-address',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-open-torrent-address'] || 'Open Torrent Address...', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+U',
           click: () => dialog.openTorrentAddress()
         },
@@ -93,45 +103,74 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
+          id: 'menu-close',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-close'] || 'Close', i18n.LANGUAGE).format(),
           role: 'close'
         }
       ]
     },
     {
-      label: 'Edit',
+      id: 'menu-edit',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-edit'] || 'Edit', i18n.LANGUAGE).format(),
       submenu: [
         {
+          id: 'menu-undo',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-undo'] || 'Undo', i18n.LANGUAGE).format(),
           role: 'undo'
         },
         {
+          id: 'menu-redo',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-redo'] || 'Redo', i18n.LANGUAGE).format(),
           role: 'redo'
         },
         {
           type: 'separator'
         },
         {
+          id: 'menu-cut',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-cut'] || 'Cut', i18n.LANGUAGE).format(),
           role: 'cut'
         },
         {
+          id: 'menu-copy',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-copy'] || 'Copy', i18n.LANGUAGE).format(),
           role: 'copy'
         },
         {
-          label: 'Paste Torrent Address',
+          id: 'menu-paste',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-paste'] || 'Paste Torrent Address', i18n.LANGUAGE).format(),
           role: 'paste'
         },
         {
+          id: 'menu-delete',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-delete'] || 'Delete', i18n.LANGUAGE).format(),
           role: 'delete'
         },
         {
+          id: 'menu-select-all',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-select-all'] || 'Select All', i18n.LANGUAGE).format(),
           role: 'selectall'
         }
       ]
     },
     {
-      label: 'View',
+      id: 'menu-view',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-view'] || 'View', i18n.LANGUAGE).format(),
       submenu: [
         {
-          label: 'Full Screen',
+          id: 'menu-full-screen',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-full-screen'] || 'Full Screen', i18n.LANGUAGE).format(),
           type: 'checkbox',
           accelerator: process.platform === 'darwin'
             ? 'Ctrl+Command+F'
@@ -139,7 +178,9 @@ function getMenuTemplate () {
           click: () => windows.main.toggleFullScreen()
         },
         {
-          label: 'Float on Top',
+          id: 'menu-float-top',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-float-top'] || 'Float on Top', i18n.LANGUAGE).format(),
           type: 'checkbox',
           click: () => windows.main.toggleAlwaysOnTop()
         },
@@ -147,7 +188,9 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Go Back',
+          id: 'menu-back',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-back'] || 'Go Back', i18n.LANGUAGE).format(),
           accelerator: 'Esc',
           click: () => windows.main.dispatch('escapeBack')
         },
@@ -155,17 +198,23 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Developer',
+          id: 'menu-developer',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-developer'] || 'Developer', i18n.LANGUAGE).format(),
           submenu: [
             {
-              label: 'Developer Tools',
+              id: 'menu-developer-tools',
+              label: new IntlMessageFormat(
+                i18n.LOCALE_MESSAGES['menu-developer-tools'] || 'Developer Tools', i18n.LANGUAGE).format(),
               accelerator: process.platform === 'darwin'
                 ? 'Alt+Command+I'
                 : 'Ctrl+Shift+I',
               click: () => windows.main.toggleDevTools()
             },
             {
-              label: 'Show WebTorrent Process',
+              id: 'menu-process-show',
+              label: new IntlMessageFormat(
+                i18n.LOCALE_MESSAGES['menu-process-show'] || 'Show WebTorrent Process', i18n.LANGUAGE).format(),
               accelerator: process.platform === 'darwin'
                 ? 'Alt+Command+P'
                 : 'Ctrl+Shift+P',
@@ -176,10 +225,14 @@ function getMenuTemplate () {
       ]
     },
     {
-      label: 'Playback',
+      id: 'menu-playback',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-playback'] || 'Playback', i18n.LANGUAGE).format(),
       submenu: [
         {
-          label: 'Play/Pause',
+          id: 'menu-play-pause',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-play-pause'] || 'Play/Pause', i18n.LANGUAGE).format(),
           accelerator: 'Space',
           click: () => windows.main.dispatch('playPause'),
           enabled: false
@@ -188,13 +241,17 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Increase Volume',
+          id: 'menu-volume-up',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-volume-up'] || 'Increase Volume', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+Up',
           click: () => windows.main.dispatch('changeVolume', 0.1),
           enabled: false
         },
         {
-          label: 'Decrease Volume',
+          id: 'menu-volume-down',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-volume-down'] || 'Decrease Volume', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+Down',
           click: () => windows.main.dispatch('changeVolume', -0.1),
           enabled: false
@@ -203,7 +260,9 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Step Forward',
+          id: 'menu-forward',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-forward'] || 'Step Forward', i18n.LANGUAGE).format(),
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Right'
             : 'Alt+Right',
@@ -211,7 +270,9 @@ function getMenuTemplate () {
           enabled: false
         },
         {
-          label: 'Step Backward',
+          id: 'menu-backward',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-backward'] || 'Step Backward', i18n.LANGUAGE).format(),
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Left'
             : 'Alt+Left',
@@ -222,13 +283,17 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Increase Speed',
+          id: 'menu-speed-up',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-speed-up'] || 'Increase Speed', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+=',
           click: () => windows.main.dispatch('changePlaybackRate', 1),
           enabled: false
         },
         {
-          label: 'Decrease Speed',
+          id: 'menu-speed-down',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-speed-down'] || 'Decrease Speed', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+-',
           click: () => windows.main.dispatch('changePlaybackRate', -1),
           enabled: false
@@ -237,29 +302,41 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          label: 'Add Subtitles File...',
+          id: 'menu-subtitles-add',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-subtitles-add'] || 'Add Subtitles File...', i18n.LANGUAGE).format(),
           click: () => windows.main.dispatch('openSubtitles'),
           enabled: false
         }
       ]
     },
     {
-      label: 'Help',
+      id: 'menu-help',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-help'] || 'Help', i18n.LANGUAGE).format(),
       role: 'help',
       submenu: [
         {
-          label: 'Learn more about ' + config.APP_NAME,
+          id: 'menu-learn-more',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-learn-more'] || 'Learn more about {appName}', i18n.LANGUAGE).format({
+              appName: config.APP_NAME
+            }),
           click: () => shell.openExternal(config.HOME_PAGE_URL)
         },
         {
-          label: 'Contribute on GitHub',
+          id: 'menu-contribute',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-contribute'] || 'Contribute on GitHub', i18n.LANGUAGE).format(),
           click: () => shell.openExternal(config.GITHUB_URL)
         },
         {
           type: 'separator'
         },
         {
-          label: 'Report an Issue...',
+          id: 'menu-report-issue',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-report-issue'] || 'Report an issue', i18n.LANGUAGE).format(),
           click: () => shell.openExternal(config.GITHUB_URL_ISSUES)
         }
       ]
@@ -272,13 +349,20 @@ function getMenuTemplate () {
       label: config.APP_NAME,
       submenu: [
         {
+          id: 'menu-about',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-about'] || 'About {appName}', i18n.LANGUAGE).format({
+              appName: config.APP_NAME
+            }),
           role: 'about'
         },
         {
           type: 'separator'
         },
         {
-          label: 'Preferences',
+          id: 'preferences',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['preferences'] || 'Preferences', i18n.LANGUAGE).format(),
           accelerator: 'Cmd+,',
           click: () => windows.main.dispatch('preferences')
         },
@@ -305,6 +389,9 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
+          id: 'menu-quit',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-quit'] || 'Quit', i18n.LANGUAGE).format(),
           role: 'quit'
         }
       ]
@@ -332,7 +419,9 @@ function getMenuTemplate () {
   if (process.platform === 'linux' || process.platform === 'win32') {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
-      label: 'Create New Torrent from File...',
+      id: 'menu-create-torrent-file',
+      label: new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['menu-create-torrent-file'] || 'Create New Torrent from File...', i18n.LANGUAGE).format(),
       click: () => dialog.openSeedFile()
     })
 
@@ -342,7 +431,9 @@ function getMenuTemplate () {
         type: 'separator'
       },
       {
-        label: 'Preferences',
+        id: 'preferences',
+        label: new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['preferences'] || 'Preferences', i18n.LANGUAGE).format(),
         accelerator: 'CmdOrCtrl+,',
         click: () => windows.main.dispatch('preferences')
       })
@@ -353,7 +444,11 @@ function getMenuTemplate () {
         type: 'separator'
       },
       {
-        label: 'About ' + config.APP_NAME,
+        id: 'menu-about',
+        label: new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['menu-about'] || 'About {appName}', i18n.LANGUAGE).format({
+            appName: config.APP_NAME
+          }),
         click: () => windows.about.init()
       }
     )
@@ -363,7 +458,9 @@ function getMenuTemplate () {
   if (process.platform === 'linux') {
     // File menu (Linux)
     template[0].submenu.push({
-      label: 'Quit',
+      id: 'menu-quit',
+      label: new IntlMessageFormat(
+        i18n.LOCALE_MESSAGES['menu-quit'] || 'Quit', i18n.LANGUAGE).format(),
       click: () => app.quit()
     })
   }
