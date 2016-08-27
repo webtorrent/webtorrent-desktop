@@ -420,9 +420,9 @@ function nl2br (...nodes) {
   const children = nodes.reduce(function (result, node) {
     if (typeof node === 'string') {
       var tokens = node.split('\n')
-      for (var i=0; i<tokens.length; i++) {
+      for (var i = 0; i < tokens.length; i++) {
         result = result.concat(tokens[i])
-        if (i<tokens.length-1) {
+        if (i < tokens.length - 1) {
           result = result.concat(<br/>)
         }
       }
