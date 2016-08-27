@@ -45,10 +45,7 @@ module.exports = class PlaybackController {
     if (this.state.saved.prefs.highestPlaybackPriority) {
       // do not pause active torrents if playing a fully downloaded torrent
       var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-      if (torrentSummary.status === 'seeding') {
-        console.log('--- NOT PAUSING active torrents for already downloaded torrent!')
-        return
-      }
+      if (torrentSummary.status === 'seeding') return
 
       var params = {
         filter: {status: /downloading|seeding/},
