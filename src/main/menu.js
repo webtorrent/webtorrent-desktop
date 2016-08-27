@@ -370,6 +370,9 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
+          id: 'menu-services',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-services'] || 'Services', i18n.LANGUAGE).format(),
           role: 'services',
           submenu: []
         },
@@ -377,12 +380,21 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
+          id: 'menu-hide',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-hide'] || 'Hide', i18n.LANGUAGE).format(),
           role: 'hide'
         },
         {
+          id: 'menu-hideothers',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-hideothers'] || 'Hide Others', i18n.LANGUAGE).format(),
           role: 'hideothers'
         },
         {
+          id: 'menu-unhide',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-unhide'] || 'Unhide', i18n.LANGUAGE).format(),
           role: 'unhide'
         },
         {
@@ -402,12 +414,18 @@ function getMenuTemplate () {
       role: 'window',
       submenu: [
         {
+          id: 'menu-minimize',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-minimize'] || 'Minimize', i18n.LANGUAGE).format(),
           role: 'minimize'
         },
         {
           type: 'separator'
         },
         {
+          id: 'menu-front',
+          label: new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['menu-font'] || 'Bring to Front', i18n.LANGUAGE).format(),
           role: 'front'
         }
       ]
