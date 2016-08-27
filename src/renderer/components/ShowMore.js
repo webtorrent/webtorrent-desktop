@@ -1,4 +1,5 @@
 const React = require('react')
+const {injectIntl} = require('react-intl')
 
 const FlatButton = require('material-ui/FlatButton').default
 
@@ -13,8 +14,10 @@ class ShowMore extends React.Component {
 
   static get defaultProps () {
     return {
-      hideLabel: 'Hide more...',
-      showLabel: 'Show more...'
+      hideLabel: this.props.intl.formatMessage({id: 'show-more-hide',
+        defaultMessage: 'Hide more...'}),
+      showLabel: this.props.intl.formatMessage({id: 'show-more-show',
+        defaultMessage: 'Show more...'})
     }
   }
 
@@ -52,4 +55,4 @@ class ShowMore extends React.Component {
   }
 }
 
-module.exports = ShowMore
+module.exports = injectIntl(ShowMore)

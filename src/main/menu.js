@@ -28,8 +28,8 @@ function setPlayerOpen (flag) {
   getMenuItem('menu-play-pause').enabled = flag
   getMenuItem('menu-volume-up').enabled = flag
   getMenuItem('menu-volume-down').enabled = flag
-  getMenuItem('menu-forward').enabled = flag
-  getMenuItem('menu-backward').enabled = flag
+  getMenuItem('menu-step-forward').enabled = flag
+  getMenuItem('menu-step-backward').enabled = flag
   getMenuItem('menu-speed-up').enabled = flag
   getMenuItem('menu-speed-down').enabled = flag
   getMenuItem('menu-subtitles-add').enabled = flag
@@ -260,9 +260,9 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          id: 'menu-forward',
+          id: 'menu-step-forward',
           label: new IntlMessageFormat(
-            i18n.LOCALE_MESSAGES['menu-forward'] || 'Step Forward', i18n.LANGUAGE).format(),
+            i18n.LOCALE_MESSAGES['menu-step-forward'] || 'Step Forward', i18n.LANGUAGE).format(),
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Right'
             : 'Alt+Right',
@@ -270,9 +270,9 @@ function getMenuTemplate () {
           enabled: false
         },
         {
-          id: 'menu-backward',
+          id: 'menu-step-backward',
           label: new IntlMessageFormat(
-            i18n.LOCALE_MESSAGES['menu-backward'] || 'Step Backward', i18n.LANGUAGE).format(),
+            i18n.LOCALE_MESSAGES['menu-step-backward'] || 'Step Backward', i18n.LANGUAGE).format(),
           accelerator: process.platform === 'darwin'
             ? 'CmdOrCtrl+Alt+Left'
             : 'Alt+Left',

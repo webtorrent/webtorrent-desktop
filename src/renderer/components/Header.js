@@ -1,4 +1,5 @@
 const React = require('react')
+const {injectIntl} = require('react-intl')
 
 const {dispatcher} = require('../lib/dispatcher')
 
@@ -11,13 +12,13 @@ class Header extends React.Component {
         <div className='nav left float-left'>
           <i
             className={'icon back ' + (loc.hasBack() ? '' : 'disabled')}
-            title='Back'
+            title={this.props.intl.formatMessage({id: 'menu-back', defaultMessage: 'Back'})}
             onClick={dispatcher('back')}>
             chevron_left
           </i>
           <i
             className={'icon forward ' + (loc.hasForward() ? '' : 'disabled')}
-            title='Forward'
+            title={this.props.intl.formatMessage({id: 'menu-forward', defaultMessage: 'Forward'})}
             onClick={dispatcher('forward')}>
             chevron_right
           </i>
@@ -41,7 +42,7 @@ class Header extends React.Component {
     return (
       <i
         className='icon add'
-        title='Add torrent'
+        title={this.props.intl.formatMessage({id: 'menu-add-torrent', defaultMessage: 'Add torrent'})}
         onClick={dispatcher('openFiles')}>
         add
       </i>
@@ -49,4 +50,4 @@ class Header extends React.Component {
   }
 }
 
-module.exports = Header
+module.exports = injectIntl(Header)

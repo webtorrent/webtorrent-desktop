@@ -1,6 +1,7 @@
 const colors = require('material-ui/styles/colors')
 const electron = require('electron')
 const React = require('react')
+const {injectIntl} = require('react-intl')
 
 const remote = electron.remote
 
@@ -79,7 +80,7 @@ class PathSelector extends React.Component {
         />
         <RaisedButton
           className='control'
-          label='Change'
+          label={this.props.intl.formatMessage({id: 'change', defaultMessage: 'Change'})}
           onClick={this.handleClick}
           style={{
             marginLeft: 10
@@ -90,4 +91,4 @@ class PathSelector extends React.Component {
   }
 }
 
-module.exports = PathSelector
+module.exports = injectIntl(PathSelector)

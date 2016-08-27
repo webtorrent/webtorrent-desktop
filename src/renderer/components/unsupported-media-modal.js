@@ -16,17 +16,30 @@ module.exports = class UnsupportedMediaModal extends React.Component {
       ? path.basename(playerPath).split('.')[0]
       : 'VLC'
     var actionButton = state.modal.externalPlayerInstalled
-      ? (<button className='button-raised' onClick={dispatcher('openExternalPlayer')}>Play in {playerName}</button>)
-      : (<button className='button-raised' onClick={() => this.onInstall}>Install VLC</button>)
+      ? (<button className='button-raised' onClick={dispatcher('openExternalPlayer')}>
+          <FormattedMessage id='media-unsupported-play-in'
+            defaultMessage='Play in {playerName}'/>
+        </button>)
+      : (<button className='button-raised' onClick={() => this.onInstall}>
+          <FormattedMessage id='media-unsupported-install-vlc'
+            defaultMessage='Install VLC'/>
+        </button>)
+    var msg = 'Couldn\'t run external player. Please make sure it\'s installed.'
     var playerMessage = state.modal.externalPlayerNotFound
-      ? 'Couldn\'t run external player. Please make sure it\'s installed.'
+      ? (<FormattedMessage id='media-unsupported-player-not-found'
+        defaultMessage={msg} />)
       : ''
+    msg = 'Sorry, we can\'t play that file.'
     return (
       <div>
-        <p><strong>Sorry, we can't play that file.</strong></p>
+        <p><strong><FormattedMessage id='media-unsupported'
+              defaultMessage={msg}/></strong></p>
         <p>{message}</p>
         <p className='float-right'>
-          <button className='button-flat' onClick={dispatcher('backToList')}>Cancel</button>
+          <button className='button-flat' onClick={dispatcher('backToList')}>
+            <FormattedMessage id='cancel'
+              defaultMessage='Cancel'/>
+          </button>
           {actionButton}
         </p>
         <p className='error-text'>{playerMessage}</p>

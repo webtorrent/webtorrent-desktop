@@ -1,7 +1,8 @@
 {
   "about": "À propos de {appName}",
 
-  "global-missing-path": "Chemin des téléchargements manquants: {downloadPath}\nVérifiez que vos disques sont bien connectés?\nSinon, choisissez un nouveau chemin de téléchargement dans les {prefsLink}",
+  "cancel": "Annuler",
+  "change": "Modifier",
 
   "play-timeout-tooltip": "Le temps d'attente pour la lecture a été dépassé. Pas de seed? Pas d'internet? Cliquez pour essayer à nouveau.",
   "play-streaming-tooltip": "Lancer le streaming",
@@ -21,8 +22,15 @@
   "download-torrenting-tooltip": "En téléchargement. Cliquez pour arrêter.",
   "download-start-tooltip": "Cliquez pour lancer le téléchargement",
 
+  "global-missing-path": "Chemin des téléchargements manquants: {downloadPath}\nVérifiez que vos disques sont bien connectés?\nSinon, choisissez un nouveau chemin de téléchargement dans les {prefsLink}",
+
+  "media-unsupported": "Désolé, nous n'avons pas pu lire ce fichier.",
+  "media-unsupported-install-vlc": "Installer VLC",
+  "media-unsupported-play-in": "Lire dans {playerName}",
+  "media-unsupported-player-not-found": "Le lecteur externe n'a pas pu être exécuté. Veuillez vérifier qu'il est bien installé.",
+
+  "menu-add-torrent": "Ajouter un Torrent",
   "menu-back": "Précédent",
-  "menu-backward": "Reculer d'un pas",
   "menu-copy": "Copier",
   "menu-close": "Fermer",
   "menu-contribute": "Contribuer sur Github",
@@ -37,7 +45,7 @@
   "menu-edit": "Édition",
   "menu-file": "Fichier",
   "menu-float-top": "Garder au dessus",
-  "menu-forward": "Avancer d'un pas",
+  "menu-forward": "Avancer",
   "menu-front": "Mettre au premier plan",
   "menu-full-screen": "Plein Écran",
   "menu-help": "Aide",
@@ -60,12 +68,18 @@
   "menu-services": "Services",
   "menu-speed-down": "Diminuer la vitesse",
   "menu-speed-up": "Augmenter la vitesse",
+  "menu-step-backward": "Reculer d'un pas",
+  "menu-step-forward": "Avancer d'un pas",
   "menu-subtitles-add": "Ajouter un fichier de sous-titres...",
   "menu-undo": "Annuler",
   "menu-unhide": "Afficher",
   "menu-volume-up": "Augmenter le volume",
   "menu-volume-down": "Diminuer le volume",
   "menu-view": "Affichage",
+
+  "ok": "OK",
+
+  "open-torrent-address-label": "Entrez l'adresse d'un torrent ou un lien magnet",
 
   "pause": "Pause",
   "play": "Lire",
@@ -78,13 +92,19 @@
 
   "preferences": "Préférences",
 
+  "show-more-hide": "Cacher les détails...",
+  "show-more-show": "Afficher les détails...",
+
   "torrent-copy-magnet": "Copier le lien Magnet",
   "torrent-copy-magnet": "Copier le lien Instant.io",
   "torrent-delete-torrent": "Effacer de la liste",
   "torrent-delete-data": "Effacer les données",
   "torrent-eta": "HPA: {hours} {minutes} {seconds}",
   "torrent-error": "Erreur",
+  "torrrent-error-desc": "Les fichiers cachés, commençant par le caractère ., ne sont pas inclus.",
+  "torrent-error-file-missing": "Désolé, vous devez choisir au moins un fichier qui ne soit pas un fichier caché",
   "torrent-error-path-missing": "Chemin manquant.\nCorrigez et relancez l'appli, ou effacez le torrent.",
+  "torrent-error-title": "Créer un Torrent",
   "torrent-finder-show": "Afficher dans Finder",
   "torrent-folder-show": "Afficher dans l'explorateur",
   "torrent-info-downloading": "Téléchargement des infos du torrent...",
@@ -93,8 +113,17 @@
   "torrent-missing-path": "Chemin manquant: {path}",
   "torrent-peers": "{numPeers, plural, one {# pair} other {# pairs}}",
   "torrent-placeholder": "Déposez un fichier torrent ici ou collez un lien magnet",
+  "torrent-remove-action": "Supprimer",
+  "torrent-remove-confirm": "Êtes-vous sûr(e) de vouloir supprimer ce torrent de la liste?",
+  "torrent-remove-data-action": "Supprimer les données",
+  "torrent-remove-data-confirm": "Êtes-vous sûr(e) de vouloir supprimer ce torrent de la liste et effacer les données?",
   "torrent-save-torrent": "Enregistrer le fichier Torrent sous...",
 
   "tray-hide": "Réduire dans le systray",
-  "tray-show": "Afficher WebTorrent"
+  "tray-show": "Afficher WebTorrent",
+
+  "update-available": "Une nouvelle version de WebTorrent est disponible: v{version}",
+  "update-available-desc": "Nous avons une mise à jour automatique pour Windows et Mac. Nous n'en avons pas encore pour Linux, donc vous devez télécharger la nouvelle version manuellement.",
+  "update-available-download": "Afficher la page des téléchargements",
+  "update-available-skip": "Ignorer cette Version"
 }
