@@ -45,7 +45,7 @@ function getMenuTemplate () {
   return [
     {
       label: new IntlMessageFormat(
-        i18n.LOCALE_MESSAGES['menu-create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format(),
+        i18n.LOCALE_MESSAGES['create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format(),
       accelerator: 'CmdOrCtrl+N',
       click: () => dialog.openSeedDirectory()
     },

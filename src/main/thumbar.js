@@ -23,8 +23,6 @@ var i18n
  * Show the Windows thumbnail toolbar buttons.
  */
 function enable () {
-  // Defer i18n loading to access electron locale
-  i18n = require('../i18n')
   update(false)
 }
 
@@ -44,6 +42,7 @@ function onPlayerPlay () {
 }
 
 function update (isPaused) {
+  if (!i18n) i18n = require('../i18n')
   var icon = isPaused
     ? 'PlayThumbnailBarButton.png'
     : 'PauseThumbnailBarButton.png'

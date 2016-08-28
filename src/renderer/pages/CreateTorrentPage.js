@@ -2,8 +2,11 @@ const createTorrent = require('create-torrent')
 const path = require('path')
 const prettyBytes = require('prettier-bytes')
 const React = require('react')
+const {injectIntl, FormattedMessage} = require('react-intl')
+const IntlMessageFormat = require('intl-messageformat')
 
 const {dispatch, dispatcher} = require('../lib/dispatcher')
+const i18n = require('../../i18n')
 
 const FlatButton = require('material-ui/FlatButton').default
 const RaisedButton = require('material-ui/RaisedButton').default
@@ -40,7 +43,12 @@ class CreateTorrentPage extends React.Component {
     var totalBytes = files
       .map((f) => f.size)
       .reduce((a, b) => a + b, 0)
-    var torrentInfo = `${numFiles} files, ${prettyBytes(totalBytes)}`
+    var torrentInfo = new IntlMessageFormat(
+      i18n.LOCALE_MESSAGES['torrent-info'] || '{numFiles} files, {totalBytes}')
+      .format({
+        numFiles: numFiles,
+        totalBytes: prettyBytes(totalBytes)
+      })
 
     // Then, use the name of the base folder (or sole file, for a single file torrent)
     // as the default name. Show all files relative to the base folder.
@@ -99,7 +107,10 @@ class CreateTorrentPage extends React.Component {
     return (
       <div className='create-torrent'>
         <Heading level={1}>
-          Create torrent "{this.state.defaultName}"
+          <FormattedMessage id='torrent-create-title' defaultMessage='Create torrent {name}'
+            values={{
+              name: this.state.defaultName
+            }} />
         </Heading>
         <div className='torrent-info'>
           {this.state.torrentInfo}
@@ -112,43 +123,43 @@ class CreateTorrentPage extends React.Component {
           style={{
             marginBottom: 10
           }}
-          hideLabel='Hide advanced settings...'
-          showLabel='Show advanced settings...'
+          hideLabel={this.props.intl.formatMessage({id: 'settings-advanced-hide', defaultMessage: 'Hide advanced settings...'})}
+          showLabel={this.props.intl.formatMessage({id: 'settings-advanced-show', defaultMessage: 'Show advanced settings...'})}
         >
           <div key='advanced' className='create-torrent-advanced'>
             <div key='private' className='torrent-attribute'>
-              <label>Private:</label>
+              <label>><FormattedMessage id='torrent-create-private' defaultMessage='Private:' /></label>
               <input type='checkbox' className='torrent-is-private' value='torrent-is-private' />
             </div>
-            <Heading level={2}>Trackers:</Heading>
+            <Heading level={2}>><FormattedMessage id='torrent-create-trackers' defaultMessage='Trackers:' /></Heading>
             <TextField
               className='torrent-trackers'
-              hintText='Tracker'
+              hintText={this.props.intl.formatMessage({id: 'torrent-create-tracker', defaultMessage: 'Tracker'})}
               multiLine
               rows={2}
               rowsMax={10}
               defaultValue={this.state.trackers}
             />
             <div key='comment' className='torrent-attribute'>
-              <label>Comment:</label>
+              <label>><FormattedMessage id='torrent-create-comment' defaultMessage='Comment:' /></label>
               <textarea className='torrent-attribute torrent-comment' />
             </div>
             <div key='files' className='torrent-attribute'>
-              <label>Files:</label>
+              <label><FormattedMessage id='torrent-create-files' defaultMessage='Files:' /></label>
               <div>{this.state.fileElems}</div>
             </div>
           </div>
         </ShowMore>
         <div className='float-right'>
           <FlatButton
-            label='Cancel'
+            label={this.props.intl.formatMessage({id: 'cancel', defaultMessage: 'Cancel'})}
             style={{
               marginRight: 10
             }}
             onClick={dispatcher('cancel')}
           />
           <RaisedButton
-            label='Create Torrent'
+            label={this.props.intl.formatMessage({id: 'create-torrent-action', defaultMessage: 'Create Torrrent'})}
             primary
             onClick={this.handleSubmit}
           />
@@ -168,4 +179,4 @@ function findCommonPrefix (a, b) {
   return a.substring(0, i)
 }
 
-module.exports = CreateTorrentPage
+module.exports = injectIntl(CreateTorrentPage)

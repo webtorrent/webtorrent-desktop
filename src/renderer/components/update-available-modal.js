@@ -11,8 +11,8 @@ module.exports = class UpdateAvailableModal extends React.Component {
     return (
       <div className='update-available-modal'>
         <p><strong><FormattedMessage id='update-available'
-              defaultMessage='A new version of WebTorrent is available: v{version}'
-              values={{version: state.modal.version}}/></strong></p>
+          defaultMessage='A new version of WebTorrent is available: v{version}'
+          values={{version: state.modal.version}}/></strong></p>
         <p>
           <FormattedMessage id='update-available-desc'
             defaultMessage={msg} />

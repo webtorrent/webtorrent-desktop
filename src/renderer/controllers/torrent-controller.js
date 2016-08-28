@@ -1,6 +1,8 @@
 const path = require('path')
 const ipcRenderer = require('electron').ipcRenderer
+const IntlMessageFormat = require('intl-messageformat')
 
+const i18n = require('../lib/i18n')
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const sound = require('../lib/sound')
@@ -177,10 +179,11 @@ function getTorrentPath (torrentSummary) {
 }
 
 function showDoneNotification (torrent) {
-  var notif = new window.Notification('Download Complete', {
-    body: torrent.name,
-    silent: true
-  })
+  var notif = new window.Notification(new IntlMessageFormat(
+    i18n.LOCALE_MESSAGES['torrent-download-complete'] || 'Download Complete', i18n.LANGUAGE).format(), {
+      body: torrent.name,
+      silent: true
+    })
 
   notif.onClick = function () {
     ipcRenderer.send('show')

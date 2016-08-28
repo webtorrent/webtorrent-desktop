@@ -1,6 +1,7 @@
 const colors = require('material-ui/styles/colors')
 const path = require('path')
 const React = require('react')
+const {injectIntl, FormattedMessage} = require('react-intl')
 
 const Checkbox = require('material-ui/Checkbox').default
 const Heading = require('../components/Heading')
@@ -28,11 +29,11 @@ class PreferencesPage extends React.Component {
       <Preference>
         <PathSelector
           dialog={{
-            title: 'Select download directory',
+            title: this.props.intl.formatMessage({id: 'preferences-select-directory-dialog', defaultMessage: 'Select download directory'}),
             properties: [ 'openDirectory' ]
           }}
           onChange={this.handleDownloadPathChange}
-          title='Download location'
+          title={this.props.intl.formatMessage({id: 'preferences-select-directory', defaultMessage: 'Download location'})}
           value={this.props.state.unsaved.prefs.downloadPath}
         />
       </Preference>
@@ -49,7 +50,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={!this.props.state.unsaved.prefs.openExternalPlayer}
-          label={'Play torrent media files using WebTorrent'}
+          label={this.props.intl.formatMessage({id: 'preferences-play-media', defaultMessage: 'Play torrent media files using WebTorrent'})}
           onCheck={this.handleOpenExternalPlayerChange}
         />
       </Preference>
@@ -66,21 +67,28 @@ class PreferencesPage extends React.Component {
     )
 
     const description = this.props.state.unsaved.prefs.openExternalPlayer
-      ? `Torrent media files will always play in ${playerName}.`
-      : `Torrent media files will play in ${playerName} if WebTorrent cannot ` +
-        'play them.'
+      ? (<FormattedMessage id='preferences-play-media-always'
+        defaultMessage='Torrent media files will always play in {playerName}.'
+        values={{
+          playerName: playerName
+        }}/>)
+      : (<FormattedMessage id='preferences-play-media-fallback'
+        defaultMessage='Torrent media files will play in {playerName} if WebTorrent cannot play them.'
+        values={{
+          playerName: playerName
+        }}/>)
 
     return (
       <Preference>
         <p>{description}</p>
         <PathSelector
           dialog={{
-            title: 'Select media player app',
+            title: this.props.intl.formatMessage({id: 'preferences-select-player-dialog', defaultMessage: 'Select media player app'}),
             properties: [ 'openFile' ]
           }}
           displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
-          title='External player'
+          title={this.props.intl.formatMessage({id: 'preferences-select-player', defaultMessage: 'External player'})}
           value={this.props.state.unsaved.prefs.externalPlayerPath}
         />
       </Preference>
@@ -98,11 +106,12 @@ class PreferencesPage extends React.Component {
   setDefaultAppButton () {
     return (
       <Preference>
-        <p>WebTorrent is not currently the default torrent app.</p>
+        <p><FormattedMessage id='preferences-default-app'
+          defaultMessage='WebTorrent is not currently the default torrent app.'/></p>
         <RaisedButton
           className='control'
           onClick={this.handleSetDefaultApp}
-          label='Make WebTorrent the default'
+          label={this.props.intl.formatMessage({id: 'preferences-default-app-action', defaultMessage: 'Make WebTorrent the default'})}
         />
       </Preference>
     )
@@ -123,14 +132,14 @@ class PreferencesPage extends React.Component {
           marginRight: 25
         }}
       >
-        <PreferencesSection title='Downloads'>
+        <PreferencesSection title={this.props.intl.formatMessage({id: 'downloads', defaultMessage: 'Downloads'})}>
           {this.downloadPathSelector()}
         </PreferencesSection>
-        <PreferencesSection title='Playback'>
+        <PreferencesSection title={this.props.intl.formatMessage({id: 'playback', defaultMessage: 'Playback'})}>
           {this.openExternalPlayerCheckbox()}
           {this.externalPlayerPathSelector()}
         </PreferencesSection>
-        <PreferencesSection title='Default torrent app'>
+        <PreferencesSection title={this.props.intl.formatMessage({id: 'preferences-default-app-title', defaultMessage: 'Default torrent app'})}>
           {this.setDefaultAppButton()}
         </PreferencesSection>
       </div>
@@ -174,4 +183,4 @@ class Preference extends React.Component {
   }
 }
 
-module.exports = PreferencesPage
+module.exports = injectIntl(PreferencesPage)

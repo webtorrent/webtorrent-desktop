@@ -79,7 +79,7 @@ function getMenuTemplate () {
           id: 'menu-create-torrent',
           label: process.platform === 'darwin'
             ? new IntlMessageFormat(
-              i18n.LOCALE_MESSAGES['menu-create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format()
+              i18n.LOCALE_MESSAGES['create-torrent'] || 'Create New Torrent...', i18n.LANGUAGE).format()
             : new IntlMessageFormat(
               i18n.LOCALE_MESSAGES['menu-create-torrent-folder'] || 'Create New Torrent from Folder...', i18n.LANGUAGE).format(),
           accelerator: 'CmdOrCtrl+N',
@@ -227,7 +227,7 @@ function getMenuTemplate () {
     {
       id: 'menu-playback',
       label: new IntlMessageFormat(
-        i18n.LOCALE_MESSAGES['menu-playback'] || 'Playback', i18n.LANGUAGE).format(),
+        i18n.LOCALE_MESSAGES['playback'] || 'Playback', i18n.LANGUAGE).format(),
       submenu: [
         {
           id: 'menu-play-pause',
