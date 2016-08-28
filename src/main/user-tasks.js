@@ -5,7 +5,7 @@ module.exports = {
 var electron = require('electron')
 var IntlMessageFormat = require('intl-messageformat')
 
-var app = electron.ap
+var app = electron.app
 
 /**
  * Add a user task menu to the app icon on right-click. (Windows)
