@@ -412,8 +412,8 @@ function getErrorMessage (torrentSummary) {
       </FormattedMessage>
     )
   }
-  return (<FormattedMessage id='torrent-error'
-    defaultMessage={'Error'} />)
+  return (<FormattedMessage id='error'
+    defaultMessage='Error' />)
 }
 
 function nl2br (...nodes) {

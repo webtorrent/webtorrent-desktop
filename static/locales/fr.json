@@ -29,6 +29,8 @@
   "download-torrenting-tooltip": "En téléchargement. Cliquez pour arrêter.",
   "download-start-tooltip": "Cliquez pour lancer le téléchargement",
 
+  "error": "Erreur",
+
   "global-missing-path": "Chemin des téléchargements manquants: {downloadPath}\nVérifiez que vos disques sont bien connectés?\nSinon, choisissez un nouveau chemin de téléchargement dans les {prefsLink}",
 
   "media-unsupported": "Désolé, nous n'avons pas pu lire ce fichier.",
@@ -127,7 +129,6 @@
   "torrent-delete-data": "Effacer les données",
   "torrent-download-complete": "Téléchargement terminé",
   "torrent-eta": "HPA: {hours} {minutes} {seconds}",
-  "torrent-error": "Erreur",
   "torrrent-error-desc": "Les fichiers cachés, commençant par le caractère ., ne sont pas inclus.",
   "torrent-error-file-missing": "Désolé, vous devez choisir au moins un fichier qui ne soit pas un fichier caché",
   "torrent-error-path-missing": "Chemin manquant.\nCorrigez et relancez l'appli, ou effacez le torrent.",
