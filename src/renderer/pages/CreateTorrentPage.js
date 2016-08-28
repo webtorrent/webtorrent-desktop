@@ -1,12 +1,12 @@
 const createTorrent = require('create-torrent')
 const path = require('path')
-const prettyBytes = require('prettier-bytes')
 const React = require('react')
 const {injectIntl, FormattedMessage} = require('react-intl')
 const IntlMessageFormat = require('intl-messageformat')
 
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 const i18n = require('../../i18n')
+const prettyBytes = i18n.prettyBytes
 
 const FlatButton = require('material-ui/FlatButton').default
 const RaisedButton = require('material-ui/RaisedButton').default

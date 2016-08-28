@@ -1,10 +1,10 @@
 const React = require('react')
 const {FormattedMessage} = require('react-intl')
 const Bitfield = require('bitfield')
-const prettyBytes = require('prettier-bytes')
 const zeroFill = require('zero-fill')
 const path = require('path')
 
+const prettyBytes = require('../../i18n.js').prettyBytes
 const TorrentSummary = require('../lib/torrent-summary')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 

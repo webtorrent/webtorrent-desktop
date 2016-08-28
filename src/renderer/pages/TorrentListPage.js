@@ -1,7 +1,7 @@
 const React = require('react')
 const {injectIntl, FormattedMessage} = require('react-intl')
-const prettyBytes = require('prettier-bytes')
 
+const prettyBytes = require('../../i18n.js').prettyBytes
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const {dispatcher} = require('../lib/dispatcher')

@@ -1,12 +1,18 @@
 const electron = require('electron')
 const fs = require('fs')
+const IntlMessageFormat = require('intl-messageformat')
 const path = require('path')
+const prettyBytes = require('prettier-bytes')
 
 const config = require('./config')
 
+const LANGUAGE = getLanguage()
+const LOCALE_MESSAGES = getLocaleMessages()
+
 module.exports = {
-  LANGUAGE: getLanguage(),
-  LOCALE_MESSAGES: getLocaleMessages()
+  LANGUAGE: LANGUAGE,
+  LOCALE_MESSAGES: LOCALE_MESSAGES,
+  prettyBytes: i18nPrettyBytes
 }
 
 function getLanguage () {
@@ -25,4 +31,14 @@ function getLocaleMessages () {
     // Use default english messages
     return {}
   }
+}
+
+var bytesMsg = new IntlMessageFormat('{num} {unit}', LANGUAGE)
+function i18nPrettyBytes (num) {
+  const [number, unit] = prettyBytes(num).split(' ')
+  return bytesMsg.format({
+    num: number,
+    unit: new IntlMessageFormat(LOCALE_MESSAGES['unit-' + unit] || unit, LANGUAGE)
+      .format(unit)
+  })
 }

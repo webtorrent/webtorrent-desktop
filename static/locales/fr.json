@@ -153,5 +153,15 @@
   "update-available": "Une nouvelle version de WebTorrent est disponible: v{version}",
   "update-available-desc": "Nous avons une mise à jour automatique pour Windows et Mac. Nous n'en avons pas encore pour Linux, donc vous devez télécharger la nouvelle version manuellement.",
   "update-available-download": "Afficher la page des téléchargements",
-  "update-available-skip": "Ignorer cette Version"
+  "update-available-skip": "Ignorer cette Version",
+
+  "unit-B": "o",
+  "unit-KB": "ko",
+  "unit-MB": "Mo",
+  "unit-GB": "Go",
+  "unit-TB": "To",
+  "unit-PB": "Po",
+  "unit-EB": "Eo",
+  "unit-ZB": "Zo",
+  "unit-YB": "Yo"
 }
