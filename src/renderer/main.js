@@ -6,6 +6,7 @@ crashReporter.init()
 const dragDrop = require('drag-drop')
 const electron = require('electron')
 const fs = require('fs')
+const IntlMessageFormat = require('intl-messageformat')
 const React = require('react')
 const ReactDOM = require('react-dom')
 const ReactIntl = require('react-intl')
@@ -76,7 +77,8 @@ function onState (err, _state) {
   state.location.go({
     url: 'home',
     setup: (cb) => {
-      state.window.title = config.APP_WINDOW_TITLE
+      state.window.title = new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['app-window-title'] || config.APP_WINDOW_TITLE, i18n.LANGUAGE).format()
       cb(null)
     }
   })

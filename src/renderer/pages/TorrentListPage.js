@@ -79,7 +79,7 @@ module.exports = injectIntl(class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)} >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
@@ -89,7 +89,7 @@ module.exports = injectIntl(class TorrentList extends React.Component {
 
   // Show name, download status, % complete
   renderTorrentMetadata (torrentSummary) {
-    var name = torrentSummary.name || (<FormattedMessage id='torrent-loading' defaultMessage={'Loading torrent...'}/>)
+    var name = torrentSummary.name || (<FormattedMessage id='torrent-loading' defaultMessage='Loading torrent...'/>)
     var elements = [(
       <div key='name' className='name ellipsis'>{name}</div>
     )]

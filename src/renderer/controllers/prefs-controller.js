@@ -1,5 +1,7 @@
+const i18n = require('../../i18n')
 const State = require('../lib/state')
 const {dispatch} = require('../lib/dispatcher')
+const IntlMessageFormat = require('intl-messageformat')
 const ipcRenderer = require('electron').ipcRenderer
 
 // Controls the Preferences screen
@@ -16,7 +18,8 @@ module.exports = class PrefsController {
       url: 'preferences',
       setup: function (cb) {
         // initialize preferences
-        state.window.title = 'Preferences'
+        state.window.title = new IntlMessageFormat(
+          i18n.LOCALE_MESSAGES['preferences'] || 'Preferences', i18n.LANGUAGE).format()
         state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
         ipcRenderer.send('setAllowNav', false)
         cb()

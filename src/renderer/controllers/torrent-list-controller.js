@@ -54,7 +54,8 @@ module.exports = class TorrentListController {
         url: 'create-torrent',
         files: files,
         setup: (cb) => {
-          this.state.window.title = 'Create New Torrent'
+          this.state.window.title = new IntlMessageFormat(
+            i18n.LOCALE_MESSAGES['create-torrent'] || 'Create New Torrent', i18n.LANGUAGE).format()
           cb(null)
         }
       })

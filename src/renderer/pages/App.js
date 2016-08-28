@@ -1,6 +1,6 @@
 const colors = require('material-ui/styles/colors')
 const React = require('react')
-const { FormattedMessage} = require('react-intl')
+const { FormattedMessage } = require('react-intl')
 
 const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
 const getMuiTheme = require('material-ui/styles/getMuiTheme').default
@@ -82,8 +82,9 @@ class App extends React.Component {
     return (
       <div key='errors'
         className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
-        <div key='title' className='title'><FormattedMessage id='error'
-          defaultMessage='Error'/></div>
+        <div key='title' className='title'>
+          <FormattedMessage id='error' defaultMessage='Error'/>
+        </div>
         {errorElems}
       </div>
     )

@@ -42,7 +42,7 @@ function setWindowFocus (flag) {
 
 // Disallow opening more screens on top of the current one.
 function setAllowNav (flag) {
-  getMenuItem('preferences').enabled = flag
+  getMenuItem('menu-preferences').enabled = flag
   getMenuItem('menu-create-torrent').enabled = flag
   if (process.platform !== 'darwin') {
     getMenuItem('menu-create-torrent-file').enabled = flag
@@ -360,7 +360,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          id: 'preferences',
+          id: 'menu-preferences',
           label: new IntlMessageFormat(
             i18n.LOCALE_MESSAGES['preferences'] || 'Preferences', i18n.LANGUAGE).format(),
           accelerator: 'Cmd+,',
@@ -449,7 +449,7 @@ function getMenuTemplate () {
         type: 'separator'
       },
       {
-        id: 'preferences',
+        id: 'menu-preferences',
         label: new IntlMessageFormat(
           i18n.LOCALE_MESSAGES['preferences'] || 'Preferences', i18n.LANGUAGE).format(),
         accelerator: 'CmdOrCtrl+,',
