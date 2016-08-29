@@ -126,7 +126,9 @@ function logUncaughtError (procName, e) {
 
   var message
   var stack = ''
-  if (e.message) {
+  if (e == null) {
+    message = 'Unexpected undefined error'
+  } else if (e.message) {
     // err is either an Error or a plain object {message, stack}
     message = e.message
     stack = e.stack
@@ -149,11 +151,13 @@ function logUncaughtError (procName, e) {
     }
   }
 
+  if (typeof stack !== 'string') stack = 'Unexpected stack: ' + stack
+  if (typeof message !== 'string') message = 'Unexpected message: ' + message
+
   // Remove the first part of each file path in the stack trace.
   // - Privacy: remove personal info like C:\Users\<full name>
   // - Aggregation: this lets us find which stacktraces occur often
-  if (stack && typeof stack === 'string') stack = stack.replace(/\(.*app.asar/g, '(...')
-  else if (stack) stack = 'Unexpected stack: ' + stack
+  stack = stack.replace(/\(.*app.asar/g, '(...')
 
   // We need to POST the telemetry object, make sure it stays < 100kb
   if (telemetry.uncaughtErrors.length > 20) return
