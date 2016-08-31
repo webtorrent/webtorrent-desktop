@@ -140,7 +140,7 @@ class CreateTorrentPage extends React.Component {
       return (<div key={i}>{relativePath}</div>)
     })
     if (files.length > maxFileElems) {
-      fileElems.push(<div key='more'>+ {maxFileElems - files.length} more</div>)
+      fileElems.push(<div key='more'>+ {files.length - maxFileElems} more</div>)
     }
 
     // Align the text fields
