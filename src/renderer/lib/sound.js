@@ -59,11 +59,9 @@ function preload () {
 }
 
 function play (name) {
-
-  if (prefs.current.systemSounds){
-
+  if (prefs.current.systemSounds) {
     var audio = cache[name]
-    
+
     if (!audio) {
       var sound = sounds[name]
       if (!sound) {
@@ -76,7 +74,5 @@ function play (name) {
 
     audio.currentTime = 0
     audio.play()
-
   }
-
 }

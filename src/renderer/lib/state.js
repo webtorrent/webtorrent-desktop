@@ -186,7 +186,7 @@ function load (cb) {
     if (err) return cb(err)
     state.saved = saved
     migrations.run(state)
-    prefs.current = state.saved.prefs;
+    prefs.current = state.saved.prefs
     cb(null, state)
   }
 }
