@@ -272,10 +272,12 @@ table {
 .create-torrent {
   padding: 10px 25px;
   overflow: hidden;
+  font: 16px/24px BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 .create-torrent .torrent-attribute {
   white-space: nowrap;
+  margin: 8px 0;
 }
 
 .create-torrent .torrent-attribute>* {
@@ -283,31 +285,18 @@ table {
 }
 
 .create-torrent .torrent-attribute label {
-  width: 60px;
-  margin-right: 10px;
+  width: 100px;
   vertical-align: top;
 }
 
 .create-torrent .torrent-attribute>div {
-  width: calc(100% - 90px);
+  width: calc(100% - 100px);
 }
 
 .create-torrent .torrent-attribute div {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.create-torrent .torrent-attribute textarea {
-  width: calc(100% - 80px);
-  height: 80px;
-  color: #eee;
-  background-color: transparent;
-  line-height: 1.5;
-  font-size: 14px;
-  font-family: inherit;
-  border-radius: 2px;
-  padding: 4px 6px;
 }
 
 /*
