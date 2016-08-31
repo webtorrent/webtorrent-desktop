@@ -98,7 +98,7 @@
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
-    "test": "standard && depcheck --ignores=babel-cli,nodemon,gh-release",
+    "test": "standard && depcheck --ignores=babel-cli,nodemon,gh-release --ignore-dirs=build,dist",
     "gh-release": "gh-release",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec 'npm run start' --ext js,pug,css"
