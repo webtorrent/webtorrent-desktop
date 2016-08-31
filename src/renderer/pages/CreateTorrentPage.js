@@ -56,7 +56,9 @@ class CreateTorrentPage extends React.Component {
     }
     var maxFileElems = 100
     var fileElems = files.slice(0, maxFileElems).map(function (file, i) {
-      var relativePath = files.length === 0 ? file.name : path.relative(pathPrefix, file.path)
+      var relativePath = files.length === 0
+        ? file.name
+        : path.relative(pathPrefix, file.path)
       return (<div key={i}>{relativePath}</div>)
     })
     if (files.length > maxFileElems) {
@@ -83,8 +85,6 @@ class CreateTorrentPage extends React.Component {
     var options = {
       // We can't let the user choose their own name if we want WebTorrent
       // to use the files in place rather than creating a new folder.
-      // If we ever want to add support for that:
-      // name: document.querySelector('.torrent-name').value
       name: this.state.defaultName,
       path: this.state.basePath,
       files: this.state.files,

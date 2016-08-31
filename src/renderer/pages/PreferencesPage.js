@@ -96,6 +96,14 @@ class PreferencesPage extends React.Component {
   }
 
   setDefaultAppButton () {
+    var isFileHandler = this.props.state.unsaved.prefs.isFileHandler
+    if (isFileHandler) {
+      return (
+        <Preference>
+          <p>WebTorrent is your default torrent app. Hooray!</p>
+        </Preference>
+      )
+    }
     return (
       <Preference>
         <p>WebTorrent is not currently the default torrent app.</p>
@@ -109,20 +117,17 @@ class PreferencesPage extends React.Component {
   }
 
   handleSetDefaultApp () {
-    window.alert('TODO')
-    // var isFileHandler = state.unsaved.prefs.isFileHandler
-    // dispatch('updatePreferences', 'isFileHandler', !isFileHandler)
+    dispatch('updatePreferences', 'isFileHandler', true)
   }
 
   render () {
+    var style = {
+      color: colors.grey400,
+      marginLeft: 25,
+      marginRight: 25
+    }
     return (
-      <div
-        style={{
-          color: colors.grey400,
-          marginLeft: 25,
-          marginRight: 25
-        }}
-      >
+      <div style={style} >
         <PreferencesSection title='Downloads'>
           {this.downloadPathSelector()}
         </PreferencesSection>
@@ -146,13 +151,12 @@ class PreferencesSection extends React.Component {
   }
 
   render () {
+    var style = {
+      marginBottom: 25,
+      marginTop: 25
+    }
     return (
-      <div
-        style={{
-          marginBottom: 25,
-          marginTop: 25
-        }}
-      >
+      <div style={style}>
         <Heading level={2}>{this.props.title}</Heading>
         {this.props.children}
       </div>
@@ -162,15 +166,8 @@ class PreferencesSection extends React.Component {
 
 class Preference extends React.Component {
   render () {
-    return (
-      <div
-        style={{
-          marginBottom: 10
-        }}
-      >
-        {this.props.children}
-      </div>
-    )
+    var style = { marginBottom: 10 }
+    return (<div style={style}>{this.props.children}</div>)
   }
 }
 
