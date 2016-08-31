@@ -15,9 +15,10 @@ module.exports = class UnsupportedMediaModal extends React.Component {
     var playerName = playerPath
       ? path.basename(playerPath).split('.')[0]
       : 'VLC'
+    var onPlay = dispatcher('openExternalPlayer')
     var actionButton = state.modal.externalPlayerInstalled
-      ? (<button className='button-raised' onClick={dispatcher('openExternalPlayer')}>Play in {playerName}</button>)
-      : (<button className='button-raised' onClick={() => this.onInstall}>Install VLC</button>)
+      ? (<button className='button-raised' onClick={onPlay}>Play in {playerName}</button>)
+      : (<button className='button-raised' onClick={() => this.onInstall()}>Install VLC</button>)
     var playerMessage = state.modal.externalPlayerNotFound
       ? 'Couldn\'t run external player. Please make sure it\'s installed.'
       : ''

@@ -100,8 +100,8 @@ function init () {
   console.timeEnd('init')
 }
 
-// Starts a given TorrentID, which can be an infohash, magnet URI, etc. Returns WebTorrent object
-// See https://github.com/feross/webtorrent/blob/master/docs/api.md#clientaddtorrentid-opts-function-ontorrent-torrent-
+// Starts a given TorrentID, which can be an infohash, magnet URI, etc.
+// Returns a WebTorrent object. See https://git.io/vik9M
 function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 

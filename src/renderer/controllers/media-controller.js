@@ -47,7 +47,10 @@ module.exports = class MediaController {
   openExternalPlayer () {
     var state = this.state
     var mediaURL = Playlist.getCurrentLocalURL(this.state)
-    ipcRenderer.send('openExternalPlayer', state.saved.prefs.externalPlayerPath, mediaURL, state.window.title)
+    ipcRenderer.send('openExternalPlayer',
+      state.saved.prefs.externalPlayerPath,
+      mediaURL,
+      state.window.title)
     state.playing.location = 'external'
   }
 

@@ -148,13 +148,16 @@ module.exports = class PlaybackController {
       rate += 0.25
     } else if (direction < 0 && rate > 0.25 && rate <= 2) {
       rate -= 0.25
-    } else if (direction < 0 && rate === 0.25) { /* when we set playback rate at 0 in html 5, playback hangs ;( */
+    } else if (direction < 0 && rate === 0.25) {
+      // When we set playback rate at 0 in html 5, playback hangs ;(
       rate = -1
     } else if (direction > 0 && rate === -1) {
       rate = 0.25
-    } else if ((direction > 0 && rate >= 1 && rate < 16) || (direction < 0 && rate > -16 && rate <= -1)) {
+    } else if ((direction > 0 && rate >= 1 && rate < 16) ||
+      (direction < 0 && rate > -16 && rate <= -1)) {
       rate *= 2
-    } else if ((direction < 0 && rate > 1 && rate <= 16) || (direction > 0 && rate >= -16 && rate < -1)) {
+    } else if ((direction < 0 && rate > 1 && rate <= 16) ||
+      (direction > 0 && rate >= -16 && rate < -1)) {
       rate /= 2
     }
     state.playing.playbackRate = rate
@@ -342,7 +345,7 @@ module.exports = class PlaybackController {
     var result = state.playing.result // 'success' or 'error'
     if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
     else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
-    else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user exited before first frame
+    else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user gave up waiting
     else console.error('Unknown state.playing.result', state.playing.result)
 
     // Reset the window contents back to the home screen

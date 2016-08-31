@@ -179,12 +179,18 @@ const dispatchHandlers = {
   'showCreateTorrent': (paths) => controllers.torrentList.showCreateTorrent(paths),
   'createTorrent': (options) => controllers.torrentList.createTorrent(options),
   'toggleTorrent': (infoHash) => controllers.torrentList.toggleTorrent(infoHash),
-  'toggleTorrentFile': (infoHash, index) => controllers.torrentList.toggleTorrentFile(infoHash, index),
-  'confirmDeleteTorrent': (infoHash, deleteData) => controllers.torrentList.confirmDeleteTorrent(infoHash, deleteData),
-  'deleteTorrent': (infoHash, deleteData) => controllers.torrentList.deleteTorrent(infoHash, deleteData),
-  'toggleSelectTorrent': (infoHash) => controllers.torrentList.toggleSelectTorrent(infoHash),
-  'openTorrentContextMenu': (infoHash) => controllers.torrentList.openTorrentContextMenu(infoHash),
-  'startTorrentingSummary': (torrentKey) => controllers.torrentList.startTorrentingSummary(torrentKey),
+  'toggleTorrentFile': (infoHash, index) =>
+    controllers.torrentList.toggleTorrentFile(infoHash, index),
+  'confirmDeleteTorrent': (infoHash, deleteData) =>
+    controllers.torrentList.confirmDeleteTorrent(infoHash, deleteData),
+  'deleteTorrent': (infoHash, deleteData) =>
+    controllers.torrentList.deleteTorrent(infoHash, deleteData),
+  'toggleSelectTorrent': (infoHash) =>
+    controllers.torrentList.toggleSelectTorrent(infoHash),
+  'openTorrentContextMenu': (infoHash) =>
+    controllers.torrentList.openTorrentContextMenu(infoHash),
+  'startTorrentingSummary': (torrentKey) =>
+    controllers.torrentList.startTorrentingSummary(torrentKey),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),

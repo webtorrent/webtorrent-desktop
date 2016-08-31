@@ -17,8 +17,8 @@ module.exports = class TorrentListController {
     this.state = state
   }
 
-  // Adds a torrent to the list, starts downloading/seeding. TorrentID can be a
-  // magnet URI, infohash, or torrent file: https://github.com/feross/webtorrent#clientaddtorrentid-opts-function-ontorrent-torrent-
+  // Adds a torrent to the list, starts downloading/seeding.
+  // TorrentID can be a magnet URI, infohash, or torrent file: https://git.io/vik9M
   addTorrent (torrentId) {
     if (torrentId.path) {
       // Use path string instead of W3C File object
@@ -149,7 +149,7 @@ module.exports = class TorrentListController {
 
       // remove torrent and poster file
       deleteFile(TorrentSummary.getTorrentPath(summary))
-      deleteFile(TorrentSummary.getPosterPath(summary)) // TODO: will the css path hack affect windows?
+      deleteFile(TorrentSummary.getPosterPath(summary))
 
       // optionally delete the torrent data
       if (deleteData) moveItemToTrash(summary)
@@ -159,7 +159,8 @@ module.exports = class TorrentListController {
       State.saveThrottled(this.state)
     }
 
-    this.state.location.clearForward('player') // prevent user from going forward to a deleted torrent
+    // prevent user from going forward to a deleted torrent
+    this.state.location.clearForward('player')
     sound.play('DELETE')
   }
 
@@ -288,7 +289,8 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), opts, function (savePath) {
+  var win = electron.remote.getCurrentWindow()
+  electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
     if (!savePath) return // They clicked Cancel
     var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
