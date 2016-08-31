@@ -17,15 +17,14 @@ class Heading extends React.Component {
 
   render () {
     const HeadingTag = 'h' + this.props.level
+    const style = {
+      color: colors.grey100,
+      fontSize: 20,
+      marginBottom: 15,
+      marginTop: 30
+    }
     return (
-      <HeadingTag
-        style={{
-          color: colors.grey100,
-          fontSize: 20,
-          marginBottom: 15,
-          marginTop: 30
-        }}
-      >
+      <HeadingTag style={style}>
         {this.props.children}
       </HeadingTag>
     )

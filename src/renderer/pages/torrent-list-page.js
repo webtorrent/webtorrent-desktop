@@ -198,8 +198,7 @@ module.exports = class TorrentList extends React.Component {
           key='download-button'
           className={'button-round icon download ' + torrentSummary.status}
           title={downloadTooltip}
-          onClick={dispatcher('toggleTorrent', infoHash)}
-        >
+          onClick={dispatcher('toggleTorrent', infoHash)}>
           {downloadIcon}
         </i>
       )
@@ -221,8 +220,7 @@ module.exports = class TorrentList extends React.Component {
             key='play-button'
             title={playTooltip}
             className={'button-round icon play ' + playClass}
-            onClick={dispatcher('playFile', infoHash)}
-          >
+            onClick={dispatcher('playFile', infoHash)}>
             {playIcon}
           </i>
         )

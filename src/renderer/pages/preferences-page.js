@@ -33,8 +33,7 @@ class PreferencesPage extends React.Component {
           }}
           onChange={this.handleDownloadPathChange}
           title='Download location'
-          value={this.props.state.unsaved.prefs.downloadPath}
-        />
+          value={this.props.state.unsaved.prefs.downloadPath} />
       </Preference>
     )
   }
@@ -50,8 +49,7 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={!this.props.state.unsaved.prefs.openExternalPlayer}
           label={'Play torrent media files using WebTorrent'}
-          onCheck={this.handleOpenExternalPlayerChange}
-        />
+          onCheck={this.handleOpenExternalPlayerChange} />
       </Preference>
     )
   }
@@ -81,8 +79,7 @@ class PreferencesPage extends React.Component {
           displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={this.props.state.unsaved.prefs.externalPlayerPath}
-        />
+          value={this.props.state.unsaved.prefs.externalPlayerPath} />
       </Preference>
     )
   }
@@ -110,8 +107,7 @@ class PreferencesPage extends React.Component {
         <RaisedButton
           className='control'
           onClick={this.handleSetDefaultApp}
-          label='Make WebTorrent the default'
-        />
+          label='Make WebTorrent the default' />
       </Preference>
     )
   }
@@ -127,7 +123,7 @@ class PreferencesPage extends React.Component {
       marginRight: 25
     }
     return (
-      <div style={style} >
+      <div style={style}>
         <PreferencesSection title='Downloads'>
           {this.downloadPathSelector()}
         </PreferencesSection>

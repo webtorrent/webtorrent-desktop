@@ -392,16 +392,14 @@ function renderPlayerControls (state) {
       <div
         key='cursor'
         className='playback-cursor'
-        style={playbackCursorStyle}
-      />
+        style={playbackCursorStyle} />
       <div
         key='scrub-bar'
         className='scrub-bar'
         draggable='true'
         onDragStart={handleDragStart}
         onClick={handleScrub}
-        onDrag={handleScrub}
-      />
+        onDrag={handleScrub} />
     </div>,
 
     <i
@@ -516,8 +514,7 @@ function renderPlayerControls (state) {
         type='range' min='0' max='1' step='0.05'
         value={volume}
         onChange={handleVolumeScrub}
-        style={volumeStyle}
-      />
+        style={volumeStyle} />
     </div>
   ))
 

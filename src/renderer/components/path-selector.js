@@ -7,6 +7,9 @@ const remote = electron.remote
 const RaisedButton = require('material-ui/RaisedButton').default
 const TextField = require('material-ui/TextField').default
 
+// Lets you pick a file or directory.
+// Uses the system Open File dialog.
+// You can't edit the text field directly.
 class PathSelector extends React.Component {
   static get propTypes () {
     return {
@@ -43,48 +46,39 @@ class PathSelector extends React.Component {
 
   render () {
     const id = this.props.title.replace(' ', '-').toLowerCase()
+    const wrapperStyle = {
+      alignItems: 'center',
+      display: 'flex',
+      width: '100%'
+    }
+    const labelStyle = {
+      flex: '0 auto',
+      marginRight: 10,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+    const textareaStyle = {
+      color: colors.grey50
+    }
+    const textFieldStyle = {
+      flex: '1',
+      fontSize: 14
+    }
+    const text = this.props.displayValue || this.props.value
+    const buttonStyle = {
+      marginLeft: 10
+    }
+
     return (
-      <div
-        className={this.props.className}
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          width: '100%'
-        }}
-      >
-        <div
-          className='label'
-          style={{
-            flex: '0 auto',
-            marginRight: 10,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}
-        >
+      <div className={this.props.className} style={wrapperStyle}>
+        <div className='label' style={labelStyle}>
           {this.props.title}:
         </div>
-        <TextField
-          className='control'
-          disabled
-          id={id}
-          inputStyle={{
-            color: colors.grey50
-          }}
-          style={{
-            flex: '1',
-            fontSize: 14
-          }}
-          value={this.props.displayValue || this.props.value}
-        />
-        <RaisedButton
-          className='control'
-          label='Change'
-          onClick={this.handleClick}
-          style={{
-            marginLeft: 10
-          }}
-        />
+        <TextField className='control' disabled id={id} value={text}
+          inputStyle={textareaStyle} style={textFieldStyle} />
+        <RaisedButton className='control' label='Change' onClick={this.handleClick}
+          style={buttonStyle} />
       </div>
     )
   }

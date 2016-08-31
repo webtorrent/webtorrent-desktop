@@ -14,6 +14,8 @@ const CreateTorrentErrorPage = require('../components/create-torrent-error-page'
 const Heading = require('../components/heading')
 const ShowMore = require('../components/show-more')
 
+// Shows a basic UI to create a torrent, from an already-selected file or folder.
+// Includes a "Show Advanced..." button and more advanced UI.
 class CreateTorrentPage extends React.Component {
   constructor (props) {
     super(props)
@@ -92,7 +94,7 @@ class CreateTorrentPage extends React.Component {
             marginBottom: 10
           }}
           hideLabel='Hide advanced settings...'
-          showLabel='Show advanced settings...' >
+          showLabel='Show advanced settings...'>
           {this.renderAdvanced()}
         </ShowMore>
         <div className='float-right'>
@@ -101,18 +103,20 @@ class CreateTorrentPage extends React.Component {
             style={{
               marginRight: 10
             }}
-            onClick={dispatcher('cancel')}
-          />
+            onClick={dispatcher('cancel')} />
           <RaisedButton
             label='Create Torrent'
             primary
-            onClick={this.handleSubmit}
-          />
+            onClick={this.handleSubmit} />
         </div>
       </div>
     )
   }
 
+  // Renders everything after clicking Show Advanced...:
+  // * Is Private? (private torrents, not announced to DHT)
+  // * Announce list (trackers)
+  // * Comment
   renderAdvanced () {
     // Create file list
     var maxFileElems = 100
