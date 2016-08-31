@@ -18,7 +18,7 @@ const TorrentPlayer = require('./lib/torrent-player')
 // Required by Material UI -- adds `onTouchTap` event
 require('react-tap-event-plugin')()
 
-const App = require('./pages/App')
+const App = require('./pages/app')
 
 const MediaController = require('./controllers/media-controller')
 const UpdateController = require('./controllers/update-controller')

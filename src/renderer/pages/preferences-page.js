@@ -3,8 +3,8 @@ const path = require('path')
 const React = require('react')
 
 const Checkbox = require('material-ui/Checkbox').default
-const Heading = require('../components/Heading')
-const PathSelector = require('../components/PathSelector')
+const Heading = require('../components/heading')
+const PathSelector = require('../components/path-selector')
 const RaisedButton = require('material-ui/RaisedButton').default
 
 const {dispatch} = require('../lib/dispatcher')

@@ -8,10 +8,10 @@ const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 const Header = require('../components/header')
 
 const Views = {
-  'home': require('./TorrentListPage'),
-  'player': require('./PlayerPage'),
-  'create-torrent': require('./CreateTorrentPage'),
-  'preferences': require('./PreferencesPage')
+  'home': require('./torrent-list-page'),
+  'player': require('./player-page'),
+  'create-torrent': require('./create-torrent-page'),
+  'preferences': require('./preferences-page')
 }
 
 const Modals = {

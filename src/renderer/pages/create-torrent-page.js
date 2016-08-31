@@ -11,8 +11,8 @@ const TextField = require('material-ui/TextField').default
 const Checkbox = require('material-ui/Checkbox').default
 
 const CreateTorrentErrorPage = require('../components/create-torrent-error-page')
-const Heading = require('../components/Heading')
-const ShowMore = require('../components/ShowMore')
+const Heading = require('../components/heading')
+const ShowMore = require('../components/show-more')
 
 class CreateTorrentPage extends React.Component {
   constructor (props) {
