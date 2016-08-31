@@ -5,6 +5,7 @@ module.exports = {
 
 var config = require('../../config')
 var path = require('path')
+const prefs = require('./prefs')
 
 var VOLUME = 0.15
 
@@ -58,16 +59,24 @@ function preload () {
 }
 
 function play (name) {
-  var audio = cache[name]
-  if (!audio) {
-    var sound = sounds[name]
-    if (!sound) {
-      throw new Error('Invalid sound name')
+
+  if (prefs.current.systemSounds){
+
+    var audio = cache[name]
+    
+    if (!audio) {
+      var sound = sounds[name]
+      if (!sound) {
+        throw new Error('Invalid sound name')
+      }
+      audio = cache[name] = new window.Audio()
+      audio.volume = sound.volume
+      audio.src = sound.url
     }
-    audio = cache[name] = new window.Audio()
-    audio.volume = sound.volume
-    audio.src = sound.url
+
+    audio.currentTime = 0
+    audio.play()
+
   }
-  audio.currentTime = 0
-  audio.play()
+
 }
