@@ -6,7 +6,7 @@ module.exports = {
   isPlayableTorrentSummary
 }
 
-var path = require('path')
+const path = require('path')
 
 // Checks whether a fileSummary or file path is audio/video that we can play,
 // based on the file extension
@@ -46,13 +46,13 @@ function isAudio (file) {
 // - a file object where obj.name is ends in .torrent
 // - a string that's a magnet link (magnet://...)
 function isTorrent (file) {
-  var isTorrentFile = getFileExtension(file) === '.torrent'
-  var isMagnet = typeof file === 'string' && /^(stream-)?magnet:/.test(file)
+  const isTorrentFile = getFileExtension(file) === '.torrent'
+  const isMagnet = typeof file === 'string' && /^(stream-)?magnet:/.test(file)
   return isTorrentFile || isMagnet
 }
 
 function getFileExtension (file) {
-  var name = typeof file === 'string' ? file : file.name
+  const name = typeof file === 'string' ? file : file.name
   return path.extname(name).toLowerCase()
 }
 

@@ -11,7 +11,7 @@ module.exports = class PrefsController {
 
   // Goes to the Preferences screen
   show () {
-    var state = this.state
+    const state = this.state
     state.location.go({
       url: 'preferences',
       setup: function (cb) {
@@ -32,20 +32,21 @@ module.exports = class PrefsController {
   // For example: updatePreferences('foo.bar', 'baz')
   // Call save() to save to config.json
   update (property, value) {
-    var path = property.split('.')
-    var key = this.state.unsaved.prefs
-    for (var i = 0; i < path.length - 1; i++) {
-      if (typeof key[path[i]] === 'undefined') {
-        key[path[i]] = {}
+    const path = property.split('.')
+    let obj = this.state.unsaved.prefs
+    let i
+    for (i = 0; i < path.length - 1; i++) {
+      if (typeof obj[path[i]] === 'undefined') {
+        obj[path[i]] = {}
       }
-      key = key[path[i]]
+      obj = obj[path[i]]
     }
-    key[path[i]] = value
+    obj[path[i]] = value
   }
 
   // All unsaved prefs take effect atomically, and are saved to config.json
   save () {
-    var state = this.state
+    const state = this.state
     if (state.unsaved.prefs.isFileHandler !== state.saved.prefs.isFileHandler) {
       ipcRenderer.send('setDefaultFileHandler', state.unsaved.prefs.isFileHandler)
     }

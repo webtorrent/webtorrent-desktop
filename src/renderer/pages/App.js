@@ -33,21 +33,21 @@ darkBaseTheme.palette.accent3Color = colors.redA100
 
 class App extends React.Component {
   render () {
-    var state = this.props.state
+    const state = this.props.state
 
     // Hide player controls while playing video, if the mouse stays still for a while
     // Never hide the controls when:
     // * The mouse is over the controls or we're scrubbing (see CSS)
     // * The video is paused
     // * The video is playing remotely on Chromecast or Airplay
-    var hideControls = state.location.url() === 'player' &&
+    const hideControls = state.location.url() === 'player' &&
       state.playing.mouseStationarySince !== 0 &&
       new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
       !state.playing.isPaused &&
       state.playing.location === 'local' &&
       state.playing.playbackRate === 1
 
-    var cls = [
+    const cls = [
       'view-' + state.location.url(), /* e.g. view-home, view-player */
       'is-' + process.platform /* e.g. is-darwin, is-win32, is-linux */
     ]
@@ -55,7 +55,7 @@ class App extends React.Component {
     if (state.window.isFocused) cls.push('is-focused')
     if (hideControls) cls.push('hide-video-controls')
 
-    var vdom = (
+    const vdom = (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
@@ -70,12 +70,12 @@ class App extends React.Component {
   }
 
   getErrorPopover () {
-    var state = this.props.state
-    var now = new Date().getTime()
-    var recentErrors = state.errors.filter((x) => now - x.time < 5000)
-    var hasErrors = recentErrors.length > 0
+    const state = this.props.state
+    const now = new Date().getTime()
+    const recentErrors = state.errors.filter((x) => now - x.time < 5000)
+    const hasErrors = recentErrors.length > 0
 
-    var errorElems = recentErrors.map(function (error, i) {
+    const errorElems = recentErrors.map(function (error, i) {
       return (<div key={i} className='error'>{error.message}</div>)
     })
     return (
@@ -88,9 +88,9 @@ class App extends React.Component {
   }
 
   getModal () {
-    var state = this.props.state
+    const state = this.props.state
     if (!state.modal) return
-    var ModalContents = Modals[state.modal.id]
+    const ModalContents = Modals[state.modal.id]
     return (
       <div key='modal' className='modal'>
         <div key='modal-background' className='modal-background' />
@@ -102,8 +102,8 @@ class App extends React.Component {
   }
 
   getView () {
-    var state = this.props.state
-    var View = Views[state.location.url()]
+    const state = this.props.state
+    const View = Views[state.location.url()]
     return (<View state={state} />)
   }
 }

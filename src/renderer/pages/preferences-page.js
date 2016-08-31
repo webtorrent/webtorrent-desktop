@@ -93,7 +93,7 @@ class PreferencesPage extends React.Component {
   }
 
   setDefaultAppButton () {
-    var isFileHandler = this.props.state.unsaved.prefs.isFileHandler
+    const isFileHandler = this.props.state.unsaved.prefs.isFileHandler
     if (isFileHandler) {
       return (
         <Preference>
@@ -117,7 +117,7 @@ class PreferencesPage extends React.Component {
   }
 
   render () {
-    var style = {
+    const style = {
       color: colors.grey400,
       marginLeft: 25,
       marginRight: 25
@@ -147,7 +147,7 @@ class PreferencesSection extends React.Component {
   }
 
   render () {
-    var style = {
+    const style = {
       marginBottom: 25,
       marginTop: 25
     }
@@ -162,7 +162,7 @@ class PreferencesSection extends React.Component {
 
 class Preference extends React.Component {
   render () {
-    var style = { marginBottom: 10 }
+    const style = { marginBottom: 10 }
     return (<div style={style}>{this.props.children}</div>)
   }
 }

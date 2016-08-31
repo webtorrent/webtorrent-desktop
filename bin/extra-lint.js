@@ -30,10 +30,9 @@ files.forEach(function (file) {
       error = 'Line >100 chars'
     }
 
-    // TODO: No vars
-    // if (line.match(/^var /) || line.match(/ var /)) {
-    //   error = 'Use const or let'
-    // }
+    if (line.match(/^var /) || line.match(/ var /)) {
+      error = 'Use const or let'
+    }
 
     if (error) {
       let name = path.basename(file)

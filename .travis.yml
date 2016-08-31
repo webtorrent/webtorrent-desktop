@@ -1,4 +1,4 @@
 language: node_js
 node_js:
   - 'node'
-install: npm install standard depcheck
+install: npm install standard depcheck walk-sync

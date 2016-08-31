@@ -20,11 +20,11 @@ class CreateTorrentPage extends React.Component {
   constructor (props) {
     super(props)
 
-    var state = this.props.state
-    var info = state.location.current()
+    const state = this.props.state
+    const info = state.location.current()
 
     // First, extract the base folder that the files are all in
-    var pathPrefix = info.folderPath
+    let pathPrefix = info.folderPath
     if (!pathPrefix) {
       pathPrefix = info.files.map((x) => x.path).reduce(findCommonPrefix)
       if (!pathPrefix.endsWith('/') && !pathPrefix.endsWith('\\')) {
@@ -33,14 +33,14 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Then, exclude .DS_Store and other dotfiles
-    var files = info.files
+    const files = info.files
       .filter((f) => !containsDots(f.path, pathPrefix))
       .map((f) => ({name: f.name, path: f.path, size: f.size}))
     if (files.length === 0) return (<CreateTorrentErrorPage state={state} />)
 
     // Then, use the name of the base folder (or sole file, for a single file torrent)
     // as the default name. Show all files relative to the base folder.
-    var defaultName, basePath
+    let defaultName, basePath
     if (files.length === 1) {
       // Single file torrent: /a/b/foo.jpg -> torrent name 'foo.jpg', path '/a/b'
       defaultName = files[0].name
@@ -52,7 +52,7 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Default trackers
-    var trackers = createTorrent.announceList.join('\n')
+    const trackers = createTorrent.announceList.join('\n')
 
     this.state = {
       comment: '',
@@ -72,14 +72,14 @@ class CreateTorrentPage extends React.Component {
   }
 
   render () {
-    var files = this.state.files
+    const files = this.state.files
 
     // Sanity check: show the number of files and total size
-    var numFiles = files.length
-    var totalBytes = files
+    const numFiles = files.length
+    const totalBytes = files
       .map((f) => f.size)
       .reduce((a, b) => a + b, 0)
-    var torrentInfo = `${numFiles} files, ${prettyBytes(totalBytes)}`
+    const torrentInfo = `${numFiles} files, ${prettyBytes(totalBytes)}`
 
     return (
       <div className='create-torrent'>
@@ -119,10 +119,10 @@ class CreateTorrentPage extends React.Component {
   // * Comment
   renderAdvanced () {
     // Create file list
-    var maxFileElems = 100
-    var files = this.state.files
-    var fileElems = files.slice(0, maxFileElems).map((file, i) => {
-      var relativePath = path.relative(this.state.pathPrefix, file.path)
+    const maxFileElems = 100
+    const files = this.state.files
+    const fileElems = files.slice(0, maxFileElems).map((file, i) => {
+      const relativePath = path.relative(this.state.pathPrefix, file.path)
       return (<div key={i}>{relativePath}</div>)
     })
     if (files.length > maxFileElems) {
@@ -130,8 +130,8 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Align the text fields
-    var textFieldStyle = { width: '' }
-    var textareaStyle = { margin: 0 }
+    const textFieldStyle = { width: '' }
+    const textareaStyle = { margin: 0 }
 
     return (
       <div key='advanced' className='create-torrent-advanced'>
@@ -178,11 +178,11 @@ class CreateTorrentPage extends React.Component {
 }
 
 function handleSubmit () {
-  var announceList = this.state.trackers
+  const announceList = this.state.trackers
     .split('\n')
     .map((s) => s.trim())
     .filter((s) => s !== '')
-  var options = {
+  const options = {
     // We can't let the user choose their own name if we want WebTorrent
     // to use the files in place rather than creating a new folder.
     name: this.state.defaultName,
@@ -197,7 +197,8 @@ function handleSubmit () {
 
 // Finds the longest common prefix
 function findCommonPrefix (a, b) {
-  for (var i = 0; i < a.length && i < b.length; i++) {
+  let i
+  for (i = 0; i < a.length && i < b.length; i++) {
     if (a.charCodeAt(i) !== b.charCodeAt(i)) break
   }
   if (i === a.length) return a
@@ -206,7 +207,7 @@ function findCommonPrefix (a, b) {
 }
 
 function containsDots (path, pathPrefix) {
-  var suffix = path.substring(pathPrefix.length).replace(/\\/g, '/')
+  const suffix = path.substring(pathPrefix.length).replace(/\\/g, '/')
   return ('/' + suffix).includes('/.')
 }
 

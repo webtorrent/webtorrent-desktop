@@ -9,7 +9,7 @@ module.exports = {
 const TorrentSummary = require('./torrent-summary')
 const TorrentPlayer = require('./torrent-player')
 
-var cache = {
+const cache = {
   infoHash: null,
   previousIndex: null,
   currentIndex: null,
@@ -41,8 +41,8 @@ function getCurrentLocalURL (state) {
 }
 
 function updateCache (state) {
-  var infoHash = state.playing.infoHash
-  var fileIndex = state.playing.fileIndex
+  const infoHash = state.playing.infoHash
+  const fileIndex = state.playing.fileIndex
 
   if (infoHash === cache.infoHash) {
     switch (fileIndex) {
@@ -69,7 +69,7 @@ function updateCache (state) {
 }
 
 function findPreviousIndex (state) {
-  var files = TorrentSummary.getByKey(state, state.playing.infoHash).files
+  const files = TorrentSummary.getByKey(state, state.playing.infoHash).files
   for (var i = state.playing.fileIndex - 1; i >= 0; i--) {
     if (TorrentPlayer.isPlayable(files[i])) return i
   }
@@ -77,7 +77,7 @@ function findPreviousIndex (state) {
 }
 
 function findNextIndex (state) {
-  var files = TorrentSummary.getByKey(state, state.playing.infoHash).files
+  const files = TorrentSummary.getByKey(state, state.playing.infoHash).files
   for (var i = state.playing.fileIndex + 1; i < files.length; i++) {
     if (TorrentPlayer.isPlayable(files[i])) return i
   }

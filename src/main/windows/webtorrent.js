@@ -1,4 +1,4 @@
-var webtorrent = module.exports = {
+const webtorrent = module.exports = {
   init,
   send,
   show,
@@ -6,13 +6,13 @@ var webtorrent = module.exports = {
   win: null
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var config = require('../../config')
-var log = require('../log')
+const config = require('../../config')
+const log = require('../log')
 
 function init () {
-  var win = webtorrent.win = new electron.BrowserWindow({
+  const win = webtorrent.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     center: true,
     fullscreen: false,

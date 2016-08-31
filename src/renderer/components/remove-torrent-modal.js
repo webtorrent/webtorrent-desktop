@@ -4,11 +4,11 @@ const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 module.exports = class RemoveTorrentModal extends React.Component {
   render () {
-    var state = this.props.state
-    var message = state.modal.deleteData
+    const state = this.props.state
+    const message = state.modal.deleteData
       ? 'Are you sure you want to remove this torrent from the list and delete the data file?'
       : 'Are you sure you want to remove this torrent from the list?'
-    var buttonText = state.modal.deleteData ? 'Remove Data' : 'Remove'
+    const buttonText = state.modal.deleteData ? 'Remove Data' : 'Remove'
 
     return (
       <div>

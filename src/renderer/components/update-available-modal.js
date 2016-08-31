@@ -5,7 +5,7 @@ const {dispatch} = require('../lib/dispatcher')
 
 module.exports = class UpdateAvailableModal extends React.Component {
   render () {
-    var state = this.props.state
+    const state = this.props.state
     return (
       <div className='update-available-modal'>
         <p><strong>A new version of WebTorrent is available: v{state.modal.version}</strong></p>

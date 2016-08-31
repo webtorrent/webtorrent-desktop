@@ -1,11 +1,11 @@
-var appConfig = require('application-config')('WebTorrent')
-var path = require('path')
-var {EventEmitter} = require('events')
+const appConfig = require('application-config')('WebTorrent')
+const path = require('path')
+const {EventEmitter} = require('events')
 
-var config = require('../../config')
-var migrations = require('./migrations')
+const config = require('../../config')
+const migrations = require('./migrations')
 
-var State = module.exports = Object.assign(new EventEmitter(), {
+const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   save,
@@ -15,7 +15,7 @@ var State = module.exports = Object.assign(new EventEmitter(), {
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
 function getDefaultState () {
-  var LocationHistory = require('location-history')
+  const LocationHistory = require('location-history')
 
   return {
     /*
@@ -98,11 +98,11 @@ function getDefaultPlayState () {
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
 function setupSavedState (cb) {
-  var fs = require('fs-extra')
-  var parseTorrent = require('parse-torrent')
-  var parallel = require('run-parallel')
+  const fs = require('fs-extra')
+  const parseTorrent = require('parse-torrent')
+  const parallel = require('run-parallel')
 
-  var saved = {
+  const saved = {
     prefs: {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
@@ -113,10 +113,10 @@ function setupSavedState (cb) {
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */
   }
 
-  var tasks = []
+  const tasks = []
 
   config.DEFAULT_TORRENTS.map(function (t, i) {
-    var infoHash = saved.torrents[i].infoHash
+    const infoHash = saved.torrents[i].infoHash
     tasks.push(function (cb) {
       fs.copy(
         path.join(config.STATIC_PATH, t.posterFileName),
@@ -139,8 +139,8 @@ function setupSavedState (cb) {
   })
 
   function createTorrentObject (t) {
-    var torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
-    var parsedTorrent = parseTorrent(torrent)
+    const torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
+    const parsedTorrent = parseTorrent(torrent)
 
     return {
       status: 'paused',
@@ -157,18 +157,18 @@ function setupSavedState (cb) {
 }
 
 function getPlayingTorrentSummary () {
-  var infoHash = this.playing.infoHash
+  const infoHash = this.playing.infoHash
   return this.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 function getPlayingFileSummary () {
-  var torrentSummary = this.getPlayingTorrentSummary()
+  const torrentSummary = this.getPlayingTorrentSummary()
   if (!torrentSummary) return null
   return torrentSummary.files[this.playing.fileIndex]
 }
 
 function load (cb) {
-  var state = getDefaultState()
+  const state = getDefaultState()
 
   appConfig.read(function (err, saved) {
     if (err || !saved.version) {
@@ -193,14 +193,14 @@ function save (state, cb) {
   delete state.saveStateTimeout
 
   // Clean up, so that we're not saving any pending state
-  var copy = Object.assign({}, state.saved)
+  const copy = Object.assign({}, state.saved)
   // Remove torrents pending addition to the list, where we haven't finished
   // reading the torrent file or file(s) to seed & don't have an infohash
   copy.torrents = copy.torrents
     .filter((x) => x.infoHash)
     .map(function (x) {
-      var torrent = {}
-      for (var key in x) {
+      const torrent = {}
+      for (let key in x) {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
         }

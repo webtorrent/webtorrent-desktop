@@ -17,14 +17,14 @@ function captureVideoFrame (video, format) {
     throw new Error('Second argument must be one of "png", "jpg", or "webp"')
   }
 
-  var canvas = document.createElement('canvas')
+  const canvas = document.createElement('canvas')
   canvas.width = video.videoWidth
   canvas.height = video.videoHeight
 
   canvas.getContext('2d').drawImage(video, 0, 0)
 
-  var dataUri = canvas.toDataURL('image/' + format)
-  var data = dataUri.split(',')[1]
+  const dataUri = canvas.toDataURL('image/' + format)
+  const data = dataUri.split(',')[1]
 
   return new Buffer(data, 'base64')
 }

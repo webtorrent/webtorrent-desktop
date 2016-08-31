@@ -30,8 +30,8 @@ module.exports = class TorrentListController {
       torrentId = torrentId.slice(torrentId.indexOf('#') + 1)
     }
 
-    var torrentKey = this.state.nextTorrentKey++
-    var path = this.state.saved.prefs.downloadPath
+    const torrentKey = this.state.nextTorrentKey++
+    const path = this.state.saved.prefs.downloadPath
 
     ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
 
@@ -66,15 +66,15 @@ module.exports = class TorrentListController {
 
   // Creates a new torrent and start seeeding
   createTorrent (options) {
-    var state = this.state
-    var torrentKey = state.nextTorrentKey++
+    const state = this.state
+    const torrentKey = state.nextTorrentKey++
     ipcRenderer.send('wt-create-torrent', torrentKey, options)
     state.location.cancel()
   }
 
   // Starts downloading and/or seeding a given torrentSummary.
   startTorrentingSummary (torrentKey) {
-    var s = TorrentSummary.getByKey(this.state, torrentKey)
+    const s = TorrentSummary.getByKey(this.state, torrentKey)
     if (!s) throw new Error('Missing key: ' + torrentKey)
 
     // New torrent: give it a path
@@ -84,7 +84,7 @@ module.exports = class TorrentListController {
       return start()
     }
 
-    var fileOrFolder = TorrentSummary.getFileOrFolder(s)
+    const fileOrFolder = TorrentSummary.getFileOrFolder(s)
 
     // New torrent: metadata not yet received
     if (!fileOrFolder) return start()
@@ -110,7 +110,7 @@ module.exports = class TorrentListController {
 
   // TODO: use torrentKey, not infoHash
   toggleTorrent (infoHash) {
-    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     if (torrentSummary.status === 'paused') {
       torrentSummary.status = 'new'
       this.startTorrentingSummary(torrentSummary.torrentKey)
@@ -123,7 +123,7 @@ module.exports = class TorrentListController {
   }
 
   toggleTorrentFile (infoHash, index) {
-    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     torrentSummary.selections[index] = !torrentSummary.selections[index]
 
     // Let the WebTorrent process know to start or stop fetching that file
@@ -142,10 +142,10 @@ module.exports = class TorrentListController {
   deleteTorrent (infoHash, deleteData) {
     ipcRenderer.send('wt-stop-torrenting', infoHash)
 
-    var index = this.state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
+    const index = this.state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
 
     if (index > -1) {
-      var summary = this.state.saved.torrents[index]
+      const summary = this.state.saved.torrents[index]
 
       // remove torrent and poster file
       deleteFile(TorrentSummary.getTorrentPath(summary))
@@ -173,8 +173,8 @@ module.exports = class TorrentListController {
   }
 
   openTorrentContextMenu (infoHash) {
-    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-    var menu = new electron.remote.Menu()
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    const menu = new electron.remote.Menu()
 
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
@@ -223,11 +223,11 @@ module.exports = class TorrentListController {
 // Calls `cb` on success, calls `onError` on failure
 function findFilesRecursive (paths, cb) {
   if (paths.length > 1) {
-    var numComplete = 0
-    var ret = []
+    let numComplete = 0
+    let ret = []
     paths.forEach(function (path) {
       findFilesRecursive([path], function (fileObjs) {
-        ret = ret.concat(fileObjs)
+        ret.push(...fileObjs)
         if (++numComplete === paths.length) {
           ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
           cb(ret)
@@ -237,13 +237,13 @@ function findFilesRecursive (paths, cb) {
     return
   }
 
-  var fileOrFolder = paths[0]
+  const fileOrFolder = paths[0]
   fs.stat(fileOrFolder, function (err, stat) {
     if (err) return dispatch('error', err)
 
     // Files: return name, path, and size
     if (!stat.isDirectory()) {
-      var filePath = fileOrFolder
+      const filePath = fileOrFolder
       return cb([{
         name: path.basename(filePath),
         path: filePath,
@@ -252,10 +252,10 @@ function findFilesRecursive (paths, cb) {
     }
 
     // Folders: recurse, make a list of all the files
-    var folderPath = fileOrFolder
+    const folderPath = fileOrFolder
     fs.readdir(folderPath, function (err, fileNames) {
       if (err) return dispatch('error', err)
-      var paths = fileNames.map((fileName) => path.join(folderPath, fileName))
+      const paths = fileNames.map((fileName) => path.join(folderPath, fileName))
       findFilesRecursive(paths, cb)
     })
   })
@@ -270,7 +270,7 @@ function deleteFile (path) {
 
 // Delete all files in a torrent
 function moveItemToTrash (torrentSummary) {
-  var filePath = TorrentSummary.getFileOrFolder(torrentSummary)
+  const filePath = TorrentSummary.getFileOrFolder(torrentSummary)
   if (filePath) ipcRenderer.send('moveItemToTrash', filePath)
 }
 
@@ -279,9 +279,9 @@ function showItemInFolder (torrentSummary) {
 }
 
 function saveTorrentFileAs (torrentSummary) {
-  var downloadPath = this.state.saved.prefs.downloadPath
-  var newFileName = path.parse(torrentSummary.name).name + '.torrent'
-  var opts = {
+  const downloadPath = this.state.saved.prefs.downloadPath
+  const newFileName = path.parse(torrentSummary.name).name + '.torrent'
+  const opts = {
     title: 'Save Torrent File',
     defaultPath: path.join(downloadPath, newFileName),
     filters: [
@@ -289,10 +289,10 @@ function saveTorrentFileAs (torrentSummary) {
       { name: 'All Files', extensions: ['*'] }
     ]
   }
-  var win = electron.remote.getCurrentWindow()
+  const win = electron.remote.getCurrentWindow()
   electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
     if (!savePath) return // They clicked Cancel
-    var torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
+    const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return dispatch('error', err)
       fs.writeFile(savePath, torrentFile, function (err) {

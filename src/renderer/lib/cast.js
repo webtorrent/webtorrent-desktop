@@ -13,19 +13,19 @@ module.exports = {
   setRate
 }
 
-// Lazy load these for a ~300ms improvement in startup time
-var airplayer, chromecasts, dlnacasts
+const config = require('../../config')
 
-var config = require('../../config')
+// Lazy load these for a ~300ms improvement in startup time
+let airplayer, chromecasts, dlnacasts
 
 // App state. Cast modifies state.playing and state.errors in response to events
-var state
+let state
 
 // Callback to notify module users when state has changed
-var update
+let update
 
 // setInterval() for updating cast status
-var statusInterval = null
+let statusInterval = null
 
 // Start looking for cast devices on the local network
 function init (appState, callback) {
@@ -59,7 +59,7 @@ function init (appState, callback) {
 
 // chromecast player implementation
 function chromecastPlayer () {
-  var ret = {
+  const ret = {
     device: null,
     addDevice,
     getDevices,
@@ -95,7 +95,7 @@ function chromecastPlayer () {
   }
 
   function open () {
-    var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
+    const torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
     ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name
@@ -146,7 +146,7 @@ function chromecastPlayer () {
 
 // airplay player implementation
 function airplayPlayer () {
-  var ret = {
+  const ret = {
     device: null,
     addDevice,
     getDevices,
@@ -238,7 +238,7 @@ function airplayPlayer () {
 
 // DLNA player implementation
 function dlnaPlayer (player) {
-  var ret = {
+  const ret = {
     device: null,
     addDevice,
     getDevices,
@@ -274,7 +274,7 @@ function dlnaPlayer (player) {
   }
 
   function open () {
-    var torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
+    const torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
     ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name,
@@ -331,7 +331,7 @@ function dlnaPlayer (player) {
 // Start polling cast device state, whenever we're connected
 function startStatusInterval () {
   statusInterval = setInterval(function () {
-    var player = getPlayer()
+    const player = getPlayer()
     if (player) player.status()
   }, 1000)
 }
@@ -355,8 +355,8 @@ function toggleMenu (location) {
   }
 
   // Find all cast devices of the given type
-  var player = getPlayer(location)
-  var devices = player ? player.getDevices() : []
+  const player = getPlayer(location)
+  const devices = player ? player.getDevices() : []
   if (devices.length === 0) throw new Error('No ' + location + ' devices available')
 
   // Show a menu
@@ -364,10 +364,10 @@ function toggleMenu (location) {
 }
 
 function selectDevice (index) {
-  var {location, devices} = state.devices.castMenu
+  const {location, devices} = state.devices.castMenu
 
   // Start casting
-  var player = getPlayer(location)
+  const player = getPlayer(location)
   player.device = devices[index]
   player.open()
 
@@ -383,7 +383,7 @@ function selectDevice (index) {
 
 // Stops casting, move video back to local screen
 function stop () {
-  var player = getPlayer()
+  const player = getPlayer()
   if (player) {
     player.stop(function () {
       player.device = null
@@ -418,18 +418,18 @@ function getPlayer (location) {
 }
 
 function play () {
-  var player = getPlayer()
+  const player = getPlayer()
   if (player) player.play(castCallback)
 }
 
 function pause () {
-  var player = getPlayer()
+  const player = getPlayer()
   if (player) player.pause(castCallback)
 }
 
 function setRate (rate) {
-  var player
-  var result = true
+  let player
+  let result = true
   if (state.playing.location === 'chromecast') {
     // TODO find how to control playback rate on chromecast
     castCallback()
@@ -444,12 +444,12 @@ function setRate (rate) {
 }
 
 function seek (time) {
-  var player = getPlayer()
+  const player = getPlayer()
   if (player) player.seek(time, castCallback)
 }
 
 function setVolume (volume) {
-  var player = getPlayer()
+  const player = getPlayer()
   if (player) player.volume(volume, castCallback)
 }
 

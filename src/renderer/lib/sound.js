@@ -3,15 +3,15 @@ module.exports = {
   play
 }
 
-var config = require('../../config')
-var path = require('path')
+const config = require('../../config')
+const path = require('path')
 
-var VOLUME = 0.15
+const VOLUME = 0.15
 
 /* Cache of Audio elements, for instant playback */
-var cache = {}
+const cache = {}
 
-var sounds = {
+const sounds = {
   ADD: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'add.wav'),
     volume: VOLUME
@@ -47,10 +47,10 @@ var sounds = {
 }
 
 function preload () {
-  for (var name in sounds) {
+  for (let name in sounds) {
     if (!cache[name]) {
-      var sound = sounds[name]
-      var audio = cache[name] = new window.Audio()
+      const sound = sounds[name]
+      const audio = cache[name] = new window.Audio()
       audio.volume = sound.volume
       audio.src = sound.url
     }
@@ -58,9 +58,9 @@ function preload () {
 }
 
 function play (name) {
-  var audio = cache[name]
+  let audio = cache[name]
   if (!audio) {
-    var sound = sounds[name]
+    const sound = sounds[name]
     if (!sound) {
       throw new Error('Invalid sound name')
     }

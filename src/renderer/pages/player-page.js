@@ -13,9 +13,9 @@ module.exports = class Player extends React.Component {
   render () {
     // Show the video as large as will fit in the window, play immediately
     // If the video is on Chromecast or Airplay, show a title screen instead
-    var state = this.props.state
-    var showVideo = state.playing.location === 'local'
-    var showControls = state.playing.location !== 'external'
+    const state = this.props.state
+    const showVideo = state.playing.location === 'local'
+    const showControls = state.playing.location !== 'external'
     return (
       <div
         className='player'
@@ -39,7 +39,7 @@ function renderMedia (state) {
   // Unfortunately, play/pause can't be done just by modifying HTML.
   // Instead, grab the DOM node and play/pause it if necessary
   // Get the <video> or <audio> tag
-  var mediaElement = document.querySelector(state.playing.type)
+  const mediaElement = document.querySelector(state.playing.type)
   if (mediaElement !== null) {
     if (state.playing.isPaused && !mediaElement.paused) {
       mediaElement.pause()
@@ -67,20 +67,20 @@ function renderMedia (state) {
     }
 
     // Switch to the newly added subtitle track, if available
-    var tracks = mediaElement.textTracks || []
-    for (var j = 0; j < tracks.length; j++) {
-      var isSelectedTrack = j === state.playing.subtitles.selectedIndex
+    const tracks = mediaElement.textTracks || []
+    for (let j = 0; j < tracks.length; j++) {
+      const isSelectedTrack = j === state.playing.subtitles.selectedIndex
       tracks[j].mode = isSelectedTrack ? 'showing' : 'hidden'
     }
 
     // Save video position
-    var file = state.getPlayingFileSummary()
+    const file = state.getPlayingFileSummary()
     file.currentTime = state.playing.currentTime = mediaElement.currentTime
     file.duration = state.playing.duration = mediaElement.duration
 
     // Save selected subtitle
     if (state.playing.subtitles.selectedIndex !== -1) {
-      var index = state.playing.subtitles.selectedIndex
+      const index = state.playing.subtitles.selectedIndex
       file.selectedSubtitle = state.playing.subtitles.tracks[index].filePath
     } else if (file.selectedSubtitle != null) {
       delete file.selectedSubtitle
@@ -90,11 +90,11 @@ function renderMedia (state) {
   }
 
   // Add subtitles to the <video> tag
-  var trackTags = []
+  const trackTags = []
   if (state.playing.subtitles.selectedIndex >= 0) {
-    for (var i = 0; i < state.playing.subtitles.tracks.length; i++) {
-      var track = state.playing.subtitles.tracks[i]
-      var isSelected = state.playing.subtitles.selectedIndex === i
+    for (let i = 0; i < state.playing.subtitles.tracks.length; i++) {
+      const track = state.playing.subtitles.tracks[i]
+      const isSelected = state.playing.subtitles.selectedIndex === i
       trackTags.push(
         <track
           key={i}
@@ -107,8 +107,8 @@ function renderMedia (state) {
   }
 
   // Create the <audio> or <video> tag
-  var MediaTagName = state.playing.type
-  var mediaTag = (
+  const MediaTagName = state.playing.type
+  const mediaTag = (
     <MediaTagName
       src={Playlist.getCurrentLocalURL(state)}
       onDoubleClick={dispatcher('toggleFullScreen')}
@@ -137,8 +137,8 @@ function renderMedia (state) {
   // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
     if (state.playing.type !== 'video') return
-    var video = e.target
-    var dimensions = {
+    const video = e.target
+    const dimensions = {
       width: video.videoWidth,
       height: video.videoHeight
     }
@@ -155,7 +155,7 @@ function renderMedia (state) {
   }
 
   function onCanPlay (e) {
-    var elem = e.target
+    const elem = e.target
     if (state.playing.type === 'video' &&
       elem.webkitVideoDecodedByteCount === 0) {
       dispatch('mediaError', 'Video codec unsupported')
@@ -169,15 +169,15 @@ function renderMedia (state) {
 }
 
 function renderOverlay (state) {
-  var elems = []
-  var audioMetadataElem = renderAudioMetadata(state)
-  var spinnerElem = renderLoadingSpinner(state)
+  const elems = []
+  const audioMetadataElem = renderAudioMetadata(state)
+  const spinnerElem = renderLoadingSpinner(state)
   if (audioMetadataElem) elems.push(audioMetadataElem)
   if (spinnerElem) elems.push(spinnerElem)
 
   // Video fills the window, centered with black bars if necessary
   // Audio gets a static poster image and a summary of the file metadata.
-  var style
+  let style
   if (state.playing.type === 'audio') {
     style = { backgroundImage: cssBackgroundImagePoster(state) }
   } else if (elems.length !== 0) {
@@ -195,27 +195,27 @@ function renderOverlay (state) {
 }
 
 function renderAudioMetadata (state) {
-  var fileSummary = state.getPlayingFileSummary()
+  const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
-  var info = fileSummary.audioInfo
+  const info = fileSummary.audioInfo
 
   // Get audio track info
-  var title = info.title
+  let title = info.title
   if (!title) {
     title = fileSummary.name
   }
-  var artist = info.artist && info.artist[0]
-  var album = info.album
+  let artist = info.artist && info.artist[0]
+  let album = info.album
   if (album && info.year && !album.includes(info.year)) {
     album += ' (' + info.year + ')'
   }
-  var track
+  let track
   if (info.track && info.track.no && info.track.of) {
     track = info.track.no + ' of ' + info.track.of
   }
 
   // Show a small info box in the middle of the screen with title/album/etc
-  var elems = []
+  const elems = []
   if (artist) {
     elems.push((
       <div key='artist' className='audio-artist'>
@@ -239,7 +239,7 @@ function renderAudioMetadata (state) {
   }
 
   // Align the title with the other info, if available. Otherwise, center title
-  var emptyLabel = (<label />)
+  const emptyLabel = (<label />)
   elems.unshift((
     <div key='title' className='audio-title'>
       {elems.length ? emptyLabel : undefined}{title}
@@ -251,14 +251,14 @@ function renderAudioMetadata (state) {
 
 function renderLoadingSpinner (state) {
   if (state.playing.isPaused) return
-  var isProbablyStalled = state.playing.isStalled ||
+  const isProbablyStalled = state.playing.isStalled ||
     (new Date().getTime() - state.playing.lastTimeUpdate > 2000)
   if (!isProbablyStalled) return
 
-  var prog = state.getPlayingTorrentSummary().progress || {}
-  var fileProgress = 0
+  const prog = state.getPlayingTorrentSummary().progress || {}
+  let fileProgress = 0
   if (prog.files) {
-    var file = prog.files[state.playing.fileIndex]
+    const file = prog.files[state.playing.fileIndex]
     fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
   }
 
@@ -275,7 +275,7 @@ function renderLoadingSpinner (state) {
 }
 
 function renderCastScreen (state) {
-  var castIcon, castType, isCast
+  let castIcon, castType, isCast
   if (state.playing.location.startsWith('chromecast')) {
     castIcon = 'cast_connected'
     castType = 'Chromecast'
@@ -290,8 +290,8 @@ function renderCastScreen (state) {
     isCast = true
   } else if (state.playing.location === 'external') {
     // TODO: get the player name in a more reliable way
-    var playerPath = state.saved.prefs.externalPlayerPath
-    var playerName = playerPath ? path.basename(playerPath).split('.')[0] : 'VLC'
+    const playerPath = state.saved.prefs.externalPlayerPath
+    const playerName = playerPath ? path.basename(playerPath).split('.')[0] : 'VLC'
     castIcon = 'tv'
     castType = playerName
     isCast = false
@@ -301,15 +301,15 @@ function renderCastScreen (state) {
     isCast = false
   }
 
-  var isStarting = state.playing.location.endsWith('-pending')
-  var castName = state.playing.castName
-  var castStatus
+  const isStarting = state.playing.location.endsWith('-pending')
+  const castName = state.playing.castName
+  let castStatus
   if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
   // Show a nice title image, if possible
-  var style = {
+  const style = {
     backgroundImage: cssBackgroundImagePoster(state)
   }
 
@@ -327,12 +327,12 @@ function renderCastScreen (state) {
 function renderCastOptions (state) {
   if (!state.devices.castMenu) return
 
-  var {location, devices} = state.devices.castMenu
-  var player = state.devices[location]
+  const {location, devices} = state.devices.castMenu
+  const player = state.devices[location]
 
-  var items = devices.map(function (device, ix) {
-    var isSelected = player.device === device
-    var name = device.name
+  const items = devices.map(function (device, ix) {
+    const isSelected = player.device === device
+    const name = device.name
     return (
       <li key={ix} onClick={dispatcher('selectCastDevice', ix)}>
         <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
@@ -349,11 +349,11 @@ function renderCastOptions (state) {
 }
 
 function renderSubtitleOptions (state) {
-  var subtitles = state.playing.subtitles
+  const subtitles = state.playing.subtitles
   if (!subtitles.tracks.length || !subtitles.showMenu) return
 
-  var items = subtitles.tracks.map(function (track, ix) {
-    var isSelected = state.playing.subtitles.selectedIndex === ix
+  const items = subtitles.tracks.map(function (track, ix) {
+    const isSelected = state.playing.subtitles.selectedIndex === ix
     return (
       <li key={ix} onClick={dispatcher('selectSubtitle', ix)}>
         <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
@@ -362,8 +362,8 @@ function renderSubtitleOptions (state) {
     )
   })
 
-  var noneSelected = state.playing.subtitles.selectedIndex === -1
-  var noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
+  const noneSelected = state.playing.subtitles.selectedIndex === -1
+  const noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
   return (
     <ul key='subtitle-options' className='options-list'>
       {items}
@@ -376,17 +376,17 @@ function renderSubtitleOptions (state) {
 }
 
 function renderPlayerControls (state) {
-  var positionPercent = 100 * state.playing.currentTime / state.playing.duration
-  var playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
-  var captionsClass = state.playing.subtitles.tracks.length === 0
+  const positionPercent = 100 * state.playing.currentTime / state.playing.duration
+  const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
+  const captionsClass = state.playing.subtitles.tracks.length === 0
     ? 'disabled'
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
-  var prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
-  var nextClass = Playlist.hasNext(state) ? '' : 'disabled'
+  const prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
+  const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
-  var elements = [
+  const elements = [
     <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
@@ -444,24 +444,24 @@ function renderPlayerControls (state) {
   }
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
-  var castTypes = ['chromecast', 'airplay', 'dlna']
-  var isCastingAnywhere = castTypes.some(
+  const castTypes = ['chromecast', 'airplay', 'dlna']
+  const isCastingAnywhere = castTypes.some(
     (castType) => state.playing.location.startsWith(castType))
 
   // Add the cast buttons. Icons for each cast type, connected/disconnected:
-  var buttonIcons = {
+  const buttonIcons = {
     'chromecast': {true: 'cast_connected', false: 'cast'},
     'airplay': {true: 'airplay', false: 'airplay'},
     'dlna': {true: 'tv', false: 'tv'}
   }
   castTypes.forEach(function (castType) {
     // Do we show this button (eg. the Chromecast button) at all?
-    var isCasting = state.playing.location.startsWith(castType)
-    var player = state.devices[castType]
+    const isCasting = state.playing.location.startsWith(castType)
+    const player = state.devices[castType]
     if ((!player || player.getDevices().length === 0) && !isCasting) return
 
     // Show the button. Three options for eg the Chromecast button:
-    var buttonClass, buttonHandler
+    let buttonClass, buttonHandler
     if (isCasting) {
       // Option 1: we are currently connected to Chromecast. Button stops the cast.
       buttonClass = 'active'
@@ -475,7 +475,7 @@ function renderPlayerControls (state) {
       buttonClass = ''
       buttonHandler = dispatcher('toggleCastMenu', castType)
     }
-    var buttonIcon = buttonIcons[castType][isCasting]
+    const buttonIcon = buttonIcons[castType][isCasting]
 
     elements.push((
       <i
@@ -488,13 +488,13 @@ function renderPlayerControls (state) {
   })
 
   // Render volume slider
-  var volume = state.playing.volume
-  var volumeIcon = 'volume_' + (
+  const volume = state.playing.volume
+  const volumeIcon = 'volume_' + (
     volume === 0 ? 'off'
     : volume < 0.3 ? 'mute'
     : volume < 0.6 ? 'down'
     : 'up')
-  var volumeStyle = {
+  const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
       'color-stop(' + (volume * 100) + '%, #727272))'
@@ -519,8 +519,8 @@ function renderPlayerControls (state) {
   ))
 
   // Show video playback progress
-  var currentTimeStr = formatTime(state.playing.currentTime)
-  var durationStr = formatTime(state.playing.duration)
+  const currentTimeStr = formatTime(state.playing.currentTime)
+  const durationStr = formatTime(state.playing.duration)
   elements.push((
     <span key='time' className='time float-left'>
       {currentTimeStr} / {durationStr}
@@ -547,7 +547,7 @@ function renderPlayerControls (state) {
   function handleDragStart (e) {
     // Prevent the cursor from changing, eg to a green + icon on Mac
     if (e.dataTransfer) {
-      var dt = e.dataTransfer
+      const dt = e.dataTransfer
       dt.effectAllowed = 'none'
     }
   }
@@ -556,9 +556,9 @@ function renderPlayerControls (state) {
   function handleScrub (e) {
     if (!e.clientX) return
     dispatch('mediaMouseMoved')
-    var windowWidth = document.querySelector('body').clientWidth
-    var fraction = e.clientX / windowWidth
-    var position = fraction * state.playing.duration /* seconds */
+    const windowWidth = document.querySelector('body').clientWidth
+    const fraction = e.clientX / windowWidth
+    const position = fraction * state.playing.duration /* seconds */
     dispatch('skipTo', position)
   }
 
@@ -589,18 +589,18 @@ function renderPlayerControls (state) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be 'spongey' / non-contiguous
 function renderLoadingBar (state) {
-  var torrentSummary = state.getPlayingTorrentSummary()
+  const torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
     return []
   }
 
   // Find all contiguous parts of the torrent which are loaded
-  var prog = torrentSummary.progress
-  var fileProg = prog.files[state.playing.fileIndex]
-  var parts = []
-  var lastPiecePresent = false
-  for (var i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
-    var partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+  const prog = torrentSummary.progress
+  const fileProg = prog.files[state.playing.fileIndex]
+  const parts = []
+  let lastPiecePresent = false
+  for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
+    const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
       parts.push({start: i - fileProg.startPiece, count: 1})
     } else if (partPresent) {
@@ -610,8 +610,8 @@ function renderLoadingBar (state) {
   }
 
   // Output some bars to show which parts of the file are loaded
-  var loadingBarElems = parts.map(function (part, i) {
-    var style = {
+  const loadingBarElems = parts.map(function (part, i) {
+    const style = {
       left: (100 * part.start / fileProg.numPieces) + '%',
       width: (100 * part.count / fileProg.numPieces) + '%'
     }
@@ -623,8 +623,8 @@ function renderLoadingBar (state) {
 
 // Returns the CSS background-image string for a poster image + dark vignette
 function cssBackgroundImagePoster (state) {
-  var torrentSummary = state.getPlayingTorrentSummary()
-  var posterPath = TorrentSummary.getPosterPath(torrentSummary)
+  const torrentSummary = state.getPlayingTorrentSummary()
+  const posterPath = TorrentSummary.getPosterPath(torrentSummary)
   if (!posterPath) return ''
   return cssBackgroundImageDarkGradient() + `, url('${posterPath}')`
 }
@@ -639,12 +639,12 @@ function formatTime (time) {
     return '0:00'
   }
 
-  var hours = Math.floor(time / 3600)
-  var minutes = Math.floor(time % 3600 / 60)
+  let hours = Math.floor(time / 3600)
+  let minutes = Math.floor(time % 3600 / 60)
   if (hours > 0) {
     minutes = zeroFill(2, minutes)
   }
-  var seconds = zeroFill(2, Math.floor(time % 60))
+  let seconds = zeroFill(2, Math.floor(time % 60))
 
   return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }

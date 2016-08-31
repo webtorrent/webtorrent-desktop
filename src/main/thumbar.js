@@ -12,10 +12,10 @@ module.exports = {
  * or activating the window.
  */
 
-var path = require('path')
-var config = require('../config')
+const path = require('path')
+const config = require('../config')
 
-var windows = require('./windows')
+const windows = require('./windows')
 
 const PREV_ICON = path.join(config.STATIC_PATH, 'PreviousTrackThumbnailBarButton.png')
 const PLAY_ICON = path.join(config.STATIC_PATH, 'PlayThumbnailBarButton.png')
@@ -27,7 +27,7 @@ const PREV = 0
 const PLAY_PAUSE = 1
 const NEXT = 2
 
-var buttons = []
+let buttons = []
 
 /**
  * Show the Windows thumbnail toolbar buttons.

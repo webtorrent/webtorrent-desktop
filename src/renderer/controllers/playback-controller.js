@@ -27,7 +27,7 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, restore the most recently viewed file or autoplay the first
   playFile (infoHash, index /* optional */) {
-    var state = this.state
+    const state = this.state
     if (state.location.url() === 'player') {
       this.updatePlayer(infoHash, index, false, (err) => {
         if (err) dispatch('error', err)
@@ -52,8 +52,8 @@ module.exports = class PlaybackController {
 
   // Open a file in OS default app.
   openItem (infoHash, index) {
-    var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-    var filePath = path.join(
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    const filePath = path.join(
       torrentSummary.path,
       torrentSummary.files[index].path)
     ipcRenderer.send('openItem', filePath)
@@ -61,12 +61,12 @@ module.exports = class PlaybackController {
 
   // Toggle (play or pause) the currently playing media
   playPause () {
-    var state = this.state
+    const state = this.state
     if (state.location.url() !== 'player') return
 
     // force rerendering if window is hidden,
     // in order to bypass `raf` and play/pause media immediately
-    var mediaTag = document.querySelector('video,audio')
+    const mediaTag = document.querySelector('video,audio')
     if (!state.window.isVisible && mediaTag) {
       if (state.playing.isPaused) mediaTag.play()
       else mediaTag.pause()
@@ -78,7 +78,7 @@ module.exports = class PlaybackController {
 
   // Play next file in list (if any)
   nextTrack () {
-    var state = this.state
+    const state = this.state
     if (Playlist.hasNext(state)) {
       this.updatePlayer(
           state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
@@ -90,7 +90,7 @@ module.exports = class PlaybackController {
 
   // Play previous track in list (if any)
   previousTrack () {
-    var state = this.state
+    const state = this.state
     if (Playlist.hasPrevious(state)) {
       this.updatePlayer(
         state.playing.infoHash, Playlist.getPreviousIndex(state), false, (err) => {
@@ -102,7 +102,7 @@ module.exports = class PlaybackController {
 
   // Play (unpause) the current media
   play () {
-    var state = this.state
+    const state = this.state
     if (!state.playing.isPaused) return
     state.playing.isPaused = false
     if (isCasting(state)) {
@@ -113,7 +113,7 @@ module.exports = class PlaybackController {
 
   // Pause the currently playing media
   pause () {
-    var state = this.state
+    const state = this.state
     if (state.playing.isPaused) return
     state.playing.isPaused = true
     if (isCasting(state)) {
@@ -142,8 +142,8 @@ module.exports = class PlaybackController {
   // to 0.25 (quarter-speed playback), then goes to -0.25, -0.5, -1, -2, etc
   // until -16 (fast rewind)
   changePlaybackRate (direction) {
-    var state = this.state
-    var rate = state.playing.playbackRate
+    const state = this.state
+    let rate = state.playing.playbackRate
     if (direction > 0 && rate >= 0.25 && rate < 2) {
       rate += 0.25
     } else if (direction < 0 && rate > 0.25 && rate <= 2) {
@@ -178,7 +178,7 @@ module.exports = class PlaybackController {
     // check if its in [0.0 - 1.0] range
     volume = Math.max(0, Math.min(1, volume))
 
-    var state = this.state
+    const state = this.state
     if (isCasting(state)) {
       Cast.setVolume(volume)
     } else {
@@ -192,8 +192,8 @@ module.exports = class PlaybackController {
   // * The video is paused
   // * The video is playing remotely on Chromecast or Airplay
   showOrHidePlayerControls () {
-    var state = this.state
-    var hideControls = state.location.url() === 'player' &&
+    const state = this.state
+    const hideControls = state.location.url() === 'player' &&
       state.playing.mouseStationarySince !== 0 &&
       new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
       !state.playing.isPaused &&
@@ -208,9 +208,8 @@ module.exports = class PlaybackController {
 
   // Opens the video player to a specific torrent
   openPlayer (infoHash, index, cb) {
-    var state = this.state
-
-    var torrentSummary = TorrentSummary.getByKey(state, infoHash)
+    const state = this.state
+    const torrentSummary = TorrentSummary.getByKey(state, infoHash)
 
     if (index === undefined) index = torrentSummary.mostRecentFileIndex
     if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
@@ -224,7 +223,7 @@ module.exports = class PlaybackController {
     torrentSummary.playStatus = 'requested'
     this.update()
 
-    var timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       telemetry.logPlayAttempt('timeout')
       // TODO: remove torrentSummary.playStatus
       torrentSummary.playStatus = 'timeout' /* no seeders available? */
@@ -237,7 +236,7 @@ module.exports = class PlaybackController {
       clearTimeout(timeout)
 
       // if we timed out (user clicked play a long time ago), don't autoplay
-      var timedOut = torrentSummary.playStatus === 'timeout'
+      const timedOut = torrentSummary.playStatus === 'timeout'
       delete torrentSummary.playStatus
       if (timedOut) {
         ipcRenderer.send('wt-stop-server')
@@ -267,10 +266,10 @@ module.exports = class PlaybackController {
 
   // Called each time the current file changes
   updatePlayer (infoHash, index, resume, cb) {
-    var state = this.state
+    const state = this.state
 
-    var torrentSummary = TorrentSummary.getByKey(state, infoHash)
-    var fileSummary = torrentSummary.files[index]
+    const torrentSummary = TorrentSummary.getByKey(state, infoHash)
+    const fileSummary = torrentSummary.files[index]
 
     if (!TorrentPlayer.isPlayable(fileSummary)) {
       torrentSummary.mostRecentFileIndex = undefined
@@ -280,16 +279,17 @@ module.exports = class PlaybackController {
     torrentSummary.mostRecentFileIndex = index
 
     // update state
+    state.playing.infoHash = infoHash
     state.playing.fileIndex = index
     state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
       : TorrentPlayer.isAudio(fileSummary) ? 'audio'
       : 'other'
 
     // pick up where we left off
-    var jumpToTime = 0
+    let jumpToTime = 0
     if (resume && fileSummary.currentTime) {
-      var fraction = fileSummary.currentTime / fileSummary.duration
-      var secondsLeft = fileSummary.duration - fileSummary.currentTime
+      const fraction = fileSummary.currentTime / fileSummary.duration
+      const secondsLeft = fileSummary.duration - fileSummary.currentTime
       if (fraction < 0.9 && secondsLeft > 10) {
         jumpToTime = fileSummary.currentTime
       }
@@ -330,7 +330,7 @@ module.exports = class PlaybackController {
     console.log('closePlayer')
 
     // Quit any external players, like Chromecast/Airplay/etc or VLC
-    var state = this.state
+    const state = this.state
     if (isCasting(state)) {
       Cast.stop()
     }
@@ -342,7 +342,7 @@ module.exports = class PlaybackController {
     state.previousVolume = state.playing.volume
 
     // Telemetry: track what happens after the user clicks play
-    var result = state.playing.result // 'success' or 'error'
+    const result = state.playing.result // 'success' or 'error'
     if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
     else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
     else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user gave up waiting

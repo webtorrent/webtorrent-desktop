@@ -29,7 +29,7 @@ class PathSelector extends React.Component {
   }
 
   handleClick () {
-    var opts = Object.assign({
+    const opts = Object.assign({
       defaultPath: this.props.value,
       properties: [ 'openFile', 'openDirectory' ]
     }, this.props.dialog)

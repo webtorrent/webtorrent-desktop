@@ -1,17 +1,17 @@
-var about = module.exports = {
+const about = module.exports = {
   init,
   win: null
 }
 
-var config = require('../../config')
-var electron = require('electron')
+const config = require('../../config')
+const electron = require('electron')
 
 function init () {
   if (about.win) {
     return about.win.show()
   }
 
-  var win = about.win = new electron.BrowserWindow({
+  const win = about.win = new electron.BrowserWindow({
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,

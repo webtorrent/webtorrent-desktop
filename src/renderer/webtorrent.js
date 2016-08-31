@@ -2,26 +2,26 @@
 // process from the main window.
 console.time('init')
 
-var crypto = require('crypto')
-var deepEqual = require('deep-equal')
-var defaultAnnounceList = require('create-torrent').announceList
-var electron = require('electron')
-var fs = require('fs-extra')
-var musicmetadata = require('musicmetadata')
-var networkAddress = require('network-address')
-var path = require('path')
-var WebTorrent = require('webtorrent')
-var zeroFill = require('zero-fill')
+const crypto = require('crypto')
+const deepEqual = require('deep-equal')
+const defaultAnnounceList = require('create-torrent').announceList
+const electron = require('electron')
+const fs = require('fs-extra')
+const musicmetadata = require('musicmetadata')
+const networkAddress = require('network-address')
+const path = require('path')
+const WebTorrent = require('webtorrent')
+const zeroFill = require('zero-fill')
 
-var crashReporter = require('../crash-reporter')
-var config = require('../config')
-var torrentPoster = require('./lib/torrent-poster')
+const crashReporter = require('../crash-reporter')
+const config = require('../config')
+const torrentPoster = require('./lib/torrent-poster')
 
 // Report when the process crashes
 crashReporter.init()
 
 // Send & receive messages from the main window
-var ipc = electron.ipcRenderer
+const ipc = electron.ipcRenderer
 
 // Force use of webtorrent trackers on all torrents
 global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
@@ -31,7 +31,7 @@ global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 /**
  * WebTorrent version.
  */
-var VERSION = require('../../package.json').version
+const VERSION = require('../../package.json').version
 
 /**
  * Version number in Azureus-style. Generated from major and minor semver version.
@@ -39,7 +39,7 @@ var VERSION = require('../../package.json').version
  *   '0.16.1' -> '0016'
  *   '1.2.5' -> '0102'
  */
-var VERSION_STR = VERSION.match(/([0-9]+)/g)
+const VERSION_STR = VERSION.match(/([0-9]+)/g)
   .slice(0, 2)
   .map((v) => zeroFill(2, v))
   .join('')
@@ -51,19 +51,19 @@ var VERSION_STR = VERSION.match(/([0-9]+)/g)
  * For example:
  *   '-WW0102-'...
  */
-var VERSION_PREFIX = '-WD' + VERSION_STR + '-'
+const VERSION_PREFIX = '-WD' + VERSION_STR + '-'
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-var client = window.client = new WebTorrent({
+const client = window.client = new WebTorrent({
   peerId: Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
 })
 
 // WebTorrent-to-HTTP streaming sever
-var server = null
+let server = null
 
 // Used for diffing, so we only send progress updates when necessary
-var prevProgress = null
+let prevProgress = null
 
 init()
 
@@ -105,7 +105,7 @@ function init () {
 function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 
-  var torrent = client.add(torrentID, {
+  const torrent = client.add(torrentID, {
     path: path,
     fileModtimes: fileModtimes
   })
@@ -121,15 +121,15 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
 }
 
 function stopTorrenting (infoHash) {
-  var torrent = client.get(infoHash)
+  const torrent = client.get(infoHash)
   if (torrent) torrent.destroy()
 }
 
 // Create a new torrent, start seeding
 function createTorrent (torrentKey, options) {
   console.log('creating torrent', torrentKey, options)
-  var paths = options.files.map((f) => f.path)
-  var torrent = client.seed(paths, options)
+  const paths = options.files.map((f) => f.path)
+  const torrent = client.seed(paths, options)
   torrent.key = torrentKey
   addTorrentEvents(torrent)
   ipc.send('wt-new-torrent')
@@ -147,14 +147,14 @@ function addTorrentEvents (torrent) {
   torrent.on('done', torrentDone)
 
   function torrentMetadata () {
-    var info = getTorrentInfo(torrent)
+    const info = getTorrentInfo(torrent)
     ipc.send('wt-metadata', torrent.key, info)
 
     updateTorrentProgress()
   }
 
   function torrentReady () {
-    var info = getTorrentInfo(torrent)
+    const info = getTorrentInfo(torrent)
     ipc.send('wt-ready', torrent.key, info)
     ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info) // TODO: hack
 
@@ -162,7 +162,7 @@ function addTorrentEvents (torrent) {
   }
 
   function torrentDone () {
-    var info = getTorrentInfo(torrent)
+    const info = getTorrentInfo(torrent)
     ipc.send('wt-done', torrent.key, info)
 
     updateTorrentProgress()
@@ -198,9 +198,9 @@ function getTorrentFileInfo (file) {
 // Every time we resolve a magnet URI, save the torrent file so that we never
 // have to download it again. Never ask the DHT the same question twice.
 function saveTorrentFile (torrentKey) {
-  var torrent = getTorrent(torrentKey)
+  const torrent = getTorrent(torrentKey)
   checkIfTorrentFileExists(torrent.infoHash, function (torrentPath, exists) {
-    var fileName = torrent.infoHash + '.torrent'
+    const fileName = torrent.infoHash + '.torrent'
     if (exists) {
       // We've already saved the file
       return ipc.send('wt-file-saved', torrentKey, fileName)
@@ -220,7 +220,7 @@ function saveTorrentFile (torrentKey) {
 // Checks whether we've already resolved a given infohash to a torrent file
 // Calls back with (torrentPath, exists). Logs, does not call back on error
 function checkIfTorrentFileExists (infoHash, cb) {
-  var torrentPath = path.join(config.TORRENT_PATH, infoHash + '.torrent')
+  const torrentPath = path.join(config.TORRENT_PATH, infoHash + '.torrent')
   fs.exists(torrentPath, function (exists) {
     cb(torrentPath, exists)
   })
@@ -229,14 +229,14 @@ function checkIfTorrentFileExists (infoHash, cb) {
 // Save a JPG that represents a torrent.
 // Auto chooses either a frame from a video file, an image, etc
 function generateTorrentPoster (torrentKey) {
-  var torrent = getTorrent(torrentKey)
+  const torrent = getTorrent(torrentKey)
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
     fs.mkdirp(config.POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
-      var posterFileName = torrent.infoHash + extension
-      var posterFilePath = path.join(config.POSTER_PATH, posterFileName)
+      const posterFileName = torrent.infoHash + extension
+      const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
       fs.writeFile(posterFilePath, buf, function (err) {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster
@@ -247,7 +247,7 @@ function generateTorrentPoster (torrentKey) {
 }
 
 function updateTorrentProgress () {
-  var progress = getTorrentProgress()
+  const progress = getTorrentProgress()
   // TODO: diff torrent-by-torrent, not once for the whole update
   if (prevProgress && deepEqual(progress, prevProgress, {strict: true})) {
     return /* don't send heavy object if it hasn't changed */
@@ -258,19 +258,19 @@ function updateTorrentProgress () {
 
 function getTorrentProgress () {
   // First, track overall progress
-  var progress = client.progress
-  var hasActiveTorrents = client.torrents.some(function (torrent) {
+  const progress = client.progress
+  const hasActiveTorrents = client.torrents.some(function (torrent) {
     return torrent.progress !== 1
   })
 
   // Track progress for every file in each torrent
   // TODO: ideally this would be tracked by WebTorrent, which could do it
   // more efficiently than looping over torrent.bitfield
-  var torrentProg = client.torrents.map(function (torrent) {
-    var fileProg = torrent.files && torrent.files.map(function (file, index) {
-      var numPieces = file._endPiece - file._startPiece + 1
-      var numPiecesPresent = 0
-      for (var piece = file._startPiece; piece <= file._endPiece; piece++) {
+  const torrentProg = client.torrents.map(function (torrent) {
+    const fileProg = torrent.files && torrent.files.map(function (file, index) {
+      const numPieces = file._endPiece - file._startPiece + 1
+      let numPiecesPresent = 0
+      for (let piece = file._startPiece; piece <= file._endPiece; piece++) {
         if (torrent.bitfield.get(piece)) numPiecesPresent++
       }
       return {
@@ -302,7 +302,7 @@ function getTorrentProgress () {
 }
 
 function startServer (infoHash) {
-  var torrent = client.get(infoHash)
+  const torrent = client.get(infoHash)
   if (torrent.ready) startServerFromReadyTorrent(torrent)
   else torrent.once('ready', () => startServerFromReadyTorrent(torrent))
 }
@@ -313,9 +313,9 @@ function startServerFromReadyTorrent (torrent, cb) {
   // start the streaming torrent-to-http server
   server = torrent.createServer()
   server.listen(0, function () {
-    var port = server.address().port
-    var urlSuffix = ':' + port
-    var info = {
+    const port = server.address().port
+    const urlSuffix = ':' + port
+    const info = {
       torrentKey: torrent.key,
       localURL: 'http://localhost' + urlSuffix,
       networkURL: 'http://' + networkAddress() + urlSuffix
@@ -333,8 +333,8 @@ function stopServer () {
 }
 
 function getAudioMetadata (infoHash, index) {
-  var torrent = client.get(infoHash)
-  var file = torrent.files[index]
+  const torrent = client.get(infoHash)
+  const file = torrent.files[index]
   musicmetadata(file.createReadStream(), function (err, info) {
     if (err) return
     console.log('got audio metadata for %s: %o', file.name, info)
@@ -344,7 +344,7 @@ function getAudioMetadata (infoHash, index) {
 
 function selectFiles (torrentOrInfoHash, selections) {
   // Get the torrent object
-  var torrent
+  let torrent
   if (typeof torrentOrInfoHash === 'string') {
     torrent = client.get(torrentOrInfoHash)
   } else {
@@ -369,8 +369,8 @@ function selectFiles (torrentOrInfoHash, selections) {
   torrent.deselect(0, torrent.pieces.length - 1, false)
 
   // Add selections (individual files)
-  for (var i = 0; i < selections.length; i++) {
-    var file = torrent.files[i]
+  for (let i = 0; i < selections.length; i++) {
+    const file = torrent.files[i]
     if (selections[i]) {
       file.select()
     } else {
@@ -383,7 +383,7 @@ function selectFiles (torrentOrInfoHash, selections) {
 // Gets a WebTorrent handle by torrentKey
 // Throws an Error if we're not currently torrenting anything w/ that key
 function getTorrent (torrentKey) {
-  var ret = client.torrents.find((x) => x.key === torrentKey)
+  const ret = client.torrents.find((x) => x.key === torrentKey)
   if (!ret) throw new Error('missing torrent key ' + torrentKey)
   return ret
 }

@@ -4,14 +4,14 @@ module.exports = {
   checkInstall
 }
 
-var cp = require('child_process')
-var vlcCommand = require('vlc-command')
+const cp = require('child_process')
+const vlcCommand = require('vlc-command')
 
-var log = require('./log')
-var windows = require('./windows')
+const log = require('./log')
+const windows = require('./windows')
 
 // holds a ChildProcess while we're playing a video in an external player, null otherwise
-var proc
+let proc = null
 
 function checkInstall (path, cb) {
   // check for VLC if external player has not been specified by the user
@@ -26,7 +26,7 @@ function spawn (path, url, title) {
   // Try to find and use VLC if external player is not specified
   vlcCommand(function (err, vlcPath) {
     if (err) return windows.main.dispatch('externalPlayerNotFound')
-    var args = [
+    const args = [
       '--play-and-exit',
       '--video-on-top',
       '--quiet',
@@ -50,7 +50,7 @@ function spawnExternal (path, args) {
   proc = cp.spawn(path, args, {stdio: 'ignore'})
 
   // If it works, close the modal after a second
-  var closeModalTimeout = setTimeout(() =>
+  const closeModalTimeout = setTimeout(() =>
     windows.main.dispatch('exitModal'), 1000)
 
   proc.on('close', function (code) {

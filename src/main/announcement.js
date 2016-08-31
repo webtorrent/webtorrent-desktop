@@ -2,12 +2,12 @@ module.exports = {
   init
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var config = require('../config')
-var log = require('./log')
+const config = require('../config')
+const log = require('./log')
 
-var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
+const ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
   '?version=' + config.APP_VERSION +
   '&platform=' + process.platform
 
@@ -26,7 +26,7 @@ var ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
  *   }
  */
 function init () {
-  var get = require('simple-get')
+  const get = require('simple-get')
   get.concat(ANNOUNCEMENT_URL, onResponse)
 }
 

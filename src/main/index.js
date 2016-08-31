@@ -1,26 +1,26 @@
 console.time('init')
 
-var electron = require('electron')
+const electron = require('electron')
 
-var app = electron.app
-var ipcMain = electron.ipcMain
+const app = electron.app
+const ipcMain = electron.ipcMain
 
-var announcement = require('./announcement')
-var config = require('../config')
-var crashReporter = require('../crash-reporter')
-var dialog = require('./dialog')
-var dock = require('./dock')
-var ipc = require('./ipc')
-var log = require('./log')
-var menu = require('./menu')
-var squirrelWin32 = require('./squirrel-win32')
-var tray = require('./tray')
-var updater = require('./updater')
-var userTasks = require('./user-tasks')
-var windows = require('./windows')
+const announcement = require('./announcement')
+const config = require('../config')
+const crashReporter = require('../crash-reporter')
+const dialog = require('./dialog')
+const dock = require('./dock')
+const ipc = require('./ipc')
+const log = require('./log')
+const menu = require('./menu')
+const squirrelWin32 = require('./squirrel-win32')
+const tray = require('./tray')
+const updater = require('./updater')
+const userTasks = require('./user-tasks')
+const windows = require('./windows')
 
-var shouldQuit = false
-var argv = sliceArgv(process.argv)
+let shouldQuit = false
+let argv = sliceArgv(process.argv)
 
 if (config.IS_PRODUCTION) {
   // When Electron is running in production mode (packaged app), then run React
@@ -51,7 +51,7 @@ function init () {
     app.setPath('userData', config.CONFIG_PATH)
   }
 
-  var isReady = false // app ready, windows can be created
+  let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
   app.isQuitting = false
 
@@ -78,7 +78,7 @@ function init () {
     // Report uncaught exceptions
     process.on('uncaughtException', (err) => {
       console.error(err)
-      var error = {message: err.message, stack: err.stack}
+      const error = {message: err.message, stack: err.stack}
       windows.main.dispatch('uncaughtError', 'main', error)
     })
   })
@@ -148,7 +148,7 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  var torrentIds = []
+  let torrentIds = []
   argv.forEach(function (arg) {
     if (arg === '-n') {
       dialog.openSeedDirectory()

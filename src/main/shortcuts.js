@@ -3,8 +3,8 @@ module.exports = {
   enable
 }
 
-var electron = require('electron')
-var windows = require('./windows')
+const electron = require('electron')
+const windows = require('./windows')
 
 function enable () {
   // Register play/pause media key, available on some keyboards.

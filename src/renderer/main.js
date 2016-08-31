@@ -28,27 +28,27 @@ const SubtitlesController = require('./controllers/subtitles-controller')
 const TorrentListController = require('./controllers/torrent-list-controller')
 const TorrentController = require('./controllers/torrent-controller')
 
+// Electron apps have two processes: a main process (node) runs first and starts
+// a renderer process (essentially a Chrome window). We're in the renderer process,
+// and this IPC channel receives from and sends messages to the main process
+const ipcRenderer = electron.ipcRenderer
+
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
 require('./lib/dispatcher').setDispatch(dispatch)
 
 // From dispatch(...), events are sent to one of the controllers
-var controllers = null
+let controllers = null
 
 // This dependency is the slowest-loading, so we lazy load it
-var Cast = null
-
-// Electron apps have two processes: a main process (node) runs first and starts
-// a renderer process (essentially a Chrome window). We're in the renderer process,
-// and this IPC channel receives from and sends messages to the main process
-var ipcRenderer = electron.ipcRenderer
+let Cast = null
 
 // All state lives in state.js. `state.saved` is read from and written to a file.
 // All other state is ephemeral. First we load state.saved then initialize the app.
-var state
+let state
 
 // Root React component
-var app
+let app
 
 State.load(onState)
 
@@ -264,7 +264,7 @@ function dispatch (action, ...args) {
     console.log('dispatch: %s %o', action, args)
   }
 
-  var handler = dispatchHandlers[action]
+  const handler = dispatchHandlers[action]
   if (handler) handler(...args)
   else console.error('Missing dispatch handler: ' + action)
 
@@ -284,7 +284,7 @@ function setupIpc () {
 
   ipcRenderer.on('fullscreenChanged', onFullscreenChanged)
 
-  var tc = controllers.torrent
+  const tc = controllers.torrent
   ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
@@ -311,7 +311,7 @@ function backToList () {
   state.modal = null
   state.location.backToFirst(function () {
     // If we were already on the torrent list, scroll to the top
-    var contentTag = document.querySelector('.content')
+    const contentTag = document.querySelector('.content')
     if (contentTag) contentTag.scrollTop = 0
   })
 }
@@ -358,18 +358,18 @@ function setDimensions (dimensions) {
   state.window.wasMaximized = electron.remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
-  var screenWidth = window.screen.width
-  var screenHeight = window.screen.height
-  var aspectRatio = dimensions.width / dimensions.height
-  var scaleFactor = Math.min(
+  const screenWidth = window.screen.width
+  const screenHeight = window.screen.height
+  const aspectRatio = dimensions.width / dimensions.height
+  const scaleFactor = Math.min(
     Math.min(screenWidth / dimensions.width, 1),
     Math.min(screenHeight / dimensions.height, 1)
   )
-  var width = Math.max(
+  const width = Math.max(
     Math.floor(dimensions.width * scaleFactor),
     config.WINDOW_MIN_WIDTH
   )
-  var height = Math.max(
+  const height = Math.max(
     Math.floor(dimensions.height * scaleFactor),
     config.WINDOW_MIN_HEIGHT
   )
@@ -384,9 +384,9 @@ function setDimensions (dimensions) {
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
 
-  var url = state.location.url()
-  var allTorrents = files.every(TorrentPlayer.isTorrent)
-  var allSubtitles = files.every(controllers.subtitles.isSubtitle)
+  const url = state.location.url()
+  const allTorrents = files.every(TorrentPlayer.isTorrent)
+  const allSubtitles = files.every(controllers.subtitles.isSubtitle)
 
   if (allTorrents) {
     // Drop torrents onto the app: go to home screen, add torrents, no matter what
@@ -422,7 +422,7 @@ function onError (err) {
 function onPaste (e) {
   if (e.target.tagName.toLowerCase() === 'input') return
 
-  var torrentIds = electron.clipboard.readText().split('\n')
+  const torrentIds = electron.clipboard.readText().split('\n')
   torrentIds.forEach(function (torrentId) {
     torrentId = torrentId.trim()
     if (torrentId.length === 0) return

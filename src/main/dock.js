@@ -4,17 +4,17 @@ module.exports = {
   setBadge
 }
 
-var {app, Menu} = require('electron')
+const {app, Menu} = require('electron')
 
-var dialog = require('./dialog')
-var log = require('./log')
+const dialog = require('./dialog')
+const log = require('./log')
 
 /**
  * Add a right-click menu to the dock icon. (Mac)
  */
 function init () {
   if (!app.dock) return
-  var menu = Menu.buildFromTemplate(getMenuTemplate())
+  const menu = Menu.buildFromTemplate(getMenuTemplate())
   app.dock.setMenu(menu)
 }
 

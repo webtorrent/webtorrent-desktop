@@ -1,12 +1,12 @@
-var appConfig = require('application-config')('WebTorrent')
-var fs = require('fs')
-var path = require('path')
+const appConfig = require('application-config')('WebTorrent')
+const fs = require('fs')
+const path = require('path')
 
-var APP_NAME = 'WebTorrent'
-var APP_TEAM = 'WebTorrent, LLC'
-var APP_VERSION = require('../package.json').version
+const APP_NAME = 'WebTorrent'
+const APP_TEAM = 'WebTorrent, LLC'
+const APP_VERSION = require('../package.json').version
 
-var PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
+const PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
 
 module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
@@ -95,7 +95,7 @@ function getDefaultDownloadPath () {
     return path.join(getConfigPath(), 'Downloads')
   }
 
-  var electron = require('electron')
+  const electron = require('electron')
 
   return process.type === 'renderer'
     ? electron.remote.app.getPath('downloads')

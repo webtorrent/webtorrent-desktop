@@ -1,4 +1,4 @@
-var main = module.exports = {
+const main = module.exports = {
   dispatch,
   hide,
   init,
@@ -14,23 +14,23 @@ var main = module.exports = {
   win: null
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var app = electron.app
+const app = electron.app
 
-var config = require('../../config')
-var log = require('../log')
-var menu = require('../menu')
-var tray = require('../tray')
+const config = require('../../config')
+const log = require('../log')
+const menu = require('../menu')
+const tray = require('../tray')
 
-var HEADER_HEIGHT = 38
-var TORRENT_HEIGHT = 100
+const HEADER_HEIGHT = 38
+const TORRENT_HEIGHT = 100
 
 function init () {
   if (main.win) {
     return main.win.show()
   }
-  var win = main.win = new electron.BrowserWindow({
+  const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: getIconPath(), // Window icon (Windows, Linux)
@@ -114,7 +114,7 @@ function setBounds (bounds, maximize) {
   }
 
   // Maximize or minimize, if the second argument is present
-  var willBeMaximized
+  let willBeMaximized
   if (maximize === true) {
     if (!main.win.isMaximized()) {
       log('setBounds: maximizing')
@@ -136,7 +136,7 @@ function setBounds (bounds, maximize) {
     log('setBounds: setting bounds to ' + JSON.stringify(bounds))
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
-      var scr = electron.screen.getDisplayMatching(main.win.getBounds())
+      const scr = electron.screen.getDisplayMatching(main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
       bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
       log('setBounds: centered to ' + JSON.stringify(bounds))

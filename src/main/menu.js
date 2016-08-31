@@ -8,16 +8,16 @@ module.exports = {
   onToggleFullScreen
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var app = electron.app
+const app = electron.app
 
-var config = require('../config')
-var dialog = require('./dialog')
-var shell = require('./shell')
-var windows = require('./windows')
+const config = require('../config')
+const dialog = require('./dialog')
+const shell = require('./shell')
+const windows = require('./windows')
 
-var menu
+let menu = null
 
 function init () {
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
@@ -72,8 +72,8 @@ function onToggleFullScreen (flag) {
 }
 
 function getMenuItem (label) {
-  for (var i = 0; i < menu.items.length; i++) {
-    var menuItem = menu.items[i].submenu.items.find(function (item) {
+  for (let i = 0; i < menu.items.length; i++) {
+    const menuItem = menu.items[i].submenu.items.find(function (item) {
       return item.label === label
     })
     if (menuItem) return menuItem
@@ -81,7 +81,7 @@ function getMenuItem (label) {
 }
 
 function getMenuTemplate () {
-  var template = [
+  const template = [
     {
       label: 'File',
       submenu: [

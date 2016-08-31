@@ -20,7 +20,7 @@ module.exports = class MediaController {
   }
 
   mediaError (error) {
-    var state = this.state
+    const state = this.state
     if (state.location.url() === 'player') {
       state.playing.result = 'error'
       state.playing.location = 'error'
@@ -45,8 +45,8 @@ module.exports = class MediaController {
   }
 
   openExternalPlayer () {
-    var state = this.state
-    var mediaURL = Playlist.getCurrentLocalURL(this.state)
+    const state = this.state
+    const mediaURL = Playlist.getCurrentLocalURL(this.state)
     ipcRenderer.send('openExternalPlayer',
       state.saved.prefs.externalPlayerPath,
       mediaURL,
@@ -55,7 +55,7 @@ module.exports = class MediaController {
   }
 
   externalPlayerNotFound () {
-    var modal = this.state.modal
+    const modal = this.state.modal
     if (modal && modal.id === 'unsupported-media-modal') {
       modal.externalPlayerNotFound = true
     }
