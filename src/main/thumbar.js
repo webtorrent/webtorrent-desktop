@@ -2,7 +2,8 @@ module.exports = {
   disable,
   enable,
   onPlayerPause,
-  onPlayerPlay
+  onPlayerPlay,
+  onPlayerUpdate
 }
 
 /**
@@ -16,39 +17,75 @@ var config = require('../config')
 
 var windows = require('./windows')
 
+const PREV_ICON = path.join(config.STATIC_PATH, 'PreviousTrackThumbnailBarButton.png')
+const PLAY_ICON = path.join(config.STATIC_PATH, 'PlayThumbnailBarButton.png')
+const PAUSE_ICON = path.join(config.STATIC_PATH, 'PauseThumbnailBarButton.png')
+const NEXT_ICON = path.join(config.STATIC_PATH, 'NextTrackThumbnailBarButton.png')
+
+// Array indices for each button
+const PREV = 0
+const PLAY_PAUSE = 1
+const NEXT = 2
+
+var buttons = []
+
 /**
  * Show the Windows thumbnail toolbar buttons.
  */
 function enable () {
-  update(false)
+  buttons = [
+    {
+      tooltip: 'Previous Track',
+      icon: PREV_ICON,
+      click: () => windows.main.dispatch('previousTrack')
+    },
+    {
+      tooltip: 'Pause',
+      icon: PAUSE_ICON,
+      click: () => windows.main.dispatch('playPause')
+    },
+    {
+      tooltip: 'Next Track',
+      icon: NEXT_ICON,
+      click: () => windows.main.dispatch('nextTrack')
+    }
+  ]
+  update()
 }
 
 /**
  * Hide the Windows thumbnail toolbar buttons.
  */
 function disable () {
-  windows.main.win.setThumbarButtons([])
+  buttons = []
+  update()
 }
 
 function onPlayerPause () {
-  update(true)
+  if (!isEnabled()) return
+  buttons[PLAY_PAUSE].tooltip = 'Play'
+  buttons[PLAY_PAUSE].icon = PLAY_ICON
+  update()
 }
 
 function onPlayerPlay () {
-  update(false)
+  if (!isEnabled()) return
+  buttons[PLAY_PAUSE].tooltip = 'Pause'
+  buttons[PLAY_PAUSE].icon = PAUSE_ICON
+  update()
 }
 
-function update (isPaused) {
-  var icon = isPaused
-    ? 'PlayThumbnailBarButton.png'
-    : 'PauseThumbnailBarButton.png'
+function onPlayerUpdate (state) {
+  if (!isEnabled()) return
+  buttons[PREV].flags = [ state.hasPrevious ? 'enabled' : 'disabled' ]
+  buttons[NEXT].flags = [ state.hasNext ? 'enabled' : 'disabled' ]
+  update()
+}
 
-  var buttons = [
-    {
-      tooltip: isPaused ? 'Play' : 'Pause',
-      icon: path.join(config.STATIC_PATH, icon),
-      click: () => windows.main.dispatch('playPause')
-    }
-  ]
+function isEnabled () {
+  return buttons.length > 0
+}
+
+function update () {
   windows.main.win.setThumbarButtons(buttons)
 }

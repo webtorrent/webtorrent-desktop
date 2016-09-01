@@ -66,6 +66,7 @@ function init () {
 
   ipc.on('onPlayerUpdate', function (e, ...args) {
     menu.onPlayerUpdate(...args)
+    thumbar.onPlayerUpdate(...args)
   })
 
   ipc.on('onPlayerClose', function () {
