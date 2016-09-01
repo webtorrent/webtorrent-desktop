@@ -59,6 +59,13 @@ function onState (err, _state) {
   if (err) return onError(err)
   state = window.state = _state // Make available for easier debugging
 
+  telemetry.init(state)
+
+  // Log uncaught JS errors
+  window.addEventListener('error',
+    (e) => telemetry.logUncaughtError('window', e),
+    true /* capture */)
+
   // Create controllers
   controllers = {
     media: new MediaController(state),
@@ -114,11 +121,6 @@ function onState (err, _state) {
   // ...window visibility state.
   document.addEventListener('webkitvisibilitychange', onVisibilityChange)
 
-  // Log uncaught JS errors
-  window.addEventListener('error',
-    (e) => telemetry.logUncaughtError('window', e),
-    true /* capture */)
-
   // Done! Ideally we want to get here < 500ms after the user clicks the app
   sound.play('STARTUP')
   console.timeEnd('init')
@@ -128,7 +130,6 @@ function onState (err, _state) {
 function delayedInit () {
   lazyLoadCast()
   sound.preload()
-  telemetry.init(state)
 }
 
 // Lazily loads Chromecast and Airplay support
