@@ -4,9 +4,7 @@ module.exports = {
   setBadge
 }
 
-var electron = require('electron')
-
-var app = electron.app
+var {app, Menu} = require('electron')
 
 var dialog = require('./dialog')
 var log = require('./log')
@@ -16,7 +14,7 @@ var log = require('./log')
  */
 function init () {
   if (!app.dock) return
-  var menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  var menu = Menu.buildFromTemplate(getMenuTemplate())
   app.dock.setMenu(menu)
 }
 
@@ -33,8 +31,11 @@ function downloadFinished (path) {
  * Display a counter badge for the app. (Mac, Linux)
  */
 function setBadge (count) {
-  log(`setBadge: ${count}`)
-  app.setBadgeCount(Number(count))
+  if (process.platform === 'darwin' ||
+      process.platform === 'linux' && app.isUnityRunning()) {
+    log(`setBadge: ${count}`)
+    app.setBadgeCount(Number(count))
+  }
 }
 
 function getMenuTemplate () {
