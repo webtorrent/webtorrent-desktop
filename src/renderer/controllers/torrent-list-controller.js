@@ -84,8 +84,13 @@ module.exports = class TorrentListController {
       return start()
     }
 
+    var fileOrFolder = TorrentSummary.getFileOrFolder(s)
+
+    // New torrent: metadata not yet received
+    if (!fileOrFolder) return start()
+
     // Existing torrent: check that the path is still there
-    fs.stat(TorrentSummary.getFileOrFolder(s), function (err) {
+    fs.stat(fileOrFolder, function (err) {
       if (err) {
         s.error = 'path-missing'
         return
