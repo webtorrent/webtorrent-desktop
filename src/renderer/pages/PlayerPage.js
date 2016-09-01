@@ -384,8 +384,6 @@ function renderPlayerControls (state) {
       : ''
   var prevClass = state.playlist.hasPrevious() ? '' : 'disabled'
   var nextClass = state.playlist.hasNext() ? '' : 'disabled'
-  var repeatClass = state.playlist.repeatEnabled() ? 'active' : ''
-  var shuffleClass = state.playlist.shuffleEnabled() ? 'active' : ''
 
   var elements = [
     <div key='playback-bar' className='playback-bar'>
@@ -445,22 +443,6 @@ function renderPlayerControls (state) {
       </i>
     ))
   }
-
-  elements.push(
-    <i
-      key='repeat'
-      className={'icon repeat float-right ' + repeatClass}
-      onClick={dispatcher('toggleRepeat')}>
-      repeat
-    </i>,
-
-    <i
-      key='shuffle'
-      className={'icon shuffle float-right ' + shuffleClass}
-      onClick={dispatcher('toggleShuffle')}>
-      shuffle
-    </i>
-  )
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
   var castTypes = ['chromecast', 'airplay', 'dlna']

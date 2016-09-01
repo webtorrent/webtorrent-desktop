@@ -106,24 +106,6 @@ module.exports = class PlaybackController {
     }
   }
 
-  // Enable or disable playlist shuffle
-  toggleShuffle (flag) {
-    var playlist = this.state.playlist
-    if (playlist) {
-      playlist.toggleShuffle(flag)
-      ipcRenderer.send('onPlayerUpdate', playlist.getState())
-    }
-  }
-
-  // Enable or disable repetition of the entire playlist
-  toggleRepeat (flag) {
-    var playlist = this.state.playlist
-    if (playlist) {
-      playlist.toggleRepeat(flag)
-      ipcRenderer.send('onPlayerUpdate', playlist.getState())
-    }
-  }
-
   // Play (unpause) the current media
   play () {
     var state = this.state
@@ -329,8 +311,6 @@ module.exports = class PlaybackController {
 
     state.window.title = fileSummary.name
 
-    ipcRenderer.send('onPlayerUpdate', state.playlist.getState())
-
     // play in VLC if set as default player (Preferences / Playback / Play in VLC)
     if (this.state.saved.prefs.openExternalPlayer) {
       dispatch('openExternalPlayer')
@@ -342,7 +322,7 @@ module.exports = class PlaybackController {
     // otherwise, play the video
     this.update()
 
-    ipcRenderer.send('onPlayerUpdate', state.playlist.getState())
+    ipcRenderer.send('onPlayerUpdate', state.playlist.hasNext(), state.playlist.hasPrevious())
     cb()
   }
 
