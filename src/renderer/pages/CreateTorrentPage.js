@@ -66,25 +66,7 @@ class CreateTorrentPage extends React.Component {
     this.setIsPrivate = (_, isPrivate) => this.setState({isPrivate})
     this.setComment = (_, comment) => this.setState({comment})
     this.setTrackers = (_, trackers) => this.setState({trackers})
-    this.handleSubmit = () => this.handleSubmit
-  }
-
-  handleSubmit () {
-    var announceList = this.state.trackers
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((s) => s !== '')
-    var options = {
-      // We can't let the user choose their own name if we want WebTorrent
-      // to use the files in place rather than creating a new folder.
-      name: this.state.defaultName,
-      path: this.state.basePath,
-      files: this.state.files,
-      announce: announceList,
-      private: this.state.isPrivate,
-      comment: this.state.comment.trim()
-    }
-    dispatch('createTorrent', options)
+    this.handleSubmit = handleSubmit.bind(this)
   }
 
   render () {
@@ -154,8 +136,8 @@ class CreateTorrentPage extends React.Component {
           <Checkbox
             className='torrent-is-private'
             style={{display: ''}}
-            value={this.state.isPrivate}
-            onChange={this.setIsPrivate} />
+            checked={this.state.isPrivate}
+            onCheck={this.setIsPrivate} />
         </div>
         <div key='trackers' className='torrent-attribute'>
           <label>Trackers:</label>
@@ -191,6 +173,24 @@ class CreateTorrentPage extends React.Component {
   }
 }
 
+function handleSubmit () {
+  var announceList = this.state.trackers
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => s !== '')
+  var options = {
+    // We can't let the user choose their own name if we want WebTorrent
+    // to use the files in place rather than creating a new folder.
+    name: this.state.defaultName,
+    path: this.state.basePath,
+    files: this.state.files,
+    announce: announceList,
+    private: this.state.isPrivate,
+    comment: this.state.comment.trim()
+  }
+  dispatch('createTorrent', options)
+}
+
 // Finds the longest common prefix
 function findCommonPrefix (a, b) {
   for (var i = 0; i < a.length && i < b.length; i++) {
@@ -203,7 +203,6 @@ function findCommonPrefix (a, b) {
 
 function containsDots (path, pathPrefix) {
   var suffix = path.substring(pathPrefix.length).replace(/\\/g, '/')
-  console.log('SUFFIX ' + suffix)
   return ('/' + suffix).includes('/.')
 }
 
