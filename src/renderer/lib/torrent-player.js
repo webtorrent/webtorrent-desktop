@@ -3,8 +3,7 @@ module.exports = {
   isVideo,
   isAudio,
   isTorrent,
-  isPlayableTorrentSummary,
-  pickFileToPlay
+  isPlayableTorrentSummary
 }
 
 var path = require('path')
@@ -59,26 +58,4 @@ function getFileExtension (file) {
 
 function isPlayableTorrentSummary (torrentSummary) {
   return torrentSummary.files && torrentSummary.files.some(isPlayable)
-}
-
-// Picks the default file to play from a list of torrent or torrentSummary files
-// Returns an index or undefined, if no files are playable
-function pickFileToPlay (files) {
-  // first, try to find the biggest video file
-  var videoFiles = files.filter(isVideo)
-  if (videoFiles.length > 0) {
-    var largestVideoFile = videoFiles.reduce(function (a, b) {
-      return a.length > b.length ? a : b
-    })
-    return files.indexOf(largestVideoFile)
-  }
-
-  // if there are no videos, play the first audio file
-  var audioFiles = files.filter(isAudio)
-  if (audioFiles.length > 0) {
-    return files.indexOf(audioFiles[0])
-  }
-
-  // no video or audio means nothing is playable
-  return undefined
 }

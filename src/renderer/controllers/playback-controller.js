@@ -6,7 +6,6 @@ const {dispatch} = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
 const errors = require('../lib/errors')
 const sound = require('../lib/sound')
-const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const State = require('../lib/state')
@@ -25,7 +24,7 @@ module.exports = class PlaybackController {
   // Play a file in a torrent.
   // * Start torrenting, if necessary
   // * Stream, if not already fully downloaded
-  // * If no file index is provided, pick the default file to play
+  // * If no file index is provided, restore the most recently viewed file or autoplay the first
   playFile (infoHash, index /* optional */) {
     var state = this.state
     if (state.location.url() === 'player') {
@@ -37,11 +36,8 @@ module.exports = class PlaybackController {
       var playlist = new Playlist(torrentSummary)
 
       // automatically choose which file in the torrent to play, if necessary
-      if (index === undefined) index = torrentSummary.defaultPlayFileIndex
-      if (index === undefined) index = TorrentPlayer.pickFileToPlay(torrentSummary.files)
-      if (index === undefined) return this.onError(new errors.UnplayableError())
-
-      playlist.jumpToFile(infoHash, index)
+      if (index === undefined) index = torrentSummary.mostRecentFileIndex
+      if (index !== undefined) playlist.jumpToFile(infoHash, index)
 
       state.location.go({
         url: 'player',
@@ -300,6 +296,8 @@ module.exports = class PlaybackController {
 
     var torrentSummary = TorrentSummary.getByKey(this.state, state.playlist.getInfoHash())
     var fileSummary = torrentSummary.files[track.fileIndex]
+
+    torrentSummary.mostRecentFileIndex = track.fileIndex
 
     // update state
     state.playing.fileIndex = track.fileIndex

@@ -2,7 +2,6 @@ const path = require('path')
 const ipcRenderer = require('electron').ipcRenderer
 
 const TorrentSummary = require('../lib/torrent-summary')
-const TorrentPlayer = require('../lib/torrent-player')
 const sound = require('../lib/sound')
 const {dispatch} = require('../lib/dispatcher')
 
@@ -73,7 +72,6 @@ module.exports = class TorrentController {
     if (!torrentSummary.selections) {
       torrentSummary.selections = torrentSummary.files.map((x) => true)
     }
-    torrentSummary.defaultPlayFileIndex = TorrentPlayer.pickFileToPlay(torrentInfo.files)
     dispatch('update')
 
     // Save the .torrent file, if it hasn't been saved already
