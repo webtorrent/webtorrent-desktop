@@ -31,7 +31,7 @@ function init (state) {
   telemetry.system = getSystemInfo()
   telemetry.approxNumTorrents = getApproxNumTorrents(state)
 
-  if (config.IS_PRODUCTION) {
+  if (config.IS_PRODUCTION && state.saved.prefs.optInTelemetry) {
     postToServer()
     // If the user keeps WebTorrent running for a long time, post every 12h
     setInterval(postToServer, 12 * 3600 * 1000)

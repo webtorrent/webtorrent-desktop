@@ -35,6 +35,10 @@ function run (state) {
     migrate_0_12_0(state.saved)
   }
 
+  if (semver.lt(version, '0.13.0')) {
+    migrate_0_13_0(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
@@ -134,4 +138,11 @@ function migrate_0_12_0 (saved) {
       delete torrentSummary.path
     }
   })
+}
+
+function migrate_0_13_0 (saved) {
+  // Enable telemetry by default
+  if (saved.prefs.optInTelemetry == null) {
+    saved.prefs.optInTelemetry = true
+  }
 }
