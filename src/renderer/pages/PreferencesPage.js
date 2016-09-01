@@ -56,8 +56,25 @@ class PreferencesPage extends React.Component {
     )
   }
 
+  systemSoundsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.systemSounds}
+          label={'System sounds'}
+          onCheck={this.handleSystemSoundsChange}
+        />
+      </Preference>
+    )
+  }
+
   handleOpenExternalPlayerChange (e, isChecked) {
     dispatch('updatePreferences', 'openExternalPlayer', !isChecked)
+  }
+
+  handleSystemSoundsChange (e, isChecked) {
+    dispatch('updatePreferences', 'systemSounds', isChecked)
   }
 
   externalPlayerPathSelector () {
@@ -137,6 +154,9 @@ class PreferencesPage extends React.Component {
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
+        </PreferencesSection>
+        <PreferencesSection title='Misc'>
+          {this.systemSoundsCheckbox()}
         </PreferencesSection>
       </div>
     )

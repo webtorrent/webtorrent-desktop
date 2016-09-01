@@ -1,5 +1,7 @@
 var appConfig = require('application-config')('WebTorrent')
 var path = require('path')
+var prefs = require('./prefs')
+
 var {EventEmitter} = require('events')
 
 var config = require('../../config')
@@ -107,7 +109,8 @@ function setupSavedState (cb) {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
       openExternalPlayer: false,
-      externalPlayerPath: null
+      externalPlayerPath: null,
+      systemSounds: false
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */
@@ -183,6 +186,7 @@ function load (cb) {
     if (err) return cb(err)
     state.saved = saved
     migrations.run(state)
+    prefs.current = state.saved.prefs
     cb(null, state)
   }
 }
