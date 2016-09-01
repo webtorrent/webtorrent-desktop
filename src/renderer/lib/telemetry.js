@@ -128,10 +128,6 @@ function logUncaughtError (procName, e) {
   var stack = ''
   if (e == null) {
     message = 'Unexpected undefined error'
-  } else if (e.message) {
-    // err is either an Error or a plain object {message, stack}
-    message = e.message
-    stack = e.stack
   } else if (e.error) {
     // Uncaught Javascript errors (window.onerror), err is an ErrorEvent
     if (!e.error.message) {
@@ -140,6 +136,10 @@ function logUncaughtError (procName, e) {
       message = e.error.message
       stack = e.error.stack
     }
+  } else if (e.message) {
+    // err is either an Error or a plain object {message, stack}
+    message = e.message
+    stack = e.stack
   } else {
     // Resource errors (captured element.onerror), err is an Event
     if (!e.target) {
