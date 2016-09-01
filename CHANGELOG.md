@@ -1,5 +1,10 @@
 # WebTorrent Desktop Version History
 
+## v0.13.1 - 2016-08-31
+
+### Fixed
+- Fixed the Create Torrent page
+
 ## v0.13.0 - 2016-08-31
 
 ### Added
