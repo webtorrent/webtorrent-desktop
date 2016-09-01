@@ -466,6 +466,11 @@ i:not(.disabled):hover { /* Show they're clickable without pointer: cursor */
   line-height: 1.5em;
 }
 
+progress {
+  width: 60px;
+  margin-right: 8px;
+}
+
 /*
  * TORRENT LIST: ERRORS
  */
