@@ -93,6 +93,7 @@ module.exports = class TorrentList extends React.Component {
     } else if (torrentSummary.status !== 'paused' && prog) {
       elements.push(
         <div key='progress-info' className='ellipsis'>
+          {renderProgressBar()}
           {renderPercentProgress()}
           {renderTotalProgress()}
           {renderPeers()}
@@ -104,6 +105,11 @@ module.exports = class TorrentList extends React.Component {
     }
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
+
+    function renderProgressBar () {
+      var progress = Math.floor(100 * prog.progress)
+      return (<progress value={progress} max='100'>{progress}%</progress>)
+    }
 
     function renderPercentProgress () {
       var progress = Math.floor(100 * prog.progress)
