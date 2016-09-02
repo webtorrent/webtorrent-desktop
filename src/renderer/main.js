@@ -123,7 +123,9 @@ function onState (err, _state) {
   document.addEventListener('webkitvisibilitychange', onVisibilityChange)
 
   // Done! Ideally we want to get here < 500ms after the user clicks the app
-  sound.play('STARTUP')
+  if (electron.remote.getCurrentWindow().isVisible()) {
+    sound.play('STARTUP')
+  }
   console.timeEnd('init')
 }
 

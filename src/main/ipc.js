@@ -17,6 +17,7 @@ const shortcuts = require('./shortcuts')
 const externalPlayer = require('./external-player')
 const windows = require('./windows')
 const thumbar = require('./thumbar')
+const startup = require('./startup')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 const messageQueueMainToWebTorrent = []
@@ -100,6 +101,14 @@ function init () {
   ipc.on('setDefaultFileHandler', (e, flag) => {
     if (flag) handlers.install()
     else handlers.uninstall()
+  })
+
+  /**
+   * Startup
+   */
+  ipc.on('setStartup', (e, flag) => {
+    if (flag) startup.install()
+    else startup.uninstall()
   })
 
   /**

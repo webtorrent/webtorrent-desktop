@@ -17,7 +17,9 @@ module.exports = class PrefsController {
       setup: function (cb) {
         // initialize preferences
         state.window.title = 'Preferences'
-        state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
+        state.unsaved = Object.assign(state.unsaved || {}, {
+          prefs: Object.assign({}, state.saved.prefs)
+        })
         ipcRenderer.send('setAllowNav', false)
         cb()
       },
@@ -49,6 +51,9 @@ module.exports = class PrefsController {
     const state = this.state
     if (state.unsaved.prefs.isFileHandler !== state.saved.prefs.isFileHandler) {
       ipcRenderer.send('setDefaultFileHandler', state.unsaved.prefs.isFileHandler)
+    }
+    if (state.unsaved.prefs.startup !== state.saved.prefs.startup) {
+      ipcRenderer.send('setStartup', state.unsaved.prefs.startup)
     }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
     State.save(state)
