@@ -26,7 +26,7 @@ const tray = require('../tray')
 const HEADER_HEIGHT = 38
 const TORRENT_HEIGHT = 100
 
-function init () {
+function init (options) {
   if (main.win) {
     return main.win.show()
   }
@@ -40,7 +40,8 @@ function init () {
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: 500,
-    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
+    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6), // header height + 5 torrents
+    show: !options.hidden
   })
 
   win.loadURL(config.WINDOW_MAIN)

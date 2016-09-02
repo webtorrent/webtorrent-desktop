@@ -8,6 +8,7 @@ const PathSelector = require('../components/path-selector')
 const RaisedButton = require('material-ui/RaisedButton').default
 
 const {dispatch} = require('../lib/dispatcher')
+const config = require('../../config')
 
 class PreferencesPage extends React.Component {
   constructor (props) {
@@ -21,6 +22,9 @@ class PreferencesPage extends React.Component {
 
     this.handleExternalPlayerPathChange =
       this.handleExternalPlayerPathChange.bind(this)
+
+    this.handleStartupChange =
+      this.handleStartupChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -112,6 +116,29 @@ class PreferencesPage extends React.Component {
     )
   }
 
+  handleStartupChange (e, isChecked) {
+    dispatch('updatePreferences', 'startup', isChecked)
+  }
+
+  setStartupSection () {
+    if (config.IS_PORTABLE) {
+      return
+    }
+
+    return (
+      <PreferencesSection title='Startup'>
+        <Preference>
+          <Checkbox
+            className='control'
+            checked={this.props.state.unsaved.prefs.startup}
+            label={'Open WebTorrent on startup.'}
+            onCheck={this.handleStartupChange}
+          />
+        </Preference>
+      </PreferencesSection>
+    )
+  }
+
   handleSetDefaultApp () {
     dispatch('updatePreferences', 'isFileHandler', true)
   }
@@ -134,6 +161,7 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
         </PreferencesSection>
+        {this.setStartupSection()}
       </div>
     )
   }

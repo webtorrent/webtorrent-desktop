@@ -21,6 +21,7 @@ const windows = require('./windows')
 
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
+const hidden = argv.includes('--hidden')
 
 if (config.IS_PRODUCTION) {
   // When Electron is running in production mode (packaged app), then run React
@@ -68,7 +69,7 @@ function init () {
   app.on('ready', function () {
     isReady = true
 
-    windows.main.init()
+    windows.main.init({hidden: hidden})
     windows.webtorrent.init()
     menu.init()
 
@@ -156,6 +157,8 @@ function processArgv (argv) {
       dialog.openTorrentFile()
     } else if (arg === '-u') {
       dialog.openTorrentAddress()
+    } else if (arg === '--hidden') {
+      // Igonre hidden argument, already being handled
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
