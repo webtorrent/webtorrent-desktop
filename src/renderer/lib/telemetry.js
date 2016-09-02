@@ -158,6 +158,7 @@ function logUncaughtError (procName, e) {
   // - Privacy: remove personal info like C:\Users\<full name>
   // - Aggregation: this lets us find which stacktraces occur often
   stack = stack.replace(/\(.*app.asar/g, '(...')
+  stack = stack.replace(/at .*app.asar/g, 'at ...')
 
   // We need to POST the telemetry object, make sure it stays < 100kb
   if (telemetry.uncaughtErrors.length > 20) return
