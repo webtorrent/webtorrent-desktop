@@ -267,11 +267,6 @@ module.exports = class TorrentList extends React.Component {
       var fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
-        .sort(function (a, b) {
-          if (a.file.name < b.file.name) return -1
-          if (b.file.name < a.file.name) return 1
-          return 0
-        })
         .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (

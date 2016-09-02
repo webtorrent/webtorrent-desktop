@@ -63,11 +63,6 @@ Playlist.prototype.setPosition = function (position) {
 function extractTracks (torrentSummary) {
   return torrentSummary.files.map((file, index) => ({ file, index }))
     .filter((object) => TorrentPlayer.isPlayable(object.file))
-    .sort(function (a, b) {
-      if (a.file.name < b.file.name) return -1
-      if (b.file.name < a.file.name) return 1
-      return 0
-    })
     .map((object) => ({
       infoHash: torrentSummary.infoHash,
       fileIndex: object.index,
