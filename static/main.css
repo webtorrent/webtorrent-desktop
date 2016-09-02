@@ -350,10 +350,6 @@ textarea,
   border-bottom: 1px solid rgb(20, 20, 20);
 }
 
-.torrent:hover {
-  -webkit-filter: brightness(1.1);
-}
-
 .torrent .metadata {
   position: absolute;
   top: 25px;
@@ -536,10 +532,6 @@ body.drag .app::after {
 
 .torrent-details tr {
   height: 28px;
-}
-
-.torrent-details tr:hover {
-  background-color: rgba(200, 200, 200, 0.3);
 }
 
 .torrent-details td {
