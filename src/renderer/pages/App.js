@@ -2,6 +2,7 @@ const colors = require('material-ui/styles/colors')
 const React = require('react')
 
 const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
+const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
 const getMuiTheme = require('material-ui/styles/getMuiTheme').default
 const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 
@@ -21,9 +22,11 @@ const Modals = {
   'unsupported-media-modal': require('../components/unsupported-media-modal')
 }
 
-darkBaseTheme.fontFamily = process.platform === 'win32'
+const fontFamily = process.platform === 'win32'
   ? '"Segoe UI", sans-serif'
   : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
+lightBaseTheme.fontFamily = fontFamily
+darkBaseTheme.fontFamily = fontFamily
 darkBaseTheme.palette.primary1Color = colors.cyan500
 darkBaseTheme.palette.primary2Color = colors.cyan500
 darkBaseTheme.palette.primary3Color = colors.grey600
@@ -92,12 +95,14 @@ class App extends React.Component {
     if (!state.modal) return
     const ModalContents = Modals[state.modal.id]
     return (
-      <div key='modal' className='modal'>
-        <div key='modal-background' className='modal-background' />
-        <div key='modal-content' className='modal-content'>
-          <ModalContents state={state} />
+      <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+        <div key='modal' className='modal'>
+          <div key='modal-background' className='modal-background' />
+          <div key='modal-content' className='modal-content'>
+            <ModalContents state={state} />
+          </div>
         </div>
-      </div>
+      </MuiThemeProvider>
     )
   }
 

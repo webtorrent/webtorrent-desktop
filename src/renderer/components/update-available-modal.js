@@ -1,6 +1,7 @@
 const React = require('react')
 const electron = require('electron')
 
+const ModalOKCancel = require('./modal-ok-cancel')
 const {dispatch} = require('../lib/dispatcher')
 
 module.exports = class UpdateAvailableModal extends React.Component {
@@ -13,10 +14,11 @@ module.exports = class UpdateAvailableModal extends React.Component {
           We have an auto-updater for Windows and Mac.
           We don't have one for Linux yet, so you'll have to download the new version manually.
         </p>
-        <p className='float-right'>
-          <button className='button button-flat' onClick={handleSkip}>Skip This Release</button>
-          <button className='button button-raised' onClick={handleShow}>Show Download Page</button>
-        </p>
+        <ModalOKCancel
+          cancelText='SKIP THIS RELEASE'
+          onCancel={handleSkip}
+          okText='SHOW DOWNLOAD PAGE'
+          onOK={handleShow} />
       </div>
     )
 

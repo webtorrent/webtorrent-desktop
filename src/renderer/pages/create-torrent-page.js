@@ -99,12 +99,14 @@ class CreateTorrentPage extends React.Component {
         </ShowMore>
         <div className='float-right'>
           <FlatButton
+            className='control'
             label='Cancel'
             style={{
               marginRight: 10
             }}
             onClick={dispatcher('cancel')} />
           <RaisedButton
+            className='control'
             label='Create Torrent'
             primary
             onClick={this.handleSubmit} />
@@ -138,7 +140,7 @@ class CreateTorrentPage extends React.Component {
         <div key='private' className='torrent-attribute'>
           <label>Private:</label>
           <Checkbox
-            className='torrent-is-private'
+            className='torrent-is-private control'
             style={{display: ''}}
             checked={this.state.isPrivate}
             onCheck={this.setIsPrivate} />
@@ -146,7 +148,7 @@ class CreateTorrentPage extends React.Component {
         <div key='trackers' className='torrent-attribute'>
           <label>Trackers:</label>
           <TextField
-            className='torrent-trackers'
+            className='torrent-trackers control'
             style={textFieldStyle}
             textareaStyle={textareaStyle}
             multiLine
@@ -158,7 +160,7 @@ class CreateTorrentPage extends React.Component {
         <div key='comment' className='torrent-attribute'>
           <label>Comment:</label>
           <TextField
-            className='torrent-comment'
+            className='torrent-comment control'
             style={textFieldStyle}
             textareaStyle={textareaStyle}
             hintText='Optionally describe your torrent...'

@@ -62,8 +62,7 @@ class PathSelector extends React.Component {
       color: colors.grey50
     }
     const textFieldStyle = {
-      flex: '1',
-      fontSize: 14
+      flex: '1'
     }
     const text = this.props.displayValue || this.props.value
     const buttonStyle = {

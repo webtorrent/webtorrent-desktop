@@ -265,14 +265,9 @@ table {
   font-weight: bold;
 }
 
-.open-torrent-address-modal input {
-  width: 100%;
-}
-
 .create-torrent {
   padding: 10px 25px;
   overflow: hidden;
-  font: 16px/24px BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 .create-torrent .torrent-attribute {
@@ -321,6 +316,15 @@ i:not(.disabled):hover { /* Show they're clickable without pointer: cursor */
   font-size: 22px;
   transition: all 0.1s ease-out;
   text-align: center;
+}
+
+/*
+ * INPUTS
+ */
+input,
+textarea,
+.control {
+  font-size: 14px !important;
 }
 
 /*
