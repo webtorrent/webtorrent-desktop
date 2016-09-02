@@ -2,6 +2,8 @@ const electron = require('electron')
 
 const ipcRenderer = electron.ipcRenderer
 
+const Playlist = require('../lib/playlist')
+
 // Controls local play back: the <video>/<audio> tag and VLC
 // Does not control remote casting (Chromecast etc)
 module.exports = class MediaController {
@@ -44,7 +46,8 @@ module.exports = class MediaController {
 
   openExternalPlayer () {
     var state = this.state
-    ipcRenderer.send('openExternalPlayer', state.saved.prefs.externalPlayerPath, state.server.localURL, state.window.title)
+    var mediaURL = Playlist.getCurrentLocalURL(this.state)
+    ipcRenderer.send('openExternalPlayer', state.saved.prefs.externalPlayerPath, mediaURL, state.window.title)
     state.playing.location = 'external'
   }
 

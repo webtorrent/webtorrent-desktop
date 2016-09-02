@@ -5,6 +5,7 @@ const zeroFill = require('zero-fill')
 const path = require('path')
 
 const TorrentSummary = require('../lib/torrent-summary')
+const Playlist = require('../lib/playlist')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -109,7 +110,7 @@ function renderMedia (state) {
   var MediaTagName = state.playing.type
   var mediaTag = (
     <MediaTagName
-      src={state.server.localURL}
+      src={Playlist.getCurrentLocalURL(state)}
       onDoubleClick={dispatcher('toggleFullScreen')}
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
@@ -144,9 +145,13 @@ function renderMedia (state) {
     dispatch('setDimensions', dimensions)
   }
 
-  // When the video completes, pause the video instead of looping
   function onEnded (e) {
-    state.playing.isPaused = true
+    if (Playlist.hasNext(state)) {
+      dispatch('nextTrack')
+    } else {
+      // When the last video completes, pause the video instead of looping
+      state.playing.isPaused = true
+    }
   }
 
   function onCanPlay (e) {
@@ -378,6 +383,8 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  var prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
+  var nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   var elements = [
     <div key='playback-bar' className='playback-bar'>
@@ -398,10 +405,24 @@ function renderPlayerControls (state) {
     </div>,
 
     <i
+      key='skip-previous'
+      className={'icon skip-previous float-left ' + prevClass}
+      onClick={dispatcher('previousTrack')}>
+      skip_previous
+    </i>,
+
+    <i
       key='play'
       className='icon play-pause float-left'
       onClick={dispatcher('playPause')}>
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
+    </i>,
+
+    <i
+      key='skip-next'
+      className={'icon skip-next float-left ' + nextClass}
+      onClick={dispatcher('nextTrack')}>
+      skip_next
     </i>,
 
     <i

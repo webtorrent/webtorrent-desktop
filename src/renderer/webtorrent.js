@@ -83,8 +83,8 @@ function init () {
     generateTorrentPoster(torrentKey))
   ipc.on('wt-get-audio-metadata', (e, infoHash, index) =>
     getAudioMetadata(infoHash, index))
-  ipc.on('wt-start-server', (e, infoHash, index) =>
-    startServer(infoHash, index))
+  ipc.on('wt-start-server', (e, infoHash) =>
+    startServer(infoHash))
   ipc.on('wt-stop-server', (e) =>
     stopServer())
   ipc.on('wt-select-files', (e, infoHash, selections) =>
@@ -301,20 +301,20 @@ function getTorrentProgress () {
   }
 }
 
-function startServer (infoHash, index) {
+function startServer (infoHash) {
   var torrent = client.get(infoHash)
-  if (torrent.ready) startServerFromReadyTorrent(torrent, index)
-  else torrent.once('ready', () => startServerFromReadyTorrent(torrent, index))
+  if (torrent.ready) startServerFromReadyTorrent(torrent)
+  else torrent.once('ready', () => startServerFromReadyTorrent(torrent))
 }
 
-function startServerFromReadyTorrent (torrent, index, cb) {
+function startServerFromReadyTorrent (torrent, cb) {
   if (server) return
 
   // start the streaming torrent-to-http server
   server = torrent.createServer()
   server.listen(0, function () {
     var port = server.address().port
-    var urlSuffix = ':' + port + '/' + index
+    var urlSuffix = ':' + port
     var info = {
       torrentKey: torrent.key,
       localURL: 'http://localhost' + urlSuffix,
@@ -322,7 +322,7 @@ function startServerFromReadyTorrent (torrent, index, cb) {
     }
 
     ipc.send('wt-server-running', info)
-    ipc.send('wt-server-' + torrent.infoHash, info) // TODO: hack
+    ipc.send('wt-server-' + torrent.infoHash, info)
   })
 }
 

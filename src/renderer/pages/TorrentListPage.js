@@ -207,10 +207,10 @@ module.exports = class TorrentList extends React.Component {
       // Do we have a saved position? Show it using a radial progress bar on top
       // of the play button, unless already showing a spinner there:
       var willShowSpinner = torrentSummary.playStatus === 'requested'
-      var defaultFile = torrentSummary.files &&
-        torrentSummary.files[torrentSummary.defaultPlayFileIndex]
-      if (defaultFile && defaultFile.currentTime && !willShowSpinner) {
-        var fraction = defaultFile.currentTime / defaultFile.duration
+      var mostRecentFile = torrentSummary.files &&
+        torrentSummary.files[torrentSummary.mostRecentFileIndex]
+      if (mostRecentFile && mostRecentFile.currentTime && !willShowSpinner) {
+        var fraction = mostRecentFile.currentTime / mostRecentFile.duration
         positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
         playClass = 'resume-position'
       }
@@ -273,11 +273,6 @@ module.exports = class TorrentList extends React.Component {
       var fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
-        .sort(function (a, b) {
-          if (a.file.name < b.file.name) return -1
-          if (b.file.name < a.file.name) return 1
-          return 0
-        })
         .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (
