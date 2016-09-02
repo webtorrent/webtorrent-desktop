@@ -6,6 +6,7 @@ const {dispatch} = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
 const errors = require('../lib/errors')
 const sound = require('../lib/sound')
+const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const State = require('../lib/state')
@@ -28,31 +29,24 @@ module.exports = class PlaybackController {
   playFile (infoHash, index /* optional */) {
     var state = this.state
     if (state.location.url() === 'player') {
-      this.play()
-      state.playlist.jumpToFile(infoHash, index)
-      this.updatePlayer(false, callback)
+      this.updatePlayer(infoHash, index, false, (err) => {
+        if (err) dispatch('error', err)
+        else this.play()
+      })
     } else {
-      var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-      var playlist = new Playlist(torrentSummary)
-
-      // automatically choose which file in the torrent to play, if necessary
-      if (index === undefined) index = torrentSummary.mostRecentFileIndex
-      if (index !== undefined) playlist.jumpToFile(infoHash, index)
-
       state.location.go({
         url: 'player',
         setup: (cb) => {
           this.play()
-          this.openPlayer(playlist, cb)
+          this.openPlayer(infoHash, index, (err) => {
+            if (!err) this.play
+            cb(err)
+          })
         },
         destroy: () => this.closePlayer()
       }, (err) => {
         if (err) dispatch('error', err)
       })
-    }
-
-    function callback (err) {
-      if (err) this.onError(err)
     }
   }
 
@@ -85,24 +79,24 @@ module.exports = class PlaybackController {
   // Play next file in list (if any)
   nextTrack () {
     var state = this.state
-    if (state.playlist && state.playlist.hasNext()) {
-      state.playlist.next()
-      this.updatePlayer(false, (err) => {
-        if (err) this.onError(err)
-        else this.play()
-      })
+    if (Playlist.hasNext(state)) {
+      this.updatePlayer(
+          state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
+            if (err) dispatch('error', err)
+            else this.play()
+          })
     }
   }
 
   // Play previous track in list (if any)
   previousTrack () {
     var state = this.state
-    if (state.playlist && state.playlist.hasPrevious()) {
-      state.playlist.previous()
-      this.updatePlayer(false, (err) => {
-        if (err) this.onError(err)
-        else this.play()
-      })
+    if (Playlist.hasPrevious(state)) {
+      this.updatePlayer(
+        state.playing.infoHash, Playlist.getPreviousIndex(state), false, (err) => {
+          if (err) dispatch('error', err)
+          else this.play()
+        })
     }
   }
 
@@ -209,15 +203,16 @@ module.exports = class PlaybackController {
     return false
   }
 
-  // Opens the video player to a specific playlist
-  openPlayer (playlist, cb) {
+  // Opens the video player to a specific torrent
+  openPlayer (infoHash, index, cb) {
     var state = this.state
-    state.playlist = playlist
 
-    var track = playlist.getCurrent()
-    if (track === undefined) return cb(new errors.UnplayableError())
+    var torrentSummary = TorrentSummary.getByKey(state, infoHash)
 
-    var torrentSummary = TorrentSummary.getByKey(state, state.playlist.getInfoHash())
+    if (index === undefined) index = torrentSummary.mostRecentFileIndex
+    if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
+    if (index === undefined) return cb(new errors.UnplayableError())
+
     state.playing.infoHash = torrentSummary.infoHash
 
     // update UI to show pending playback
@@ -247,7 +242,7 @@ module.exports = class PlaybackController {
       }
 
       ipcRenderer.send('onPlayerOpen')
-      this.updatePlayer(true, cb)
+      this.updatePlayer(infoHash, index, true, cb)
     })
   }
 
@@ -267,23 +262,25 @@ module.exports = class PlaybackController {
     }
   }
 
-  // Called each time the playlist state changes
-  updatePlayer (resume, cb) {
+  // Called each time the current file changes
+  updatePlayer (infoHash, index, resume, cb) {
     var state = this.state
-    var track = state.playlist.getCurrent()
 
-    if (track === undefined) {
+    var torrentSummary = TorrentSummary.getByKey(state, infoHash)
+    var fileSummary = torrentSummary.files[index]
+
+    if (!TorrentPlayer.isPlayable(fileSummary)) {
+      torrentSummary.mostRecentFileIndex = undefined
       return cb(new Error('Can\'t play that file'))
     }
 
-    var torrentSummary = TorrentSummary.getByKey(this.state, state.playlist.getInfoHash())
-    var fileSummary = torrentSummary.files[track.fileIndex]
-
-    torrentSummary.mostRecentFileIndex = track.fileIndex
+    torrentSummary.mostRecentFileIndex = index
 
     // update state
-    state.playing.fileIndex = track.fileIndex
-    state.playing.type = track.type
+    state.playing.fileIndex = index
+    state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
+      : TorrentPlayer.isAudio(fileSummary) ? 'audio'
+      : 'other'
 
     // pick up where we left off
     var jumpToTime = 0
@@ -298,7 +295,7 @@ module.exports = class PlaybackController {
 
     // if it's audio, parse out the metadata (artist, title, etc)
     if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, track.fileIndex)
+      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
     }
 
     // if it's video, check for subtitles files that are done downloading
@@ -322,7 +319,7 @@ module.exports = class PlaybackController {
     // otherwise, play the video
     this.update()
 
-    ipcRenderer.send('onPlayerUpdate', state.playlist.hasNext(), state.playlist.hasPrevious())
+    ipcRenderer.send('onPlayerUpdate', Playlist.hasNext(state), Playlist.hasPrevious(state))
     cb()
   }
 
@@ -350,7 +347,6 @@ module.exports = class PlaybackController {
 
     // Reset the window contents back to the home screen
     state.playing = State.getDefaultPlayState()
-    state.playlist = null
     state.server = null
 
     // Reset the window size and location back to where it was

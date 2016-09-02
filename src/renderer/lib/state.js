@@ -39,7 +39,6 @@ function getDefaultState () {
     selectedInfoHash: null, /* the torrent we've selected to view details. see state.torrents */
     playing: getDefaultPlayState(), /* the media (audio or video) that we're currently playing */
     devices: {}, /* playback devices like Chromecast and AppleTV */
-    playlist: null,
     dock: {
       badge: 0,
       progress: 0

@@ -5,6 +5,7 @@ const zeroFill = require('zero-fill')
 const path = require('path')
 
 const TorrentSummary = require('../lib/torrent-summary')
+const Playlist = require('../lib/playlist')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -109,7 +110,7 @@ function renderMedia (state) {
   var MediaTagName = state.playing.type
   var mediaTag = (
     <MediaTagName
-      src={state.server.localURL + '/' + state.playing.fileIndex}
+      src={Playlist.getCurrentLocalURL(state)}
       onDoubleClick={dispatcher('toggleFullScreen')}
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
@@ -145,7 +146,7 @@ function renderMedia (state) {
   }
 
   function onEnded (e) {
-    if (state.playlist.hasNext()) {
+    if (Playlist.hasNext(state)) {
       dispatch('nextTrack')
     } else {
       // When the last video completes, pause the video instead of looping
@@ -382,8 +383,8 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
-  var prevClass = state.playlist.hasPrevious() ? '' : 'disabled'
-  var nextClass = state.playlist.hasNext() ? '' : 'disabled'
+  var prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
+  var nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   var elements = [
     <div key='playback-bar' className='playback-bar'>
