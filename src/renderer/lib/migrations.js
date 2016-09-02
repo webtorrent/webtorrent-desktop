@@ -35,6 +35,10 @@ function run (state) {
     migrate_0_12_0(state.saved)
   }
 
+  if (semver.lt(version, '0.14.0')) {
+    migrate_0_14_0(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
@@ -133,5 +137,11 @@ function migrate_0_12_0 (saved) {
       // Default torrent with "missing path" error. Clear path.
       delete torrentSummary.path
     }
+  })
+}
+
+function migrate_0_14_0 (saved) {
+  saved.torrents.forEach(function (ts) {
+    delete ts.defaultPlayFileIndex
   })
 }
