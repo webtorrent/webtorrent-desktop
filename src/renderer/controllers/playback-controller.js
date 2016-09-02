@@ -34,12 +34,20 @@ module.exports = class PlaybackController {
         else this.play()
       })
     } else {
+      let initialized = false
       state.location.go({
         url: 'player',
         setup: (cb) => {
-          this.play()
+          const torrentSummary = TorrentSummary.getByKey(state, infoHash)
+
+          if (index === undefined || initialized) index = torrentSummary.mostRecentFileIndex
+          if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
+          if (index === undefined) return cb(new errors.UnplayableError())
+
+          initialized = true
+
           this.openPlayer(infoHash, index, (err) => {
-            if (!err) this.play
+            if (!err) this.play()
             cb(err)
           })
         },
@@ -210,10 +218,6 @@ module.exports = class PlaybackController {
   openPlayer (infoHash, index, cb) {
     const state = this.state
     const torrentSummary = TorrentSummary.getByKey(state, infoHash)
-
-    if (index === undefined) index = torrentSummary.mostRecentFileIndex
-    if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
-    if (index === undefined) return cb(new errors.UnplayableError())
 
     state.playing.infoHash = torrentSummary.infoHash
 
