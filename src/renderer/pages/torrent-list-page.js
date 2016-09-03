@@ -46,11 +46,9 @@ module.exports = class TorrentList extends React.Component {
     // Background image: show some nice visuals, like a frame from the movie, if possible
     const style = {}
     if (torrentSummary.posterFileName) {
-      const gradient = isSelected
-        ? 'linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%)'
-        : 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%)'
+      const gradient = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%)'
       const posterPath = TorrentSummary.getPosterPath(torrentSummary)
-      style.backgroundImage = gradient + `, url('${posterPath}')`
+      style.backgroundImage = `${gradient}, url('${posterPath}')`
     }
 
     // Foreground: name of the torrent, basic info like size, play button,

@@ -350,10 +350,6 @@ textarea,
   border-bottom: 1px solid rgb(20, 20, 20);
 }
 
-.torrent:hover {
-  -webkit-filter: brightness(1.1);
-}
-
 .torrent .metadata {
   position: absolute;
   top: 25px;
@@ -462,6 +458,15 @@ textarea,
 progress {
   width: 60px;
   margin-right: 8px;
+  -webkit-appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background-color: #888;
+}
+
+progress::-webkit-progress-value {
+  background-color: #eee;
 }
 
 /*
@@ -515,6 +520,7 @@ body.drag .app::after {
 /*
  * TORRENT LIST: EXPANDED TORRENT DETAILS
  */
+
 .torrent.selected {
   height: auto;
 }
@@ -536,10 +542,6 @@ body.drag .app::after {
 
 .torrent-details tr {
   height: 28px;
-}
-
-.torrent-details tr:hover {
-  background-color: rgba(200, 200, 200, 0.3);
 }
 
 .torrent-details td {
