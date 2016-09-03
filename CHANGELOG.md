@@ -1,5 +1,20 @@
 # WebTorrent Desktop Version History
 
+## v0.14.0 - 2016-09-03
+
+### Added
+- Autoplay through all files in a torrent (#871)
+- Torrents now have a progress bar (#844)
+
+### Changed
+- Modals now use Material UI
+- Torrent list style improvements
+
+### Fixed
+- Fix App.js crash in Linux (#882)
+- Fix error on Windows caused by `setBadge` (#867)
+- Don't crash when restarting after adding a magnet link (#869)
+
 ## v0.13.1 - 2016-08-31
 
 ### Fixed
