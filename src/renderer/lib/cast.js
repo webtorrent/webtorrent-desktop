@@ -126,13 +126,7 @@ function chromecastPlayer () {
   }
 
   function status () {
-    ret.device.status(function (err, status) {
-      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
-      state.playing.isPaused = status.playerState === 'PAUSED'
-      state.playing.currentTime = status.currentTime
-      state.playing.volume = status.volume.muted ? 0 : status.volume.level
-      update()
-    })
+    ret.device.status(handleStatus)
   }
 
   function seek (time, callback) {
@@ -306,13 +300,7 @@ function dlnaPlayer (player) {
   }
 
   function status () {
-    ret.device.status(function (err, status) {
-      if (err) return console.log('error getting %s status: %o', state.playing.location, err)
-      state.playing.isPaused = status.playerState === 'PAUSED'
-      state.playing.currentTime = status.currentTime
-      state.playing.volume = status.volume.level
-      update()
-    })
+    ret.device.status(handleStatus)
   }
 
   function seek (time, callback) {
@@ -326,6 +314,18 @@ function dlnaPlayer (player) {
       callback(err)
     })
   }
+}
+
+function handleStatus (err, status) {
+  if (err || !status) {
+    return console.log('error getting %s status: %o',
+      state.playing.location,
+      err || 'missing response')
+  }
+  state.playing.isPaused = status.playerState === 'PAUSED'
+  state.playing.currentTime = status.currentTime
+  state.playing.volume = status.volume.muted ? 0 : status.volume.level
+  update()
 }
 
 // Start polling cast device state, whenever we're connected
