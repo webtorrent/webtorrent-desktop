@@ -127,6 +127,7 @@ module.exports = class TorrentController {
 
   torrentFileModtimes (torrentKey, fileModtimes) {
     const torrentSummary = this.getTorrentSummary(torrentKey)
+    if (!torrentSummary) throw new Error('Not saving modtimes for deleted torrent ' + torrentKey)
     torrentSummary.fileModtimes = fileModtimes
     dispatch('saveStateThrottled')
   }
