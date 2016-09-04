@@ -205,7 +205,7 @@ function getMenuTemplate () {
         {
           label: 'Step Forward',
           accelerator: process.platform === 'darwin'
-            ? 'Alt+Right'
+            ? 'CmdOrCtrl+Alt+Right'
             : 'Alt+Right',
           click: () => windows.main.dispatch('skip', 10),
           enabled: false
@@ -213,7 +213,7 @@ function getMenuTemplate () {
         {
           label: 'Step Backward',
           accelerator: process.platform === 'darwin'
-            ? 'Alt+Left'
+            ? 'CmdOrCtrl+Alt+Left'
             : 'Alt+Left',
           click: () => windows.main.dispatch('skip', -10),
           enabled: false
