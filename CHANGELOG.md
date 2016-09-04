@@ -14,6 +14,7 @@
 - Fix App.js crash in Linux (#882)
 - Fix error on Windows caused by `setBadge` (#867)
 - Don't crash when restarting after adding a magnet link (#869)
+- Restore playback state when reopening player (#877)
 
 ## v0.13.1 - 2016-08-31
 
@@ -23,7 +24,6 @@
 ## v0.13.0 - 2016-08-31
 
 ### Added
-- Torrent progress bar
 - Support .m4a audio
 - Better telemetry: log error versions, report more types of errors
 
