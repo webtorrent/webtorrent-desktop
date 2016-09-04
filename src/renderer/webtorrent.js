@@ -350,6 +350,9 @@ function selectFiles (torrentOrInfoHash, selections) {
   } else {
     torrent = torrentOrInfoHash
   }
+  if (!torrent) {
+    throw new Error('selectFiles: missing torrent ' + torrentOrInfoHash)
+  }
 
   // Selections not specified?
   // Load all files. We still need to replace the default whole-torrent

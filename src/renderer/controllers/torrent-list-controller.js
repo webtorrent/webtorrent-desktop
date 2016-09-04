@@ -127,7 +127,9 @@ module.exports = class TorrentListController {
     torrentSummary.selections[index] = !torrentSummary.selections[index]
 
     // Let the WebTorrent process know to start or stop fetching that file
-    ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
+    if (torrentSummary.status !== 'paused') {
+      ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
+    }
   }
 
   confirmDeleteTorrent (infoHash, deleteData) {
