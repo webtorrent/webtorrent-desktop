@@ -205,16 +205,16 @@ function getMenuTemplate () {
         {
           label: 'Step Forward',
           accelerator: process.platform === 'darwin'
-            ? 'Right'
-            : 'Right',
+            ? 'Alt+Right'
+            : 'Alt+Right',
           click: () => windows.main.dispatch('skip', 10),
           enabled: false
         },
         {
           label: 'Step Backward',
           accelerator: process.platform === 'darwin'
-            ? 'Left'
-            : 'Left',
+            ? 'Alt+Left'
+            : 'Alt+Left',
           click: () => windows.main.dispatch('skip', -10),
           enabled: false
         },
