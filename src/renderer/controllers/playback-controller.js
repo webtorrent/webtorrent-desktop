@@ -4,10 +4,8 @@ const path = require('path')
 const Cast = require('../lib/cast')
 const {dispatch} = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
-const {
-      UnplayableFileError,
-      UnplayableTorrentError,
-      PlaybackTimedOutError } = require('../lib/errors')
+const {UnplayableFileError, UnplayableTorrentError,
+      PlaybackTimedOutError} = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
