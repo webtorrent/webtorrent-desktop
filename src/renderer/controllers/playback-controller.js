@@ -4,7 +4,10 @@ const path = require('path')
 const Cast = require('../lib/cast')
 const {dispatch} = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
-const errors = require('../lib/errors')
+const {
+      UnplayableFileError,
+      UnplayableTorrentError,
+      PlaybackTimedOutError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -42,7 +45,7 @@ module.exports = class PlaybackController {
 
           if (index === undefined || initialized) index = torrentSummary.mostRecentFileIndex
           if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
-          if (index === undefined) return cb(new errors.UnplayableError())
+          if (index === undefined) return cb(new UnplayableTorrentError())
 
           initialized = true
 
@@ -232,7 +235,7 @@ module.exports = class PlaybackController {
       // TODO: remove torrentSummary.playStatus
       torrentSummary.playStatus = 'timeout' /* no seeders available? */
       sound.play('ERROR')
-      cb(new Error('Playback timed out. Try again.'))
+      cb(new PlaybackTimedOutError())
       this.update()
     }, 10000) /* give it a few seconds */
 
@@ -277,7 +280,7 @@ module.exports = class PlaybackController {
 
     if (!TorrentPlayer.isPlayable(fileSummary)) {
       torrentSummary.mostRecentFileIndex = undefined
-      return cb(new Error('Can\'t play that file'))
+      return cb(new UnplayableFileError())
     }
 
     torrentSummary.mostRecentFileIndex = index
