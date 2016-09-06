@@ -1,6 +1,6 @@
 module.exports = {
   init,
-  setPlayerOpen,
+  togglePlaybackControls,
   setWindowFocus,
   setAllowNav,
   onPlayerUpdate,
@@ -24,7 +24,7 @@ function init () {
   electron.Menu.setApplicationMenu(menu)
 }
 
-function setPlayerOpen (flag) {
+function togglePlaybackControls (flag) {
   getMenuItem('Play/Pause').enabled = flag
   getMenuItem('Skip Next').enabled = flag
   getMenuItem('Skip Previous').enabled = flag
