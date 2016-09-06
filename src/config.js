@@ -1,12 +1,22 @@
 const appConfig = require('application-config')('WebTorrent')
 const fs = require('fs')
 const path = require('path')
+const electron = require('electron')
 
 const APP_NAME = 'WebTorrent'
 const APP_TEAM = 'WebTorrent, LLC'
 const APP_VERSION = require('../package.json').version
 
-const PORTABLE_PATH = path.join(path.dirname(process.execPath), 'Portable Settings')
+const IS_TEST = isTest()
+const PORTABLE_PATH = IS_TEST
+  ? path.join(__dirname, '../test/tempTestData')
+  : path.join(path.dirname(process.execPath), 'Portable Settings')
+const IS_PORTABLE = isPortable()
+const IS_PRODUCTION = isProduction()
+
+console.log('Production: %s portable: %s test: %s',
+  IS_PRODUCTION, IS_PORTABLE, IS_TEST)
+if (IS_PORTABLE) console.log('Portable path: %s', PORTABLE_PATH)
 
 module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
@@ -62,8 +72,9 @@ module.exports = {
 
   HOME_PAGE_URL: 'https://webtorrent.io',
 
-  IS_PORTABLE: isPortable(),
-  IS_PRODUCTION: isProduction(),
+  IS_PORTABLE: IS_PORTABLE,
+  IS_PRODUCTION: IS_PRODUCTION,
+  IS_TEST: IS_TEST,
 
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: path.join(__dirname, '..'),
@@ -79,7 +90,7 @@ module.exports = {
 }
 
 function getConfigPath () {
-  if (isPortable()) {
+  if (IS_PORTABLE) {
     return PORTABLE_PATH
   } else {
     return path.dirname(appConfig.filePath)
@@ -89,22 +100,31 @@ function getConfigPath () {
 function getDefaultDownloadPath () {
   if (!process || !process.type) {
     return ''
-  }
-
-  if (isPortable()) {
+  } else if (IS_PORTABLE) {
     return path.join(getConfigPath(), 'Downloads')
+  } else {
+    return getPath('downloads')
   }
+}
 
-  const electron = require('electron')
+function getPath (key) {
+  if (process.type === 'renderer') {
+    return electron.remote.app.getPath(key)
+  } else {
+    electron.app.getPath(key)
+  }
+}
 
-  return process.type === 'renderer'
-    ? electron.remote.app.getPath('downloads')
-    : electron.app.getPath('downloads')
+function isTest () {
+  return process.env.NODE_ENV === 'test'
 }
 
 function isPortable () {
+  if (IS_TEST) {
+    return true
+  }
   try {
-    return process.platform === 'win32' && isProduction() && !!fs.statSync(PORTABLE_PATH)
+    return process.platform === 'win32' && IS_PRODUCTION && !!fs.statSync(PORTABLE_PATH)
   } catch (err) {
     return false
   }

@@ -66,7 +66,9 @@
     "plist": "^2.0.1",
     "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
+    "spectron": "^3.3.0",
     "standard": "*",
+    "tape": "^4.6.0",
     "walk-sync": "^0.3.1"
   },
   "engines": {
@@ -100,6 +102,7 @@
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
+    "integration-test": "npm run build && node ./test",
     "test": "standard && depcheck --ignores=babel-cli,nodemon,gh-release --ignore-dirs=build,dist && node ./bin/extra-lint.js",
     "gh-release": "gh-release",
     "update-authors": "./bin/update-authors.sh",

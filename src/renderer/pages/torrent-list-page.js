@@ -14,7 +14,7 @@ module.exports = class TorrentList extends React.Component {
     if (state.downloadPathStatus === 'missing') {
       contents.push(
         <div key='torrent-missing-path'>
-          <p>Download path missing: {state.saved.prefs.downloadPath}</p>
+          <p id='torrent-error'>Download path missing: {state.saved.prefs.downloadPath}</p>
           <p>Check that all drives are connected?</p>
           <p>Alternatively, choose a new download path
             in <a href='#' onClick={dispatcher('preferences')}>Preferences</a>

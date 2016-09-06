@@ -1,7 +1,6 @@
 console.time('init')
 
 const electron = require('electron')
-
 const app = electron.app
 const ipcMain = electron.ipcMain
 
@@ -159,6 +158,10 @@ function processArgv (argv) {
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
+    } else if (arg.startsWith('--')) {
+      // Ignore Spectron flags
+    } else if (arg === 'data:,') {
+      // Ignore weird Spectron argument
     } else if (arg !== '.') {
       // Ignore '.' argument, which gets misinterpreted as a torrent id, when a
       // development copy of WebTorrent is started while a production version is
