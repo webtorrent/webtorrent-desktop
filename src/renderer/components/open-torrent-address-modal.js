@@ -11,6 +11,7 @@ module.exports = class OpenTorrentAddressModal extends React.Component {
         <p><label>Enter torrent address or magnet link</label></p>
         <div>
           <TextField
+            id='torrent-address-field'
             className='control'
             ref={(c) => { this.torrentURL = c }}
             fullWidth
@@ -31,7 +32,7 @@ module.exports = class OpenTorrentAddressModal extends React.Component {
 }
 
 function handleKeyDown (e) {
-  if (e.which === 13) this.handleOK() /* hit Enter to submit */
+  if (e.which === 13) handleOK.call(this) /* hit Enter to submit */
 }
 
 function handleOK () {
