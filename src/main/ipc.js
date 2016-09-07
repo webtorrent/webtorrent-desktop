@@ -58,7 +58,7 @@ function init () {
    */
 
   ipc.on('onPlayerOpen', function () {
-    menu.setPlayerOpen(true)
+    menu.togglePlaybackControls(true)
     powerSaveBlocker.enable()
     shortcuts.enable()
     thumbar.enable()
@@ -70,7 +70,7 @@ function init () {
   })
 
   ipc.on('onPlayerClose', function () {
-    menu.setPlayerOpen(false)
+    menu.togglePlaybackControls(false)
     powerSaveBlocker.disable()
     shortcuts.disable()
     thumbar.disable()
@@ -126,7 +126,12 @@ function init () {
     })
   })
 
-  ipc.on('openExternalPlayer', (e, ...args) => externalPlayer.spawn(...args))
+  ipc.on('openExternalPlayer', (e, ...args) => {
+    menu.togglePlaybackControls(false)
+    thumbar.disable()
+    externalPlayer.spawn(...args)
+  })
+
   ipc.on('quitExternalPlayer', () => externalPlayer.kill())
 
   // Capture all events

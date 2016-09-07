@@ -87,7 +87,7 @@ module.exports = class PlaybackController {
   // Play next file in list (if any)
   nextTrack () {
     const state = this.state
-    if (Playlist.hasNext(state)) {
+    if (Playlist.hasNext(state) && state.playing.location !== 'external') {
       this.updatePlayer(
           state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
             if (err) dispatch('error', err)
@@ -99,7 +99,7 @@ module.exports = class PlaybackController {
   // Play previous track in list (if any)
   previousTrack () {
     const state = this.state
-    if (Playlist.hasPrevious(state)) {
+    if (Playlist.hasPrevious(state) && state.playing.location !== 'external') {
       this.updatePlayer(
         state.playing.infoHash, Playlist.getPreviousIndex(state), false, (err) => {
           if (err) dispatch('error', err)
