@@ -32,10 +32,12 @@ test('show download path missing', function (t) {
     .then((text) => console.log('Title ' + text))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Download path missing'))
     .then((err) => t.notOk(err))
+    .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-download-path-missing'))
     .then(() => app.client.click('a'))
     .then(() => setup.wait())
     .then(() => app.browserWindow.getTitle())
-    .then((windowTitle) => t.equal(windowTitle, 'Preferences'))
+    .then((windowTitle) => t.equal(windowTitle, 'Preferences', 'window title'))
+    .then(() => setup.screenshotCreateOrCompare(app, t, 'prefs-basic'))
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))
 })
