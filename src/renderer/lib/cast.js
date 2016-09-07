@@ -14,6 +14,7 @@ module.exports = {
 }
 
 const config = require('../../config')
+const {CastingError} = require('./errors')
 
 // Lazy load these for a ~300ms improvement in startup time
 let airplayer, chromecasts, dlnacasts
@@ -350,14 +351,16 @@ function toggleMenu (location) {
 
   // Never cast to two devices at the same time
   if (state.playing.location !== 'local') {
-    throw new Error('You can\'t connect to ' + location +
-      ' when already connected to another device')
-  }
+    throw new CastingError(
+      `You can't connect to ${location} when already connected to another device`
+    ) }
 
   // Find all cast devices of the given type
   const player = getPlayer(location)
   const devices = player ? player.getDevices() : []
-  if (devices.length === 0) throw new Error('No ' + location + ' devices available')
+  if (devices.length === 0) {
+    throw new CastingError(`No ${location} devices available`)
+  }
 
   // Show a menu
   state.devices.castMenu = {location, devices}

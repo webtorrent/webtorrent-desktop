@@ -3,6 +3,7 @@ const path = require('path')
 const electron = require('electron')
 
 const {dispatch} = require('../lib/dispatcher')
+const {TorrentKeyNotFoundError} = require('../lib/errors')
 const State = require('../lib/state')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -75,7 +76,7 @@ module.exports = class TorrentListController {
   // Starts downloading and/or seeding a given torrentSummary.
   startTorrentingSummary (torrentKey) {
     const s = TorrentSummary.getByKey(this.state, torrentKey)
-    if (!s) throw new Error('Missing key: ' + torrentKey)
+    if (!s) throw new TorrentKeyNotFoundError(torrentKey)
 
     // New torrent: give it a path
     if (!s.path) {

@@ -15,6 +15,7 @@ const zeroFill = require('zero-fill')
 
 const crashReporter = require('../crash-reporter')
 const config = require('../config')
+const {TorrentKeyNotFoundError} = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 
 // Report when the process crashes
@@ -387,7 +388,7 @@ function selectFiles (torrentOrInfoHash, selections) {
 // Throws an Error if we're not currently torrenting anything w/ that key
 function getTorrent (torrentKey) {
   const ret = client.torrents.find((x) => x.key === torrentKey)
-  if (!ret) throw new Error('missing torrent key ' + torrentKey)
+  if (!ret) throw new TorrentKeyNotFoundError(torrentKey)
   return ret
 }
 

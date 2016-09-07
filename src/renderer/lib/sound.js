@@ -4,6 +4,7 @@ module.exports = {
 }
 
 const config = require('../../config')
+const {InvalidSoundNameError} = require('./errors')
 const path = require('path')
 
 const VOLUME = 0.15
@@ -62,7 +63,7 @@ function play (name) {
   if (!audio) {
     const sound = sounds[name]
     if (!sound) {
-      throw new Error('Invalid sound name')
+      throw new InvalidSoundNameError(name)
     }
     audio = cache[name] = new window.Audio()
     audio.volume = sound.volume
