@@ -3,14 +3,18 @@ const Application = require('spectron').Application
 const fs = require('fs-extra')
 
 const TEST_DATA_DIR = path.join(__dirname, 'tempTestData')
+const TEST_DOWNLOAD_DIR = path.join(TEST_DATA_DIR, 'Downloads')
 
 module.exports = {
   TEST_DATA_DIR,
+  TEST_DOWNLOAD_DIR,
   createApp,
   endTest,
   screenshotCreateOrCompare,
+  compareDownloadFolder,
   waitForLoad,
-  wait
+  wait,
+  wipeTestDataDir
 }
 
 // Runs WebTorrent Desktop.
@@ -26,8 +30,16 @@ function createApp (t) {
 }
 
 // Starts the app, waits for it to load, returns a promise
-function waitForLoad (app, t) {
+function waitForLoad (app, t, opts) {
+  if (!opts) opts = {}
   return app.start().then(function () {
+    return app.client.waitUntilWindowLoaded()
+  }).then(function () {
+    // Offline mode? Disable internet in the webtorrent window
+    // TODO. For now, just run integration tests with internet turned off.
+    // Spectron is poorly documented, and contrary to the docs, webContents.session is missing
+    // That is the correct API (in theory) to put the app in offline mode
+  }).then(function () {
     // Switch to the main window. Index 0 is apparently the hidden webtorrent window...
     return app.client.windowByIndex(1)
   }).then(function () {
@@ -36,7 +48,7 @@ function waitForLoad (app, t) {
     return app.webContents.getTitle()
   }).then(function (title) {
     // Note the window title is WebTorrent (BETA), this is the HTML <title>
-    t.equal(title, 'WebTorrent Desktop', 'html title')
+    t.equal(title, 'Main Window', 'html title')
   })
 }
 
@@ -77,4 +89,23 @@ function screenshotCreateOrCompare (app, t, name) {
       }
     }
   })
+}
+
+// Resets the test directory, containing config.json, torrents, downloads, etc
+function wipeTestDataDir () {
+  fs.removeSync(TEST_DATA_DIR)
+  fs.mkdirpSync(TEST_DOWNLOAD_DIR) // Downloads/ is inside of TEST_DATA_DIR
+}
+
+function compareDownloadFolder (t, dirname, filenames) {
+  const dirpath = path.join(TEST_DOWNLOAD_DIR, dirname)
+  try {
+    const actualFilenames = fs.readdirSync(dirpath)
+    const expectedSorted = filenames.slice().sort()
+    const actualSorted = actualFilenames.slice().sort()
+    t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
+  } catch (e) {
+    console.error(e)
+    t.equal(filenames, null, 'download folder missing: ' + dirname)
+  }
 }

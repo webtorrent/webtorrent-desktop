@@ -62,6 +62,7 @@ module.exports = class TorrentList extends React.Component {
     if (!torrentSummary.torrentKey) throw new InvalidTorrentError('Missing torrentKey')
     return (
       <div
+        id={torrentSummary.testID && ('torrent-' + torrentSummary.testID)}
         key={torrentSummary.torrentKey}
         style={style}
         className={classes.join(' ')}
@@ -346,7 +347,7 @@ module.exports = class TorrentList extends React.Component {
         </td>
         <td className='col-select'
           onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
-          <i className='icon'>{isSelected ? 'close' : 'add'}</i>
+          <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>
     )

@@ -9,12 +9,12 @@ module.exports = class ModalOKCancel extends React.Component {
     return (
       <div className='float-right'>
         <FlatButton
-          className='control'
+          className='control cancel'
           style={cancelStyle}
           label={cancelText}
           onClick={onCancel} />
         <RaisedButton
-          className='control'
+          className='control ok'
           primary
           label={okText}
           onClick={onOK} />

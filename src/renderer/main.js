@@ -58,6 +58,7 @@ State.load(onState)
 function onState (err, _state) {
   if (err) return onError(err)
   state = window.state = _state // Make available for easier debugging
+  window.dispatch = dispatch
 
   telemetry.init(state)
 
