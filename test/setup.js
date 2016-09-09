@@ -59,7 +59,8 @@ function endTest (app, t, err) {
 // If we already have a reference under test/screenshots, assert that they're the same
 // Otherwise, create the reference screenshot: test/screenshots/<platform>/<name>.png
 function screenshotCreateOrCompare (app, t, name) {
-  const ssPath = path.join(__dirname, 'screenshots', process.platform, name + '.png')
+  const ssDir = path.join(__dirname, 'screenshots', process.platform)
+  const ssPath = path.join(ssDir, name + '.png')
   fs.ensureFileSync(ssPath)
   const ssBuf = fs.readFileSync(ssPath)
   return app.browserWindow.capturePage().then(function (buffer) {
@@ -67,8 +68,13 @@ function screenshotCreateOrCompare (app, t, name) {
       console.log('Saving screenshot ' + ssPath)
       fs.writeFileSync(ssPath, buffer)
     } else {
-      t.ok(Buffer.compare(buffer, ssBuf) === 0, 'screenshot ' + name)
-      return Promise.resolve()
+      const match = Buffer.compare(buffer, ssBuf) === 0
+      t.ok(match, 'screenshot comparison ' + name)
+      if (!match) {
+        const ssFailedPath = path.join(ssDir, name + '-failed.png')
+        console.log('Saving screenshot, failed comparison: ' + ssFailedPath)
+        fs.writeFileSync(ssFailedPath, buffer)
+      }
     }
   })
 }

@@ -41,3 +41,12 @@ test('show download path missing', function (t) {
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))
 })
+
+// TODO:
+// require('./test-torrent-list')
+// require('./test-add-torrent')
+// require('./test-create-torrent')
+// require('./test-prefs')
+// require('./test-video')
+// require('./test-audio')
+// require('./test-cast')
