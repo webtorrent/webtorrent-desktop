@@ -52,9 +52,9 @@ function waitForLoad (app, t, opts) {
   })
 }
 
-// Returns a promise that resolves after 'ms' milliseconds. Default: 500
+// Returns a promise that resolves after 'ms' milliseconds. Default: 1 second
 function wait (ms) {
-  if (ms === undefined) ms = 500 // Default: wait long enough for the UI to update
+  if (ms === undefined) ms = 1000 // Default: wait long enough for the UI to update
   return new Promise(function (resolve, reject) {
     setTimeout(resolve, ms)
   })
@@ -97,6 +97,9 @@ function wipeTestDataDir () {
   fs.mkdirpSync(TEST_DOWNLOAD_DIR) // Downloads/ is inside of TEST_DATA_DIR
 }
 
+// Checks a given folder under Downloads.
+// Makes sure that the filenames match exactly.
+// If `filenames` is null, asserts that the folder doesn't exist.
 function compareDownloadFolder (t, dirname, filenames) {
   const dirpath = path.join(TEST_DOWNLOAD_DIR, dirname)
   try {
@@ -105,7 +108,11 @@ function compareDownloadFolder (t, dirname, filenames) {
     const actualSorted = actualFilenames.slice().sort()
     t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
   } catch (e) {
-    console.error(e)
-    t.equal(filenames, null, 'download folder missing: ' + dirname)
+    if (e.code === 'ENOENT') {
+      t.equal(filenames, null, 'download folder missing: ' + dirname)
+    } else {
+      console.error(e)
+      t.fail('unexpected error getting download folder: ' + dirname)
+    }
   }
 }
