@@ -56,6 +56,28 @@ Restart the app automatically every time code changes. Useful during development
 $ npm run watch
 ```
 
+### Run linters
+
+```
+$ npm test
+```
+
+### Run integration tests
+
+```
+$ npm run integration-test
+```
+
+The integration tests use Spectron and Tape. They click through the app, taking screenshots and comparing each one to a reference. Why screenshots?
+
+* Ad-hoc checking makes the tests a lot more work to write
+* Even diffing the whole HTML is not as thorough as screenshot diffing. For example, it wouldn't catch an bug where hitting ESC from a video doesn't correctly restore window size.
+* Chrome's own integration tests use screenshot diffing iirc
+* Small UI changes will break a few tests, but the fix is as easy as deleting the offending screenshots and running the tests, which will recreate them with the new look.
+* The resulting Github PR will then show, pixel by pixel, the exact UI changes that were made! Ses https://github.com/blog/817-behold-image-view-modes
+
+For MacOS, you'll need a Retina screen for the integration tests to pass.
+
 ### Package the app
 
 Builds app binaries for Mac, Linux, and Windows.
