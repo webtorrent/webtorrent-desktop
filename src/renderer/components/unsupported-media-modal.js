@@ -1,6 +1,5 @@
 const React = require('react')
 const electron = require('electron')
-const path = require('path')
 
 const ModalOKCancel = require('./modal-ok-cancel')
 const {dispatcher} = require('../lib/dispatcher')
@@ -12,15 +11,11 @@ module.exports = class UnsupportedMediaModal extends React.Component {
     const message = (err && err.getMessage)
       ? err.getMessage()
       : err
-    const playerPath = state.saved.prefs.externalPlayerPath
-    const playerName = playerPath
-      ? path.basename(playerPath).split('.')[0]
-      : 'VLC'
     const onAction = state.modal.externalPlayerInstalled
       ? dispatcher('openExternalPlayer')
       : () => this.onInstall()
     const actionText = state.modal.externalPlayerInstalled
-      ? 'PLAY IN ' + playerName.toUpperCase()
+      ? 'PLAY IN ' + state.getExternalPlayerName().toUpperCase()
       : 'INSTALL VLC'
     const errorMessage = state.modal.externalPlayerNotFound
       ? 'Couldn\'t run external player. Please make sure it\'s installed.'
