@@ -5,6 +5,7 @@ module.exports = {
 }
 
 const cp = require('child_process')
+const path = require('path')
 const vlcCommand = require('vlc-command')
 
 const log = require('./log')
@@ -13,15 +14,15 @@ const windows = require('./windows')
 // holds a ChildProcess while we're playing a video in an external player, null otherwise
 let proc = null
 
-function checkInstall (path, cb) {
+function checkInstall (playerPath, cb) {
   // check for VLC if external player has not been specified by the user
   // otherwise assume the player is installed
-  if (path == null) return vlcCommand((err) => cb(!err))
+  if (playerPath == null) return vlcCommand((err) => cb(!err))
   process.nextTick(() => cb(true))
 }
 
-function spawn (path, url, title) {
-  if (path != null) return spawnExternal(path, [url])
+function spawn (playerPath, url, title) {
+  if (playerPath != null) return spawnExternal(playerPath, [url])
 
   // Try to find and use VLC if external player is not specified
   vlcCommand(function (err, vlcPath) {
@@ -44,10 +45,15 @@ function kill () {
   proc = null
 }
 
-function spawnExternal (path, args) {
-  log('Running external media player:', path + ' ' + args.join(' '))
+function spawnExternal (playerPath, args) {
+  log('Running external media player:', playerPath + ' ' + args.join(' '))
 
-  proc = cp.spawn(path, args, {stdio: 'ignore'})
+  if (path.extname(playerPath) === '.app') {
+    // Mac: Use executable in packaged .app bundle
+    playerPath += '/Contents/MacOS/' + path.basename(playerPath, '.app')
+  }
+
+  proc = cp.spawn(playerPath, args, {stdio: 'ignore'})
 
   // If it works, close the modal after a second
   const closeModalTimeout = setTimeout(() =>

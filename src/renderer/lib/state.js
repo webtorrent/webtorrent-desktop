@@ -68,7 +68,8 @@ function getDefaultState () {
      * Getters, for convenience
      */
     getPlayingTorrentSummary,
-    getPlayingFileSummary
+    getPlayingFileSummary,
+    getExternalPlayerName
   }
 }
 
@@ -166,6 +167,12 @@ function getPlayingFileSummary () {
   const torrentSummary = this.getPlayingTorrentSummary()
   if (!torrentSummary) return null
   return torrentSummary.files[this.playing.fileIndex]
+}
+
+function getExternalPlayerName () {
+  const playerPath = this.saved.prefs.externalPlayerPath
+  if (!playerPath) return 'VLC'
+  return path.basename(playerPath).split('.')[0]
 }
 
 function load (cb) {

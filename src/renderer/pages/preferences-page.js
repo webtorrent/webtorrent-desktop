@@ -1,11 +1,11 @@
-const colors = require('material-ui/styles/colors')
 const path = require('path')
 const React = require('react')
 
+const colors = require('material-ui/styles/colors')
 const Checkbox = require('material-ui/Checkbox').default
+const RaisedButton = require('material-ui/RaisedButton').default
 const Heading = require('../components/heading')
 const PathSelector = require('../components/path-selector')
-const RaisedButton = require('material-ui/RaisedButton').default
 
 const {dispatch} = require('../lib/dispatcher')
 
@@ -59,9 +59,8 @@ class PreferencesPage extends React.Component {
   }
 
   externalPlayerPathSelector () {
-    const playerName = path.basename(
-      this.props.state.unsaved.prefs.externalPlayerPath || 'VLC'
-    )
+    const playerPath = this.props.state.unsaved.prefs.externalPlayerPath
+    const playerName = this.props.state.getExternalPlayerName()
 
     const description = this.props.state.unsaved.prefs.openExternalPlayer
       ? `Torrent media files will always play in ${playerName}.`
@@ -79,16 +78,12 @@ class PreferencesPage extends React.Component {
           displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={this.props.state.unsaved.prefs.externalPlayerPath} />
+          value={playerPath ? path.dirname(playerPath) : null} />
       </Preference>
     )
   }
 
   handleExternalPlayerPathChange (filePath) {
-    if (path.extname(filePath) === '.app') {
-      // Mac: Use executable in packaged .app bundle
-      filePath += '/Contents/MacOS/' + path.basename(filePath, '.app')
-    }
     dispatch('updatePreferences', 'externalPlayerPath', filePath)
   }
 
