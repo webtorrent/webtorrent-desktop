@@ -1,9 +1,15 @@
-const path = require('path')
 const electron = require('electron')
+const config = require('./config')
 
-const MOCK_OPEN_TORRENTS = [path.join(__dirname, 'resources', '1.torrent')]
-
-console.log('Mocking electron native integrations...')
+console.log('Mocking electron.dialog.showOpenDialog...')
 electron.dialog.showOpenDialog = function (win, opts, cb) {
-  cb(MOCK_OPEN_TORRENTS)
+  const ret = /select.*torrent file/i.test(opts.title)
+    ? config.TORRENT_FILES
+    : config.SEED_FILES
+  cb(ret)
+}
+
+console.log('Mocking electron.remote.dialog.showSaveDialog...')
+electron.dialog.showSaveDialog = function (win, opts, cb) {
+  cb(config.SAVED_TORRENT_FILE)
 }

@@ -1,10 +1,11 @@
 const test = require('tape')
 const fs = require('fs-extra')
 const setup = require('./setup')
+const config = require('./config')
 
 test('torrent-list: show download path missing', function (t) {
-  setup.wipeTestDataDir()
-  fs.removeSync(setup.TEST_DOWNLOAD_DIR)
+  setup.resetTestDataDir()
+  fs.removeSync(config.TEST_DIR_DOWNLOAD)
 
   t.timeoutAfter(10e3)
   const app = setup.createApp()
@@ -24,7 +25,7 @@ test('torrent-list: show download path missing', function (t) {
 })
 
 test('torrent-list: start, stop, and delete torrents', function (t) {
-  setup.wipeTestDataDir()
+  setup.resetTestDataDir()
 
   const app = setup.createApp()
   setup.waitForLoad(app, t, {offline: true})
@@ -35,7 +36,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-hover'))
     // Click download on the first torrent, start downloading
     .then(() => app.client.click('.icon.download'))
-    .then(() => app.client.waitUntilTextExists('.torrent-list', '276 MB'))
+    .then(() => app.client.waitUntilTextExists('.torrent-list', 'peer'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-start-download'))
     // Click download on the first torrent again, stop downloading
     .then(() => app.client.click('.icon.download'))
@@ -62,7 +63,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
 })
 
 test('torrent-list: expand torrent, unselect file', function (t) {
-  setup.wipeTestDataDir()
+  setup.resetTestDataDir()
 
   const app = setup.createApp()
   setup.waitForLoad(app, t, {offline: true})

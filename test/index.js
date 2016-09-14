@@ -1,17 +1,11 @@
 const test = require('tape')
-const fs = require('fs-extra')
 const setup = require('./setup')
 
-console.log('Creating download dir: ' + setup.TEST_DOWNLOAD_DIR)
-fs.mkdirpSync(setup.TEST_DOWNLOAD_DIR)
-
-test.onFinish(function () {
-  console.log('Removing test dir: ' + setup.TEST_DATA_DIR)
-  fs.removeSync(setup.TEST_DATA_DIR) // includes download dir
-})
+test.onFinish(setup.deleteTestDataDir)
 
 test('app runs', function (t) {
   t.timeoutAfter(10e3)
+  setup.resetTestDataDir()
   const app = setup.createApp()
   setup.waitForLoad(app, t)
     .then(() => setup.wait())
@@ -20,12 +14,11 @@ test('app runs', function (t) {
           (err) => setup.endTest(app, t, err || 'error'))
 })
 
-// require('./test-torrent-list')
+require('./test-torrent-list')
 require('./test-add-torrent')
 
 // TODO:
-// require('./test-create-torrent')
-// require('./test-prefs')
 // require('./test-video')
 // require('./test-audio')
 // require('./test-cast')
+// require('./test-prefs')

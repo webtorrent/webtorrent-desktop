@@ -215,10 +215,40 @@ module.exports = class TorrentListController {
 
     menu.append(new electron.remote.MenuItem({
       label: 'Save Torrent File As...',
-      click: () => saveTorrentFileAs(torrentSummary)
+      click: () => dispatch('saveTorrentFileAs', torrentSummary.torrentKey)
     }))
 
     menu.popup(electron.remote.getCurrentWindow())
+  }
+
+  // Takes a torrentSummary or torrentKey
+  // Shows a Save File dialog, then saves the .torrent file wherever the user requests
+  saveTorrentFileAs (torrentKey) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, torrentKey)
+    if (!torrentSummary) throw new Error('Missing torrentKey: ' + torrentKey)
+    const downloadPath = this.state.saved.prefs.downloadPath
+    const newFileName = path.parse(torrentSummary.name).name + '.torrent'
+    const win = electron.remote.getCurrentWindow()
+    const opts = {
+      title: 'Save Torrent File',
+      defaultPath: path.join(downloadPath, newFileName),
+      filters: [
+        { name: 'Torrent Files', extensions: ['torrent'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    }
+
+    electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
+      console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
+      if (!savePath) return // They clicked Cancel
+      const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
+      fs.readFile(torrentPath, function (err, torrentFile) {
+        if (err) return dispatch('error', err)
+        fs.writeFile(savePath, torrentFile, function (err) {
+          if (err) return dispatch('error', err)
+        })
+      })
+    })
   }
 }
 
@@ -279,28 +309,4 @@ function moveItemToTrash (torrentSummary) {
 
 function showItemInFolder (torrentSummary) {
   ipcRenderer.send('showItemInFolder', TorrentSummary.getFileOrFolder(torrentSummary))
-}
-
-function saveTorrentFileAs (torrentSummary) {
-  const downloadPath = this.state.saved.prefs.downloadPath
-  const newFileName = path.parse(torrentSummary.name).name + '.torrent'
-  const opts = {
-    title: 'Save Torrent File',
-    defaultPath: path.join(downloadPath, newFileName),
-    filters: [
-      { name: 'Torrent Files', extensions: ['torrent'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
-  }
-  const win = electron.remote.getCurrentWindow()
-  electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
-    if (!savePath) return // They clicked Cancel
-    const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-    fs.readFile(torrentPath, function (err, torrentFile) {
-      if (err) return dispatch('error', err)
-      fs.writeFile(savePath, torrentFile, function (err) {
-        if (err) return dispatch('error', err)
-      })
-    })
-  })
 }

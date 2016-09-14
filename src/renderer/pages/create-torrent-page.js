@@ -99,14 +99,14 @@ class CreateTorrentPage extends React.Component {
         </ShowMore>
         <div className='float-right'>
           <FlatButton
-            className='control'
+            className='control cancel'
             label='Cancel'
             style={{
               marginRight: 10
             }}
             onClick={dispatcher('cancel')} />
           <RaisedButton
-            className='control'
+            className='control create-torrent'
             label='Create Torrent'
             primary
             onClick={this.handleSubmit} />

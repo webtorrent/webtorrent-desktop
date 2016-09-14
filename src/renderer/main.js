@@ -194,6 +194,8 @@ const dispatchHandlers = {
     controllers.torrentList.openTorrentContextMenu(infoHash),
   'startTorrentingSummary': (torrentKey) =>
     controllers.torrentList.startTorrentingSummary(torrentKey),
+  'saveTorrentFileAs': (torrentKey) =>
+    controllers.torrentList.saveTorrentFileAs(torrentKey),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback.playFile(infoHash, index),

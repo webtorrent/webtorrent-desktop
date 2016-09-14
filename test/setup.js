@@ -1,20 +1,20 @@
 const path = require('path')
 const Application = require('spectron').Application
 const fs = require('fs-extra')
-
-const TEST_DATA_DIR = path.join(__dirname, 'tempTestData')
-const TEST_DOWNLOAD_DIR = path.join(TEST_DATA_DIR, 'Downloads')
+const parseTorrent = require('parse-torrent')
+const config = require('./config')
 
 module.exports = {
-  TEST_DATA_DIR,
-  TEST_DOWNLOAD_DIR,
   createApp,
   endTest,
   screenshotCreateOrCompare,
   compareDownloadFolder,
+  compareFiles,
+  compareTorrentFiles,
   waitForLoad,
   wait,
-  wipeTestDataDir
+  resetTestDataDir,
+  deleteTestDataDir
 }
 
 // Runs WebTorrent Desktop.
@@ -92,16 +92,22 @@ function screenshotCreateOrCompare (app, t, name) {
 }
 
 // Resets the test directory, containing config.json, torrents, downloads, etc
-function wipeTestDataDir () {
-  fs.removeSync(TEST_DATA_DIR)
-  fs.mkdirpSync(TEST_DOWNLOAD_DIR) // Downloads/ is inside of TEST_DATA_DIR
+function resetTestDataDir () {
+  fs.removeSync(config.TEST_DIR)
+  // Create TEST_DIR as well as /Downloads and /Desktop
+  fs.mkdirpSync(config.TEST_DIR_DOWNLOAD)
+  fs.mkdirpSync(config.TEST_DIR_DESKTOP)
+}
+
+function deleteTestDataDir () {
+  fs.removeSync(config.TEST_DIR)
 }
 
 // Checks a given folder under Downloads.
 // Makes sure that the filenames match exactly.
 // If `filenames` is null, asserts that the folder doesn't exist.
 function compareDownloadFolder (t, dirname, filenames) {
-  const dirpath = path.join(TEST_DOWNLOAD_DIR, dirname)
+  const dirpath = path.join(config.TEST_DIR_DOWNLOAD, dirname)
   try {
     const actualFilenames = fs.readdirSync(dirpath)
     const expectedSorted = filenames.slice().sort()
@@ -115,4 +121,27 @@ function compareDownloadFolder (t, dirname, filenames) {
       t.fail('unexpected error getting download folder: ' + dirname)
     }
   }
+}
+
+// Makes sure two files have identical contents
+function compareFiles (t, pathActual, pathExpected) {
+  const bufActual = fs.readFileSync(pathActual)
+  const bufExpected = fs.readFileSync(pathExpected)
+  const match = Buffer.compare(bufActual, bufExpected) === 0
+  t.ok(match, 'correct contents: ' + pathActual)
+}
+
+// Makes sure two torrents have the same infohash and flags
+function compareTorrentFiles (t, pathActual, pathExpected) {
+  const bufActual = fs.readFileSync(pathActual)
+  const bufExpected = fs.readFileSync(pathExpected)
+  const fieldsActual = extractImportantFields(parseTorrent(bufActual))
+  const fieldsExpected = extractImportantFields(parseTorrent(bufExpected))
+  t.deepEqual(fieldsActual, fieldsExpected, 'torrent contents: ' + pathActual)
+}
+
+function extractImportantFields (parsedTorrent) {
+  const { infoHash, name, announce, urlList, comment } = parsedTorrent
+  const priv = parsedTorrent.private
+  return { infoHash, name, announce, urlList, comment, 'private': priv }
 }
