@@ -20,7 +20,11 @@ const windows = require('./windows')
 
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
-const hidden = argv.includes('--hidden')
+
+// Start the app without showing the main window when auto launching on login
+// (On Windows and Linux, we get a flag. On MacOS, we get special API.)
+const hidden = argv.includes('--hidden') ||
+  (process.platform === 'darwin' && app.getLoginItemSettings().wasOpenedAsHidden)
 
 if (config.IS_PRODUCTION) {
   // When Electron is running in production mode (packaged app), then run React
@@ -157,7 +161,7 @@ function processArgv (argv) {
     } else if (arg === '-u') {
       dialog.openTorrentAddress()
     } else if (arg === '--hidden') {
-      // Igonre hidden argument, already being handled
+      // Ignore hidden argument, already being handled
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
       // Issue: https://github.com/feross/webtorrent-desktop/issues/214
