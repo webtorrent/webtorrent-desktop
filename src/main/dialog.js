@@ -21,12 +21,7 @@ function openSeedFile () {
     title: 'Select a file for the torrent.',
     properties: [ 'openFile' ]
   }
-  setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('showCreateTorrent', selectedPaths)
-  })
+  showOpenSeed(opts)
 }
 
 /*
@@ -46,12 +41,7 @@ function openSeedDirectory () {
       title: 'Select a folder for the torrent.',
       properties: [ 'openDirectory' ]
     }
-  setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('showCreateTorrent', selectedPaths)
-  })
+  showOpenSeed(opts)
 }
 
 /*
@@ -118,4 +108,17 @@ function setTitle (title) {
 
 function resetTitle () {
   windows.main.dispatch('resetTitle')
+}
+
+/**
+ * Pops up an Open File dialog with the given options.
+ * After the user selects files / folders, shows the Create Torrent page.
+ */
+function showOpenSeed (opts) {
+  setTitle(opts.title)
+  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
+    resetTitle()
+    if (!Array.isArray(selectedPaths)) return
+    windows.main.dispatch('showCreateTorrent', selectedPaths)
+  })
 }

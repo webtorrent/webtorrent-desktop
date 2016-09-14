@@ -39,9 +39,10 @@ class ShowMore extends React.Component {
       ? this.props.hideLabel
       : this.props.showLabel
     return (
-      <div style={this.props.style}>
+      <div className='show-more' style={this.props.style}>
         {this.state.expanded ? this.props.children : null}
         <RaisedButton
+          className='control'
           onClick={this.handleClick}
           label={label} />
       </div>

@@ -15,17 +15,15 @@ test('app runs', function (t) {
   const app = setup.createApp()
   setup.waitForLoad(app, t)
     .then(() => setup.wait())
-    .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-basic'))
+    .then(() => setup.screenshotCreateOrCompare(app, t, 'app-basic'))
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))
 })
 
-console.log('Testing the torrent list (home page)...')
-setup.wipeTestDataDir()
-require('./test-torrent-list')
+// require('./test-torrent-list')
+require('./test-add-torrent')
 
 // TODO:
-// require('./test-add-torrent')
 // require('./test-create-torrent')
 // require('./test-prefs')
 // require('./test-video')

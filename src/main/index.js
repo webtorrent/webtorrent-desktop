@@ -147,8 +147,14 @@ function onAppOpen (newArgv) {
   }
 }
 
+// Remove leading args.
+// Production: 1 arg, eg: /Applications/WebTorrent.app/Contents/MacOS/WebTorrent
+// Development: 2 args, eg: electron .
+// Test: 4 args, eg: electron -r .../mocks.js .
 function sliceArgv (argv) {
-  return argv.slice(config.IS_PRODUCTION ? 1 : 2)
+  return argv.slice(config.IS_PRODUCTION ? 1
+    : config.IS_TEST ? 4
+    : 2)
 }
 
 function processArgv (argv) {
