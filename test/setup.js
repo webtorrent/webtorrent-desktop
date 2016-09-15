@@ -45,6 +45,8 @@ function waitForLoad (app, t, opts) {
   }).then(function () {
     return app.client.waitUntilWindowLoaded()
   }).then(function () {
+    if (!opts.online) app.electron.ipcRenderer.send('testOffline', true)
+  }).then(function () {
     return app.webContents.getTitle()
   }).then(function (title) {
     // Note the window title is WebTorrent (BETA), this is the HTML <title>

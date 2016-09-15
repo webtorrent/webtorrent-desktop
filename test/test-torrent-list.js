@@ -3,7 +3,7 @@ const fs = require('fs-extra')
 const setup = require('./setup')
 const config = require('./config')
 
-test('torrent-list: show download path missing', function (t) {
+test.skip('torrent-list: show download path missing', function (t) {
   setup.resetTestDataDir()
   fs.removeSync(config.TEST_DIR_DOWNLOAD)
 
@@ -37,6 +37,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
     // Click download on the first torrent, start downloading
     .then(() => app.client.click('.icon.download'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'peer'))
+    .then(() => setup.wait(100e3))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-start-download'))
     // Click download on the first torrent again, stop downloading
     .then(() => app.client.click('.icon.download'))

@@ -98,14 +98,16 @@ function init () {
   /**
    * File handlers
    */
+
   ipc.on('setDefaultFileHandler', (e, flag) => {
     if (flag) handlers.install()
     else handlers.uninstall()
   })
 
   /**
-   * Startup
+   * Auto start on login
    */
+
   ipc.on('setStartup', (e, flag) => {
     if (flag) startup.install()
     else startup.uninstall()
@@ -143,7 +145,25 @@ function init () {
 
   ipc.on('quitExternalPlayer', () => externalPlayer.kill())
 
-  // Capture all events
+  /**
+   * Test
+   */
+
+  ipc.on('testOffline', function (e, isOffline) {
+    log('Testing, network ' + (isOffline ? 'OFFLINE' : 'ONLINE'))
+    // Get the two Electron BrowserWindows (main UI window, hidden webtorrent window)
+    const wins = [windows.main.win, windows.webtorrent.win]
+    wins.forEach(function (win) {
+      if (isOffline) win.webContents.session.enableNetworkEmulation({ latency: 10e3 })
+      else win.webContents.session.disableNetworkEmulation()
+      log('WTF')
+    })
+  })
+
+  /**
+   * Message passing
+   */
+
   const oldEmit = ipc.emit
   ipc.emit = function (name, e, ...args) {
     // Relay messages between the main window and the WebTorrent hidden window
