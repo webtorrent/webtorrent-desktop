@@ -1,7 +1,7 @@
 const test = require('tape')
 const setup = require('./setup')
 
-test('basic-streaming', function (t) {
+test('video-streaming', function (t) {
   setup.resetTestDataDir()
 
   t.timeoutAfter(30e3)
