@@ -54,11 +54,16 @@ const VERSION_STR = VERSION.match(/([0-9]+)/g)
  */
 const VERSION_PREFIX = '-WD' + VERSION_STR + '-'
 
+/**
+ * Generate an ephemeral peer ID each time.
+ * TODO: once there are around 2^24 = ~8 million WebTorrent Desktops online at the same time,
+ *       ID collisions will start happening. Birthday paradox. Can we use more than six bytes?
+ */
+const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
+
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
-const client = window.client = new WebTorrent({
-  peerId: Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
-})
+let client = window.client = new WebTorrent({ peerId: PEER_ID })
 
 // WebTorrent-to-HTTP streaming sever
 let server = null
@@ -69,8 +74,7 @@ let prevProgress = null
 init()
 
 function init () {
-  client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
-  client.on('error', (err) => ipc.send('wt-error', null, err.message))
+  listenToClientEvents()
 
   ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
     startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
@@ -91,6 +95,20 @@ function init () {
   ipc.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
 
+  // TODO: remove this once the following bugs are fixed:
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=490143
+  // https://github.com/electron/electron/issues/7212
+  ipc.on('wt-test-offline', () => {
+    console.log('Test, going OFFLINE')
+    client = window.client = new WebTorrent({
+      peerId: PEER_ID,
+      tracker: false,
+      dht: false,
+      webSeeds: false
+    })
+    listenToClientEvents()
+  })
+
   ipc.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
@@ -99,6 +117,11 @@ function init () {
 
   setInterval(updateTorrentProgress, 1000)
   console.timeEnd('init')
+}
+
+function listenToClientEvents () {
+  client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
+  client.on('error', (err) => ipc.send('wt-error', null, err.message))
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc.
