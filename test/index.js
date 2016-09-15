@@ -15,9 +15,10 @@ test('app runs', function (t) {
 })
 
 require('./test-torrent-list')
-// require('./test-add-torrent')
-// require('./test-video')
+require('./test-add-torrent')
+require('./test-video')
 
+// TODO:
 // require('./test-audio')
 // require('./test-cast')
 // require('./test-prefs')

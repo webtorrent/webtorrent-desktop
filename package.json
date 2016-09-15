@@ -66,6 +66,7 @@
     "nodemon": "^1.10.2",
     "open": "0.0.5",
     "plist": "^2.0.1",
+    "pngjs": "^3.0.0",
     "rimraf": "^2.5.2",
     "run-series": "^1.1.4",
     "spectron": "^3.3.0",

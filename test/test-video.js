@@ -9,7 +9,7 @@ test('basic-streaming', function (t) {
   setup.waitForLoad(app, t, {online: true})
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Play Big Buck Bunny. Wait for it to start streaming.
-    .then(() => app.client.moveToObject('.torrent.bbb'))
+    .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.wait())
     .then(() => app.client.click('.icon.play'))
     .then(() => setup.wait(10e3))
@@ -23,6 +23,8 @@ test('basic-streaming', function (t) {
     .then(() => app.webContents.executeJavaScript('dispatch("escapeBack")'))
     .then(() => setup.wait())
     // Delete Big Buck Bunny
+    .then(() => app.client.moveToObject('.torrent'))
+    .then(() => setup.wait())
     .then(() => app.client.click('.icon.delete'))
     .then(() => setup.wait())
     .then(() => app.client.click('.control.ok'))

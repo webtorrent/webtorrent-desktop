@@ -2,6 +2,7 @@ const path = require('path')
 const Application = require('spectron').Application
 const fs = require('fs-extra')
 const parseTorrent = require('parse-torrent')
+const PNG = require('pngjs').PNG
 const config = require('./config')
 
 module.exports = {
@@ -78,7 +79,7 @@ function screenshotCreateOrCompare (app, t, name) {
       console.log('Saving screenshot ' + ssPath)
       fs.writeFileSync(ssPath, buffer)
     } else {
-      const match = Buffer.compare(buffer, ssBuf) === 0
+      const match = compareIgnoringTransparency(buffer, ssBuf)
       t.ok(match, 'screenshot comparison ' + name)
       if (!match) {
         const ssFailedPath = path.join(ssDir, name + '-failed.png')
@@ -87,6 +88,30 @@ function screenshotCreateOrCompare (app, t, name) {
       }
     }
   })
+}
+
+// Compares two PNGs, ignoring any transparent regions in bufExpected.
+// Returns true if they match.
+function compareIgnoringTransparency (bufActual, bufExpected) {
+  // Common case: exact byte-for-byte match
+  if (Buffer.compare(bufActual, bufExpected) === 0) return true
+
+  // Otherwise, compare pixel by pixel
+  const pngA = PNG.sync.read(bufActual)
+  const pngE = PNG.sync.read(bufExpected)
+  if (pngA.width !== pngE.width || pngA.height !== pngE.height) return false
+  const w = pngA.width
+  const h = pngE.height
+  const da = pngA.data
+  const de = pngE.data
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4
+      if (de[i + 3] === 0) continue // Skip transparent pixels
+      if (da[i] !== de[i] || da[i + 1] !== de[i + 1] || da[i + 2] !== de[i + 2]) return false
+    }
+  }
+  return true
 }
 
 // Resets the test directory, containing config.json, torrents, downloads, etc
