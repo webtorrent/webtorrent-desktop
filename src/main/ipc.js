@@ -146,26 +146,6 @@ function init () {
   ipc.on('quitExternalPlayer', () => externalPlayer.kill())
 
   /**
-   * Test
-   */
-
-  ipc.on('testOffline', function (e, isOffline) {
-    log('Testing, network ' + (isOffline ? 'OFFLINE' : 'ONLINE'))
-    windows.webtorrent.send('wt-test-offline')
-
-    // TODO: this easy way to disable networking doesn't work due to a Chrome bug.
-    // WebRTC is unaffected by DevTools throttling:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=490143
-    // Also doesn't work due to an Electron bug. Node networking APIs are unaffected, only
-    // Chrome networking (external resources, XHRs, etc) are affected.
-    // const wins = [windows.main.win, windows.webtorrent.win]
-    // wins.forEach(function (win) {
-    //   if (isOffline) win.webContents.session.enableNetworkEmulation({ offline: true })
-    //   else win.webContents.session.disableNetworkEmulation()
-    // !})
-  })
-
-  /**
    * Message passing
    */
 

@@ -36,8 +36,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-hover'))
     // Click download on the first torrent, start downloading
     .then(() => app.client.click('.icon.download'))
-    .then(() => app.client.waitUntilTextExists('.torrent-list', 'peer'))
-    .then(() => setup.wait(100e3))
+    .then(() => app.client.waitUntilTextExists('.torrent-list', '0%'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-start-download'))
     // Click download on the first torrent again, stop downloading
     .then(() => app.client.click('.icon.download'))

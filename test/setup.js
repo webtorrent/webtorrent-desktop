@@ -35,17 +35,13 @@ function waitForLoad (app, t, opts) {
   return app.start().then(function () {
     return app.client.waitUntilWindowLoaded()
   }).then(function () {
-    // Offline mode? Disable internet in the webtorrent window
-    // TODO. For now, just run integration tests with internet turned off.
-    // Spectron is poorly documented, and contrary to the docs, webContents.session is missing
-    // That is the correct API (in theory) to put the app in offline mode
+    // Offline mode
+    if (opts.offline) app.webContents.executeJavaScript('testOfflineMode()')
   }).then(function () {
     // Switch to the main window. Index 0 is apparently the hidden webtorrent window...
     return app.client.windowByIndex(1)
   }).then(function () {
     return app.client.waitUntilWindowLoaded()
-  }).then(function () {
-    if (!opts.online) app.electron.ipcRenderer.send('testOffline', true)
   }).then(function () {
     return app.webContents.getTitle()
   }).then(function (title) {

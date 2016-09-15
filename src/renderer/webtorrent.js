@@ -95,20 +95,6 @@ function init () {
   ipc.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
 
-  // TODO: remove this once the following bugs are fixed:
-  // https://bugs.chromium.org/p/chromium/issues/detail?id=490143
-  // https://github.com/electron/electron/issues/7212
-  ipc.on('wt-test-offline', () => {
-    console.log('Test, going OFFLINE')
-    client = window.client = new WebTorrent({
-      peerId: PEER_ID,
-      tracker: false,
-      dht: false,
-      webSeeds: false
-    })
-    listenToClientEvents()
-  })
-
   ipc.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
@@ -417,4 +403,18 @@ function getTorrent (torrentKey) {
 
 function onError (err) {
   console.log(err)
+}
+
+// TODO: remove this once the following bugs are fixed:
+// https://bugs.chromium.org/p/chromium/issues/detail?id=490143
+// https://github.com/electron/electron/issues/7212
+window.testOfflineMode = function () {
+  console.log('Test, going OFFLINE')
+  client = window.client = new WebTorrent({
+    peerId: PEER_ID,
+    tracker: false,
+    dht: false,
+    webSeeds: false
+  })
+  listenToClientEvents()
 }
