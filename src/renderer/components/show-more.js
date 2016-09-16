@@ -1,6 +1,6 @@
 const React = require('react')
 
-const FlatButton = require('material-ui/FlatButton').default
+const RaisedButton = require('material-ui/RaisedButton').default
 
 class ShowMore extends React.Component {
   static get propTypes () {
@@ -41,7 +41,7 @@ class ShowMore extends React.Component {
     return (
       <div style={this.props.style}>
         {this.state.expanded ? this.props.children : null}
-        <FlatButton
+        <RaisedButton
           onClick={this.handleClick}
           label={label} />
       </div>
