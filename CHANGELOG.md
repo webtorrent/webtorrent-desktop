@@ -1,5 +1,20 @@
 # WebTorrent Desktop Version History
 
+## v0.15.0 - 2016-09-16
+
+### Added
+- Option to start automatically on login
+- Add integration tests
+- Add more detailed telemetry to diagnose "buffer allocation failed"
+
+### Changed
+- Disable playback controls while in external player (#909)
+
+### Fixed
+- Fix several uncaught errors (#889, #891, #892)
+- Update to the latest webtorrent.js, fixing some more uncaught errors
+- Clicking on the "torrent finished" notification works again (#912)
+
 ## v0.14.0 - 2016-09-03
 
 ### Added
