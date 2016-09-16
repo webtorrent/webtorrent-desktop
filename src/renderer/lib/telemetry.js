@@ -29,7 +29,8 @@ function init (state) {
   telemetry.localTime = now.toTimeString()
   telemetry.screens = getScreenInfo()
   telemetry.system = getSystemInfo()
-  telemetry.approxNumTorrents = getApproxNumTorrents(state)
+  telemetry.torrentStats = getTorrentStats(state)
+  telemetry.approxNumTorrents = telemetry.torrentStats.approxCount
 
   if (config.IS_PRODUCTION) {
     postToServer()
@@ -104,18 +105,63 @@ function getSystemInfo () {
     osPlatform: process.platform,
     osRelease: os.type() + ' ' + os.release(),
     architecture: os.arch(),
-    totalMemoryMB: os.totalmem() / (1 << 20),
+    totalMemoryMB: roundPow2(os.totalmem() / (1 << 20)),
     numCores: os.cpus().length
   }
 }
 
-// Get the number of torrents, rounded to the nearest power of two
-function getApproxNumTorrents (state) {
-  const exactNum = state.saved.torrents.length
-  if (exactNum === 0) return 0
+// Get stats like the # of torrents currently active, # in list, total size
+function getTorrentStats (state) {
+  const count = state.saved.torrents.length
+  let sizeMB = 0
+  let byStatus = {
+    new: { count: 0, sizeMB: 0 },
+    downloading: { count: 0, sizeMB: 0 },
+    seeding: { count: 0, sizeMB: 0 },
+    paused: { count: 0, sizeMB: 0 }
+  }
+
+  // First, count torrents & total file size
+  for (let i = 0; i < count; i++) {
+    const t = state.saved.torrents[i]
+    const stat = byStatus[t.status]
+    if (!t || !t.files || !stat) continue
+    stat.count++
+    for (let j = 0; j < t.files.length; j++) {
+      const f = t.files[j]
+      if (!f || !f.length) continue
+      const fileSizeMB = f.length / (1 << 20)
+      sizeMB += fileSizeMB
+      stat.sizeMB += fileSizeMB
+    }
+  }
+
+  // Then, round all the counts and sums to the nearest power of 2
+  const ret = roundTorrentStats({count, sizeMB})
+  ret.byStatus = {
+    new: roundTorrentStats(byStatus.new),
+    downloading: roundTorrentStats(byStatus.downloading),
+    seeding: roundTorrentStats(byStatus.seeding),
+    paused: roundTorrentStats(byStatus.paused)
+  }
+  return ret
+}
+
+function roundTorrentStats (stats) {
+  return {
+    approxCount: roundPow2(stats.count),
+    approxSizeMB: roundPow2(stats.sizeMB)
+  }
+}
+
+// Rounds to the nearest power of 2, for privacy and easy bucketing.
+// Rounds 35 to 32, 70 to 64, 5 to 4, 1 to 1, 0 to 0.
+// Supports nonnegative numbers only.
+function roundPow2 (n) {
+  if (n <= 0) return 0
   // Otherwise, return 1, 2, 4, 8, etc by rounding in log space
-  const log2 = Math.log(exactNum) / Math.log(2)
-  return 1 << Math.round(log2)
+  const log2 = Math.log(n) / Math.log(2)
+  return Math.pow(2, Math.round(log2))
 }
 
 // An uncaught error happened in the main process or in one of the windows
