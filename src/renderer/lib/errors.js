@@ -35,10 +35,6 @@ class TorrentKeyNotFoundError extends TorrentError {
 
 class InvalidTorrentError extends TorrentError {}
 
-/* Miscellaneous */
-
-class IllegalArgumentError extends ExtendableError {}
-
 module.exports = {
   CastingError,
   PlaybackError,
@@ -49,6 +45,5 @@ module.exports = {
   PlaybackTimedOutError,
   InvalidSoundNameError,
   TorrentKeyNotFoundError,
-  InvalidTorrentError,
-  IllegalArgumentError
+  InvalidTorrentError
 }

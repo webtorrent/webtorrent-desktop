@@ -1,6 +1,6 @@
 module.exports = torrentPoster
 
-const captureVideoFrame = require('./capture-video-frame')
+const captureFrame = require('capture-frame')
 const path = require('path')
 
 function torrentPoster (torrent, cb) {
@@ -61,7 +61,7 @@ function torrentPosterFromVideo (file, torrent, cb) {
     function onSeeked () {
       video.removeEventListener('seeked', onSeeked)
 
-      const buf = captureVideoFrame(video)
+      const buf = captureFrame(video)
 
       // unload video element
       video.pause()
