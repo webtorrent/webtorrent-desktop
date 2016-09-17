@@ -11,7 +11,8 @@ const windows = require('./windows')
 
 const AUTO_UPDATE_URL = config.AUTO_UPDATE_URL +
   '?version=' + config.APP_VERSION +
-  '&platform=' + process.platform
+  '&platform=' + process.platform +
+  '&sysarch=' + config.OS_SYSARCH
 
 function init () {
   if (process.platform === 'linux') {

@@ -105,6 +105,7 @@ function getSystemInfo () {
     osPlatform: process.platform,
     osRelease: os.type() + ' ' + os.release(),
     architecture: os.arch(),
+    systemArchitecture: config.OS_SYSARCH,
     totalMemoryMB: roundPow2(os.totalmem() / (1 << 20)),
     numCores: os.cpus().length
   }
