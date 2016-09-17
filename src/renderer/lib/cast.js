@@ -33,6 +33,15 @@ function init (appState, callback) {
   state = appState
   update = callback
 
+  // Don't actually cast during integration tests
+  // (Otherwise you'd need a physical Chromecast + AppleTV + DLNA TV to run them.)
+  if (config.IS_TEST) {
+    state.devices.chromecast = testPlayer('chromecast')
+    state.devices.airplay = testPlayer('airplay')
+    state.devices.dlna = testPlayer('dlna')
+    return
+  }
+
   // Load modules, scan the network for devices
   airplayer = require('airplayer')()
   chromecasts = require('chromecasts')()
@@ -56,6 +65,32 @@ function init (appState, callback) {
   airplayer.on('update', function (device) {
     state.devices.airplay.addDevice(device)
   })
+}
+
+// integration test player implementation
+function testPlayer (type) {
+  return {
+    getDevices,
+    open,
+    play,
+    pause,
+    stop,
+    status,
+    seek,
+    volume
+  }
+
+  function getDevices () {
+    return [{name: type + '-1'}, {name: type + '-2'}]
+  }
+
+  function open () {}
+  function play () {}
+  function pause () {}
+  function stop () {}
+  function status () {}
+  function seek () {}
+  function volume () {}
 }
 
 // chromecast player implementation

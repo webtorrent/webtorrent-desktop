@@ -6,6 +6,7 @@ const zeroFill = require('zero-fill')
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
+const config = require('../../config')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 module.exports = class Player extends React.Component {
@@ -585,6 +586,8 @@ function renderPlayerControls (state) {
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be 'spongey' / non-contiguous
 function renderLoadingBar (state) {
+  if (config.IS_TEST) return // Don't integration test the loading bar. Screenshots won't match.
+
   const torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
     return []
