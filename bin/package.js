@@ -462,8 +462,8 @@ function buildWin32 (cb) {
 
           // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
           fs.renameSync(
-            path.join(DIST_PATH, `${BUILD_NAME}-full.nupkg`),
-            path.join(DIST_PATH, `${BUILD_NAME}-ia32-full.nupkg`)
+            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
+            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
           )
 
           // Change file name inside RELEASES-ia32 to match renamed file
