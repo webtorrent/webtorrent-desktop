@@ -1,5 +1,6 @@
 const appConfig = require('application-config')('WebTorrent')
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const electron = require('electron')
 
@@ -9,7 +10,7 @@ const APP_VERSION = require('../package.json').version
 
 const IS_TEST = isTest()
 const PORTABLE_PATH = IS_TEST
-  ? path.join(__dirname, '../test/tempTestData')
+  ? path.join(process.platform === 'win32' ? os.tmpdir() : '/tmp', 'WebTorrentTest')
   : path.join(path.dirname(process.execPath), 'Portable Settings')
 const IS_PORTABLE = isPortable()
 const IS_PRODUCTION = isProduction()
