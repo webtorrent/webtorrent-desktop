@@ -468,8 +468,13 @@ function buildWin32 (cb) {
 
           // Change file name inside RELEASES-ia32 to match renamed file
           var relContent = fs.readFileSync(relPath, 'utf8')
-          relContent = relContent.replace(/full\.nupkg$/, '-ia32-full.nupkg')
-          fs.writeFileSync(relPath, relContent)
+          var relContent32 = relContent.replace(/full\.nupkg$/, '-ia32-full.nupkg')
+          fs.writeFileSync(relPath, relContent32)
+
+          if (relContent === relContent32) {
+            // Sanity check
+            throw new Error('Fixing RELEASE-ia32 failed. Replacement did not modify the file.')
+          }
 
           console.log('Windows: Renamed ia32 installer files.')
         }
