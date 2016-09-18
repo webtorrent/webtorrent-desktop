@@ -1,5 +1,12 @@
 # WebTorrent Desktop Version History
 
+## v0.16.0 - 2016-09-18
+
+### Added
+- **Windows 64-bit support!**
+  - Existing 32-bit users will update to 64-bit automatically in next release
+  - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
+
 ## v0.15.0 - 2016-09-16
 
 ### Added
