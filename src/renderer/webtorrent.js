@@ -56,8 +56,10 @@ const VERSION_PREFIX = '-WD' + VERSION_STR + '-'
 
 /**
  * Generate an ephemeral peer ID each time.
- * TODO: once there are around 2^24 = ~8 million WebTorrent Desktops online at the same time,
- *       ID collisions will start happening. Birthday paradox. Can we use more than six bytes?
+ * Once there are around 2^24 = ~8 million WebTorrent Desktops online at the same time,
+ * ID collisions will start happening. Birthday paradox.
+ * This is fine, though. Bad peers can already clone someone else's peer ID.
+ * The network is robust to occasional collisions.
  */
 const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
 
@@ -166,7 +168,7 @@ function addTorrentEvents (torrent) {
   function torrentReady () {
     const info = getTorrentInfo(torrent)
     ipc.send('wt-ready', torrent.key, info)
-    ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info) // TODO: hack
+    ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info)
 
     updateTorrentProgress()
   }
