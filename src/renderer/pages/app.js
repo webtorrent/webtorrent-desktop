@@ -27,8 +27,8 @@ const fontFamily = process.platform === 'win32'
   : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
 lightBaseTheme.fontFamily = fontFamily
 darkBaseTheme.fontFamily = fontFamily
-darkBaseTheme.palette.primary1Color = colors.cyan500
-darkBaseTheme.palette.primary2Color = colors.cyan500
+darkBaseTheme.palette.primary1Color = '#ffffff'
+darkBaseTheme.palette.primary2Color = '#ffffff'
 darkBaseTheme.palette.primary3Color = colors.grey600
 darkBaseTheme.palette.accent1Color = colors.redA200
 darkBaseTheme.palette.accent2Color = colors.redA400

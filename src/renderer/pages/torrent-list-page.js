@@ -1,5 +1,6 @@
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
+const Checkbox = require('material-ui/Checkbox').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
@@ -168,6 +169,7 @@ module.exports = class TorrentList extends React.Component {
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
+    const isActive = ['downloading', 'seeding'].includes(torrentSummary.status)
 
     let playIcon, playTooltip, playClass
     if (torrentSummary.playStatus === 'timeout') {
@@ -178,29 +180,18 @@ module.exports = class TorrentList extends React.Component {
       playTooltip = 'Start streaming'
     }
 
-    let downloadIcon, downloadTooltip
-    if (torrentSummary.status === 'seeding') {
-      downloadIcon = 'file_upload'
-      downloadTooltip = 'Seeding. Click to stop.'
-    } else if (torrentSummary.status === 'downloading') {
-      downloadIcon = 'file_download'
-      downloadTooltip = 'Torrenting. Click to stop.'
-    } else {
-      downloadIcon = 'file_download'
-      downloadTooltip = 'Click to start torrenting.'
-    }
+    let downloadTooltip = uppercase(torrentSummary.status)
 
     // Only show the play/dowload buttons for torrents that contain playable media
-    let playButton, downloadButton, positionElem
+    let playButton, downloadCheckbox, positionElem
     if (!torrentSummary.error) {
-      downloadButton = (
-        <i
+      downloadCheckbox = (
+        <Checkbox
           key='download-button'
-          className={'button-round icon download ' + torrentSummary.status}
-          title={downloadTooltip}
-          onClick={dispatcher('toggleTorrent', infoHash)}>
-          {downloadIcon}
-        </i>
+          className={'download ' + torrentSummary.status}
+          label={downloadTooltip}
+          checked={isActive}
+          onCheck={dispatcher('toggleTorrent', infoHash)} />
       )
 
       // Do we have a saved position? Show it using a radial progress bar on top
@@ -219,7 +210,7 @@ module.exports = class TorrentList extends React.Component {
           <i
             key='play-button'
             title={playTooltip}
-            className={'button-round icon play ' + playClass}
+            className={'icon play ' + playClass}
             onClick={dispatcher('playFile', infoHash)}>
             {playIcon}
           </i>
@@ -228,10 +219,8 @@ module.exports = class TorrentList extends React.Component {
     }
 
     return (
-      <div key='buttons' className='buttons'>
-        {positionElem}
+      <div className='torrent-controls'>
         {playButton}
-        {downloadButton}
         <i
           key='delete-button'
           className='icon delete'
@@ -239,6 +228,7 @@ module.exports = class TorrentList extends React.Component {
           onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
+        {downloadCheckbox}
       </div>
     )
   }
@@ -373,6 +363,11 @@ module.exports = class TorrentList extends React.Component {
       </div>
     )
   }
+}
+
+// Takes "foo bar", returns "Foo bar"
+function uppercase (str) {
+  return str.slice(0, 1).toUpperCase() + str.slice(1)
 }
 
 function getErrorMessage (torrentSummary) {
