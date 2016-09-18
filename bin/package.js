@@ -451,26 +451,25 @@ function buildWin32 (cb) {
           })
 
         if (destArch === 'ia32') {
-          /**
-           * Rename ia32 Squirrel files to contain "-ia32". Specifically:
-           *   - RELEASES -> RELEASES-ia32
-           *   - WebTorrent-x.x.x-delta.nupkg -> WebTorrent-x.x.x-delta-ia32.nupkg
-           *   - WebTorrent-x.x.x-full.nupkg -> WebTorrent-x.x.x-full-ia32.nupkg
-           */
           console.log('Windows: Renaming ia32 installer files...')
 
+          // RELEASES -> RELEASES-ia32
+          var relPath = path.join(DIST_PATH, 'RELEASES-ia32')
           fs.renameSync(
             path.join(DIST_PATH, 'RELEASES'),
-            path.join(DIST_PATH, 'RELEASES-ia32')
+            relPath
           )
-          fs.readdirSync(DIST_PATH)
-            .filter((filename) => filename.endsWith('.nupkg'))
-            .forEach((filename) => {
-              fs.renameSync(
-                path.join(DIST_PATH, filename),
-                path.join(DIST_PATH, filename.replace(/\.nupkg$/, '-ia32.nupkg'))
-              )
-            })
+
+          // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
+          fs.renameSync(
+            path.join(DIST_PATH, `${config.BUILD_NAME}-full.nupkg`),
+            path.join(DIST_PATH, `${config.BUILD_NAME}-ia32-full.nupkg`)
+          )
+
+          // Change file name inside RELEASES-ia32 to match renamed file
+          var relContent = fs.readFileSync(relPath, 'utf8')
+          relContent = relContent.replace(/full\.nupkg$/, '-ia32-full.nupkg')
+          fs.writeFileSync(relPath, relContent)
 
           console.log('Windows: Renamed ia32 installer files.')
         }
