@@ -112,7 +112,7 @@ var darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build 64 bit binaries only.
+  // Build x64 binaries only.
   arch: 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
@@ -133,8 +133,8 @@ var win32 = {
   // Build for Windows.
   platform: 'win32',
 
-  // Build 32 bit binaries only.
-  arch: 'ia32',
+  // Build ia32 and x64 binaries.
+  arch: 'all',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   'version-string': {
@@ -167,7 +167,7 @@ var linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build 32 and 64 bit binaries.
+  // Build ia32 and x64 binaries.
   arch: 'all'
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
@@ -388,19 +388,25 @@ function buildWin32 (cb) {
     }
 
     var tasks = []
-    if (argv.package === 'exe' || argv.package === 'all') {
-      tasks.push((cb) => packageInstaller(cb))
-    }
-    if (argv.package === 'portable' || argv.package === 'all') {
-      tasks.push((cb) => packagePortable(cb))
-    }
+    buildPath.forEach(function (filesPath) {
+      var destArch = filesPath.split('-').pop()
+
+      if (argv.package === 'exe' || argv.package === 'all') {
+        tasks.push((cb) => packageInstaller(filesPath, destArch, cb))
+      }
+      if (argv.package === 'portable' || argv.package === 'all') {
+        tasks.push((cb) => packagePortable(filesPath, destArch, cb))
+      }
+    })
     series(tasks, cb)
 
-    function packageInstaller (cb) {
-      console.log('Windows: Creating installer...')
+    function packageInstaller (filesPath, destArch, cb) {
+      console.log(`Windows: Creating ${destArch} installer...`)
+
+      var archStr = destArch === 'ia32' ? '-ia32' : ''
 
       installer.createWindowsInstaller({
-        appDirectory: buildPath[0],
+        appDirectory: filesPath,
         authors: config.APP_TEAM,
         description: config.APP_NAME,
         exe: config.APP_NAME + '.exe',
@@ -410,8 +416,21 @@ function buildWin32 (cb) {
         noMsi: true,
         outputDirectory: DIST_PATH,
         productName: config.APP_NAME,
-        remoteReleases: config.GITHUB_URL,
-        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+        /**
+         * Only create delta updates for the Windows x64 build because 90% of our
+         * users have Windows x64 and the delta files take a *very* long time to
+         * generate. Also, the ia32 files on GitHub have non-standard Squirrel
+         * names (i.e. RELEASES-ia32 instead of RELEASES) and so Squirrel won't
+         * find them unless we proxy the requests.
+         */
+        remoteReleases: destArch === 'x64'
+          ? config.GITHUB_URL
+          : undefined,
+        /**
+         * If you hit a "GitHub API rate limit exceeded" error, set this token!
+         */
+        remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + archStr + '.exe',
         setupIcon: config.APP_ICON + '.ico',
         signWithParams: signWithParams,
         title: config.APP_NAME,
@@ -419,23 +438,65 @@ function buildWin32 (cb) {
         version: pkg.version
       })
       .then(function () {
-        console.log('Windows: Created installer.')
+        console.log(`Windows: Created ${destArch} installer.`)
+
+        /**
+         * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
+         * versions of the app)
+         */
+        fs.readdirSync(DIST_PATH)
+          .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
+          .forEach((filename) => {
+            fs.unlinkSync(path.join(DIST_PATH, filename))
+          })
+
+        if (destArch === 'ia32') {
+          console.log('Windows: Renaming ia32 installer files...')
+
+          // RELEASES -> RELEASES-ia32
+          var relPath = path.join(DIST_PATH, 'RELEASES-ia32')
+          fs.renameSync(
+            path.join(DIST_PATH, 'RELEASES'),
+            relPath
+          )
+
+          // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
+          fs.renameSync(
+            path.join(DIST_PATH, `${BUILD_NAME}-full.nupkg`),
+            path.join(DIST_PATH, `${BUILD_NAME}-ia32-full.nupkg`)
+          )
+
+          // Change file name inside RELEASES-ia32 to match renamed file
+          var relContent = fs.readFileSync(relPath, 'utf8')
+          var relContent32 = relContent.replace(/full\.nupkg$/, '-ia32-full.nupkg')
+          fs.writeFileSync(relPath, relContent32)
+
+          if (relContent === relContent32) {
+            // Sanity check
+            throw new Error('Fixing RELEASE-ia32 failed. Replacement did not modify the file.')
+          }
+
+          console.log('Windows: Renamed ia32 installer files.')
+        }
+
         cb(null)
       })
       .catch(cb)
     }
 
-    function packagePortable (cb) {
-      console.log('Windows: Creating portable app...')
+    function packagePortable (filesPath, destArch, cb) {
+      console.log(`Windows: Creating ${destArch} portable app...`)
 
-      var portablePath = path.join(buildPath[0], 'Portable Settings')
+      var portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
 
-      var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
-      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
+      var archStr = destArch === 'ia32' ? '-ia32' : ''
+
+      var inPath = path.join(DIST_PATH, path.basename(filesPath))
+      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log('Windows: Created portable app.')
+      console.log(`Windows: Created ${destArch} portable app.`)
       cb(null)
     }
   })
@@ -500,8 +561,10 @@ function buildLinux (cb) {
     // Create .zip file for Linux
     console.log(`Linux: Creating ${destArch} zip...`)
 
+    var archStr = destArch === 'ia32' ? '-ia32' : ''
+
     var inPath = path.join(DIST_PATH, path.basename(filesPath))
-    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
+    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
     zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)
