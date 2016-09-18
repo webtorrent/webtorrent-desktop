@@ -7,6 +7,9 @@
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 
+### Fixed
+- Mac: Fix background image on .DMG
+
 ## v0.15.0 - 2016-09-16
 
 ### Added
