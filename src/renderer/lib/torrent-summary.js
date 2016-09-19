@@ -53,5 +53,6 @@ function getByKey (state, torrentKey) {
 function getFileOrFolder (torrentSummary) {
   const ts = torrentSummary
   if (!ts.path || !ts.files || ts.files.length === 0) return null
-  return path.join(ts.path, ts.files[0].path.split('/')[0])
+  const dirname = ts.files[0].path.split(path.sep)[0]
+  return path.join(ts.path, dirname)
 }
