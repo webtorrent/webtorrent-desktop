@@ -28,6 +28,7 @@ test('add-torrent', function (t) {
       path.join(config.TEST_DIR_DOWNLOAD, 'm3.jpg')))
     .then(() => app.electron.ipcRenderer.send('openTorrentFile'))
     .then(() => app.client.waitUntilTextExists('m3.jpg'))
+    .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'add-torrent-100-percent'))
     .then(() => setup.endTest(app, t),
