@@ -288,6 +288,7 @@ function setupIpc () {
   ipcRenderer.on('dispatch', (e, ...args) => dispatch(...args))
 
   ipcRenderer.on('fullscreenChanged', onFullscreenChanged)
+  ipcRenderer.on('windowBoundsChanged', onWindowBoundsChanged)
 
   const tc = controllers.torrent
   ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
@@ -460,6 +461,11 @@ function onFullscreenChanged (e, isFullScreen) {
   }
 
   update()
+}
+
+function onWindowBoundsChanged (e, newBounds) {
+  state.saved.bounds = newBounds
+  dispatch('saveStateThrottled')
 }
 
 function checkDownloadPath () {

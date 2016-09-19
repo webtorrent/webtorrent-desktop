@@ -23,13 +23,13 @@ const log = require('../log')
 const menu = require('../menu')
 const tray = require('../tray')
 
-const HEADER_HEIGHT = 38
-const TORRENT_HEIGHT = 100
-
-function init (options) {
+function init (state, options) {
   if (main.win) {
     return main.win.show()
   }
+
+  const initialBounds = Object.assign(config.DEFAULT_BOUNDS, state.saved.bounds)
+
   const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
@@ -39,14 +39,16 @@ function init (options) {
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
-    width: 500,
-    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6), // header height + 5 torrents
-    show: !options.hidden
+    show: !options.hidden,
+    width: initialBounds.width,
+    height: initialBounds.height,
+    x: initialBounds.x,
+    y: initialBounds.y
   })
 
   win.loadURL(config.WINDOW_MAIN)
 
-  if (win.setSheetOffset) win.setSheetOffset(HEADER_HEIGHT)
+  if (win.setSheetOffset) win.setSheetOffset(config.UI_HEADER_HEIGHT)
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen(main.win.isFullScreen())
@@ -68,6 +70,14 @@ function init (options) {
     menu.onToggleFullScreen(false)
     send('fullscreenChanged', false)
     win.setMenuBarVisibility(true)
+  })
+
+  win.on('move', function (e) {
+    send('windowBoundsChanged', e.sender.getBounds())
+  })
+
+  win.on('resize', function (e) {
+    send('windowBoundsChanged', e.sender.getBounds())
   })
 
   win.on('close', function (e) {
