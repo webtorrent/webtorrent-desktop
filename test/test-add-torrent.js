@@ -1,5 +1,4 @@
 const test = require('tape')
-const fs = require('fs-extra')
 const path = require('path')
 const setup = require('./setup')
 const config = require('./config')
@@ -23,7 +22,7 @@ test('add-torrent', function (t) {
     .then(() => app.client.waitUntilTextExists('REMOVE'))
     .then(() => app.client.click('.control.ok'))
     // Add the same existing torrent, this time with the file present. Should be at 100%
-    .then(() => fs.copySync(
+    .then(() => setup.copy(
       path.join(__dirname, 'resources', 'm3.jpg'),
       path.join(config.TEST_DIR_DOWNLOAD, 'm3.jpg')))
     .then(() => app.electron.ipcRenderer.send('openTorrentFile'))
@@ -39,7 +38,7 @@ test('create-torrent', function (t) {
   setup.resetTestDataDir()
 
   // Set up the files to seed
-  fs.copySync(path.join(__dirname, 'resources', 'm3.jpg'), config.SEED_FILES[0])
+  setup.copy(path.join(__dirname, 'resources', 'm3.jpg'), config.SEED_FILES[0])
 
   t.timeoutAfter(30e3)
   const app = setup.createApp()

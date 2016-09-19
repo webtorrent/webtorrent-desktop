@@ -15,7 +15,8 @@ module.exports = {
   waitForLoad,
   wait,
   resetTestDataDir,
-  deleteTestDataDir
+  deleteTestDataDir,
+  copy
 }
 
 // Runs WebTorrent Desktop.
@@ -97,6 +98,7 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
   if (Buffer.compare(bufActual, bufExpected) === 0) return true
 
   // Otherwise, compare pixel by pixel
+  let sumSquareDiff = 0
   const pngA = PNG.sync.read(bufActual)
   const pngE = PNG.sync.read(bufExpected)
   if (pngA.width !== pngE.width || pngA.height !== pngE.height) return false
@@ -108,10 +110,21 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4
       if (de[i + 3] === 0) continue // Skip transparent pixels
-      if (da[i] !== de[i] || da[i + 1] !== de[i + 1] || da[i + 2] !== de[i + 2]) return false
+      const ca = (da[i] << 16) | (da[i + 1] << 8) | da[i + 2]
+      const ce = (de[i] << 16) | (de[i + 1] << 8) | de[i + 2]
+      if (ca === ce) continue
+
+      // Add pixel diff to running sum
+      // This is necessary on Windows, where rendering apparently isn't quite deterministic
+      // and a few pixels in the screenshot will sometimes be off by 1. (Visually identical.)
+      sumSquareDiff += (da[i] - de[i]) * (da[i] - de[i])
+      sumSquareDiff += (da[i + 1] - de[i + 1]) * (da[i + 1] - de[i + 1])
+      sumSquareDiff += (da[i + 2] - de[i + 2]) * (da[i + 2] - de[i + 2])
     }
   }
-  return true
+  const l2Distance = Math.round(Math.sqrt(sumSquareDiff))
+  console.log('screenshot diff l2 distance: ' + l2Distance)
+  return l2Distance < 100
 }
 
 // Resets the test directory, containing config.json, torrents, downloads, etc
@@ -133,6 +146,9 @@ function compareDownloadFolder (t, dirname, filenames) {
   const dirpath = path.join(config.TEST_DIR_DOWNLOAD, dirname)
   try {
     const actualFilenames = fs.readdirSync(dirpath)
+    if (filenames === null) {
+      return t.fail('expected download folder to be absent, but it\'s here: ' + dirpath)
+    }
     const expectedSorted = filenames.slice().sort()
     const actualSorted = actualFilenames.slice().sort()
     t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
@@ -167,4 +183,14 @@ function extractImportantFields (parsedTorrent) {
   const { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
   return { infoHash, name, announce, urlList, comment, 'private': priv }
+}
+
+function copy (pathFrom, pathTo) {
+  try {
+    fs.copySync(pathFrom, pathTo)
+  } catch (e) {
+    // Windows sometimes gives us an EPERM error even tho the copy happened...
+    if (process.platform !== 'win32' || e.code !== 'EPERM') throw e
+    console.log('ignoring windows copy EPERM error', e)
+  }
 }

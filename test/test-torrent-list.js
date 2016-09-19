@@ -83,6 +83,7 @@ test('torrent-list: expand torrent, unselect file', function (t) {
     // Start the torrent
     .then(() => app.client.click('#torrent-cosmos .icon.download'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'peers'))
+    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-cosmos-expand-start'))
     // Make sure that it creates all files EXCEPT the deslected one
     .then(() => setup.compareDownloadFolder(t, 'CosmosLaundromatFirstCycle', [
