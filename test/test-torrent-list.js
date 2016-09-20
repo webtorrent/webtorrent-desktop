@@ -28,7 +28,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
   setup.resetTestDataDir()
 
   const app = setup.createApp()
-  setup.waitForLoad(app, t, {offline: true})
+  setup.waitForLoad(app, t)
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Mouse over the first torrent
     .then(() => app.client.moveToObject('.torrent'))
@@ -66,7 +66,7 @@ test('torrent-list: expand torrent, unselect file', function (t) {
   setup.resetTestDataDir()
 
   const app = setup.createApp()
-  setup.waitForLoad(app, t, {offline: true})
+  setup.waitForLoad(app, t)
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Mouse over the torrent
     .then(() => app.client.moveToObject('#torrent-cosmos'))

@@ -38,7 +38,7 @@ function waitForLoad (app, t, opts) {
     return app.client.waitUntilWindowLoaded()
   }).then(function () {
     // Offline mode
-    if (opts.offline) app.webContents.executeJavaScript('testOfflineMode()')
+    if (!opts.online) app.webContents.executeJavaScript('testOfflineMode()')
   }).then(function () {
     // Switch to the main window. Index 0 is apparently the hidden webtorrent window...
     return app.client.windowByIndex(1)
