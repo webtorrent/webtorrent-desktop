@@ -39,9 +39,9 @@ function build () {
   rimraf.sync(DIST_PATH)
   rimraf.sync(BUILD_PATH)
 
-  console.log('Babel: Building JSX...')
+  console.log('Build: Transpiling to ES5...')
   cp.execSync('npm run build', { NODE_ENV: 'production', stdio: 'inherit' })
-  console.log('Babel: Built JSX.')
+  console.log('Build: Transpiled to ES5.')
 
   var platform = argv._[0]
   if (platform === 'darwin') {

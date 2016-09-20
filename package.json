@@ -49,11 +49,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-plugin-syntax-jsx": "^6.13.0",
-    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
-    "babel-plugin-transform-object-rest-spread": "^6.8.0",
-    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "buble": "^0.14.0",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
     "electron-osx-sign": "^0.3.0",
@@ -99,14 +95,14 @@
     "url": "git://github.com/feross/webtorrent-desktop.git"
   },
   "scripts": {
-    "build": "babel --quiet src --out-dir build",
+    "build": "buble src --output build",
     "clean": "node ./bin/clean.js",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
     "integration-test": "npm run build && node ./test",
-    "test": "standard && depcheck --ignores=babel-cli,nodemon,gh-release --ignore-dirs=build,dist && node ./bin/extra-lint.js",
+    "test": "standard && depcheck --ignores=buble,nodemon,gh-release --ignore-dirs=build,dist && node ./bin/extra-lint.js",
     "gh-release": "gh-release",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,pug,css"
