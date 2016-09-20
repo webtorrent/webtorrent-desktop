@@ -14,6 +14,7 @@ test('torrent-list: show download path missing', function (t) {
     .then((text) => console.log('Title ' + text))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Download path missing'))
     .then((err) => t.notOk(err))
+    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-download-path-missing'))
     .then(() => app.client.click('a'))
     .then(() => setup.wait())

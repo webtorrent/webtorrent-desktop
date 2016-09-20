@@ -12,16 +12,16 @@ test('audio-streaming', function (t) {
     .then(() => app.client.moveToObject('#torrent-wired'))
     .then(() => setup.wait())
     .then(() => app.client.click('#torrent-wired .icon.play'))
-    .then(() => app.client.waitUntilTextExists('The Wired CD'))
+    .then(() => app.client.waitUntilTextExists('.player', 'The Wired CD'))
     // Pause. Skip to two seconds in. Wait another two seconds for it to load.
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
     .then(() => setup.wait())
-    .then(() => app.client.waitUntilTextExists('Artist'))
+    .then(() => app.client.waitUntilTextExists('.player', 'Artist'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired'))
     // Click next
     .then(() => app.client.click('.skip-next'))
-    .then(() => app.client.waitUntilTextExists('The Wired CD'))
+    .then(() => app.client.waitUntilTextExists('.player', 'David Byrne'))
     .then(() => app.client.moveToObject('.letterbox'))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
@@ -30,7 +30,8 @@ test('audio-streaming', function (t) {
     // Play from end of song, let it advance on its own
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 206)'))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
-    .then(() => setup.wait(5e3)) // Let it play a few seconds, past the end of the song
+    // Play past the end of the song, then pause after the start of the next song by Zap Mama
+    .then(() => app.client.waitUntilTextExists('.player', 'Zap Mama'), 15e3)
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
     .then(() => setup.wait())
@@ -45,7 +46,7 @@ test('audio-streaming', function (t) {
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-4'))
     // Back. Return to torrent list
     .then(() => app.client.click('.back'))
-    .then(() => app.client.waitUntilTextExists('Big Buck Bunny'))
+    .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-list'))
     // Forward. Should play again where we left off (should not stay paused)
     .then(() => app.client.click('.forward'))
