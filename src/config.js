@@ -93,13 +93,13 @@ let cfg = {
   WINDOW_MAIN: 'file://' + path.join(__dirname, '..', 'static', 'main.html'),
   WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, '..', 'static', 'webtorrent.html'),
 
-  WINDOW_MIN_HEIGHT: 38 + (120 * 2), // header height + 2 torrents
   WINDOW_MIN_WIDTH: 425,
 
   UI_HEADER_HEIGHT: 38,
   UI_TORRENT_HEIGHT: 100
 }
 
+cfg.WINDOW_MIN_HEIGHT = cfg.UI_HEADER_HEIGHT + (cfg.UI_TORRENT_HEIGHT * 2) // header + 2 torrents
 cfg.DEFAULT_BOUNDS = {
   width: 500,
   height: cfg.UI_HEADER_HEIGHT + (cfg.UI_TORRENT_HEIGHT * (cfg.DEFAULT_TORRENTS.length + 1))
