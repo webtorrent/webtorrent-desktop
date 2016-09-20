@@ -126,7 +126,7 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
   }
   const l2Distance = Math.round(Math.sqrt(sumSquareDiff))
   console.log('screenshot diff l2 distance: ' + l2Distance)
-  return l2Distance < 100
+  return l2Distance < 2000
 }
 
 // Resets the test directory, containing config.json, torrents, downloads, etc
@@ -191,7 +191,10 @@ function copy (pathFrom, pathTo) {
   try {
     fs.copySync(pathFrom, pathTo)
   } catch (e) {
-    // Windows sometimes gives us an EPERM error even tho the copy happened...
+    // There is a bug in either node or `fs-extra` on windows
+    // Windows lets us create files and folders under C:\Windows\Temp,
+    // but when you try to `copySync` into one of those folders, you get EPERM
+    // Ignore for now...
     if (process.platform !== 'win32' || e.code !== 'EPERM') throw e
     console.log('ignoring windows copy EPERM error', e)
   }
