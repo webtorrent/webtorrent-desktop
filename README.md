@@ -76,7 +76,11 @@ The integration tests use Spectron and Tape. They click through the app, taking 
 * Small UI changes will break a few tests, but the fix is as easy as deleting the offending screenshots and running the tests, which will recreate them with the new look.
 * The resulting Github PR will then show, pixel by pixel, the exact UI changes that were made! Ses https://github.com/blog/817-behold-image-view-modes
 
-For MacOS, you'll need a Retina screen for the integration tests to pass.
+For MacOS, you'll need a Retina screen for the integration tests to pass. Your screen should have the same resolution as a 2016 12" Macbook.
+
+For Windows, you'll need Windows 10 with a 1366x768 screen.
+
+When running integration tests, keep the mouse on the edge of the screen and don't touch the mouse or keyboard while the tests are running.
 
 ### Package the app
 
