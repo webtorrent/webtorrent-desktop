@@ -75,7 +75,9 @@ function screenshotCreateOrCompare (app, t, name) {
   const ssPath = path.join(ssDir, name + '.png')
   fs.ensureFileSync(ssPath)
   const ssBuf = fs.readFileSync(ssPath)
-  return app.browserWindow.capturePage().then(function (buffer) {
+  return wait().then(function () {
+    return app.browserWindow.capturePage()
+  }).then(function (buffer) {
     if (ssBuf.length === 0) {
       console.log('Saving screenshot ' + ssPath)
       fs.writeFileSync(ssPath, buffer)

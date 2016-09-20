@@ -17,7 +17,7 @@ test('audio-streaming', function (t) {
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
     .then(() => setup.wait())
-    .then(() => app.client.waitUntilTextExists('.player', 'Artist'))
+    .then(() => app.client.waitUntilTextExists('.player', 'Beastie Boys'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired'))
     // Click next
     .then(() => app.client.click('.skip-next'))
@@ -25,7 +25,6 @@ test('audio-streaming', function (t) {
     .then(() => app.client.moveToObject('.letterbox'))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-2'))
     // Play from end of song, let it advance on its own
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 206)'))
@@ -34,15 +33,12 @@ test('audio-streaming', function (t) {
     .then(() => app.client.waitUntilTextExists('.player', 'Zap Mama'), 15e3)
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-3'))
     // Fullscreen
     .then(() => app.client.click('.fullscreen'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-fullscreen'))
     // Back to normal audio view. Give the player controls have had time to disappear.
     .then(() => app.webContents.executeJavaScript('dispatch("escapeBack")'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-4'))
     // Back. Return to torrent list
     .then(() => app.client.click('.back'))
@@ -53,7 +49,6 @@ test('audio-streaming', function (t) {
     .then(() => setup.wait())
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-5'))
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))

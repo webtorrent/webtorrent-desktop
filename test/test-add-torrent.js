@@ -28,7 +28,6 @@ test('add-torrent', function (t) {
     .then(() => app.electron.ipcRenderer.send('openTorrentFile'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'm3.jpg'))
     .then(() => app.client.moveToObject('.torrent'))
-    .then(() => setup.wait())
     .then(() => setup.screenshotCreateOrCompare(app, t, 'add-torrent-100-percent'))
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))
@@ -55,6 +54,7 @@ test('create-torrent', function (t) {
     // Click OK to create the torrent
     .then(() => app.client.click('.control.create-torrent'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'tmp.jpg'))
+    .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'create-torrent-100-percent'))
     // Click "Save Torrent File As..." on the new torrent
     .then(() => app.webContents.executeJavaScript(

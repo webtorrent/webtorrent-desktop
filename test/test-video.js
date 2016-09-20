@@ -28,7 +28,6 @@ test('video-streaming', function (t) {
     .then(() => app.client.click('.icon.delete'))
     .then(() => setup.wait())
     .then(() => app.client.click('.control.ok'))
-    .then(() => setup.wait())
     // Take another screenshot to verify that the window resized correctly
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-return'))
     .then(() => setup.endTest(app, t),
