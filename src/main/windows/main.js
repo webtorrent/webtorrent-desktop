@@ -28,7 +28,7 @@ function init (state, options) {
     return main.win.show()
   }
 
-  const initialBounds = Object.assign(config.DEFAULT_BOUNDS, state.saved.bounds)
+  const initialBounds = Object.assign(config.WINDOW_INITIAL_BOUNDS, state.saved.bounds)
 
   const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
