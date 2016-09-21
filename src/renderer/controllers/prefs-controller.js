@@ -55,7 +55,7 @@ module.exports = class PrefsController {
       ipcRenderer.send('setStartup', state.unsaved.prefs.startup)
     }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
-    dispatch('saveState')
+    dispatch('stateSaveImmediate')
     dispatch('checkDownloadPath')
   }
 }

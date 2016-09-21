@@ -257,8 +257,8 @@ const dispatchHandlers = {
   'onOpen': onOpen,
   'error': onError,
   'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
-  'saveState': () => State.save(state),
-  'saveStateThrottled': () => State.saveThrottled(state),
+  'stateSave': () => State.save(state),
+  'stateSaveImmediate': () => State.saveImmediate(state),
   'update': () => {} // No-op, just trigger an update
 }
 
@@ -308,7 +308,7 @@ function setupIpc () {
 
   ipcRenderer.send('ipcReady')
 
-  State.on('savedState', () => ipcRenderer.send('savedState'))
+  State.on('stateSaved', () => ipcRenderer.send('stateSaved'))
 }
 
 // Quits any modal popovers and returns to the torrent list screen
@@ -465,7 +465,7 @@ function onFullscreenChanged (e, isFullScreen) {
 
 function onWindowBoundsChanged (e, newBounds) {
   state.saved.bounds = newBounds
-  dispatch('saveStateThrottled')
+  dispatch('stateSave')
 }
 
 function checkDownloadPath () {
