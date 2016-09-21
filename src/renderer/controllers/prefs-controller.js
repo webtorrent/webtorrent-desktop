@@ -1,4 +1,3 @@
-const State = require('../lib/state')
 const {dispatch} = require('../lib/dispatcher')
 const ipcRenderer = require('electron').ipcRenderer
 
@@ -56,7 +55,7 @@ module.exports = class PrefsController {
       ipcRenderer.send('setStartup', state.unsaved.prefs.startup)
     }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
-    State.save(state)
+    dispatch('saveState')
     dispatch('checkDownloadPath')
   }
 }
