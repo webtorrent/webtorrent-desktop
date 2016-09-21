@@ -14,11 +14,14 @@ const PORTABLE_PATH = IS_TEST
 const IS_PORTABLE = isPortable()
 const IS_PRODUCTION = isProduction()
 
+const UI_HEADER_HEIGHT = 38
+const UI_TORRENT_HEIGHT = 100
+
 console.log('Production: %s portable: %s test: %s',
   IS_PRODUCTION, IS_PORTABLE, IS_TEST)
 if (IS_PORTABLE) console.log('Portable path: %s', PORTABLE_PATH)
 
-let cfg = {
+module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
@@ -92,19 +95,16 @@ let cfg = {
   WINDOW_MAIN: 'file://' + path.join(__dirname, '..', 'static', 'main.html'),
   WINDOW_WEBTORRENT: 'file://' + path.join(__dirname, '..', 'static', 'webtorrent.html'),
 
+  WINDOW_INITIAL_BOUNDS: {
+    width: 500,
+    height: UI_HEADER_HEIGHT + (UI_TORRENT_HEIGHT * 6) // header + 6 torrents
+  },
+  WINDOW_MIN_HEIGHT: UI_HEADER_HEIGHT + (UI_TORRENT_HEIGHT * 2), // header + 2 torrents
   WINDOW_MIN_WIDTH: 425,
 
-  UI_HEADER_HEIGHT: 38,
-  UI_TORRENT_HEIGHT: 100
+  UI_HEADER_HEIGHT: UI_HEADER_HEIGHT,
+  UI_TORRENT_HEIGHT: UI_TORRENT_HEIGHT
 }
-
-cfg.WINDOW_MIN_HEIGHT = cfg.UI_HEADER_HEIGHT + (cfg.UI_TORRENT_HEIGHT * 2) // header + 2 torrents
-cfg.DEFAULT_BOUNDS = {
-  width: 500,
-  height: cfg.UI_HEADER_HEIGHT + (cfg.UI_TORRENT_HEIGHT * (cfg.DEFAULT_TORRENTS.length + 1))
-}
-
-module.exports = cfg
 
 function getConfigPath () {
   if (IS_PORTABLE) {
