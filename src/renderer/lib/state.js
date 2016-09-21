@@ -1,15 +1,18 @@
 const appConfig = require('application-config')('WebTorrent')
+const debounce = require('debounce')
 const path = require('path')
 const {EventEmitter} = require('events')
 
 const config = require('../../config')
 const migrations = require('./migrations')
 
+const SAVE_THROTTLED_INTERVAL = 1000
+
 const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   save,
-  saveThrottled
+  saveThrottled: debounce(save, SAVE_THROTTLED_INTERVAL)
 })
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
@@ -199,7 +202,6 @@ function load (cb) {
 // Write state.saved to the JSON state file
 function save (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
-  delete state.saveStateTimeout
 
   // Clean up, so that we're not saving any pending state
   const copy = Object.assign({}, state.saved)
@@ -228,13 +230,4 @@ function save (state, cb) {
     if (err) console.error(err)
     else State.emit('savedState')
   })
-}
-
-// Write, but no more than once a second
-function saveThrottled (state) {
-  if (state.saveStateTimeout) return
-  state.saveStateTimeout = setTimeout(function () {
-    if (!state.saveStateTimeout) return
-    save(state)
-  }, 1000)
 }
