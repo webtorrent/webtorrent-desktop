@@ -27,7 +27,8 @@ function createApp (t) {
     path: path.join(__dirname, '..', 'node_modules', '.bin',
       'electron' + (process.platform === 'win32' ? '.cmd' : '')),
     args: ['-r', path.join(__dirname, 'mocks.js'), path.join(__dirname, '..')],
-    env: {NODE_ENV: 'test'}
+    env: {NODE_ENV: 'test'},
+    waitTimeout: 10e3
   })
 }
 
@@ -101,6 +102,7 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
 
   // Otherwise, compare pixel by pixel
   let sumSquareDiff = 0
+  let numDiff = 0
   const pngA = PNG.sync.read(bufActual)
   const pngE = PNG.sync.read(bufExpected)
   if (pngA.width !== pngE.width || pngA.height !== pngE.height) return false
@@ -119,14 +121,16 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
       // Add pixel diff to running sum
       // This is necessary on Windows, where rendering apparently isn't quite deterministic
       // and a few pixels in the screenshot will sometimes be off by 1. (Visually identical.)
+      numDiff++
       sumSquareDiff += (da[i] - de[i]) * (da[i] - de[i])
       sumSquareDiff += (da[i + 1] - de[i + 1]) * (da[i + 1] - de[i + 1])
       sumSquareDiff += (da[i + 2] - de[i + 2]) * (da[i + 2] - de[i + 2])
     }
   }
+  const rms = Math.sqrt(sumSquareDiff / (numDiff + 1))
   const l2Distance = Math.round(Math.sqrt(sumSquareDiff))
-  console.log('screenshot diff l2 distance: ' + l2Distance)
-  return l2Distance < 2000
+  console.log('screenshot diff l2 distance: ' + l2Distance + ', rms: ' + rms)
+  return l2Distance < 4000 && rms < 100
 }
 
 // Resets the test directory, containing config.json, torrents, downloads, etc

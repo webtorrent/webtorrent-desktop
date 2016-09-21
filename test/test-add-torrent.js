@@ -45,11 +45,11 @@ test('create-torrent', function (t) {
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Click the + button, open a non-torrent file to seed
     .then(() => app.client.click('.icon.add'))
-    .then(() => app.client.waitUntilTextExists('.create-torrent', 'Create'))
+    .then(() => app.client.waitUntilTextExists('h1', 'Create'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'create-torrent-simple'))
     // Click to show advanced settings
     .then(() => app.client.click('.show-more .control'))
-    .then(() => app.client.waitUntilTextExists('.create-torrent', 'Comment'))
+    .then(() => app.client.waitUntilTextExists('.create-torrent-advanced', 'Comment'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'create-torrent-advanced'))
     // Click OK to create the torrent
     .then(() => app.client.click('.control.create-torrent'))

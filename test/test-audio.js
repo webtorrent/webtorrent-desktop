@@ -22,7 +22,6 @@ test('audio-streaming', function (t) {
     // Click next
     .then(() => app.client.click('.skip-next'))
     .then(() => app.client.waitUntilTextExists('.player', 'David Byrne'))
-    .then(() => setup.wait(5e3))
     .then(() => app.client.moveToObject('.letterbox'))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
@@ -31,8 +30,7 @@ test('audio-streaming', function (t) {
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 206)'))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     // Play past the end of the song, then pause after the start of the next song by Zap Mama
-    .then(() => app.client.waitUntilTextExists('.player', 'Zap Mama'), 15e3)
-    .then(() => setup.wait(5e3))
+    .then(() => app.client.waitUntilTextExists('.player', 'Zap Mama', 15e3))
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-3'))
