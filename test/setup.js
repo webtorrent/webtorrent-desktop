@@ -11,6 +11,7 @@ module.exports = {
   screenshotCreateOrCompare,
   compareDownloadFolder,
   compareFiles,
+  compareTorrentFile,
   compareTorrentFiles,
   waitForLoad,
   wait,
@@ -182,6 +183,13 @@ function compareTorrentFiles (t, pathActual, pathExpected) {
   const bufExpected = fs.readFileSync(pathExpected)
   const fieldsActual = extractImportantFields(parseTorrent(bufActual))
   const fieldsExpected = extractImportantFields(parseTorrent(bufExpected))
+  t.deepEqual(fieldsActual, fieldsExpected, 'torrent contents: ' + pathActual)
+}
+
+// Makes sure two torrents have the same infohash and flags
+function compareTorrentFile (t, pathActual, fieldsExpected) {
+  const bufActual = fs.readFileSync(pathActual)
+  const fieldsActual = extractImportantFields(parseTorrent(bufActual))
   t.deepEqual(fieldsActual, fieldsExpected, 'torrent contents: ' + pathActual)
 }
 

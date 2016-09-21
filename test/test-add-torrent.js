@@ -36,6 +36,24 @@ test('add-torrent', function (t) {
 test('create-torrent', function (t) {
   setup.resetTestDataDir()
 
+  const expectedTorrent = {
+    announce: [
+      'udp://exodus.desync.com:6969',
+      'udp://tracker.coppersurfer.tk:6969',
+      'udp://tracker.internetwarriors.net:1337',
+      'udp://tracker.leechers-paradise.org:6969',
+      'udp://tracker.openbittorrent.com:80',
+      'wss://tracker.btorrent.xyz',
+      'wss://tracker.fastcast.nz',
+      'wss://tracker.openwebtorrent.com'
+    ],
+    comment: undefined,
+    infoHash: '4b087858a32e31a0d313b5f9e0a2e13c08c5403f',
+    name: 'tmp.jpg',
+    private: false,
+    urlList: []
+  }
+
   // Set up the files to seed
   setup.copy(path.join(__dirname, 'resources', 'm3.jpg'), config.SEED_FILES[0])
 
@@ -61,9 +79,9 @@ test('create-torrent', function (t) {
       'dispatch("saveTorrentFileAs", 6)'))
     .then(() => setup.wait())
     // Mock saves to <temp folder>/Desktop/saved.torrent
-    .then(() => setup.compareTorrentFiles(t,
+    .then(() => setup.compareTorrentFile(t,
       config.SAVED_TORRENT_FILE,
-      path.join(__dirname, 'resources', 'expected-single-file.torrent')))
+      expectedTorrent))
     .then(() => setup.endTest(app, t),
           (err) => setup.endTest(app, t, err || 'error'))
 })
