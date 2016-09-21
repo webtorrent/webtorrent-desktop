@@ -107,7 +107,7 @@ function init () {
     setTimeout(() => {
       console.error('Saving state took too long. Quitting.')
       app.quit()
-    }, 2000) // quit after 2 secs, at most
+    }, 4000) // quit after 4 secs, at most
   })
 
   app.on('activate', function () {
