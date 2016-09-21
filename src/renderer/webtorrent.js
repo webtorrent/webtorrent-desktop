@@ -348,9 +348,11 @@ function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
   musicmetadata(file.createReadStream(), function (err, info) {
-    if (err) return
-    console.log('got audio metadata for %s: %o', file.name, info)
-    ipc.send('wt-audio-metadata', infoHash, index, info)
+    if (err) return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
+    const { artist, album, albumartist, title, year, track, disk, genre } = info
+    const importantInfo = { artist, album, albumartist, title, year, track, disk, genre }
+    console.log('got audio metadata for %s: %o', file.name, importantInfo)
+    ipc.send('wt-audio-metadata', infoHash, index, importantInfo)
   })
 }
 

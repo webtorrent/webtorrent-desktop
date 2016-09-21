@@ -39,6 +39,10 @@ function run (state) {
     migrate_0_14_0(state.saved)
   }
 
+  if (semver.lt(version, '0.17.0')) {
+    migrate_0_17_0(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
@@ -143,5 +147,17 @@ function migrate_0_12_0 (saved) {
 function migrate_0_14_0 (saved) {
   saved.torrents.forEach(function (ts) {
     delete ts.defaultPlayFileIndex
+  })
+}
+
+function migrate_0_17_0 (saved) {
+  // Fix a sad, sad bug that resulted in 100MB+ config.json files
+  saved.torrents.forEach(function (ts) {
+    if (!ts.files) return
+    ts.files.forEach(function (file) {
+      if (!file.audioInfo || !file.audioInfo.picture) return
+      // This contained a Buffer, which 30x'd in size when serialized to JSON
+      delete file.audioInfo.picture
+    })
   })
 }
