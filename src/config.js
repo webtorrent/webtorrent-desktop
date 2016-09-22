@@ -85,7 +85,7 @@ module.exports = {
   IS_PRODUCTION: IS_PRODUCTION,
   IS_TEST: IS_TEST,
 
-  OS_SYSARCH: arch().replace('x86', 'ia32'),
+  OS_SYSARCH: arch() === 'x64' ? 'x64' : 'ia32',
 
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: path.join(__dirname, '..'),
