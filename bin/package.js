@@ -73,11 +73,11 @@ var all = {
   // Package the application's source code into an archive, using Electron's archive
   // format. Mitigates issues around long path names on Windows and slightly speeds up
   // require().
-  asar: true,
-
-  // A glob expression, that unpacks the files with matching names to the
-  // "app.asar.unpacked" directory.
-  'asar-unpack': 'WebTorrent*',
+  asar: {
+    // A glob expression, that unpacks the files with matching names to the
+    // "app.asar.unpacked" directory.
+    unpack: 'WebTorrent*'
+  },
 
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on Mac. Note: Windows requires the build version to
@@ -137,7 +137,7 @@ var win32 = {
   arch: 'all',
 
   // Object hash of application metadata to embed into the executable (Windows only)
-  'version-string': {
+  win32metadata: {
 
     // Company that produced the file.
     CompanyName: config.APP_NAME,
