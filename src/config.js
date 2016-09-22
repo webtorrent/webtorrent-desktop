@@ -2,6 +2,7 @@ const appConfig = require('application-config')('WebTorrent')
 const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
+const arch = require('arch')
 
 const APP_NAME = 'WebTorrent'
 const APP_TEAM = 'WebTorrent, LLC'
@@ -84,7 +85,7 @@ module.exports = {
   IS_PRODUCTION: IS_PRODUCTION,
   IS_TEST: IS_TEST,
 
-  OS_SYSARCH: is64BitOperatingSystem() ? 'x64' : 'ia32',
+  OS_SYSARCH: arch().replace('x86', 'ia32'),
 
   POSTER_PATH: path.join(getConfigPath(), 'Posters'),
   ROOT_PATH: path.join(__dirname, '..'),
@@ -160,33 +161,4 @@ function isProduction () {
   if (process.platform === 'linux') {
     return !/\/electron$/.test(process.execPath)
   }
-}
-
-/**
- * Returns the operating system's CPU architecture. This is different than
- * `process.arch` which returns the architecture the binary was compiled for.
- *
- * On Windows, the most reliable way to detect a 64-bit OS from within a 32-bit
- * app is based on the presence of a WOW64 file: %SystemRoot%\SysNative.
- *
- * Background: https://twitter.com/feross/status/776949077208510464
- */
-function is64BitOperatingSystem () {
-  // This is a 64-bit binary, so the OS clearly supports 64-bit apps
-  if (process.arch === 'x64') return true
-
-  let useEnv = false
-  try {
-    useEnv = !!(process.env.SYSTEMROOT && fs.statSync(process.env.SYSTEMROOT))
-  } catch (err) {}
-
-  let sysRoot = useEnv ? process.env.SYSTEMROOT : 'C:\\Windows'
-
-  // If %SystemRoot%\SysNative exists, we are in a WOW64 FS Redirected application.
-  let isWOW64 = false
-  try {
-    isWOW64 = !!fs.statSync(path.join(sysRoot, 'sysnative'))
-  } catch (err) {}
-
-  return isWOW64
 }
