@@ -68,8 +68,7 @@ class PreferencesPage extends React.Component {
 
     const description = this.props.state.unsaved.prefs.openExternalPlayer
       ? `Torrent media files will always play in ${playerName}.`
-      : `Torrent media files will play in ${playerName} if WebTorrent cannot ` +
-        'play them.'
+      : `Torrent media files will play in ${playerName} if WebTorrent cannot play them.`
 
     return (
       <Preference>
