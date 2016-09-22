@@ -6,18 +6,9 @@ const electron = require('electron')
 
 const app = electron.app
 
-const dialog = require('./dialog')
-const dock = require('./dock')
-const handlers = require('./handlers')
 const log = require('./log')
 const menu = require('./menu')
-const powerSaveBlocker = require('./power-save-blocker')
-const shell = require('./shell')
-const shortcuts = require('./shortcuts')
-const externalPlayer = require('./external-player')
 const windows = require('./windows')
-const thumbar = require('./thumbar')
-const startup = require('./startup')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 const messageQueueMainToWebTorrent = []
@@ -44,21 +35,37 @@ function init () {
    * Dialog
    */
 
-  ipc.on('openTorrentFile', () => dialog.openTorrentFile())
-  ipc.on('openFiles', () => dialog.openFiles())
+  ipc.on('openTorrentFile', () => {
+    const dialog = require('./dialog')
+    dialog.openTorrentFile()
+  })
+  ipc.on('openFiles', () => {
+    const dialog = require('./dialog')
+    dialog.openFiles()
+  })
 
   /**
    * Dock
    */
 
-  ipc.on('setBadge', (e, ...args) => dock.setBadge(...args))
-  ipc.on('downloadFinished', (e, ...args) => dock.downloadFinished(...args))
+  ipc.on('setBadge', (e, ...args) => {
+    const dock = require('./dock')
+    dock.setBadge(...args)
+  })
+  ipc.on('downloadFinished', (e, ...args) => {
+    const dock = require('./dock')
+    dock.downloadFinished(...args)
+  })
 
   /**
    * Events
    */
 
   ipc.on('onPlayerOpen', function () {
+    const powerSaveBlocker = require('./power-save-blocker')
+    const shortcuts = require('./shortcuts')
+    const thumbar = require('./thumbar')
+
     menu.togglePlaybackControls(true)
     powerSaveBlocker.enable()
     shortcuts.enable()
@@ -66,11 +73,17 @@ function init () {
   })
 
   ipc.on('onPlayerUpdate', function (e, ...args) {
+    const thumbar = require('./thumbar')
+
     menu.onPlayerUpdate(...args)
     thumbar.onPlayerUpdate(...args)
   })
 
   ipc.on('onPlayerClose', function () {
+    const powerSaveBlocker = require('./power-save-blocker')
+    const shortcuts = require('./shortcuts')
+    const thumbar = require('./thumbar')
+
     menu.togglePlaybackControls(false)
     powerSaveBlocker.disable()
     shortcuts.disable()
@@ -78,11 +91,17 @@ function init () {
   })
 
   ipc.on('onPlayerPlay', function () {
+    const powerSaveBlocker = require('./power-save-blocker')
+    const thumbar = require('./thumbar')
+
     powerSaveBlocker.enable()
     thumbar.onPlayerPlay()
   })
 
   ipc.on('onPlayerPause', function () {
+    const powerSaveBlocker = require('./power-save-blocker')
+    const thumbar = require('./thumbar')
+
     powerSaveBlocker.disable()
     thumbar.onPlayerPause()
   })
@@ -91,15 +110,26 @@ function init () {
    * Shell
    */
 
-  ipc.on('openItem', (e, ...args) => shell.openItem(...args))
-  ipc.on('showItemInFolder', (e, ...args) => shell.showItemInFolder(...args))
-  ipc.on('moveItemToTrash', (e, ...args) => shell.moveItemToTrash(...args))
+  ipc.on('openItem', (e, ...args) => {
+    const shell = require('./shell')
+    shell.openItem(...args)
+  })
+  ipc.on('showItemInFolder', (e, ...args) => {
+    const shell = require('./shell')
+    shell.showItemInFolder(...args)
+  })
+  ipc.on('moveItemToTrash', (e, ...args) => {
+    const shell = require('./shell')
+    shell.moveItemToTrash(...args)
+  })
 
   /**
    * File handlers
    */
 
   ipc.on('setDefaultFileHandler', (e, flag) => {
+    const handlers = require('./handlers')
+
     if (flag) handlers.install()
     else handlers.uninstall()
   })
@@ -109,6 +139,8 @@ function init () {
    */
 
   ipc.on('setStartup', (e, flag) => {
+    const startup = require('./startup')
+
     if (flag) startup.install()
     else startup.uninstall()
   })
@@ -132,18 +164,26 @@ function init () {
    */
 
   ipc.on('checkForExternalPlayer', function (e, path) {
+    const externalPlayer = require('./external-player')
+
     externalPlayer.checkInstall(path, function (isInstalled) {
       windows.main.send('checkForExternalPlayer', isInstalled)
     })
   })
 
   ipc.on('openExternalPlayer', (e, ...args) => {
+    const externalPlayer = require('./external-player')
+    const thumbar = require('./thumbar')
+
     menu.togglePlaybackControls(false)
     thumbar.disable()
     externalPlayer.spawn(...args)
   })
 
-  ipc.on('quitExternalPlayer', () => externalPlayer.kill())
+  ipc.on('quitExternalPlayer', () => {
+    const externalPlayer = require('./external-player')
+    externalPlayer.kill()
+  })
 
   /**
    * Message passing

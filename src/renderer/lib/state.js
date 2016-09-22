@@ -181,19 +181,18 @@ function getExternalPlayerName () {
 }
 
 function load (cb) {
-  const state = getDefaultState()
-
   appConfig.read(function (err, saved) {
     if (err || !saved.version) {
       console.log('Missing config file: Creating new one')
-      setupStateSaved(onSaved)
+      setupStateSaved(onSavedState)
     } else {
-      onSaved(null, saved)
+      onSavedState(null, saved)
     }
   })
 
-  function onSaved (err, saved) {
+  function onSavedState (err, saved) {
     if (err) return cb(err)
+    const state = getDefaultState()
     state.saved = saved
     migrations.run(state)
     cb(null, state)

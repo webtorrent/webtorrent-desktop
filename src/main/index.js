@@ -2,23 +2,15 @@ console.time('init')
 
 const electron = require('electron')
 const app = electron.app
-const ipcMain = electron.ipcMain
 
 const parallel = require('run-parallel')
 
-const announcement = require('./announcement')
 const config = require('../config')
 const crashReporter = require('../crash-reporter')
-const dialog = require('./dialog')
-const dock = require('./dock')
 const ipc = require('./ipc')
 const log = require('./log')
 const menu = require('./menu')
-const squirrelWin32 = require('./squirrel-win32')
 const State = require('../renderer/lib/state')
-const tray = require('./tray')
-const updater = require('./updater')
-const userTasks = require('./user-tasks')
 const windows = require('./windows')
 
 let shouldQuit = false
@@ -36,6 +28,7 @@ if (config.IS_PRODUCTION) {
 }
 
 if (process.platform === 'win32') {
+  const squirrelWin32 = require('./squirrel-win32')
   shouldQuit = squirrelWin32.handleEvent(argv[0])
   argv = argv.filter((arg) => !arg.includes('--squirrel'))
 }
@@ -57,6 +50,8 @@ function init () {
   if (config.IS_PORTABLE) {
     app.setPath('userData', config.CONFIG_PATH)
   }
+
+  const ipcMain = electron.ipcMain
 
   let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
@@ -121,6 +116,12 @@ function init () {
 }
 
 function delayedInit () {
+  const announcement = require('./announcement')
+  const dock = require('./dock')
+  const tray = require('./tray')
+  const updater = require('./updater')
+  const userTasks = require('./user-tasks')
+
   announcement.init()
   dock.init()
   tray.init()
@@ -169,12 +170,16 @@ function sliceArgv (argv) {
 function processArgv (argv) {
   let torrentIds = []
   argv.forEach(function (arg) {
-    if (arg === '-n') {
-      dialog.openSeedDirectory()
-    } else if (arg === '-o') {
-      dialog.openTorrentFile()
-    } else if (arg === '-u') {
-      dialog.openTorrentAddress()
+    if (arg === '-n' || arg === '-o' || arg === '-u') {
+      // Critical path: Only load the 'dialog' package if it is needed
+      const dialog = require('./dialog')
+      if (arg === '-n') {
+        dialog.openSeedDirectory()
+      } else if (arg === '-o') {
+        dialog.openTorrentFile()
+      } else if (arg === '-u') {
+        dialog.openTorrentAddress()
+      }
     } else if (arg === '--hidden') {
       // Ignore hidden argument, already being handled
     } else if (arg.startsWith('-psn')) {

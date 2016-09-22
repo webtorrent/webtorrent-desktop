@@ -13,8 +13,6 @@ const electron = require('electron')
 const app = electron.app
 
 const config = require('../config')
-const dialog = require('./dialog')
-const shell = require('./shell')
 const windows = require('./windows')
 
 let menu = null
@@ -90,17 +88,26 @@ function getMenuTemplate () {
             ? 'Create New Torrent...'
             : 'Create New Torrent from Folder...',
           accelerator: 'CmdOrCtrl+N',
-          click: () => dialog.openSeedDirectory()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openSeedDirectory()
+          }
         },
         {
           label: 'Open Torrent File...',
           accelerator: 'CmdOrCtrl+O',
-          click: () => dialog.openTorrentFile()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openTorrentFile()
+          }
         },
         {
           label: 'Open Torrent Address...',
           accelerator: 'CmdOrCtrl+U',
-          click: () => dialog.openTorrentAddress()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openTorrentAddress()
+          }
         },
         {
           type: 'separator'
@@ -277,18 +284,27 @@ function getMenuTemplate () {
       submenu: [
         {
           label: 'Learn more about ' + config.APP_NAME,
-          click: () => shell.openExternal(config.HOME_PAGE_URL)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.HOME_PAGE_URL)
+          }
         },
         {
           label: 'Contribute on GitHub',
-          click: () => shell.openExternal(config.GITHUB_URL)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL)
+          }
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: () => shell.openExternal(config.GITHUB_URL_ISSUES)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL_ISSUES)
+          }
         }
       ]
     }
@@ -361,7 +377,10 @@ function getMenuTemplate () {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
-      click: () => dialog.openSeedFile()
+      click: () => {
+        const dialog = require('./dialog')
+        dialog.openSeedFile()
+      }
     })
 
     // Edit menu (Windows, Linux)
