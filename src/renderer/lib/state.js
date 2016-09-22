@@ -1,15 +1,19 @@
 const appConfig = require('application-config')('WebTorrent')
+const debounce = require('debounce')
 const path = require('path')
 const {EventEmitter} = require('events')
 
 const config = require('../../config')
 const migrations = require('./migrations')
 
+const SAVE_DEBOUNCE_INTERVAL = 1000
+
 const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
-  save,
-  saveThrottled
+  // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
+  save: debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL),
+  saveImmediate
 })
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
@@ -98,7 +102,7 @@ function getDefaultPlayState () {
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function setupSavedState (cb) {
+function setupStateSaved (cb) {
   const fs = require('fs-extra')
   const parseTorrent = require('parse-torrent')
   const parallel = require('run-parallel')
@@ -182,7 +186,7 @@ function load (cb) {
   appConfig.read(function (err, saved) {
     if (err || !saved.version) {
       console.log('Missing config file: Creating new one')
-      setupSavedState(onSaved)
+      setupStateSaved(onSaved)
     } else {
       onSaved(null, saved)
     }
@@ -197,9 +201,8 @@ function load (cb) {
 }
 
 // Write state.saved to the JSON state file
-function save (state, cb) {
+function saveImmediate (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
-  delete state.saveStateTimeout
 
   // Clean up, so that we're not saving any pending state
   const copy = Object.assign({}, state.saved)
@@ -226,15 +229,6 @@ function save (state, cb) {
 
   appConfig.write(copy, (err) => {
     if (err) console.error(err)
-    else State.emit('savedState')
+    else State.emit('stateSaved')
   })
-}
-
-// Write, but no more than once a second
-function saveThrottled (state) {
-  if (state.saveStateTimeout) return
-  state.saveStateTimeout = setTimeout(function () {
-    if (!state.saveStateTimeout) return
-    save(state)
-  }, 1000)
 }

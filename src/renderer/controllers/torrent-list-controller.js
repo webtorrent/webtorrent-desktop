@@ -4,7 +4,6 @@ const electron = require('electron')
 
 const {dispatch} = require('../lib/dispatcher')
 const {TorrentKeyNotFoundError} = require('../lib/errors')
-const State = require('../lib/state')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
 
@@ -159,7 +158,7 @@ module.exports = class TorrentListController {
 
       // remove torrent from saved list
       this.state.saved.torrents.splice(index, 1)
-      State.saveThrottled(this.state)
+      dispatch('stateSave')
     }
 
     // prevent user from going forward to a deleted torrent

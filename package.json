@@ -22,6 +22,7 @@
     "capture-frame": "^1.0.0",
     "chromecasts": "^1.8.0",
     "create-torrent": "^3.24.5",
+    "debounce": "^1.0.0",
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^2.12.1",

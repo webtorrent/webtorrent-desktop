@@ -129,20 +129,20 @@ module.exports = class TorrentController {
     const torrentSummary = this.getTorrentSummary(torrentKey)
     if (!torrentSummary) throw new Error('Not saving modtimes for deleted torrent ' + torrentKey)
     torrentSummary.fileModtimes = fileModtimes
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentFileSaved (torrentKey, torrentFileName) {
     console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
     const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.torrentFileName = torrentFileName
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentPosterSaved (torrentKey, posterFileName) {
     const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.posterFileName = posterFileName
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentAudioMetadata (infoHash, index, info) {
