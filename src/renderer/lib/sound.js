@@ -7,7 +7,7 @@ const config = require('../../config')
 const {InvalidSoundNameError} = require('./errors')
 const path = require('path')
 
-const VOLUME = 0.15
+const VOLUME = 0.3
 
 /* Cache of Audio elements, for instant playback */
 const cache = {}
@@ -19,7 +19,7 @@ const sounds = {
   },
   DELETE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'delete.wav'),
-    volume: VOLUME
+    volume: VOLUME * 0.5
   },
   DISABLE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'disable.wav'),
@@ -39,7 +39,7 @@ const sounds = {
   },
   PLAY: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'play.wav'),
-    volume: VOLUME
+    volume: VOLUME * 1.25
   },
   STARTUP: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'startup.wav'),
