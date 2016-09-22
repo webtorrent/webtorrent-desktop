@@ -4,6 +4,8 @@ const electron = require('electron')
 const app = electron.app
 const ipcMain = electron.ipcMain
 
+const parallel = require('run-parallel')
+
 const announcement = require('./announcement')
 const config = require('../config')
 const crashReporter = require('../crash-reporter')
@@ -60,23 +62,17 @@ function init () {
   app.ipcReady = false // main window has finished loading and IPC is ready
   app.isQuitting = false
 
-  // Open handlers must be added as early as possible
-  app.on('open-file', onOpen)
-  app.on('open-url', onOpen)
+  parallel({
+    appReady: (cb) => app.on('ready', () => cb(null)),
+    state: (cb) => State.load(cb)
+  }, onReady)
 
-  ipc.init()
+  function onReady (err, results) {
+    if (err) throw err
 
-  app.once('will-finish-launching', function () {
-    crashReporter.init()
-  })
-
-  app.on('ready', function () {
     isReady = true
 
-    State.load(function (err, state) {
-      if (err) throw err
-      windows.main.init(state, {hidden: hidden})
-    })
+    windows.main.init(results.state, {hidden: hidden})
     windows.webtorrent.init()
     menu.init()
 
@@ -89,6 +85,15 @@ function init () {
       const error = {message: err.message, stack: err.stack}
       windows.main.dispatch('uncaughtError', 'main', error)
     })
+  }
+
+  app.on('open-file', onOpen)
+  app.on('open-url', onOpen)
+
+  ipc.init()
+
+  app.once('will-finish-launching', function () {
+    crashReporter.init()
   })
 
   app.once('ipcReady', function () {
