@@ -174,7 +174,10 @@ module.exports = class TorrentList extends React.Component {
     }
 
     function renderTorrentStatus () {
-      return (<span>{capitalize(torrentSummary.status)}</span>)
+      let status = torrentSummary.status === 'paused'
+        ? 'Idle'
+        : capitalize(torrentSummary.status)
+      return (<span>{status}</span>)
     }
   }
 
