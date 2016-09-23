@@ -88,24 +88,49 @@ module.exports = class TorrentList extends React.Component {
     if (torrentSummary.error) {
       elements.push(
         <div key='progress-info' className='ellipsis'>
+          {renderDownloadCheckbox()}
+          {renderTorrentStatus()}
           {getErrorMessage(torrentSummary)}
         </div>
       )
     } else if (torrentSummary.status !== 'paused' && prog) {
       elements.push(
         <div key='progress-info' className='ellipsis'>
+          {renderDownloadCheckbox()}
+          {renderTorrentStatus()}
           {renderProgressBar()}
           {renderPercentProgress()}
           {renderTotalProgress()}
           {renderPeers()}
-          {renderDownloadSpeed()}
-          {renderUploadSpeed()}
+          {renderSpeeds()}
           {renderEta()}
+        </div>
+      )
+    } else {
+      elements.push(
+        <div key='progress-info' className='ellipsis'>
+          {renderDownloadCheckbox()}
+          {renderTorrentStatus()}
         </div>
       )
     }
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
+
+    function renderDownloadCheckbox () {
+      const infoHash = torrentSummary.infoHash
+      const isActive = ['downloading', 'seeding'].includes(torrentSummary.status)
+      return (
+        <Checkbox
+          key='download-button'
+          className={'download ' + torrentSummary.status}
+          style={{display: 'inline-block', width: '32px'}}
+          iconStyle={{width: '20px', height: '20px'}}
+          checked={isActive}
+          onClick={stopPropagation}
+          onCheck={dispatcher('toggleTorrent', infoHash)} />
+      )
+    }
 
     function renderProgressBar () {
       const progress = Math.floor(100 * prog.progress)
@@ -133,14 +158,12 @@ module.exports = class TorrentList extends React.Component {
       return (<span key='peers'>{prog.numPeers} {count}</span>)
     }
 
-    function renderDownloadSpeed () {
-      if (prog.downloadSpeed === 0) return
-      return (<span key='download'>↓ {prettyBytes(prog.downloadSpeed)}/s</span>)
-    }
-
-    function renderUploadSpeed () {
-      if (prog.uploadSpeed === 0) return
-      return (<span key='upload'>↑ {prettyBytes(prog.uploadSpeed)}/s</span>)
+    function renderSpeeds () {
+      let str = ''
+      if (prog.downloadSpeed > 0) str += prettySpeed(prog.downloadSpeed) + ' ↓ '
+      if (prog.uploadSpeed > 0) str += prettySpeed(prog.uploadSpeed) + ' ↑ '
+      if (str === '') return
+      return (<span key='download'>{str}</span>)
     }
 
     function renderEta () {
@@ -161,7 +184,11 @@ module.exports = class TorrentList extends React.Component {
       const minutesStr = (hours || minutes) ? minutes + 'm' : ''
       const secondsStr = seconds + 's'
 
-      return (<span>ETA: {hoursStr} {minutesStr} {secondsStr}</span>)
+      return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+    }
+
+    function renderTorrentStatus () {
+      return (<span>{capitalize(torrentSummary.status)}</span>)
     }
   }
 
@@ -169,53 +196,28 @@ module.exports = class TorrentList extends React.Component {
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
-    const isActive = ['downloading', 'seeding'].includes(torrentSummary.status)
 
-    let playIcon, playTooltip, playClass
+    let playIcon, playTooltip
     if (torrentSummary.playStatus === 'timeout') {
       playIcon = 'warning'
       playTooltip = 'Playback timed out. No seeds? No internet? Click to try again.'
     } else {
-      playIcon = 'play_arrow'
+      playIcon = 'play_circle_outline'
       playTooltip = 'Start streaming'
     }
 
-    let downloadTooltip = uppercase(torrentSummary.status)
-
     // Only show the play/dowload buttons for torrents that contain playable media
-    let playButton, downloadCheckbox, positionElem
-    if (!torrentSummary.error) {
-      downloadCheckbox = (
-        <Checkbox
-          key='download-button'
-          className={'download ' + torrentSummary.status}
-          label={downloadTooltip}
-          checked={isActive}
-          onCheck={dispatcher('toggleTorrent', infoHash)} />
+    let playButton
+    if (!torrentSummary.error && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
+      playButton = (
+        <i
+          key='play-button'
+          title={playTooltip}
+          className={'icon play'}
+          onClick={dispatcher('playFile', infoHash)}>
+          {playIcon}
+        </i>
       )
-
-      // Do we have a saved position? Show it using a radial progress bar on top
-      // of the play button, unless already showing a spinner there:
-      const willShowSpinner = torrentSummary.playStatus === 'requested'
-      const mostRecentFile = torrentSummary.files &&
-        torrentSummary.files[torrentSummary.mostRecentFileIndex]
-      if (mostRecentFile && mostRecentFile.currentTime && !willShowSpinner) {
-        const fraction = mostRecentFile.currentTime / mostRecentFile.duration
-        positionElem = this.renderRadialProgressBar(fraction, 'radial-progress-large')
-        playClass = 'resume-position'
-      }
-
-      if (TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-        playButton = (
-          <i
-            key='play-button'
-            title={playTooltip}
-            className={'icon play ' + playClass}
-            onClick={dispatcher('playFile', infoHash)}>
-            {playIcon}
-          </i>
-        )
-      }
     }
 
     return (
@@ -228,7 +230,6 @@ module.exports = class TorrentList extends React.Component {
           onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
           close
         </i>
-        {downloadCheckbox}
       </div>
     )
   }
@@ -365,8 +366,12 @@ module.exports = class TorrentList extends React.Component {
   }
 }
 
+function stopPropagation (e) {
+  e.stopPropagation()
+}
+
 // Takes "foo bar", returns "Foo bar"
-function uppercase (str) {
+function capitalize (str) {
   return str.slice(0, 1).toUpperCase() + str.slice(1)
 }
 
@@ -381,4 +386,9 @@ function getErrorMessage (torrentSummary) {
     )
   }
   return 'Error'
+}
+
+// Returns '1.9m', '205k', etc
+function prettySpeed (n) {
+  return prettyBytes(n).replace('B', '').toLowerCase()
 }

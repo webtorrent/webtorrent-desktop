@@ -338,20 +338,16 @@ textarea,
 }
 
 .torrent:not(:last-child) {
-  border-bottom: 1px solid rgb(20, 20, 20);
+  border-bottom: 1px solid #282828;
 }
 
 .torrent .metadata {
   position: absolute;
-  top: 25px;
+  top: 20px;
   left: 15px;
   right: 15px;
-  width: calc(100% - 40px);
+  width: calc(100% - 30px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
-}
-
-.torrent:hover .metadata {
-  width: calc(100% - 150px);
 }
 
 .torrent .metadata span:not(:last-child)::after {
@@ -361,28 +357,34 @@ textarea,
   padding-right: 4px;
 }
 
+.torrent:hover .metadata {
+  width: calc(100% - 120px);
+}
+
 .torrent .torrent-controls {
-  position: absolute;
-  top: 29px;
-  right: 10px;
-  align-items: center;
-  display: block /* TODO: none */;
+  display: none;
 }
 
 .torrent:hover .torrent-controls {
   display: block;
 }
 
-.torrent .buttons {
-  display: flex;
+.torrent .play {
+  position: absolute;
+  top: 23px;
+  right: 45px;
+  font-size: 55px;
 }
 
-.torrent .buttons > * {
-  margin-left: 6px; /* space buttons apart */
+.torrent .delete {
+  position: absolute;
+  top: 38px;
+  right: 12px;
 }
 
-.torrent .buttons .play {
-  font-size: 40px;
+.torrent .download {
+  vertical-align: -0.4em;
+  margin-left: -2px;
 }
 
 .torrent .buttons .radial-progress {
@@ -393,16 +395,19 @@ textarea,
   font-size: 20px;
   font-weight: bold;
   line-height: 1.5em;
+  margin-bottom: 6px;
 }
 
 progress {
   width: 60px;
   margin-right: 8px;
   -webkit-appearance: none;
+  opacity: 0.8;
 }
 
 progress::-webkit-progress-bar {
   background-color: #888;
+  border-radius: 2px;
 }
 
 progress::-webkit-progress-value {
