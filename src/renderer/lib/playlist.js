@@ -37,7 +37,9 @@ function getPreviousIndex (state) {
 }
 
 function getCurrentLocalURL (state) {
-  return state.server.localURL + '/' + state.playing.fileIndex
+  return state.server
+    ? state.server.localURL + '/' + state.playing.fileIndex
+    : ''
 }
 
 function updateCache (state) {
