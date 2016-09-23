@@ -56,12 +56,8 @@ const VERSION_PREFIX = '-WD' + VERSION_STR + '-'
 
 /**
  * Generate an ephemeral peer ID each time.
- * Once there are around 2^24 = ~8 million WebTorrent Desktops online at the same time,
- * ID collisions will start happening. Birthday paradox.
- * This is fine, though. Bad peers can already clone someone else's peer ID.
- * The network is robust to occasional collisions.
  */
-const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(6).toString('hex'))
+const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(9).toString('base64'))
 
 // Connect to the WebTorrent and BitTorrent networks. WebTorrent Desktop is a hybrid
 // client, as explained here: https://webtorrent.io/faq
