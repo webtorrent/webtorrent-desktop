@@ -152,26 +152,21 @@ module.exports = class PlaybackController {
   changePlaybackRate (direction) {
     const state = this.state
     let rate = state.playing.playbackRate
-    if (direction > 0 && rate >= 0.25 && rate < 2) {
+    if (direction > 0 && rate < 2) {
       rate += 0.25
     } else if (direction < 0 && rate > 0.25 && rate <= 2) {
       rate -= 0.25
-    } else if (direction < 0 && rate === 0.25) {
-      // When we set playback rate at 0 in html 5, playback hangs ;(
-      rate = -1
-    } else if (direction > 0 && rate === -1) {
-      rate = 0.25
-    } else if ((direction > 0 && rate >= 1 && rate < 16) ||
-      (direction < 0 && rate > -16 && rate <= -1)) {
+    } else if (direction > 0 && rate >= 1 && rate < 16) {
       rate *= 2
-    } else if ((direction < 0 && rate > 1 && rate <= 16) ||
-      (direction > 0 && rate >= -16 && rate < -1)) {
+    } else if (direction < 0 && rate > 1 && rate <= 16) {
       rate /= 2
     }
     state.playing.playbackRate = rate
     if (isCasting(state) && !Cast.setRate(rate)) {
       state.playing.playbackRate = 1
     }
+    // Wait a bit before we hide the controls and header again
+    state.playing.mouseStationarySince = new Date().getTime()
   }
 
   // Change the volume, in range [0, 1], by some amount
