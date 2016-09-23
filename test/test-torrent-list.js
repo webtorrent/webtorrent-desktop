@@ -7,7 +7,7 @@ test('torrent-list: show download path missing', function (t) {
   setup.resetTestDataDir()
   fs.removeSync(config.TEST_DIR_DOWNLOAD)
 
-  t.timeoutAfter(10e3)
+  t.timeoutAfter(20e3)
   const app = setup.createApp()
   setup.waitForLoad(app, t)
     .then(() => app.client.getTitle())
@@ -34,11 +34,11 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
     .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-hover'))
     // Click download on the first torrent, start downloading
-    .then(() => app.client.click('.icon.download'))
+    .then(() => app.client.click('.download input'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', '276 MB'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-start-download'))
     // Click download on the first torrent again, stop downloading
-    .then(() => app.client.click('.icon.download'))
+    .then(() => app.client.click('.download input'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-hover-download'))
     // Click delete on the first torrent
     .then(() => app.client.click('.icon.delete'))
@@ -72,7 +72,7 @@ test('torrent-list: expand torrent, unselect file', function (t) {
     .then(() => app.client.click('#torrent-cosmos .icon.deselect-file'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-cosmos-expand-deselect'))
     // Start the torrent
-    .then(() => app.client.click('#torrent-cosmos .icon.download'))
+    .then(() => app.client.click('#torrent-cosmos .download input'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', '0%'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-cosmos-expand-start'))
     // Make sure that it creates all files EXCEPT the deslected one
