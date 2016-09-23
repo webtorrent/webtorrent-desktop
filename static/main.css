@@ -630,14 +630,6 @@ body.drag .app::after {
   cursor: none;
 }
 
-/* TODO: find better way to handle this (that also
- * keeps the header visible too).
- */
-.app.hide-video-controls .player .controls:hover {
-  opacity: 1;
-  cursor: default;
-}
-
 /* invisible click target for scrubbing */
 .player .controls .scrub-bar {
   position: absolute;
