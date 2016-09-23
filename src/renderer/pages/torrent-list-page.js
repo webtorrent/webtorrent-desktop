@@ -83,35 +83,23 @@ module.exports = class TorrentList extends React.Component {
 
     // If it's downloading/seeding then show progress info
     const prog = torrentSummary.progress
+    const progElems = [renderDownloadCheckbox(), renderTorrentStatus()]
     if (torrentSummary.error) {
-      elements.push(
-        <div key='progress-info' className='ellipsis'>
-          {renderDownloadCheckbox()}
-          {renderTorrentStatus()}
-          {getErrorMessage(torrentSummary)}
-        </div>
-      )
+      progElems.push(getErrorMessage(torrentSummary))
     } else if (torrentSummary.status !== 'paused' && prog) {
-      elements.push(
-        <div key='progress-info' className='ellipsis'>
-          {renderDownloadCheckbox()}
-          {renderTorrentStatus()}
-          {renderProgressBar()}
-          {renderPercentProgress()}
-          {renderTotalProgress()}
-          {renderPeers()}
-          {renderSpeeds()}
-          {renderEta()}
-        </div>
-      )
-    } else {
-      elements.push(
-        <div key='progress-info' className='ellipsis'>
-          {renderDownloadCheckbox()}
-          {renderTorrentStatus()}
-        </div>
-      )
+      Array.prototype.push.call(progElems,
+        renderProgressBar(),
+        renderPercentProgress(),
+        renderTotalProgress(),
+        renderPeers(),
+        renderSpeeds(),
+        renderEta())
     }
+    elements.push(
+      <div key='progress-info' className='ellipsis'>
+        {progElems}
+      </div>
+    )
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
 
@@ -158,8 +146,8 @@ module.exports = class TorrentList extends React.Component {
 
     function renderSpeeds () {
       let str = ''
-      if (prog.downloadSpeed > 0) str += prettySpeed(prog.downloadSpeed) + ' ↓ '
-      if (prog.uploadSpeed > 0) str += prettySpeed(prog.uploadSpeed) + ' ↑ '
+      if (prog.downloadSpeed > 0) str += ' ↓ ' + prettyBytes(prog.downloadSpeed) + '/s'
+      if (prog.uploadSpeed > 0) str += ' ↑ ' + prettyBytes(prog.uploadSpeed) + '/s'
       if (str === '') return
       return (<span key='download'>{str}</span>)
     }
@@ -375,9 +363,4 @@ function getErrorMessage (torrentSummary) {
     )
   }
   return 'Error'
-}
-
-// Returns '1.9m', '205k', etc
-function prettySpeed (n) {
-  return prettyBytes(n).replace('B', '').toLowerCase()
 }
