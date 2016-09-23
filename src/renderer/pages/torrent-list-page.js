@@ -56,8 +56,6 @@ module.exports = class TorrentList extends React.Component {
     // Foreground: name of the torrent, basic info like size, play button,
     // cast buttons if available, and delete
     const classes = ['torrent']
-    //  playStatus turns the play button into a loading spinner or error icon
-    if (torrentSummary.playStatus) classes.push(torrentSummary.playStatus)
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     if (!torrentSummary.torrentKey) throw new InvalidTorrentError('Missing torrentKey')
@@ -197,25 +195,16 @@ module.exports = class TorrentList extends React.Component {
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
 
-    let playIcon, playTooltip
-    if (torrentSummary.playStatus === 'timeout') {
-      playIcon = 'warning'
-      playTooltip = 'Playback timed out. No seeds? No internet? Click to try again.'
-    } else {
-      playIcon = 'play_circle_outline'
-      playTooltip = 'Start streaming'
-    }
-
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton
     if (!torrentSummary.error && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
       playButton = (
         <i
           key='play-button'
-          title={playTooltip}
+          title='Start streaming'
           className={'icon play'}
           onClick={dispatcher('playFile', infoHash)}>
-          {playIcon}
+          play_circle_outline
         </i>
       )
     }

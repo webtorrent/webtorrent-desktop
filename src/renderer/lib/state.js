@@ -215,9 +215,6 @@ function saveImmediate (state, cb) {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
         }
-        if (key === 'playStatus') {
-          continue // Don't save whether a torrent is playing / pending
-        }
         if (key === 'error') {
           continue // Don't save error states
         }

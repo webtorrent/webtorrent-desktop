@@ -4,8 +4,7 @@ const path = require('path')
 const Cast = require('../lib/cast')
 const {dispatch} = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
-const {UnplayableFileError, UnplayableTorrentError,
-      PlaybackTimedOutError} = require('../lib/errors')
+const {UnplayableFileError, UnplayableTorrentError} = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -223,34 +222,11 @@ module.exports = class PlaybackController {
     state.playing.infoHash = torrentSummary.infoHash
 
     // update UI to show pending playback
-    if (torrentSummary.progress !== 1) sound.play('PLAY')
-    // TODO: remove torrentSummary.playStatus
-    torrentSummary.playStatus = 'requested'
-    this.update()
+    sound.play('PLAY')
 
-    const timeout = setTimeout(() => {
-      telemetry.logPlayAttempt('timeout')
-      // TODO: remove torrentSummary.playStatus
-      torrentSummary.playStatus = 'timeout' /* no seeders available? */
-      sound.play('ERROR')
-      cb(new PlaybackTimedOutError())
-      this.update()
-    }, 10000) /* give it a few seconds */
-
-    this.startServer(torrentSummary, () => {
-      clearTimeout(timeout)
-
-      // if we timed out (user clicked play a long time ago), don't autoplay
-      const timedOut = torrentSummary.playStatus === 'timeout'
-      delete torrentSummary.playStatus
-      if (timedOut) {
-        ipcRenderer.send('wt-stop-server')
-        return this.update()
-      }
-
-      ipcRenderer.send('onPlayerOpen')
-      this.updatePlayer(infoHash, index, true, cb)
-    })
+    this.startServer(torrentSummary)
+    ipcRenderer.send('onPlayerOpen')
+    this.updatePlayer(infoHash, index, true, cb)
   }
 
   // Starts WebTorrent server for media streaming
@@ -265,7 +241,6 @@ module.exports = class PlaybackController {
 
     function onTorrentReady () {
       ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
-      ipcRenderer.once('wt-server-' + torrentSummary.infoHash, () => cb())
     }
   }
 
