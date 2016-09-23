@@ -38,11 +38,15 @@ function init (state, options) {
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
-    show: !options.hidden,
+    show: false,
     width: initialBounds.width,
     height: initialBounds.height,
     x: initialBounds.x,
     y: initialBounds.y
+  })
+
+  win.once('ready-to-show', function () {
+    if (!options.hidden) win.show()
   })
 
   win.loadURL(config.WINDOW_MAIN)
