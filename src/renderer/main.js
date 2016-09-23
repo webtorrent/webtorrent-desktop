@@ -466,8 +466,10 @@ function onFullscreenChanged (e, isFullScreen) {
 }
 
 function onWindowBoundsChanged (e, newBounds) {
-  state.saved.bounds = newBounds
-  dispatch('stateSave')
+  if (state.location.url() !== 'player') {
+    state.saved.bounds = newBounds
+    dispatch('stateSave')
+  }
 }
 
 function checkDownloadPath () {
