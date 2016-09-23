@@ -1,5 +1,23 @@
 # WebTorrent Desktop Version History
 
+## v0.17.0 - 2016-09-23
+
+### Added
+- Remember window size and position
+
+### Changed
+- Torrent list redesign
+- Quieter, more subtle sounds
+- Got rid of the play button spinner, now goes to the player immediately
+- Faster startup
+
+### Fixed
+- Fix bug where playback rate could go negative
+- Don't hide header when moused over player controls
+- Fix Delete Data File on Windows
+- Fix a sad, sad bug that resulted in 100+ MB config files
+- Fix app DMG background image
+
 ## v0.16.0 - 2016-09-18
 
 ### Added
