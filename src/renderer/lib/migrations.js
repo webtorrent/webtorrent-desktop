@@ -4,10 +4,10 @@ module.exports = {
   run
 }
 
-const semver = require('semver')
-const config = require('../../config')
-const TorrentSummary = require('./torrent-summary')
 const fs = require('fs')
+const semver = require('semver')
+
+const config = require('../../config')
 
 // Change `state.saved` (which will be saved back to config.json on exit) as
 // needed, for example to deal with config.json format changes across versions
@@ -116,6 +116,8 @@ function migrate_0_11_0 (saved) {
 }
 
 function migrate_0_12_0 (saved) {
+  const TorrentSummary = require('./torrent-summary')
+
   if (saved.prefs.openExternalPlayer == null && saved.prefs.playInVlc != null) {
     saved.prefs.openExternalPlayer = saved.prefs.playInVlc
   }

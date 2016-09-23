@@ -21,7 +21,6 @@ const app = electron.app
 const config = require('../../config')
 const log = require('../log')
 const menu = require('../menu')
-const tray = require('../tray')
 
 function init (state, options) {
   if (main.win) {
@@ -81,6 +80,8 @@ function init (state, options) {
   })
 
   win.on('close', function (e) {
+    const tray = require('../tray')
+
     if (process.platform !== 'darwin' && !tray.hasTray()) {
       app.quit()
     } else if (!app.isQuitting) {
@@ -221,11 +222,15 @@ function toggleFullScreen (flag) {
 }
 
 function onWindowBlur () {
+  const tray = require('../tray')
+
   menu.setWindowFocus(false)
   tray.setWindowFocus(false)
 }
 
 function onWindowFocus () {
+  const tray = require('../tray')
+
   menu.setWindowFocus(true)
   tray.setWindowFocus(true)
 }
