@@ -17,10 +17,6 @@ class UnplayableFileError extends PlaybackError {
   constructor () { super('Can\'t play that file') }
 }
 
-class PlaybackTimedOutError extends PlaybackError {
-  constructor () { super('Playback timed out. Try again.') }
-}
-
 /* Sound */
 
 class InvalidSoundNameError extends SoundError {
@@ -42,7 +38,6 @@ module.exports = {
   TorrentError,
   UnplayableTorrentError,
   UnplayableFileError,
-  PlaybackTimedOutError,
   InvalidSoundNameError,
   TorrentKeyNotFoundError,
   InvalidTorrentError
