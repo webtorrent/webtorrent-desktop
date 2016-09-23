@@ -6,7 +6,10 @@ class Header extends React.Component {
   render () {
     const loc = this.props.state.location
     return (
-      <div className='header' onMouseMove={dispatcher('mediaMouseMoved')}>
+      <div className='header'
+        onMouseMove={dispatcher('mediaMouseMoved')}
+        onMouseEnter={dispatcher('mediaControlsMouseEnter')}
+        onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
         {this.getTitle()}
         <div className='nav left float-left'>
           <i

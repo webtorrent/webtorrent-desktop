@@ -222,6 +222,8 @@ const dispatchHandlers = {
   'mediaSuccess': () => controllers.media.mediaSuccess(),
   'mediaTimeUpdate': () => controllers.media.mediaTimeUpdate(),
   'mediaMouseMoved': () => controllers.media.mediaMouseMoved(),
+  'mediaControlsMouseEnter': () => controllers.media.controlsMouseEnter(),
+  'mediaControlsMouseLeave': () => controllers.media.controlsMouseLeave(),
   'openExternalPlayer': () => controllers.media.openExternalPlayer(),
   'externalPlayerNotFound': () => controllers.media.externalPlayerNotFound(),
 

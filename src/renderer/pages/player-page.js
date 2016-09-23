@@ -438,7 +438,7 @@ function renderPlayerControls (state) {
   ]
 
   if (state.playing.type === 'video') {
-    // show closed captions icon
+    // Show closed captions icon
     elements.push((
       <i
         key='subtitles'
@@ -506,8 +506,6 @@ function renderPlayerControls (state) {
       'color-stop(' + (volume * 100) + '%, #727272))'
   }
 
-  // TODO: dcposch change the range input to use value / onChanged instead of
-  // "readonly" / onMouse[Down,Move,Up]
   elements.push((
     <div key='volume' className='volume float-left'>
       <i
@@ -533,7 +531,7 @@ function renderPlayerControls (state) {
     </span>
   ))
 
-  // render playback rate
+  // Render playback rate
   if (state.playing.playbackRate !== 1) {
     elements.push((
       <span key='rate' className='rate float-left'>
@@ -543,7 +541,9 @@ function renderPlayerControls (state) {
   }
 
   return (
-    <div key='controls' className='controls'>
+    <div key='controls' className='controls'
+      onMouseEnter={dispatcher('mediaControlsMouseEnter')}
+      onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
       {elements}
       {renderCastOptions(state)}
       {renderSubtitleOptions(state)}

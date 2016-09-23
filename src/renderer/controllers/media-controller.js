@@ -44,6 +44,16 @@ module.exports = class MediaController {
     this.state.playing.mouseStationarySince = new Date().getTime()
   }
 
+  controlsMouseEnter () {
+    this.state.playing.mouseInControls = true
+    this.state.playing.mouseStationarySince = new Date().getTime()
+  }
+
+  controlsMouseLeave () {
+    this.state.playing.mouseInControls = false
+    this.state.playing.mouseStationarySince = new Date().getTime()
+  }
+
   openExternalPlayer () {
     const state = this.state
     const mediaURL = Playlist.getCurrentLocalURL(this.state)

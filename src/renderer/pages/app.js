@@ -43,12 +43,7 @@ class App extends React.Component {
     // * The mouse is over the controls or we're scrubbing (see CSS)
     // * The video is paused
     // * The video is playing remotely on Chromecast or Airplay
-    const hideControls = state.location.url() === 'player' &&
-      state.playing.mouseStationarySince !== 0 &&
-      new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
-      !state.playing.isPaused &&
-      state.playing.location === 'local' &&
-      state.playing.playbackRate === 1
+    const hideControls = state.shouldHidePlayerControls()
 
     const cls = [
       'view-' + state.location.url(), /* e.g. view-home, view-player */

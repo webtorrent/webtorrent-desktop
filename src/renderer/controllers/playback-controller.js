@@ -201,11 +201,7 @@ module.exports = class PlaybackController {
   // * The video is playing remotely on Chromecast or Airplay
   showOrHidePlayerControls () {
     const state = this.state
-    const hideControls = state.location.url() === 'player' &&
-      state.playing.mouseStationarySince !== 0 &&
-      new Date().getTime() - state.playing.mouseStationarySince > 2000 &&
-      !state.playing.isPaused &&
-      state.playing.location === 'local'
+    const hideControls = state.shouldHidePlayerControls()
 
     if (hideControls !== state.playing.hideControls) {
       state.playing.hideControls = hideControls
@@ -230,7 +226,7 @@ module.exports = class PlaybackController {
   }
 
   // Starts WebTorrent server for media streaming
-  startServer (torrentSummary, cb) {
+  startServer (torrentSummary) {
     if (torrentSummary.status === 'paused') {
       dispatch('startTorrentingSummary', torrentSummary.torrentKey)
       ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,

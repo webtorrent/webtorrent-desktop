@@ -73,7 +73,8 @@ function getDefaultState () {
      */
     getPlayingTorrentSummary,
     getPlayingFileSummary,
-    getExternalPlayerName
+    getExternalPlayerName,
+    shouldHidePlayerControls
   }
 }
 
@@ -178,6 +179,16 @@ function getExternalPlayerName () {
   const playerPath = this.saved.prefs.externalPlayerPath
   if (!playerPath) return 'VLC'
   return path.basename(playerPath).split('.')[0]
+}
+
+function shouldHidePlayerControls () {
+  return this.location.url() === 'player' &&
+    this.playing.mouseStationarySince !== 0 &&
+    new Date().getTime() - this.playing.mouseStationarySince > 2000 &&
+    !this.playing.mouseInControls &&
+    !this.playing.isPaused &&
+    this.playing.location === 'local' &&
+    this.playing.playbackRate === 1
 }
 
 function load (cb) {
