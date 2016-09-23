@@ -43,7 +43,7 @@ const sounds = {
   },
   STARTUP: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'startup.wav'),
-    volume: VOLUME * 2
+    volume: VOLUME
   }
 }
 
