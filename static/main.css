@@ -398,22 +398,6 @@ textarea,
   margin-bottom: 6px;
 }
 
-progress {
-  width: 60px;
-  margin-right: 8px;
-  -webkit-appearance: none;
-  opacity: 0.8;
-}
-
-progress::-webkit-progress-bar {
-  background-color: #888;
-  border-radius: 2px;
-}
-
-progress::-webkit-progress-value {
-  background-color: #eee;
-}
-
 /*
  * TORRENT LIST: ERRORS
  */

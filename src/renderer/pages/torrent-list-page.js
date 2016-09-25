@@ -1,6 +1,7 @@
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
 const Checkbox = require('material-ui/Checkbox').default
+const LinearProgress = require('material-ui/LinearProgress').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
@@ -120,7 +121,21 @@ module.exports = class TorrentList extends React.Component {
 
     function renderProgressBar () {
       const progress = Math.floor(100 * prog.progress)
-      return (<progress value={progress} max='100'>{progress}%</progress>)
+      const styles = {
+        wrapper: {
+          display: 'inline-block',
+          marginRight: '8px'
+        },
+        progress: {
+          height: '8px',
+          width: '60px'
+        }
+      }
+      return (
+        <div style={styles.wrapper}>
+          <LinearProgress style={styles.progress} mode='determinate' value={progress} />
+        </div>
+      )
     }
 
     function renderPercentProgress () {
