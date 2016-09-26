@@ -189,7 +189,19 @@ module.exports = class TorrentList extends React.Component {
     }
 
     function renderTorrentStatus () {
-      return (<span>{capitalize(torrentSummary.status)}</span>)
+      let status
+      if (torrentSummary.status === 'paused') {
+        if (!torrentSummary.progress) status = ''
+        else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
+        else status = 'Paused'
+      } else if (torrentSummary.status === 'downloading') {
+        status = 'Downloading'
+      } else if (torrentSummary.status === 'seeding') {
+        status = 'Seeding'
+      } else { // torrentSummary.status is 'new' or something unexpected
+        status = ''
+      }
+      return (<span>{status}</span>)
     }
   }
 
@@ -360,11 +372,6 @@ module.exports = class TorrentList extends React.Component {
 
 function stopPropagation (e) {
   e.stopPropagation()
-}
-
-// Takes "foo bar", returns "Foo bar"
-function capitalize (str) {
-  return str.slice(0, 1).toUpperCase() + str.slice(1)
 }
 
 function getErrorMessage (torrentSummary) {
