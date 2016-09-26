@@ -398,6 +398,23 @@ textarea,
   margin-bottom: 6px;
 }
 
+.torrent hr {
+  position: absolute;
+  bottom: 5px;
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 1px;
+  background: #ccc;
+  display: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.torrent:hover hr {
+  display: block;
+}
+
 /*
  * TORRENT LIST: ERRORS
  */

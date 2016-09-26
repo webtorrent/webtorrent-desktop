@@ -71,6 +71,7 @@ module.exports = class TorrentList extends React.Component {
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
+        <hr />
       </div>
     )
   }
@@ -84,17 +85,25 @@ module.exports = class TorrentList extends React.Component {
 
     // If it's downloading/seeding then show progress info
     const prog = torrentSummary.progress
-    const progElems = [renderDownloadCheckbox(), renderTorrentStatus()]
+    let progElems
     if (torrentSummary.error) {
-      progElems.push(getErrorMessage(torrentSummary))
+      progElems = [getErrorMessage(torrentSummary)]
     } else if (torrentSummary.status !== 'paused' && prog) {
-      Array.prototype.push.call(progElems,
+      progElems = [
+        renderDownloadCheckbox(),
+        renderTorrentStatus(),
         renderProgressBar(),
         renderPercentProgress(),
         renderTotalProgress(),
         renderPeers(),
         renderSpeeds(),
-        renderEta())
+        renderEta()
+      ]
+    } else {
+      progElems = [
+        renderDownloadCheckbox(),
+        renderTorrentStatus()
+      ]
     }
     elements.push(
       <div key='progress-info' className='ellipsis'>
