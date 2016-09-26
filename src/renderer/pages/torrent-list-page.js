@@ -137,7 +137,7 @@ module.exports = class TorrentList extends React.Component {
         },
         progress: {
           height: '8px',
-          width: '60px'
+          width: '30px'
         }
       }
       return (
