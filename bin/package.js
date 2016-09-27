@@ -423,13 +423,18 @@ function buildWin32 (cb) {
          * names (i.e. RELEASES-ia32 instead of RELEASES) and so Squirrel won't
          * find them unless we proxy the requests.
          */
-        remoteReleases: destArch === 'x64'
-          ? config.GITHUB_URL
-          : undefined,
+        // TODO: Re-enable Windows 64-bit delta updates when we confirm that they
+        //       work correctly in the presence of the "ia32" .nupkg files. I
+        //       (feross) noticed them listed in the 64-bit RELEASES file and
+        //       manually edited them out for the v0.17 release. Shipping only
+        //       full updates for now will work fine, with no ill-effects.
+        // remoteReleases: destArch === 'x64'
+        //   ? config.GITHUB_URL
+        //   : undefined,
         /**
          * If you hit a "GitHub API rate limit exceeded" error, set this token!
          */
-        remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
+        // remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
         setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + archStr + '.exe',
         setupIcon: config.APP_ICON + '.ico',
         signWithParams: signWithParams,
