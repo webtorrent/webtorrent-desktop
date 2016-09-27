@@ -109,7 +109,7 @@ module.exports = class TorrentList extends React.Component {
       return (
         <Checkbox
           key='download-button'
-          className={'download ' + torrentSummary.status}
+          className={'control download ' + torrentSummary.status}
           style={{display: 'inline-block', width: '32px'}}
           iconStyle={{width: '20px', height: '20px'}}
           checked={isActive}
