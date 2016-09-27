@@ -147,12 +147,14 @@ function isPortable () {
     return false
   }
 
-  let portablePathExists = false
   try {
-    portablePathExists = !!fs.statSync(PORTABLE_PATH)
-  } catch (err) {}
-
-  return portablePathExists
+    // This line throws if the "Portable Settings" folder does not exist, and does
+    // nothing otherwise.
+    fs.accessSync(PORTABLE_PATH, fs.constants.R_OK | fs.constants.W_OK)
+    return true
+  } catch (err) {
+    return false
+  }
 }
 
 function isProduction () {
