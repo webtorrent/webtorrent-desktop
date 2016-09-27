@@ -33,9 +33,11 @@ if (process.platform === 'win32') {
   argv = argv.filter((arg) => !arg.includes('--squirrel'))
 }
 
-if (!shouldQuit) {
+if (!shouldQuit && !config.IS_PORTABLE) {
   // Prevent multiple instances of app from running at same time. New instances
-  // signal this instance and quit.
+  // signal this instance and quit. Note: This feature creates a lock file in
+  // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
+  // we want to be "silent" as well as "portable".
   shouldQuit = app.makeSingleInstance(onAppOpen)
   if (shouldQuit) {
     app.quit()
@@ -48,7 +50,11 @@ if (!shouldQuit) {
 
 function init () {
   if (config.IS_PORTABLE) {
+    const path = require('path')
+    // Put all user data into the "Portable Settings" folder
     app.setPath('userData', config.CONFIG_PATH)
+    // Put Electron crash files, etc. into the "Portable Settings\Temp" folder
+    app.setPath('temp', path.join(config.CONFIG_PATH, 'Temp'))
   }
 
   const ipcMain = electron.ipcMain

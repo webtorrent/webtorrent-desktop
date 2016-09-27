@@ -116,9 +116,7 @@ function getConfigPath () {
 }
 
 function getDefaultDownloadPath () {
-  if (!process || !process.type) {
-    return ''
-  } else if (IS_PORTABLE) {
+  if (IS_PORTABLE) {
     return path.join(getConfigPath(), 'Downloads')
   } else {
     return getPath('downloads')
@@ -126,9 +124,14 @@ function getDefaultDownloadPath () {
 }
 
 function getPath (key) {
-  if (process.type === 'renderer') {
+  if (!process.versions.electron) {
+    // Node.js process
+    return ''
+  } else if (process.type === 'renderer') {
+    // Electron renderer process
     return electron.remote.app.getPath(key)
   } else {
+    // Electron main process
     return electron.app.getPath(key)
   }
 }
@@ -159,6 +162,7 @@ function isPortable () {
 
 function isProduction () {
   if (!process.versions.electron) {
+    // Node.js process
     return false
   }
   if (process.platform === 'darwin') {
