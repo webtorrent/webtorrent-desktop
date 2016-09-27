@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Builds app binaries for Mac, Linux, and Windows.
+ * Builds app binaries for Mac, Windows, and Linux.
  */
 
 var cp = require('child_process')
@@ -492,6 +492,9 @@ function buildWin32 (cb) {
 
       var downloadsPath = path.join(portablePath, 'Downloads')
       mkdirp.sync(downloadsPath)
+
+      var tempPath = path.join(portablePath, 'Temp')
+      mkdirp.sync(tempPath)
 
       var archStr = destArch === 'ia32' ? '-ia32' : ''
 
