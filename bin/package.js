@@ -490,6 +490,9 @@ function buildWin32 (cb) {
       var portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
 
+      var downloadsPath = path.join(portablePath, 'Downloads')
+      mkdirp.sync(downloadsPath)
+
       var archStr = destArch === 'ia32' ? '-ia32' : ''
 
       var inPath = path.join(DIST_PATH, path.basename(filesPath))
