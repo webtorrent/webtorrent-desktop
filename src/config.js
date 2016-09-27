@@ -12,8 +12,8 @@ const IS_TEST = isTest()
 const PORTABLE_PATH = IS_TEST
   ? path.join(process.platform === 'win32' ? 'C:\\Windows\\Temp' : '/tmp', 'WebTorrentTest')
   : path.join(path.dirname(process.execPath), 'Portable Settings')
-const IS_PORTABLE = isPortable()
 const IS_PRODUCTION = isProduction()
+const IS_PORTABLE = isPortable()
 
 const UI_HEADER_HEIGHT = 38
 const UI_TORRENT_HEIGHT = 100
@@ -141,11 +141,18 @@ function isPortable () {
   if (IS_TEST) {
     return true
   }
-  try {
-    return process.platform === 'win32' && IS_PRODUCTION && !!fs.statSync(PORTABLE_PATH)
-  } catch (err) {
+
+  if (process.platform !== 'win32' || !IS_PRODUCTION) {
+    // Fast path: Non-Windows platforms should not check for path on disk
     return false
   }
+
+  let portablePathExists = false
+  try {
+    portablePathExists = !!fs.statSync(PORTABLE_PATH)
+  } catch (err) {}
+
+  return portablePathExists
 }
 
 function isProduction () {
