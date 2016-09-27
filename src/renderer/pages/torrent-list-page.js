@@ -1,5 +1,6 @@
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
+
 const Checkbox = require('material-ui/Checkbox').default
 const LinearProgress = require('material-ui/LinearProgress').default
 
@@ -120,8 +121,14 @@ module.exports = class TorrentList extends React.Component {
         <Checkbox
           key='download-button'
           className={'control download ' + torrentSummary.status}
-          style={{display: 'inline-block', width: '32px'}}
-          iconStyle={{width: '20px', height: '20px'}}
+          style={{
+            display: 'inline-block',
+            width: 32
+          }}
+          iconStyle={{
+            width: 20,
+            height: 20
+          }}
           checked={isActive}
           onClick={stopPropagation}
           onCheck={dispatcher('toggleTorrent', infoHash)} />
@@ -133,11 +140,11 @@ module.exports = class TorrentList extends React.Component {
       const styles = {
         wrapper: {
           display: 'inline-block',
-          marginRight: '8px'
+          marginRight: 8
         },
         progress: {
-          height: '8px',
-          width: '30px'
+          height: 8,
+          width: 30
         }
       }
       return (
