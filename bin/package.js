@@ -4,25 +4,25 @@
  * Builds app binaries for Mac, Windows, and Linux.
  */
 
-var cp = require('child_process')
-var electronPackager = require('electron-packager')
-var fs = require('fs')
-var minimist = require('minimist')
-var mkdirp = require('mkdirp')
-var os = require('os')
-var path = require('path')
-var rimraf = require('rimraf')
-var series = require('run-series')
-var zip = require('cross-zip')
+const cp = require('child_process')
+const electronPackager = require('electron-packager')
+const fs = require('fs')
+const minimist = require('minimist')
+const mkdirp = require('mkdirp')
+const os = require('os')
+const path = require('path')
+const rimraf = require('rimraf')
+const series = require('run-series')
+const zip = require('cross-zip')
 
-var config = require('../src/config')
-var pkg = require('../package.json')
+const config = require('../src/config')
+const pkg = require('../package.json')
 
-var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
-var BUILD_PATH = path.join(config.ROOT_PATH, 'build')
-var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+const BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
+const BUILD_PATH = path.join(config.ROOT_PATH, 'build')
+const DIST_PATH = path.join(config.ROOT_PATH, 'dist')
 
-var argv = minimist(process.argv.slice(2), {
+const argv = minimist(process.argv.slice(2), {
   boolean: [
     'sign'
   ],
@@ -43,7 +43,7 @@ function build () {
   cp.execSync('npm run build', { NODE_ENV: 'production', stdio: 'inherit' })
   console.log('Build: Transpiled to ES5.')
 
-  var platform = argv._[0]
+  const platform = argv._[0]
   if (platform === 'darwin') {
     buildDarwin(printDone)
   } else if (platform === 'win32') {
@@ -61,7 +61,7 @@ function build () {
   }
 }
 
-var all = {
+const all = {
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on Mac.
   'app-copyright': config.APP_COPYRIGHT,
@@ -108,7 +108,7 @@ var all = {
   version: require('electron/package.json').version
 }
 
-var darwin = {
+const darwin = {
   // Build for Mac
   platform: 'darwin',
 
@@ -129,7 +129,7 @@ var darwin = {
   icon: config.APP_ICON + '.icns'
 }
 
-var win32 = {
+const win32 = {
   // Build for Windows.
   platform: 'win32',
 
@@ -163,7 +163,7 @@ var win32 = {
   icon: config.APP_ICON + '.ico'
 }
 
-var linux = {
+const linux = {
   // Build for Linux.
   platform: 'linux',
 
@@ -176,18 +176,18 @@ var linux = {
 build()
 
 function buildDarwin (cb) {
-  var plist = require('plist')
+  const plist = require('plist')
 
   console.log('Mac: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
     console.log('Mac: Packaged electron. ' + buildPath)
 
-    var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
-    var contentsPath = path.join(appPath, 'Contents')
-    var resourcesPath = path.join(contentsPath, 'Resources')
-    var infoPlistPath = path.join(contentsPath, 'Info.plist')
-    var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
+    const appPath = path.join(buildPath[0], config.APP_NAME + '.app')
+    const contentsPath = path.join(appPath, 'Contents')
+    const resourcesPath = path.join(contentsPath, 'Resources')
+    const infoPlistPath = path.join(contentsPath, 'Info.plist')
+    const infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
     infoPlist.CFBundleDocumentTypes = [
       {
@@ -261,7 +261,7 @@ function buildDarwin (cb) {
     }
 
     function signApp (cb) {
-      var sign = require('electron-osx-sign')
+      const sign = require('electron-osx-sign')
 
       /*
        * Sign the app with Apple Developer ID certificates. We sign the app for 2 reasons:
@@ -276,7 +276,7 @@ function buildDarwin (cb) {
        *   - Xcode Command Line Tools (xcode-select --install)
        *   - Membership in the Apple Developer Program
        */
-      var signOpts = {
+      const signOpts = {
         app: appPath,
         platform: 'darwin',
         verbose: true
@@ -302,8 +302,8 @@ function buildDarwin (cb) {
       // Create .zip file (used by the auto-updater)
       console.log('Mac: Creating zip...')
 
-      var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
-      var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
+      const inPath = path.join(buildPath[0], config.APP_NAME + '.app')
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
       zip.zipSync(inPath, outPath)
 
       console.log('Mac: Created zip.')
@@ -312,13 +312,13 @@ function buildDarwin (cb) {
     function packageDmg (cb) {
       console.log('Mac: Creating dmg...')
 
-      var appDmg = require('appdmg')
+      const appDmg = require('appdmg')
 
-      var targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
+      const targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
       rimraf.sync(targetPath)
 
       // Create a .dmg (Mac disk image) file, for easy user installation.
-      var dmgOpts = {
+      const dmgOpts = {
         basepath: config.ROOT_PATH,
         target: targetPath,
         specification: {
@@ -339,7 +339,7 @@ function buildDarwin (cb) {
         }
       }
 
-      var dmg = appDmg(dmgOpts)
+      const dmg = appDmg(dmgOpts)
       dmg.once('error', cb)
       dmg.on('progress', function (info) {
         if (info.type === 'step-begin') console.log(info.title + '...')
@@ -353,7 +353,7 @@ function buildDarwin (cb) {
 }
 
 function buildWin32 (cb) {
-  var installer = require('electron-winstaller')
+  const installer = require('electron-winstaller')
   console.log('Windows: Packaging electron...')
 
   /*
@@ -361,7 +361,7 @@ function buildWin32 (cb) {
    *   - Windows Authenticode private key and cert (authenticode.p12)
    *   - Windows Authenticode password file (authenticode.txt)
    */
-  var CERT_PATH
+  let CERT_PATH
   try {
     fs.accessSync('D:')
     CERT_PATH = 'D:'
@@ -373,12 +373,12 @@ function buildWin32 (cb) {
     if (err) return cb(err)
     console.log('Windows: Packaged electron. ' + buildPath)
 
-    var signWithParams
+    let signWithParams
     if (process.platform === 'win32') {
       if (argv.sign) {
-        var certificateFile = path.join(CERT_PATH, 'authenticode.p12')
-        var certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
-        var timestampServer = 'http://timestamp.comodoca.com'
+        const certificateFile = path.join(CERT_PATH, 'authenticode.p12')
+        const certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
+        const timestampServer = 'http://timestamp.comodoca.com'
         signWithParams = `/a /f "${certificateFile}" /p "${certificatePassword}" /tr "${timestampServer}" /td sha256`
       } else {
         printWarning()
@@ -387,9 +387,9 @@ function buildWin32 (cb) {
       printWarning()
     }
 
-    var tasks = []
+    const tasks = []
     buildPath.forEach(function (filesPath) {
-      var destArch = filesPath.split('-').pop()
+      const destArch = filesPath.split('-').pop()
 
       if (argv.package === 'exe' || argv.package === 'all') {
         tasks.push((cb) => packageInstaller(filesPath, destArch, cb))
@@ -403,7 +403,7 @@ function buildWin32 (cb) {
     function packageInstaller (filesPath, destArch, cb) {
       console.log(`Windows: Creating ${destArch} installer...`)
 
-      var archStr = destArch === 'ia32' ? '-ia32' : ''
+      const archStr = destArch === 'ia32' ? '-ia32' : ''
 
       installer.createWindowsInstaller({
         appDirectory: filesPath,
@@ -459,7 +459,7 @@ function buildWin32 (cb) {
           console.log('Windows: Renaming ia32 installer files...')
 
           // RELEASES -> RELEASES-ia32
-          var relPath = path.join(DIST_PATH, 'RELEASES-ia32')
+          const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
           fs.renameSync(
             path.join(DIST_PATH, 'RELEASES'),
             relPath
@@ -472,8 +472,8 @@ function buildWin32 (cb) {
           )
 
           // Change file name inside RELEASES-ia32 to match renamed file
-          var relContent = fs.readFileSync(relPath, 'utf8')
-          var relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
+          const relContent = fs.readFileSync(relPath, 'utf8')
+          const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
           fs.writeFileSync(relPath, relContent32)
 
           if (relContent === relContent32) {
@@ -492,19 +492,19 @@ function buildWin32 (cb) {
     function packagePortable (filesPath, destArch, cb) {
       console.log(`Windows: Creating ${destArch} portable app...`)
 
-      var portablePath = path.join(filesPath, 'Portable Settings')
+      const portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
 
-      var downloadsPath = path.join(portablePath, 'Downloads')
+      const downloadsPath = path.join(portablePath, 'Downloads')
       mkdirp.sync(downloadsPath)
 
-      var tempPath = path.join(portablePath, 'Temp')
+      const tempPath = path.join(portablePath, 'Temp')
       mkdirp.sync(tempPath)
 
-      var archStr = destArch === 'ia32' ? '-ia32' : ''
+      const archStr = destArch === 'ia32' ? '-ia32' : ''
 
-      var inPath = path.join(DIST_PATH, path.basename(filesPath))
-      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
+      const inPath = path.join(DIST_PATH, path.basename(filesPath))
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
       zip.zipSync(inPath, outPath)
 
       console.log(`Windows: Created ${destArch} portable app.`)
@@ -519,9 +519,9 @@ function buildLinux (cb) {
     if (err) return cb(err)
     console.log('Linux: Packaged electron. ' + buildPath)
 
-    var tasks = []
+    const tasks = []
     buildPath.forEach(function (filesPath) {
-      var destArch = filesPath.split('-').pop()
+      const destArch = filesPath.split('-').pop()
 
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, destArch, cb))
@@ -537,8 +537,8 @@ function buildLinux (cb) {
     // Create .deb file for Debian-based platforms
     console.log(`Linux: Creating ${destArch} deb...`)
 
-    var deb = require('nobin-debian-installer')()
-    var destPath = path.join('/opt', pkg.name)
+    const deb = require('nobin-debian-installer')()
+    const destPath = path.join('/opt', pkg.name)
 
     deb.pack({
       package: pkg,
@@ -572,10 +572,10 @@ function buildLinux (cb) {
     // Create .zip file for Linux
     console.log(`Linux: Creating ${destArch} zip...`)
 
-    var archStr = destArch === 'ia32' ? '-ia32' : ''
+    const archStr = destArch === 'ia32' ? '-ia32' : ''
 
-    var inPath = path.join(DIST_PATH, path.basename(filesPath))
-    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
+    const inPath = path.join(DIST_PATH, path.basename(filesPath))
+    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
     zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)

@@ -7,16 +7,16 @@ const path = require('path')
 let hasErrors = false
 
 // Find all Javascript source files
-var files = walkSync('src', {globs: ['**/*.js']})
+const files = walkSync('src', {globs: ['**/*.js']})
 console.log('Running extra-lint on ' + files.length + ' files...')
 
 // Read each file, line by line
 files.forEach(function (file) {
-  var filepath = path.join('src', file)
-  var lines = fs.readFileSync(filepath, 'utf8').split('\n')
+  const filepath = path.join('src', file)
+  const lines = fs.readFileSync(filepath, 'utf8').split('\n')
 
   lines.forEach(function (line, i) {
-    var error
+    let error
 
     // Consistent JSX tag closing
     if (line.match(/' {2}\/> *$/) ||
