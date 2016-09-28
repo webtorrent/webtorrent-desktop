@@ -7,9 +7,6 @@
     "email": "feross@webtorrent.io",
     "url": "https://webtorrent.io"
   },
-  "bin": {
-    "webtorrent-desktop": "./bin/cmd.js"
-  },
   "bugs": {
     "url": "https://github.com/feross/webtorrent-desktop/issues"
   },
