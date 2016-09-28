@@ -98,6 +98,7 @@ module.exports = class TorrentListController {
     fs.stat(fileOrFolder, function (err) {
       if (err) {
         s.error = 'path-missing'
+        dispatch('backToList')
         return
       }
       start()
