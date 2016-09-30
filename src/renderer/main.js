@@ -132,7 +132,6 @@ function onState (err, _state) {
 // Runs a few seconds after the app loads, to avoid slowing down startup time
 function delayedInit () {
   lazyLoadCast()
-  sound.preload()
 }
 
 // Lazily loads Chromecast and Airplay support
