@@ -1,5 +1,4 @@
 module.exports = {
-  preload,
   play
 }
 
@@ -44,17 +43,6 @@ const sounds = {
   STARTUP: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'startup.wav'),
     volume: VOLUME
-  }
-}
-
-function preload () {
-  for (let name in sounds) {
-    if (!cache[name]) {
-      const sound = sounds[name]
-      const audio = cache[name] = new window.Audio()
-      audio.volume = sound.volume
-      audio.src = sound.url
-    }
   }
 }
 
