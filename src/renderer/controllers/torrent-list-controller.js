@@ -101,7 +101,7 @@ module.exports = class TorrentListController {
     function start () {
       ipcRenderer.send('wt-start-torrenting',
         s.torrentKey,
-        TorrentSummary.getTorrentID(s),
+        TorrentSummary.getTorrentId(s),
         s.path,
         s.fileModtimes,
         s.selections)

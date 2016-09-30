@@ -2,7 +2,7 @@ module.exports = {
   getPosterPath,
   getTorrentPath,
   getByKey,
-  getTorrentID,
+  getTorrentId,
   getFileOrFolder
 }
 
@@ -28,7 +28,7 @@ function getPosterPath (torrentSummary) {
 
 // Expects a torrentSummary
 // Returns a torrentID: filename, magnet URI, or infohash
-function getTorrentID (torrentSummary) {
+function getTorrentId (torrentSummary) {
   const s = torrentSummary
   if (s.torrentFileName) { // Load torrent file from disk
     return getTorrentPath(s)
