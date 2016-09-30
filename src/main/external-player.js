@@ -48,7 +48,7 @@ function kill () {
 function spawnExternal (playerPath, args) {
   log('Running external media player:', playerPath + ' ' + args.join(' '))
 
-  if (path.extname(playerPath) === '.app') {
+  if (process.platform === 'darwin' && path.extname(playerPath) === '.app') {
     // Mac: Use executable in packaged .app bundle
     playerPath += '/Contents/MacOS/' + path.basename(playerPath, '.app')
   }
