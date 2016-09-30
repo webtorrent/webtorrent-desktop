@@ -25,6 +25,11 @@ module.exports = class TorrentListController {
       torrentId = torrentId.path
     }
 
+    // Trim extra spaces off pasted magnet links
+    if (typeof torrentId === 'string') {
+      torrentId = torrentId.trim()
+    }
+
     // Allow a instant.io link to be pasted
     if (typeof torrentId === 'string' && instantIoRegex.test(torrentId)) {
       torrentId = torrentId.slice(torrentId.indexOf('#') + 1)
