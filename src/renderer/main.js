@@ -428,14 +428,7 @@ function onError (err) {
 
 function onPaste (e) {
   if (e.target.tagName.toLowerCase() === 'input') return
-
-  const torrentIds = electron.clipboard.readText().split('\n')
-  torrentIds.forEach(function (torrentId) {
-    torrentId = torrentId.trim()
-    if (torrentId.length === 0) return
-    controllers.torrentList.addTorrent(torrentId)
-  })
-
+  controllers.torrentList.addTorrent(electron.clipboard.readText())
   update()
 }
 
