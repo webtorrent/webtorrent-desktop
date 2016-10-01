@@ -7,6 +7,8 @@ const getMuiTheme = require('material-ui/styles/getMuiTheme').default
 const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 
 const Header = require('../components/header')
+
+// Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListPage = require('./torrent-list-page')
 
 const Views = {
@@ -38,6 +40,9 @@ darkBaseTheme.palette.accent1Color = colors.redA200
 darkBaseTheme.palette.accent2Color = colors.redA400
 darkBaseTheme.palette.accent3Color = colors.redA100
 
+let darkMuiTheme
+let lightMuiTheme
+
 class App extends React.Component {
   render () {
     const state = this.props.state
@@ -57,8 +62,12 @@ class App extends React.Component {
     if (state.window.isFocused) cls.push('is-focused')
     if (hideControls) cls.push('hide-video-controls')
 
-    const vdom = (
-      <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
+    if (!darkMuiTheme) {
+      darkMuiTheme = getMuiTheme(darkBaseTheme)
+    }
+
+    return (
+      <MuiThemeProvider muiTheme={darkMuiTheme}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
           {this.getErrorPopover()}
@@ -67,8 +76,6 @@ class App extends React.Component {
         </div>
       </MuiThemeProvider>
     )
-
-    return vdom
   }
 
   getErrorPopover () {
@@ -93,13 +100,16 @@ class App extends React.Component {
     const state = this.props.state
     if (!state.modal) return
 
-    const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
-    lightBaseTheme.fontFamily = fontFamily
-    lightBaseTheme.userAgent = false
+    if (!lightMuiTheme) {
+      const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
+      lightBaseTheme.fontFamily = fontFamily
+      lightBaseTheme.userAgent = false
+      lightMuiTheme = getMuiTheme(lightBaseTheme)
+    }
 
     const ModalContents = Modals[state.modal.id]()
     return (
-      <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+      <MuiThemeProvider muiTheme={lightMuiTheme}>
         <div key='modal' className='modal'>
           <div key='modal-background' className='modal-background' />
           <div key='modal-content' className='modal-content'>
