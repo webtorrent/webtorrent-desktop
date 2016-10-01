@@ -29,6 +29,7 @@
     "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",
+    "lodash.merge": "^4.6.0",
     "material-ui": "^0.15.4",
     "mkdirp": "^0.5.1",
     "musicmetadata": "^2.0.2",
@@ -102,7 +103,7 @@
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
     "start": "npm run build && electron .",
-    "test": "standard && depcheck --ignores=buble,nodemon,gh-release --ignore-dirs=build,dist && node ./bin/extra-lint.js",
+    "test": "standard && depcheck --ignores=buble,lodash.merge,nodemon,gh-release --ignore-dirs=build,dist && node ./bin/extra-lint.js",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,pug,css --ignore build/ --ignore dist/"
   }
