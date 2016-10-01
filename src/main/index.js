@@ -124,15 +124,18 @@ function init () {
 function delayedInit () {
   const announcement = require('./announcement')
   const dock = require('./dock')
-  const tray = require('./tray')
   const updater = require('./updater')
   const userTasks = require('./user-tasks')
 
   announcement.init()
   dock.init()
-  tray.init()
   updater.init()
   userTasks.init()
+
+  if (process.platform !== 'darwin') {
+    const tray = require('./tray')
+    tray.init()
+  }
 }
 
 function onOpen (e, torrentId) {

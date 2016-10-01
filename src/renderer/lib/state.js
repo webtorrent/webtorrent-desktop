@@ -1,10 +1,8 @@
 const appConfig = require('application-config')('WebTorrent')
-const debounce = require('debounce')
 const path = require('path')
 const {EventEmitter} = require('events')
 
 const config = require('../../config')
-const migrations = require('./migrations')
 
 const SAVE_DEBOUNCE_INTERVAL = 1000
 
@@ -12,7 +10,14 @@ const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
-  save: debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL),
+  save: function () {
+    // Perf optimization: Lazy-require debounce (and it's dependencies)
+    const debounce = require('debounce')
+    // After first State.save() invokation, future calls go straight to the
+    // debounced function
+    State.save = debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL)
+    State.save()
+  },
   saveImmediate
 })
 
@@ -205,7 +210,13 @@ function load (cb) {
     if (err) return cb(err)
     const state = getDefaultState()
     state.saved = saved
-    migrations.run(state)
+
+    if (process.type === 'renderer') {
+      // Perf optimization: Save require() calls in the main process
+      const migrations = require('./migrations')
+      migrations.run(state)
+    }
+
     cb(null, state)
   }
 }

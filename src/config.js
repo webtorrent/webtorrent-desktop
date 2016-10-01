@@ -1,5 +1,4 @@
 const appConfig = require('application-config')('WebTorrent')
-const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 const arch = require('arch')
@@ -145,6 +144,8 @@ function isPortable () {
     // Fast path: Non-Windows platforms should not check for path on disk
     return false
   }
+
+  const fs = require('fs')
 
   try {
     // This line throws if the "Portable Settings" folder does not exist, and does
