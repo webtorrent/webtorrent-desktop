@@ -112,7 +112,7 @@ function dispatch (...args) {
 
 function hide () {
   if (!main.win) return
-  main.win.send('dispatch', 'backToList')
+  dispatch('backToList')
   main.win.hide()
 }
 

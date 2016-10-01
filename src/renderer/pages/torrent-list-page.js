@@ -7,7 +7,6 @@ const LinearProgress = require('material-ui/LinearProgress').default
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const {dispatcher} = require('../lib/dispatcher')
-const {InvalidTorrentError} = require('../lib/errors')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -60,7 +59,7 @@ module.exports = class TorrentList extends React.Component {
     const classes = ['torrent']
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
-    if (!torrentSummary.torrentKey) throw new InvalidTorrentError('Missing torrentKey')
+    if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
     return (
       <div
         id={torrentSummary.testID && ('torrent-' + torrentSummary.testID)}

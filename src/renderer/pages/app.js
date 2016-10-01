@@ -1,32 +1,36 @@
 const colors = require('material-ui/styles/colors')
+const createGetter = require('fn-getter')
 const React = require('react')
 
 const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
-const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
 const getMuiTheme = require('material-ui/styles/getMuiTheme').default
 const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
 
 const Header = require('../components/header')
+const TorrentListPage = require('./torrent-list-page')
 
 const Views = {
-  'home': require('./torrent-list-page'),
-  'player': require('./player-page'),
-  'create-torrent': require('./create-torrent-page'),
-  'preferences': require('./preferences-page')
+  'home': createGetter(() => TorrentListPage),
+  'player': createGetter(() => require('./player-page')),
+  'create-torrent': createGetter(() => require('./create-torrent-page')),
+  'preferences': createGetter(() => require('./preferences-page'))
 }
 
 const Modals = {
-  'open-torrent-address-modal': require('../components/open-torrent-address-modal'),
-  'remove-torrent-modal': require('../components/remove-torrent-modal'),
-  'update-available-modal': require('../components/update-available-modal'),
-  'unsupported-media-modal': require('../components/unsupported-media-modal')
+  'open-torrent-address-modal': createGetter(
+    () => require('../components/open-torrent-address-modal')
+  ),
+  'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
+  'update-available-modal': createGetter(() => require('../components/update-available-modal')),
+  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
 }
 
 const fontFamily = process.platform === 'win32'
   ? '"Segoe UI", sans-serif'
   : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
-lightBaseTheme.fontFamily = fontFamily
+
 darkBaseTheme.fontFamily = fontFamily
+darkBaseTheme.userAgent = false
 darkBaseTheme.palette.primary1Color = colors.grey50
 darkBaseTheme.palette.primary2Color = colors.grey50
 darkBaseTheme.palette.primary3Color = colors.grey600
@@ -88,7 +92,12 @@ class App extends React.Component {
   getModal () {
     const state = this.props.state
     if (!state.modal) return
-    const ModalContents = Modals[state.modal.id]
+
+    const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
+    lightBaseTheme.fontFamily = fontFamily
+    lightBaseTheme.userAgent = false
+
+    const ModalContents = Modals[state.modal.id]()
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
         <div key='modal' className='modal'>
@@ -103,7 +112,7 @@ class App extends React.Component {
 
   getView () {
     const state = this.props.state
-    const View = Views[state.location.url()]
+    const View = Views[state.location.url()]()
     return (<View state={state} />)
   }
 }

@@ -29,8 +29,6 @@ class TorrentKeyNotFoundError extends TorrentError {
   constructor (torrentKey) { super(`Can't resolve torrent key ${torrentKey}`) }
 }
 
-class InvalidTorrentError extends TorrentError {}
-
 module.exports = {
   CastingError,
   PlaybackError,
@@ -39,6 +37,5 @@ module.exports = {
   UnplayableTorrentError,
   UnplayableFileError,
   InvalidSoundNameError,
-  TorrentKeyNotFoundError,
-  InvalidTorrentError
+  TorrentKeyNotFoundError
 }
