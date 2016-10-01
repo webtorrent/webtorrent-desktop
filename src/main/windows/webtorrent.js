@@ -9,7 +9,6 @@ const webtorrent = module.exports = {
 const electron = require('electron')
 
 const config = require('../../config')
-const log = require('../log')
 
 function init () {
   const win = webtorrent.win = new electron.BrowserWindow({
@@ -52,7 +51,6 @@ function send (...args) {
 
 function toggleDevTools () {
   if (!webtorrent.win) return
-  log('toggleDevTools')
   if (webtorrent.win.webContents.isDevToolsOpened()) {
     webtorrent.win.webContents.closeDevTools()
     webtorrent.win.hide()

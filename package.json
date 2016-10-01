@@ -26,6 +26,7 @@
     "drag-drop": "^2.12.1",
     "electron": "1.4.2",
     "es6-error": "^3.0.1",
+    "fn-getter": "^1.0.0",
     "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",
