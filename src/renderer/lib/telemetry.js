@@ -14,14 +14,16 @@ const config = require('../../config')
 let telemetry
 
 function init (state) {
-  if (!state.saved.telemetry) {
+  telemetry = state.saved.telemetry
+
+  // First app run
+  if (!telemetry) {
     const crypto = require('crypto')
-    state.saved.telemetry = {
+    telemetry = state.saved.telemetry = {
       userID: crypto.randomBytes(32).toString('hex') // 256-bit random ID
     }
     reset()
   }
-  telemetry = state.saved.telemetry
 }
 
 function send (state) {
