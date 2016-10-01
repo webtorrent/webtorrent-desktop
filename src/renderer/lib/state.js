@@ -6,6 +6,8 @@ const config = require('../../config')
 
 const SAVE_DEBOUNCE_INTERVAL = 1000
 
+appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
+
 const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
@@ -16,12 +18,10 @@ const State = module.exports = Object.assign(new EventEmitter(), {
     // After first State.save() invokation, future calls go straight to the
     // debounced function
     State.save = debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL)
-    State.save()
+    State.save(...arguments)
   },
   saveImmediate
 })
-
-appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
 function getDefaultState () {
   const LocationHistory = require('location-history')

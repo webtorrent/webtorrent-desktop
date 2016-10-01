@@ -3,6 +3,12 @@ console.time('init')
 const crashReporter = require('../crash-reporter')
 crashReporter.init()
 
+// Perf optimization: Start asynchronously read on config file before all the
+// blocking require() calls below.
+
+const State = require('./lib/state')
+State.load(onState)
+
 const dragDrop = require('drag-drop')
 const electron = require('electron')
 const fs = require('fs')
@@ -12,7 +18,6 @@ const ReactDOM = require('react-dom')
 const config = require('../config')
 const telemetry = require('./lib/telemetry')
 const sound = require('./lib/sound')
-const State = require('./lib/state')
 const TorrentPlayer = require('./lib/torrent-player')
 
 // Required by Material UI -- adds `onTouchTap` event
@@ -50,22 +55,22 @@ let state
 // Root React component
 let app
 
-State.load(onState)
-
 // Called once when the application loads. (Not once per window.)
 // Connects to the torrent networks, sets up the UI and OS integrations like
 // the dock icon and drag+drop.
 function onState (err, _state) {
   if (err) return onError(err)
-  state = window.state = _state // Make available for easier debugging
+
+  // Make available for easier debugging
+  state = window.state = _state
   window.dispatch = dispatch
 
   telemetry.init(state)
 
   // Log uncaught JS errors
-  window.addEventListener('error',
-    (e) => telemetry.logUncaughtError('window', e),
-    true /* capture */)
+  window.addEventListener(
+    'error', (e) => telemetry.logUncaughtError('window', e), true /* capture */
+  )
 
   // Create controllers
   controllers = {
@@ -90,23 +95,18 @@ function onState (err, _state) {
   // Restart everything we were torrenting last time the app ran
   resumeTorrents()
 
+  // Initialize ReactDOM
+  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
   // a progress bar and to keep the cursor in sync when playing a video
   setInterval(update, 1000)
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
-
-  // Lazy-load other stuff, like the AppleTV module, later to keep startup fast
-  window.setTimeout(delayedInit, config.DELAYED_INIT)
 
   // Listen for messages from the main process
   setupIpc()
 
-  // Warn if the download dir is gone, eg b/c an external drive is unplugged
-  checkDownloadPath()
-
-  // OS integrations:
-  // ...drag and drop files/text to start torrenting or seeding
+  // Drag and drop files/text to start torrenting or seeding
   dragDrop('body', {
     onDrop: onOpen,
     onDropText: onOpen
@@ -119,18 +119,28 @@ function onState (err, _state) {
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
 
-  // ...window visibility state.
-  document.addEventListener('webkitvisibilitychange', onVisibilityChange)
-
-  // Done! Ideally we want to get here < 500ms after the user clicks the app
   if (electron.remote.getCurrentWindow().isVisible()) {
     sound.play('STARTUP')
   }
+
+  // To keep app startup fast, some code is delayed.
+  window.setTimeout(delayedInit, config.DELAYED_INIT)
+
+  // Done! Ideally we want to get here < 500ms after the user clicks the app
   console.timeEnd('init')
 }
 
 // Runs a few seconds after the app loads, to avoid slowing down startup time
 function delayedInit () {
+  telemetry.send(state)
+
+  // Warn if the download dir is gone, eg b/c an external drive is unplugged
+  checkDownloadPath()
+
+  // ...window visibility state.
+  document.addEventListener('webkitvisibilitychange', onVisibilityChange)
+  onVisibilityChange()
+
   lazyLoadCast()
 }
 
