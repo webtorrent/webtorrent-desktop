@@ -273,7 +273,7 @@ function commandToArgs (command) {
 }
 
 function installLinux () {
-  const fs = require('fs-extra')
+  const fs = require('fs')
   const os = require('os')
   const path = require('path')
 
@@ -326,6 +326,8 @@ function installLinux () {
   function writeIconFile (err, iconFile) {
     if (err) return log.error(err.message)
 
+    const mkdirp = require('mkdirp')
+
     const iconFilePath = path.join(
       os.homedir(),
       '.local',
@@ -333,9 +335,11 @@ function installLinux () {
       'icons',
       'webtorrent-desktop.png'
     )
-    fs.mkdirp(path.dirname(iconFilePath))
-    fs.writeFile(iconFilePath, iconFile, function (err) {
+    mkdirp(path.dirname(iconFilePath), (err) => {
       if (err) return log.error(err.message)
+      fs.writeFile(iconFilePath, iconFile, (err) => {
+        if (err) log.error(err.message)
+      })
     })
   }
 }
@@ -343,7 +347,7 @@ function installLinux () {
 function uninstallLinux () {
   const os = require('os')
   const path = require('path')
-  const fs = require('fs-extra')
+  const rimraf = require('rimraf')
 
   const desktopFilePath = path.join(
     os.homedir(),
@@ -352,7 +356,7 @@ function uninstallLinux () {
     'applications',
     'webtorrent-desktop.desktop'
   )
-  fs.removeSync(desktopFilePath)
+  rimraf(desktopFilePath)
 
   const iconFilePath = path.join(
     os.homedir(),
@@ -361,5 +365,5 @@ function uninstallLinux () {
     'icons',
     'webtorrent-desktop.png'
   )
-  fs.removeSync(iconFilePath)
+  rimraf(iconFilePath)
 }

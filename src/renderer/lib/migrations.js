@@ -48,7 +48,7 @@ function run (state) {
 }
 
 function migrate_0_7_0 (saved) {
-  const fs = require('fs-extra')
+  const cpFile = require('cp-file')
   const path = require('path')
 
   saved.torrents.forEach(function (ts) {
@@ -70,7 +70,7 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) fs.copySync(src, dst)
+      if (src !== dst) cpFile.sync(src, dst)
 
       delete ts.torrentPath
       ts.torrentFileName = infoHash + '.torrent'
@@ -85,7 +85,7 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.POSTER_PATH, infoHash + extension)
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) fs.copySync(src, dst)
+      if (src !== dst) cpFile.sync(src, dst)
 
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
@@ -139,7 +139,7 @@ function migrate_0_12_0 (saved) {
     if (!fileOrFolder) return
     try {
       fs.statSync(fileOrFolder)
-    } catch (e) {
+    } catch (err) {
       // Default torrent with "missing path" error. Clear path.
       delete torrentSummary.path
     }

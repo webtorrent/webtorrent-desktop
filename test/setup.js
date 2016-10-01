@@ -1,8 +1,11 @@
-const path = require('path')
 const Application = require('spectron').Application
-const fs = require('fs-extra')
+const fs = require('fs')
+const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
+const path = require('path')
 const PNG = require('pngjs').PNG
+const rimraf = require('rimraf')
+
 const config = require('./config')
 
 module.exports = {
@@ -75,8 +78,13 @@ function endTest (app, t, err) {
 function screenshotCreateOrCompare (app, t, name) {
   const ssDir = path.join(__dirname, 'screenshots', process.platform)
   const ssPath = path.join(ssDir, name + '.png')
-  fs.ensureFileSync(ssPath)
-  const ssBuf = fs.readFileSync(ssPath)
+  let ssBuf
+
+  try {
+    ssBuf = fs.readFileSync(ssPath)
+  } catch (err) {
+    ssBuf = Buffer.alloc(0)
+  }
   return wait().then(function () {
     return app.browserWindow.capturePage()
   }).then(function (buffer) {
@@ -136,14 +144,14 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
 
 // Resets the test directory, containing config.json, torrents, downloads, etc
 function resetTestDataDir () {
-  fs.removeSync(config.TEST_DIR)
+  rimraf.sync(config.TEST_DIR)
   // Create TEST_DIR as well as /Downloads and /Desktop
-  fs.mkdirpSync(config.TEST_DIR_DOWNLOAD)
-  fs.mkdirpSync(config.TEST_DIR_DESKTOP)
+  mkdirp.sync(config.TEST_DIR_DOWNLOAD)
+  mkdirp.sync(config.TEST_DIR_DESKTOP)
 }
 
 function deleteTestDataDir () {
-  fs.removeSync(config.TEST_DIR)
+  rimraf.sync(config.TEST_DIR)
 }
 
 // Checks a given folder under Downloads.
@@ -159,11 +167,11 @@ function compareDownloadFolder (t, dirname, filenames) {
     const expectedSorted = filenames.slice().sort()
     const actualSorted = actualFilenames.slice().sort()
     t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
-  } catch (e) {
-    if (e.code === 'ENOENT') {
+  } catch (err) {
+    if (err.code === 'ENOENT') {
       t.equal(filenames, null, 'download folder missing: ' + dirname)
     } else {
-      console.error(e)
+      console.error(err)
       t.fail('unexpected error getting download folder: ' + dirname)
     }
   }
@@ -200,14 +208,14 @@ function extractImportantFields (parsedTorrent) {
 }
 
 function copy (pathFrom, pathTo) {
+  const cpFile = require('cp-file')
   try {
-    fs.copySync(pathFrom, pathTo)
-  } catch (e) {
-    // There is a bug in either node or `fs-extra` on windows
+    cpFile.sync(pathFrom, pathTo)
+  } catch (err) {
     // Windows lets us create files and folders under C:\Windows\Temp,
     // but when you try to `copySync` into one of those folders, you get EPERM
     // Ignore for now...
-    if (process.platform !== 'win32' || e.code !== 'EPERM') throw e
-    console.log('ignoring windows copy EPERM error', e)
+    if (process.platform !== 'win32' || err.code !== 'EPERM') throw err
+    console.log('ignoring windows copy EPERM error', err)
   }
 }

@@ -6,7 +6,8 @@ const crypto = require('crypto')
 const deepEqual = require('deep-equal')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
-const fs = require('fs-extra')
+const fs = require('fs')
+const mkdirp = require('mkdirp')
 const musicmetadata = require('musicmetadata')
 const networkAddress = require('network-address')
 const path = require('path')
@@ -203,34 +204,28 @@ function getTorrentFileInfo (file) {
   }
 }
 
-// Every time we resolve a magnet URI, save the torrent file so that we never
-// have to download it again. Never ask the DHT the same question twice.
+// Every time we resolve a magnet URI, save the torrent file so that we can use
+// it on next startup. Starting with the full torrent metadata will be faster
+// than re-fetching it from peers using ut_metadata.
 function saveTorrentFile (torrentKey) {
   const torrent = getTorrent(torrentKey)
-  checkIfTorrentFileExists(torrent.infoHash, function (torrentPath, exists) {
+  const torrentPath = path.join(config.TORRENT_PATH, torrent.infoHash + '.torrent')
+
+  fs.access(torrentPath, fs.constants.R_OK, function (err) {
     const fileName = torrent.infoHash + '.torrent'
-    if (exists) {
+    if (!err) {
       // We've already saved the file
       return ipc.send('wt-file-saved', torrentKey, fileName)
     }
 
     // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.TORRENT_PATH, function (_) {
+    mkdirp(config.TORRENT_PATH, function (_) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
         return ipc.send('wt-file-saved', torrentKey, fileName)
       })
     })
-  })
-}
-
-// Checks whether we've already resolved a given infohash to a torrent file
-// Calls back with (torrentPath, exists). Logs, does not call back on error
-function checkIfTorrentFileExists (infoHash, cb) {
-  const torrentPath = path.join(config.TORRENT_PATH, infoHash + '.torrent')
-  fs.exists(torrentPath, function (exists) {
-    cb(torrentPath, exists)
   })
 }
 
@@ -241,7 +236,7 @@ function generateTorrentPoster (torrentKey) {
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    fs.mkdirp(config.POSTER_PATH, function (err) {
+    mkdirp(config.POSTER_PATH, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
       const posterFileName = torrent.infoHash + extension
       const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
