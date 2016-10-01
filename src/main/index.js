@@ -122,6 +122,8 @@ function init () {
 }
 
 function delayedInit () {
+  if (app.isQuitting) return
+
   const announcement = require('./announcement')
   const dock = require('./dock')
   const updater = require('./updater')
