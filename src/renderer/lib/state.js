@@ -109,7 +109,8 @@ function getDefaultPlayState () {
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
 function setupStateSaved (cb) {
-  const fs = require('fs-extra')
+  const cpFile = require('cp-file')
+  const fs = require('fs')
   const parseTorrent = require('parse-torrent')
   const parallel = require('run-parallel')
 
@@ -130,18 +131,16 @@ function setupStateSaved (cb) {
   config.DEFAULT_TORRENTS.map(function (t, i) {
     const infoHash = saved.torrents[i].infoHash
     tasks.push(function (cb) {
-      fs.copy(
+      cpFile(
         path.join(config.STATIC_PATH, t.posterFileName),
-        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName)),
-        cb
-      )
+        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
+      ).then(cb).catch(cb)
     })
     tasks.push(function (cb) {
-      fs.copy(
+      cpFile(
         path.join(config.STATIC_PATH, t.torrentFileName),
-        path.join(config.TORRENT_PATH, infoHash + '.torrent'),
-        cb
-      )
+        path.join(config.TORRENT_PATH, infoHash + '.torrent')
+      ).then(cb).catch(cb)
     })
   })
 
@@ -151,6 +150,7 @@ function setupStateSaved (cb) {
   })
 
   function createTorrentObject (t) {
+    // TODO: Doing several fs.readFileSync calls during first startup is not ideal
     const torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
     const parsedTorrent = parseTorrent(torrent)
 
