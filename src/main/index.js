@@ -127,12 +127,15 @@ function delayedInit () {
   const announcement = require('./announcement')
   const dock = require('./dock')
   const updater = require('./updater')
-  const userTasks = require('./user-tasks')
 
   announcement.init()
   dock.init()
   updater.init()
-  userTasks.init()
+
+  if (process.platform === 'win32') {
+    const userTasks = require('./user-tasks')
+    userTasks.init()
+  }
 
   if (process.platform !== 'darwin') {
     const tray = require('./tray')
