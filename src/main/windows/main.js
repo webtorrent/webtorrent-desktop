@@ -84,11 +84,14 @@ function init (state, options) {
   })
 
   win.on('close', function (e) {
-    const tray = require('../tray')
-
-    if (process.platform !== 'darwin' && !tray.hasTray()) {
-      app.quit()
-    } else if (!app.isQuitting) {
+    if (process.platform !== 'darwin') {
+      const tray = require('../tray')
+      if (!tray.hasTray()) {
+        app.quit()
+        return
+      }
+    }
+    if (!app.isQuitting) {
       e.preventDefault()
       hide()
     }
@@ -226,17 +229,21 @@ function toggleFullScreen (flag) {
 }
 
 function onWindowBlur () {
-  const tray = require('../tray')
-
   menu.setWindowFocus(false)
-  tray.setWindowFocus(false)
+
+  if (process.platform !== 'darwin') {
+    const tray = require('../tray')
+    tray.setWindowFocus(false)
+  }
 }
 
 function onWindowFocus () {
-  const tray = require('../tray')
-
   menu.setWindowFocus(true)
-  tray.setWindowFocus(true)
+
+  if (process.platform !== 'darwin') {
+    const tray = require('../tray')
+    tray.setWindowFocus(true)
+  }
 }
 
 function getIconPath () {
