@@ -2,6 +2,7 @@
 // Reports back so that we can improve WebTorrent Desktop
 module.exports = {
   init,
+  send,
   logUncaughtError,
   logPlayAttempt
 }
@@ -22,7 +23,9 @@ function init (state) {
     telemetry = state.saved.telemetry = createSummary()
     reset()
   }
+}
 
+function send (state) {
   const now = new Date()
   telemetry.version = config.APP_VERSION
   telemetry.timestamp = now.toISOString()
@@ -223,7 +226,7 @@ function getElemString (elem) {
   let ret = elem.tagName
   try {
     ret += '.' + Array.from(elem.classList).join('.')
-  } catch (e) {}
+  } catch (err) {}
   return ret
 }
 

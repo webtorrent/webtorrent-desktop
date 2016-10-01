@@ -45,16 +45,24 @@ function init (state, options) {
     y: initialBounds.y
   })
 
-  win.once('ready-to-show', function () {
+  win.loadURL(config.WINDOW_MAIN)
+
+  win.once('ready-to-show', () => {
     if (!options.hidden) win.show()
   })
 
-  win.loadURL(config.WINDOW_MAIN)
-
-  if (win.setSheetOffset) win.setSheetOffset(config.UI_HEADER_HEIGHT)
+  if (win.setSheetOffset) {
+    win.setSheetOffset(config.UI_HEADER_HEIGHT)
+  }
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen(main.win.isFullScreen())
+  })
+
+  win.webContents.on('will-navigate', (e, url) => {
+    // Prevent drag-and-drop from navigating the Electron window, which can happen
+    // before our drag-and-drop handlers have been initialized.
+    e.preventDefault()
   })
 
   win.on('blur', onWindowBlur)
