@@ -18,10 +18,6 @@ const IS_PORTABLE = isPortable()
 const UI_HEADER_HEIGHT = 38
 const UI_TORRENT_HEIGHT = 100
 
-console.log('Production: %s portable: %s test: %s',
-  IS_PRODUCTION, IS_PORTABLE, IS_TEST)
-if (IS_PORTABLE) console.log('Portable path: %s', PORTABLE_PATH)
-
 module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
