@@ -7,22 +7,21 @@ module.exports = {
   logPlayAttempt
 }
 
-const crypto = require('crypto')
 const electron = require('electron')
-const https = require('https')
-const os = require('os')
-const url = require('url')
 
 const config = require('../../config')
 
 let telemetry
 
 function init (state) {
-  telemetry = state.saved.telemetry
-  if (!telemetry) {
-    telemetry = state.saved.telemetry = createSummary()
+  if (!state.saved.telemetry) {
+    const crypto = require('crypto')
+    state.saved.telemetry = {
+      userID: crypto.randomBytes(32).toString('hex') // 256-bit random ID
+    }
     reset()
   }
+  telemetry = state.saved.telemetry
 }
 
 function send (state) {
@@ -35,15 +34,29 @@ function send (state) {
   telemetry.torrentStats = getTorrentStats(state)
   telemetry.approxNumTorrents = telemetry.torrentStats.approxCount
 
-  if (config.IS_PRODUCTION) {
-    postToServer()
-    // If the user keeps WebTorrent running for a long time, post every 12h
-    setInterval(postToServer, 12 * 3600 * 1000)
-  } else {
+  if (!config.IS_PRODUCTION) {
     // Development: telemetry used only for local debugging
     // Empty uncaught errors, etc at the start of every run
-    reset()
+    return reset()
   }
+
+  const get = require('simple-get')
+
+  const opts = {
+    url: config.TELEMETRY_URL,
+    method: 'POST',
+    body: telemetry,
+    json: true
+  }
+
+  get(opts, function (err, res) {
+    if (err) return console.error('Error sending telemetry', err)
+    if (res.statusCode !== 200) {
+      return console.error(`Error sending telemetry, status code: ${res.statusCode}`)
+    }
+    console.log('Sent telemetry')
+    reset()
+  })
 }
 
 function reset () {
@@ -58,41 +71,6 @@ function reset () {
   }
 }
 
-function postToServer () {
-  // Serialize the telemetry summary
-  const payload = new Buffer(JSON.stringify(telemetry), 'utf8')
-
-  // POST to our server
-  const options = url.parse(config.TELEMETRY_URL)
-  options.method = 'POST'
-  options.headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': payload.length
-  }
-
-  const req = https.request(options, function (res) {
-    if (res.statusCode === 200) {
-      console.log('Successfully posted telemetry summary')
-      reset()
-    } else {
-      console.error('Couldn\'t post telemetry summary, got HTTP ' + res.statusCode)
-    }
-  })
-  req.on('error', function (e) {
-    console.error('Couldn\'t post telemetry summary', e)
-  })
-  req.write(payload)
-  req.end()
-}
-
-// Creates a new telemetry summary. Gives the user a unique ID,
-// collects screen resolution, etc
-function createSummary () {
-  // Make a 256-bit random unique ID
-  const userID = crypto.randomBytes(32).toString('hex')
-  return { userID }
-}
-
 // Track screen resolution
 function getScreenInfo () {
   return electron.screen.getAllDisplays().map((screen) => ({
@@ -104,6 +82,7 @@ function getScreenInfo () {
 
 // Track basic system info like OS version and amount of RAM
 function getSystemInfo () {
+  const os = require('os')
   return {
     osPlatform: process.platform,
     osRelease: os.type() + ' ' + os.release(),

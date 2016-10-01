@@ -134,6 +134,10 @@ function onState (err, _state) {
 function delayedInit () {
   telemetry.send(state)
 
+  // Send telemetry data every 12 hours, for users who keep the app running
+  // for extended periods of time
+  setInterval(() => telemetry.send(state), 12 * 3600 * 1000)
+
   // Warn if the download dir is gone, eg b/c an external drive is unplugged
   checkDownloadPath()
 
