@@ -106,7 +106,7 @@ class CreateTorrentPage extends React.Component {
             }}
             onClick={dispatcher('cancel')} />
           <RaisedButton
-            className='control create-torrent'
+            className='control create-torrent-button'
             label='Create Torrent'
             primary
             onClick={this.handleSubmit} />
