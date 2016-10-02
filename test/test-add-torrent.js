@@ -70,7 +70,7 @@ test('create-torrent', function (t) {
     .then(() => app.client.waitUntilTextExists('.create-torrent-advanced', 'Comment'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'create-torrent-advanced'))
     // Click OK to create the torrent
-    .then(() => app.client.click('.control.create-torrent'))
+    .then(() => app.client.click('.control.create-torrent-button'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'tmp.jpg'))
     .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'create-torrent-100-percent'))
