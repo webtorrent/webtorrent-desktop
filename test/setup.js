@@ -1,4 +1,5 @@
 const Application = require('spectron').Application
+const cpFile = require('cp-file')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
@@ -208,7 +209,6 @@ function extractImportantFields (parsedTorrent) {
 }
 
 function copy (pathFrom, pathTo) {
-  const cpFile = require('cp-file')
   try {
     cpFile.sync(pathFrom, pathTo)
   } catch (err) {

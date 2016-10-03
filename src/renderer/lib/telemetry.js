@@ -46,12 +46,11 @@ function send (state) {
 
   const opts = {
     url: config.TELEMETRY_URL,
-    method: 'POST',
     body: telemetry,
     json: true
   }
 
-  get(opts, function (err, res) {
+  get.post(opts, function (err, res) {
     if (err) return console.error('Error sending telemetry', err)
     if (res.statusCode !== 200) {
       return console.error(`Error sending telemetry, status code: ${res.statusCode}`)
