@@ -18,7 +18,7 @@
     "bitfield": "^1.0.2",
     "capture-frame": "^1.0.0",
     "chromecasts": "^1.8.0",
-    "cp-file": "^3.2.0",
+    "cp-file": "^4.0.1",
     "create-torrent": "^3.24.5",
     "debounce": "^1.0.0",
     "deep-equal": "^1.0.1",
