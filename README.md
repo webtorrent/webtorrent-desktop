@@ -65,7 +65,7 @@ $ npm test
 ### Run integration tests
 
 ```
-$ npm run integration-test
+$ npm run test-integration
 ```
 
 The integration tests use Spectron and Tape. They click through the app, taking screenshots and comparing each one to a reference. Why screenshots?
