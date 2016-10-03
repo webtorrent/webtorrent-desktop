@@ -134,7 +134,7 @@ const win32 = {
   platform: 'win32',
 
   // Build ia32 and x64 binaries.
-  arch: 'all',
+  arch: ['ia32', 'x64'],
 
   // Object hash of application metadata to embed into the executable (Windows only)
   win32metadata: {
@@ -168,7 +168,7 @@ const linux = {
   platform: 'linux',
 
   // Build ia32 and x64 binaries.
-  arch: 'all'
+  arch: ['ia32', 'x64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
