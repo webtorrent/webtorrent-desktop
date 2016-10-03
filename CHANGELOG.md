@@ -1,5 +1,23 @@
 # WebTorrent Desktop Version History
 
+## v0.17.1 - 2016-10-03
+
+### Changed
+- Faster startup (improved by ~25%)
+- Update Electron to 1.4.2
+- Remove support for pasting multiple newline-separated magnet links
+- Reduce UX sound volume
+
+### Fixed
+- Fix external player (VLC, etc.) opening before HTTP server was ready
+- Windows (Portable App): Fix "Portable App" mode
+  - Write application support files to the "Portable Settings" folder
+  - Stop writing Electron "single instance" lock file to "%APPDATA%\Roaming\WebTorrent"
+  - Some temp data is still written to "%APPDATA%\Temp" (will be fixed in future version)
+- Don't show pointer cursor on torrent list checkbox
+- Trim extra whitespace from magnet links pasted into "Open Torrent Address" dialog
+- Fix weird outline on 'Create Torrent' button
+
 ## v0.17.0 - 2016-09-23
 
 ### Added
