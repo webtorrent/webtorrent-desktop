@@ -15,6 +15,7 @@ const main = module.exports = {
 }
 
 const electron = require('electron')
+const debounce = require('debounce')
 
 const app = electron.app
 
@@ -83,13 +84,13 @@ function init (state, options) {
     win.setMenuBarVisibility(true)
   })
 
-  win.on('move', function (e) {
+  win.on('move', debounce(function (e) {
     send('windowBoundsChanged', e.sender.getBounds())
-  })
+  }, 1000))
 
-  win.on('resize', function (e) {
+  win.on('resize', debounce(function (e) {
     send('windowBoundsChanged', e.sender.getBounds())
-  })
+  }, 1000))
 
   win.on('close', function (e) {
     if (process.platform !== 'darwin') {
