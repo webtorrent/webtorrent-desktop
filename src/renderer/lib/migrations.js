@@ -5,6 +5,7 @@ module.exports = {
 }
 
 const fs = require('fs')
+const path = require('path')
 const semver = require('semver')
 
 const config = require('../../config')
@@ -18,30 +19,15 @@ function run (state) {
   }
 
   const version = state.saved.version
+  const saved = state.saved
 
-  if (semver.lt(version, '0.7.0')) {
-    migrate_0_7_0(state.saved)
-  }
-
-  if (semver.lt(version, '0.7.2')) {
-    migrate_0_7_2(state.saved)
-  }
-
-  if (semver.lt(version, '0.11.0')) {
-    migrate_0_11_0(state.saved)
-  }
-
-  if (semver.lt(version, '0.12.0')) {
-    migrate_0_12_0(state.saved)
-  }
-
-  if (semver.lt(version, '0.14.0')) {
-    migrate_0_14_0(state.saved)
-  }
-
-  if (semver.lt(version, '0.17.0')) {
-    migrate_0_17_0(state.saved)
-  }
+  if (semver.lt(version, '0.7.0')) migrate_0_7_0(saved)
+  if (semver.lt(version, '0.7.2')) migrate_0_7_2(saved)
+  if (semver.lt(version, '0.11.0')) migrate_0_11_0(saved)
+  if (semver.lt(version, '0.12.0')) migrate_0_12_0(saved)
+  if (semver.lt(version, '0.14.0')) migrate_0_14_0(saved)
+  if (semver.lt(version, '0.17.0')) migrate_0_17_0(saved)
+  if (semver.lt(version, '0.17.2')) migrate_0_17_2(saved)
 
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
@@ -162,4 +148,61 @@ function migrate_0_17_0 (saved) {
       delete file.audioInfo.picture
     })
   })
+}
+
+function migrate_0_17_2 (saved) {
+  // Remove the trailing dot (.) from the Wired CD torrent name, since
+  // folders/files that end in a trailing dot (.) or space are not deletable from
+  // Windows Explorer. See: https://github.com/feross/webtorrent-desktop/issues/905
+
+  const cpFile = require('cp-file')
+  const rimraf = require('rimraf')
+
+  const OLD_NAME = 'The WIRED CD - Rip. Sample. Mash. Share.'
+  const NEW_NAME = 'The WIRED CD - Rip. Sample. Mash. Share'
+
+  const OLD_HASH = '3ba219a8634bf7bae3d848192b2da75ae995589d'
+  const NEW_HASH = 'a88fda5954e89178c372716a6a78b8180ed4dad3'
+
+  const ts = saved.torrents.find((ts) => {
+    return ts.infoHash === OLD_HASH
+  })
+
+  if (!ts) return // Wired CD torrent does not exist
+
+  // New versions of WebTorrent ship with a fixed torrent file. Let's fix up the
+  // name in existing versions of WebTorrent.
+  ts.name = ts.displayName = NEW_NAME
+  ts.files.forEach((file) => {
+    file.path = file.path.replace(OLD_NAME, NEW_NAME)
+  })
+
+  // Changing the torrent name causes the info hash to change
+  ts.infoHash = NEW_HASH
+  ts.magnetURI = ts.magnetURI.replace(OLD_HASH, NEW_HASH)
+
+  try {
+    fs.renameSync(
+      path.join(config.POSTER_PATH, ts.posterFileName),
+      path.join(config.POSTER_PATH, NEW_HASH + '.jpg')
+    )
+  } catch (err) {}
+  ts.posterFileName = NEW_HASH + '.jpg'
+
+  rimraf.sync(path.join(config.TORRENT_PATH, ts.torrentFileName))
+  cpFile.sync(
+    path.join(config.STATIC_PATH, 'wiredCd.torrent'),
+    path.join(config.TORRENT_PATH, NEW_HASH + '.torrent')
+  )
+  ts.torrentFileName = NEW_HASH + '.torrent'
+
+  if (ts.path) {
+    // If torrent folder already exists on disk, try to rename it
+    try {
+      fs.renameSync(
+        path.join(ts.path, OLD_NAME),
+        path.join(ts.path, NEW_NAME)
+      )
+    } catch (err) {}
+  }
 }
