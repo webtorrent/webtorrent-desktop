@@ -599,12 +599,15 @@ function renderLoadingBar (state) {
 
   const torrentSummary = state.getPlayingTorrentSummary()
   if (!torrentSummary.progress) {
-    return []
+    return null
   }
 
   // Find all contiguous parts of the torrent which are loaded
   const prog = torrentSummary.progress
   const fileProg = prog.files[state.playing.fileIndex]
+
+  if (!fileProg) return null
+
   const parts = []
   let lastPiecePresent = false
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
@@ -626,6 +629,7 @@ function renderLoadingBar (state) {
 
     return (<div key={i} className='loading-bar-part' style={style} />)
   })
+
   return (<div key='loading-bar' className='loading-bar'>{loadingBarElems}</div>)
 }
 
