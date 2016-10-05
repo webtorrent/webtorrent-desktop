@@ -60,7 +60,7 @@ module.exports = {
     },
     {
       testID: 'wired',
-      name: 'The WIRED CD - Rip. Sample. Mash. Share.',
+      name: 'The WIRED CD - Rip. Sample. Mash. Share',
       posterFileName: 'wiredCd.jpg',
       torrentFileName: 'wiredCd.torrent'
     }
