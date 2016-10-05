@@ -268,8 +268,16 @@ module.exports = class PlaybackController {
     state.playing.jumpToTime = jumpToTime
 
     // if it's audio, parse out the metadata (artist, title, etc)
-    if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
-      ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
+    if (torrentSummary.status === 'paused') {
+      ipcRenderer.once('wt-ready-' + torrentSummary.infoHash, getAudioMetadata)
+    } else {
+      getAudioMetadata()
+    }
+
+    function getAudioMetadata () {
+      if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+        ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
+      }
     }
 
     // if it's video, check for subtitles files that are done downloading
