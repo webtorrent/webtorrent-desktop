@@ -125,8 +125,6 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
 
   // Only download the files the user wants, not necessarily all files
   torrent.once('ready', () => selectFiles(torrent, selections))
-
-  return torrent
 }
 
 function stopTorrenting (infoHash) {
