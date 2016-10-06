@@ -182,47 +182,41 @@ module.exports = class TorrentListController {
 
   openTorrentContextMenu (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-    const menu = new electron.remote.Menu()
 
-    menu.append(new electron.remote.MenuItem({
-      label: 'Remove From List',
-      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
-    }))
-
-    menu.append(new electron.remote.MenuItem({
-      label: 'Remove Data File',
-      click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
-    }))
-
-    menu.append(new electron.remote.MenuItem({
-      type: 'separator'
-    }))
-
-    if (torrentSummary.files) {
-      menu.append(new electron.remote.MenuItem({
+    const menuTemplate = [
+      {
+        label: 'Remove From List',
+        click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)
+      },
+      {
+        label: 'Remove Data File',
+        click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
+      },
+      {
+        type: 'separator'
+      },
+      {
         label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
         click: () => showItemInFolder(torrentSummary)
-      }))
-      menu.append(new electron.remote.MenuItem({
+      },
+      {
         type: 'separator'
-      }))
-    }
+      },
+      {
+        label: 'Copy Magnet Link to Clipboard',
+        click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
+      },
+      {
+        label: 'Copy Instant.io Link to Clipboard',
+        click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
+      },
+      {
+        label: 'Save Torrent File As...',
+        click: () => dispatch('saveTorrentFileAs', torrentSummary.torrentKey)
+      }
+    ]
 
-    menu.append(new electron.remote.MenuItem({
-      label: 'Copy Magnet Link to Clipboard',
-      click: () => electron.clipboard.writeText(torrentSummary.magnetURI)
-    }))
-
-    menu.append(new electron.remote.MenuItem({
-      label: 'Copy Instant.io Link to Clipboard',
-      click: () => electron.clipboard.writeText(`https://instant.io/#${torrentSummary.infoHash}`)
-    }))
-
-    menu.append(new electron.remote.MenuItem({
-      label: 'Save Torrent File As...',
-      click: () => dispatch('saveTorrentFileAs', torrentSummary.torrentKey)
-    }))
-
+    const menu = electron.remote.Menu.buildFromTemplate(menuTemplate)
     menu.popup(electron.remote.getCurrentWindow())
   }
 
