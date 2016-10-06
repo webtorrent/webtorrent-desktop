@@ -216,6 +216,13 @@ module.exports = class TorrentListController {
       {
         label: 'Save Torrent File As...',
         click: () => dispatch('saveTorrentFileAs', torrentSummary.torrentKey)
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Paste Torrent Address',
+        role: 'paste'
       }
     ]
 
