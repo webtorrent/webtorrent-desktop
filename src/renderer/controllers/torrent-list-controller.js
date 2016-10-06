@@ -182,6 +182,7 @@ module.exports = class TorrentListController {
 
   openTorrentContextMenu (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    const torrentStarted = !!(torrentSummary.files && torrentSummary.progress)
 
     const menuTemplate = [
       {
@@ -190,6 +191,7 @@ module.exports = class TorrentListController {
       },
       {
         label: 'Remove Data File',
+        enabled: torrentStarted,
         click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, true)
       },
       {
@@ -197,6 +199,7 @@ module.exports = class TorrentListController {
       },
       {
         label: process.platform === 'darwin' ? 'Show in Finder' : 'Show in Folder',
+        enabled: torrentStarted,
         click: () => showItemInFolder(torrentSummary)
       },
       {
