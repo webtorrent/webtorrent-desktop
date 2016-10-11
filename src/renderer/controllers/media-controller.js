@@ -1,7 +1,5 @@
-const electron = require('electron')
-
-const ipcRenderer = electron.ipcRenderer
-
+const {ipcRenderer} = require('electron')
+const telemetry = require('../lib/telemetry')
 const Playlist = require('../lib/playlist')
 
 // Controls local play back: the <video>/<audio> tag and VLC
@@ -12,7 +10,7 @@ module.exports = class MediaController {
   }
 
   mediaSuccess () {
-    this.state.playing.result = 'success'
+    telemetry.logPlayAttempt('success')
   }
 
   mediaStalled () {
@@ -22,7 +20,7 @@ module.exports = class MediaController {
   mediaError (error) {
     const state = this.state
     if (state.location.url() === 'player') {
-      state.playing.result = 'error'
+      telemetry.logPlayAttempt('error')
       state.playing.location = 'error'
       ipcRenderer.send('checkForExternalPlayer', state.saved.prefs.externalPlayerPath)
       ipcRenderer.once('checkForExternalPlayer', function (e, isInstalled) {

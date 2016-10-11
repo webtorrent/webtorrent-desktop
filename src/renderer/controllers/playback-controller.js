@@ -211,6 +211,7 @@ module.exports = class PlaybackController {
     const torrentSummary = TorrentSummary.getByKey(state, infoHash)
 
     state.playing.infoHash = torrentSummary.infoHash
+    state.playing.isReady = false
 
     // update UI to show pending playback
     sound.play('PLAY')
@@ -232,6 +233,7 @@ module.exports = class PlaybackController {
 
     function onTorrentReady () {
       ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
+      ipcRenderer.once('wt-server-running', () => state.playing.isReady = true)
     }
   }
 
@@ -320,12 +322,7 @@ module.exports = class PlaybackController {
     // Save volume (this session only, not in state.saved)
     state.previousVolume = state.playing.volume
 
-    // Telemetry: track what happens after the user clicks play
-    const result = state.playing.result // 'success' or 'error'
-    if (result === 'success') telemetry.logPlayAttempt('success') // first frame displayed
-    else if (result === 'error') telemetry.logPlayAttempt('error') // codec missing, etc
-    else if (result === undefined) telemetry.logPlayAttempt('abandoned') // user gave up waiting
-    else console.error('Unknown state.playing.result', state.playing.result)
+    if (!state.playing.isReady) telemetry.logPlayAttempt('abandoned') // user gave up waiting
 
     // Reset the window contents back to the home screen
     state.playing = State.getDefaultPlayState()

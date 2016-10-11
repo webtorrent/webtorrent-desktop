@@ -91,7 +91,8 @@ function getDefaultPlayState () {
     location: 'local', /* 'local', 'chromecast', 'airplay' */
     type: null, /* 'audio' or 'video', could be 'other' if ever support eg streaming to VLC */
     currentTime: 0, /* seconds */
-    duration: 1, /* seconds */
+    duration: 1, /* seconds */,
+    isReady: false,
     isPaused: true,
     isStalled: false,
     lastTimeUpdate: 0, /* Unix time in ms */
