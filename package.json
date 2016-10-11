@@ -90,6 +90,7 @@
   "optionalDependencies": {
     "appdmg": "^0.4.3"
   },
+  "private": true,
   "productName": "WebTorrent",
   "repository": {
     "type": "git",
