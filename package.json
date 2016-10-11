@@ -24,7 +24,7 @@
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^2.12.1",
-    "es6-error": "^3.0.1",
+    "es6-error": "^4.0.0",
     "fn-getter": "^1.0.0",
     "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
