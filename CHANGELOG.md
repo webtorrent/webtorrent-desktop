@@ -1,5 +1,11 @@
 # WebTorrent Desktop Version History
 
+## UNRELEASED
+
+### Changed
+- Update Electron to 1.4.3
+  - Windows 32-bit: App can use 4GB of memory instead of just 2GB
+
 ## v0.17.2 - 2016-10-10
 
 ### Fixed
