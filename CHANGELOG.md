@@ -1,5 +1,13 @@
 # WebTorrent Desktop Version History
 
+## v0.17.2 - 2016-10-10
+
+### Fixed
+- Windows: Fix impossible-to-delete "Wired CD" default torrent
+- Throttle browser-window 'move' and 'resize' events
+- Fix crash ("Cannot read property 'files' of null" error)
+- Fix crash ("TypeError: Cannot read property 'startPiece' of undefined")
+
 ## v0.17.1 - 2016-10-03
 
 ### Changed
