@@ -30,7 +30,7 @@
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",
     "lodash.merge": "^4.6.0",
-    "material-ui": "^0.15.4",
+    "material-ui": "^0.16.0",
     "mkdirp": "^0.5.1",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
