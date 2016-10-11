@@ -67,6 +67,7 @@ function reset () {
     total: 0,
     success: 0,
     error: 0,
+    external: 0,
     abandoned: 0
   }
 }
@@ -209,10 +210,10 @@ function getElemString (elem) {
   return ret
 }
 
-// The user pressed play. It either worked or showed the
-// 'Play in VLC' codec error
+// The user pressed play. Did it work, display an error,
+// open an external player or did user abandon the attempt?
 function logPlayAttempt (result) {
-  if (!['success', 'error', 'abandoned'].includes(result)) {
+  if (!['success', 'error', 'external', 'abandoned'].includes(result)) {
     return console.error('Unknown play attempt result', result)
   }
 
