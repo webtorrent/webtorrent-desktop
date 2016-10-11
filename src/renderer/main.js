@@ -1,10 +1,6 @@
 /**
  * Perf optimization: Hook into require() to modify how certain modules load:
  *
- * - `lodash/merge` (used by `material-ui`) causes 119 require() calls at startup,
- *   which take ~100ms. Replace it with `lodash.merge` which is equivalent.
- *   See: https://github.com/callemall/material-ui/pull/4380#issuecomment-250894552
- *
  * - `inline-style-prefixer` (used by `material-ui`) takes ~40ms. It is not
  *   actually used because auto-prefixing is disabled with
  *   `darkBaseTheme.userAgent = false`. Return a fake object.
@@ -12,7 +8,6 @@
 let Module = require('module')
 const _require = Module.prototype.require
 Module.prototype.require = function (id) {
-  if (id === 'lodash/merge') id = 'lodash.merge'
   if (id === 'inline-style-prefixer') return {}
   return _require.apply(this, arguments)
 }
