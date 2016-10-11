@@ -223,6 +223,8 @@ module.exports = class PlaybackController {
 
   // Starts WebTorrent server for media streaming
   startServer (torrentSummary) {
+    const state = this.state
+
     if (torrentSummary.status === 'paused') {
       dispatch('startTorrentingSummary', torrentSummary.torrentKey)
       ipcRenderer.once('wt-ready-' + torrentSummary.infoHash,
@@ -233,7 +235,7 @@ module.exports = class PlaybackController {
 
     function onTorrentReady () {
       ipcRenderer.send('wt-start-server', torrentSummary.infoHash)
-      ipcRenderer.once('wt-server-running', () => state.playing.isReady = true)
+      ipcRenderer.once('wt-server-running', () => { state.playing.isReady = true })
     }
   }
 

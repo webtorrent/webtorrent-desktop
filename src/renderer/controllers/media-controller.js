@@ -56,7 +56,10 @@ module.exports = class MediaController {
     const state = this.state
     state.playing.location = 'external'
 
-    let open = function () {
+    const onServerRunning = function () {
+      state.playing.isReady = true
+      telemetry.logPlayAttempt('external')
+
       const mediaURL = Playlist.getCurrentLocalURL(state)
       ipcRenderer.send('openExternalPlayer',
         state.saved.prefs.externalPlayerPath,
@@ -64,8 +67,8 @@ module.exports = class MediaController {
         state.window.title)
     }
 
-    if (state.server != null) open()
-    else ipcRenderer.once('wt-server-running', open)
+    if (state.server != null) onServerRunning()
+    else ipcRenderer.once('wt-server-running', onServerRunning)
   }
 
   externalPlayerNotFound () {
