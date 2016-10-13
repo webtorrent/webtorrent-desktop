@@ -275,9 +275,9 @@ function renderLoadingSpinner (state) {
     <div key='loading' className='media-stalled'>
       <div key='loading-spinner' className='loading-spinner'>&nbsp;</div>
       <div key='loading-progress' className='loading-status ellipsis'>
-        <span className='progress'>{fileProgress}%</span> downloaded,
-        <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
-        <span>↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
+        <span className='progress'>{fileProgress}%</span> downloaded
+        <span> ↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
+        <span> ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
     </div>
   )
