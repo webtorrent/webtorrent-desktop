@@ -128,6 +128,26 @@ module.exports = class TorrentListController {
     }
   }
 
+  pauseAllTorrents () {
+    this.state.saved.torrents.forEach((torrentSummary) => {
+      if (torrentSummary.status === 'downloading') {
+        torrentSummary.status = 'paused'
+        ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+        sound.play('DISABLE')
+      }
+    })
+  }
+
+  resumeAllTorrents () {
+    this.state.saved.torrents.forEach((torrentSummary) => {
+      if (torrentSummary.status === 'paused') {
+        torrentSummary.status = 'downloading'
+        this.startTorrentingSummary(torrentSummary.torrentKey)
+        sound.play('ENABLE')
+      }
+    })
+  }
+
   toggleTorrentFile (infoHash, index) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     torrentSummary.selections[index] = !torrentSummary.selections[index]
