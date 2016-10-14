@@ -37,7 +37,7 @@ class PreferencesPage extends React.Component {
           }}
           onChange={this.handleDownloadPathChange}
           title='Download location'
-          value={this.props.state.unsaved.prefs.downloadPath} />
+          value={this.props.state.saved.prefs.downloadPath} />
       </Preference>
     )
   }
@@ -51,7 +51,7 @@ class PreferencesPage extends React.Component {
       <Preference>
         <Checkbox
           className='control'
-          checked={!this.props.state.unsaved.prefs.openExternalPlayer}
+          checked={!this.props.state.saved.prefs.openExternalPlayer}
           label={'Play torrent media files using WebTorrent'}
           onCheck={this.handleOpenExternalPlayerChange} />
       </Preference>
@@ -81,10 +81,10 @@ class PreferencesPage extends React.Component {
   }
 
   externalPlayerPathSelector () {
-    const playerPath = this.props.state.unsaved.prefs.externalPlayerPath
+    const playerPath = this.props.state.saved.prefs.externalPlayerPath
     const playerName = this.props.state.getExternalPlayerName()
 
-    const description = this.props.state.unsaved.prefs.openExternalPlayer
+    const description = this.props.state.saved.prefs.openExternalPlayer
       ? `Torrent media files will always play in ${playerName}.`
       : `Torrent media files will play in ${playerName} if WebTorrent cannot play them.`
 
@@ -162,7 +162,7 @@ class PreferencesPage extends React.Component {
   }
 
   setDefaultAppButton () {
-    const isFileHandler = this.props.state.unsaved.prefs.isFileHandler
+    const isFileHandler = this.props.state.saved.prefs.isFileHandler
     if (isFileHandler) {
       return (
         <Preference>
@@ -195,7 +195,7 @@ class PreferencesPage extends React.Component {
         <Preference>
           <Checkbox
             className='control'
-            checked={this.props.state.unsaved.prefs.startup}
+            checked={this.props.state.saved.prefs.startup}
             label={'Open WebTorrent on startup.'}
             onCheck={this.handleStartupChange}
           />

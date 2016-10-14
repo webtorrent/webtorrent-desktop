@@ -16,45 +16,22 @@ module.exports = class PrefsController {
       setup: function (cb) {
         // initialize preferences
         state.window.title = 'Preferences'
-        state.unsaved = Object.assign(state.unsaved || {}, {
-          prefs: Object.assign({}, state.saved.prefs)
-        })
         ipcRenderer.send('setAllowNav', false)
         cb()
       },
       destroy: () => {
         ipcRenderer.send('setAllowNav', true)
-        this.save()
       }
     })
   }
 
-  // Updates a single property in the UNSAVED prefs
-  // For example: updatePreferences('foo.bar', 'baz')
-  // Call save() to save to config.json
+  // Updates a single property in the saved prefs
+  // For example: updatePreferences('isFileHandler', true)
   update (property, value) {
-    const path = property.split('.')
-    let obj = this.state.unsaved.prefs
-    let i
-    for (i = 0; i < path.length - 1; i++) {
-      if (typeof obj[path[i]] === 'undefined') {
-        obj[path[i]] = {}
-      }
-      obj = obj[path[i]]
-    }
-    obj[path[i]] = value
-  }
+    if (property === 'isFileHandler') ipcRenderer.send('setDefaultFileHandler', value)
+    else if (property === 'startup') ipcRenderer.send('setStartup', value)
 
-  // All unsaved prefs take effect atomically, and are saved to config.json
-  save () {
-    const state = this.state
-    if (state.unsaved.prefs.isFileHandler !== state.saved.prefs.isFileHandler) {
-      ipcRenderer.send('setDefaultFileHandler', state.unsaved.prefs.isFileHandler)
-    }
-    if (state.unsaved.prefs.startup !== state.saved.prefs.startup) {
-      ipcRenderer.send('setStartup', state.unsaved.prefs.startup)
-    }
-    state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
+    this.state.saved.prefs[property] = value
     dispatch('stateSaveImmediate')
     dispatch('checkDownloadPath')
   }
