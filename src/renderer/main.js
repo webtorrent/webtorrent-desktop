@@ -225,6 +225,8 @@ const dispatchHandlers = {
   'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),
   'createTorrent': (options) => controllers.torrentList().createTorrent(options),
   'toggleTorrent': (infoHash) => controllers.torrentList().toggleTorrent(infoHash),
+  'pauseAllTorrents': () => controllers.torrentList().pauseAllTorrents(),
+  'resumeAllTorrents': () => controllers.torrentList().resumeAllTorrents(),
   'toggleTorrentFile': (infoHash, index) =>
     controllers.torrentList().toggleTorrentFile(infoHash, index),
   'confirmDeleteTorrent': (infoHash, deleteData) =>

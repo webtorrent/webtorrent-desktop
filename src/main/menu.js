@@ -279,6 +279,22 @@ function getMenuTemplate () {
       ]
     },
     {
+      label: 'Transfers',
+      submenu: [
+        {
+          label: 'Pause All',
+          click: () => windows.main.dispatch('pauseAllTorrents')
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Resume All',
+          click: () => windows.main.dispatch('resumeAllTorrents')
+        }
+      ]
+    },
+    {
       label: 'Help',
       role: 'help',
       submenu: [
