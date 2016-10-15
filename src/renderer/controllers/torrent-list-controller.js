@@ -133,9 +133,9 @@ module.exports = class TorrentListController {
       if (torrentSummary.status === 'downloading') {
         torrentSummary.status = 'paused'
         ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-        sound.play('DISABLE')
       }
     })
+    sound.play('DISABLE')
   }
 
   resumeAllTorrents () {
@@ -143,9 +143,9 @@ module.exports = class TorrentListController {
       if (torrentSummary.status === 'paused') {
         torrentSummary.status = 'downloading'
         this.startTorrentingSummary(torrentSummary.torrentKey)
-        sound.play('ENABLE')
       }
     })
+    sound.play('ENABLE')
   }
 
   toggleTorrentFile (infoHash, index) {
