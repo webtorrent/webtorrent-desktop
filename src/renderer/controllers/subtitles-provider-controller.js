@@ -1,34 +1,45 @@
-const electron = require('electron')
 const fs = require('fs')
 const path = require('path')
-const parallel = require('run-parallel')
-
-const remote = electron.remote
-
 const OS = require('opensubtitles-api')
 const http = require('http')
+
+const util = require('util')
 
 const {dispatch} = require('../lib/dispatcher')
 
 module.exports = class SubtitlesProviderController {
-  
+
   constructor (state) {
     this.state = state
   }
 
-  fetchSubtitlesFor(fileName){
-
-    let manager = new SubtitlesProvidersManager('en',fileName)
-
+  fetchSubtitles(){
+    let downloadPath = state.saved.prefs.downloadPath
+    let filePath = path.join(downloadPath,state.getPlayingFileSummary().path)
+    let fileName = state.getPlayingFileSummary().name
+    //TODO: get user main language
+    let manager = new SubtitlesProvidersManager('en',filePath)
     let providers = manager.avaibleProvidersNames
+    let files = []
 
     //For each provider, show what subs he has
     providers.forEach(provider => {
       manager.fetchSubsFromProvider(provider,subs => {
-        console.log(subs)
+
+        //TODO: show modal to allow user to choose the sub file from the provider he wants
         subs.forEach(sub => {
-          //manager.downloadSubtitle(sub,sub.score + "_" + sub.downloads +".srt")
+          //For now, we download the 3 most popular subs for each provider on the current dir
+          let subPath = path.join(path.dirname(filePath),util.format("auto_downloaded_os_%s_%s_%s.srt",fileName,sub.score,sub.downloads))
+
+          //Each time a sub is download, we added to the files list
+          manager.downloadSubtitle(sub,subPath,file => {
+            files.push(file)
+            dispatch('addSubtitles',files,true)
+          })
         })
+      }, (provider) => {
+        //TODO: let user enter other query options such as an imdbid
+        dispatch('error', util.format('No subtitles found in %s',provider.name))
       })
     })
   }
@@ -36,42 +47,36 @@ module.exports = class SubtitlesProviderController {
 
 class SubtitlesProvidersManager {
 
+
   constructor(lang,currentMediaFileName){
-
     this.lang = lang
-
     this.fileName = currentMediaFileName
-
     //Contains each providers which extends BaseSubtitleProvider
     this.providers = [new OpenSubtitlesProvider(this.lang,this.fileName)]
-
   }
 
   get avaibleProvidersNames(){
     return this.providers.map(provider => provider.name)
   }
 
-  fetchSubsFromProvider(name,listener){
+  fetchSubsFromProvider(name,onSubsFetched,onNoSubsFounded){
     let provider = this.providers.find(elem => elem.name === name)
-
-    provider.onSubsFetched = listener
-
-    provider.onNoSubsFounded = () => {
-      console.log("No subs founded :(, try another query options");
-    }
+    provider.onSubsFetched = onSubsFetched
+    provider.onNoSubsFounded = onNoSubsFounded
     provider.fetchSubs()
   }
 
-  downloadSubtitle(subtitle,outFileName){
+  downloadSubtitle(subtitle,outFileName,doneListener){
     let file = fs.createWriteStream(outFileName)
     http.get(subtitle['url'], function(response) {
       response.pipe(file);
+      if(doneListener)
+        doneListener(file)
     })
   }
-
 }
 
-
+//Base class for each sub provider liek OpenSubtitles
 class BaseSubtitleProvider {
   constructor(name){
     this.name = name
@@ -107,6 +112,8 @@ class OpenSubtitlesProvider extends BaseSubtitleProvider {
     })
   }
 
+  //If the default settings don't find anything, we tried other settings
+  //such as the imdbid which will be enter manually by the user
   setCustomQuery(query){
     Object.assign(this.options,query)
   }
@@ -126,28 +133,9 @@ class OpenSubtitlesProvider extends BaseSubtitleProvider {
         }
       }else{
         if(this.onNoSubsFounded){
-          this.onNoSubsFounded()
+          this.onNoSubsFounded(this)
         }
       }
     })
   }
-}
-
-
-function sample(file){
-
-  let manager = new SubtitlesProvidersManager("en",file)
-
-  let providers = manager.avaibleProvidersNames
-
-  console.log(providers)
-
-  providers.forEach(provider => {
-    manager.fetchSubsFromProvider(provider,subs => {
-      console.log(subs)
-      subs.forEach(sub => {
-        manager.downloadSubtitle(sub,sub.score + "_" + sub.downloads +".srt")
-      })
-    })
-  })
 }

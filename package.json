@@ -33,6 +33,7 @@
     "mkdirp": "^0.5.1",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
+    "opensubtitles-api": "^3.3.0",
     "parse-torrent": "^5.7.3",
     "prettier-bytes": "^1.0.1",
     "react": "^15.2.1",
