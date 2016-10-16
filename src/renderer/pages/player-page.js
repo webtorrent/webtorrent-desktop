@@ -356,18 +356,18 @@ function renderCastOptions (state) {
 
 function renderSubtitleOptions (state) {
   const subtitles = state.playing.subtitles
-  if (!subtitles.tracks.length && subtitles.showMenu){
+  if (!subtitles.tracks.length && subtitles.showMenu) {
     return (
       <ul key='subtitle-options' className='options-list'>
-      <li onClick={dispatcher('openSubtitles')}>
-        Open
-      </li>
+        <li onClick={dispatcher('openSubtitles')}>
+          Open
+        </li>
         <li onClick={dispatcher('fetchSubtitles')}>
           Auto Download
         </li>
       </ul>
     )
-  }else if( !subtitles.showMenu ){
+  } else if (!subtitles.showMenu) {
     return
   }
 
@@ -380,8 +380,6 @@ function renderSubtitleOptions (state) {
       </li>
     )
   })
-
-
 
   const noneSelected = state.playing.subtitles.selectedIndex === -1
   const noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
@@ -598,14 +596,6 @@ function renderPlayerControls (state) {
   }
 
   function handleSubtitles (e) {
-    /*if (!state.playing.subtitles.tracks.length || e.ctrlKey || e.metaKey) {
-      // if no subtitles available select it, or download it
-      //dispatch('openSubtitles')
-      state.playing.subtitles.showMenu = true
-      //dispatch('toggleSubtitlesMenu')
-    } else {
-      dispatch('toggleSubtitlesMenu')
-    }*/
     dispatch('toggleSubtitlesMenu')
   }
 }
