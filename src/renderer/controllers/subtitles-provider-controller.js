@@ -28,21 +28,21 @@ module.exports =
         manager.fetchSubsFromProvider(provider, subs => {
           // TODO: show modal to allow user to choose the sub file from the provider he wants
           subs.forEach(sub => {
-            // For now, we download the 3 most popular subs for each provider on the current dir
+            // For now, we download the 3 most popular subs for each provider
             let subPath = path.join(
               path.dirname(filePath),
               util.format('auto_downloaded_os_%s_%s_%s.srt',
               fileName, sub.score, sub.downloads)
             )
 
-            // Each time a sub is download, we added to the files list
+            // Each time a sub is downloaded, we add it to the files list
             manager.downloadSubtitle(sub, subPath, file => {
               files.push(file)
               dispatch('addSubtitles', files, true)
             })
           })
         }, (provider) => {
-          // TODO: let user enter other query options such as an imdbid
+          // TODO: let user enter an other query options such as an imdbid
           dispatch('error', util.format('No subtitles found in %s', provider.name))
         })
       })
@@ -54,7 +54,7 @@ class SubtitlesProvidersManager {
   constructor (lang, currentMediaFileName) {
     this.lang = lang
     this.fileName = currentMediaFileName
-    // Contains each providers which extends BaseSubtitleProvider
+    // Contains all the providers
     this.providers = [new OpenSubtitlesProvider(this.lang, this.fileName)]
   }
 
@@ -80,7 +80,7 @@ class SubtitlesProvidersManager {
   }
 }
 
-// Base class for each sub provider liek OpenSubtitles
+// Base class for each sub provider like OpenSubtitles
 class BaseSubtitleProvider {
   constructor (name) {
     this.name = name
@@ -116,7 +116,7 @@ class OpenSubtitlesProvider extends BaseSubtitleProvider {
     })
   }
 
-  // If the default settings don't find anything, we tried other settings
+  // If the default settings don't find anything, we try other settings
   // such as the imdbid which will be enter manually by the user
   setCustomQuery (query) {
     Object.assign(this.options, query)
