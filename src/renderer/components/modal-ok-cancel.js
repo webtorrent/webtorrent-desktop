@@ -17,7 +17,8 @@ module.exports = class ModalOKCancel extends React.Component {
           className='control ok'
           primary
           label={okText}
-          onClick={onOK} />
+          onClick={onOK}
+          autoFocus />
       </div>
     )
   }
