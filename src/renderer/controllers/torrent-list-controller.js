@@ -130,7 +130,8 @@ module.exports = class TorrentListController {
 
   pauseAllTorrents () {
     this.state.saved.torrents.forEach((torrentSummary) => {
-      if (torrentSummary.status === 'downloading') {
+      if (torrentSummary.status === 'downloading' ||
+          torrentSummary.status === 'seeding') {
         torrentSummary.status = 'paused'
         ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
       }
