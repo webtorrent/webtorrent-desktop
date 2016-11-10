@@ -58,7 +58,7 @@ function play (name) {
     audio.src = sound.url
   }
   audio.currentTime = 0
-  if ( state.saved.prefs.soundNotifications ){
+  if (state.saved.prefs.soundNotifications) {
     audio.play()
   }
 }
