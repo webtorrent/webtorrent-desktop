@@ -46,7 +46,7 @@ const sounds = {
   }
 }
 
-function play (name) {
+function play (name, state) {
   let audio = cache[name]
   if (!audio) {
     const sound = sounds[name]
@@ -58,7 +58,11 @@ function play (name) {
     audio.src = sound.url
   }
   audio.currentTime = 0
-  if (state.saved.prefs.soundNotifications) {
-    audio.play()
+  try {
+    if (state.saved.prefs.soundNotifications) {
+      audio.play()
+    }
+  } catch (e) {
+    e.message
   }
 }
