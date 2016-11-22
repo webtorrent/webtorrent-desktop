@@ -388,7 +388,8 @@ function toggleMenu (location) {
   if (state.playing.location !== 'local') {
     throw new CastingError(
       `You can't connect to ${location} when already connected to another device`
-    ) }
+    )
+  }
 
   // Find all cast devices of the given type
   const player = getPlayer(location)
