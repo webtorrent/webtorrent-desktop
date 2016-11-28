@@ -160,8 +160,8 @@ module.exports = class TorrentListController {
   }
 
   confirmDeleteTorrent (infoHash, deleteData) {
-    this.state.modal = {
-      id: 'remove-torrent-modal',
+    this.state.snackbar = {
+      id: 'remove-torrent-snackbar',
       infoHash,
       deleteData
     }
