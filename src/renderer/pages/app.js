@@ -103,7 +103,7 @@ class App extends React.Component {
 
   getSnackBar () {
     const state = this.props.state
-    if(!state.snackbar) return
+    if (!state.snackbar) return
 
     if (!lightMuiTheme) {
       const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default

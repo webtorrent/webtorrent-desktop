@@ -12,18 +12,18 @@ module.exports = class RemoveTorrentSnackbar extends React.Component {
       : 'Torrent removed'
 
     dispatch('deleteTorrent', state.snackbar.infoHash, false)
-
+    let open = true
     return (
-        <Snackbar
-          action={message}
-          onActionTouchTap={handleUndo}
-          onRequestClose={handleRemove}
-          autoHideDuration={4000}
-          open={true} />
+      <Snackbar
+        action={message}
+        onActionTouchTap={handleUndo}
+        onRequestClose={handleRemove}
+        autoHideDuration={4000}
+        open={open} />
     )
 
     function handleUndo () {
-      dispath('addTorrent', state.snackbar.infoHash)
+      dispatch('addTorrent', state.snackbar.infoHash)
     }
 
     function handleRemove () {
