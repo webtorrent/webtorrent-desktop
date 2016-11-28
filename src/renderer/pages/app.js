@@ -27,6 +27,10 @@ const Modals = {
   'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
 }
 
+const SnackBars = {
+  'remove-torrent-snackbar': createGetter(() => require('../components/remove-torrent-snackbar'))
+}
+
 const fontFamily = process.platform === 'win32'
   ? '"Segoe UI", sans-serif'
   : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
@@ -73,6 +77,7 @@ class App extends React.Component {
           {this.getErrorPopover()}
           <div key='content' className='content'>{this.getView()}</div>
           {this.getModal()}
+          {this.getSnackBar()}
         </div>
       </MuiThemeProvider>
     )
@@ -93,6 +98,25 @@ class App extends React.Component {
         <div key='title' className='title'>Error</div>
         {errorElems}
       </div>
+    )
+  }
+
+  getSnackBar () {
+    const state = this.props.state
+    if(!state.snackbar) return
+
+    if (!lightMuiTheme) {
+      const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
+      lightBaseTheme.fontFamily = fontFamily
+      lightBaseTheme.userAgent = false
+      lightMuiTheme = getMuiTheme(lightBaseTheme)
+    }
+
+    const SnackBarContents = SnackBars[state.snackbar.id]()
+    return (
+      <MuiThemeProvider muiTheme={lightMuiTheme}>
+        <SnackBarContents state={state} />
+      </MuiThemeProvider>
     )
   }
 
