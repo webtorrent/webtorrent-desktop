@@ -23,14 +23,14 @@ const config = require('../../config')
 const log = require('../log')
 const menu = require('../menu')
 
-function init (state, options) {
+function init (state, options, decorate) {
   if (main.win) {
     return main.win.show()
   }
 
   const initialBounds = Object.assign(config.WINDOW_INITIAL_BOUNDS, state.saved.bounds)
 
-  const win = main.win = new electron.BrowserWindow({
+  let windowOptions = {
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
     icon: getIconPath(), // Window icon (Windows, Linux)
@@ -44,7 +44,10 @@ function init (state, options) {
     height: initialBounds.height,
     x: initialBounds.x,
     y: initialBounds.y
-  })
+  }
+  if (decorate) windowOptions = decorate(windowOptions)
+
+  const win = main.win = new electron.BrowserWindow(windowOptions)
 
   win.loadURL(config.WINDOW_MAIN)
 

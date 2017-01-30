@@ -17,8 +17,11 @@ const windows = require('./windows')
 
 let menu = null
 
-function init () {
-  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+function init (decorate) {
+  let template = getMenuTemplate()
+  if (decorate) template = decorate(template)
+    
+  menu = electron.Menu.buildFromTemplate(template)
   electron.Menu.setApplicationMenu(menu)
 }
 

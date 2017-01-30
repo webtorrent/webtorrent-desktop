@@ -2,6 +2,8 @@ const appConfig = require('application-config')('WebTorrent')
 const path = require('path')
 const electron = require('electron')
 const arch = require('arch')
+const {resolve} = require('path')
+const gaze = require('gaze')
 
 const APP_NAME = 'WebTorrent'
 const APP_TEAM = 'WebTorrent, LLC'
@@ -17,7 +19,7 @@ const IS_PORTABLE = isPortable()
 const UI_HEADER_HEIGHT = 38
 const UI_TORRENT_HEIGHT = 100
 
-module.exports = {
+const exports = module.exports = {
   ANNOUNCEMENT_URL: 'https://webtorrent.io/desktop/announcement',
   AUTO_UPDATE_URL: 'https://webtorrent.io/desktop/update',
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
@@ -100,6 +102,73 @@ module.exports = {
 
   UI_HEADER_HEIGHT: UI_HEADER_HEIGHT,
   UI_TORRENT_HEIGHT: UI_TORRENT_HEIGHT
+}
+
+const configFile = appConfig.filePath
+const config = require(configFile)
+const watchers = []
+
+function watch() {
+  gaze(configFile, function (err) {
+    if (err) {
+      throw err
+    }
+    this.on('changed', () => {
+      try {
+        if (exec(readFileSync(configFile, 'utf8'))) {
+          notify('WebTorrent configuration reloaded!')
+          watchers.forEach(fn => fn())
+        }
+      } catch (err) {
+        dialog.showMessageBox({
+          message: `An error occurred loading your configuration (${configFile}): ${err.message}`,
+          buttons: ['Ok']
+        })
+      }
+    })
+    this.on('error', () => {
+      // Ignore file watching errors
+    })
+  })
+}
+
+let _str // last script
+function exec(str) {
+  if (str === _str) {
+    return false
+  }
+  _str = str
+  const script = new vm.Script(str)
+  const module = {}
+  script.runInNewContext({module})
+  if (!module.exports) {
+    throw new Error('Error reading configuration: `module.exports` not set')
+  }
+  const _cfg = module.exports
+  if (!_cfg.config) {
+    throw new Error('Error reading configuration: `config` key is missing')
+  }
+  _cfg.plugins = _cfg.plugins || []
+  _cfg.localPlugins = _cfg.localPlugins || []
+  cfg = _cfg
+  return true
+}
+
+exports.subscribe = function (fn) {
+  watchers.push(fn)
+  return () => {
+    watchers.splice(watchers.indexOf(fn), 1)
+  }
+}
+
+exports.getPlugins = function () {
+  return config.plugins
+}
+
+exports.getConfigPath = getConfigPath
+
+exports.getConfig = function () {
+  return config
 }
 
 function getConfigPath () {

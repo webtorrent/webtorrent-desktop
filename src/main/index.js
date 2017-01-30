@@ -12,6 +12,8 @@ const log = require('./log')
 const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
+const Plugins = require('../plugins')
+const plugins = new Plugins()
 
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
@@ -72,10 +74,19 @@ function init () {
     if (err) throw err
 
     isReady = true
+    const state = results.state
 
-    windows.main.init(results.state, {hidden: hidden})
-    windows.webtorrent.init()
-    menu.init()
+    // init new plugins then notify user
+    plugins.subscribe(() => {
+      console.log('-- new plugins finished installing')
+
+      // update menu and windows 
+      // passing thru new plugin decorators
+      initApp(state)
+    })
+
+    plugins.init(state)
+    initApp(state)
 
     // To keep app startup fast, some code is delayed.
     setTimeout(delayedInit, config.DELAYED_INIT)
@@ -86,6 +97,26 @@ function init () {
       const error = {message: err.message, stack: err.stack}
       windows.main.dispatch('uncaughtError', 'main', error)
     })
+  }
+
+  function initApp (state) {
+    // decorate app
+    plugins.onApp(app)
+
+    // init decorate menu
+    menu.init((tpl) => plugins.decorateMenu(tpl))
+
+    // init and decorate window
+    windows.main.init(
+      state, 
+      {hidden: hidden}, 
+      (options) => plugins.decorateWindow(options)
+    )
+    windows.webtorrent.init((options) => plugins.decorateWindow(options))
+    plugins.onWindow([
+      windows.main.win,
+      windows.webtorrent.win
+    ])
   }
 
   app.on('open-file', onOpen)
