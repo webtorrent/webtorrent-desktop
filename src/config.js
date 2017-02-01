@@ -1,4 +1,5 @@
 const appConfig = require('application-config')('WebTorrent')
+const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 const arch = require('arch')
@@ -105,7 +106,7 @@ const exports = module.exports = {
 }
 
 const configFile = appConfig.filePath
-const config = require(configFile)
+const config = getConfig()
 const watchers = []
 
 function watch() {
@@ -162,13 +163,19 @@ exports.subscribe = function (fn) {
 }
 
 exports.getPlugins = function () {
-  return config.plugins
+  return config.plugins || {}
 }
 
 exports.getConfigPath = getConfigPath
+exports.getConfig = getConfig
 
-exports.getConfig = function () {
-  return config
+function getConfig () {
+  const config = {}
+  try {
+    return require(configFile)
+  } catch (e) {
+    return config
+  }
 }
 
 function getConfigPath () {
@@ -213,8 +220,6 @@ function isPortable () {
     // Fast path: Non-Windows platforms should not check for path on disk
     return false
   }
-
-  const fs = require('fs')
 
   try {
     // This line throws if the "Portable Settings" folder does not exist, and does

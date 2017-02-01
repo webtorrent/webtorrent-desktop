@@ -69,7 +69,7 @@ module.exports = class Plugins {
     // a bit after the user launches the terminal
     // to prevent slowness
     // TODO: handle force updates
-    if (this.state.saved.installedPlugins !== this.id) {
+    if (this.needsUpdate()) {
       // install immediately if the user changed plugins
       console.log('plugins have changed / not init, scheduling plugins installation')
       setTimeout(() => {
@@ -84,6 +84,22 @@ module.exports = class Plugins {
       -- id: ${this.id}
       -- installedPlugins: ${this.state.saved.installedPlugins})}
     `)
+  }
+
+  didPluginsChange () {
+    return this.state.saved.installedPlugins !== this.id
+  }
+
+  hasPlugins () {
+    return !this.isEmptyObject(this.plugins)
+  }
+
+  isFirstInstall () {
+    return (!this.state.saved.installedPlugins && this.hasPlugins())
+  }
+
+  needsUpdate () {
+    return (this.didPluginsChange() || this.isFirstInstall())
   }
 
   getId (plugins) {
@@ -332,6 +348,7 @@ module.exports = class Plugins {
   requirePlugins () {
     console.log('- requirePlugins')
     const {plugins} = this.paths
+    let installNeeded = false
     console.log('- requirePlugins: paths: ', plugins)
 
     const load = (path) => {
@@ -355,12 +372,14 @@ module.exports = class Plugins {
         // plugin not installed
         // node_modules removed? did a manual plugin uninstall?
         // try installing and then loading if successfull
-        this.installPackages((err) => this.loadPlugins(err))
+        installNeeded = true
 
         // console.error(err)
         // this.alert(`Plugin error: Plugin "${basename(path)}" failed to load (${err.message})`)
       }
     }
+
+    if (installNeeded) this.updatePlugins()
 
     return plugins.map(load)
       .filter(v => Boolean(v))
