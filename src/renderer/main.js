@@ -472,8 +472,10 @@ function onError (err) {
   update()
 }
 
+const editableHtmlTags = new Set(['input', 'textarea'])
+
 function onPaste (e) {
-  if (e.target.tagName.toLowerCase() === 'input') return
+  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
 
   update()
