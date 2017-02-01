@@ -7,6 +7,7 @@ const {app, dialog} = require('electron')
 const {sync: mkdirpSync} = require('mkdirp')
 const ms = require('ms')
 const shellEnv = require('shell-env')
+const crypto = require('crypto')
 
 const config = require('./config')
 
@@ -38,11 +39,8 @@ module.exports = class Plugins {
     console.log('-- initializing plugins')
     this.state = state
 
-    // initialize unsaved state
-    this.state.unsaved = Object.assign(this.state.unsaved || {}, {
-      installedPlugins: Object.assign({}, this.state.saved.installedPlugins),
-      installedPluginVersions: Object.assign({}, this.state.saved.installedPluginVersions)
-    })
+    // initialize state
+    this.state.saved = Object.assign(this.state.saved || {})
 
     // init plugin directories if not present
     mkdirpSync(this.path)
@@ -56,12 +54,12 @@ module.exports = class Plugins {
     // we listen on configuration updates to trigger
     // plugin installation
     config.subscribe(() => {
-      const plugins_ = config.getPlugins()
-      if (plugins !== plugins_) {
-        const id_ = this.getId(plugins_)
-        if (this.id !== id_) {
-          this.id = id_
-          this.plugins = plugins_
+      const plugins = config.getPlugins()
+      if (plugins !== this.plugins) {
+        const id = this.getId(plugins)
+        if (this.id !== id) {
+          this.id = id
+          this.plugins = plugins
           this.updatePlugins()
         }
       }
@@ -88,8 +86,11 @@ module.exports = class Plugins {
     `)
   }
 
-  getId (plugins_) {
-    return JSON.stringify(plugins_)
+  getId (plugins) {
+    const hash = crypto.createHash('sha256');
+    hash.update(JSON.stringify(plugins));
+    return hash.digest('hex')
+    // return JSON.stringify(plugins)
   }
 
   updatePlugins (forceUpdate = false) {
@@ -100,7 +101,6 @@ module.exports = class Plugins {
       // return notify('Plugin update in progress')
     }
     this.updating = true
-    this.id_ = this.id
     const hasPackages = this.syncPackageJSON()
 
     // there are plugins loaded from repositories
@@ -148,8 +148,7 @@ module.exports = class Plugins {
 
     // OK, no errors
     // flag successful plugin update
-    this.state.unsaved.installedPlugins = this.id_
-    console.log('-- id_: ', this.id_)
+    this.state.saved.installedPlugins = this.id
 
     // check if package based plugins were updated
     const loaded = this.modules.length
@@ -157,7 +156,7 @@ module.exports = class Plugins {
     const pluginVersions = JSON.stringify(this.getPluginVersions())
     console.log('-- pluginVersions: ', pluginVersions)
     const changed = this.state.saved.installedPluginVersions !== pluginVersions && loaded === total
-    this.state.unsaved.installedPluginVersions = pluginVersions
+    this.state.saved.installedPluginVersions = pluginVersions
 
     // notify watchers
     if (this.forceUpdate || changed) {
@@ -353,6 +352,11 @@ module.exports = class Plugins {
         return mod
       } catch (err) {
         console.log('- plugin not installed: ', path)
+        // plugin not installed
+        // node_modules removed? did a manual plugin uninstall?
+        // try installing and then loading if successfull
+        this.installPackages((err) => this.loadPlugins(err))
+
         // console.error(err)
         // this.alert(`Plugin error: Plugin "${basename(path)}" failed to load (${err.message})`)
       }
