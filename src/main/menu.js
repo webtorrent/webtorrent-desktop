@@ -286,9 +286,6 @@ function getMenuTemplate () {
           click: () => windows.main.dispatch('pauseAllTorrents')
         },
         {
-          type: 'separator'
-        },
-        {
           label: 'Resume All',
           click: () => windows.main.dispatch('resumeAllTorrents')
         }
@@ -371,7 +368,7 @@ function getMenuTemplate () {
     })
 
     // Add Window menu (Mac)
-    template.splice(5, 0, {
+    template.splice(6, 0, {
       role: 'window',
       submenu: [
         {
