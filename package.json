@@ -54,7 +54,7 @@
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
     "electron": "1.4.15",
-    "electron-osx-sign": "^0.3.0",
+    "electron-osx-sign": "^0.4.3",
     "electron-packager": "^8.0.0",
     "electron-winstaller": "^2.3.0",
     "gh-release": "^2.0.3",
