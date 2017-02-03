@@ -408,7 +408,7 @@ function getMenuTemplate () {
       })
 
     // Help menu (Windows, Linux)
-    template[4].submenu.push(
+    template[5].submenu.push(
       {
         type: 'separator'
       },
