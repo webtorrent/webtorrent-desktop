@@ -104,8 +104,8 @@ const all = {
   // "devDependencies" before starting to package the app.
   prune: true,
 
-  // The Electron version with which the app is built (without the leading 'v')
-  version: require('electron/package.json').version
+  // The Electron version that the app is built with (without the leading 'v')
+  electronVersion: require('electron/package.json').version
 }
 
 const darwin = {
