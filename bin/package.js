@@ -21,6 +21,7 @@ const pkg = require('../package.json')
 const BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 const BUILD_PATH = path.join(config.ROOT_PATH, 'build')
 const DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+const NODE_MODULES_PATH = path.join(config.ROOT_PATH, 'node_modules')
 
 const argv = minimist(process.argv.slice(2), {
   boolean: [
@@ -36,6 +37,12 @@ const argv = minimist(process.argv.slice(2), {
 })
 
 function build () {
+  console.log('Reinstalling node_modules...')
+  rimraf.sync(NODE_MODULES_PATH)
+  cp.execSync('npm install', { stdio: 'inherit' })
+  cp.execSync('npm dedupe', { stdio: 'inherit' })
+
+  console.log('Nuking dist/ and build/...')
   rimraf.sync(DIST_PATH)
   rimraf.sync(BUILD_PATH)
 
