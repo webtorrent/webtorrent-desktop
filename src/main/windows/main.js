@@ -32,16 +32,17 @@ function init (state, options) {
 
   const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
+    backgroundThrottling: false, // do not throttle animations/timers when page is background
     darkTheme: true, // Forces dark theme (GTK+3)
+    height: initialBounds.height,
     icon: getIconPath(), // Window icon (Windows, Linux)
-    minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
+    minWidth: config.WINDOW_MIN_WIDTH,
+    show: false,
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
-    show: false,
     width: initialBounds.width,
-    height: initialBounds.height,
     x: initialBounds.x,
     y: initialBounds.y
   })
