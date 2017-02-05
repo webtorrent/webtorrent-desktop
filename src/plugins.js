@@ -13,8 +13,6 @@ const config = require('./config')
 
 module.exports = class Plugins {
   constructor () {
-    console.log('-- constructing plugins')
-
     // modules path
     this.path = resolve(config.getConfigPath(), 'webtorrent-plugins')
     console.log('- plugins path: ', this.path)
@@ -54,12 +52,15 @@ module.exports = class Plugins {
     // we listen on configuration updates to trigger
     // plugin installation
     config.subscribe(() => {
+      console.log('--> CONFIG UPDATED, check if plugins update is needed')
       const plugins = config.getPlugins()
       if (plugins !== this.plugins) {
         const id = this.getId(plugins)
         if (this.id !== id) {
+          console.log('--> UPDATE PLUGINS')
           this.id = id
           this.plugins = plugins
+          this.paths = this.getPaths(this.plugins)
           this.updatePlugins()
         }
       }
@@ -79,11 +80,6 @@ module.exports = class Plugins {
 
     // otherwise update plugins every 5 hours
     setInterval(this.updatePlugins, ms('5h'))
-
-    console.log(`
-      -- id: ${this.id}
-      -- installedPlugins: ${this.state.saved.installedPlugins})}
-    `)
   }
 
   didPluginsChange () {
@@ -106,7 +102,6 @@ module.exports = class Plugins {
     const hash = crypto.createHash('sha256');
     hash.update(JSON.stringify(plugins));
     return hash.digest('hex')
-    // return JSON.stringify(plugins)
   }
 
   updatePlugins (forceUpdate = false) {
@@ -117,17 +112,8 @@ module.exports = class Plugins {
       // return notify('Plugin update in progress')
     }
     this.updating = true
-    const hasPackages = this.syncPackageJSON()
-
-    // there are plugins loaded from repositories
-    // npm install must run for these ones
-    if (hasPackages) {
-      this.installPackages((err) => this.loadPlugins(err))
-      return
-    }
-
-    // only local plugins to be loaded
-    this.loadPlugins(null, true)
+    this.syncPackageJSON()
+    this.installPackages((err) => this.loadPlugins(err))
   }
 
   loadPlugins (err, localOnly = false) {
@@ -150,8 +136,8 @@ module.exports = class Plugins {
       return
     }
 
-    // cache paths
-    // this.paths = this.getPaths(this.plugins)
+    // update state with latest plugins
+    this.state.saved.plugins = this.plugins
 
     // cache modules
     this.modules = this.requirePlugins()
@@ -231,7 +217,6 @@ module.exports = class Plugins {
   syncPackageJSON () {
     console.log('- syncPackageJSON')
     const dependencies = this.toDependencies(this.plugins)
-    if (this.isEmptyObject(dependencies)) return false
 
     console.log('- set plugins package file')
     const pkg = {

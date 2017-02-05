@@ -106,8 +106,12 @@ const exports = module.exports = {
 }
 
 const configFile = appConfig.filePath
-const config = getConfig()
+let config = getConfig()
 const watchers = []
+
+function updateConfig () {
+  config = JSON.parse(fs.readFileSync(configFile))
+}
 
 function watch() {
   gaze(configFile, function (err) {
@@ -116,15 +120,13 @@ function watch() {
     }
     this.on('changed', () => {
       try {
-        if (exec(readFileSync(configFile, 'utf8'))) {
-          notify('WebTorrent configuration reloaded!')
-          watchers.forEach(fn => fn())
-        }
+        console.log('-- config updated: ', configFile)
+        updateConfig()
+        console.log('WebTorrent configuration reloaded!')
+        watchers.forEach(fn => fn())
       } catch (err) {
-        dialog.showMessageBox({
-          message: `An error occurred loading your configuration (${configFile}): ${err.message}`,
-          buttons: ['Ok']
-        })
+        // TODO: display notification
+        console.log(`An error occurred loading your configuration (${configFile}): ${err.message}`)
       }
     })
     this.on('error', () => {
@@ -133,27 +135,8 @@ function watch() {
   })
 }
 
-let _str // last script
-function exec(str) {
-  if (str === _str) {
-    return false
-  }
-  _str = str
-  const script = new vm.Script(str)
-  const module = {}
-  script.runInNewContext({module})
-  if (!module.exports) {
-    throw new Error('Error reading configuration: `module.exports` not set')
-  }
-  const _cfg = module.exports
-  if (!_cfg.config) {
-    throw new Error('Error reading configuration: `config` key is missing')
-  }
-  _cfg.plugins = _cfg.plugins || []
-  _cfg.localPlugins = _cfg.localPlugins || []
-  cfg = _cfg
-  return true
-}
+// start watching for config changes
+watch()
 
 exports.subscribe = function (fn) {
   watchers.push(fn)
@@ -162,9 +145,10 @@ exports.subscribe = function (fn) {
   }
 }
 
-exports.getPlugins = function () {
+function getPlugins () {
   return config.plugins || {}
 }
+exports.getPlugins = getPlugins
 
 exports.getConfigPath = getConfigPath
 exports.getConfig = getConfig
