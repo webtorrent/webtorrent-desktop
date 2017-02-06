@@ -3,6 +3,7 @@ const {resolve, basename} = require('path')
 const {writeFileSync} = require('fs')
 const State = require('./renderer/lib/state')
 const notifier = require('node-notifier')
+const {app} = require('electron')
 
 const {sync: mkdirpSync} = require('mkdirp')
 const ms = require('ms')
@@ -96,8 +97,8 @@ module.exports = class Plugins {
   }
 
   getId (plugins) {
-    const hash = crypto.createHash('sha256');
-    hash.update(JSON.stringify(plugins));
+    const hash = crypto.createHash('sha256')
+    hash.update(JSON.stringify(plugins))
     return hash.digest('hex')
   }
 
@@ -125,9 +126,7 @@ module.exports = class Plugins {
         return
       }
 
-      this.alert(
-        'Error updating plugins: Check `${this.path}/npm-debug.log` for more information.'
-      )
+      this.alert(`Error updating plugins: Check '${this.path}/npm-debug.log' for more information.`)
       return
     }
 
@@ -269,13 +268,9 @@ module.exports = class Plugins {
 
       // Use the install command that is appropriate for our shell
       exec(installCommands[whichShell], {
-        cwd: this.path//,
-        // env,
-        // shell
+        cwd: this.path
       }, err => {
-        if (err) {
-          return fn(err)
-        }
+        if (err) return fn(err)
         fn(null)
       })
     }).catch(fn)
@@ -397,11 +392,11 @@ module.exports = class Plugins {
  * Logs passed arguments to console using a prefix.
  *
  */
-function log() {
+function log () {
   const prefix = '[ PLUGINS ]-->'
   const args = [prefix]
 
-  for (var i=0; i<arguments.length; ++i) {
+  for (var i = 0; i < arguments.length; ++i) {
     args.push(arguments[i])
   }
 

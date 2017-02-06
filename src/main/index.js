@@ -78,7 +78,7 @@ function init () {
 
     // init new plugins then notify user
     plugins.subscribe(() => {
-      // update menu and windows 
+      // update menu and windows
       // passing thru new plugin decorators
       initApp(state)
     })
@@ -106,8 +106,8 @@ function init () {
 
     // init and decorate window
     windows.main.init(
-      state, 
-      {hidden: hidden}, 
+      state,
+      {hidden: hidden},
       (options) => plugins.decorateWindow(options)
     )
     windows.webtorrent.init((options) => plugins.decorateWindow(options))

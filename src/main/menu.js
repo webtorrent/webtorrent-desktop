@@ -20,7 +20,7 @@ let menu = null
 function init (decorate) {
   let template = getMenuTemplate()
   if (decorate) template = decorate(template)
-    
+
   menu = electron.Menu.buildFromTemplate(template)
   electron.Menu.setApplicationMenu(menu)
 }

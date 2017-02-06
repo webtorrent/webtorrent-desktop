@@ -32,6 +32,7 @@
     "location-history": "^1.0.0",
     "material-ui": "^0.16.0",
     "mkdirp": "^0.5.1",
+    "ms": "^0.7.2",
     "musicmetadata": "^2.0.2",
     "network-address": "^1.1.0",
     "node-notifier": "^5.0.2",

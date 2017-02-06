@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 const arch = require('arch')
-const {resolve} = require('path')
 const gaze = require('gaze')
 
 const APP_NAME = 'WebTorrent'
@@ -113,7 +112,7 @@ function updateConfig () {
   config = JSON.parse(fs.readFileSync(configFile))
 }
 
-function watch() {
+function watch () {
   gaze(configFile, function (err) {
     if (err) {
       throw err
