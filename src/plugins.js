@@ -2,8 +2,8 @@ const {exec} = require('child_process')
 const {resolve, basename} = require('path')
 const {writeFileSync} = require('fs')
 const State = require('./renderer/lib/state')
+const notifier = require('node-notifier')
 
-const {app, dialog} = require('electron')
 const {sync: mkdirpSync} = require('mkdirp')
 const ms = require('ms')
 const shellEnv = require('shell-env')
@@ -55,6 +55,7 @@ module.exports = class Plugins {
       if (plugins !== this.plugins) {
         const id = this.getId(plugins)
         if (this.id !== id) {
+          this.alert('Installing plugins...')
           log('UPDATING...')
           this.id = id
           this.plugins = plugins
@@ -156,7 +157,8 @@ module.exports = class Plugins {
     // notify watchers
     if (this.forceUpdate || changed) {
       this.watchers.forEach(fn => fn(err, {forceUpdate: this.forceUpdate}))
-      log('instalation completed')
+      this.alert('Installation completed')
+      log('installation completed')
     }
 
     // save state
@@ -221,12 +223,11 @@ module.exports = class Plugins {
   }
 
   alert (message) {
-    log(message)
-    // TODO: display notifications
-    // dialog.showMessageBox({
-    //   message,
-    //   buttons: ['Ok']
-    // })
+    notifier.notify({
+      title: 'WebTorrent Plugins',
+      // icon: config.icon, // TODO: save icon in webtorrent local folder and set config.icon
+      message: message
+    })
   }
 
   isLocalPath (string) {
@@ -333,9 +334,7 @@ module.exports = class Plugins {
     }
 
     if (installNeeded) this.updatePlugins()
-
-    return plugins.map(load)
-      .filter(v => Boolean(v))
+    return plugins.map(load).filter(v => Boolean(v))
   }
 
   onApp (app) {
