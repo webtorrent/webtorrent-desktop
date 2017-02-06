@@ -120,7 +120,6 @@ function watch() {
     }
     this.on('changed', () => {
       try {
-        console.log('-- config updated: ', configFile)
         updateConfig()
         console.log('WebTorrent configuration reloaded!')
         watchers.forEach(fn => fn())

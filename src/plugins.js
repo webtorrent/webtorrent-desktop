@@ -14,8 +14,8 @@ const config = require('./config')
 module.exports = class Plugins {
   constructor () {
     // modules path
-    this.path = resolve(config.getConfigPath(), 'webtorrent-plugins')
-    console.log('- plugins path: ', this.path)
+    this.path = resolve(config.getConfigPath(), 'plugins')
+    log('path: ', this.path)
     this.availableExtensions = new Set([
       'onApp', 'onWindow', 'onRendererWindow', 'onUnload', 'middleware',
       'reduceUI', 'reduceSessions', 'reduceTermGroups',
@@ -34,7 +34,6 @@ module.exports = class Plugins {
   }
 
   init (state) {
-    console.log('-- initializing plugins')
     this.state = state
 
     // initialize state
@@ -52,12 +51,11 @@ module.exports = class Plugins {
     // we listen on configuration updates to trigger
     // plugin installation
     config.subscribe(() => {
-      console.log('--> CONFIG UPDATED, check if plugins update is needed')
       const plugins = config.getPlugins()
       if (plugins !== this.plugins) {
         const id = this.getId(plugins)
         if (this.id !== id) {
-          console.log('--> UPDATE PLUGINS')
+          log('UPDATING...')
           this.id = id
           this.plugins = plugins
           this.paths = this.getPaths(this.plugins)
@@ -66,19 +64,17 @@ module.exports = class Plugins {
       }
     })
 
-    // we schedule the initial plugins update
-    // a bit after the user launches the terminal
+    // schedule the initial plugins update
+    // a bit after the user launches the app
     // to prevent slowness
-    // TODO: handle force updates
     if (this.needsUpdate()) {
-      // install immediately if the user changed plugins
-      console.log('plugins have changed / not init, scheduling plugins installation')
       setTimeout(() => {
         this.updatePlugins()
       }, 5000)
+      log('installation scheduled')
     }
 
-    // otherwise update plugins every 5 hours
+    // update plugins every 5 hours
     setInterval(this.updatePlugins, ms('5h'))
   }
 
@@ -105,7 +101,6 @@ module.exports = class Plugins {
   }
 
   updatePlugins (forceUpdate = false) {
-    console.log('-- update plugins')
     this.forceUpdate = forceUpdate
     if (this.updating) {
       // TODO
@@ -117,7 +112,6 @@ module.exports = class Plugins {
   }
 
   loadPlugins (err, localOnly = false) {
-    console.log('- loadPlugins')
     this.updating = false
 
     // handle errors first
@@ -125,13 +119,13 @@ module.exports = class Plugins {
       console.error(err.stack)
       if (/not a recognized/.test(err.message) || /command not found/.test(err.message)) {
         this.alert(
-          'Error updating plugins: We could not find the `npm` command. Make sure it\'s in $PATH'
+          'Error updating plugins: We could not find the "npm" command. Make sure it\'s in $PATH'
         )
         return
       }
 
       this.alert(
-        'Error updating plugins: Check `~/.webtorrent_plugins/npm-debug.log` for more information.'
+        'Error updating plugins: Check `${this.path}/npm-debug.log` for more information.'
       )
       return
     }
@@ -156,23 +150,13 @@ module.exports = class Plugins {
     const loaded = this.modules.length
     const total = this.paths.plugins.length
     const pluginVersions = JSON.stringify(this.getPluginVersions())
-    console.log('-- pluginVersions: ', pluginVersions)
     const changed = this.state.saved.installedPluginVersions !== pluginVersions && loaded === total
     this.state.saved.installedPluginVersions = pluginVersions
 
     // notify watchers
     if (this.forceUpdate || changed) {
-      console.log(`- notify watchers: this.forceUpdate: ${this.forceUpdate} / changed: ${changed}`)
-      if (changed) {
-        // this.alert(
-        //   'Plugins Updated: Restart the app or hot-reload with "View" > "Reload" to enjoy the updates!'
-        // )
-      } else {
-        this.alert(
-          'Plugins Updated: No changes!'
-        )
-      }
       this.watchers.forEach(fn => fn(err, {forceUpdate: this.forceUpdate}))
+      log('instalation completed')
     }
 
     // save state
@@ -215,10 +199,7 @@ module.exports = class Plugins {
   }
 
   syncPackageJSON () {
-    console.log('- syncPackageJSON')
     const dependencies = this.toDependencies(this.plugins)
-
-    console.log('- set plugins package file')
     const pkg = {
       name: 'webtorrent-plugins',
       description: 'Auto-generated from WebTorrent config.',
@@ -240,7 +221,8 @@ module.exports = class Plugins {
   }
 
   alert (message) {
-    console.log(`[ PLUGINS MSG ]--> ${message}`)
+    log(message)
+    // TODO: display notifications
     // dialog.showMessageBox({
     //   message,
     //   buttons: ['Ok']
@@ -253,27 +235,21 @@ module.exports = class Plugins {
   }
 
   toDependencies (plugins) {
-    console.log('- toDependencies: plugins: ', plugins)
     const obj = {}
     const pluginNames = Object.keys(plugins)
 
     pluginNames.forEach(name => {
       let url = plugins[name]
       if (this.isLocalPath(url)) return
-
-      console.log('- set package as plugin dependency')
       obj[name] = url
     })
-    console.log('- dependencies: ', obj)
     return obj
   }
 
   installPackages (fn) {
-    console.log('- installPackages')
     const {shell = '', npmRegistry} = config
 
     shellEnv(shell).then(env => {
-      console.log('- SHELL')
       if (npmRegistry) {
         env.NPM_CONFIG_REGISTRY = npmRegistry
       }
@@ -291,8 +267,6 @@ module.exports = class Plugins {
       const whichShell = shell.match(/fish/) ? 'fish' : 'posix'
 
       // Use the install command that is appropriate for our shell
-      console.log('- installPackages: exec: ', installCommands[whichShell])
-      console.log('- install path: ', this.path)
       exec(installCommands[whichShell], {
         cwd: this.path//,
         // env,
@@ -331,10 +305,8 @@ module.exports = class Plugins {
   }
 
   requirePlugins () {
-    console.log('- requirePlugins')
     const {plugins} = this.paths
     let installNeeded = false
-    console.log('- requirePlugins: paths: ', plugins)
 
     const load = (path) => {
       let mod
@@ -353,14 +325,10 @@ module.exports = class Plugins {
 
         return mod
       } catch (err) {
-        console.log('- plugin not installed: ', path)
         // plugin not installed
         // node_modules removed? did a manual plugin uninstall?
         // try installing and then loading if successfull
         installNeeded = true
-
-        // console.error(err)
-        // this.alert(`Plugin error: Plugin "${basename(path)}" failed to load (${err.message})`)
       }
     }
 
@@ -371,7 +339,6 @@ module.exports = class Plugins {
   }
 
   onApp (app) {
-    console.log('-- plugins onApp')
     this.modules.forEach(plugin => {
       if (plugin.onApp) {
         plugin.onApp(app)
@@ -406,12 +373,10 @@ module.exports = class Plugins {
   }
 
   decorateMenu (tpl) {
-    console.log('-- plugins: decorate menu')
     return this.decorateObject(tpl, 'decorateMenu')
   }
 
   decorateWindow (options) {
-    console.log('-- plugins: decorate window')
     return this.decorateObject(options, 'decorateWindow')
   }
 
@@ -427,4 +392,19 @@ module.exports = class Plugins {
   getDecoratedBrowserOptions (defaults) {
     return this.decorateObject(defaults, 'decorateBrowserOptions')
   }
+}
+
+/**
+ * Logs passed arguments to console using a prefix.
+ *
+ */
+function log() {
+  const prefix = '[ PLUGINS ]-->'
+  const args = [prefix]
+
+  for (var i=0; i<arguments.length; ++i) {
+    args.push(arguments[i])
+  }
+
+  console.log.apply(console, args)
 }

@@ -78,8 +78,6 @@ function init () {
 
     // init new plugins then notify user
     plugins.subscribe(() => {
-      console.log('-- new plugins finished installing')
-
       // update menu and windows 
       // passing thru new plugin decorators
       initApp(state)
