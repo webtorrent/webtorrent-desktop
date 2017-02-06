@@ -77,7 +77,9 @@ module.exports = class Plugins {
     }
 
     // update plugins every 5 hours
-    setInterval(this.updatePlugins, ms('5h'))
+    setInterval(() => {
+      this.updatePlugins()
+    }, ms('5h'))
   }
 
   didPluginsChange () {
