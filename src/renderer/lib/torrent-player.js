@@ -37,6 +37,7 @@ function isAudio (file) {
     '.mp3',
     '.ogg',
     '.wav',
+    '.flac',
     '.m4a'
   ].includes(getFileExtension(file))
 }
