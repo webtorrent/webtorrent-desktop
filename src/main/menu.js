@@ -324,7 +324,7 @@ function getMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    // Add WebTorrent app menu (Mac)
+    // WebTorrent menu (Mac)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -367,7 +367,25 @@ function getMenuTemplate () {
       ]
     })
 
-    // Add Window menu (Mac)
+    // Edit menu (Mac)
+    template[2].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Speech',
+        submenu: [
+          {
+            role: 'startspeaking'
+          },
+          {
+            role: 'stopspeaking'
+          }
+        ]
+      }
+    )
+
+    // Window menu (Mac)
     template.splice(6, 0, {
       role: 'window',
       submenu: [
