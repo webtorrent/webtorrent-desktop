@@ -32,7 +32,7 @@ function downloadFinished (path) {
  */
 function setBadge (count) {
   if (process.platform === 'darwin' ||
-      process.platform === 'linux' && app.isUnityRunning()) {
+      (process.platform === 'linux' && app.isUnityRunning())) {
     log(`setBadge: ${count}`)
     app.setBadgeCount(Number(count))
   }

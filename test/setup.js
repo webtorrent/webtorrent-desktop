@@ -122,7 +122,7 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
   const de = pngE.data
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-      const i = (y * w + x) * 4
+      const i = ((y * w) + x) * 4
       if (de[i + 3] === 0) continue // Skip transparent pixels
       const ca = (da[i] << 16) | (da[i + 1] << 8) | da[i + 2]
       const ce = (de[i] << 16) | (de[i + 1] << 8) | de[i + 2]

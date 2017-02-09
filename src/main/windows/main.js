@@ -166,8 +166,8 @@ function setBounds (bounds, maximize) {
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
       const scr = electron.screen.getDisplayMatching(main.win.getBounds())
-      bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
-      bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
+      bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
+      bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
       log('setBounds: centered to ' + JSON.stringify(bounds))
     }
     // Resize the window's content area (so window border doesn't need to be taken
