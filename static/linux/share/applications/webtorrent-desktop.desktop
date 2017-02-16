@@ -12,6 +12,7 @@ Path=/opt/webtorrent-desktop
 Exec=/opt/webtorrent-desktop/WebTorrent %U
 TryExec=/opt/webtorrent-desktop/WebTorrent
 StartupNotify=false
+StartupWMClass=WebTorrent
 Categories=Network;FileTransfer;P2P;
 MimeType=application/x-bittorrent;x-scheme-handler/magnet;x-scheme-handler/stream-magnet;
 
