@@ -117,11 +117,11 @@ class PreferencesPage extends React.Component {
     return (
       <Preference>
         <Checkbox
-            className='control'
-            checked={this.props.state.unsaved.prefs.disableNotifications}
-            label={"Disable notifications."}
-            onCheck={this.handleDisableNotifications}
-          />
+          className='control'
+          checked={this.props.state.unsaved.prefs.disableNotifications}
+          label={'Disable notifications.'}
+          onCheck={this.handleDisableNotifications}
+        />
       </Preference>
     )
   }
