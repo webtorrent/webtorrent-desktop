@@ -36,8 +36,8 @@ function setWindowFocus (flag) {
 }
 
 function initLinux () {
-  checkLinuxTraySupport(function (supportsTray) {
-    if (supportsTray) createTray()
+  checkLinuxTraySupport(function (err) {
+    if (!err) createTray()
   })
 }
 
@@ -55,10 +55,14 @@ function checkLinuxTraySupport (cb) {
   // libappindicator1. If WebTorrent was installed from the deb file, we should
   // always have it. If it was installed from the zip file, we might not.
   cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
-    if (err) return cb(false)
+    if (err) return cb(err)
     // Unfortunately there's no cleaner way, as far as I can tell, to check
     // whether a debian package is installed:
-    cb(stdout.endsWith('\tinstall\n'))
+    if (stdout.endsWith('\tinstall\n')) {
+      cb(null)
+    } else {
+      cb(new Error('debian package not installed'))
+    }
   })
 }
 

@@ -281,7 +281,7 @@ module.exports = class TorrentListController {
 
 // Recursively finds {name, path, size} for all files in a folder
 // Calls `cb` on success, calls `onError` on failure
-function findFilesRecursive (paths, cb) {
+function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
     let ret = []
@@ -290,7 +290,7 @@ function findFilesRecursive (paths, cb) {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
           ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
-          cb(ret)
+          cb_(ret)
         }
       })
     })
@@ -304,7 +304,7 @@ function findFilesRecursive (paths, cb) {
     // Files: return name, path, and size
     if (!stat.isDirectory()) {
       const filePath = fileOrFolder
-      return cb([{
+      return cb_([{
         name: path.basename(filePath),
         path: filePath,
         size: stat.size
@@ -316,7 +316,7 @@ function findFilesRecursive (paths, cb) {
     fs.readdir(folderPath, function (err, fileNames) {
       if (err) return dispatch('error', err)
       const paths = fileNames.map((fileName) => path.join(folderPath, fileName))
-      findFilesRecursive(paths, cb)
+      findFilesRecursive(paths, cb_)
     })
   })
 }
