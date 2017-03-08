@@ -148,7 +148,7 @@ function onState (err, _state) {
 
   const debouncedFullscreenToggle = debounce(function () {
     dispatch('toggleFullScreen')
-  }, 100)
+  }, 1000, true)
 
   document.addEventListener('wheel', function (event) {
     // ctrlKey detects pinch to zoom, http://crbug.com/289887
