@@ -24,6 +24,7 @@ const State = require('./lib/state')
 State.load(onState)
 
 const createGetter = require('fn-getter')
+const debounce = require('debounce')
 const dragDrop = require('drag-drop')
 const electron = require('electron')
 const fs = require('fs')
@@ -144,6 +145,18 @@ function onState (err, _state) {
 
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
+
+  const debouncedFullscreenToggle = debounce(function () {
+    dispatch('toggleFullScreen')
+  }, 100)
+
+  document.addEventListener('wheel', function (event) {
+    // ctrlKey detects pinch to zoom, http://crbug.com/289887
+    if (event.ctrlKey) {
+      event.preventDefault()
+      debouncedFullscreenToggle()
+    }
+  })
 
   // ...focus and blur. Needed to show correct dock icon text ('badge') in OSX
   window.addEventListener('focus', onFocus)
