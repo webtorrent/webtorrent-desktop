@@ -1,4 +1,4 @@
-const State = require('../lib/state')
+const {dispatch} = require('../lib/dispatcher')
 
 // Controls the UI checking for new versions of the app, prompting install
 module.exports = class UpdateController {
@@ -8,7 +8,7 @@ module.exports = class UpdateController {
 
   // Shows a modal saying that we have an update
   updateAvailable (version) {
-    var skipped = this.state.saved.skippedVersions
+    const skipped = this.state.saved.skippedVersions
     if (skipped && skipped.includes(version)) {
       console.log('new version skipped by user: v' + version)
       return
@@ -18,9 +18,9 @@ module.exports = class UpdateController {
 
   // Don't show the modal again until the next version
   skipVersion (version) {
-    var skipped = this.state.saved.skippedVersions
+    let skipped = this.state.saved.skippedVersions
     if (!skipped) skipped = this.state.saved.skippedVersions = []
     skipped.push(version)
-    State.saveThrottled(this.state)
+    dispatch('stateSave')
   }
 }

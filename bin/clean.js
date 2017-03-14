@@ -5,13 +5,13 @@
  * Useful for developers.
  */
 
-var fs = require('fs')
-var os = require('os')
-var path = require('path')
-var rimraf = require('rimraf')
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
+const rimraf = require('rimraf')
 
-var config = require('../src/config')
-var handlers = require('../src/main/handlers')
+const config = require('../src/config')
+const handlers = require('../src/main/handlers')
 
 // First, remove generated files
 rimraf.sync('build/')
@@ -21,11 +21,11 @@ rimraf.sync('dist/')
 rimraf.sync(config.CONFIG_PATH)
 
 // Remove any temporary files
-var tmpPath
+let tmpPath
 try {
   tmpPath = path.join(fs.statSync('/tmp') && '/tmp', 'webtorrent')
 } catch (err) {
-  tmpPath = path.join(os.tmpDir(), 'webtorrent')
+  tmpPath = path.join(os.tmpdir(), 'webtorrent')
 }
 rimraf.sync(tmpPath)
 

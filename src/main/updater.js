@@ -2,16 +2,17 @@ module.exports = {
   init
 }
 
-var electron = require('electron')
-var get = require('simple-get')
+const electron = require('electron')
+const get = require('simple-get')
 
-var config = require('../config')
-var log = require('./log')
-var windows = require('./windows')
+const config = require('../config')
+const log = require('./log')
+const windows = require('./windows')
 
-var AUTO_UPDATE_URL = config.AUTO_UPDATE_URL +
+const AUTO_UPDATE_URL = config.AUTO_UPDATE_URL +
   '?version=' + config.APP_VERSION +
-  '&platform=' + process.platform
+  '&platform=' + process.platform +
+  '&sysarch=' + config.OS_SYSARCH
 
 function init () {
   if (process.platform === 'linux') {

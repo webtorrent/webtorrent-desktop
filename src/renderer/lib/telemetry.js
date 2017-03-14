@@ -2,44 +2,62 @@
 // Reports back so that we can improve WebTorrent Desktop
 module.exports = {
   init,
+  send,
   logUncaughtError,
   logPlayAttempt
 }
 
-const crypto = require('crypto')
 const electron = require('electron')
-const https = require('https')
-const os = require('os')
-const url = require('url')
 
 const config = require('../../config')
 
-var telemetry
+let telemetry
 
 function init (state) {
   telemetry = state.saved.telemetry
+
+  // First app run
   if (!telemetry) {
-    telemetry = state.saved.telemetry = createSummary()
+    const crypto = require('crypto')
+    telemetry = state.saved.telemetry = {
+      userID: crypto.randomBytes(32).toString('hex') // 256-bit random ID
+    }
     reset()
   }
+}
 
-  var now = new Date()
+function send (state) {
+  const now = new Date()
   telemetry.version = config.APP_VERSION
   telemetry.timestamp = now.toISOString()
   telemetry.localTime = now.toTimeString()
   telemetry.screens = getScreenInfo()
   telemetry.system = getSystemInfo()
-  telemetry.approxNumTorrents = getApproxNumTorrents(state)
+  telemetry.torrentStats = getTorrentStats(state)
+  telemetry.approxNumTorrents = telemetry.torrentStats.approxCount
 
-  if (config.IS_PRODUCTION) {
-    postToServer()
-    // If the user keeps WebTorrent running for a long time, post every 12h
-    setInterval(postToServer, 12 * 3600 * 1000)
-  } else {
+  if (!config.IS_PRODUCTION) {
     // Development: telemetry used only for local debugging
     // Empty uncaught errors, etc at the start of every run
-    reset()
+    return reset()
   }
+
+  const get = require('simple-get')
+
+  const opts = {
+    url: config.TELEMETRY_URL,
+    body: telemetry,
+    json: true
+  }
+
+  get.post(opts, function (err, res) {
+    if (err) return console.error('Error sending telemetry', err)
+    if (res.statusCode !== 200) {
+      return console.error(`Error sending telemetry, status code: ${res.statusCode}`)
+    }
+    console.log('Sent telemetry')
+    reset()
+  })
 }
 
 function reset () {
@@ -48,45 +66,10 @@ function reset () {
     minVersion: config.APP_VERSION,
     total: 0,
     success: 0,
-    timeout: 0,
     error: 0,
+    external: 0,
     abandoned: 0
   }
-}
-
-function postToServer () {
-  // Serialize the telemetry summary
-  var payload = new Buffer(JSON.stringify(telemetry), 'utf8')
-
-  // POST to our server
-  var options = url.parse(config.TELEMETRY_URL)
-  options.method = 'POST'
-  options.headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': payload.length
-  }
-
-  var req = https.request(options, function (res) {
-    if (res.statusCode === 200) {
-      console.log('Successfully posted telemetry summary')
-      reset()
-    } else {
-      console.error('Couldn\'t post telemetry summary, got HTTP ' + res.statusCode)
-    }
-  })
-  req.on('error', function (e) {
-    console.error('Couldn\'t post telemetry summary', e)
-  })
-  req.write(payload)
-  req.end()
-}
-
-// Creates a new telemetry summary. Gives the user a unique ID,
-// collects screen resolution, etc
-function createSummary () {
-  // Make a 256-bit random unique ID
-  var userID = crypto.randomBytes(32).toString('hex')
-  return { userID }
 }
 
 // Track screen resolution
@@ -100,22 +83,69 @@ function getScreenInfo () {
 
 // Track basic system info like OS version and amount of RAM
 function getSystemInfo () {
+  const os = require('os')
   return {
     osPlatform: process.platform,
     osRelease: os.type() + ' ' + os.release(),
     architecture: os.arch(),
-    totalMemoryMB: os.totalmem() / (1 << 20),
+    systemArchitecture: config.OS_SYSARCH,
+    totalMemoryMB: roundPow2(os.totalmem() / (1 << 20)),
     numCores: os.cpus().length
   }
 }
 
-// Get the number of torrents, rounded to the nearest power of two
-function getApproxNumTorrents (state) {
-  var exactNum = state.saved.torrents.length
-  if (exactNum === 0) return 0
+// Get stats like the # of torrents currently active, # in list, total size
+function getTorrentStats (state) {
+  const count = state.saved.torrents.length
+  let sizeMB = 0
+  let byStatus = {
+    new: { count: 0, sizeMB: 0 },
+    downloading: { count: 0, sizeMB: 0 },
+    seeding: { count: 0, sizeMB: 0 },
+    paused: { count: 0, sizeMB: 0 }
+  }
+
+  // First, count torrents & total file size
+  for (let i = 0; i < count; i++) {
+    const t = state.saved.torrents[i]
+    const stat = byStatus[t.status]
+    if (!t || !t.files || !stat) continue
+    stat.count++
+    for (let j = 0; j < t.files.length; j++) {
+      const f = t.files[j]
+      if (!f || !f.length) continue
+      const fileSizeMB = f.length / (1 << 20)
+      sizeMB += fileSizeMB
+      stat.sizeMB += fileSizeMB
+    }
+  }
+
+  // Then, round all the counts and sums to the nearest power of 2
+  const ret = roundTorrentStats({count, sizeMB})
+  ret.byStatus = {
+    new: roundTorrentStats(byStatus.new),
+    downloading: roundTorrentStats(byStatus.downloading),
+    seeding: roundTorrentStats(byStatus.seeding),
+    paused: roundTorrentStats(byStatus.paused)
+  }
+  return ret
+}
+
+function roundTorrentStats (stats) {
+  return {
+    approxCount: roundPow2(stats.count),
+    approxSizeMB: roundPow2(stats.sizeMB)
+  }
+}
+
+// Rounds to the nearest power of 2, for privacy and easy bucketing.
+// Rounds 35 to 32, 70 to 64, 5 to 4, 1 to 1, 0 to 0.
+// Supports nonnegative numbers only.
+function roundPow2 (n) {
+  if (n <= 0) return 0
   // Otherwise, return 1, 2, 4, 8, etc by rounding in log space
-  var log2 = Math.log(exactNum) / Math.log(2)
-  return 1 << Math.round(log2)
+  const log2 = Math.log(n) / Math.log(2)
+  return Math.pow(2, Math.round(log2))
 }
 
 // An uncaught error happened in the main process or in one of the windows
@@ -124,12 +154,10 @@ function logUncaughtError (procName, e) {
   // Hopefully uncaught errors immediately on startup are fixed in dev
   if (!telemetry) return
 
-  var message
-  var stack = ''
-  if (e.message) {
-    // err is either an Error or a plain object {message, stack}
-    message = e.message
-    stack = e.stack
+  let message
+  let stack = ''
+  if (e == null) {
+    message = 'Unexpected undefined error'
   } else if (e.error) {
     // Uncaught Javascript errors (window.onerror), err is an ErrorEvent
     if (!e.error.message) {
@@ -138,6 +166,10 @@ function logUncaughtError (procName, e) {
       message = e.error.message
       stack = e.error.stack
     }
+  } else if (e.message) {
+    // err is either an Error or a plain object {message, stack}
+    message = e.message
+    stack = e.stack
   } else {
     // Resource errors (captured element.onerror), err is an Event
     if (!e.target) {
@@ -149,11 +181,14 @@ function logUncaughtError (procName, e) {
     }
   }
 
+  if (typeof stack !== 'string') stack = 'Unexpected stack: ' + stack
+  if (typeof message !== 'string') message = 'Unexpected message: ' + message
+
   // Remove the first part of each file path in the stack trace.
   // - Privacy: remove personal info like C:\Users\<full name>
   // - Aggregation: this lets us find which stacktraces occur often
-  if (stack && typeof stack === 'string') stack = stack.replace(/\(.*app.asar/g, '(...')
-  else if (stack) stack = 'Unexpected stack: ' + stack
+  stack = stack.replace(/\(.*app.asar/g, '(...')
+  stack = stack.replace(/at .*app.asar/g, 'at ...')
 
   // We need to POST the telemetry object, make sure it stays < 100kb
   if (telemetry.uncaughtErrors.length > 20) return
@@ -161,28 +196,28 @@ function logUncaughtError (procName, e) {
   if (stack.length > 1000) stack = stack.substring(0, 1000)
 
   // Log the app version *at the time of the error*
-  var version = config.APP_VERSION
+  const version = config.APP_VERSION
 
   telemetry.uncaughtErrors.push({process: procName, message, stack, version})
 }
 
 // Turns a DOM element into a string, eg "DIV.my-class.visible"
 function getElemString (elem) {
-  var ret = elem.tagName
+  let ret = elem.tagName
   try {
     ret += '.' + Array.from(elem.classList).join('.')
-  } catch (e) {}
+  } catch (err) {}
   return ret
 }
 
-// The user pressed play. It either worked, timed out, or showed the
-// 'Play in VLC' codec error
+// The user pressed play. Did it work, display an error,
+// open an external player or did user abandon the attempt?
 function logPlayAttempt (result) {
-  if (!['success', 'timeout', 'error', 'abandoned'].includes(result)) {
+  if (!['success', 'error', 'external', 'abandoned'].includes(result)) {
     return console.error('Unknown play attempt result', result)
   }
 
-  var attempts = telemetry.playAttempts
+  const attempts = telemetry.playAttempts
   attempts.total = (attempts.total || 0) + 1
   attempts[result] = (attempts[result] || 0) + 1
 }

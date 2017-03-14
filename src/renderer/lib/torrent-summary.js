@@ -2,12 +2,12 @@ module.exports = {
   getPosterPath,
   getTorrentPath,
   getByKey,
-  getTorrentID,
+  getTorrentId,
   getFileOrFolder
 }
 
-var path = require('path')
-var config = require('../../config')
+const path = require('path')
+const config = require('../../config')
 
 // Expects a torrentSummary
 // Returns an absolute path to the torrent file, or null if unavailable
@@ -20,7 +20,7 @@ function getTorrentPath (torrentSummary) {
 // Returns an absolute path to the poster image, or null if unavailable
 function getPosterPath (torrentSummary) {
   if (!torrentSummary || !torrentSummary.posterFileName) return null
-  var posterPath = path.join(config.POSTER_PATH, torrentSummary.posterFileName)
+  const posterPath = path.join(config.POSTER_PATH, torrentSummary.posterFileName)
   // Work around a Chrome bug (reproduced in vanilla Chrome, not just Electron):
   // Backslashes in URLS in CSS cause bizarre string encoding issues
   return posterPath.replace(/\\/g, '/')
@@ -28,8 +28,8 @@ function getPosterPath (torrentSummary) {
 
 // Expects a torrentSummary
 // Returns a torrentID: filename, magnet URI, or infohash
-function getTorrentID (torrentSummary) {
-  var s = torrentSummary
+function getTorrentId (torrentSummary) {
+  const s = torrentSummary
   if (s.torrentFileName) { // Load torrent file from disk
     return getTorrentPath(s)
   } else { // Load torrent from DHT
@@ -51,7 +51,8 @@ function getByKey (state, torrentKey) {
 // TODO: make this assumption explicit, enforce it in the `create-torrent`
 // module. Store root folder explicitly to avoid hacky path processing below.
 function getFileOrFolder (torrentSummary) {
-  var ts = torrentSummary
+  const ts = torrentSummary
   if (!ts.path || !ts.files || ts.files.length === 0) return null
-  return path.join(ts.path, ts.files[0].path.split('/')[0])
+  const dirname = ts.files[0].path.split(path.sep)[0]
+  return path.join(ts.path, dirname)
 }

@@ -1,22 +1,22 @@
 module.exports = torrentPoster
 
-var captureVideoFrame = require('./capture-video-frame')
-var path = require('path')
+const captureFrame = require('capture-frame')
+const path = require('path')
 
 function torrentPoster (torrent, cb) {
   // First, try to use a poster image if available
-  var posterFile = torrent.files.filter(function (file) {
+  const posterFile = torrent.files.filter(function (file) {
     return /^poster\.(jpg|png|gif)$/.test(file.name)
   })[0]
   if (posterFile) return torrentPosterFromImage(posterFile, torrent, cb)
 
   // Second, try to use the largest video file
   // Filter out file formats that the <video> tag definitely can't play
-  var videoFile = getLargestFileByExtension(torrent, ['.mp4', '.m4v', '.webm', '.mov', '.mkv'])
+  const videoFile = getLargestFileByExtension(torrent, ['.mp4', '.m4v', '.webm', '.mov', '.mkv'])
   if (videoFile) return torrentPosterFromVideo(videoFile, torrent, cb)
 
   // Third, try to use the largest image file
-  var imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.jpeg', '.png'])
+  const imgFile = getLargestFileByExtension(torrent, ['.gif', '.jpg', '.jpeg', '.png'])
   if (imgFile) return torrentPosterFromImage(imgFile, torrent, cb)
 
   // TODO: generate a waveform from the largest sound file
@@ -25,8 +25,8 @@ function torrentPoster (torrent, cb) {
 }
 
 function getLargestFileByExtension (torrent, extensions) {
-  var files = torrent.files.filter(function (file) {
-    var extname = path.extname(file.name).toLowerCase()
+  const files = torrent.files.filter(function (file) {
+    const extname = path.extname(file.name).toLowerCase()
     return extensions.indexOf(extname) !== -1
   })
   if (files.length === 0) return undefined
@@ -36,15 +36,15 @@ function getLargestFileByExtension (torrent, extensions) {
 }
 
 function torrentPosterFromVideo (file, torrent, cb) {
-  var index = torrent.files.indexOf(file)
+  const index = torrent.files.indexOf(file)
 
-  var server = torrent.createServer(0)
+  const server = torrent.createServer(0)
   server.listen(0, onListening)
 
   function onListening () {
-    var port = server.address().port
-    var url = 'http://localhost:' + port + '/' + index
-    var video = document.createElement('video')
+    const port = server.address().port
+    const url = 'http://localhost:' + port + '/' + index
+    const video = document.createElement('video')
     video.addEventListener('canplay', onCanPlay)
 
     video.volume = 0
@@ -61,7 +61,7 @@ function torrentPosterFromVideo (file, torrent, cb) {
     function onSeeked () {
       video.removeEventListener('seeked', onSeeked)
 
-      var buf = captureVideoFrame(video)
+      const buf = captureFrame(video)
 
       // unload video element
       video.pause()
@@ -78,6 +78,6 @@ function torrentPosterFromVideo (file, torrent, cb) {
 }
 
 function torrentPosterFromImage (file, torrent, cb) {
-  var extname = path.extname(file.name)
+  const extname = path.extname(file.name)
   file.getBuffer((err, buf) => cb(err, buf, extname))
 }

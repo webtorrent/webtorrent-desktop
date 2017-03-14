@@ -1,4 +1,4 @@
-var main = module.exports = {
+const main = module.exports = {
   dispatch,
   hide,
   init,
@@ -14,41 +14,57 @@ var main = module.exports = {
   win: null
 }
 
-var electron = require('electron')
+const electron = require('electron')
+const debounce = require('debounce')
 
-var app = electron.app
+const app = electron.app
 
-var config = require('../../config')
-var log = require('../log')
-var menu = require('../menu')
-var tray = require('../tray')
+const config = require('../../config')
+const log = require('../log')
+const menu = require('../menu')
 
-var HEADER_HEIGHT = 38
-var TORRENT_HEIGHT = 100
-
-function init () {
+function init (state, options) {
   if (main.win) {
     return main.win.show()
   }
-  var win = main.win = new electron.BrowserWindow({
+
+  const initialBounds = Object.assign(config.WINDOW_INITIAL_BOUNDS, state.saved.bounds)
+
+  const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
+    backgroundThrottling: false, // do not throttle animations/timers when page is background
     darkTheme: true, // Forces dark theme (GTK+3)
+    height: initialBounds.height,
     icon: getIconPath(), // Window icon (Windows, Linux)
-    minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
+    minWidth: config.WINDOW_MIN_WIDTH,
+    show: false,
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
-    width: 500,
-    height: HEADER_HEIGHT + (TORRENT_HEIGHT * 6) // header height + 5 torrents
+    width: initialBounds.width,
+    x: initialBounds.x,
+    y: initialBounds.y
   })
 
   win.loadURL(config.WINDOW_MAIN)
 
-  if (win.setSheetOffset) win.setSheetOffset(HEADER_HEIGHT)
+  win.once('ready-to-show', () => {
+    if (!options.hidden) win.show()
+  })
+
+  if (win.setSheetOffset) {
+    win.setSheetOffset(config.UI_HEADER_HEIGHT)
+  }
 
   win.webContents.on('dom-ready', function () {
     menu.onToggleFullScreen(main.win.isFullScreen())
+  })
+
+  win.webContents.on('will-navigate', (e, url) => {
+    // Prevent drag-and-drop from navigating the Electron window, which can happen
+    // before our drag-and-drop handlers have been initialized.
+    e.preventDefault()
   })
 
   win.on('blur', onWindowBlur)
@@ -69,10 +85,23 @@ function init () {
     win.setMenuBarVisibility(true)
   })
 
+  win.on('move', debounce(function (e) {
+    send('windowBoundsChanged', e.sender.getBounds())
+  }, 1000))
+
+  win.on('resize', debounce(function (e) {
+    send('windowBoundsChanged', e.sender.getBounds())
+  }, 1000))
+
   win.on('close', function (e) {
-    if (process.platform !== 'darwin' && !tray.hasTray()) {
-      app.quit()
-    } else if (!app.isQuitting) {
+    if (process.platform !== 'darwin') {
+      const tray = require('../tray')
+      if (!tray.hasTray()) {
+        app.quit()
+        return
+      }
+    }
+    if (!app.isQuitting) {
       e.preventDefault()
       hide()
     }
@@ -85,7 +114,7 @@ function dispatch (...args) {
 
 function hide () {
   if (!main.win) return
-  main.win.send('dispatch', 'backToList')
+  dispatch('backToList')
   main.win.hide()
 }
 
@@ -114,7 +143,7 @@ function setBounds (bounds, maximize) {
   }
 
   // Maximize or minimize, if the second argument is present
-  var willBeMaximized
+  let willBeMaximized
   if (maximize === true) {
     if (!main.win.isMaximized()) {
       log('setBounds: maximizing')
@@ -136,9 +165,9 @@ function setBounds (bounds, maximize) {
     log('setBounds: setting bounds to ' + JSON.stringify(bounds))
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
-      var scr = electron.screen.getDisplayMatching(main.win.getBounds())
-      bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
-      bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
+      const scr = electron.screen.getDisplayMatching(main.win.getBounds())
+      bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
+      bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
       log('setBounds: centered to ' + JSON.stringify(bounds))
     }
     // Resize the window's content area (so window border doesn't need to be taken
@@ -211,12 +240,20 @@ function toggleFullScreen (flag) {
 
 function onWindowBlur () {
   menu.setWindowFocus(false)
-  tray.setWindowFocus(false)
+
+  if (process.platform !== 'darwin') {
+    const tray = require('../tray')
+    tray.setWindowFocus(false)
+  }
 }
 
 function onWindowFocus () {
   menu.setWindowFocus(true)
-  tray.setWindowFocus(true)
+
+  if (process.platform !== 'darwin') {
+    const tray = require('../tray')
+    tray.setWindowFocus(true)
+  }
 }
 
 function getIconPath () {

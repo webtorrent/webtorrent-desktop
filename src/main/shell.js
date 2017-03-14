@@ -5,8 +5,8 @@ module.exports = {
   moveItemToTrash
 }
 
-var electron = require('electron')
-var log = require('./log')
+const electron = require('electron')
+const log = require('./log')
 
 /**
  * Open the given external protocol URL in the desktop’s default manner.

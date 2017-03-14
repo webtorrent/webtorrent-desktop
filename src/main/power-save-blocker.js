@@ -3,10 +3,10 @@ module.exports = {
   disable
 }
 
-var electron = require('electron')
-var log = require('./log')
+const electron = require('electron')
+const log = require('./log')
 
-var blockId = 0
+let blockId = 0
 
 /**
  * Block the system from entering low-power (sleep) mode or turning off the

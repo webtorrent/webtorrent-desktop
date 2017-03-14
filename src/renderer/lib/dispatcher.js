@@ -4,8 +4,8 @@ module.exports = {
   setDispatch
 }
 
-var dispatchers = {}
-var _dispatch = function () {}
+const dispatchers = {}
+let _dispatch = function () {}
 
 function setDispatch (dispatch) {
   _dispatch = dispatch
@@ -20,8 +20,8 @@ function dispatch (...args) {
 // function. This prevents React from updating the listener functions on
 // each update().
 function dispatcher (...args) {
-  var str = JSON.stringify(args)
-  var handler = dispatchers[str]
+  const str = JSON.stringify(args)
+  let handler = dispatchers[str]
   if (!handler) {
     handler = dispatchers[str] = function (e) {
       // Do not propagate click to elements below the button

@@ -1,28 +1,29 @@
 #!/usr/bin/env node
 
 /**
- * Builds app binaries for Mac, Linux, and Windows.
+ * Builds app binaries for Mac, Windows, and Linux.
  */
 
-var cp = require('child_process')
-var electronPackager = require('electron-packager')
-var fs = require('fs')
-var minimist = require('minimist')
-var mkdirp = require('mkdirp')
-var os = require('os')
-var path = require('path')
-var rimraf = require('rimraf')
-var series = require('run-series')
-var zip = require('cross-zip')
+const cp = require('child_process')
+const electronPackager = require('electron-packager')
+const fs = require('fs')
+const minimist = require('minimist')
+const mkdirp = require('mkdirp')
+const os = require('os')
+const path = require('path')
+const rimraf = require('rimraf')
+const series = require('run-series')
+const zip = require('cross-zip')
 
-var config = require('../src/config')
-var pkg = require('../package.json')
+const config = require('../src/config')
+const pkg = require('../package.json')
 
-var BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
-var BUILD_PATH = path.join(config.ROOT_PATH, 'build')
-var DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+const BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
+const BUILD_PATH = path.join(config.ROOT_PATH, 'build')
+const DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+const NODE_MODULES_PATH = path.join(config.ROOT_PATH, 'node_modules')
 
-var argv = minimist(process.argv.slice(2), {
+const argv = minimist(process.argv.slice(2), {
   boolean: [
     'sign'
   ],
@@ -36,14 +37,20 @@ var argv = minimist(process.argv.slice(2), {
 })
 
 function build () {
+  console.log('Reinstalling node_modules...')
+  rimraf.sync(NODE_MODULES_PATH)
+  cp.execSync('npm install', { stdio: 'inherit' })
+  cp.execSync('npm dedupe', { stdio: 'inherit' })
+
+  console.log('Nuking dist/ and build/...')
   rimraf.sync(DIST_PATH)
   rimraf.sync(BUILD_PATH)
 
-  console.log('Babel: Building JSX...')
+  console.log('Build: Transpiling to ES5...')
   cp.execSync('npm run build', { NODE_ENV: 'production', stdio: 'inherit' })
-  console.log('Babel: Built JSX.')
+  console.log('Build: Transpiled to ES5.')
 
-  var platform = argv._[0]
+  const platform = argv._[0]
   if (platform === 'darwin') {
     buildDarwin(printDone)
   } else if (platform === 'win32') {
@@ -61,7 +68,7 @@ function build () {
   }
 }
 
-var all = {
+const all = {
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on Mac.
   'app-copyright': config.APP_COPYRIGHT,
@@ -73,11 +80,11 @@ var all = {
   // Package the application's source code into an archive, using Electron's archive
   // format. Mitigates issues around long path names on Windows and slightly speeds up
   // require().
-  asar: true,
-
-  // A glob expression, that unpacks the files with matching names to the
-  // "app.asar.unpacked" directory.
-  'asar-unpack': 'WebTorrent*',
+  asar: {
+    // A glob expression, that unpacks the files with matching names to the
+    // "app.asar.unpacked" directory.
+    unpack: 'WebTorrent*'
+  },
 
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on Mac. Note: Windows requires the build version to
@@ -89,7 +96,7 @@ var all = {
 
   // Pattern which specifies which files to ignore when copying files to create the
   // package(s).
-  ignore: /^\/src|^\/dist|\/(appveyor.yml|\.appveyor.yml|\.github|appdmg|AUTHORS|CONTRIBUTORS|bench|benchmark|benchmark\.js|bin|bower\.json|component\.json|coverage|doc|docs|docs\.mli|dragdrop\.min\.js|example|examples|example\.html|example\.js|externs|ipaddr\.min\.js|Makefile|min|minimist|perf|rusha|simplepeer\.min\.js|simplewebsocket\.min\.js|static\/screenshot\.png|test|tests|test\.js|tests\.js|webtorrent\.min\.js|\.[^\/]*|.*\.md|.*\.markdown)$/,
+  ignore: /^\/src|^\/dist|\/(appveyor.yml|\.appveyor.yml|\.github|appdmg|AUTHORS|CONTRIBUTORS|bench|benchmark|benchmark\.js|bin|bower\.json|component\.json|coverage|doc|docs|docs\.mli|dragdrop\.min\.js|example|examples|example\.html|example\.js|externs|ipaddr\.min\.js|Makefile|min|minimist|perf|rusha|simplepeer\.min\.js|simplewebsocket\.min\.js|static\/screenshot\.png|test|tests|test\.js|tests\.js|webtorrent\.min\.js|\.[^/]*|.*\.md|.*\.markdown)$/,
 
   // The application name.
   name: config.APP_NAME,
@@ -104,15 +111,15 @@ var all = {
   // "devDependencies" before starting to package the app.
   prune: true,
 
-  // The Electron version with which the app is built (without the leading 'v')
-  version: require('electron/package.json').version
+  // The Electron version that the app is built with (without the leading 'v')
+  electronVersion: require('electron/package.json').version
 }
 
-var darwin = {
+const darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build 64 bit binaries only.
+  // Build x64 binaries only.
   arch: 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
@@ -129,15 +136,15 @@ var darwin = {
   icon: config.APP_ICON + '.icns'
 }
 
-var win32 = {
+const win32 = {
   // Build for Windows.
   platform: 'win32',
 
-  // Build 32 bit binaries only.
-  arch: 'ia32',
+  // Build ia32 and x64 binaries.
+  arch: ['ia32', 'x64'],
 
   // Object hash of application metadata to embed into the executable (Windows only)
-  'version-string': {
+  win32metadata: {
 
     // Company that produced the file.
     CompanyName: config.APP_NAME,
@@ -163,12 +170,12 @@ var win32 = {
   icon: config.APP_ICON + '.ico'
 }
 
-var linux = {
+const linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build 32 and 64 bit binaries.
-  arch: 'all'
+  // Build ia32 and x64 binaries.
+  arch: ['ia32', 'x64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
@@ -176,18 +183,18 @@ var linux = {
 build()
 
 function buildDarwin (cb) {
-  var plist = require('plist')
+  const plist = require('plist')
 
   console.log('Mac: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
     if (err) return cb(err)
     console.log('Mac: Packaged electron. ' + buildPath)
 
-    var appPath = path.join(buildPath[0], config.APP_NAME + '.app')
-    var contentsPath = path.join(appPath, 'Contents')
-    var resourcesPath = path.join(contentsPath, 'Resources')
-    var infoPlistPath = path.join(contentsPath, 'Info.plist')
-    var infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
+    const appPath = path.join(buildPath[0], config.APP_NAME + '.app')
+    const contentsPath = path.join(appPath, 'Contents')
+    const resourcesPath = path.join(contentsPath, 'Resources')
+    const infoPlistPath = path.join(contentsPath, 'Info.plist')
+    const infoPlist = plist.parse(fs.readFileSync(infoPlistPath, 'utf8'))
 
     infoPlist.CFBundleDocumentTypes = [
       {
@@ -261,7 +268,7 @@ function buildDarwin (cb) {
     }
 
     function signApp (cb) {
-      var sign = require('electron-osx-sign')
+      const sign = require('electron-osx-sign')
 
       /*
        * Sign the app with Apple Developer ID certificates. We sign the app for 2 reasons:
@@ -276,7 +283,7 @@ function buildDarwin (cb) {
        *   - Xcode Command Line Tools (xcode-select --install)
        *   - Membership in the Apple Developer Program
        */
-      var signOpts = {
+      const signOpts = {
         app: appPath,
         platform: 'darwin',
         verbose: true
@@ -302,8 +309,8 @@ function buildDarwin (cb) {
       // Create .zip file (used by the auto-updater)
       console.log('Mac: Creating zip...')
 
-      var inPath = path.join(buildPath[0], config.APP_NAME + '.app')
-      var outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
+      const inPath = path.join(buildPath[0], config.APP_NAME + '.app')
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
       zip.zipSync(inPath, outPath)
 
       console.log('Mac: Created zip.')
@@ -312,13 +319,13 @@ function buildDarwin (cb) {
     function packageDmg (cb) {
       console.log('Mac: Creating dmg...')
 
-      var appDmg = require('appdmg')
+      const appDmg = require('appdmg')
 
-      var targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
+      const targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
       rimraf.sync(targetPath)
 
       // Create a .dmg (Mac disk image) file, for easy user installation.
-      var dmgOpts = {
+      const dmgOpts = {
         basepath: config.ROOT_PATH,
         target: targetPath,
         specification: {
@@ -339,7 +346,7 @@ function buildDarwin (cb) {
         }
       }
 
-      var dmg = appDmg(dmgOpts)
+      const dmg = appDmg(dmgOpts)
       dmg.once('error', cb)
       dmg.on('progress', function (info) {
         if (info.type === 'step-begin') console.log(info.title + '...')
@@ -353,7 +360,7 @@ function buildDarwin (cb) {
 }
 
 function buildWin32 (cb) {
-  var installer = require('electron-winstaller')
+  const installer = require('electron-winstaller')
   console.log('Windows: Packaging electron...')
 
   /*
@@ -361,7 +368,7 @@ function buildWin32 (cb) {
    *   - Windows Authenticode private key and cert (authenticode.p12)
    *   - Windows Authenticode password file (authenticode.txt)
    */
-  var CERT_PATH
+  let CERT_PATH
   try {
     fs.accessSync('D:')
     CERT_PATH = 'D:'
@@ -373,12 +380,12 @@ function buildWin32 (cb) {
     if (err) return cb(err)
     console.log('Windows: Packaged electron. ' + buildPath)
 
-    var signWithParams
+    let signWithParams
     if (process.platform === 'win32') {
       if (argv.sign) {
-        var certificateFile = path.join(CERT_PATH, 'authenticode.p12')
-        var certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
-        var timestampServer = 'http://timestamp.comodoca.com'
+        const certificateFile = path.join(CERT_PATH, 'authenticode.p12')
+        const certificatePassword = fs.readFileSync(path.join(CERT_PATH, 'authenticode.txt'), 'utf8')
+        const timestampServer = 'http://timestamp.comodoca.com'
         signWithParams = `/a /f "${certificateFile}" /p "${certificatePassword}" /tr "${timestampServer}" /td sha256`
       } else {
         printWarning()
@@ -387,20 +394,26 @@ function buildWin32 (cb) {
       printWarning()
     }
 
-    var tasks = []
-    if (argv.package === 'exe' || argv.package === 'all') {
-      tasks.push((cb) => packageInstaller(cb))
-    }
-    if (argv.package === 'portable' || argv.package === 'all') {
-      tasks.push((cb) => packagePortable(cb))
-    }
+    const tasks = []
+    buildPath.forEach(function (filesPath) {
+      const destArch = filesPath.split('-').pop()
+
+      if (argv.package === 'exe' || argv.package === 'all') {
+        tasks.push((cb) => packageInstaller(filesPath, destArch, cb))
+      }
+      if (argv.package === 'portable' || argv.package === 'all') {
+        tasks.push((cb) => packagePortable(filesPath, destArch, cb))
+      }
+    })
     series(tasks, cb)
 
-    function packageInstaller (cb) {
-      console.log('Windows: Creating installer...')
+    function packageInstaller (filesPath, destArch, cb) {
+      console.log(`Windows: Creating ${destArch} installer...`)
+
+      const archStr = destArch === 'ia32' ? '-ia32' : ''
 
       installer.createWindowsInstaller({
-        appDirectory: buildPath[0],
+        appDirectory: filesPath,
         authors: config.APP_TEAM,
         description: config.APP_NAME,
         exe: config.APP_NAME + '.exe',
@@ -410,8 +423,26 @@ function buildWin32 (cb) {
         noMsi: true,
         outputDirectory: DIST_PATH,
         productName: config.APP_NAME,
-        remoteReleases: config.GITHUB_URL,
-        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
+        /**
+         * Only create delta updates for the Windows x64 build because 90% of our
+         * users have Windows x64 and the delta files take a *very* long time to
+         * generate. Also, the ia32 files on GitHub have non-standard Squirrel
+         * names (i.e. RELEASES-ia32 instead of RELEASES) and so Squirrel won't
+         * find them unless we proxy the requests.
+         */
+        // TODO: Re-enable Windows 64-bit delta updates when we confirm that they
+        //       work correctly in the presence of the "ia32" .nupkg files. I
+        //       (feross) noticed them listed in the 64-bit RELEASES file and
+        //       manually edited them out for the v0.17 release. Shipping only
+        //       full updates for now will work fine, with no ill-effects.
+        // remoteReleases: destArch === 'x64'
+        //   ? config.GITHUB_URL
+        //   : undefined,
+        /**
+         * If you hit a "GitHub API rate limit exceeded" error, set this token!
+         */
+        // remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + archStr + '.exe',
         setupIcon: config.APP_ICON + '.ico',
         signWithParams: signWithParams,
         title: config.APP_NAME,
@@ -419,23 +450,71 @@ function buildWin32 (cb) {
         version: pkg.version
       })
       .then(function () {
-        console.log('Windows: Created installer.')
+        console.log(`Windows: Created ${destArch} installer.`)
+
+        /**
+         * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
+         * versions of the app)
+         */
+        fs.readdirSync(DIST_PATH)
+          .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
+          .forEach((filename) => {
+            fs.unlinkSync(path.join(DIST_PATH, filename))
+          })
+
+        if (destArch === 'ia32') {
+          console.log('Windows: Renaming ia32 installer files...')
+
+          // RELEASES -> RELEASES-ia32
+          const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
+          fs.renameSync(
+            path.join(DIST_PATH, 'RELEASES'),
+            relPath
+          )
+
+          // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
+          fs.renameSync(
+            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
+            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
+          )
+
+          // Change file name inside RELEASES-ia32 to match renamed file
+          const relContent = fs.readFileSync(relPath, 'utf8')
+          const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
+          fs.writeFileSync(relPath, relContent32)
+
+          if (relContent === relContent32) {
+            // Sanity check
+            throw new Error('Fixing RELEASES-ia32 failed. Replacement did not modify the file.')
+          }
+
+          console.log('Windows: Renamed ia32 installer files.')
+        }
+
         cb(null)
       })
       .catch(cb)
     }
 
-    function packagePortable (cb) {
-      console.log('Windows: Creating portable app...')
+    function packagePortable (filesPath, destArch, cb) {
+      console.log(`Windows: Creating ${destArch} portable app...`)
 
-      var portablePath = path.join(buildPath[0], 'Portable Settings')
+      const portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
 
-      var inPath = path.join(DIST_PATH, path.basename(buildPath[0]))
-      var outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
+      const downloadsPath = path.join(portablePath, 'Downloads')
+      mkdirp.sync(downloadsPath)
+
+      const tempPath = path.join(portablePath, 'Temp')
+      mkdirp.sync(tempPath)
+
+      const archStr = destArch === 'ia32' ? '-ia32' : ''
+
+      const inPath = path.join(DIST_PATH, path.basename(filesPath))
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log('Windows: Created portable app.')
+      console.log(`Windows: Created ${destArch} portable app.`)
       cb(null)
     }
   })
@@ -447,9 +526,9 @@ function buildLinux (cb) {
     if (err) return cb(err)
     console.log('Linux: Packaged electron. ' + buildPath)
 
-    var tasks = []
+    const tasks = []
     buildPath.forEach(function (filesPath) {
-      var destArch = filesPath.split('-').pop()
+      const destArch = filesPath.split('-').pop()
 
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, destArch, cb))
@@ -465,8 +544,8 @@ function buildLinux (cb) {
     // Create .deb file for Debian-based platforms
     console.log(`Linux: Creating ${destArch} deb...`)
 
-    var deb = require('nobin-debian-installer')()
-    var destPath = path.join('/opt', pkg.name)
+    const deb = require('nobin-debian-installer')()
+    const destPath = path.join('/opt', pkg.name)
 
     deb.pack({
       package: pkg,
@@ -500,8 +579,10 @@ function buildLinux (cb) {
     // Create .zip file for Linux
     console.log(`Linux: Creating ${destArch} zip...`)
 
-    var inPath = path.join(DIST_PATH, path.basename(filesPath))
-    var outPath = path.join(DIST_PATH, BUILD_NAME + '-linux-' + destArch + '.zip')
+    const archStr = destArch === 'ia32' ? '-ia32' : ''
+
+    const inPath = path.join(DIST_PATH, path.basename(filesPath))
+    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
     zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)

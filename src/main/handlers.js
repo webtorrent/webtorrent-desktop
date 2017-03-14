@@ -3,8 +3,8 @@ module.exports = {
   uninstall
 }
 
-var config = require('../config')
-var path = require('path')
+const config = require('../config')
+const path = require('path')
 
 function install () {
   if (process.platform === 'darwin') {
@@ -31,8 +31,8 @@ function uninstall () {
 }
 
 function installDarwin () {
-  var electron = require('electron')
-  var app = electron.app
+  const electron = require('electron')
+  const app = electron.app
 
   // On Mac, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.
@@ -44,18 +44,18 @@ function installDarwin () {
 
 function uninstallDarwin () {}
 
-var EXEC_COMMAND = [ process.execPath ]
+const EXEC_COMMAND = [ process.execPath ]
 
 if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
 }
 
 function installWin32 () {
-  var Registry = require('winreg')
+  const Registry = require('winreg')
 
-  var log = require('./log')
+  const log = require('./log')
 
-  var iconPath = path.join(
+  const iconPath = path.join(
     process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico'
   )
   registerProtocolHandlerWin32(
@@ -100,7 +100,7 @@ function installWin32 () {
    */
 
   function registerProtocolHandlerWin32 (protocol, name, icon, command) {
-    var protocolKey = new Registry({
+    const protocolKey = new Registry({
       hive: Registry.HKCU, // HKEY_CURRENT_USER
       key: '\\Software\\Classes\\' + protocol
     })
@@ -120,7 +120,7 @@ function installWin32 () {
     function setIcon (err) {
       if (err) log.error(err.message)
 
-      var iconKey = new Registry({
+      const iconKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol + '\\DefaultIcon'
       })
@@ -130,7 +130,7 @@ function installWin32 () {
     function setCommand (err) {
       if (err) log.error(err.message)
 
-      var commandKey = new Registry({
+      const commandKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
       })
@@ -161,7 +161,7 @@ function installWin32 () {
     setExt()
 
     function setExt () {
-      var extKey = new Registry({
+      const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + ext
       })
@@ -171,7 +171,7 @@ function installWin32 () {
     function setId (err) {
       if (err) log.error(err.message)
 
-      var idKey = new Registry({
+      const idKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + id
       })
@@ -181,7 +181,7 @@ function installWin32 () {
     function setIcon (err) {
       if (err) log.error(err.message)
 
-      var iconKey = new Registry({
+      const iconKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + id + '\\DefaultIcon'
       })
@@ -191,7 +191,7 @@ function installWin32 () {
     function setCommand (err) {
       if (err) log.error(err.message)
 
-      var commandKey = new Registry({
+      const commandKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + id + '\\shell\\open\\command'
       })
@@ -205,7 +205,7 @@ function installWin32 () {
 }
 
 function uninstallWin32 () {
-  var Registry = require('winreg')
+  const Registry = require('winreg')
 
   unregisterProtocolHandlerWin32('magnet', EXEC_COMMAND)
   unregisterProtocolHandlerWin32('stream-magnet', EXEC_COMMAND)
@@ -215,7 +215,7 @@ function uninstallWin32 () {
     getCommand()
 
     function getCommand () {
-      var commandKey = new Registry({
+      const commandKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
       })
@@ -227,7 +227,7 @@ function uninstallWin32 () {
     }
 
     function destroyProtocol () {
-      var protocolKey = new Registry({
+      const protocolKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + protocol
       })
@@ -239,7 +239,7 @@ function uninstallWin32 () {
     eraseId()
 
     function eraseId () {
-      var idKey = new Registry({
+      const idKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + id
       })
@@ -247,7 +247,7 @@ function uninstallWin32 () {
     }
 
     function getExt () {
-      var extKey = new Registry({
+      const extKey = new Registry({
         hive: Registry.HKCU,
         key: '\\Software\\Classes\\' + ext
       })
@@ -259,7 +259,7 @@ function uninstallWin32 () {
     }
 
     function destroyExt () {
-      var extKey = new Registry({
+      const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: '\\Software\\Classes\\' + ext
       })
@@ -273,12 +273,12 @@ function commandToArgs (command) {
 }
 
 function installLinux () {
-  var fs = require('fs-extra')
-  var os = require('os')
-  var path = require('path')
+  const fs = require('fs')
+  const os = require('os')
+  const path = require('path')
 
-  var config = require('../config')
-  var log = require('./log')
+  const config = require('../config')
+  const log = require('./log')
 
   // Do not install in user dir if running on system
   if (/^\/opt/.test(process.execPath)) return
@@ -287,7 +287,7 @@ function installLinux () {
   installIconFile()
 
   function installDesktopFile () {
-    var templatePath = path.join(
+    const templatePath = path.join(
       config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop'
     )
     fs.readFile(templatePath, 'utf8', writeDesktopFile)
@@ -296,7 +296,7 @@ function installLinux () {
   function writeDesktopFile (err, desktopFile) {
     if (err) return log.error(err.message)
 
-    var appPath = config.IS_PRODUCTION
+    const appPath = config.IS_PRODUCTION
       ? path.dirname(process.execPath)
       : config.ROOT_PATH
 
@@ -305,7 +305,7 @@ function installLinux () {
     desktopFile = desktopFile.replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
     desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
 
-    var desktopFilePath = path.join(
+    const desktopFilePath = path.join(
       os.homedir(),
       '.local',
       'share',
@@ -319,47 +319,51 @@ function installLinux () {
   }
 
   function installIconFile () {
-    var iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
+    const iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
     fs.readFile(iconStaticPath, writeIconFile)
   }
 
   function writeIconFile (err, iconFile) {
     if (err) return log.error(err.message)
 
-    var iconFilePath = path.join(
+    const mkdirp = require('mkdirp')
+
+    const iconFilePath = path.join(
       os.homedir(),
       '.local',
       'share',
       'icons',
       'webtorrent-desktop.png'
     )
-    fs.mkdirp(path.dirname(iconFilePath))
-    fs.writeFile(iconFilePath, iconFile, function (err) {
+    mkdirp(path.dirname(iconFilePath), (err) => {
       if (err) return log.error(err.message)
+      fs.writeFile(iconFilePath, iconFile, (err) => {
+        if (err) log.error(err.message)
+      })
     })
   }
 }
 
 function uninstallLinux () {
-  var os = require('os')
-  var path = require('path')
-  var fs = require('fs-extra')
+  const os = require('os')
+  const path = require('path')
+  const rimraf = require('rimraf')
 
-  var desktopFilePath = path.join(
+  const desktopFilePath = path.join(
     os.homedir(),
     '.local',
     'share',
     'applications',
     'webtorrent-desktop.desktop'
   )
-  fs.removeSync(desktopFilePath)
+  rimraf(desktopFilePath)
 
-  var iconFilePath = path.join(
+  const iconFilePath = path.join(
     os.homedir(),
     '.local',
     'share',
     'icons',
     'webtorrent-desktop.png'
   )
-  fs.removeSync(iconFilePath)
+  rimraf(iconFilePath)
 }

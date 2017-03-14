@@ -2,7 +2,6 @@ const path = require('path')
 const ipcRenderer = require('electron').ipcRenderer
 
 const TorrentSummary = require('../lib/torrent-summary')
-const TorrentPlayer = require('../lib/torrent-player')
 const sound = require('../lib/sound')
 const {dispatch} = require('../lib/dispatcher')
 
@@ -12,12 +11,12 @@ module.exports = class TorrentController {
   }
 
   torrentInfoHash (torrentKey, infoHash) {
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    let torrentSummary = this.getTorrentSummary(torrentKey)
     console.log('got infohash for %s torrent %s',
       torrentSummary ? 'existing' : 'new', torrentKey)
 
     if (!torrentSummary) {
-      var torrents = this.state.saved.torrents
+      const torrents = this.state.saved.torrents
 
       // Check if an existing (non-active) torrent has the same info hash
       if (torrents.find((t) => t.infoHash === infoHash)) {
@@ -49,7 +48,7 @@ module.exports = class TorrentController {
     }
     dispatch('error', message)
 
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
     if (torrentSummary) {
       console.log('Pausing torrent %s due to error: %s', torrentSummary.infoHash, message)
       torrentSummary.status = 'paused'
@@ -59,21 +58,20 @@ module.exports = class TorrentController {
 
   torrentMetadata (torrentKey, torrentInfo) {
     // Summarize torrent
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.status = 'downloading'
     torrentSummary.name = torrentSummary.displayName || torrentInfo.name
     torrentSummary.path = torrentInfo.path
     torrentSummary.magnetURI = torrentInfo.magnetURI
     // TODO: make torrentInfo immutable, save separately as torrentSummary.info
     // For now, check whether torrentSummary.files has already been set:
-    var hasDetailedFileInfo = torrentSummary.files && torrentSummary.files[0].path
+    const hasDetailedFileInfo = torrentSummary.files && torrentSummary.files[0].path
     if (!hasDetailedFileInfo) {
       torrentSummary.files = torrentInfo.files
     }
     if (!torrentSummary.selections) {
       torrentSummary.selections = torrentSummary.files.map((x) => true)
     }
-    torrentSummary.defaultPlayFileIndex = TorrentPlayer.pickFileToPlay(torrentInfo.files)
     dispatch('update')
 
     // Save the .torrent file, if it hasn't been saved already
@@ -85,7 +83,7 @@ module.exports = class TorrentController {
 
   torrentDone (torrentKey, torrentInfo) {
     // Update the torrent summary
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.status = 'seeding'
 
     // Notify the user that a torrent finished, but only if we actually DL'd at least part of it.
@@ -102,22 +100,18 @@ module.exports = class TorrentController {
   }
 
   torrentProgress (progressInfo) {
-    // Overall progress across all active torrents, 0 to 1
-    var progress = progressInfo.progress
-    var hasActiveTorrents = progressInfo.hasActiveTorrents
-
+    // Overall progress across all active torrents, 0 to 1, or -1 to hide the progress bar
     // Hide progress bar when client has no torrents, or progress is 100%
-    // TODO: isn't this equivalent to: if (progress === 1) ?
-    if (!hasActiveTorrents || progress === 1) {
-      progress = -1
-    }
+    const progress = (!progressInfo.hasActiveTorrents || progressInfo.progress === 1)
+      ? -1
+      : progressInfo.progress
 
     // Show progress bar under the WebTorrent taskbar icon, on OSX
     this.state.dock.progress = progress
 
     // Update progress for each individual torrent
     progressInfo.torrents.forEach((p) => {
-      var torrentSummary = this.getTorrentSummary(p.torrentKey)
+      const torrentSummary = this.getTorrentSummary(p.torrentKey)
       if (!torrentSummary) {
         console.log('warning: got progress for missing torrent %s', p.torrentKey)
         return
@@ -132,27 +126,28 @@ module.exports = class TorrentController {
   }
 
   torrentFileModtimes (torrentKey, fileModtimes) {
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
+    if (!torrentSummary) throw new Error('Not saving modtimes for deleted torrent ' + torrentKey)
     torrentSummary.fileModtimes = fileModtimes
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentFileSaved (torrentKey, torrentFileName) {
     console.log('torrent file saved %s: %s', torrentKey, torrentFileName)
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.torrentFileName = torrentFileName
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentPosterSaved (torrentKey, posterFileName) {
-    var torrentSummary = this.getTorrentSummary(torrentKey)
+    const torrentSummary = this.getTorrentSummary(torrentKey)
     torrentSummary.posterFileName = posterFileName
-    dispatch('saveStateThrottled')
+    dispatch('stateSave')
   }
 
   torrentAudioMetadata (infoHash, index, info) {
-    var torrentSummary = this.getTorrentSummary(infoHash)
-    var fileSummary = torrentSummary.files[index]
+    const torrentSummary = this.getTorrentSummary(infoHash)
+    const fileSummary = torrentSummary.files[index]
     fileSummary.audioInfo = info
     dispatch('update')
   }
@@ -169,7 +164,7 @@ module.exports = class TorrentController {
 }
 
 function getTorrentPath (torrentSummary) {
-  var itemPath = TorrentSummary.getFileOrFolder(torrentSummary)
+  let itemPath = TorrentSummary.getFileOrFolder(torrentSummary)
   if (torrentSummary.files.length > 1) {
     itemPath = path.dirname(itemPath)
   }
@@ -177,12 +172,12 @@ function getTorrentPath (torrentSummary) {
 }
 
 function showDoneNotification (torrent) {
-  var notif = new window.Notification('Download Complete', {
+  const notif = new window.Notification('Download Complete', {
     body: torrent.name,
     silent: true
   })
 
-  notif.onClick = function () {
+  notif.onclick = function () {
     ipcRenderer.send('show')
   }
 

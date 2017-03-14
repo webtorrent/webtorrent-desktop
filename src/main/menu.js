@@ -1,30 +1,31 @@
 module.exports = {
   init,
-  setPlayerOpen,
+  togglePlaybackControls,
   setWindowFocus,
   setAllowNav,
+  onPlayerUpdate,
   onToggleAlwaysOnTop,
   onToggleFullScreen
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var app = electron.app
+const app = electron.app
 
-var config = require('../config')
-var dialog = require('./dialog')
-var shell = require('./shell')
-var windows = require('./windows')
+const config = require('../config')
+const windows = require('./windows')
 
-var menu
+let menu = null
 
 function init () {
   menu = electron.Menu.buildFromTemplate(getMenuTemplate())
   electron.Menu.setApplicationMenu(menu)
 }
 
-function setPlayerOpen (flag) {
+function togglePlaybackControls (flag) {
   getMenuItem('Play/Pause').enabled = flag
+  getMenuItem('Skip Next').enabled = flag
+  getMenuItem('Skip Previous').enabled = flag
   getMenuItem('Increase Volume').enabled = flag
   getMenuItem('Decrease Volume').enabled = flag
   getMenuItem('Step Forward').enabled = flag
@@ -32,6 +33,16 @@ function setPlayerOpen (flag) {
   getMenuItem('Increase Speed').enabled = flag
   getMenuItem('Decrease Speed').enabled = flag
   getMenuItem('Add Subtitles File...').enabled = flag
+
+  if (flag === false) {
+    getMenuItem('Skip Next').enabled = false
+    getMenuItem('Skip Previous').enabled = false
+  }
+}
+
+function onPlayerUpdate (hasNext, hasPrevious) {
+  getMenuItem('Skip Next').enabled = hasNext
+  getMenuItem('Skip Previous').enabled = hasPrevious
 }
 
 function setWindowFocus (flag) {
@@ -59,8 +70,8 @@ function onToggleFullScreen (flag) {
 }
 
 function getMenuItem (label) {
-  for (var i = 0; i < menu.items.length; i++) {
-    var menuItem = menu.items[i].submenu.items.find(function (item) {
+  for (let i = 0; i < menu.items.length; i++) {
+    const menuItem = menu.items[i].submenu.items.find(function (item) {
       return item.label === label
     })
     if (menuItem) return menuItem
@@ -68,7 +79,7 @@ function getMenuItem (label) {
 }
 
 function getMenuTemplate () {
-  var template = [
+  const template = [
     {
       label: 'File',
       submenu: [
@@ -77,17 +88,26 @@ function getMenuTemplate () {
             ? 'Create New Torrent...'
             : 'Create New Torrent from Folder...',
           accelerator: 'CmdOrCtrl+N',
-          click: () => dialog.openSeedDirectory()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openSeedDirectory()
+          }
         },
         {
           label: 'Open Torrent File...',
           accelerator: 'CmdOrCtrl+O',
-          click: () => dialog.openTorrentFile()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openTorrentFile()
+          }
         },
         {
           label: 'Open Torrent Address...',
           accelerator: 'CmdOrCtrl+U',
-          click: () => dialog.openTorrentAddress()
+          click: () => {
+            const dialog = require('./dialog')
+            dialog.openTorrentAddress()
+          }
         },
         {
           type: 'separator'
@@ -188,6 +208,21 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
+          label: 'Skip Next',
+          accelerator: 'N',
+          click: () => windows.main.dispatch('nextTrack'),
+          enabled: false
+        },
+        {
+          label: 'Skip Previous',
+          accelerator: 'P',
+          click: () => windows.main.dispatch('previousTrack'),
+          enabled: false
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Increase Volume',
           accelerator: 'CmdOrCtrl+Up',
           click: () => windows.main.dispatch('changeVolume', 0.1),
@@ -244,30 +279,52 @@ function getMenuTemplate () {
       ]
     },
     {
+      label: 'Transfers',
+      submenu: [
+        {
+          label: 'Pause All',
+          click: () => windows.main.dispatch('pauseAllTorrents')
+        },
+        {
+          label: 'Resume All',
+          click: () => windows.main.dispatch('resumeAllTorrents')
+        }
+      ]
+    },
+    {
       label: 'Help',
       role: 'help',
       submenu: [
         {
           label: 'Learn more about ' + config.APP_NAME,
-          click: () => shell.openExternal(config.HOME_PAGE_URL)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.HOME_PAGE_URL)
+          }
         },
         {
           label: 'Contribute on GitHub',
-          click: () => shell.openExternal(config.GITHUB_URL)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL)
+          }
         },
         {
           type: 'separator'
         },
         {
           label: 'Report an Issue...',
-          click: () => shell.openExternal(config.GITHUB_URL_ISSUES)
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL_ISSUES)
+          }
         }
       ]
     }
   ]
 
   if (process.platform === 'darwin') {
-    // Add WebTorrent app menu (Mac)
+    // WebTorrent menu (Mac)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -310,8 +367,26 @@ function getMenuTemplate () {
       ]
     })
 
-    // Add Window menu (Mac)
-    template.splice(5, 0, {
+    // Edit menu (Mac)
+    template[2].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Speech',
+        submenu: [
+          {
+            role: 'startspeaking'
+          },
+          {
+            role: 'stopspeaking'
+          }
+        ]
+      }
+    )
+
+    // Window menu (Mac)
+    template.splice(6, 0, {
       role: 'window',
       submenu: [
         {
@@ -333,7 +408,10 @@ function getMenuTemplate () {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
-      click: () => dialog.openSeedFile()
+      click: () => {
+        const dialog = require('./dialog')
+        dialog.openSeedFile()
+      }
     })
 
     // Edit menu (Windows, Linux)
@@ -348,7 +426,7 @@ function getMenuTemplate () {
       })
 
     // Help menu (Windows, Linux)
-    template[4].submenu.push(
+    template[5].submenu.push(
       {
         type: 'separator'
       },

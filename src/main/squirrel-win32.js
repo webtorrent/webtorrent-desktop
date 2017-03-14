@@ -2,18 +2,18 @@ module.exports = {
   handleEvent
 }
 
-var cp = require('child_process')
-var electron = require('electron')
-var fs = require('fs')
-var os = require('os')
-var path = require('path')
+const cp = require('child_process')
+const electron = require('electron')
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
 
-var app = electron.app
+const app = electron.app
 
-var handlers = require('./handlers')
+const handlers = require('./handlers')
 
-var EXE_NAME = path.basename(process.execPath)
-var UPDATE_EXE = path.join(process.execPath, '..', '..', 'Update.exe')
+const EXE_NAME = path.basename(process.execPath)
+const UPDATE_EXE = path.join(process.execPath, '..', '..', 'Update.exe')
 
 function handleEvent (cmd) {
   if (cmd === '--squirrel-install') {
@@ -73,9 +73,9 @@ function handleEvent (cmd) {
  * the output from standard out.
  */
 function spawn (command, args, cb) {
-  var stdout = ''
-
-  var child
+  let stdout = ''
+  let error = null
+  let child = null
   try {
     child = cp.spawn(command, args)
   } catch (err) {
@@ -90,10 +90,10 @@ function spawn (command, args, cb) {
     stdout += data
   })
 
-  var error = null
   child.on('error', function (processError) {
     error = processError
   })
+
   child.on('close', function (code, signal) {
     if (code !== 0 && !error) error = new Error('Command failed: #{signal || code}')
     if (error) error.stdout = stdout
@@ -122,12 +122,12 @@ function createShortcuts (cb) {
  * command.
  */
 function updateShortcuts (cb) {
-  var homeDir = os.homedir()
+  const homeDir = os.homedir()
   if (homeDir) {
-    var desktopShortcutPath = path.join(homeDir, 'Desktop', 'WebTorrent.lnk')
+    const desktopShortcutPath = path.join(homeDir, 'Desktop', 'WebTorrent.lnk')
     // If the desktop shortcut was deleted by the user, then keep it deleted.
     fs.access(desktopShortcutPath, function (err) {
-      var desktopShortcutExists = !err
+      const desktopShortcutExists = !err
       createShortcuts(function () {
         if (desktopShortcutExists) {
           cb()

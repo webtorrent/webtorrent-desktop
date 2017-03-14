@@ -1,4 +1,4 @@
-var webtorrent = module.exports = {
+const webtorrent = module.exports = {
   init,
   send,
   show,
@@ -6,14 +6,14 @@ var webtorrent = module.exports = {
   win: null
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var config = require('../../config')
-var log = require('../log')
+const config = require('../../config')
 
 function init () {
-  var win = webtorrent.win = new electron.BrowserWindow({
+  const win = webtorrent.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
+    backgroundThrottling: false, // do not throttle animations/timers when page is background
     center: true,
     fullscreen: false,
     fullscreenable: false,
@@ -52,7 +52,6 @@ function send (...args) {
 
 function toggleDevTools () {
   if (!webtorrent.win) return
-  log('toggleDevTools')
   if (webtorrent.win.webContents.isDevToolsOpened()) {
     webtorrent.win.webContents.closeDevTools()
     webtorrent.win.hide()

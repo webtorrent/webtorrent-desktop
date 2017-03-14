@@ -1,21 +1,30 @@
-var appConfig = require('application-config')('WebTorrent')
-var path = require('path')
-var {EventEmitter} = require('events')
+const appConfig = require('application-config')('WebTorrent')
+const path = require('path')
+const {EventEmitter} = require('events')
 
-var config = require('../../config')
-var migrations = require('./migrations')
+const config = require('../../config')
 
-var State = module.exports = Object.assign(new EventEmitter(), {
-  getDefaultPlayState,
-  load,
-  save,
-  saveThrottled
-})
+const SAVE_DEBOUNCE_INTERVAL = 1000
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
+const State = module.exports = Object.assign(new EventEmitter(), {
+  getDefaultPlayState,
+  load,
+  // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
+  save: function () {
+    // Perf optimization: Lazy-require debounce (and it's dependencies)
+    const debounce = require('debounce')
+    // After first State.save() invokation, future calls go straight to the
+    // debounced function
+    State.save = debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL)
+    State.save(...arguments)
+  },
+  saveImmediate
+})
+
 function getDefaultState () {
-  var LocationHistory = require('location-history')
+  const LocationHistory = require('location-history')
 
   return {
     /*
@@ -68,7 +77,9 @@ function getDefaultState () {
      * Getters, for convenience
      */
     getPlayingTorrentSummary,
-    getPlayingFileSummary
+    getPlayingFileSummary,
+    getExternalPlayerName,
+    shouldHidePlayerControls
   }
 }
 
@@ -81,6 +92,7 @@ function getDefaultPlayState () {
     type: null, /* 'audio' or 'video', could be 'other' if ever support eg streaming to VLC */
     currentTime: 0, /* seconds */
     duration: 1, /* seconds */
+    isReady: false,
     isPaused: true,
     isStalled: false,
     lastTimeUpdate: 0, /* Unix time in ms */
@@ -97,39 +109,40 @@ function getDefaultPlayState () {
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function setupSavedState (cb) {
-  var fs = require('fs-extra')
-  var parseTorrent = require('parse-torrent')
-  var parallel = require('run-parallel')
+function setupStateSaved (cb) {
+  const cpFile = require('cp-file')
+  const fs = require('fs')
+  const parseTorrent = require('parse-torrent')
+  const parallel = require('run-parallel')
 
-  var saved = {
+  const saved = {
     prefs: {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
       openExternalPlayer: false,
-      externalPlayerPath: null
+      externalPlayerPath: null,
+      startup: false
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
+    torrentsToResume: [],
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */
   }
 
-  var tasks = []
+  const tasks = []
 
   config.DEFAULT_TORRENTS.map(function (t, i) {
-    var infoHash = saved.torrents[i].infoHash
+    const infoHash = saved.torrents[i].infoHash
     tasks.push(function (cb) {
-      fs.copy(
+      cpFile(
         path.join(config.STATIC_PATH, t.posterFileName),
-        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName)),
-        cb
-      )
+        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
+      ).then(cb).catch(cb)
     })
     tasks.push(function (cb) {
-      fs.copy(
+      cpFile(
         path.join(config.STATIC_PATH, t.torrentFileName),
-        path.join(config.TORRENT_PATH, infoHash + '.torrent'),
-        cb
-      )
+        path.join(config.TORRENT_PATH, infoHash + '.torrent')
+      ).then(cb).catch(cb)
     })
   })
 
@@ -139,8 +152,9 @@ function setupSavedState (cb) {
   })
 
   function createTorrentObject (t) {
-    var torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
-    var parsedTorrent = parseTorrent(torrent)
+    // TODO: Doing several fs.readFileSync calls during first startup is not ideal
+    const torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
+    const parsedTorrent = parseTorrent(torrent)
 
     return {
       status: 'paused',
@@ -151,61 +165,79 @@ function setupSavedState (cb) {
       torrentFileName: parsedTorrent.infoHash + '.torrent',
       magnetURI: parseTorrent.toMagnetURI(parsedTorrent),
       files: parsedTorrent.files,
-      selections: parsedTorrent.files.map((x) => true)
+      selections: parsedTorrent.files.map((x) => true),
+      testID: t.testID
     }
   }
 }
 
 function getPlayingTorrentSummary () {
-  var infoHash = this.playing.infoHash
+  const infoHash = this.playing.infoHash
   return this.saved.torrents.find((x) => x.infoHash === infoHash)
 }
 
 function getPlayingFileSummary () {
-  var torrentSummary = this.getPlayingTorrentSummary()
+  const torrentSummary = this.getPlayingTorrentSummary()
   if (!torrentSummary) return null
   return torrentSummary.files[this.playing.fileIndex]
 }
 
-function load (cb) {
-  var state = getDefaultState()
+function getExternalPlayerName () {
+  const playerPath = this.saved.prefs.externalPlayerPath
+  if (!playerPath) return 'VLC'
+  return path.basename(playerPath).split('.')[0]
+}
 
+function shouldHidePlayerControls () {
+  return this.location.url() === 'player' &&
+    this.playing.mouseStationarySince !== 0 &&
+    new Date().getTime() - this.playing.mouseStationarySince > 2000 &&
+    !this.playing.mouseInControls &&
+    !this.playing.isPaused &&
+    this.playing.location === 'local' &&
+    this.playing.playbackRate === 1
+}
+
+function load (cb) {
   appConfig.read(function (err, saved) {
     if (err || !saved.version) {
       console.log('Missing config file: Creating new one')
-      setupSavedState(onSaved)
+      setupStateSaved(onSavedState)
     } else {
-      onSaved(null, saved)
+      onSavedState(null, saved)
     }
   })
 
-  function onSaved (err, saved) {
+  function onSavedState (err, saved) {
     if (err) return cb(err)
+    const state = getDefaultState()
     state.saved = saved
-    migrations.run(state)
+
+    if (process.type === 'renderer') {
+      // Perf optimization: Save require() calls in the main process
+      const migrations = require('./migrations')
+      migrations.run(state)
+    }
+
     cb(null, state)
   }
 }
 
 // Write state.saved to the JSON state file
-function save (state, cb) {
+function saveImmediate (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
-  delete state.saveStateTimeout
 
   // Clean up, so that we're not saving any pending state
-  var copy = Object.assign({}, state.saved)
+  const copy = Object.assign({}, state.saved)
   // Remove torrents pending addition to the list, where we haven't finished
   // reading the torrent file or file(s) to seed & don't have an infohash
   copy.torrents = copy.torrents
     .filter((x) => x.infoHash)
     .map(function (x) {
-      var torrent = {}
-      for (var key in x) {
+      const torrent = {}
+      for (let key in x) {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
-        }
-        if (key === 'playStatus') {
-          continue // Don't save whether a torrent is playing / pending
         }
         if (key === 'error') {
           continue // Don't save error states
@@ -217,15 +249,6 @@ function save (state, cb) {
 
   appConfig.write(copy, (err) => {
     if (err) console.error(err)
-    else State.emit('savedState')
+    else State.emit('stateSaved')
   })
-}
-
-// Write, but no more than once a second
-function saveThrottled (state) {
-  if (state.saveStateTimeout) return
-  state.saveStateTimeout = setTimeout(function () {
-    if (!state.saveStateTimeout) return
-    save(state)
-  }, 1000)
 }

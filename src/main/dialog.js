@@ -6,10 +6,10 @@ module.exports = {
   openFiles
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var log = require('./log')
-var windows = require('./windows')
+const log = require('./log')
+const windows = require('./windows')
 
 /**
  * Show open dialog to create a single-file torrent.
@@ -17,16 +17,11 @@ var windows = require('./windows')
 function openSeedFile () {
   if (!windows.main.win) return
   log('openSeedFile')
-  var opts = {
+  const opts = {
     title: 'Select a file for the torrent.',
     properties: [ 'openFile' ]
   }
-  setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('showCreateTorrent', selectedPaths)
-  })
+  showOpenSeed(opts)
 }
 
 /*
@@ -37,7 +32,7 @@ function openSeedFile () {
 function openSeedDirectory () {
   if (!windows.main.win) return
   log('openSeedDirectory')
-  var opts = process.platform === 'darwin'
+  const opts = process.platform === 'darwin'
     ? {
       title: 'Select a file or folder for the torrent.',
       properties: [ 'openFile', 'openDirectory' ]
@@ -46,12 +41,7 @@ function openSeedDirectory () {
       title: 'Select a folder for the torrent.',
       properties: [ 'openDirectory' ]
     }
-  setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('showCreateTorrent', selectedPaths)
-  })
+  showOpenSeed(opts)
 }
 
 /*
@@ -61,7 +51,7 @@ function openSeedDirectory () {
 function openFiles () {
   if (!windows.main.win) return
   log('openFiles')
-  var opts = process.platform === 'darwin'
+  const opts = process.platform === 'darwin'
     ? {
       title: 'Select a file or folder to add.',
       properties: [ 'openFile', 'openDirectory' ]
@@ -84,7 +74,7 @@ function openFiles () {
 function openTorrentFile () {
   if (!windows.main.win) return
   log('openTorrentFile')
-  var opts = {
+  const opts = {
     title: 'Select a .torrent file.',
     filters: [{ name: 'Torrent Files', extensions: ['torrent'] }],
     properties: [ 'openFile', 'multiSelections' ]
@@ -118,4 +108,17 @@ function setTitle (title) {
 
 function resetTitle () {
   windows.main.dispatch('resetTitle')
+}
+
+/**
+ * Pops up an Open File dialog with the given options.
+ * After the user selects files / folders, shows the Create Torrent page.
+ */
+function showOpenSeed (opts) {
+  setTitle(opts.title)
+  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
+    resetTitle()
+    if (!Array.isArray(selectedPaths)) return
+    windows.main.dispatch('showCreateTorrent', selectedPaths)
+  })
 }

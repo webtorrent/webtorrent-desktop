@@ -4,14 +4,14 @@ module.exports = {
   setWindowFocus
 }
 
-var electron = require('electron')
+const electron = require('electron')
 
-var app = electron.app
+const app = electron.app
 
-var config = require('../config')
-var windows = require('./windows')
+const config = require('../config')
+const windows = require('./windows')
 
-var tray
+let tray
 
 function init () {
   if (process.platform === 'linux') {
@@ -36,8 +36,8 @@ function setWindowFocus (flag) {
 }
 
 function initLinux () {
-  checkLinuxTraySupport(function (supportsTray) {
-    if (supportsTray) createTray()
+  checkLinuxTraySupport(function (err) {
+    if (!err) createTray()
   })
 }
 
@@ -49,16 +49,20 @@ function initWin32 () {
  * Check for libappindicator1 support before creating tray icon
  */
 function checkLinuxTraySupport (cb) {
-  var cp = require('child_process')
+  const cp = require('child_process')
 
   // Check that we're on Ubuntu (or another debian system) and that we have
   // libappindicator1. If WebTorrent was installed from the deb file, we should
   // always have it. If it was installed from the zip file, we might not.
   cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
-    if (err) return cb(false)
+    if (err) return cb(err)
     // Unfortunately there's no cleaner way, as far as I can tell, to check
     // whether a debian package is installed:
-    cb(stdout.endsWith('\tinstall\n'))
+    if (stdout.endsWith('\tinstall\n')) {
+      cb(null)
+    } else {
+      cb(new Error('debian package not installed'))
+    }
   })
 }
 
@@ -74,7 +78,7 @@ function createTray () {
 }
 
 function updateTrayMenu () {
-  var contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  const contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
   tray.setContextMenu(contextMenu)
 }
 

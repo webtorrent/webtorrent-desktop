@@ -1,22 +1,24 @@
 const React = require('react')
 
+const ModalOKCancel = require('./modal-ok-cancel')
 const {dispatch, dispatcher} = require('../lib/dispatcher')
 
 module.exports = class RemoveTorrentModal extends React.Component {
   render () {
-    var state = this.props.state
-    var message = state.modal.deleteData
+    const state = this.props.state
+    const message = state.modal.deleteData
       ? 'Are you sure you want to remove this torrent from the list and delete the data file?'
       : 'Are you sure you want to remove this torrent from the list?'
-    var buttonText = state.modal.deleteData ? 'Remove Data' : 'Remove'
+    const buttonText = state.modal.deleteData ? 'REMOVE DATA' : 'REMOVE'
 
     return (
       <div>
         <p><strong>{message}</strong></p>
-        <p className='float-right'>
-          <button className='button button-flat' onClick={dispatcher('exitModal')}>Cancel</button>
-          <button className='button button-raised' onClick={handleRemove}>{buttonText}</button>
-        </p>
+        <ModalOKCancel
+          cancelText='CANCEL'
+          onCancel={dispatcher('exitModal')}
+          okText={buttonText}
+          onOK={handleRemove} />
       </div>
     )
 

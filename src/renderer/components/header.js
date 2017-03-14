@@ -4,9 +4,12 @@ const {dispatcher} = require('../lib/dispatcher')
 
 class Header extends React.Component {
   render () {
-    var loc = this.props.state.location
+    const loc = this.props.state.location
     return (
-      <div className='header'>
+      <div className='header'
+        onMouseMove={dispatcher('mediaMouseMoved')}
+        onMouseEnter={dispatcher('mediaControlsMouseEnter')}
+        onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
         {this.getTitle()}
         <div className='nav left float-left'>
           <i
@@ -31,12 +34,12 @@ class Header extends React.Component {
 
   getTitle () {
     if (process.platform !== 'darwin') return null
-    var state = this.props.state
+    const state = this.props.state
     return (<div className='title ellipsis'>{state.window.title}</div>)
   }
 
   getAddButton () {
-    var state = this.props.state
+    const state = this.props.state
     if (state.location.url() !== 'home') return null
     return (
       <i

@@ -2,10 +2,10 @@ module.exports = {
   init
 }
 
-var config = require('./config')
-var electron = require('electron')
-
 function init () {
+  const config = require('./config')
+  const electron = require('electron')
+
   electron.crashReporter.start({
     companyName: config.APP_NAME,
     productName: config.APP_NAME,

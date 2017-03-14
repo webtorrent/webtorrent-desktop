@@ -1,28 +1,28 @@
 module.exports = {
-  preload,
   play
 }
 
-var config = require('../../config')
-var path = require('path')
+const config = require('../../config')
+const {InvalidSoundNameError} = require('./errors')
+const path = require('path')
 
-var VOLUME = 0.15
+const VOLUME = 0.25
 
 /* Cache of Audio elements, for instant playback */
-var cache = {}
+const cache = {}
 
-var sounds = {
+const sounds = {
   ADD: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'add.wav'),
     volume: VOLUME
   },
   DELETE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'delete.wav'),
-    volume: VOLUME
+    volume: VOLUME * 0.5
   },
   DISABLE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'disable.wav'),
-    volume: VOLUME
+    volume: VOLUME * 0.5
   },
   DONE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'done.wav'),
@@ -30,7 +30,7 @@ var sounds = {
   },
   ENABLE: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'enable.wav'),
-    volume: VOLUME
+    volume: VOLUME * 0.5
   },
   ERROR: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'error.wav'),
@@ -42,27 +42,16 @@ var sounds = {
   },
   STARTUP: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'startup.wav'),
-    volume: VOLUME * 2
-  }
-}
-
-function preload () {
-  for (var name in sounds) {
-    if (!cache[name]) {
-      var sound = sounds[name]
-      var audio = cache[name] = new window.Audio()
-      audio.volume = sound.volume
-      audio.src = sound.url
-    }
+    volume: VOLUME
   }
 }
 
 function play (name) {
-  var audio = cache[name]
+  let audio = cache[name]
   if (!audio) {
-    var sound = sounds[name]
+    const sound = sounds[name]
     if (!sound) {
-      throw new Error('Invalid sound name')
+      throw new InvalidSoundNameError(name)
     }
     audio = cache[name] = new window.Audio()
     audio.volume = sound.volume

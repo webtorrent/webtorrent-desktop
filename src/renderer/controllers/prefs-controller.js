@@ -1,4 +1,3 @@
-const State = require('../lib/state')
 const {dispatch} = require('../lib/dispatcher')
 const ipcRenderer = require('electron').ipcRenderer
 
@@ -11,13 +10,15 @@ module.exports = class PrefsController {
 
   // Goes to the Preferences screen
   show () {
-    var state = this.state
+    const state = this.state
     state.location.go({
       url: 'preferences',
       setup: function (cb) {
         // initialize preferences
         state.window.title = 'Preferences'
-        state.unsaved = Object.assign(state.unsaved || {}, {prefs: state.saved.prefs || {}})
+        state.unsaved = Object.assign(state.unsaved || {}, {
+          prefs: Object.assign({}, state.saved.prefs)
+        })
         ipcRenderer.send('setAllowNav', false)
         cb()
       },
@@ -32,25 +33,29 @@ module.exports = class PrefsController {
   // For example: updatePreferences('foo.bar', 'baz')
   // Call save() to save to config.json
   update (property, value) {
-    var path = property.split('.')
-    var key = this.state.unsaved.prefs
-    for (var i = 0; i < path.length - 1; i++) {
-      if (typeof key[path[i]] === 'undefined') {
-        key[path[i]] = {}
+    const path = property.split('.')
+    let obj = this.state.unsaved.prefs
+    let i
+    for (i = 0; i < path.length - 1; i++) {
+      if (typeof obj[path[i]] === 'undefined') {
+        obj[path[i]] = {}
       }
-      key = key[path[i]]
+      obj = obj[path[i]]
     }
-    key[path[i]] = value
+    obj[path[i]] = value
   }
 
   // All unsaved prefs take effect atomically, and are saved to config.json
   save () {
-    var state = this.state
+    const state = this.state
     if (state.unsaved.prefs.isFileHandler !== state.saved.prefs.isFileHandler) {
       ipcRenderer.send('setDefaultFileHandler', state.unsaved.prefs.isFileHandler)
     }
+    if (state.unsaved.prefs.startup !== state.saved.prefs.startup) {
+      ipcRenderer.send('setStartup', state.unsaved.prefs.startup)
+    }
     state.saved.prefs = Object.assign(state.saved.prefs || {}, state.unsaved.prefs)
-    State.save(state)
+    dispatch('stateSaveImmediate')
     dispatch('checkDownloadPath')
   }
 }

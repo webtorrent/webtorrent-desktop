@@ -1,6 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="https://webtorrent.io"><img src="https://webtorrent.io/img/WebTorrent.png" alt="WebTorrent" width="200"></a>
+  <a href="https://webtorrent.io">
+    <img src="https://webtorrent.io/img/WebTorrent.png" alt="WebTorrent" width="200">
+  </a>
   <br>
   WebTorrent Desktop
   <br>
@@ -10,9 +12,15 @@
 <h4 align="center">The streaming torrent app. For Mac, Windows, and Linux.</h4>
 
 <p align="center">
-  <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter"></a>
-  <a href="https://travis-ci.org/feross/webtorrent-desktop"><img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg" alt="Travis"></a>
-  <a href="https://github.com/feross/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="Release"></a>
+  <a href="https://gitter.im/feross/webtorrent">
+    <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter">
+  </a>
+  <a href="https://travis-ci.org/feross/webtorrent-desktop">
+    <img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg" alt="Travis">
+  </a>
+  <a href="https://github.com/feross/webtorrent-desktop/releases">
+    <img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="Release">
+  </a>
 </p>
 
 ## Install
@@ -56,6 +64,38 @@ Restart the app automatically every time code changes. Useful during development
 $ npm run watch
 ```
 
+### Run linters
+
+```
+$ npm test
+```
+
+### Run integration tests
+
+```
+$ npm run test-integration
+```
+
+The integration tests use Spectron and Tape. They click through the app, taking screenshots and
+comparing each one to a reference. Why screenshots?
+
+* Ad-hoc checking makes the tests a lot more work to write
+* Even diffing the whole HTML is not as thorough as screenshot diffing. For example, it wouldn't
+  catch an bug where hitting ESC from a video doesn't correctly restore window size.
+* Chrome's own integration tests use screenshot diffing iirc
+* Small UI changes will break a few tests, but the fix is as easy as deleting the offending
+  screenshots and running the tests, which will recreate them with the new look.
+* The resulting Github PR will then show, pixel by pixel, the exact UI changes that were made! See
+  https://github.com/blog/817-behold-image-view-modes
+
+For MacOS, you'll need a Retina screen for the integration tests to pass. Your screen should have
+the same resolution as a 2016 12" Macbook.
+
+For Windows, you'll need Windows 10 with a 1366x768 screen.
+
+When running integration tests, keep the mouse on the edge of the screen and don't touch the mouse
+or keyboard while the tests are running.
+
 ### Package the app
 
 Builds app binaries for Mac, Linux, and Windows.
@@ -84,7 +124,7 @@ The following optional arguments are available:
    - `all` - All platforms (default)
 
 Note: Even with the `--package` option, the auto-update files (.nupkg for Windows,
-*-darwin.zip for Mac) will always be produced.
+-darwin.zip for Mac) will always be produced.
 
 #### Windows build notes
 
