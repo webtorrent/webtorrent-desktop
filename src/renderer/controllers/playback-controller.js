@@ -88,13 +88,13 @@ module.exports = class PlaybackController {
 
   pauseActiveTorrents (infoHash) {
     // Playback Priority: pause all active torrents if needed.
-    if (this.state.saved.prefs.highestPlaybackPriority) {
-      // Do not pause active torrents if playing a fully downloaded torrent.
-      var torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
-      if (torrentSummary.status === 'seeding') return
+    if (!this.state.saved.prefs.highestPlaybackPriority) return
 
-      dispatch('prioritizeTorrent', infoHash)
-    }
+    // Do not pause active torrents if playing a fully downloaded torrent.
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    if (torrentSummary.status === 'seeding') return
+
+    dispatch('prioritizeTorrent', infoHash)
   }
 
   // Play next file in list (if any)

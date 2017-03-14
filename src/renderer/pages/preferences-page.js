@@ -69,7 +69,7 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={this.props.state.unsaved.prefs.highestPlaybackPriority}
           label={'Highest Playback Priority'}
-          onCheck={this.handleHighestPlaybackPriorityChange} 
+          onCheck={this.handleHighestPlaybackPriorityChange}
         />
         <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
       </Preference>

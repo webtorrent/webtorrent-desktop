@@ -122,7 +122,7 @@ module.exports = class TorrentListController {
       this.startTorrentingSummary(torrentSummary.torrentKey)
       sound.play('ENABLE')
       return
-    } 
+    }
 
     this.pauseTorrent(torrentSummary, true)
   }
