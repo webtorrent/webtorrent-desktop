@@ -128,6 +128,7 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
 }
 
 function stopTorrenting (infoHash) {
+  console.log('--- STOP TORRENTING: ', infoHash)
   const torrent = client.get(infoHash)
   if (torrent) torrent.destroy()
 }

@@ -254,6 +254,8 @@ const dispatchHandlers = {
     controllers.torrentList().startTorrentingSummary(torrentKey),
   'saveTorrentFileAs': (torrentKey) =>
     controllers.torrentList().saveTorrentFileAs(torrentKey),
+  'prioritizeTorrent': (infoHash) => controllers.torrentList().prioritizeTorrent(infoHash),
+  'resumePausedTorrents': () => controllers.torrentList().resumePausedTorrents(),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback().playFile(infoHash, index),
@@ -354,6 +356,7 @@ function setupIpc () {
   ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
+  ipcRenderer.on('wt-done', () => controllers.torrentList().resumePausedTorrents())
   ipcRenderer.on('wt-warning', (e, ...args) => tc.torrentWarning(...args))
   ipcRenderer.on('wt-error', (e, ...args) => tc.torrentError(...args))
 

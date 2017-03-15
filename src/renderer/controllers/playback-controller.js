@@ -27,6 +27,8 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, restore the most recently viewed file or autoplay the first
   playFile (infoHash, index /* optional */) {
+    this.pauseActiveTorrents(infoHash)
+
     const state = this.state
     if (state.location.url() === 'player') {
       this.updatePlayer(infoHash, index, false, (err) => {
@@ -82,6 +84,17 @@ module.exports = class PlaybackController {
 
     if (state.playing.isPaused) this.play()
     else this.pause()
+  }
+
+  pauseActiveTorrents (infoHash) {
+    // Playback Priority: pause all active torrents if needed.
+    if (!this.state.saved.prefs.highestPlaybackPriority) return
+
+    // Do not pause active torrents if playing a fully downloaded torrent.
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    if (torrentSummary.status === 'seeding') return
+
+    dispatch('prioritizeTorrent', infoHash)
   }
 
   // Play next file in list (if any)
@@ -340,6 +353,11 @@ module.exports = class PlaybackController {
     ipcRenderer.send('wt-stop-server')
 
     ipcRenderer.send('onPlayerClose')
+
+    // Playback Priority: resume previously paused downloads.
+    if (this.state.saved.prefs.highestPlaybackPriority) {
+      dispatch('resumePausedTorrents')
+    }
 
     this.update()
   }
