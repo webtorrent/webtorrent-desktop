@@ -12,15 +12,10 @@
 <h4 align="center">The streaming torrent app. For Mac, Windows, and Linux.</h4>
 
 <p align="center">
-  <a href="https://gitter.im/feross/webtorrent">
-    <img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="Gitter">
-  </a>
-  <a href="https://travis-ci.org/feross/webtorrent-desktop">
-    <img src="https://img.shields.io/travis/feross/webtorrent-desktop/master.svg" alt="Travis">
-  </a>
-  <a href="https://github.com/feross/webtorrent-desktop/releases">
-    <img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="Release">
-  </a>
+  <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="gitter"></a>
+  <a href="https://github.com/feross/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="github release"></a>
+  <a href="https://travis-ci.org/feross/webtorrent"><img src="https://img.shields.io/travis/feross/webtorrent/master.svg" alt="travis"></a>
+  <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
 ## Install
