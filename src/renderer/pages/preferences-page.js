@@ -108,6 +108,56 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'externalPlayerPath', filePath)
   }
 
+  autoAddTorrentsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.autoAddTorrents}
+          label={'Enable'}
+          onCheck={(e, value) => {this.handleAutoAddTorrentsChange(e, value)}}
+        />
+      </Preference>
+    )
+  }
+
+  handleAutoAddTorrentsChange (e, isChecked) {
+    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+    if (isChecked && !torrentsFolderPath) {
+      alert('Select a torrents folder first.')
+      e.preventDefault()
+      return
+    }
+
+    dispatch('updatePreferences', 'autoAddTorrents', isChecked)
+  }
+
+  torrentsFolderPathSelector () {
+    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+
+    const value = torrentsFolderPath || 'Path to be watched.'
+    const description = 'Torrent files saved to this folder will be automatically added to the list.'
+
+    return (
+      <Preference>
+        <p>{description}</p>
+        <PathSelector
+          dialog={{
+            title: 'Select torrents folder path',
+            properties: [ 'openDirectory' ]
+          }}
+          displayValue={value}
+          onChange={this.handletorrentsFolderPathChange}
+          title='Torrents folder'
+          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null} />
+      </Preference>
+    )
+  }
+
+  handletorrentsFolderPathChange (filePath) {
+    dispatch('updatePreferences', 'torrentsFolderPath', filePath)
+  }
+
   setDefaultAppButton () {
     const isFileHandler = this.props.state.unsaved.prefs.isFileHandler
     if (isFileHandler) {
@@ -173,6 +223,10 @@ class PreferencesPage extends React.Component {
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
+        </PreferencesSection>
+        <PreferencesSection title='Auto add torrents'>
+          {this.autoAddTorrentsCheckbox()}
+          {this.torrentsFolderPathSelector()}
         </PreferencesSection>
         {this.setStartupSection()}
       </div>
