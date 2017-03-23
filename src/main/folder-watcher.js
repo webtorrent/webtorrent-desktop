@@ -50,5 +50,4 @@ class FolderWatcher {
   }
 }
 
-
 module.exports = FolderWatcher

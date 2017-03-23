@@ -115,7 +115,7 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={this.props.state.unsaved.prefs.autoAddTorrents}
           label={'Enable'}
-          onCheck={(e, value) => {this.handleAutoAddTorrentsChange(e, value)}}
+          onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
         />
       </Preference>
     )
@@ -124,7 +124,7 @@ class PreferencesPage extends React.Component {
   handleAutoAddTorrentsChange (e, isChecked) {
     const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
     if (isChecked && !torrentsFolderPath) {
-      alert('Select a torrents folder first.')
+      alert('Select a torrents folder first.') // eslint-disable-line
       e.preventDefault()
       return
     }
@@ -136,7 +136,7 @@ class PreferencesPage extends React.Component {
     const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
 
     const value = torrentsFolderPath || 'Path to be watched.'
-    const description = 'Torrent files saved to this folder will be automatically added to the list.'
+    const description = 'Torrent files saved to this folder will be automatically added.'
 
     return (
       <Preference>
