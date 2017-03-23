@@ -136,7 +136,11 @@ function delayedInit (state) {
   announcement.init()
   dock.init()
   updater.init()
-  folderWatcher.init()
+
+  ipc.setModule('folderWatcher', folderWatcher)
+  if (folderWatcher.isEnabled()) {
+    folderWatcher.start()
+  }
 
   if (process.platform === 'win32') {
     const userTasks = require('./user-tasks')

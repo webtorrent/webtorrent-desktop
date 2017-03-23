@@ -1,5 +1,6 @@
 module.exports = {
-  init
+  init,
+  setModule
 }
 
 const electron = require('electron')
@@ -12,6 +13,14 @@ const windows = require('./windows')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 const messageQueueMainToWebTorrent = []
+
+// Will hold modules injected from the app that will be used on fired
+// IPC events.
+const modules = {}
+
+function setModule (name, module) {
+  modules[name] = module
+}
 
 function init () {
   const ipc = electron.ipcMain
@@ -104,6 +113,16 @@ function init () {
 
     powerSaveBlocker.disable()
     thumbar.onPlayerPause()
+  })
+
+  ipc.on('startFolderWatcher', function () {
+    log('--- Torrent Watcher started')
+    modules['folderWatcher'].start()
+  })
+
+  ipc.on('stopFolderWatcher', function () {
+    log('--- Torrent Watcher stop')
+    modules['folderWatcher'].stop()
   })
 
   /**

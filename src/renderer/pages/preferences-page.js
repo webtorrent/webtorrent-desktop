@@ -130,6 +130,13 @@ class PreferencesPage extends React.Component {
     }
 
     dispatch('updatePreferences', 'autoAddTorrents', isChecked)
+
+    if (isChecked) {
+      dispatch('startFolderWatcher', null)
+      return
+    }
+
+    dispatch('stopFolderWatcher', null)
   }
 
   torrentsFolderPathSelector () {
