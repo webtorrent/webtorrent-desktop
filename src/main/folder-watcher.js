@@ -5,7 +5,7 @@ class FolderWatcher {
   constructor ({window, state}) {
     this.window = window
     this.state = state
-    this.torrentsFolderPath
+    this.torrentsFolderPath = null
     this.watching = false
   }
 
