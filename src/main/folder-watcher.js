@@ -1,3 +1,4 @@
+const ipc = require('electron').ipcMain
 const chokidar = require('chokidar')
 const log = require('./log')
 
@@ -14,7 +15,6 @@ class FolderWatcher {
   }
 
   start () {
-    log('--- FOLDER WATCHER --> START')
     // Stop watching previous folder before
     // start watching a new one.
     if (this.watching) this.stop()
@@ -30,7 +30,7 @@ class FolderWatcher {
     this.watcher = chokidar.watch(glob, options)
     this.watcher
       .on('add', (path) => {
-        log('-- torrent added: ', path)
+        log('Folder Watcher: added torrent: ', path)
         this.window.dispatch('addTorrent', path)
       })
 
@@ -38,7 +38,7 @@ class FolderWatcher {
   }
 
   stop () {
-    log('--- FOLDER WATCHER --> STOP')
+    log('Folder Watcher: stop.')
     if (!this.watching) return
     this.watcher.close()
     this.watching = false
