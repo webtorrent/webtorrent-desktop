@@ -67,7 +67,7 @@ function init () {
   })
 
   /**
-   * Events
+   * Player Events
    */
 
   ipc.on('onPlayerOpen', function () {
@@ -115,13 +115,25 @@ function init () {
     thumbar.onPlayerPause()
   })
 
+  /**
+   * Folder Watcher Events
+   */
+
   ipc.on('startFolderWatcher', function () {
-    log('--- Torrent Watcher started')
+    if (!modules['folderWatcher']) {
+      log('IPC ERR: folderWatcher module is not defined.')
+      return
+    }
+
     modules['folderWatcher'].start()
   })
 
   ipc.on('stopFolderWatcher', function () {
-    log('--- Torrent Watcher stop')
+    if (!modules['folderWatcher']) {
+      log('IPC ERR: folderWatcher module is not defined.')
+      return
+    }
+
     modules['folderWatcher'].stop()
   })
 
