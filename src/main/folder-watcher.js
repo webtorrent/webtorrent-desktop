@@ -1,4 +1,3 @@
-const ipc = require('electron').ipcMain
 const chokidar = require('chokidar')
 const log = require('./log')
 
