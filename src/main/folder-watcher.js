@@ -25,7 +25,10 @@ class FolderWatcher {
     const glob = `${torrentsFolderPath}/**/*.torrent`
     log('Folder Watcher: watching: ', glob)
 
-    const options = {ignoreInitial: true}
+    const options = {
+      ignoreInitial: true,
+      awaitWriteFinish: true
+    }
     this.watcher = chokidar.watch(glob, options)
     this.watcher
       .on('add', (path) => {
