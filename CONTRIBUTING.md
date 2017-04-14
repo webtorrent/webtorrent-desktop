@@ -24,7 +24,7 @@ and to avoid style arguments. `npm test` runs `standard` automatically, so you d
 to!
 
 [standard-image]: https://cdn.rawgit.com/feross/standard/master/badge.svg
-[standard-url]: https://github.com/feross/standard
+[standard-url]: https://standardjs.com
 
 ## Project Governance
 
@@ -161,7 +161,7 @@ By making a contribution to this project, I certify that:
 
 - Update the website
 
-  Create a pull request in [webtorrent.io](https://github.com/feross/webtorrent.io). Update
+  Create a pull request in [webtorrent.io](https://github.com/webtorrent/webtorrent.io). Update
   `config.js`, updating the desktop app version.
 
   As soon as this PR is merged, Jenkins will automatically redeploy the WebTorrent website, and

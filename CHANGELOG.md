@@ -67,7 +67,7 @@
 ## v0.16.0 - 2016-09-18
 
 ### Added
-- **Windows 64-bit support!** ([#931](https://github.com/feross/webtorrent-desktop/pull/931))
+- **Windows 64-bit support!** ([#931](https://github.com/webtorrent/webtorrent-desktop/pull/931))
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 
@@ -516,7 +516,7 @@ Windows, and Linux. For now, we're only releasing binaries for OS X.
 
 WebTorrent Desktop is in ALPHA and under very active development – expect lots more polish in
 the coming weeks! If you know JavaScript and want to help us out, there's
-[lots to do](https://github.com/feross/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
+[lots to do](https://github.com/webtorrent/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
 ### Features
 

@@ -13,8 +13,8 @@
 
 <p align="center">
   <a href="https://gitter.im/feross/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="gitter"></a>
-  <a href="https://github.com/feross/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/feross/webtorrent-desktop.svg" alt="github release"></a>
-  <a href="https://travis-ci.org/feross/webtorrent"><img src="https://img.shields.io/travis/feross/webtorrent/master.svg" alt="travis"></a>
+  <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/webtorrent/webtorrent-desktop.svg" alt="github release"></a>
+  <a href="https://travis-ci.org/webtorrent/webtorrent-desktop"><img src="https://img.shields.io/travis/webtorrent/webtorrent-desktop/master.svg" alt="travis"></a>
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
@@ -22,7 +22,7 @@
 
 Download the latest version of WebTorrent Desktop from
 [the official website](https://webtorrent.io/desktop/) or the
-[GitHub releases](https://github.com/feross/webtorrent-desktop/releases) page.
+[GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page.
 
 **WebTorrent Desktop** is under very active development. You can try out the
 current (unstable) development version by cloning the Git repo. See the
@@ -40,7 +40,7 @@ instructions below in the ["How to Contribute"](#how-to-contribute) section.
 ### Get the code
 
 ```
-$ git clone https://github.com/feross/webtorrent-desktop.git
+$ git clone https://github.com/webtorrent/webtorrent-desktop.git
 $ cd webtorrent-desktop
 $ npm install
 ```
@@ -153,10 +153,6 @@ Time out? Show a missing codec error?
 
 The app never sends any personally identifying information, nor does it track which
 torrents you add.
-
-### Code Style
-
-[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 ## License
 
