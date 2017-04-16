@@ -18,15 +18,8 @@ module.exports = class Plugins {
     this.path = resolve(config.getConfigPath(), 'plugins')
     log('path: ', this.path)
     this.availableExtensions = new Set([
-      'onApp', 'onWindow', 'onRendererWindow', 'onUnload', 'middleware',
-      'reduceUI', 'reduceSessions', 'reduceTermGroups',
-      'decorateMenu', 'decorateTerm', 'decorateWindow',
-      'decorateTab', 'decorateNotification', 'decorateNotifications',
-      'decorateTabs', 'decorateConfig', 'decorateEnv',
-      'decorateTermGroup', 'getTermProps',
-      'getTabProps', 'getTabsProps', 'getTermGroupProps',
-      'mapTermsState', 'mapHeaderState', 'mapNotificationsState',
-      'mapTermsDispatch', 'mapHeaderDispatch', 'mapNotificationsDispatch'
+      'onApp', 'onWindow', 'decorateMenu', 'decorateWindow',
+      'decorateConfig', 'setDispatcher'
     ])
 
     this.forceUpdate = false
@@ -80,6 +73,37 @@ module.exports = class Plugins {
     setInterval(() => {
       this.updatePlugins()
     }, ms('5h'))
+  }
+
+  initRenderer (dispatch) {
+    this.setDispatcherOnPlugins(dispatch)
+  }
+
+  /**
+   * Pass WebTorrent renderer dispatcher to each plugin that's
+   * interested. Interested plugins will set a 'setDispatcher'
+   * method to get it.
+   *
+   * @param {object} dispatch WebTorrent dispatcher
+   */
+  setDispatcherOnPlugins (dispatch) {
+    this.modules.forEach(plugin => {
+      if (plugin.setDispatcher) {
+        plugin.setDispatcher(dispatch)
+      }
+    })
+  }
+
+  on (action) {
+    this.modules.forEach(plugin => {
+      const actionName = this.capitalizeFirstLetter(action)
+      const actionHandler = plugin[`on${actionName}`]
+      if (actionHandler) actionHandler()
+    })
+  }
+
+  capitalizeFirstLetter (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1)
   }
 
   didPluginsChange () {

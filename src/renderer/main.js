@@ -36,6 +36,9 @@ const telemetry = require('./lib/telemetry')
 const sound = require('./lib/sound')
 const TorrentPlayer = require('./lib/torrent-player')
 
+const Plugins = require('../plugins')
+const plugins = new Plugins()
+
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListController = require('./controllers/torrent-list-controller')
 
@@ -113,6 +116,9 @@ function onState (err, _state) {
       return new UpdateController(state)
     })
   }
+
+  plugins.init(state)
+  plugins.initRenderer(dispatch)
 
   // Add first page to location history
   state.location.go({
@@ -332,6 +338,7 @@ function dispatch (action, ...args) {
   }
 
   const handler = dispatchHandlers[action]
+  plugins.on(action)
   if (handler) handler(...args)
   else console.error('Missing dispatch handler: ' + action)
 
