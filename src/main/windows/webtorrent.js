@@ -13,6 +13,7 @@ const config = require('../../config')
 function init (decorate) {
   let options = {
     backgroundColor: '#1E1E1E',
+    backgroundThrottling: false, // do not throttle animations/timers when page is background
     center: true,
     fullscreen: false,
     fullscreenable: false,

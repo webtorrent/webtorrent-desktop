@@ -78,7 +78,7 @@ function migrate_0_7_0 (saved) {
     }
 
     // Fix exception caused by incorrect file ordering.
-    // https://github.com/feross/webtorrent-desktop/pull/604#issuecomment-222805214
+    // https://github.com/webtorrent/webtorrent-desktop/pull/604#issuecomment-222805214
     delete ts.defaultPlayFileIndex
     delete ts.files
     delete ts.selections
@@ -111,7 +111,7 @@ function migrate_0_12_0 (saved) {
 
   // Undo a terrible bug where clicking Play on a default torrent on a fresh
   // install results in a "path missing" error
-  // See https://github.com/feross/webtorrent-desktop/pull/806
+  // See https://github.com/webtorrent/webtorrent-desktop/pull/806
   const defaultTorrentFiles = [
     '6a9759bffd5c0af65319979fb7832189f4f3c35d.torrent',
     '88594aaacbde40ef3e2510c47374ec0aa396c08e.torrent',
@@ -153,7 +153,7 @@ function migrate_0_17_0 (saved) {
 function migrate_0_17_2 (saved) {
   // Remove the trailing dot (.) from the Wired CD torrent name, since
   // folders/files that end in a trailing dot (.) or space are not deletable from
-  // Windows Explorer. See: https://github.com/feross/webtorrent-desktop/issues/905
+  // Windows Explorer. See: https://github.com/webtorrent/webtorrent-desktop/issues/905
 
   const cpFile = require('cp-file')
   const rimraf = require('rimraf')

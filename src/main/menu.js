@@ -289,9 +289,6 @@ function getMenuTemplate () {
           click: () => windows.main.dispatch('pauseAllTorrents')
         },
         {
-          type: 'separator'
-        },
-        {
           label: 'Resume All',
           click: () => windows.main.dispatch('resumeAllTorrents')
         }
@@ -330,7 +327,7 @@ function getMenuTemplate () {
   ]
 
   if (process.platform === 'darwin') {
-    // Add WebTorrent app menu (Mac)
+    // WebTorrent menu (Mac)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
@@ -373,8 +370,26 @@ function getMenuTemplate () {
       ]
     })
 
-    // Add Window menu (Mac)
-    template.splice(5, 0, {
+    // Edit menu (Mac)
+    template[2].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Speech',
+        submenu: [
+          {
+            role: 'startspeaking'
+          },
+          {
+            role: 'stopspeaking'
+          }
+        ]
+      }
+    )
+
+    // Window menu (Mac)
+    template.splice(6, 0, {
       role: 'window',
       submenu: [
         {
@@ -414,7 +429,7 @@ function getMenuTemplate () {
       })
 
     // Help menu (Windows, Linux)
-    template[4].submenu.push(
+    template[5].submenu.push(
       {
         type: 'separator'
       },

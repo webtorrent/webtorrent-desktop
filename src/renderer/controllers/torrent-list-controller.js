@@ -121,11 +121,10 @@ module.exports = class TorrentListController {
       torrentSummary.status = 'new'
       this.startTorrentingSummary(torrentSummary.torrentKey)
       sound.play('ENABLE')
-    } else {
-      torrentSummary.status = 'paused'
-      ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-      sound.play('DISABLE')
+      return
     }
+
+    this.pauseTorrent(torrentSummary, true)
   }
 
   pauseAllTorrents () {
@@ -147,6 +146,40 @@ module.exports = class TorrentListController {
       }
     })
     sound.play('ENABLE')
+  }
+
+  pauseTorrent (torrentSummary, playSound) {
+    torrentSummary.status = 'paused'
+    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+
+    if (playSound) sound.play('DISABLE')
+  }
+
+  prioritizeTorrent (infoHash) {
+    this.state.saved.torrents
+    .filter((torrent) => { // We're interested in active torrents only.
+      return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
+    })
+    .map((torrent) => { // Pause all active torrents except the one that started playing.
+      if (infoHash === torrent.infoHash) return
+
+      // Pause torrent without playing sounds.
+      this.pauseTorrent(torrent, false)
+
+      this.state.saved.torrentsToResume.push(torrent.infoHash)
+    })
+
+    console.log('Playback Priority: paused torrents: ', this.state.saved.torrentsToResume)
+  }
+
+  resumePausedTorrents () {
+    console.log('Playback Priority: resuming paused torrents')
+    this.state.saved.torrentsToResume.map((infoHash) => {
+      this.toggleTorrent(infoHash)
+    })
+
+    // reset paused torrents
+    this.state.saved.torrentsToResume = []
   }
 
   toggleTorrentFile (infoHash, index) {
@@ -281,7 +314,7 @@ module.exports = class TorrentListController {
 
 // Recursively finds {name, path, size} for all files in a folder
 // Calls `cb` on success, calls `onError` on failure
-function findFilesRecursive (paths, cb) {
+function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
     let ret = []
@@ -290,7 +323,7 @@ function findFilesRecursive (paths, cb) {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
           ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
-          cb(ret)
+          cb_(ret)
         }
       })
     })
@@ -304,7 +337,7 @@ function findFilesRecursive (paths, cb) {
     // Files: return name, path, and size
     if (!stat.isDirectory()) {
       const filePath = fileOrFolder
-      return cb([{
+      return cb_([{
         name: path.basename(filePath),
         path: filePath,
         size: stat.size
@@ -316,7 +349,7 @@ function findFilesRecursive (paths, cb) {
     fs.readdir(folderPath, function (err, fileNames) {
       if (err) return dispatch('error', err)
       const paths = fileNames.map((fileName) => path.join(folderPath, fileName))
-      findFilesRecursive(paths, cb)
+      findFilesRecursive(paths, cb_)
     })
   })
 }

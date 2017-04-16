@@ -25,7 +25,7 @@ let tmpPath
 try {
   tmpPath = path.join(fs.statSync('/tmp') && '/tmp', 'webtorrent')
 } catch (err) {
-  tmpPath = path.join(os.tmpDir(), 'webtorrent')
+  tmpPath = path.join(os.tmpdir(), 'webtorrent')
 }
 rimraf.sync(tmpPath)
 

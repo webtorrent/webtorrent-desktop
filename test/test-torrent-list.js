@@ -79,7 +79,7 @@ test('torrent-list: expand torrent, unselect file', function (t) {
     // Make sure that it creates all files EXCEPT the deslected one
     .then(() => setup.compareDownloadFolder(t, 'CosmosLaundromatFirstCycle', [
       // TODO: the .gif should NOT be here, since we just deselected it.
-      // This is a bug. See https://github.com/feross/webtorrent-desktop/issues/719
+      // This is a bug. See https://github.com/webtorrent/webtorrent-desktop/issues/719
       'Cosmos Laundromat - First Cycle (1080p).gif',
       'Cosmos Laundromat - First Cycle (1080p).mp4',
       'Cosmos Laundromat - First Cycle (1080p).ogv',

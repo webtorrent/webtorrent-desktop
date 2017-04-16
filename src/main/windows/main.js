@@ -32,16 +32,17 @@ function init (state, options, decorate) {
 
   let windowOptions = {
     backgroundColor: '#282828',
+    backgroundThrottling: false, // do not throttle animations/timers when page is background
     darkTheme: true, // Forces dark theme (GTK+3)
+    height: initialBounds.height,
     icon: getIconPath(), // Window icon (Windows, Linux)
-    minWidth: config.WINDOW_MIN_WIDTH,
     minHeight: config.WINDOW_MIN_HEIGHT,
+    minWidth: config.WINDOW_MIN_WIDTH,
+    show: false,
     title: config.APP_WINDOW_TITLE,
     titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
-    show: false,
     width: initialBounds.width,
-    height: initialBounds.height,
     x: initialBounds.x,
     y: initialBounds.y
   }
@@ -168,8 +169,8 @@ function setBounds (bounds, maximize) {
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
       const scr = electron.screen.getDisplayMatching(main.win.getBounds())
-      bounds.x = Math.round(scr.bounds.x + scr.bounds.width / 2 - bounds.width / 2)
-      bounds.y = Math.round(scr.bounds.y + scr.bounds.height / 2 - bounds.height / 2)
+      bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
+      bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
       log('setBounds: centered to ' + JSON.stringify(bounds))
     }
     // Resize the window's content area (so window border doesn't need to be taken

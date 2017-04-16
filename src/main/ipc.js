@@ -166,8 +166,8 @@ function init () {
   ipc.on('checkForExternalPlayer', function (e, path) {
     const externalPlayer = require('./external-player')
 
-    externalPlayer.checkInstall(path, function (isInstalled) {
-      windows.main.send('checkForExternalPlayer', isInstalled)
+    externalPlayer.checkInstall(path, function (err) {
+      windows.main.send('checkForExternalPlayer', !err)
     })
   })
 

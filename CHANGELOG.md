@@ -1,10 +1,24 @@
 # WebTorrent Desktop Version History
 
-## UNRELEASED
+## v0.18.0
+
+### Added
+- Add a new "Transfers" menu for pausing or resuming all torrents (#1027)
 
 ### Changed
-- Update Electron to 1.4.3
+- Update Electron to 1.4.15
   - Windows 32-bit: App can use 4GB of memory instead of just 2GB
+  - Fix "Portable App" writing crash reports to "%APPDATA%\Temp" (Windows)
+- Updated WebTorrent engine to 0.98.5
+  - Fix issue where http web seeds would sometimes stall
+  - Don't send 'completed' event to tracker again if torrent is already complete
+  - Add more peer ID entropy
+  - Set user-agent header for tracker http requests
+
+### Fixed
+- Fix paste shortcut in tracker list on Create Torrent page (#1112)
+- Auto-focus the 'OK' button in modal dialogs (#1058)
+- Fix formatting issue in the speed stats on the Player page (#1039)
 
 ## v0.17.2 - 2016-10-10
 
@@ -53,7 +67,7 @@
 ## v0.16.0 - 2016-09-18
 
 ### Added
-- **Windows 64-bit support!** ([#931](https://github.com/feross/webtorrent-desktop/pull/931))
+- **Windows 64-bit support!** ([#931](https://github.com/webtorrent/webtorrent-desktop/pull/931))
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 
@@ -113,16 +127,13 @@
 ## v0.12.0 - 2016-08-23
 
 ### Added
-
 - Custom external media player
 - Linux: add system-wide launcher and icons for Debian, including Ubuntu
 
 ### Changed
-
 - Telemetry improvements: redact stacktraces, log app version
 
 ### Fixed
-
 - Fix playback and download of default torrents ("missing path" error) (#804)
 - Fix Delete Torrent + Data for newly added magnet links
 - Fix jumpToTime error (#804)
@@ -135,13 +146,11 @@
 - Check for missing default download path and torrent folders on start up (#776)
 
 ### Changed
-
 - Do not automatically set WebTorrent as the default handler for torrents (#771)
 - Torrents can only be created from the home screen (#770)
 - Update Electron to 1.3.3 (#772)
 
 ### Fixed
-
 - Allow modifying the default tracker list on the Create Torrent page (#775)
 - Prevent opening multiple stacked Preference windows or Create Torrent windows (#770)
 - Windows: Player window auto-resize does not match video aspect ratio (#565)
@@ -150,13 +159,11 @@
 ## v0.10.0 - 2016-08-05
 
 ### Added
-
 - Drag-and-drop magnet links (selected text) is now supported (#284)
 - Windows: Add "User Tasks" shortcuts to app icon in Start Menu (#114)
 - Linux: Show badge count for completed torrent downloads
 
 ### Changed
-
 - Change WebTorrent Desktop peer ID prefix to 'WD' to distinguish from WebTorrent in the browser, 'WW' (#688)
 - Switch UI to React to improve UI rendering speed (#729)
   - The primary bottleneck was actually `hyperx`, not `virtual-dom`.
@@ -173,7 +180,6 @@
   - Location history abstraction released independently as [`location-history`](https://www.npmjs.com/package/location-history)
 
 ### Fixed
-
 - When streaming to VLC, set VLC window title to torrent file name (#746)
 - Fix "Cannot read property 'numPiecesPresent' of undefined" exception (#695)
 - Fix rare case where config file could not be completely written (#733)
@@ -181,35 +187,29 @@
 ## v0.9.0 - 2016-07-20
 
 ### Added
-
 - Save selected subtitles
 - Ask for confirmation before deleting torrents
 - Support Debian Jessie
 
 ### Changed
-
 - Only send telemetry in production
 - Clean up the code. Split main.js, refactor lots of things
 
 ### Fixed
-
 - Fix state.playing.jumpToTime behavior
 - Remove torrent file and poster image when deleting a torrent
 
 ## v0.8.1 - 2016-06-24
 
 ### Added
-
 - New URI handler: stream-magnet
 
 ### Fixed
-
 - DLNA crashing bug
 
 ## v0.8.0 - 2016-06-23
 
 ### Added
-
 - Cast menu: choose which Chromecast, Airplay, or DLNA device you want to use
 - Telemetry: send basic data, plus stats on how often the play button works
 - Make posters from jpeg files, not just jpg
@@ -217,17 +217,14 @@
 - Windows thumbnail bar with a play/pause button
 
 ### Changed
-
 - Nicer modal styles
 
 ### Fixed
-
 - Windows tray icon now stays in the right state
 
 ## v0.7.2 - 2016-06-02
 
 ### Fixed
-
 - Fix exception that affects users upgrading from v0.5.1 or older
   - Ensure `state.saved.prefs` configuration exists
 - Fix window title on "About WebTorrent" window
@@ -235,23 +232,19 @@
 ## v0.7.1 - 2016-06-02
 
 ### Changed
-
 - Change "Step Forward" keyboard shortcut to `Alt+Left` (Windows)
 - Change "Step Backward" keyboard shortcut to to `Alt+Right` (Windows)
 
 ### Fixed
-
 - First time startup bug -- invalid torrent/poster paths
 
 ## v0.7.0 - 2016-06-02
 
 ### Added
-
 - Improved AirPlay support -- using the new [`airplayer`](https://www.npmjs.com/package/airplayer) package
 - Remember volume setting in player, for as long as the app is open
 
 ### Changed
-
 - Add (+) button now also accepts non .torrent files and creates a torrent from
   those files
 - Show prompt text in title bar for open dialogs (OS X)
@@ -261,7 +254,6 @@
   - Fix crash reporter not working (Windows)
 
 ### Fixed
-
 - Re-enable WebRTC (web peers)! (OS X, Windows)
   - Windows support was disabled in v0.6.1 to work around a bug in Electron
   - OS X support was disabled in v0.4.0 to work around a 100% CPU bug
@@ -272,7 +264,6 @@
 - Fix torrent loading message UI misalignment
 
 ### Known issues
-
 - When upgrading to WebTorrent Desktop v0.7.0, some torrent metadata (file list,
   selected files, whether torrent is streamable) will be cleared. Just start the
   torrent to re-populate the metadata.
@@ -280,7 +271,6 @@
 ## v0.6.1 - 2016-05-26
 
 ### Fixed
-
 - Disable WebRTC to work around Electron crash (Windows)
   - Will be re-enabled in the next version of WebTorrent, which will be based on
     the next version of Electron, where the bug is fixed.
@@ -292,7 +282,6 @@
 ## v0.6.0 - 2016-05-24
 
 ### Added
-
 - Added Preferences page to set Download folder
 - Save video position, resume playback from saved position
 - Add additional video player keyboard shortcuts (#275)
@@ -302,7 +291,6 @@
 - Add announcement feature
 
 ### Changed
-
 - Nicer player UI
 - Reduce startup jank, improve startup time (#568)
 - Cleanup unsupported codec detection (#569, #570)
@@ -310,7 +298,6 @@
 - Improve subtitle positioning (#551)
 
 ### Fixed
-
 - Fix Uncaught TypeError: Cannot read property 'update' of undefined (#567)
 - Fix bugs in LocationHistory
   - When player is active, and magnet link is pasted, go back to list
@@ -321,23 +308,19 @@
 ## v0.5.1 - 2016-05-18
 
 ### Fixed
-
 - Fix auto-updater (OS X, Windows).
 
 ## v0.5.0 - 2016-05-17
 
 ### Added
-
 - Select/deselect individual files to torrent.
 - Automatically include subtitle files (.srt, .vtt) from torrent in the subtitles menu.
 - "Add Subtitle File..." menu item.
 
 ### Changed
-
 - When manually adding subtitle track(s), always switch to the new track.
 
 ### Fixed
-
 - Magnet links throw exception on app launch. (OS X)
 - Multi-file torrents would not seed in-place, were copied to Downloads folder.
 - Missing 'About WebTorrent' menu item. (Windows)
@@ -346,7 +329,6 @@
 ## v0.4.0 - 2016-05-13
 
 ### Added
-
 - Better Windows support!
   - Windows 32-bit build.
   - Windows Portable App build.
@@ -369,7 +351,6 @@
 - New default torrent on first launch: The WIRED CD.
 
 ### Changed
-
 - Improve app startup time by 40%.
 - UI tweaks: Reduce font size, reduce torrent list item height.
 - Add Playback menu for playback-related functionality.
@@ -380,7 +361,6 @@
 - Remove "Add Fake Airplay/Chromecast" menu items.
 
 ### Fixed
-
 - Disable WebRTC to fix 100% CPU usage/crashes caused by Chromium issue. This is
   temporary. (OS X)
 - When fullscreen, make controls use the full window. (OS X)
@@ -405,24 +385,20 @@ to this release!
 ## v0.3.3 - 2016-04-07
 
 ### Fixed
-
 - App icon was incorrect (OS X)
 
 ## v0.3.2 - 2016-04-07
 
 ### Added
-
 - Register WebTorrent as default handler for magnet links (OS X)
 
 ### Changed
-
 - Faster startup time (50ms)
 - Update Electron to 0.37.5
   - Remove the white flash when loading pages and resizing the window
   - Fix crash when sending IPC messages
 
 ### Fixed
-
 - Fix installation bugs with .deb file (Linux)
 - Pause audio reliably when closing the window
 - Enforce minimimum window size when resizing player (for audio-only .mov files, which are 0x0)
@@ -430,17 +406,14 @@ to this release!
 ## v0.3.1 - 2016-04-06
 
 ### Added
-
 - Add crash reporter to torrent engine process
 
 ### Fixed
-
 - Fix cast screen background: cover, don't tile
 
 ## v0.3.0 - 2016-04-06
 
 ### Added
-
 - **Ubuntu/Debian support!** (.deb installer)
 - **DLNA streaming support**
 - Add "File > Quit" menu item (Linux)
@@ -448,14 +421,12 @@ to this release!
 - Crash reporting
 
 ### Changed
-
 - On startup, do not re-verify files when timestamps are unchanged
 - Moved torrent engine to an independent process, for better UI performance
 - Removed media queries (UI resizing based on window width)
 - Improved Chromecast icon, when connected
 
 ### Fixed
-
 - "Download Complete" notification shows consistently
 - Create new torrents and seed them without copying to temporary folder
 - Clicking the "Download Complete" notification will always activate app
@@ -474,7 +445,6 @@ Thanks to @dcposch, @grunjol, and @feross for contributing to this release.
 ## v0.2.0 - 2016-03-29
 
 ### Added
-
 - Minimise to tray (Windows, Linux)
 - Show spinner and download speed when player is stalled waiting for data
 - Highlight window on drag-and-drop
@@ -483,12 +453,10 @@ Thanks to @dcposch, @grunjol, and @feross for contributing to this release.
     Linux users need to download new versions manually.
 
 ### Changed
-
 - Renamed WebTorrent.app to WebTorrent Desktop
 - Add Cosmos Laundromat as a default torrent
 
 ### Fixed
-
 - Only capture media keys when player is active
 - Update WebTorrent to 0.88.1 for performance improvements
   - When seeding, do not proactively connect to new peers
@@ -548,7 +516,7 @@ Windows, and Linux. For now, we're only releasing binaries for OS X.
 
 WebTorrent Desktop is in ALPHA and under very active development – expect lots more polish in
 the coming weeks! If you know JavaScript and want to help us out, there's
-[lots to do](https://github.com/feross/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
+[lots to do](https://github.com/webtorrent/webtorrent-desktop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+contribution%22)!
 
 ### Features
 

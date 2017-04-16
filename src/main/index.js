@@ -227,7 +227,7 @@ function processArgv (argv) {
       // Ignore hidden argument, already being handled
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
-      // Issue: https://github.com/feross/webtorrent-desktop/issues/214
+      // Issue: https://github.com/webtorrent/webtorrent-desktop/issues/214
     } else if (arg.startsWith('--')) {
       // Ignore Spectron flags
     } else if (arg === 'data:,') {

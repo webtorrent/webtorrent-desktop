@@ -23,7 +23,8 @@ module.exports = class UpdateAvailableModal extends React.Component {
     )
 
     function handleShow () {
-      electron.shell.openExternal('https://github.com/feross/webtorrent-desktop/releases')
+      // TODO: use the GitHub urls from config.js
+      electron.shell.openExternal('https://github.com/webtorrent/webtorrent-desktop/releases')
       dispatch('exitModal')
     }
 

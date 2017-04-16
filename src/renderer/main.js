@@ -24,6 +24,7 @@ const State = require('./lib/state')
 State.load(onState)
 
 const createGetter = require('fn-getter')
+const debounce = require('debounce')
 const dragDrop = require('drag-drop')
 const electron = require('electron')
 const fs = require('fs')
@@ -145,6 +146,18 @@ function onState (err, _state) {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
+  const debouncedFullscreenToggle = debounce(function () {
+    dispatch('toggleFullScreen')
+  }, 1000, true)
+
+  document.addEventListener('wheel', function (event) {
+    // ctrlKey detects pinch to zoom, http://crbug.com/289887
+    if (event.ctrlKey) {
+      event.preventDefault()
+      debouncedFullscreenToggle()
+    }
+  })
+
   // ...focus and blur. Needed to show correct dock icon text ('badge') in OSX
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
@@ -241,6 +254,8 @@ const dispatchHandlers = {
     controllers.torrentList().startTorrentingSummary(torrentKey),
   'saveTorrentFileAs': (torrentKey) =>
     controllers.torrentList().saveTorrentFileAs(torrentKey),
+  'prioritizeTorrent': (infoHash) => controllers.torrentList().prioritizeTorrent(infoHash),
+  'resumePausedTorrents': () => controllers.torrentList().resumePausedTorrents(),
 
   // Playback
   'playFile': (infoHash, index) => controllers.playback().playFile(infoHash, index),
@@ -341,6 +356,7 @@ function setupIpc () {
   ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
+  ipcRenderer.on('wt-done', () => controllers.torrentList().resumePausedTorrents())
   ipcRenderer.on('wt-warning', (e, ...args) => tc.torrentWarning(...args))
   ipcRenderer.on('wt-error', (e, ...args) => tc.torrentError(...args))
 
@@ -472,8 +488,10 @@ function onError (err) {
   update()
 }
 
+const editableHtmlTags = new Set(['input', 'textarea'])
+
 function onPaste (e) {
-  if (e.target.tagName.toLowerCase() === 'input') return
+  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
 
   update()
