@@ -356,7 +356,20 @@ function renderCastOptions (state) {
 
 function renderSubtitleOptions (state) {
   const subtitles = state.playing.subtitles
-  if (!subtitles.tracks.length || !subtitles.showMenu) return
+  if (!subtitles.tracks.length && subtitles.showMenu) {
+    return (
+      <ul key='subtitle-options' className='options-list'>
+        <li onClick={dispatcher('openSubtitles')}>
+          Open
+        </li>
+        <li onClick={dispatcher('fetchSubtitles')}>
+          Auto Download
+        </li>
+      </ul>
+    )
+  } else if (!subtitles.showMenu) {
+    return
+  }
 
   const items = subtitles.tracks.map(function (track, ix) {
     const isSelected = state.playing.subtitles.selectedIndex === ix
@@ -583,12 +596,7 @@ function renderPlayerControls (state) {
   }
 
   function handleSubtitles (e) {
-    if (!state.playing.subtitles.tracks.length || e.ctrlKey || e.metaKey) {
-      // if no subtitles available select it
-      dispatch('openSubtitles')
-    } else {
-      dispatch('toggleSubtitlesMenu')
-    }
+    dispatch('toggleSubtitlesMenu')
   }
 }
 

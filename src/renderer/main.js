@@ -101,6 +101,10 @@ function onState (err, _state) {
       const SubtitlesController = require('./controllers/subtitles-controller')
       return new SubtitlesController(state)
     }),
+    subtitlesProvider: createGetter(() => {
+      const SubtitlesProviderController = require('./controllers/subtitles-provider-controller')
+      return new SubtitlesProviderController(state)
+    }),
     torrent: createGetter(() => {
       const TorrentController = require('./controllers/torrent-controller')
       return new TorrentController(state)
@@ -275,6 +279,9 @@ const dispatchHandlers = {
   'toggleSubtitlesMenu': () => controllers.subtitles().toggleSubtitlesMenu(),
   'checkForSubtitles': () => controllers.subtitles().checkForSubtitles(),
   'addSubtitles': (files, autoSelect) => controllers.subtitles().addSubtitles(files, autoSelect),
+
+  // Subtitles download
+  'fetchSubtitles': () => controllers.subtitlesProvider().fetchSubtitles(),
 
   // Local media: <video>, <audio>, external players
   'mediaStalled': () => controllers.media().mediaStalled(),
