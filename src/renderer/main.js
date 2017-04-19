@@ -118,7 +118,7 @@ function onState (err, _state) {
   }
 
   plugins.init(state)
-  plugins.initRenderer(dispatch)
+  plugins.initRenderer({dispatch, state})
 
   // Add first page to location history
   state.location.go({
@@ -338,7 +338,7 @@ function dispatch (action, ...args) {
   }
 
   const handler = dispatchHandlers[action]
-  plugins.on(action)
+  plugins.on(action, ...args)
   if (handler) handler(...args)
   else console.error('Missing dispatch handler: ' + action)
 

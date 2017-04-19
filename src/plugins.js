@@ -19,7 +19,7 @@ module.exports = class Plugins {
     log('path: ', this.path)
     this.availableExtensions = new Set([
       'onApp', 'onWindow', 'decorateMenu', 'decorateWindow',
-      'decorateConfig', 'setDispatcher'
+      'decorateConfig', 'initRenderer', 'onCheckForSubtitles'
     ])
 
     this.forceUpdate = false
@@ -75,30 +75,20 @@ module.exports = class Plugins {
     }, ms('5h'))
   }
 
-  initRenderer (dispatch) {
-    this.setDispatcherOnPlugins(dispatch)
-  }
-
-  /**
-   * Pass WebTorrent renderer dispatcher to each plugin that's
-   * interested. Interested plugins will set a 'setDispatcher'
-   * method to get it.
-   *
-   * @param {object} dispatch WebTorrent dispatcher
-   */
-  setDispatcherOnPlugins (dispatch) {
+  initRenderer (params) {
     this.modules.forEach(plugin => {
-      if (plugin.setDispatcher) {
-        plugin.setDispatcher(dispatch)
+      if (plugin.initRenderer) {
+        plugin.initRenderer(params)
       }
     })
   }
 
-  on (action) {
+  on (action, params) {
+    log(`ON ${action}:`, params)
     this.modules.forEach(plugin => {
       const actionName = this.capitalizeFirstLetter(action)
       const actionHandler = plugin[`on${actionName}`]
-      if (actionHandler) actionHandler()
+      if (actionHandler) actionHandler(params)
     })
   }
 
@@ -332,6 +322,10 @@ module.exports = class Plugins {
 
     const load = (path) => {
       let mod
+      if (!path.match(/\/$/)) {
+        path += '/'
+      }
+
       try {
         // eslint-disable-next-line import/no-dynamic-require
         mod = require(path)
@@ -347,6 +341,8 @@ module.exports = class Plugins {
 
         return mod
       } catch (err) {
+        log('Require plugins ERROR:', err)
+        this.alert(`Error loading plugin: ${path}`)
         // plugin not installed
         // node_modules removed? did a manual plugin uninstall?
         // try installing and then loading if successfull
