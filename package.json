@@ -14,7 +14,7 @@
     "airplayer": "^2.0.0",
     "application-config": "^1.0.0",
     "arch": "^2.0.0",
-    "auto-launch": "^4.0.1",
+    "auto-launch": "^5.0.1",
     "bitfield": "^1.0.2",
     "capture-frame": "^1.0.0",
     "chromecasts": "^1.8.0",
