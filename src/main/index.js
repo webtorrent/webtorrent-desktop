@@ -12,7 +12,7 @@ const log = require('./log')
 const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
-const Plugins = require('../plugins')
+const Plugins = require('./plugins')
 const plugins = new Plugins()
 
 let shouldQuit = false

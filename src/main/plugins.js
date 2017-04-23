@@ -1,7 +1,7 @@
 const {exec} = require('child_process')
 const {resolve, basename} = require('path')
 const {writeFileSync} = require('fs')
-const State = require('./renderer/lib/state')
+const State = require('../renderer/lib/state')
 const notifier = require('node-notifier')
 const {app} = require('electron')
 
@@ -10,16 +10,15 @@ const ms = require('ms')
 const shellEnv = require('shell-env')
 const crypto = require('crypto')
 
-const config = require('./config')
+const config = require('../config')
 
 module.exports = class Plugins {
   constructor () {
     // modules path
     this.path = resolve(config.getConfigPath(), 'plugins')
-    log('path: ', this.path)
+    log('Path: ', this.path)
     this.availableExtensions = new Set([
-      'onApp', 'onWindow', 'decorateMenu', 'decorateWindow',
-      'decorateConfig', 'initRenderer', 'onCheckForSubtitles'
+      'onApp', 'onWindow', 'decorateMenu', 'decorateWindow', 'decorateConfig'
     ])
 
     this.forceUpdate = false
@@ -66,7 +65,7 @@ module.exports = class Plugins {
       setTimeout(() => {
         this.updatePlugins()
       }, 5000)
-      log('installation scheduled')
+      log('Installation scheduled')
     }
 
     // update plugins every 5 hours
@@ -75,20 +74,14 @@ module.exports = class Plugins {
     }, ms('5h'))
   }
 
-  initRenderer (params) {
-    this.modules.forEach(plugin => {
-      if (plugin.initRenderer) {
-        plugin.initRenderer(params)
-      }
-    })
-  }
-
   on (action, params) {
     log(`ON ${action}:`, params)
     this.modules.forEach(plugin => {
       const actionName = this.capitalizeFirstLetter(action)
-      const actionHandler = plugin[`on${actionName}`]
-      if (actionHandler) actionHandler(params)
+      const methodName = `on${actionName}`
+      if (typeof plugin[methodName] === 'function') {
+        plugin[methodName](params)
+      }
     })
   }
 
@@ -173,7 +166,7 @@ module.exports = class Plugins {
     if (this.forceUpdate || changed) {
       this.watchers.forEach(fn => fn(err, {forceUpdate: this.forceUpdate}))
       this.alert('Installation completed')
-      log('installation completed')
+      log('Installation completed')
     }
 
     // save state
@@ -321,28 +314,26 @@ module.exports = class Plugins {
     let installNeeded = false
 
     const load = (path) => {
-      let mod
       if (!path.match(/\/$/)) {
         path += '/'
       }
 
+      const mainPath = `${path}main.js`
+
       try {
-        // eslint-disable-next-line import/no-dynamic-require
-        mod = require(path)
-        const exposed = mod && Object.keys(mod).some(key => this.availableExtensions.has(key))
-        if (!exposed) {
-          this.alert(`Plugin error: Plugin "${basename(path)}" does not expose any ` +
-            'WebTorrent extension API methods')
-          return
-        }
+        const Plugin = require(mainPath) // eslint-disable import/no-dynamic-require
+        const plugin = new Plugin()
+
+        const exposed = plugin && Object.keys(plugin).some(key => this.availableExtensions.has(key))
+        if (!exposed) return
 
         // populate the name for internal errors here
-        mod._name = basename(path)
+        plugin._name = basename(mainPath)
 
-        return mod
+        return plugin
       } catch (err) {
         log('Require plugins ERROR:', err)
-        this.alert(`Error loading plugin: ${path}`)
+        this.alert(`Error loading plugin: ${mainPath}`)
         // plugin not installed
         // node_modules removed? did a manual plugin uninstall?
         // try installing and then loading if successfull
@@ -350,7 +341,14 @@ module.exports = class Plugins {
       }
     }
 
-    if (installNeeded) this.updatePlugins()
+    // Plugin installation happens on the MAIN process.
+    // If plugins haven't finished installing, wait for them.
+    if (installNeeded) {
+      log('Plugins install needed, wait...')
+      setTimeout(() => {
+        this.requirePlugins()
+      }, 3000)
+    }
     return plugins.map(load).filter(v => Boolean(v))
   }
 
@@ -415,7 +413,7 @@ module.exports = class Plugins {
  *
  */
 function log () {
-  const prefix = '[ PLUGINS ]-->'
+  const prefix = '[ PLUGINS.Main ]-->'
   const args = [prefix]
 
   for (var i = 0; i < arguments.length; ++i) {
