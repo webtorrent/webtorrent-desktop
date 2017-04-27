@@ -320,7 +320,8 @@ function startServerFromReadyTorrent (torrent, cb) {
     const info = {
       torrentKey: torrent.key,
       localURL: 'http://localhost' + urlSuffix,
-      networkURL: 'http://' + networkAddress() + urlSuffix
+      networkURL: 'http://' + networkAddress() + urlSuffix,
+      networkAddress: networkAddress()
     }
 
     ipc.send('wt-server-running', info)
