@@ -452,7 +452,7 @@ function setDimensions (dimensions) {
 // via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
-  
+
   // File API seems to transform "magnet:?foo" in "magnet:///?foo"
   // this is a sanitization
   files = files.map(file => file.replace(/^magnet:\/+\?/i, 'magnet:?'))
