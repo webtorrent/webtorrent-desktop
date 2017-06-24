@@ -1,5 +1,6 @@
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
+const natsort = require('natsort')
 
 const Checkbox = require('material-ui/Checkbox').default
 const LinearProgress = require('material-ui/LinearProgress').default
@@ -278,9 +279,11 @@ module.exports = class TorrentList extends React.Component {
       )
     } else {
       // We do know the files. List them and show download stats for each one
+      const sorter = natsort()
       const fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
+        .sort((a, b) => sorter(a.file.name, b.file.name))
         .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (
