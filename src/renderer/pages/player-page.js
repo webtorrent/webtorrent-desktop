@@ -314,6 +314,16 @@ function renderCastScreen (state) {
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
+  const prog = state.getPlayingTorrentSummary().progress || {}
+  let fileProgress = 0
+  if (prog.files) {
+    const file = prog.files[state.playing.fileIndex]
+    fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
+  }
+
+  const downloaded = prettyBytes(prog.downloaded)
+  const total = prettyBytes(prog.length || 0)
+
   // Show a nice title image, if possible
   const style = {
     backgroundImage: cssBackgroundImagePoster(state)
@@ -325,6 +335,14 @@ function renderCastScreen (state) {
         <i className='icon'>{castIcon}</i>
         <div key='type' className='cast-type'>{castType}</div>
         <div key='status' className='cast-status'>{castStatus}</div>
+        <div key='download-progress'>
+          <span className='progress'>{fileProgress}%</span> downloaded
+          <span> | {downloaded} / {total}</span>
+          <br/>
+          <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
+          <br/>
+          <span>{prog.numPeers} peer(s)</span>
+        </div>
       </div>
     </div>
   )
