@@ -49,19 +49,33 @@ function initWin32 () {
  * Check for libappindicator1 support before creating tray icon
  */
 function checkLinuxTraySupport (cb) {
-  const cp = require('child_process')
+  const fs = require('fs')
 
-  // Check that we're on Ubuntu (or another debian system) and that we have
-  // libappindicator1. If WebTorrent was installed from the deb file, we should
-  // always have it. If it was installed from the zip file, we might not.
-  cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
-    if (err) return cb(err)
-    // Unfortunately there's no cleaner way, as far as I can tell, to check
-    // whether a debian package is installed:
-    if (stdout.endsWith('\tinstall\n')) {
-      cb(null)
+  // Check that we have libappindicator1 if we are running debian
+  // If WebTorrent was installed from the deb file, we should always have it
+  // If it was installed from the zip file, we might not
+
+  // if /etc/debian_version exists, the distro is debian based
+  fs.stat('/etc/debian_version', function (err) {
+    // the distro is debian based
+    if (err == null) {
+      const cp = require('child_process')
+      cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
+        if (err) return cb(err)
+        // Unfortunately there's no cleaner way, as far as I can tell, to check
+        // whether a debian package is installed:
+        if (stdout.endsWith('\tinstall\n')) {
+          cb()
+        } else {
+          cb(new Error('debian package not installed'))
+        }
+      })
+    // the distro isn't debian based
+    } else if (err.code === 'ENOENT') {
+      cb()
+    // error checking file
     } else {
-      cb(new Error('debian package not installed'))
+      cb(err)
     }
   })
 }
