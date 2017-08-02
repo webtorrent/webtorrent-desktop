@@ -309,24 +309,71 @@ function renderCastScreen (state) {
 
   const isStarting = state.playing.location.endsWith('-pending')
   const castName = state.playing.castName
+  const fileName = state.getPlayingFileSummary().name || ''
   let castStatus
   if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
   const prog = state.getPlayingTorrentSummary().progress || {}
-  let fileProgress = 0
-  if (prog.files) {
-    const file = prog.files[state.playing.fileIndex]
-    fileProgress = Math.floor(100 * file.numPiecesPresent / file.numPieces)
-  }
-
-  const downloaded = prettyBytes(prog.downloaded)
-  const total = prettyBytes(prog.length || 0)
 
   // Show a nice title image, if possible
   const style = {
     backgroundImage: cssBackgroundImagePoster(state)
+  }
+
+  function renderDownloadProgress () {
+    if (!prog.files) return
+
+    const fileProg = prog.files[state.playing.fileIndex]
+    const fileProgress = fileProg.numPiecesPresent / fileProg.numPieces
+    const fileLength = state.getPlayingFileSummary().length
+
+    const total = prettyBytes(fileLength)
+    const downloaded = prettyBytes(fileProgress * fileLength)
+
+    let sizes
+    if (fileProgress < 1) {
+      sizes = <span> | {downloaded} / {total}</span>
+    } else {
+      sizes = <span> | {downloaded}</span>
+    }
+
+    return (
+      <span className='progress'>{Math.round(100 * fileProgress)}% downloaded {sizes}</span>
+    )
+  }
+
+  function renderSpeed () {
+    const downloadSpeed = prettyBytes(prog.downloadSpeed || 0)
+    const uploadSpeed = prettyBytes(prog.uploadSpeed || 0)
+
+    return (<span>↓ {downloadSpeed}/s ↑ {uploadSpeed}/s</span>)
+  }
+
+  function renderEta () {
+    const downloaded = prog.downloaded || 0
+    const total = prog.length || 0
+    const missing = total - downloaded
+    const downloadSpeed = prog.downloadSpeed || 0
+    if (downloadSpeed === 0 || missing === 0) return
+
+    const rawEta = missing / downloadSpeed
+    const hours = Math.floor(rawEta / 3600) % 24
+    const minutes = Math.floor(rawEta / 60) % 60
+    const seconds = Math.floor(rawEta % 60)
+
+    // Only display hours and minutes if they are greater than 0 but always
+    // display minutes if hours is being displayed
+    const hoursStr = hours ? hours + 'h' : ''
+    const minutesStr = (hours || minutes) ? minutes + 'm' : ''
+    const secondsStr = seconds + 's'
+
+    return (<span> | {hoursStr} {minutesStr} {secondsStr} remaining</span>)
+  }
+
+  function renderNumberOfPeers () {
+    return (<span>{prog.numPeers || 0} peer(s)</span>)
   }
 
   return (
@@ -335,13 +382,13 @@ function renderCastScreen (state) {
         <i className='icon'>{castIcon}</i>
         <div key='type' className='cast-type'>{castType}</div>
         <div key='status' className='cast-status'>{castStatus}</div>
+        <div key='name' className='name'>{fileName}</div>
         <div key='download-progress'>
-          <span className='progress'>{fileProgress}%</span> downloaded
-          <span> | {downloaded} / {total}</span>
-          <br/>
-          <span>↓ {prettyBytes(prog.downloadSpeed || 0)}/s ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
-          <br/>
-          <span>{prog.numPeers} peer(s)</span>
+          {renderDownloadProgress()}
+          <br />
+          {renderSpeed() } { renderEta()}
+          <br />
+          {renderNumberOfPeers()}
         </div>
       </div>
     </div>
