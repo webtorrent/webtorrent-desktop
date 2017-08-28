@@ -615,6 +615,7 @@ body.drag .app::after {
   font-size: 13px;
   margin: 9px 8px 8px 8px;
   opacity: 0.8;
+  font-variant-numeric: tabular-nums;
 }
 
 .player .controls .icon.closed-caption {
