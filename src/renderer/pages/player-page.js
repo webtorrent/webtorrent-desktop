@@ -652,9 +652,10 @@ function formatTime (time, total) {
   }
 
   let totalHours = Math.floor(total / 3600)
+  let totalMinutes = Math.floor(total % 3600 / 60)
   let hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (totalHours > 0) {
+  if (totalMinutes > 9) {
     minutes = zeroFill(2, minutes)
   }
   let seconds = zeroFill(2, Math.floor(time % 60))
