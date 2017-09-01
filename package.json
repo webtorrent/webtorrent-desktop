@@ -68,7 +68,8 @@
     "spectron": "^3.3.0",
     "standard": "*",
     "tape": "^4.6.0",
-    "walk-sync": "^0.3.1"
+    "walk-sync": "^0.3.1",
+    "webtorrentify-github-release": "^0.0.3"
   },
   "engines": {
     "node": ">=4.0.0"
@@ -98,7 +99,7 @@
   "scripts": {
     "build": "buble src --output build",
     "clean": "node ./bin/clean.js",
-    "gh-release": "gh-release",
+    "gh-release": "gh-release && webtorrentify-github-release",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",
