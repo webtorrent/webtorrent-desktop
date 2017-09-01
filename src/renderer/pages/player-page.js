@@ -523,8 +523,8 @@ function renderPlayerControls (state) {
   ))
 
   // Show video playback progress
-  const currentTimeStr = formatTime(state.playing.currentTime)
-  const durationStr = formatTime(state.playing.duration)
+  const currentTimeStr = formatTime(state.playing.currentTime, state.playing.duration)
+  const durationStr = formatTime(state.playing.duration, state.playing.duration)
   elements.push((
     <span key='time' className='time float-left'>
       {currentTimeStr} / {durationStr}
@@ -646,17 +646,19 @@ function cssBackgroundImageDarkGradient () {
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
-function formatTime (time) {
+function formatTime (time, total) {
   if (typeof time !== 'number' || Number.isNaN(time)) {
     return '0:00'
   }
 
+  let totalHours = Math.floor(total / 3600)
+  let totalMinutes = Math.floor(total % 3600 / 60)
   let hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (hours > 0) {
+  if (totalMinutes > 9) {
     minutes = zeroFill(2, minutes)
   }
   let seconds = zeroFill(2, Math.floor(time % 60))
 
-  return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds
+  return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }
