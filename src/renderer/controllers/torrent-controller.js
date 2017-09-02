@@ -92,7 +92,12 @@ module.exports = class TorrentController {
       if (!this.state.window.isFocused) {
         this.state.dock.badge += 1
       }
-      showDoneNotification(torrentSummary)
+
+      // Avoid displaying notification if notifications are disabled.
+      if (!this.state.saved.prefs.disableNotifications) {
+        showDoneNotification(torrentSummary)
+      }
+
       ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
     }
 

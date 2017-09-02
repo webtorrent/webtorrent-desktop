@@ -25,6 +25,9 @@ class PreferencesPage extends React.Component {
 
     this.handleStartupChange =
       this.handleStartupChange.bind(this)
+
+    this.handleDisableNotifications =
+      this.handleDisableNotifications.bind(this)
   }
 
   downloadPathSelector () {
@@ -128,8 +131,25 @@ class PreferencesPage extends React.Component {
     )
   }
 
+  setNotifications () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.disableNotifications}
+          label={'Disable notifications.'}
+          onCheck={this.handleDisableNotifications}
+        />
+      </Preference>
+    )
+  }
+
   handleStartupChange (e, isChecked) {
     dispatch('updatePreferences', 'startup', isChecked)
+  }
+
+  handleDisableNotifications (e, isChecked) {
+    dispatch('updatePreferences', 'disableNotifications', isChecked)
   }
 
   setStartupSection () {
@@ -173,6 +193,9 @@ class PreferencesPage extends React.Component {
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
+        </PreferencesSection>
+        <PreferencesSection title='Notifications'>
+          {this.setNotifications()}
         </PreferencesSection>
         {this.setStartupSection()}
       </div>
