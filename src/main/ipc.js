@@ -173,9 +173,11 @@ function init () {
 
   ipc.on('openExternalPlayer', (e, ...args) => {
     const externalPlayer = require('./external-player')
+    const shortcuts = require('./shortcuts')
     const thumbar = require('./thumbar')
 
     menu.togglePlaybackControls(false)
+    shortcuts.disable()
     thumbar.disable()
     externalPlayer.spawn(...args)
   })
