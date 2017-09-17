@@ -221,10 +221,12 @@ function renderAudioMetadata (state) {
     if (common.label || common.catalognumber) {
       album += ', '
       let releaseInfo = []
-      if(common.label)
+      if (common.label) {
         releaseInfo.push(common.label)
-      if(common.catalognumber)
+      }
+      if (common.catalognumber) {
         releaseInfo.push(common.catalognumber)
+      }
       album += releaseInfo.join(' / ')
     }
   }
