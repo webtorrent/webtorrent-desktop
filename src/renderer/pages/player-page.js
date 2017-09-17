@@ -218,8 +218,14 @@ function renderAudioMetadata (state) {
   let album = common.album
   if (album && common.year && !album.includes(common.year)) {
     album += ' (' + common.year + ')'
-    if (common.label) {
-      album += ', ' + common.label
+    if (common.label || common.catalognumber) {
+      album += ', '
+      let releaseInfo = []
+      if(common.label)
+        releaseInfo.push(common.label)
+      if(common.catalognumber)
+        releaseInfo.push(common.catalognumber)
+      album += releaseInfo.join(' / ')
     }
   }
   let track
