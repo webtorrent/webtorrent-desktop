@@ -214,7 +214,8 @@ function renderAudioMetadata (state) {
     title = fileSummary.name
   }
   let artist = common.albumartist || common.artist ||
-    (common.artists && common.artists.filter(function (a) { return a }).join(', ')) || '(Unknown Artist)'
+    (common.artists && common.artists.filter(function (a) { return a }).join(', '))
+    || '(Unknown Artist)'
   let album = common.album
   if (album && common.year && !album.includes(common.year)) {
     album += ' (' + common.year + ')'
