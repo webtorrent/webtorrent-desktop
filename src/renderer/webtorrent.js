@@ -340,12 +340,14 @@ console.log('Initializing...')
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  mm.parseStream(file.createReadStream(), mime.getType(file.name), {native: false, skipCovers: true}).then(function (metadata) {
-    console.log('got audio metadata for %s: %o', file.name, metadata)
-    ipc.send('wt-audio-metadata', infoHash, index, metadata)
-  }).catch(function (err) {
-    return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-  })
+  mm.parseStream(file.createReadStream(), mime.getType(file.name),
+    {native: false, skipCovers: true})
+    .then(function (metadata) {
+      console.log('got audio metadata for %s: %o', file.name, metadata)
+      ipc.send('wt-audio-metadata', infoHash, index, metadata)
+    }).catch(function (err) {
+      return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
+    })
 }
 
 function selectFiles (torrentOrInfoHash, selections) {
