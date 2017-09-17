@@ -206,22 +206,41 @@ function renderOverlay (state) {
 function renderAudioMetadata (state) {
   const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
-  const info = fileSummary.audioInfo
+  const common = fileSummary.audioInfo.common
 
   // Get audio track info
-  let title = info.title
+  let title = common.title
   if (!title) {
     title = fileSummary.name
   }
-  let artist = info.artist && info.artist[0]
-  let album = info.album
-  if (album && info.year && !album.includes(info.year)) {
-    album += ' (' + info.year + ')'
+  let artist = common.albumartist || common.artist ||
+    (common.artists && common.artists.filter(function (a) { return a }).join(', ')) || '(Unknown Artist)'
+  let album = common.album
+  if (album && common.year && !album.includes(common.year)) {
+    album += ' (' + common.year + ')'
+    if (common.label) {
+      album += ', ' + common.label
+    }
   }
   let track
-  if (info.track && info.track.no && info.track.of) {
-    track = info.track.no + ' of ' + info.track.of
+  if (common.track && common.track.no && common.track.of) {
+    track = common.track.no + ' of ' + common.track.of
   }
+
+  let format = []
+  if (fileSummary.audioInfo.format.dataformat) {
+    format.push(fileSummary.audioInfo.format.dataformat)
+  }
+  if (fileSummary.audioInfo.format.bitrate) {
+    format.push(fileSummary.audioInfo.format.bitrate / 1000 + ' kbps')
+  }
+  if (fileSummary.audioInfo.format.sampleRate) {
+    format.push(fileSummary.audioInfo.format.sampleRate / 1000 + ' kHz')
+  }
+  if (fileSummary.audioInfo.format.bitsPerSample) {
+    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+  }
+  format = format.join(', ')
 
   // Show a small info box in the middle of the screen with title/album/etc
   const elems = []
@@ -245,6 +264,14 @@ function renderAudioMetadata (state) {
         <label>Track</label>{track}
       </div>
     ))
+  }
+
+  if (format) {
+    elems.push((
+      <div key='format' className='audio-format'>
+        <label>Format</label>{format}
+      </div>
+  ))
   }
 
   // Align the title with the other info, if available. Otherwise, center title

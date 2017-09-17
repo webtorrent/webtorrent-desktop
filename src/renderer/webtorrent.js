@@ -7,8 +7,9 @@ const deepEqual = require('deep-equal')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
+const mime = require('mime')
 const mkdirp = require('mkdirp')
-const musicmetadata = require('musicmetadata')
+const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
@@ -334,15 +335,16 @@ function stopServer () {
   server = null
 }
 
+console.log('Initializing...')
+
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  musicmetadata(file.createReadStream(), function (err, info) {
-    if (err) return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-    const { artist, album, albumartist, title, year, track, disk, genre } = info
-    const importantInfo = { artist, album, albumartist, title, year, track, disk, genre }
-    console.log('got audio metadata for %s: %o', file.name, importantInfo)
-    ipc.send('wt-audio-metadata', infoHash, index, importantInfo)
+  mm.parseStream(file.createReadStream(), mime.getType(file.name), {native: false, skipCovers: true}).then(function (metadata) {
+    console.log('got audio metadata for %s: %o', file.name, metadata)
+    ipc.send('wt-audio-metadata', infoHash, index, metadata)
+  }).catch(function (err) {
+    return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
   })
 }
 
