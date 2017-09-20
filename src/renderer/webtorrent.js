@@ -7,7 +7,6 @@ const deepEqual = require('deep-equal')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
-const mime = require('mime')
 const mkdirp = require('mkdirp')
 const mm = require('music-metadata')
 const networkAddress = require('network-address')
@@ -340,7 +339,7 @@ console.log('Initializing...')
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  mm.parseStream(file.createReadStream(), mime.getType(file.name),
+  mm.parseStream(file.createReadStream(), file.name,
     {native: false, skipCovers: true})
     .then(function (metadata) {
       console.log('got audio metadata for %s: %o', file.name, metadata)
