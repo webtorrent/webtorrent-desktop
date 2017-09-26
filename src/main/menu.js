@@ -288,6 +288,14 @@ function getMenuTemplate () {
         {
           label: 'Resume All',
           click: () => windows.main.dispatch('resumeAllTorrents')
+        },
+        {
+          label: 'Remove All From List',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', false)
+        },
+        {
+          label: 'Remove All Data Files',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', true)
         }
       ]
     },

@@ -201,6 +201,13 @@ module.exports = class TorrentListController {
     }
   }
 
+  confirmDeleteAllTorrents (deleteData) {
+    this.state.modal = {
+      id: 'delete-all-torrents-modal',
+      deleteData
+    }
+  }
+
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
     ipcRenderer.send('wt-stop-torrenting', infoHash)
@@ -221,6 +228,26 @@ module.exports = class TorrentListController {
       this.state.saved.torrents.splice(index, 1)
       dispatch('stateSave')
     }
+
+    // prevent user from going forward to a deleted torrent
+    this.state.location.clearForward('player')
+    sound.play('DELETE')
+  }
+
+  deleteAllTorrents (deleteData) {
+    this.state.saved.torrents.forEach((summary) => {
+      ipcRenderer.send('wt-stop-torrenting', summary.infoHash)
+
+      // remove torrent and poster file
+      deleteFile(TorrentSummary.getTorrentPath(summary))
+      deleteFile(TorrentSummary.getPosterPath(summary))
+
+      if (deleteData) moveItemToTrash(summary)
+
+      dispatch('stateSave')
+    })
+
+    this.state.saved.torrents = []
 
     // prevent user from going forward to a deleted torrent
     this.state.location.clearForward('player')
