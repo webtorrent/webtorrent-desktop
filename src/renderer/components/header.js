@@ -28,6 +28,9 @@ class Header extends React.Component {
         <div className='nav right float-right'>
           {this.getAddButton()}
         </div>
+        <div className='nav right float-right'>
+          {this.getRemoveCompletedButton()}
+        </div>
       </div>
     )
   }
@@ -47,6 +50,19 @@ class Header extends React.Component {
         title='Add torrent'
         onClick={dispatcher('openFiles')}>
         add
+      </i>
+    )
+  }
+
+  getRemoveCompletedButton () {
+    const state = this.props.state
+    if (state.location.url() !== 'home') return null
+    return (
+      <i
+        className='icon add'
+        title='Remove completed torrents'
+        onClick={dispatcher('confirmRemoveCompletedTorrents')}>
+        close
       </i>
     )
   }
