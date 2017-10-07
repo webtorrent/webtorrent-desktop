@@ -28,6 +28,7 @@ function run (state) {
   if (semver.lt(version, '0.14.0')) migrate_0_14_0(saved)
   if (semver.lt(version, '0.17.0')) migrate_0_17_0(saved)
   if (semver.lt(version, '0.17.2')) migrate_0_17_2(saved)
+  if (semver.lt(version, '0.18.1')) migrate_0_18_1(saved)
 
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
@@ -204,5 +205,12 @@ function migrate_0_17_2 (saved) {
         path.join(ts.path, NEW_NAME)
       )
     } catch (err) {}
+  }
+}
+
+function migrate_0_18_1 (saved) {
+  if (saved.prefs.activeTorrentsLimit == null) {
+    // The app used to make itself the default torrent file handler automatically
+    saved.prefs.activeTorrentsLimit = 0
   }
 }
