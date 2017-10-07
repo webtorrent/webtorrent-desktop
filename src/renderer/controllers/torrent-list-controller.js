@@ -39,6 +39,7 @@ module.exports = class TorrentListController {
     const path = this.state.saved.prefs.downloadPath
 
     ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+    this.pauseOtherTorrents(torrentKey)
 
     dispatch('backToList')
   }
@@ -104,13 +105,15 @@ module.exports = class TorrentListController {
       start()
     })
 
-    function start () {
+    const start = () => {
       ipcRenderer.send('wt-start-torrenting',
         s.torrentKey,
         TorrentSummary.getTorrentId(s),
         s.path,
         s.fileModtimes,
         s.selections)
+
+      this.pauseOtherTorrents(torrentKey)
     }
   }
 
@@ -125,6 +128,20 @@ module.exports = class TorrentListController {
     }
 
     this.pauseTorrent(torrentSummary, true)
+  }
+
+  pauseOtherTorrents (torrentKey) {
+    const summary = TorrentSummary.getByKey(this.state, torrentKey)
+    this.state.saved.torrents
+      .filter(torrentSummary => torrentSummary !== summary)
+      .forEach((torrentSummary) => {
+        if (torrentSummary.status === 'downloading' ||
+            torrentSummary.status === 'seeding') {
+          torrentSummary.status = 'paused'
+          ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+        }
+      })
+    sound.play('DISABLE')
   }
 
   pauseAllTorrents () {

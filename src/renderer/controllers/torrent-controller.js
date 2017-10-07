@@ -96,6 +96,9 @@ module.exports = class TorrentController {
       ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
     }
 
+    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+    torrentSummary.status = 'paused'
+
     dispatch('update')
   }
 
