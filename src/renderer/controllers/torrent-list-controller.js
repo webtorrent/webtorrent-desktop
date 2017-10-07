@@ -85,11 +85,24 @@ module.exports = class TorrentListController {
     const s = TorrentSummary.getByKey(this.state, torrentKey)
     if (!s) throw new TorrentKeyNotFoundError(torrentKey)
 
+    const start = (path = s.path) => {
+      ipcRenderer.send('wt-start-torrenting',
+        s.torrentKey,
+        TorrentSummary.getTorrentId(s),
+        path,
+        s.fileModtimes,
+        s.selections)
+
+      if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+        this.pauseOtherTorrents(torrentKey)
+      }
+    }
+
     // New torrent: give it a path
     if (!s.path) {
       // Use Downloads folder by default
       s.path = this.state.saved.prefs.downloadPath
-      return start()
+      return start(s.path)
     }
 
     const fileOrFolder = TorrentSummary.getFileOrFolder(s)
@@ -106,19 +119,6 @@ module.exports = class TorrentListController {
       }
       start()
     })
-
-    const start = () => {
-      ipcRenderer.send('wt-start-torrenting',
-        s.torrentKey,
-        TorrentSummary.getTorrentId(s),
-        s.path,
-        s.fileModtimes,
-        s.selections)
-
-      if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
-        this.pauseOtherTorrents(torrentKey)
-      }
-    }
   }
 
   // TODO: use torrentKey, not infoHash
