@@ -39,7 +39,9 @@ module.exports = class TorrentListController {
     const path = this.state.saved.prefs.downloadPath
 
     ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
-    this.pauseOtherTorrents(torrentKey)
+    if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+      this.pauseOtherTorrents(torrentKey)
+    }
 
     dispatch('backToList')
   }
@@ -113,7 +115,9 @@ module.exports = class TorrentListController {
         s.fileModtimes,
         s.selections)
 
-      this.pauseOtherTorrents(torrentKey)
+      if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+        this.pauseOtherTorrents(torrentKey)
+      }
     }
   }
 

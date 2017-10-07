@@ -95,9 +95,11 @@ module.exports = class TorrentController {
       showDoneNotification(torrentSummary)
       ipcRenderer.send('downloadFinished', getTorrentPath(torrentSummary))
     }
-
-    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-    torrentSummary.status = 'paused'
+    
+    if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+      ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+      torrentSummary.status = 'paused'
+    }
 
     dispatch('update')
   }
