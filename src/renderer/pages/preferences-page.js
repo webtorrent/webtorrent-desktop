@@ -17,6 +17,9 @@ class PreferencesPage extends React.Component {
     this.handleDownloadPathChange =
       this.handleDownloadPathChange.bind(this)
 
+    this.handleActiveTorrentsLimitChange =
+      this.handleActiveTorrentsLimitChange.bind(this)
+
     this.handleOpenExternalPlayerChange =
       this.handleOpenExternalPlayerChange.bind(this)
 
@@ -44,6 +47,22 @@ class PreferencesPage extends React.Component {
 
   handleDownloadPathChange (filePath) {
     dispatch('updatePreferences', 'downloadPath', filePath)
+  }
+
+  activeTorrentsLimitCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.activeTorrentsLimit !== 0}
+          label={'Limit the number of active torrents'}
+          onCheck={this.handleActiveTorrentsLimitChange} />
+      </Preference>
+    )
+  }
+
+  handleActiveTorrentsLimitChange (e, isChecked) {
+    dispatch('updatePreferences', 'activeTorrentsLimit', isChecked ? 1 : 0)
   }
 
   openExternalPlayerCheckbox () {
@@ -165,6 +184,7 @@ class PreferencesPage extends React.Component {
       <div style={style}>
         <PreferencesSection title='Downloads'>
           {this.downloadPathSelector()}
+          {this.activeTorrentsLimitCheckbox()}
         </PreferencesSection>
         <PreferencesSection title='Playback'>
           {this.openExternalPlayerCheckbox()}

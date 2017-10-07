@@ -39,6 +39,9 @@ module.exports = class TorrentListController {
     const path = this.state.saved.prefs.downloadPath
 
     ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+    if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+      this.pauseOtherTorrents(torrentKey)
+    }
 
     dispatch('backToList')
   }
@@ -82,11 +85,24 @@ module.exports = class TorrentListController {
     const s = TorrentSummary.getByKey(this.state, torrentKey)
     if (!s) throw new TorrentKeyNotFoundError(torrentKey)
 
+    const start = (path = s.path) => {
+      ipcRenderer.send('wt-start-torrenting',
+        s.torrentKey,
+        TorrentSummary.getTorrentId(s),
+        path,
+        s.fileModtimes,
+        s.selections)
+
+      if (this.state.saved.prefs.activeTorrentsLimit !== 0) {
+        this.pauseOtherTorrents(torrentKey)
+      }
+    }
+
     // New torrent: give it a path
     if (!s.path) {
       // Use Downloads folder by default
       s.path = this.state.saved.prefs.downloadPath
-      return start()
+      return start(s.path)
     }
 
     const fileOrFolder = TorrentSummary.getFileOrFolder(s)
@@ -103,15 +119,6 @@ module.exports = class TorrentListController {
       }
       start()
     })
-
-    function start () {
-      ipcRenderer.send('wt-start-torrenting',
-        s.torrentKey,
-        TorrentSummary.getTorrentId(s),
-        s.path,
-        s.fileModtimes,
-        s.selections)
-    }
   }
 
   // TODO: use torrentKey, not infoHash
@@ -125,6 +132,20 @@ module.exports = class TorrentListController {
     }
 
     this.pauseTorrent(torrentSummary, true)
+  }
+
+  pauseOtherTorrents (torrentKey) {
+    const summary = TorrentSummary.getByKey(this.state, torrentKey)
+    this.state.saved.torrents
+      .filter(torrentSummary => torrentSummary !== summary)
+      .forEach((torrentSummary) => {
+        if (torrentSummary.status === 'downloading' ||
+            torrentSummary.status === 'seeding') {
+          torrentSummary.status = 'paused'
+          ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+        }
+      })
+    sound.play('DISABLE')
   }
 
   pauseAllTorrents () {

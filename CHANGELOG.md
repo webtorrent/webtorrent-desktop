@@ -1,5 +1,10 @@
 # WebTorrent Desktop Version History
 
+## v0.18.1
+
+### Added
+- Add a new preference to limit active torrents to 1 (https://github.com/lewisl9029/webtorrent-desktop/pull/1)
+
 ## v0.18.0
 
 ### Added

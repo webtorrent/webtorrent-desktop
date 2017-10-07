@@ -118,6 +118,7 @@ function setupStateSaved (cb) {
   const saved = {
     prefs: {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
+      activeTorrentsLimit: 0,
       isFileHandler: false,
       openExternalPlayer: false,
       externalPlayerPath: null,
