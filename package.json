@@ -17,6 +17,7 @@
     "auto-launch": "^4.0.1",
     "bitfield": "^1.0.2",
     "capture-frame": "^1.0.0",
+    "chokidar": "^1.6.1",
     "chromecasts": "^1.8.0",
     "cp-file": "^4.0.1",
     "create-torrent": "^3.24.5",
