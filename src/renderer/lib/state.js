@@ -121,7 +121,9 @@ function setupStateSaved (cb) {
       isFileHandler: false,
       openExternalPlayer: false,
       externalPlayerPath: null,
-      startup: false
+      startup: false,
+      autoAddTorrents: false,
+      torrentsFolderPath: ''
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],

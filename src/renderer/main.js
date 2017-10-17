@@ -111,6 +111,10 @@ function onState (err, _state) {
     update: createGetter(() => {
       const UpdateController = require('./controllers/update-controller')
       return new UpdateController(state)
+    }),
+    folderWatcher: createGetter(() => {
+      const FolderWatcherController = require('./controllers/folder-watcher-controller')
+      return new FolderWatcherController()
     })
   }
 
@@ -296,6 +300,8 @@ const dispatchHandlers = {
   'preferences': () => controllers.prefs().show(),
   'updatePreferences': (key, value) => controllers.prefs().update(key, value),
   'checkDownloadPath': checkDownloadPath,
+  'startFolderWatcher': () => controllers.folderWatcher().start(),
+  'stopFolderWatcher': () => controllers.folderWatcher().stop(),
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update().updateAvailable(version),
