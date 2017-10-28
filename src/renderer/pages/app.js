@@ -26,7 +26,7 @@ const Modals = {
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
   'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal')),
   'open-download-path-selector-modal': createGetter(() => {
-    require('../components/open-download-path-selector-modal')
+    return require('../components/open-download-path-selector-modal')
   })
 }
 
