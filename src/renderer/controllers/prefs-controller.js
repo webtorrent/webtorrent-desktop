@@ -58,4 +58,11 @@ module.exports = class PrefsController {
     dispatch('stateSaveImmediate')
     dispatch('checkDownloadPath')
   }
+  // Set unsaved prefs to the state object when a different location is chosen for a torrent
+  setPrefs () {
+    const state = this.state
+    state.unsaved = Object.assign(state.unsaved || {}, {
+      prefs: Object.assign({}, state.saved.prefs)
+    })
+  }
 }

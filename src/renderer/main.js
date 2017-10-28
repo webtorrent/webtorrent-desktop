@@ -127,7 +127,7 @@ function onState (err, _state) {
     }
   })
 
-  // Restart everything we were torrenting last time the app ran
+  // Restart everything wewere torrenting last time the app ran
   resumeTorrents()
 
   // Initialize ReactDOM
@@ -237,6 +237,20 @@ const dispatchHandlers = {
   'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
   'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
   'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
+  'openDownloadPathSelector': (exitCallBack, selectedTorrents) => {
+    controllers.prefs().setPrefs()
+    state.modal = {
+      id: 'open-download-path-selector-modal',
+      exitCallBack: () => {
+        controllers.prefs().save()
+        if (typeof exitCallBack === 'function') exitCallBack()
+        else if (typeof exitCallBack === 'string' && selectedTorrents) {
+          selectedTorrents.forEach(function (selectedPath) {
+            dispatch('addTorrent', selectedPath)
+          })
+        }
+      }}
+  },
 
   'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
   'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),
@@ -462,25 +476,27 @@ function onOpen (files) {
   const url = state.location.url()
   const allTorrents = files.every(TorrentPlayer.isTorrent)
   const allSubtitles = files.every(controllers.subtitles().isSubtitle)
+  // controllers.prefs().show()
+  dispatch('openDownloadPathSelector', () => {
+    if (allTorrents) {
+      // Drop torrents onto the app: go to home screen, add torrents, no matter what
+      dispatch('backToList')
+      // All .torrent files? Add them.
+      files.forEach((file) => controllers.torrentList().addTorrent(file))
+    } else if (url === 'player' && allSubtitles) {
+      // Drop subtitles onto a playing video: add subtitles
+      controllers.subtitles().addSubtitles(files, true)
+    } else if (url === 'home') {
+      // Drop files onto home screen: show Create Torrent
+      state.modal = null
+      controllers.torrentList().showCreateTorrent(files)
+    } else {
+      // Drop files onto any other screen: show error
+      return onError('Please go back to the torrent list before creating a new torrent.')
+    }
 
-  if (allTorrents) {
-    // Drop torrents onto the app: go to home screen, add torrents, no matter what
-    dispatch('backToList')
-    // All .torrent files? Add them.
-    files.forEach((file) => controllers.torrentList().addTorrent(file))
-  } else if (url === 'player' && allSubtitles) {
-    // Drop subtitles onto a playing video: add subtitles
-    controllers.subtitles().addSubtitles(files, true)
-  } else if (url === 'home') {
-    // Drop files onto home screen: show Create Torrent
-    state.modal = null
-    controllers.torrentList().showCreateTorrent(files)
-  } else {
-    // Drop files onto any other screen: show error
-    return onError('Please go back to the torrent list before creating a new torrent.')
-  }
-
-  update()
+    update()
+  })
 }
 
 function onError (err) {

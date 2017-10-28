@@ -37,5 +37,8 @@ function handleKeyDown (e) {
 
 function handleOK () {
   dispatch('exitModal')
-  dispatch('addTorrent', this.torrentURL.input.value)
+  const torrentUrl = this.torrentURL.input.value
+  dispatch('openDownloadPathSelector', () => {
+    dispatch('addTorrent', torrentUrl)
+  })
 }
