@@ -25,7 +25,7 @@ function spawn (playerPath, url, title) {
   if (playerPath != null) return spawnExternal(playerPath, [url])
 
   // Try to find and use VLC if external player is not specified
-  vlcCommand(function (err, vlcPath) {
+  vlcCommand((err, vlcPath) => {
     if (err) return windows.main.dispatch('externalPlayerNotFound')
     const args = [
       '--play-and-exit',
@@ -40,17 +40,17 @@ function spawn (playerPath, url, title) {
 
 function kill () {
   if (!proc) return
-  log('Killing external player, pid ' + proc.pid)
+  log(`Killing external player, pid ${proc.pid}`)
   proc.kill('SIGKILL') // kill -9
   proc = null
 }
 
 function spawnExternal (playerPath, args) {
-  log('Running external media player:', playerPath + ' ' + args.join(' '))
+  log('Running external media player:', `${playerPath} ${args.join(' ')}`)
 
   if (process.platform === 'darwin' && path.extname(playerPath) === '.app') {
     // Mac: Use executable in packaged .app bundle
-    playerPath += '/Contents/MacOS/' + path.basename(playerPath, '.app')
+    playerPath += `/Contents/MacOS/${path.basename(playerPath, '.app')}`
   }
 
   proc = cp.spawn(playerPath, args, {stdio: 'ignore'})
@@ -59,7 +59,7 @@ function spawnExternal (playerPath, args) {
   const closeModalTimeout = setTimeout(() =>
     windows.main.dispatch('exitModal'), 1000)
 
-  proc.on('close', function (code) {
+  proc.on('close', code => {
     clearTimeout(closeModalTimeout)
     if (!proc) return // Killed
     log('External player exited with code ', code)
@@ -71,7 +71,7 @@ function spawnExternal (playerPath, args) {
     proc = null
   })
 
-  proc.on('error', function (e) {
+  proc.on('error', e => {
     log('External player error', e)
   })
 }
