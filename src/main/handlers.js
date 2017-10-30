@@ -7,26 +7,24 @@ const config = require('../config')
 const path = require('path')
 
 function install () {
-  if (process.platform === 'darwin') {
-    installDarwin()
-  }
-  if (process.platform === 'win32') {
-    installWin32()
-  }
-  if (process.platform === 'linux') {
-    installLinux()
+  switch (process.platform) {
+    case 'darwin': installDarwin()
+      break
+    case 'win32': installWin32()
+      break
+    case 'linux': installLinux()
+      break
   }
 }
 
 function uninstall () {
-  if (process.platform === 'darwin') {
-    uninstallDarwin()
-  }
-  if (process.platform === 'win32') {
-    uninstallWin32()
-  }
-  if (process.platform === 'linux') {
-    uninstallLinux()
+  switch (process.platform) {
+    case 'darwin': uninstallDarwin()
+      break
+    case 'win32': uninstallWin32()
+      break
+    case 'linux': uninstallLinux()
+      break
   }
 }
 
@@ -42,9 +40,9 @@ function installDarwin () {
   // File handlers are defined in `Info.plist`.
 }
 
-function uninstallDarwin () {}
+function uninstallDarwin () { }
 
-const EXEC_COMMAND = [ process.execPath ]
+const EXEC_COMMAND = [process.execPath]
 
 if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
@@ -108,37 +106,37 @@ function installWin32 () {
     setProtocol()
 
     function setProtocol (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
       protocolKey.set('', Registry.REG_SZ, name, setURLProtocol)
     }
 
     function setURLProtocol (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
       protocolKey.set('URL Protocol', Registry.REG_SZ, '', setIcon)
     }
 
     function setIcon (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const iconKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol + '\\DefaultIcon'
+        key: `\\Software\\Classes\\${protocol}\\DefaultIcon`
       })
       iconKey.set('', Registry.REG_SZ, icon, setCommand)
     }
 
     function setCommand (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const commandKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${protocol}\\shell\\open\\command`
       })
       commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
     }
   }
 
@@ -163,43 +161,43 @@ function installWin32 () {
     function setExt () {
       const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
       extKey.set('', Registry.REG_SZ, id, setId)
     }
 
     function setId (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const idKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id
+        key: `\\Software\\Classes\\${id}`
       })
       idKey.set('', Registry.REG_SZ, name, setIcon)
     }
 
     function setIcon (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const iconKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id + '\\DefaultIcon'
+        key: `\\Software\\Classes\\${id}\\DefaultIcon`
       })
       iconKey.set('', Registry.REG_SZ, icon, setCommand)
     }
 
     function setCommand (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const commandKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${id}\\shell\\open\\command`
       })
       commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
     }
   }
 }
@@ -217,9 +215,9 @@ function uninstallWin32 () {
     function getCommand () {
       const commandKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${protocol}\\shell\\open\\command`
       })
-      commandKey.get('', function (err, item) {
+      commandKey.get('', (err, item) => {
         if (!err && item.value.indexOf(commandToArgs(command)) >= 0) {
           destroyProtocol()
         }
@@ -229,9 +227,9 @@ function uninstallWin32 () {
     function destroyProtocol () {
       const protocolKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol
+        key: `\\Software\\Classes\\${protocol}`
       })
-      protocolKey.destroy(function () {})
+      protocolKey.destroy(() => { })
     }
   }
 
@@ -241,7 +239,7 @@ function uninstallWin32 () {
     function eraseId () {
       const idKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + id
+        key: `\\Software\\Classes\\${id}`
       })
       idKey.destroy(getExt)
     }
@@ -249,9 +247,9 @@ function uninstallWin32 () {
     function getExt () {
       const extKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
-      extKey.get('', function (err, item) {
+      extKey.get('', (err, item) => {
         if (!err && item.value === id) {
           destroyExt()
         }
@@ -261,9 +259,9 @@ function uninstallWin32 () {
     function destroyExt () {
       const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
-      extKey.destroy(function () {})
+      extKey.destroy(() => { })
     }
   }
 }
@@ -300,10 +298,11 @@ function installLinux () {
       ? path.dirname(process.execPath)
       : config.ROOT_PATH
 
-    desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
-    desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
-    desktopFile = desktopFile.replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
-    desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
+    desktopFile = desktopFile
+      .replace(/\$APP_NAME/g, config.APP_NAME)
+      .replace(/\$APP_PATH/g, appPath)
+      .replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
+      .replace(/\$TRY_EXEC_PATH/g, process.execPath)
 
     const desktopFilePath = path.join(
       os.homedir(),
@@ -313,7 +312,7 @@ function installLinux () {
       'webtorrent-desktop.desktop'
     )
     fs.mkdirp(path.dirname(desktopFilePath))
-    fs.writeFile(desktopFilePath, desktopFile, function (err) {
+    fs.writeFile(desktopFilePath, desktopFile, (err) => {
       if (err) return log.error(err.message)
     })
   }
