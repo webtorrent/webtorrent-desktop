@@ -160,6 +160,7 @@ function renderMedia (state) {
     } else {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
+      if (state.window.isFullScreen) dispatch('toggleFullScreen')
     }
   }
 
