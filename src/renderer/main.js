@@ -254,7 +254,9 @@ const dispatchHandlers = {
       infoHash: options.infoHash
     }
   },
-  'updateTorrentLocation': (filePath, infoHash) => controllers.torrentList().updateLocation(filePath, infoHash),
+  'updateTorrentLocation': (filePath, infoHash) => {
+    controllers.torrentList().updateLocation(filePath, infoHash)
+  },
   'startOver': (infoHash) => controllers.torrentList().startOverInNewPath(infoHash),
   'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
   'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),

@@ -43,7 +43,9 @@ module.exports = class OpenDownloadPathSelector extends React.Component {
   }
   handleDownloadPathChange (filePath) {
     this.setState({downloadPath: filePath}, () => {
-      if (!this.props.state.modal.updateOnlyTorrent) { dispatch('updatePreferences', 'downloadPath', filePath) } else {
+      if (!this.props.state.modal.updateOnlyTorrent) {
+        dispatch('updatePreferences', 'downloadPath', filePath)
+      } else {
         dispatch('updateTorrentLocation', filePath, this.props.state.modal.infoHash)
       }
     })
