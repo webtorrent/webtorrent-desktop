@@ -233,11 +233,28 @@ module.exports = class TorrentListController {
       this.state.selectedInfoHash = infoHash
     }
   }
-
+  updateLocation (newFilePath, infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    dispatch('toggleTorrent', infoHash)
+    torrentSummary.newFilePath = newFilePath
+  }
+  startOverInNewPath (infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    // copy the downloaded data into the new path and start over
+    const currentPath = TorrentSummary.getFileOrFolder(torrentSummary)
+    fs.createReadStream(currentPath).pipe(fs.createWriteStream(`${torrentSummary.newFilePath}/${torrentSummary.name}`))
+    torrentSummary.path = torrentSummary.newFilePath
+    delete torrentSummary.newFilePath
+    dispatch('toggleTorrent', infoHash)
+  }
   openTorrentContextMenu (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const menu = new electron.remote.Menu()
 
+    menu.append(new electron.remote.MenuItem({
+      label: 'Change location',
+      click: () => dispatch('openDownloadPathSelector', () => dispatch('startOver', infoHash), '', {updateOnlyTorrent: true, infoHash})
+    }))
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
       click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)

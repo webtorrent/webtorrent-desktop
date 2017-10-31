@@ -237,21 +237,25 @@ const dispatchHandlers = {
   'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
   'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
   'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
-  'openDownloadPathSelector': (exitCallBack, selectedTorrents) => {
-    controllers.prefs().setPrefs()
+  'openDownloadPathSelector': (exitCallBack, selectedTorrents, options = {}) => {
+    if (!options.updateOnlyTorrent) controllers.prefs().setPrefs()
     state.modal = {
       id: 'open-download-path-selector-modal',
       exitCallBack: () => {
-        controllers.prefs().save()
+        if (!options.updateOnlyTorrent) controllers.prefs().save()
         if (typeof exitCallBack === 'function') exitCallBack()
         else if (typeof exitCallBack === 'string' && selectedTorrents) {
           selectedTorrents.forEach(function (selectedPath) {
             dispatch('addTorrent', selectedPath)
           })
         }
-      }}
+      },
+      updateOnlyTorrent: options.updateOnlyTorrent,
+      infoHash: options.infoHash
+    }
   },
-
+  'updateTorrentLocation': (filePath, infoHash) => controllers.torrentList().updateLocation(filePath, infoHash),
+  'startOver': (infoHash) => controllers.torrentList().startOverInNewPath(infoHash),
   'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
   'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),
   'createTorrent': (options) => controllers.torrentList().createTorrent(options),
