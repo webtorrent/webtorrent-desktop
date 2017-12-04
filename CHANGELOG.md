@@ -1,5 +1,37 @@
 # WebTorrent Desktop Version History
 
+## v0.19.0
+
+### Added
+- Added watch folder feature: Allows to automatically add new torrent files
+  downloaded to a configured folder on disk
+- Added security policy
+- Added highest playback priority feature: pauses other active torrents 
+  when playback starts; added highest playback priority checkbox on preferences
+- Add 'Start Speaking' and 'Stop Speaking' menu item (Mac)
+
+### Changed
+- Changed gitter url
+- Changed from Feross's github account to WebTorrent's organization
+- Resuming paused torrents when streaming torrent finishes downloading (wt-done)
+- Not pausing active torrents when playing an already downloaded torrent
+- Tweak pinch-to-zoom timing
+- Toggle fullscreen on pinch to zoom
+- Updated to electron@1.6.0
+- Updated to material-ui@0.17
+- Treat .FLAC as playable audio
+- Move release instructions to contributing.md
+- Replace release scripts with instructions
+- Downloads section on Preferences renamed to "Folders"
+
+### Fixed
+- Fixed width minutes
+- Use tabular nums and fixed width for no jitter on time
+- Fixed resuming when downloading finishes
+- Fixed styling issues; returning early in pauseActiveTorrents
+- Fixes for Standard v10
+- Fix 'About WebTorrent' menu location on Windows
+
 ## v0.18.0
 
 ### Added
