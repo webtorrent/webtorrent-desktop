@@ -29,7 +29,6 @@ function spawn (playerPath, url, title) {
     if (err) return windows.main.dispatch('externalPlayerNotFound')
     const args = [
       '--play-and-exit',
-      '--video-on-top',
       '--quiet',
       `--meta-title=${JSON.stringify(title)}`,
       url
