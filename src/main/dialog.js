@@ -83,9 +83,7 @@ function openTorrentFile () {
   electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
     resetTitle()
     if (!Array.isArray(selectedPaths)) return
-    selectedPaths.forEach(function (selectedPath) {
-      windows.main.dispatch('addTorrent', selectedPath)
-    })
+    windows.main.dispatch('openDownloadPathSelector', 'addTorrent', selectedPaths)
   })
 }
 
