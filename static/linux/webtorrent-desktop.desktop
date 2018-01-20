@@ -4,7 +4,6 @@ Version=1.0
 GenericName=BitTorrent Client
 X-GNOME-FullName=$APP_NAME
 Comment=Download and share files over BitTorrent
-Encoding=UTF-8
 Type=Application
 Icon=webtorrent-desktop
 Terminal=false
@@ -20,14 +19,11 @@ Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
 [Desktop Action CreateNewTorrent]
 Name=Create New Torrent...
 Exec=$EXEC_PATH -n
-Path=$APP_PATH
 
 [Desktop Action OpenTorrentFile]
 Name=Open Torrent File...
 Exec=$EXEC_PATH -o
-Path=$APP_PATH
 
 [Desktop Action OpenTorrentAddress]
 Name=Open Torrent Address...
 Exec=$EXEC_PATH -u
-Path=$APP_PATH
