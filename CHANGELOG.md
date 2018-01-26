@@ -99,7 +99,7 @@
 ## v0.16.0 - 2016-09-18
 
 ### Added
-- **Windows 64-bit support!** ([#931](https://github.com/webtorrent/webtorrent-desktop/pull/931))
+- **Windows 64-bit support!** (#931)
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 

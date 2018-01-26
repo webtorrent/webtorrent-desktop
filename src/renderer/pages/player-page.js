@@ -160,6 +160,7 @@ function renderMedia (state) {
     } else {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
+      if (state.window.isFullScreen) dispatch('toggleFullScreen')
     }
   }
 
@@ -303,7 +304,7 @@ function renderCastScreen (state) {
     isCast = false
   } else if (state.playing.location === 'error') {
     castIcon = 'error_outline'
-    castType = 'Error'
+    castType = 'Unable to Play'
     isCast = false
   }
 
