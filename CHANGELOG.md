@@ -9,7 +9,7 @@
 - Add pinch-to-zoom gesture to enter/exit fullscreen (#1148)
 
 ### Changed
-- [SECURITY] Mitigate
+- [SECURITY] Mitigate Electron protocol handler issue (Windows)
 - Moved project from Feross's GitHub account to the WebTorrent GitHub organization
 - Updated to electron@1.6.16
 - Updated to material-ui@0.17
