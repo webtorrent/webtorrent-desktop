@@ -1,38 +1,25 @@
 # WebTorrent Desktop Version History
 
-## v0.19.0
+## v0.19.0 - 2018-01-26
 
 ### Added
-- Added watch folder feature: Allows to automatically add new torrent files
-  downloaded to a configured folder on disk
-- Added security policy
-- Added highest playback priority feature: pauses other active torrents 
-  when playback starts; added highest playback priority checkbox on preferences
-- Add 'Start Speaking' and 'Stop Speaking' menu item (Mac)
+- Added watch folder feature: Automatically add new torrent files added to a folder on disk (#1154)
+- Added highest playback priority feature: pauses other active torrents when playback starts (#840)
+- Add 'Start Speaking' and 'Stop Speaking' menu item (Mac) (#439)
+- Add pinch-to-zoom gesture to enter/exit fullscreen (#1148)
 
 ### Changed
-- Changed gitter url
-- Changed from Feross's github account to WebTorrent's organization
-- Resuming paused torrents when streaming torrent finishes downloading (wt-done)
-- Not pausing active torrents when playing an already downloaded torrent
-- Tweak pinch-to-zoom timing
-- Toggle fullscreen on pinch to zoom
-- Updated to electron@1.6.0
+- [SECURITY] Mitigate
+- Moved project from Feross's GitHub account to the WebTorrent GitHub organization
+- Updated to electron@1.6.16
 - Updated to material-ui@0.17
-- Treat .FLAC as playable audio
-- Move release instructions to contributing.md
-- Replace release scripts with instructions
-- Downloads section on Preferences renamed to "Folders"
+- Treat .FLAC as playable audio (#1127)
 
 ### Fixed
-- Fixed width minutes
-- Use tabular nums and fixed width for no jitter on time
-- Fixed resuming when downloading finishes
-- Fixed styling issues; returning early in pauseActiveTorrents
-- Fixes for Standard v10
-- Fix 'About WebTorrent' menu location on Windows
+- Fix time and duration so it doesn't bounce in the UI (#1233)
+- Fix 'About WebTorrent' menu location on Windows (#1120)
 
-## v0.18.0
+## v0.18.0 - 2017-02-03
 
 ### Added
 - Add a new "Transfers" menu for pausing or resuming all torrents (#1027)
@@ -99,7 +86,7 @@
 ## v0.16.0 - 2016-09-18
 
 ### Added
-- **Windows 64-bit support!** ([#931](https://github.com/webtorrent/webtorrent-desktop/pull/931))
+- **Windows 64-bit support!** (#931)
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 
