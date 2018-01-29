@@ -123,7 +123,8 @@ function setupStateSaved (cb) {
       externalPlayerPath: null,
       startup: false,
       autoAddTorrents: false,
-      torrentsFolderPath: ''
+      torrentsFolderPath: '',
+      highestPlaybackPriority: true
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],
