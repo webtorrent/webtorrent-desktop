@@ -174,6 +174,7 @@ module.exports = class TorrentListController {
 
   resumePausedTorrents () {
     console.log('Playback Priority: resuming paused torrents')
+    if (!this.state.saved.torrentsToResume || !this.state.saved.torrentsToResume.length) return
     this.state.saved.torrentsToResume.map((infoHash) => {
       this.toggleTorrent(infoHash)
     })
