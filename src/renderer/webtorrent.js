@@ -339,8 +339,15 @@ console.log('Initializing...')
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  mm.parseStream(file.createReadStream(), file.name,
-    {native: false, skipCovers: true})
+
+  const options = {native: false, skipCovers: true}
+  const onMetaData = file.done
+    // If completed; use direct file access
+    ? mm.parseFile(path.join(torrent.path, file.path), options)
+    // otherwise stream
+    : mm.parseStream(file.createReadStream(), file.name, options)
+
+  onMetaData
     .then(function (metadata) {
       console.log('got audio metadata for %s: %o', file.name, metadata)
       ipc.send('wt-audio-metadata', infoHash, index, metadata)
