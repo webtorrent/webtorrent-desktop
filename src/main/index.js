@@ -72,13 +72,16 @@ function init () {
     if (err) throw err
 
     isReady = true
+    const state = results.state
 
-    windows.main.init(results.state, {hidden: hidden})
+    windows.main.init(state, {hidden: hidden})
     windows.webtorrent.init()
     menu.init()
 
     // To keep app startup fast, some code is delayed.
-    setTimeout(delayedInit, config.DELAYED_INIT)
+    setTimeout(() => {
+      delayedInit(state)
+    }, config.DELAYED_INIT)
 
     // Report uncaught exceptions
     process.on('uncaughtException', (err) => {
@@ -121,16 +124,23 @@ function init () {
   })
 }
 
-function delayedInit () {
+function delayedInit (state) {
   if (app.isQuitting) return
 
   const announcement = require('./announcement')
   const dock = require('./dock')
   const updater = require('./updater')
+  const FolderWatcher = require('./folder-watcher')
+  const folderWatcher = new FolderWatcher({window: windows.main, state})
 
   announcement.init()
   dock.init()
   updater.init()
+
+  ipc.setModule('folderWatcher', folderWatcher)
+  if (folderWatcher.isEnabled()) {
+    folderWatcher.start()
+  }
 
   if (process.platform === 'win32') {
     const userTasks = require('./user-tasks')

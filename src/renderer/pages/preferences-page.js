@@ -108,6 +108,59 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'externalPlayerPath', filePath)
   }
 
+  autoAddTorrentsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.unsaved.prefs.autoAddTorrents}
+          label={'Watch for new .torrent files and add them immediately'}
+          onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
+        />
+      </Preference>
+    )
+  }
+
+  handleAutoAddTorrentsChange (e, isChecked) {
+    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+    if (isChecked && !torrentsFolderPath) {
+      alert('Select a torrents folder first.') // eslint-disable-line
+      e.preventDefault()
+      return
+    }
+
+    dispatch('updatePreferences', 'autoAddTorrents', isChecked)
+
+    if (isChecked) {
+      dispatch('startFolderWatcher', null)
+      return
+    }
+
+    dispatch('stopFolderWatcher', null)
+  }
+
+  torrentsFolderPathSelector () {
+    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+
+    return (
+      <Preference>
+        <PathSelector
+          dialog={{
+            title: 'Select folder to watch for new torrents',
+            properties: [ 'openDirectory' ]
+          }}
+          displayValue={torrentsFolderPath || ''}
+          onChange={this.handletorrentsFolderPathChange}
+          title='Folder to watch'
+          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null} />
+      </Preference>
+    )
+  }
+
+  handletorrentsFolderPathChange (filePath) {
+    dispatch('updatePreferences', 'torrentsFolderPath', filePath)
+  }
+
   setDefaultAppButton () {
     const isFileHandler = this.props.state.unsaved.prefs.isFileHandler
     if (isFileHandler) {
@@ -163,8 +216,10 @@ class PreferencesPage extends React.Component {
     }
     return (
       <div style={style}>
-        <PreferencesSection title='Downloads'>
+        <PreferencesSection title='Folders'>
           {this.downloadPathSelector()}
+          {this.autoAddTorrentsCheckbox()}
+          {this.torrentsFolderPathSelector()}
         </PreferencesSection>
         <PreferencesSection title='Playback'>
           {this.openExternalPlayerCheckbox()}
