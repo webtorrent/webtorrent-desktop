@@ -98,7 +98,7 @@ function init () {
 
   window.addEventListener('error', (e) =>
     ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
-    true)
+  true)
 
   setInterval(updateTorrentProgress, 1000)
   console.timeEnd('init')

@@ -30,7 +30,7 @@ test('add-torrent', function (t) {
     .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'add-torrent-100-percent'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 test('create-torrent', function (t) {
@@ -84,5 +84,5 @@ test('create-torrent', function (t) {
       config.SAVED_TORRENT_FILE,
       expectedTorrent))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
