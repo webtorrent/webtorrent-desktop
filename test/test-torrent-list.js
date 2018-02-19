@@ -22,7 +22,7 @@ test('torrent-list: show download path missing', function (t) {
     .then((windowTitle) => t.equal(windowTitle, 'Preferences', 'window title'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'prefs-basic'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 test('torrent-list: start, stop, and delete torrents', function (t) {
@@ -54,7 +54,7 @@ test('torrent-list: start, stop, and delete torrents', function (t) {
     .then(() => app.client.click('.control.ok'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-deleted'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 test('torrent-list: expand torrent, unselect file', function (t) {
@@ -101,5 +101,5 @@ test('torrent-list: expand torrent, unselect file', function (t) {
     // Make sure that all the files are gone
     .then(() => setup.compareDownloadFolder(t, 'CosmosLaundromatFirstCycle', null))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
