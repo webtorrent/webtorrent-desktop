@@ -252,6 +252,11 @@ function renderAudioMetadata (state) {
   }
   format = format.join(', ')
 
+  let comments
+  if (common.comment) {
+    comments = common.comment.join(' / ')
+  }
+
   // Show a small info box in the middle of the screen with title/album/etc
   const elems = []
   if (artist) {
@@ -282,6 +287,14 @@ function renderAudioMetadata (state) {
         <label>Format</label>{format}
       </div>
   ))
+  }
+
+  if (comments) {
+    elems.push((
+      <div key='comments' className='audio-comments'>
+        <label>Comments</label>{comments}
+      </div>
+    ))
   }
 
   // Align the title with the other info, if available. Otherwise, center title
