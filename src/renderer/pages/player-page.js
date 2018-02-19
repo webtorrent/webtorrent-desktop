@@ -286,7 +286,7 @@ function renderAudioMetadata (state) {
       <div key='format' className='audio-format'>
         <label>Format</label>{format}
       </div>
-  ))
+    ))
   }
 
   if (comments) {
