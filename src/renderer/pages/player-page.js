@@ -210,34 +210,69 @@ function renderAudioMetadata (state) {
   const common = fileSummary.audioInfo.common
 
   // Get audio track info
-  let title = common.title
-  if (!title) {
-    title = fileSummary.name
-  }
-  let artist = common.albumartist || common.artist ||
+  const title = common.title ? common.title : fileSummary.name
+
+  // Show a small info box in the middle of the screen with title/album/etc
+  const elems = []
+
+  // Audio metadata: artist(s)
+  const artist = common.albumartist || common.artist ||
     (common.artists && common.artists.filter(function (a) { return a }).join(', ')) ||
     '(Unknown Artist)'
-  let album = common.album
-  if (album && common.year && !album.includes(common.year)) {
-    album += ' (' + common.year + ')'
-    if (common.label || common.catalognumber) {
-      album += ', '
-      let releaseInfo = []
-      if (common.label) {
-        releaseInfo.push(common.label)
-      }
-      if (common.catalognumber) {
-        releaseInfo.push(common.catalognumber)
-      }
-      album += releaseInfo.join(' / ')
-    }
-  }
-  let track
-  if (common.track && common.track.no && common.track.of) {
-    track = common.track.no + ' of ' + common.track.of
+  if (artist) {
+    elems.push((
+      <div key='artist' className='audio-artist'>
+        <label>Artist</label>{artist}
+      </div>
+    ))
   }
 
-  let format = []
+  // Audio metadata: album
+  if (common.album) {
+    elems.push((
+      <div key='album' className='audio-album'>
+        <label>Album</label>{common.album}
+      </div>
+    ))
+  }
+
+  // Audio metadata: year
+  if (common.year) {
+    elems.push((
+      <div key='year' className='audio-year'>
+        <label>Year</label>{common.year}
+      </div>
+    ))
+  }
+
+  // Audio metadata: release information (label & catalog-number)
+  if (common.label || common.catalognumber) {
+    const releaseInfo = []
+    if (common.label) {
+      releaseInfo.push(common.label)
+    }
+    if (common.catalognumber) {
+      releaseInfo.push(common.catalognumber)
+    }
+    elems.push((
+      <div key='release' className='audio-release'>
+        <label>Release</label>{ releaseInfo.join(' / ') }
+      </div>
+    ))
+  }
+
+  // Audio metadata: track-number
+  if (common.track && common.track.no && common.track.of) {
+    const track = common.track.no + ' of ' + common.track.of
+    elems.push((
+      <div key='track' className='audio-track'>
+        <label>Track</label>{track}
+      </div>
+    ))
+  }
+
+  // Audio metadata: format
+  const format = []
   if (fileSummary.audioInfo.format.dataformat) {
     format.push(fileSummary.audioInfo.format.dataformat)
   }
@@ -250,38 +285,7 @@ function renderAudioMetadata (state) {
   if (fileSummary.audioInfo.format.bitsPerSample) {
     format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
   }
-  format = format.join(', ')
-
-  let comments
-  if (common.comment) {
-    comments = common.comment.join(' / ')
-  }
-
-  // Show a small info box in the middle of the screen with title/album/etc
-  const elems = []
-  if (artist) {
-    elems.push((
-      <div key='artist' className='audio-artist'>
-        <label>Artist</label>{artist}
-      </div>
-    ))
-  }
-  if (album) {
-    elems.push((
-      <div key='album' className='audio-album'>
-        <label>Album</label>{album}
-      </div>
-    ))
-  }
-  if (track) {
-    elems.push((
-      <div key='track' className='audio-track'>
-        <label>Track</label>{track}
-      </div>
-    ))
-  }
-
-  if (format) {
+  if (format.size > 0) {
     elems.push((
       <div key='format' className='audio-format'>
         <label>Format</label>{format}
@@ -289,10 +293,11 @@ function renderAudioMetadata (state) {
     ))
   }
 
-  if (comments) {
+  // Audio metadata: comments
+  if (common.comment) {
     elems.push((
       <div key='comments' className='audio-comments'>
-        <label>Comments</label>{comments}
+        <label>Comments</label>{common.comment.join(' / ')}
       </div>
     ))
   }
