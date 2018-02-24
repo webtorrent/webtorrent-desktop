@@ -285,10 +285,10 @@ function renderAudioMetadata (state) {
   if (fileSummary.audioInfo.format.bitsPerSample) {
     format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
   }
-  if (format.size > 0) {
+  if (format.length > 0) {
     elems.push((
       <div key='format' className='audio-format'>
-        <label>Format</label>{format}
+        <label>Format</label>{ format.join(', ') }
       </div>
     ))
   }
