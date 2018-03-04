@@ -74,15 +74,23 @@ function filterOnExtension (torrent, extensions) {
 }
 
 function scoreCoverFile (file) {
-  const name = path.basename(file.name, path.extname(file.name)).toLowerCase()
-  switch (name) {
-    case 'cover': return 100
-    case 'folder': return 95
-    case 'front': return 85
-    case 'front-cover': return 90
-    case 'back': return 40
-    default: return 0
+  const fileName = path.basename(file.name, path.extname(file.name)).toLowerCase()
+  const relevanceScore = {
+    cover: 100,
+    folder: 95,
+    front: 90,
+    back: 20
   }
+
+  for (let keyword in relevanceScore) {
+    if (fileName === keyword) {
+      return relevanceScore[keyword]
+    }
+    if (fileName.indexOf(keyword) !== -1) {
+      return 0.8 * relevanceScore[keyword]
+    }
+  }
+  return 0
 }
 
 function torrentPosterFromAudio (torrent, cb) {
@@ -94,7 +102,9 @@ function torrentPosterFromAudio (torrent, cb) {
       score: scoreCoverFile(file)
     }
   }).sort((a, b) => {
-    return b.score - a.score
+    const delta = b.score - a.score
+    // If score is equal, pick the largest file, aiming for highest resolution
+    return delta === 0 ? b.file.length - a.file.length : delta
   })
 
   if (bestCover.length < 1) return cb(new Error('Generated poster contains no data'))
