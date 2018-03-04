@@ -15,7 +15,7 @@ function torrentPoster (torrent, cb) {
   const posterFile = torrent.files.filter(function (file) {
     return /^poster\.(jpg|png|gif)$/.test(file.name)
   })[0]
-  if (posterFile) return torrentPosterFromImage(posterFile, torrent, cb)
+  if (posterFile) return extractPoster(posterFile, cb)
 
   // 'score' each media type based on total size present in torrent
   const bestScore = ['audio', 'video', 'image'].map(mediaType => {
@@ -159,7 +159,10 @@ function torrentPosterFromVideo (torrent, cb) {
 
 function torrentPosterFromImage (torrent, cb) {
   const file = getLargestFileByExtension(torrent, mediaExtensions.image)
+  extractPoster(file, cb)
+}
 
+function extractPoster (file, cb) {
   const extname = path.extname(file.name)
-  file.getBuffer((err, buf) => cb(err, buf, extname))
+  file.getBuffer((err, buf) => { return cb(err, buf, extname) })
 }
