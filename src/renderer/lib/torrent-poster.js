@@ -78,7 +78,8 @@ function scoreCoverFile (file) {
   const relevanceScore = {
     cover: 100,
     folder: 95,
-    front: 90,
+    album: 90,
+    front: 80,
     back: 20
   }
 
