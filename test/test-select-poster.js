@@ -18,7 +18,7 @@ test("get cover from: 'wiredCd.torrent'", (t) => {
         t.fail(err)
       } else {
         t.equals(extension, '.jpg')
-        t.end();
+        t.end()
       }
     })
   })
