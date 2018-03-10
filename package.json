@@ -108,6 +108,6 @@
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/",
-    "fix": "standard --fix"
+    "fix-style": "standard --fix"
   }
 }
