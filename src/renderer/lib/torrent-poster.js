@@ -58,6 +58,12 @@ function calculateDataLengthByExtension (torrent, extensions) {
     })
 }
 
+/**
+ * Get the largest file of a given torrent, filtered by provided extension
+ * @param torrent Torrent to search in
+ * @param extensions Extension whitelist filter
+ * @returns Torrent file object
+ */
 function getLargestFileByExtension (torrent, extensions) {
   const files = filterOnExtension(torrent, extensions)
   if (files.length === 0) return undefined
@@ -66,6 +72,12 @@ function getLargestFileByExtension (torrent, extensions) {
   })
 }
 
+/**
+ * Filter file on a list extension, can be used to find al image files
+ * @param torrent Torrent to filter files from
+ * @param extensions File extensions to filter on
+ * @returns {number} Array of torrent file objects matching one of the given extensions
+ */
 function filterOnExtension (torrent, extensions) {
   return torrent.files.filter(file => {
     const extname = path.extname(file.name).toLowerCase()
@@ -73,8 +85,13 @@ function filterOnExtension (torrent, extensions) {
   })
 }
 
-function scoreCoverFile (file) {
-  const fileName = path.basename(file.name, path.extname(file.name)).toLowerCase()
+/**
+ * Returns a score how likely the file is suitable as a poster
+ * @param imgFile File object of an image
+ * @returns {number} Score, higher score is a better match
+ */
+function scoreAudioCoverFile (imgFile) {
+  const fileName = path.basename(imgFile.name, path.extname(imgFile.name)).toLowerCase()
   const relevanceScore = {
     cover: 100,
     folder: 95,
@@ -100,18 +117,26 @@ function torrentPosterFromAudio (torrent, cb) {
   const bestCover = imageFiles.map(file => {
     return {
       file: file,
-      score: scoreCoverFile(file)
+      score: scoreAudioCoverFile(file)
     }
-  }).sort((a, b) => {
-    const delta = b.score - a.score
+  }).reduce((a, b) => {
+    if (a.score > b.score) {
+      return a
+    }
+    if (b.score > a.score) {
+      return b
+    }
     // If score is equal, pick the largest file, aiming for highest resolution
-    return delta === 0 ? b.file.length - a.file.length : delta
+    if (a.file.length > b.file.length) {
+      return a
+    }
+    return b
   })
 
-  if (bestCover.length < 1) return cb(new Error('Generated poster contains no data'))
+  if (!bestCover) return cb(new Error('Generated poster contains no data'))
 
-  const extname = path.extname(bestCover[0].file.name)
-  bestCover[0].file.getBuffer((err, buf) => cb(err, buf, extname))
+  const extname = path.extname(bestCover.file.name)
+  bestCover.file.getBuffer((err, buf) => cb(err, buf, extname))
 }
 
 function torrentPosterFromVideo (torrent, cb) {
