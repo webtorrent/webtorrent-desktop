@@ -1,0 +1,90 @@
+name: webtorrent-desktop
+version: git
+version-script: |
+  read -r GREP_RE <<EOF
+  (["'])version\1:
+  EOF
+
+  read -r SED_RE <<EOF
+  (["',])
+  EOF
+
+  grep -E "$GREP_RE" package.json | awk '{print $2}' | sed -E "s/$SED_RE//g"
+
+icon: static/linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png
+summary: WebTorrent, the streaming torrent client. For Mac, Windows, and Linux
+description: >
+  Whether it's video from the Internet Archive, music from Creative Commons, or
+  audiobooks from Librivox, you can play it right away. You don't have to wait
+  for it to finish downloading.
+
+  WebTorrent Desktop connects to both BitTorrent and WebTorrent peers:	It can
+  talk to peers running Transmission or uTorrent, and it can also talk to web
+  pages like instant.io.
+
+grade: stable
+confinement: strict
+
+apps:
+  webtorrent-desktop:
+    command: desktop-launch alsa-launch $SNAP/opt/webtorrent-desktop/WebTorrent
+    desktop: opt/webtorrent-desktop/resources/app/static/linux/share/applications/webtorrent-desktop.desktop
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR
+      HOME: $SNAP_USER_COMMON
+    plugs:
+    - browser-support
+    - desktop
+    - desktop-legacy
+    - gsettings
+    - home
+    - network
+    - network-bind
+    - network-observe
+    - opengl
+    - pulseaudio
+    - removable-media
+    - screen-inhibit-control
+    - wayland
+    - x11
+
+parts:
+  alsa:
+    after: [alsa-lib, alsa-plugins]
+  alsa-lib:
+    install: |
+      for pcfile in $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/pkgconfig/*.pc; do
+        sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\${prefix}~g" $pcfile || true
+        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1$SNAPCRAFT_STAGE\3~" $pcfile || true 
+      done
+  alsa-plugins:
+    after: [alsa-lib]
+
+  webtorrent-desktop:
+    after: [alsa, desktop-gtk2]
+    plugin: nodejs
+    source: .
+    prepare: |
+      rm -f *.snap || true # remove any previous builds
+      rm -f *_source.tar.bz2 || true # remove source tarball of ourself
+    build: |
+      npm run build
+      DESKTOPFILE=static/linux/share/applications/webtorrent-desktop.desktop
+      sed -i 's|Icon=.*|Icon=${SNAP}/opt/webtorrent-desktop/resources/app/static/linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png|' $DESKTOPFILE
+      sed -i -E 's|(.*=)(/opt/webtorrent-desktop)|\1${SNAP}/2|g' $DESKTOPFILE
+      node_modules/electron-packager/cli.js . --out=$SNAPCRAFT_PART_INSTALL/opt
+    stage:
+    - -lib/node_modules/webtorrent-desktop
+    organize:
+      opt/WebTorrent-linux-*: opt/webtorrent-desktop
+    build-packages:
+    - g++
+    - make
+    - python
+    stage-packages:
+    - libgconf-2-4
+    - libnss3
+    - libpulse0
+    - libxss1
+    - libxtst6
+    - locales-all
