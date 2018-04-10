@@ -51,12 +51,6 @@ apps:
 parts:
   alsa:
     after: [alsa-lib, alsa-plugins]
-  alsa-lib:
-    install: |
-      for pcfile in $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/pkgconfig/*.pc; do
-        sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\${prefix}~g" $pcfile || true
-        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1$SNAPCRAFT_STAGE\3~" $pcfile || true 
-      done
   alsa-plugins:
     after: [alsa-lib]
 
