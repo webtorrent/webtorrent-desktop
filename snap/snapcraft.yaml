@@ -65,7 +65,7 @@ parts:
       npm run build
       DESKTOPFILE=static/linux/share/applications/webtorrent-desktop.desktop
       sed -i 's|Icon=.*|Icon=${SNAP}/opt/webtorrent-desktop/resources/app/static/linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png|' $DESKTOPFILE
-      sed -i -E 's|(.*=)(/opt/webtorrent-desktop)|\1${SNAP}/2|g' $DESKTOPFILE
+      sed -i -E 's|(.*=)(/opt/webtorrent-desktop)|\1${SNAP}\2|g' $DESKTOPFILE
       node_modules/electron-packager/cli.js . --out=$SNAPCRAFT_PART_INSTALL/opt
     stage:
     - -lib/node_modules/webtorrent-desktop
