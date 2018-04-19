@@ -207,7 +207,7 @@ function renderOverlay (state) {
 function renderAudioMetadata (state) {
   const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
-  const common = fileSummary.audioInfo.common
+  const common = fileSummary.audioInfo.common || {}
 
   // Get audio track info
   const title = common.title ? common.title : fileSummary.name
@@ -273,6 +273,7 @@ function renderAudioMetadata (state) {
 
   // Audio metadata: format
   const format = []
+  fileSummary.audioInfo.format = fileSummary.audioInfo.format || ''
   if (fileSummary.audioInfo.format.dataformat) {
     format.push(fileSummary.audioInfo.format.dataformat)
   }
