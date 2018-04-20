@@ -340,6 +340,10 @@ function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
 
+  // Set initial matadata to display the filename first.
+  const metadata = { title: file.name }
+  ipc.send('wt-audio-metadata', infoHash, index, metadata)
+
   const options = {native: false, skipCovers: true, fileSize: file.length}
   const onMetaData = file.done
     // If completed; use direct file access
