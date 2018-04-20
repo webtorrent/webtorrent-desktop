@@ -33,12 +33,18 @@ function isVideo (file) {
 function isAudio (file) {
   return [
     '.aac',
+    '.aiff',
+    '.ape',
     '.ac3',
-    '.mp3',
-    '.ogg',
-    '.wav',
     '.flac',
-    '.m4a'
+    '.m4a',
+    '.mp2',
+    '.mp3',
+    '.oga',
+    '.ogg',
+    '.opus',
+    '.wav',
+    '.wma'
   ].includes(getFileExtension(file))
 }
 

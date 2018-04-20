@@ -820,10 +820,15 @@ video::-webkit-media-text-track-container {
 
 .audio-metadata label {
   display:inline-block;
-  width: 100px;
+  width: 120px;
   text-align: right;
   font-weight: normal;
   margin-right: 25px;
+}
+
+.audio-metadata .audio-format,
+.audio-metadata .audio-comments {
+  font-weight: normal;
 }
 
 /*
