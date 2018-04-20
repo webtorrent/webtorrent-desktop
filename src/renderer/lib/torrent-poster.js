@@ -93,9 +93,9 @@ function filterOnExtension (torrent, extensions) {
 function scoreAudioCoverFile (imgFile) {
   const fileName = path.basename(imgFile.name, path.extname(imgFile.name)).toLowerCase()
   const relevanceScore = {
-    cover: 100,
-    folder: 95,
-    album: 90,
+    cover: 80,
+    folder: 80,
+    album: 80,
     front: 80,
     back: 20
   }
