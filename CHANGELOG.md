@@ -10,7 +10,6 @@
 - README.md: added cask instructions (#1364)
 - Displaying filename while music metadata is being downloaded (#1361)
 - Improved the poster selection for audio/music based torrent (#1334)
-- Updated copyright a year later (#1304)
 - Removed 'video-on-top' from VLC player launch options (#1286)
 - Replaced dependency `musicmetadata` with `music-metadata` (#1240)
 
