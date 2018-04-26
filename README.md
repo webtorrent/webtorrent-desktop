@@ -22,7 +22,11 @@
 
 Download the latest version of WebTorrent Desktop from
 [the official website](https://webtorrent.io/desktop/) or the
-[GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page.
+[GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page. Alternatively, you can install it with [Homebrew-Cask](https://github.com/caskroom/homebrew-cask):
+
+```
+$ brew cask install webtorrent
+```
 
 **WebTorrent Desktop** is under very active development. You can try out the
 current (unstable) development version by cloning the Git repo. See the
