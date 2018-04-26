@@ -97,7 +97,8 @@ function scoreAudioCoverFile (imgFile) {
     folder: 80,
     album: 80,
     front: 80,
-    back: 20
+    back: 20,
+    spectrogram: -80
   }
 
   for (let keyword in relevanceScore) {
