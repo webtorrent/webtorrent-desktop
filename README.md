@@ -20,8 +20,6 @@
 
 ## Install
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/webtorrent/webtorrent-desktop.svg)](https://greenkeeper.io/)
-
 Download the latest version of WebTorrent Desktop from
 [the official website](https://webtorrent.io/desktop/) or the
 [GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page.
