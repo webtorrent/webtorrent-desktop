@@ -1,5 +1,23 @@
 # WebTorrent Desktop Version History
 
+## v0.20.0 - 2018-04-26
+
+### Added
+- Added support for additional audio extensions: 'aiff', 'ape', 'mp2', 'oga', 'opus', 'wma' (#1240)
+
+### Changed
+
+- README.md: added cask instructions (#1364)
+- Displaying filename while music metadata is being downloaded (#1361)
+- Improved the poster selection for audio/music based torrent (#1334)
+- Updated copyright a year later (#1304)
+- Removed 'video-on-top' from VLC player launch options (#1286)
+- Replaced dependency `musicmetadata` with `music-metadata` (#1240)
+
+### Fixed
+
+- Added missing key to torrent status element (#1166)
+
 ## v0.19.0 - 2018-01-26
 
 ### Added
