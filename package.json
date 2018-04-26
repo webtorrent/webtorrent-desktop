@@ -51,7 +51,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "buble": "^0.15.2",
+    "buble": "^0.19.3",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
     "electron": "1.6.16",
