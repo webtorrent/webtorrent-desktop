@@ -461,7 +461,6 @@ function onOpen (files) {
 
   // File API seems to transform "magnet:?foo" in "magnet:///?foo"
   // this is a sanitization
-  console.log('------------- FILES', files)
   files = files.map(file => {
     if (typeof file !== 'string') return file
     return file.replace(/^magnet:\/+\?/i, 'magnet:?')
