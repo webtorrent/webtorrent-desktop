@@ -106,7 +106,7 @@ function scoreAudioCoverFile (imgFile) {
       return relevanceScore[keyword]
     }
     if (fileName.indexOf(keyword) !== -1) {
-      return 0.8 * relevanceScore[keyword]
+      return relevanceScore[keyword]
     }
   }
   return 0
