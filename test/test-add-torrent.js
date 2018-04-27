@@ -40,10 +40,9 @@ test('create-torrent', function (t) {
     announce: [
       'udp://explodie.org:6969',
       'udp://tracker.coppersurfer.tk:6969',
+      'udp://tracker.empire-js.us:1337',
       'udp://tracker.leechers-paradise.org:6969',
-      'udp://tracker.openbittorrent.com:80',
       'udp://tracker.opentrackr.org:1337',
-      'udp://zer0day.ch:1337',
       'wss://tracker.btorrent.xyz',
       'wss://tracker.fastcast.nz',
       'wss://tracker.openwebtorrent.com'
