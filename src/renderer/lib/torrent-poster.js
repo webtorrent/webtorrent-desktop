@@ -97,7 +97,8 @@ function scoreAudioCoverFile (imgFile) {
     folder: 80,
     album: 80,
     front: 80,
-    back: 20
+    back: 20,
+    spectrogram: -80
   }
 
   for (let keyword in relevanceScore) {
@@ -105,7 +106,7 @@ function scoreAudioCoverFile (imgFile) {
       return relevanceScore[keyword]
     }
     if (fileName.indexOf(keyword) !== -1) {
-      return 0.8 * relevanceScore[keyword]
+      return relevanceScore[keyword]
     }
   }
   return 0
