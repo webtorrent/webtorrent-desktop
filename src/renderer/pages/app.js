@@ -24,7 +24,10 @@ const Modals = {
   ),
   'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
-  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
+  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal')),
+  'open-download-path-selector-modal': createGetter(() => {
+    return require('../components/open-download-path-selector-modal')
+  })
 }
 
 const fontFamily = process.platform === 'win32'

@@ -234,11 +234,47 @@ module.exports = class TorrentListController {
       this.state.selectedInfoHash = infoHash
     }
   }
-
+  updateLocation (newFilePath, infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    dispatch('toggleTorrent', infoHash)
+    torrentSummary.newFilePath = newFilePath
+  }
+  startOverInNewPath (infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    // If the no location selected proceed with the existing
+    if (!torrentSummary.newFilePath) {
+      dispatch('updateTorrentLocation', this.state.saved.prefs.downloadPath, infoHash)
+    } // Default download path when nothing is selected
+    if (torrentSummary.newFilePath) {
+      // copy the downloaded data into the new path and start over
+      // const currentPath = TorrentSummary.getFileOrFolder(torrentSummary)
+      // Handle files and folders differently to keep track of the downloaded contents
+      torrentSummary.files.forEach((file) => {
+        let filePath = file.path.split('/')
+        if (filePath.length > 1 && !fs.existsSync(`${torrentSummary.newFilePath}/${filePath[0]}`)) {
+          // handle for directory
+          fs.mkdirSync(`${torrentSummary.newFilePath}/${filePath[0]}`)
+        }
+        fs.createReadStream(`${torrentSummary.path}/${file.path}`)
+        .pipe(fs.createWriteStream(`${torrentSummary.newFilePath}/${file.path}`))
+        fs.unlink(`${torrentSummary.path}/${file.path}`, (err) => {
+          if (err) dispatch('error', err)
+        })
+      })
+      torrentSummary.path = torrentSummary.newFilePath
+      delete torrentSummary.newFilePath
+      dispatch('toggleTorrent', infoHash)
+    }
+    dispatch('exitModal')
+  }
   openTorrentContextMenu (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const menu = new electron.remote.Menu()
-
+    menu.append(new electron.remote.MenuItem({
+      label: 'Change location',
+      click: () => dispatch('openDownloadPathSelector',
+      () => dispatch('startOver', infoHash), '', {updateOnlyTorrent: true, infoHash})
+    }))
     menu.append(new electron.remote.MenuItem({
       label: 'Remove From List',
       click: () => dispatch('confirmDeleteTorrent', torrentSummary.infoHash, false)

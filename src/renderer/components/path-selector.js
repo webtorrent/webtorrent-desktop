@@ -19,7 +19,8 @@ class PathSelector extends React.Component {
       id: React.PropTypes.string,
       onChange: React.PropTypes.func,
       title: React.PropTypes.string.isRequired,
-      value: React.PropTypes.string
+      value: React.PropTypes.string,
+      textareaStyle: React.PropTypes.object
     }
   }
 
@@ -58,9 +59,9 @@ class PathSelector extends React.Component {
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-    const textareaStyle = {
+    const textareaStyle = Object.assign({}, {
       color: colors.grey50
-    }
+    }, this.props.textareaStyle)
     const textFieldStyle = {
       flex: '1'
     }
