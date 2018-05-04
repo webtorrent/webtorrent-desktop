@@ -138,7 +138,7 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log('setBounds: not setting bounds because we\'re in full screen')
+    log(`setBounds: not setting bounds because we're in full screen`)
     return
   }
 
@@ -162,13 +162,13 @@ function setBounds (bounds, maximize) {
 
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
-    log('setBounds: setting bounds to ' + JSON.stringify(bounds))
+    log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
       const scr = electron.screen.getDisplayMatching(main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
       bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
-      log('setBounds: centered to ' + JSON.stringify(bounds))
+      log(`setBounds: centered to ${JSON.stringify(bounds)}`)
     }
     // Resize the window's content area (so window border doesn't need to be taken
     // into account)

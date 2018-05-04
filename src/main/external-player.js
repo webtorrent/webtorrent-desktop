@@ -39,13 +39,13 @@ function spawn (playerPath, url, title) {
 
 function kill () {
   if (!proc) return
-  log('Killing external player, pid ' + proc.pid)
+  log(`Killing external player, pid ${proc.pid}`)
   proc.kill('SIGKILL') // kill -9
   proc = null
 }
 
 function spawnExternal (playerPath, args) {
-  log('Running external media player:', playerPath + ' ' + args.join(' '))
+  log('Running external media player:', `${playerPath} ${args.join(' ')}`)
 
   if (process.platform === 'darwin' && path.extname(playerPath) === '.app') {
     // Mac: Use executable in packaged .app bundle

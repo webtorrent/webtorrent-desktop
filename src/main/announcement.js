@@ -7,9 +7,8 @@ const electron = require('electron')
 const config = require('../config')
 const log = require('./log')
 
-const ANNOUNCEMENT_URL = config.ANNOUNCEMENT_URL +
-  '?version=' + config.APP_VERSION +
-  '&platform=' + process.platform
+const ANNOUNCEMENT_URL =
+  `${config.ANNOUNCEMENT_URL}?version=${config.APP_VERSION}&platform=${process.platform}`
 
 /**
  * In certain situations, the WebTorrent team may need to show an announcement to
