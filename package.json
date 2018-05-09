@@ -51,6 +51,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
+    "babel-eslint": "^8.2.3",
     "buble": "^0.19.3",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
@@ -108,5 +109,8 @@
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/"
+  },
+  "standard": {
+    "parser": "babel-eslint"
   }
 }
