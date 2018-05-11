@@ -359,7 +359,7 @@ function setupIpc () {
   ipcRenderer.on('windowBoundsChanged', onWindowBoundsChanged)
 
   const tc = controllers.torrent()
-  ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
+  ipcRenderer.on('wt-parsed', (e, ...args) => tc.torrentParsed(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
   ipcRenderer.on('wt-done', () => controllers.torrentList().resumePausedTorrents())
