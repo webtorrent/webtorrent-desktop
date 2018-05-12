@@ -19,7 +19,7 @@
     "capture-frame": "^1.0.0",
     "chokidar": "^1.6.1",
     "chromecasts": "^1.9.1",
-    "cp-file": "^4.0.1",
+    "cp-file": "^6.0.0",
     "create-torrent": "^3.24.5",
     "debounce": "^1.0.0",
     "deep-equal": "^1.0.1",
