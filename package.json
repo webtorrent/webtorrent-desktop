@@ -30,7 +30,7 @@
     "iso-639-1": "^1.2.1",
     "languagedetect": "^1.1.1",
     "location-history": "^1.0.0",
-    "material-ui": "^0.17.0",
+    "material-ui": "^0.20.1",
     "mkdirp": "^0.5.1",
     "music-metadata": "^0.11.2",
     "network-address": "^1.1.0",
