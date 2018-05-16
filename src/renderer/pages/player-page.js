@@ -248,7 +248,8 @@ function renderAudioMetadata (state) {
   // Audio metadata: release information (label & catalog-number)
   if (common.label || common.catalognumber) {
     const releaseInfo = []
-    if (common.label && common.catalognumber && common.label.length === common.catalognumber.length) {
+    if (common.label && common.catalognumber &&
+      common.label.length === common.catalognumber.length) {
       // Assume labels & catalog-numbers are pairs
       for (let n = 0; n < common.label.length; ++n) {
         releaseInfo.push(common.label[0] + ' / ' + common.catalognumber[n])
