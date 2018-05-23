@@ -32,7 +32,7 @@
     "location-history": "^1.0.0",
     "material-ui": "^0.17.0",
     "mkdirp": "^0.5.1",
-    "music-metadata": "^1.0.0",
+    "music-metadata": "^1.1.0",
     "network-address": "^1.1.0",
     "parse-torrent": "^5.7.3",
     "prettier-bytes": "^1.0.1",
