@@ -13,20 +13,33 @@
 
 <p align="center">
   <a href="https://gitter.im/webtorrent/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="gitter"></a>
-  <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/webtorrent/webtorrent-desktop.svg" alt="github release"></a>
   <a href="https://travis-ci.org/webtorrent/webtorrent-desktop"><img src="https://img.shields.io/travis/webtorrent/webtorrent-desktop/master.svg" alt="travis"></a>
+  <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/webtorrent/webtorrent-desktop.svg" alt="github release version"></a>
+  <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/downloads/webtorrent/webtorrent-desktop/total.svg" alt="github release downloads"></a>
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
 ## Install
 
-Download the latest version of WebTorrent Desktop from
-[the official website](https://webtorrent.io/desktop/) or the
-[GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page.
+### Recommended Install
 
-**WebTorrent Desktop** is under very active development. You can try out the
-current (unstable) development version by cloning the Git repo. See the
-instructions below in the ["How to Contribute"](#how-to-contribute) section.
+Download the latest version of WebTorrent Desktop from
+[the official website](https://webtorrent.io/desktop/):
+
+### [✨ Download WebTorrent Desktop ✨](https://webtorrent.io/desktop/)
+
+### Advanced Install
+
+- Download specific installer files from the [GitHub releases](https://github.com/webtorrent/webtorrent-desktop/releases) page.
+
+- Use [Homebrew-Cask](https://github.com/caskroom/homebrew-cask) to install from the command line:
+
+  ```
+  $ brew cask install webtorrent
+  ```
+
+- Try the (unstable) development version by cloning the Git repository. See the
+  ["How to Contribute"](#how-to-contribute) instructions.
 
 ## Screenshots
 

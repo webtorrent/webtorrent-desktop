@@ -53,5 +53,5 @@ test('audio-streaming', function (t) {
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-5'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })

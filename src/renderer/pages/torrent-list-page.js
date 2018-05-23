@@ -216,7 +216,7 @@ module.exports = class TorrentList extends React.Component {
       } else { // torrentSummary.status is 'new' or something unexpected
         status = ''
       }
-      return (<span>{status}</span>)
+      return (<span key='torrent-status'>{status}</span>)
     }
   }
 

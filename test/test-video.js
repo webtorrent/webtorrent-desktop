@@ -31,5 +31,5 @@ test('video-streaming', function (t) {
     // Take another screenshot to verify that the window resized correctly
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-return'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })

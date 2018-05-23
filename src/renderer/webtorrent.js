@@ -8,7 +8,7 @@ const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
-const musicmetadata = require('musicmetadata')
+const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
@@ -98,7 +98,7 @@ function init () {
 
   window.addEventListener('error', (e) =>
     ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
-    true)
+  true)
 
   setInterval(updateTorrentProgress, 1000)
   console.timeEnd('init')
@@ -334,16 +334,30 @@ function stopServer () {
   server = null
 }
 
+console.log('Initializing...')
+
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  musicmetadata(file.createReadStream(), function (err, info) {
-    if (err) return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-    const { artist, album, albumartist, title, year, track, disk, genre } = info
-    const importantInfo = { artist, album, albumartist, title, year, track, disk, genre }
-    console.log('got audio metadata for %s: %o', file.name, importantInfo)
-    ipc.send('wt-audio-metadata', infoHash, index, importantInfo)
-  })
+
+  // Set initial matadata to display the filename first.
+  const metadata = { title: file.name }
+  ipc.send('wt-audio-metadata', infoHash, index, metadata)
+
+  const options = {native: false, skipCovers: true, fileSize: file.length}
+  const onMetaData = file.done
+    // If completed; use direct file access
+    ? mm.parseFile(path.join(torrent.path, file.path), options)
+    // otherwise stream
+    : mm.parseStream(file.createReadStream(), file.name, options)
+
+  onMetaData
+    .then(function (metadata) {
+      console.log('got audio metadata for %s (length=%s): %o', file.name, file.length, metadata)
+      ipc.send('wt-audio-metadata', infoHash, index, metadata)
+    }).catch(function (err) {
+      return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
+    })
 }
 
 function selectFiles (torrentOrInfoHash, selections) {

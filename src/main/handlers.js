@@ -40,9 +40,9 @@ function installDarwin () {
   // File handlers are defined in `Info.plist`.
 }
 
-function uninstallDarwin () { }
+function uninstallDarwin () {}
 
-const EXEC_COMMAND = [process.execPath]
+const EXEC_COMMAND = [ process.execPath, '--' ]
 
 if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
@@ -312,7 +312,7 @@ function installLinux () {
       'webtorrent-desktop.desktop'
     )
     fs.mkdirp(path.dirname(desktopFilePath))
-    fs.writeFile(desktopFilePath, desktopFile, (err) => {
+    fs.writeFile(desktopFilePath, desktopFile, err => {
       if (err) return log.error(err.message)
     })
   }
@@ -334,9 +334,9 @@ function installLinux () {
       'icons',
       'webtorrent-desktop.png'
     )
-    mkdirp(path.dirname(iconFilePath), (err) => {
+    mkdirp(path.dirname(iconFilePath), err => {
       if (err) return log.error(err.message)
-      fs.writeFile(iconFilePath, iconFile, (err) => {
+      fs.writeFile(iconFilePath, iconFile, err => {
         if (err) log.error(err.message)
       })
     })

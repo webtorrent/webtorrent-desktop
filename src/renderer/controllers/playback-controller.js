@@ -102,10 +102,10 @@ module.exports = class PlaybackController {
     const state = this.state
     if (Playlist.hasNext(state) && state.playing.location !== 'external') {
       this.updatePlayer(
-          state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
-            if (err) dispatch('error', err)
-            else this.play()
-          })
+        state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
+          if (err) dispatch('error', err)
+          else this.play()
+        })
     }
   }
 
@@ -271,7 +271,7 @@ module.exports = class PlaybackController {
     state.playing.fileIndex = index
     state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
       : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-      : 'other'
+        : 'other'
 
     // pick up where we left off
     let jumpToTime = 0

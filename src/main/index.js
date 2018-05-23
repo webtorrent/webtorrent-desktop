@@ -188,7 +188,7 @@ function onAppOpen (newArgv) {
 function sliceArgv (argv) {
   return argv.slice(config.IS_PRODUCTION ? 1
     : config.IS_TEST ? 4
-    : 2)
+      : 2)
 }
 
 function processArgv (argv) {

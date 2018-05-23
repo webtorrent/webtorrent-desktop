@@ -1,7 +1,7 @@
 {
   "name": "webtorrent-desktop",
   "description": "WebTorrent, the streaming torrent client. For Mac, Windows, and Linux.",
-  "version": "0.18.0",
+  "version": "0.20.0",
   "author": {
     "name": "WebTorrent, LLC",
     "email": "feross@webtorrent.io",
@@ -16,15 +16,15 @@
     "arch": "^2.0.0",
     "auto-launch": "^4.0.1",
     "bitfield": "^1.0.2",
-    "capture-frame": "^1.0.0",
+    "capture-frame": "^2.0.0",
     "chokidar": "^1.6.1",
-    "chromecasts": "^1.8.0",
-    "cp-file": "^4.0.1",
+    "chromecasts": "^1.9.1",
+    "cp-file": "^6.0.0",
     "create-torrent": "^3.24.5",
     "debounce": "^1.0.0",
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
-    "drag-drop": "^2.12.1",
+    "drag-drop": "^4.1.0",
     "es6-error": "^4.0.0",
     "fn-getter": "^1.0.0",
     "iso-639-1": "^1.2.1",
@@ -32,7 +32,7 @@
     "location-history": "^1.0.0",
     "material-ui": "^0.17.0",
     "mkdirp": "^0.5.1",
-    "musicmetadata": "^2.0.2",
+    "music-metadata": "^1.0.0",
     "network-address": "^1.1.0",
     "parse-torrent": "^5.7.3",
     "prettier-bytes": "^1.0.1",
@@ -51,14 +51,15 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "buble": "^0.15.2",
+    "babel-eslint": "^8.2.3",
+    "buble": "^0.19.3",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
-    "electron": "1.6.0",
+    "electron": "1.6.16",
     "electron-osx-sign": "0.4.3",
     "electron-packager": "~8.5.1",
     "electron-winstaller": "~2.5.2",
-    "gh-release": "^2.0.3",
+    "gh-release": "^3.2.1",
     "minimist": "^1.2.0",
     "nobin-debian-installer": "0.0.10",
     "nodemon": "^1.10.2",
@@ -108,5 +109,8 @@
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/"
+  },
+  "standard": {
+    "parser": "babel-eslint"
   }
 }
