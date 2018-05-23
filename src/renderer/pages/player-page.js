@@ -248,15 +248,23 @@ function renderAudioMetadata (state) {
   // Audio metadata: release information (label & catalog-number)
   if (common.label || common.catalognumber) {
     const releaseInfo = []
-    if (common.label) {
-      releaseInfo.push(common.label)
-    }
-    if (common.catalognumber) {
-      releaseInfo.push(common.catalognumber)
+    if (common.label && common.catalognumber &&
+      common.label.length === common.catalognumber.length) {
+      // Assume labels & catalog-numbers are pairs
+      for (let n = 0; n < common.label.length; ++n) {
+        releaseInfo.push(common.label[0] + ' / ' + common.catalognumber[n])
+      }
+    } else {
+      if (common.label) {
+        releaseInfo.push(...common.label)
+      }
+      if (common.catalognumber) {
+        releaseInfo.push(...common.catalognumber)
+      }
     }
     elems.push((
       <div key='release' className='audio-release'>
-        <label>Release</label>{ releaseInfo.join(' / ') }
+        <label>Release</label>{ releaseInfo.join(', ') }
       </div>
     ))
   }
