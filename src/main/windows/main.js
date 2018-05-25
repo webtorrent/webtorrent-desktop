@@ -151,7 +151,7 @@ function setBounds (bounds, maximize) {
     main.win.unmaximize()
   }
 
-  const willBeMaximized = typeof maximize === 'boolean' ? maximize : main.win.isMaximized
+  const willBeMaximized = typeof maximize === 'boolean' ? maximize : main.win.isMaximized()
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
     log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
