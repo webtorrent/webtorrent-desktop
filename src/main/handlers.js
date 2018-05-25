@@ -229,7 +229,7 @@ function uninstallWin32 () {
         hive: Registry.HKCU,
         key: `\\Software\\Classes\\${protocol}`
       })
-      protocolKey.destroy(() => { })
+      protocolKey.destroy(() => {})
     }
   }
 
