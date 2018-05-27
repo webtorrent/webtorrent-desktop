@@ -70,7 +70,7 @@ function spawnExternal (playerPath, args) {
     proc = null
   })
 
-  proc.on('error', e => {
-    log('External player error', e)
+  proc.on('error', err => {
+    log('External player error', err)
   })
 }
