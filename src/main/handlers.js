@@ -229,7 +229,7 @@ function uninstallWin32 () {
         hive: Registry.HKCU,
         key: `\\Software\\Classes\\${protocol}`
       })
-      protocolKey.destroy(() => { })
+      protocolKey.destroy(() => {})
     }
   }
 
@@ -261,7 +261,7 @@ function uninstallWin32 () {
         hive: Registry.HKCU, // HKEY_CURRENT_USER
         key: `\\Software\\Classes\\${ext}`
       })
-      extKey.destroy(() => { })
+      extKey.destroy(() => {})
     }
   }
 }
