@@ -133,19 +133,19 @@ function setupStateSaved (cb) {
 
   const tasks = []
 
-  config.DEFAULT_TORRENTS.map(function (t, i) {
+  config.DEFAULT_TORRENTS.map((t, i) => {
     const infoHash = saved.torrents[i].infoHash
-    tasks.push(function (cb) {
+    tasks.push(cb => {
       cpFile(
         path.join(config.STATIC_PATH, t.posterFileName),
         path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
-      ).then(cb).catch(cb)
+      ).then(() => cb()).catch(cb)
     })
-    tasks.push(function (cb) {
+    tasks.push(cb => {
       cpFile(
         path.join(config.STATIC_PATH, t.torrentFileName),
         path.join(config.TORRENT_PATH, infoHash + '.torrent')
-      ).then(cb).catch(cb)
+      ).then(() => cb()).catch(cb)
     })
   })
 
