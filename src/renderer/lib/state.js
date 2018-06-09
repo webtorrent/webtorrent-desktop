@@ -113,7 +113,6 @@ function setupStateSaved (cb) {
   const cpFile = require('cp-file')
   const fs = require('fs')
   const parseTorrent = require('parse-torrent')
-  const parallel = require('run-parallel')
 
   const saved = {
     prefs: {
@@ -133,26 +132,25 @@ function setupStateSaved (cb) {
 
   const tasks = []
 
-  config.DEFAULT_TORRENTS.map((t, i) => {
+  config.DEFAULT_TORRENTS.forEach((t, i) => {
     const infoHash = saved.torrents[i].infoHash
-    tasks.push(cb => {
+    tasks.push(
       cpFile(
         path.join(config.STATIC_PATH, t.posterFileName),
         path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
-      ).then(() => cb()).catch(cb)
-    })
-    tasks.push(cb => {
+      )
+    )
+    tasks.push(
       cpFile(
         path.join(config.STATIC_PATH, t.torrentFileName),
         path.join(config.TORRENT_PATH, infoHash + '.torrent')
-      ).then(() => cb()).catch(cb)
-    })
+      )
+    )
   })
 
-  parallel(tasks, function (err) {
-    if (err) return cb(err)
-    cb(null, saved)
-  })
+  Promise.all(tasks)
+    .then(() => cb(null, saved))
+    .catch(err => cb(err))
 
   function createTorrentObject (t) {
     // TODO: Doing several fs.readFileSync calls during first startup is not ideal
