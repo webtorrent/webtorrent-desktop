@@ -37,7 +37,7 @@
     "parse-torrent": "^6.0.1",
     "prettier-bytes": "^1.0.1",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2",
+    "react-dom": "^16.4.0",
     "react-tap-event-plugin": "^2.0.1",
     "rimraf": "^2.5.2",
     "run-parallel": "^1.1.6",
