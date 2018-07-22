@@ -4,8 +4,10 @@ const captureFrame = require('capture-frame')
 const path = require('path')
 
 const mediaExtensions = {
-  audio: ['.aac', '.asf', '.flac', '.m2a', '.m4a', '.m4b', '.mp2', '.mp4', '.mp3', '.oga', '.ogg', '.opus',
-    '.wma', '.wav', '.wv', '.wvp'],
+  audio: [
+    '.aac', '.asf', '.flac', '.m2a', '.m4a', '.m4b', '.mp2', '.mp4',
+    '.mp3', '.oga', '.ogg', '.opus', '.wma', '.wav', '.wv', '.wvp'
+  ],
   video: ['.mp4', '.m4v', '.webm', '.mov', '.mkv'],
   image: ['.gif', '.jpg', '.jpeg', '.png']
 }
