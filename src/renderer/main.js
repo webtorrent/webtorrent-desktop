@@ -150,6 +150,8 @@ function onState (err, _state) {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
+  document.addEventListener('keyup', onKeyup)
+
   const debouncedFullscreenToggle = debounce(function () {
     dispatch('toggleFullScreen')
   }, 1000, true)
@@ -506,6 +508,33 @@ const editableHtmlTags = new Set(['input', 'textarea'])
 function onPaste (e) {
   if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
+
+  update()
+}
+
+function onKeyup (e) {
+  const code = e.code;
+  const shiftKey = e.shiftKey;
+
+  if (code === 'ArrowLeft') {
+    dispatch('skip', -5)
+  } else if (code === 'ArrowRight') {
+    dispatch('skip', 5)
+  } else if (code === 'ArrowUp') {
+    dispatch('changeVolume', 0.1)
+  } else if (code === 'ArrowDown') {
+    dispatch('changeVolume', -0.1)
+  } else if (code === 'KeyJ') {
+    dispatch('skip', -10)
+  } else if (code === 'KeyL') {
+    dispatch('skip', 10)
+  } else if (code === 'KeyK') {
+    dispatch('playPause')
+  } else if (code === 'Period' && shiftKey) {
+    dispatch('changePlaybackRate', 1)
+  } else if (code === 'Comma' && shiftKey) {
+    dispatch('changePlaybackRate', -1)
+  }
 
   update()
 }
