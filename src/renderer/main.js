@@ -513,8 +513,8 @@ function onPaste (e) {
 }
 
 function onKeyup (e) {
-  const code = e.code;
-  const shiftKey = e.shiftKey;
+  const code = e.code
+  const shiftKey = e.shiftKey
 
   if (code === 'ArrowLeft') {
     dispatch('skip', -5)
