@@ -3,12 +3,7 @@ module.exports = torrentPoster
 const captureFrame = require('capture-frame')
 const path = require('path')
 
-const mediaExtensions = {
-  audio: ['.aac', '.asf', '.flac', '.m2a', '.m4a', '.mp2', '.mp4', '.mp3', '.oga', '.ogg', '.opus',
-    '.wma', '.wav', '.wv', '.wvp'],
-  video: ['.mp4', '.m4v', '.webm', '.mov', '.mkv'],
-  image: ['.gif', '.jpg', '.jpeg', '.png']
-}
+const mediaExtensions = require('./media-extensions')
 
 function torrentPoster (torrent, cb) {
   // First, try to use a poster image if available
