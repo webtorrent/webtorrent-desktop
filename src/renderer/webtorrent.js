@@ -348,7 +348,7 @@ function getAudioMetadata (infoHash, index) {
   const options = {native: false,
     skipCovers: true,
     fileSize: file.length,
-    observer: (event) => {
+    observer: event => {
       console.log(`async-audio-metadata-update: file='${file.name}', type=${event.tag.type}, tag-id=${event.tag.id}`)
       ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
     }}
@@ -359,7 +359,7 @@ function getAudioMetadata (infoHash, index) {
     : mm.parseStream(file.createReadStream(), file.name, options)
 
   onMetaData
-    .then(function () {
+    .then(() => {
       console.log(`metadata for file='${file.name}' completed.`)
     }).catch(function (err) {
       return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
