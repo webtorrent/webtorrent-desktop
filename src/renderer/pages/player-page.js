@@ -216,9 +216,7 @@ function renderAudioMetadata (state) {
   const elems = []
 
   // Audio metadata: artist(s)
-  const artist = common.albumartist || common.artist ||
-    (common.artists && common.artists.filter(function (a) { return a }).join(', ')) ||
-    '(Unknown Artist)'
+  const artist = common.artist || common.albumartist
   if (artist) {
     elems.push((
       <div key='artist' className='audio-artist'>
