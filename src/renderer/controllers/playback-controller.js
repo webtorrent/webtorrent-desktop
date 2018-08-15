@@ -292,7 +292,7 @@ module.exports = class PlaybackController {
     }
 
     function getAudioMetadata () {
-      if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+      if (state.playing.type === 'audio') {
         ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
       }
     }
