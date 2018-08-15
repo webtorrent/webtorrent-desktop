@@ -288,7 +288,7 @@ function renderAudioMetadata (state) {
   }
 
   // Audio metadata: disk & track-number
-  const count = ['track']
+  const count = ['track', 'disk']
   count.forEach(key => {
     const nrElem = renderTrack(common, key, key[0].toUpperCase() + key.substring(1))
     if (nrElem) {
