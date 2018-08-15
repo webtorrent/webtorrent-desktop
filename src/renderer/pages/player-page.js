@@ -245,6 +245,15 @@ function renderAudioMetadata (state) {
     ))
   }
 
+  // Audio metadata: disk & track-number
+  const count = ['track', 'disk']
+  count.forEach(key => {
+    const nrElem = renderTrack(common, key, key[0].toUpperCase() + key.substring(1))
+    if (nrElem) {
+      elems.push(nrElem)
+    }
+  })
+
   // Audio metadata: album
   if (common.album) {
     elems.push((
@@ -286,15 +295,6 @@ function renderAudioMetadata (state) {
       </div>
     ))
   }
-
-  // Audio metadata: disk & track-number
-  const count = ['track', 'disk']
-  count.forEach(key => {
-    const nrElem = renderTrack(common, key, key[0].toUpperCase() + key.substring(1))
-    if (nrElem) {
-      elems.push(nrElem)
-    }
-  })
 
   // Audio metadata: format
   const format = []
