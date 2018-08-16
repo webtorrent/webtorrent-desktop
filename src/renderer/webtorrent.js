@@ -349,7 +349,7 @@ function getAudioMetadata (infoHash, index) {
     skipCovers: true,
     fileSize: file.length,
     observer: event => {
-      console.log(`async-audio-metadata-update: file='${file.name}', type=${event.tag.type}, tag-id=${event.tag.id}`)
+      // console.log(`async-audio-metadata-update: file='${file.name}', type=${event.tag.type}, tag-id=${event.tag.id}`)
       ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
     }}
   const onMetaData = file.done
