@@ -216,8 +216,11 @@ function renderTrack (common, key, label) {
     if (common[key].of) {
       str += ` of ${common[key].of}`
     }
-    return React.createElement('div', { key, className: 'audio-' + key },
-      React.createElement('label', null, label), str
+    const style = { textTransform: 'capitalize' }
+    return (
+      <div className={`audio-${key}`}>
+        <label style={style}>{key}</label> {str}
+      </div>
     )
   }
 }
