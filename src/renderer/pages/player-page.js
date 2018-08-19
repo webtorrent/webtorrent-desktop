@@ -206,10 +206,11 @@ function renderOverlay (state) {
 
 /**
  * Render track or disk number string
+ * @param common metadata.common part
  * @param key should be either 'track' or 'disk'
- * @param label should be either 'Track' or 'Disk'
+ * @return track or disk number metadata as JSX block
  */
-function renderTrack (common, key, label) {
+function renderTrack (common, key) {
   // Audio metadata: track-number
   if (common[key].no) {
     let str = `${common[key].no}`
@@ -249,7 +250,7 @@ function renderAudioMetadata (state) {
   // Audio metadata: disk & track-number
   const count = ['track', 'disk']
   count.forEach(key => {
-    const nrElem = renderTrack(common, key, key[0].toUpperCase() + key.substring(1))
+    const nrElem = renderTrack(common, key)
     if (nrElem) {
       elems.push(nrElem)
     }
