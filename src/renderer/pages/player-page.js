@@ -212,7 +212,7 @@ function renderOverlay (state) {
  */
 function renderTrack (common, key) {
   // Audio metadata: track-number
-  if (common[key].no) {
+  if (common[key] && common[key].no) {
     let str = `${common[key].no}`
     if (common[key].of) {
       str += ` of ${common[key].of}`
