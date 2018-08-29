@@ -2,7 +2,7 @@ const React = require('react')
 const electron = require('electron')
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class UpdateAvailableModal extends React.Component {
   render () {

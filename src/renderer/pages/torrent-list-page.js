@@ -6,7 +6,7 @@ const LinearProgress = require('material-ui/LinearProgress').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
-const {dispatcher} = require('../lib/dispatcher')
+const { dispatcher } = require('../lib/dispatcher')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -365,8 +365,8 @@ module.exports = class TorrentList extends React.Component {
 
   renderRadialProgressBar (fraction, cssClass) {
     const rotation = 360 * fraction
-    const transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
-    const transformFix = {transform: 'rotate(' + rotation + 'deg)'}
+    const transformFill = { transform: 'rotate(' + (rotation / 2) + 'deg)' }
+    const transformFix = { transform: 'rotate(' + rotation + 'deg)' }
 
     return (
       <div key='radial-progress' className={'radial-progress ' + cssClass}>

@@ -7,7 +7,7 @@ const path = require('path')
 let hasErrors = false
 
 // Find all Javascript source files
-const files = walkSync('src', {globs: ['**/*.js']})
+const files = walkSync('src', { globs: ['**/*.js'] })
 console.log('Running extra-lint on ' + files.length + ' files...')
 
 // Read each file, line by line

@@ -1,6 +1,6 @@
 const React = require('react')
 
-const {dispatcher} = require('../lib/dispatcher')
+const { dispatcher } = require('../lib/dispatcher')
 
 module.exports = class CreateTorrentErrorPage extends React.Component {
   render () {

@@ -2,7 +2,7 @@ const React = require('react')
 const electron = require('electron')
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatcher} = require('../lib/dispatcher')
+const { dispatcher } = require('../lib/dispatcher')
 
 module.exports = class UnsupportedMediaModal extends React.Component {
   render () {

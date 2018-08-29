@@ -4,7 +4,7 @@ module.exports = {
   setBadge
 }
 
-const {app, Menu} = require('electron')
+const { app, Menu } = require('electron')
 
 const dialog = require('./dialog')
 const log = require('./log')

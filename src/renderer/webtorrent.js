@@ -16,7 +16,7 @@ const zeroFill = require('zero-fill')
 
 const crashReporter = require('../crash-reporter')
 const config = require('../config')
-const {TorrentKeyNotFoundError} = require('./lib/errors')
+const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 
 // Report when the process crashes
@@ -97,7 +97,7 @@ function init () {
   ipc.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
-    ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
+    ipc.send('wt-uncaught-error', { message: e.error.message, stack: e.error.stack }),
   true)
 
   setInterval(updateTorrentProgress, 1000)
@@ -251,7 +251,7 @@ function generateTorrentPoster (torrentKey) {
 function updateTorrentProgress () {
   const progress = getTorrentProgress()
   // TODO: diff torrent-by-torrent, not once for the whole update
-  if (prevProgress && deepEqual(progress, prevProgress, {strict: true})) {
+  if (prevProgress && deepEqual(progress, prevProgress, { strict: true })) {
     return /* don't send heavy object if it hasn't changed */
   }
   ipc.send('wt-progress', progress)
@@ -345,7 +345,7 @@ function getAudioMetadata (infoHash, index) {
   const metadata = { title: file.name }
   ipc.send('wt-audio-metadata', infoHash, index, metadata)
 
-  const options = {native: false, skipCovers: true, fileSize: file.length}
+  const options = { native: false, skipCovers: true, fileSize: file.length }
   const onMetaData = file.done
     // If completed; use direct file access
     ? mm.parseFile(path.join(torrent.path, file.path), options)

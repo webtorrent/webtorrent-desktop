@@ -2,8 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 
-const {dispatch} = require('../lib/dispatcher')
-const {TorrentKeyNotFoundError} = require('../lib/errors')
+const { dispatch } = require('../lib/dispatcher')
+const { TorrentKeyNotFoundError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
 

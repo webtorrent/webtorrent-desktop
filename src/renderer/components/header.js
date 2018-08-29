@@ -1,6 +1,6 @@
 const React = require('react')
 
-const {dispatcher} = require('../lib/dispatcher')
+const { dispatcher } = require('../lib/dispatcher')
 
 class Header extends React.Component {
   render () {

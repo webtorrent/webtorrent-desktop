@@ -5,7 +5,7 @@ const RaisedButton = require('material-ui/RaisedButton').default
 module.exports = class ModalOKCancel extends React.Component {
   render () {
     const cancelStyle = { marginRight: 10, color: 'black' }
-    const {cancelText, onCancel, okText, onOK} = this.props
+    const { cancelText, onCancel, okText, onOK } = this.props
     return (
       <div className='float-right'>
         <FlatButton
