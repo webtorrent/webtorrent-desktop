@@ -16,7 +16,7 @@ module.exports = {
 const http = require('http')
 
 const config = require('../../config')
-const {CastingError} = require('./errors')
+const { CastingError } = require('./errors')
 
 // Lazy load these for a ~300ms improvement in startup time
 let airplayer, chromecasts, dlnacasts
@@ -83,7 +83,7 @@ function testPlayer (type) {
   }
 
   function getDevices () {
-    return [{name: type + '-1'}, {name: type + '-2'}]
+    return [{ name: type + '-1' }, { name: type + '-2' }]
   }
 
   function open () {}
@@ -429,11 +429,11 @@ function toggleMenu (location) {
   }
 
   // Show a menu
-  state.devices.castMenu = {location, devices}
+  state.devices.castMenu = { location, devices }
 }
 
 function selectDevice (index) {
-  const {location, devices} = state.devices.castMenu
+  const { location, devices } = state.devices.castMenu
 
   // Start casting
   const player = getPlayer(location)

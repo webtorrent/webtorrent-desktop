@@ -2,7 +2,7 @@ const React = require('react')
 const TextField = require('material-ui/TextField').default
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 
 module.exports = class OpenTorrentAddressModal extends React.Component {
   render () {

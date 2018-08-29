@@ -5,7 +5,7 @@ const zeroFill = require('zero-fill')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -397,7 +397,7 @@ function renderCastScreen (state) {
 function renderCastOptions (state) {
   if (!state.devices.castMenu) return
 
-  const {location, devices} = state.devices.castMenu
+  const { location, devices } = state.devices.castMenu
   const player = state.devices[location]
 
   const items = devices.map(function (device, ix) {
@@ -520,9 +520,9 @@ function renderPlayerControls (state) {
 
   // Add the cast buttons. Icons for each cast type, connected/disconnected:
   const buttonIcons = {
-    'chromecast': {true: 'cast_connected', false: 'cast'},
-    'airplay': {true: 'airplay', false: 'airplay'},
-    'dlna': {true: 'tv', false: 'tv'}
+    'chromecast': { true: 'cast_connected', false: 'cast' },
+    'airplay': { true: 'airplay', false: 'airplay' },
+    'dlna': { true: 'tv', false: 'tv' }
   }
   castTypes.forEach(function (castType) {
     // Do we show this button (eg. the Chromecast button) at all?
@@ -677,7 +677,7 @@ function renderLoadingBar (state) {
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
     const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
-      parts.push({start: i - fileProg.startPiece, count: 1})
+      parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }

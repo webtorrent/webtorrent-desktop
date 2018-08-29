@@ -5,7 +5,7 @@ const parallel = require('run-parallel')
 
 const remote = electron.remote
 
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class SubtitlesController {
   constructor (state) {

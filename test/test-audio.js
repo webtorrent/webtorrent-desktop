@@ -6,7 +6,7 @@ test('audio-streaming', function (t) {
 
   t.timeoutAfter(60e3)
   const app = setup.createApp()
-  setup.waitForLoad(app, t, {online: true})
+  setup.waitForLoad(app, t, { online: true })
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Play Wired CD. Wait for it to start streaming.
     .then(() => app.client.moveToObject('#torrent-wired'))

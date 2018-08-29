@@ -7,7 +7,7 @@ const RaisedButton = require('material-ui/RaisedButton').default
 const Heading = require('../components/heading')
 const PathSelector = require('../components/path-selector')
 
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 const config = require('../../config')
 
 class PreferencesPage extends React.Component {

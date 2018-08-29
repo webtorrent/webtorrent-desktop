@@ -2,7 +2,7 @@ const chokidar = require('chokidar')
 const log = require('./log')
 
 class FolderWatcher {
-  constructor ({window, state}) {
+  constructor ({ window, state }) {
     this.window = window
     this.state = state
     this.torrentsFolderPath = null

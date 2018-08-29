@@ -1,6 +1,6 @@
 const appConfig = require('application-config')('WebTorrent')
 const path = require('path')
-const {EventEmitter} = require('events')
+const { EventEmitter } = require('events')
 
 const config = require('../../config')
 

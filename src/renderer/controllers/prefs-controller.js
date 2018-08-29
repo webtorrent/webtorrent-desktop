@@ -1,4 +1,4 @@
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 const ipcRenderer = require('electron').ipcRenderer
 
 // Controls the Preferences screen

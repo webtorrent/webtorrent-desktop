@@ -74,7 +74,7 @@ function init () {
     isReady = true
     const state = results.state
 
-    windows.main.init(state, {hidden: hidden})
+    windows.main.init(state, { hidden: hidden })
     windows.webtorrent.init()
     menu.init()
 
@@ -86,7 +86,7 @@ function init () {
     // Report uncaught exceptions
     process.on('uncaughtException', (err) => {
       console.error(err)
-      const error = {message: err.message, stack: err.stack}
+      const error = { message: err.message, stack: err.stack }
       windows.main.dispatch('uncaughtError', 'main', error)
     })
   }
@@ -131,7 +131,7 @@ function delayedInit (state) {
   const dock = require('./dock')
   const updater = require('./updater')
   const FolderWatcher = require('./folder-watcher')
-  const folderWatcher = new FolderWatcher({window: windows.main, state})
+  const folderWatcher = new FolderWatcher({ window: windows.main, state })
 
   announcement.init()
   dock.init()

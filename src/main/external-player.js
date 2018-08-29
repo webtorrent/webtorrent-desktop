@@ -52,7 +52,7 @@ function spawnExternal (playerPath, args) {
     playerPath += `/Contents/MacOS/${path.basename(playerPath, '.app')}`
   }
 
-  proc = cp.spawn(playerPath, args, {stdio: 'ignore'})
+  proc = cp.spawn(playerPath, args, { stdio: 'ignore' })
 
   // If it works, close the modal after a second
   const closeModalTimeout = setTimeout(() =>
