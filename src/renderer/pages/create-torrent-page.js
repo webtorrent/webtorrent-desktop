@@ -3,7 +3,7 @@ const path = require('path')
 const prettyBytes = require('prettier-bytes')
 const React = require('react')
 
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 
 const FlatButton = require('material-ui/FlatButton').default
 const RaisedButton = require('material-ui/RaisedButton').default
@@ -35,7 +35,7 @@ class CreateTorrentPage extends React.Component {
     // Then, exclude .DS_Store and other dotfiles
     const files = info.files
       .filter((f) => !containsDots(f.path, pathPrefix))
-      .map((f) => ({name: f.name, path: f.path, size: f.size}))
+      .map((f) => ({ name: f.name, path: f.path, size: f.size }))
     if (files.length === 0) return (<CreateTorrentErrorPage state={state} />)
 
     // Then, use the name of the base folder (or sole file, for a single file torrent)
@@ -65,9 +65,9 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Create React event handlers only once
-    this.setIsPrivate = (_, isPrivate) => this.setState({isPrivate})
-    this.setComment = (_, comment) => this.setState({comment})
-    this.setTrackers = (_, trackers) => this.setState({trackers})
+    this.setIsPrivate = (_, isPrivate) => this.setState({ isPrivate })
+    this.setComment = (_, comment) => this.setState({ comment })
+    this.setTrackers = (_, trackers) => this.setState({ trackers })
     this.handleSubmit = handleSubmit.bind(this)
   }
 
@@ -141,7 +141,7 @@ class CreateTorrentPage extends React.Component {
           <label>Private:</label>
           <Checkbox
             className='torrent-is-private control'
-            style={{display: ''}}
+            style={{ display: '' }}
             checked={this.state.isPrivate}
             onCheck={this.setIsPrivate} />
         </div>

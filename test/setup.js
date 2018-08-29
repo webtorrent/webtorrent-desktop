@@ -32,7 +32,7 @@ function createApp (t) {
     path: path.join(__dirname, '..', 'node_modules', '.bin',
       'electron' + (process.platform === 'win32' ? '.cmd' : '')),
     args: ['-r', path.join(__dirname, 'mocks.js'), path.join(__dirname, '..')],
-    env: {NODE_ENV: 'test'},
+    env: { NODE_ENV: 'test' },
     waitTimeout: 10e3
   })
 }

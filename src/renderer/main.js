@@ -450,7 +450,7 @@ function setDimensions (dimensions) {
   )
 
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {contentBounds: true, x: null, y: null, width, height})
+  ipcRenderer.send('setBounds', { contentBounds: true, x: null, y: null, width, height })
   state.playing.aspectRatio = aspectRatio
 }
 
