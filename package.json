@@ -67,7 +67,7 @@
     "plist": "^2.0.1",
     "pngjs": "^3.0.0",
     "run-series": "^1.1.4",
-    "spectron": "^3.3.0",
+    "spectron": "^4.0.0",
     "standard": "*",
     "tape": "^4.6.0",
     "walk-sync": "^0.3.1"
