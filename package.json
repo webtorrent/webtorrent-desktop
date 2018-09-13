@@ -57,7 +57,7 @@
     "depcheck": "^0.6.4",
     "electron": "1.6.16",
     "electron-osx-sign": "^0.4.10",
-    "electron-packager": "~8.5.1",
+    "electron-packager": "~12.1.2",
     "electron-winstaller": "^2.6.4",
     "gh-release": "^3.2.1",
     "minimist": "^1.2.0",
