@@ -204,6 +204,28 @@ function renderOverlay (state) {
   )
 }
 
+/**
+ * Render track or disk number string
+ * @param common metadata.common part
+ * @param key should be either 'track' or 'disk'
+ * @return track or disk number metadata as JSX block
+ */
+function renderTrack (common, key) {
+  // Audio metadata: track-number
+  if (common[key] && common[key].no) {
+    let str = `${common[key].no}`
+    if (common[key].of) {
+      str += ` of ${common[key].of}`
+    }
+    const style = { textTransform: 'capitalize' }
+    return (
+      <div className={`audio-${key}`}>
+        <label style={style}>{key}</label> {str}
+      </div>
+    )
+  }
+}
+
 function renderAudioMetadata (state) {
   const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
@@ -226,6 +248,15 @@ function renderAudioMetadata (state) {
       </div>
     ))
   }
+
+  // Audio metadata: disk & track-number
+  const count = ['track', 'disk']
+  count.forEach(key => {
+    const nrElem = renderTrack(common, key)
+    if (nrElem) {
+      elems.push(nrElem)
+    }
+  })
 
   // Audio metadata: album
   if (common.album) {
@@ -265,16 +296,6 @@ function renderAudioMetadata (state) {
     elems.push((
       <div key='release' className='audio-release'>
         <label>Release</label>{ releaseInfo.join(', ') }
-      </div>
-    ))
-  }
-
-  // Audio metadata: track-number
-  if (common.track && common.track.no && common.track.of) {
-    const track = common.track.no + ' of ' + common.track.of
-    elems.push((
-      <div key='track' className='audio-track'>
-        <label>Track</label>{track}
       </div>
     ))
   }
