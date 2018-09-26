@@ -71,20 +71,21 @@ test('torrent-list: expand torrent, unselect file', function (t) {
     .then(() => app.client.click('#torrent-cosmos .download input'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', '0%'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'torrent-list-cosmos-expand-start'))
+    // TODO: individual files are not created until download initiates
     // Make sure that it creates all files EXCEPT the deslected one
-    .then(() => setup.compareDownloadFolder(t, 'CosmosLaundromatFirstCycle', [
-      // TODO: the .gif should NOT be here, since we just deselected it.
-      // This is a bug. See https://github.com/webtorrent/webtorrent-desktop/issues/719
-      'Cosmos Laundromat - First Cycle (1080p).gif',
-      'Cosmos Laundromat - First Cycle (1080p).mp4',
-      'Cosmos Laundromat - First Cycle (1080p).ogv',
-      'CosmosLaundromat-FirstCycle1080p.en.srt',
-      'CosmosLaundromat-FirstCycle1080p.es.srt',
-      'CosmosLaundromat-FirstCycle1080p.fr.srt',
-      'CosmosLaundromat-FirstCycle1080p.it.srt',
-      'CosmosLaundromatFirstCycle_meta.sqlite',
-      'CosmosLaundromatFirstCycle_meta.xml'
-    ]))
+    // .then(() => setup.compareDownloadFolder(t, 'CosmosLaundromatFirstCycle', [
+    //   // TODO: the .gif should NOT be here, since we just deselected it.
+    //   // This is a bug. See https://github.com/webtorrent/webtorrent-desktop/issues/719
+    //   'Cosmos Laundromat - First Cycle (1080p).gif',
+    //   'Cosmos Laundromat - First Cycle (1080p).mp4',
+    //   'Cosmos Laundromat - First Cycle (1080p).ogv',
+    //   'CosmosLaundromat-FirstCycle1080p.en.srt',
+    //   'CosmosLaundromat-FirstCycle1080p.es.srt',
+    //   'CosmosLaundromat-FirstCycle1080p.fr.srt',
+    //   'CosmosLaundromat-FirstCycle1080p.it.srt',
+    //   'CosmosLaundromatFirstCycle_meta.sqlite',
+    //   'CosmosLaundromatFirstCycle_meta.xml'
+    // ]))
     // Delete torrent plus data
     // Spectron doesn't have proper support for menu clicks yet...
     .then(() => app.webContents.executeJavaScript(

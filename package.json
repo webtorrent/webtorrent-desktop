@@ -57,7 +57,7 @@
     "depcheck": "^0.6.4",
     "electron": "3.0.0",
     "electron-osx-sign": "^0.4.10",
-    "electron-packager": "^12.1.2",
+    "electron-packager": "~12.1.2",
     "electron-winstaller": "^2.6.4",
     "gh-release": "^3.2.1",
     "minimist": "^1.2.0",
@@ -67,7 +67,7 @@
     "plist": "^3.0.1",
     "pngjs": "^3.0.0",
     "run-series": "^1.1.4",
-    "spectron": "^4.0.0",
+    "spectron": "github:mathiasvr/spectron",
     "standard": "*",
     "tape": "^4.6.0",
     "walk-sync": "^0.3.1"

@@ -4,7 +4,7 @@ const setup = require('./setup')
 test('video-streaming', function (t) {
   setup.resetTestDataDir()
 
-  t.timeoutAfter(30e3)
+  t.timeoutAfter(60e3)
   const app = setup.createApp()
   setup.waitForLoad(app, t, { online: true })
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
