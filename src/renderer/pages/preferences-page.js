@@ -1,5 +1,6 @@
 const path = require('path')
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const colors = require('material-ui/styles/colors')
 const Checkbox = require('material-ui/Checkbox').default
@@ -238,7 +239,7 @@ class PreferencesPage extends React.Component {
 class PreferencesSection extends React.Component {
   static get propTypes () {
     return {
-      title: React.PropTypes.string
+      title: PropTypes.string
     }
   }
 

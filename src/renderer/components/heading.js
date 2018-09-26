@@ -1,11 +1,12 @@
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const colors = require('material-ui/styles/colors')
 
 class Heading extends React.Component {
   static get propTypes () {
     return {
-      level: React.PropTypes.number
+      level: PropTypes.number
     }
   }
 
