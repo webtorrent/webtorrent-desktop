@@ -32,7 +32,7 @@
     "location-history": "^1.0.0",
     "material-ui": "^0.17.0",
     "mkdirp": "^0.5.1",
-    "music-metadata": "^2.6.1",
+    "music-metadata": "^3.1.0",
     "network-address": "^1.1.0",
     "parse-torrent": "^6.0.1",
     "prettier-bytes": "^1.0.1",
@@ -51,7 +51,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3",
+    "babel-eslint": "^9.0.0",
     "buble": "^0.19.3",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.4",
