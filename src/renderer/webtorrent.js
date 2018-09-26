@@ -345,7 +345,12 @@ function getAudioMetadata (infoHash, index) {
   const metadata = { title: file.name }
   ipc.send('wt-audio-metadata', infoHash, index, metadata)
 
-  const options = { native: false, skipCovers: true, fileSize: file.length }
+  const options = { native: false,
+    skipCovers: true,
+    fileSize: file.length,
+    observer: event => {
+      ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
+    } }
   const onMetaData = file.done
     // If completed; use direct file access
     ? mm.parseFile(path.join(torrent.path, file.path), options)
@@ -353,9 +358,8 @@ function getAudioMetadata (infoHash, index) {
     : mm.parseStream(file.createReadStream(), file.name, options)
 
   onMetaData
-    .then(function (metadata) {
-      console.log('got audio metadata for %s (length=%s): %o', file.name, file.length, metadata)
-      ipc.send('wt-audio-metadata', infoHash, index, metadata)
+    .then(() => {
+      console.log(`metadata for file='${file.name}' completed.`)
     }).catch(function (err) {
       return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
     })
