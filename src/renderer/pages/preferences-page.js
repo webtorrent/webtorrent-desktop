@@ -67,7 +67,7 @@ class PreferencesPage extends React.Component {
       <Preference>
         <Checkbox
           className='control'
-          checked={this.props.state.unsaved.prefs.highestPlaybackPriority}
+          checked={this.props.state.saved.prefs.highestPlaybackPriority}
           label={'Highest Playback Priority'}
           onCheck={this.handleHighestPlaybackPriorityChange}
         />
@@ -113,7 +113,7 @@ class PreferencesPage extends React.Component {
       <Preference>
         <Checkbox
           className='control'
-          checked={this.props.state.unsaved.prefs.autoAddTorrents}
+          checked={this.props.state.saved.prefs.autoAddTorrents}
           label={'Watch for new .torrent files and add them immediately'}
           onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
         />
@@ -122,7 +122,7 @@ class PreferencesPage extends React.Component {
   }
 
   handleAutoAddTorrentsChange (e, isChecked) {
-    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+    const torrentsFolderPath = this.props.state.saved.prefs.torrentsFolderPath
     if (isChecked && !torrentsFolderPath) {
       alert('Select a torrents folder first.') // eslint-disable-line
       e.preventDefault()
@@ -140,7 +140,7 @@ class PreferencesPage extends React.Component {
   }
 
   torrentsFolderPathSelector () {
-    const torrentsFolderPath = this.props.state.unsaved.prefs.torrentsFolderPath
+    const torrentsFolderPath = this.props.state.saved.prefs.torrentsFolderPath
 
     return (
       <Preference>
