@@ -1,3 +1,5 @@
+const path = require('path')
+
 const colors = require('material-ui/styles/colors')
 const electron = require('electron')
 const React = require('react')
@@ -31,8 +33,8 @@ class PathSelector extends React.Component {
 
   handleClick () {
     const opts = Object.assign({
-      defaultPath: this.props.value,
-      properties: ['openFile', 'openDirectory']
+      defaultPath: this.props.value && path.dirname(this.props.value),
+      properties: [ 'openFile', 'openDirectory' ]
     }, this.props.dialog)
 
     remote.dialog.showOpenDialog(
