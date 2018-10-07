@@ -1,5 +1,6 @@
 const React = require('react')
 const TextField = require('material-ui/TextField').default
+const electron = require('electron')
 
 const ModalOKCancel = require('./modal-ok-cancel')
 const { dispatch, dispatcher } = require('../lib/dispatcher')
@@ -28,6 +29,11 @@ module.exports = class OpenTorrentAddressModal extends React.Component {
 
   componentDidMount () {
     this.torrentURL.input.focus()
+    const clipboardContent = electron.clipboard.readText()
+    if (clipboardContent.match(/magnet:\?xt=urn:[a-z0-9]+:[a-z0-9]{32}/i) !== null) {
+      this.torrentURL.input.value = clipboardContent
+      this.torrentURL.input.select()
+    }
   }
 }
 
