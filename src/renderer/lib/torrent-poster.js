@@ -5,6 +5,8 @@ const path = require('path')
 
 const mediaExtensions = require('./media-extensions')
 
+const msgNoSuitablePoster = 'Cannot generate a poster from any files in the torrent'
+
 function torrentPoster (torrent, cb) {
   // First, try to use a poster image if available
   const posterFile = torrent.files.filter(function (file) {
@@ -23,7 +25,7 @@ function torrentPoster (torrent, cb) {
 
   if (bestScore.size === 0) {
     // Admit defeat, no video, audio or image had a significant presence
-    return cb(new Error('Cannot generate a poster from any files in the torrent'))
+    return cb(new Error(msgNoSuitablePoster))
   }
 
   // Based on which media type is dominant we select the corresponding poster function
@@ -110,6 +112,8 @@ function scoreAudioCoverFile (imgFile) {
 function torrentPosterFromAudio (torrent, cb) {
   const imageFiles = filterOnExtension(torrent, mediaExtensions.image)
 
+  if (imageFiles.length === 0) return cb(new Error(msgNoSuitablePoster))
+
   const bestCover = imageFiles.map(file => {
     return {
       file: file,
@@ -128,8 +132,6 @@ function torrentPosterFromAudio (torrent, cb) {
     }
     return b
   })
-
-  if (!bestCover) return cb(new Error('Generated poster contains no data'))
 
   const extname = path.extname(bestCover.file.name)
   bestCover.file.getBuffer((err, buf) => cb(err, buf, extname))
@@ -172,7 +174,7 @@ function torrentPosterFromVideo (torrent, cb) {
 
       server.destroy()
 
-      if (buf.length === 0) return cb(new Error('Generated poster contains no data'))
+      if (buf.length === 0) return cb(new Error(msgNoSuitablePoster))
 
       cb(null, buf, '.jpg')
     }
