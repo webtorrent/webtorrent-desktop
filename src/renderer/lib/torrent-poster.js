@@ -131,8 +131,6 @@ function torrentPosterFromAudio (torrent, cb) {
     return b
   })
 
-  if (!bestCover) return cb(new Error('Generated poster contains no data'))
-
   const extname = path.extname(bestCover.file.name)
   bestCover.file.getBuffer((err, buf) => cb(err, buf, extname))
 }
