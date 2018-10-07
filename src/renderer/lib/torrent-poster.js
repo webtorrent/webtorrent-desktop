@@ -110,6 +110,8 @@ function scoreAudioCoverFile (imgFile) {
 function torrentPosterFromAudio (torrent, cb) {
   const imageFiles = filterOnExtension(torrent, mediaExtensions.image)
 
+  if (!imageFiles.length) return cb(new Error('Generated poster contains no files'));
+
   const bestCover = imageFiles.map(file => {
     return {
       file: file,
