@@ -6,7 +6,7 @@ const LinearProgress = require('material-ui/LinearProgress').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
-const { dispatcher } = require('../lib/dispatcher')
+const { dispatcher, dispatch } = require('../lib/dispatcher')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -394,10 +394,20 @@ function getErrorMessage (torrentSummary) {
   if (err === 'path-missing') {
     return (
       <span>
-        Path missing.<br />
-        Fix and restart the app, or delete the torrent.
+        Torrent data missing.<br />
+        Fix or click to
+        <a onClick={(e) => {
+          e.stopPropagation()
+          restartTorrent(torrentSummary)
+        }}>re-download torrent</a>.
       </span>
     )
   }
   return 'Error'
+}
+
+function restartTorrent (summary) {
+  delete summary.path
+  delete summary.error
+  dispatch('startTorrentingSummary', summary.torrentKey)
 }
