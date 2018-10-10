@@ -5,7 +5,7 @@
  *   actually used because auto-prefixing is disabled with
  *   `darkBaseTheme.userAgent = false`. Return a fake object.
  */
-let Module = require('module')
+const Module = require('module')
 const _require = Module.prototype.require
 Module.prototype.require = function (id) {
   if (id === 'inline-style-prefixer') return {}

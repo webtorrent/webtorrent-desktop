@@ -236,7 +236,7 @@ function saveImmediate (state, cb) {
     .filter((x) => x.infoHash)
     .map(function (x) {
       const torrent = {}
-      for (let key in x) {
+      for (const key in x) {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
         }

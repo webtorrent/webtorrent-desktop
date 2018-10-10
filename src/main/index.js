@@ -192,7 +192,7 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  let torrentIds = []
+  const torrentIds = []
   argv.forEach(function (arg) {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed

@@ -35,7 +35,7 @@ files.forEach(function (file) {
     }
 
     if (error) {
-      let name = path.basename(file)
+      const name = path.basename(file)
       console.log('%s:%d - %s:\n%s', name, i + 1, error, line)
       hasErrors = true
     }
