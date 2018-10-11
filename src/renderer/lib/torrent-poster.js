@@ -98,7 +98,7 @@ function scoreAudioCoverFile (imgFile) {
     spectrogram: -80
   }
 
-  for (let keyword in relevanceScore) {
+  for (const keyword in relevanceScore) {
     if (fileName === keyword) {
       return relevanceScore[keyword]
     }

@@ -318,7 +318,7 @@ module.exports = class TorrentListController {
 function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
-    let ret = []
+    const ret = []
     paths.forEach(function (path) {
       findFilesRecursive([path], function (fileObjs) {
         ret.push(...fileObjs)

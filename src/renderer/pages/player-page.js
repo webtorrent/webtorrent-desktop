@@ -734,14 +734,14 @@ function formatTime (time, total) {
     return '0:00'
   }
 
-  let totalHours = Math.floor(total / 3600)
-  let totalMinutes = Math.floor(total % 3600 / 60)
-  let hours = Math.floor(time / 3600)
+  const totalHours = Math.floor(total / 3600)
+  const totalMinutes = Math.floor(total % 3600 / 60)
+  const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
   if (totalMinutes > 9) {
     minutes = zeroFill(2, minutes)
   }
-  let seconds = zeroFill(2, Math.floor(time % 60))
+  const seconds = zeroFill(2, Math.floor(time % 60))
 
   return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }
