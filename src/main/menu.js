@@ -121,29 +121,8 @@ function getMenuTemplate () {
       label: 'Edit',
       submenu: [
         {
-          role: 'undo'
-        },
-        {
-          role: 'redo'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          role: 'cut'
-        },
-        {
-          role: 'copy'
-        },
-        {
           label: 'Paste Torrent Address',
           role: 'paste'
-        },
-        {
-          role: 'delete'
-        },
-        {
-          role: 'selectall'
         }
       ]
     },
