@@ -1,7 +1,8 @@
 const mediaExtensions = {
   audio: [
-    '.aac', '.asf', '.flac', '.m2a', '.m4a', '.m4b', '.mp2', '.mp4',
-    '.mp3', '.oga', '.ogg', '.opus', '.wma', '.wav', '.wv', '.wvp'],
+    '.aac', 'aif', 'aiff', '.asf', '.flac', '.m2a', '.m4a', '.m4b',
+    '.mp2', '.mp3', '.mpc', '.oga', '.ogg', '.opus', 'spx', '.wma',
+    '.wav', '.wv', '.wvp'],
   video: [
     '.avi', '.mp4', '.m4v', '.webm', '.mov', '.mkv', 'mpg', 'mpeg',
     '.ogv', '.webm', '.wmv'],
