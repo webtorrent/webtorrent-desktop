@@ -70,7 +70,7 @@
     "spectron": "^3.3.0",
     "standard": "*",
     "tape": "^4.6.0",
-    "walk-sync": "^0.3.1"
+    "walk-sync": "^1.0.0"
   },
   "engines": {
     "node": ">=4.0.0"
