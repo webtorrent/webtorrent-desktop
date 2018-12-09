@@ -12,6 +12,8 @@ module.exports = class TorrentList extends React.Component {
   render () {
     const state = this.props.state
 
+    
+
     const contents = []
     if (state.downloadPathStatus === 'missing') {
       contents.push(
@@ -43,6 +45,7 @@ module.exports = class TorrentList extends React.Component {
 
   renderTorrent (torrentSummary) {
     const state = this.props.state
+    const compact = state.compactListView
     const infoHash = torrentSummary.infoHash
     const isSelected = infoHash && state.selectedInfoHash === infoHash
 
@@ -57,6 +60,11 @@ module.exports = class TorrentList extends React.Component {
     // Foreground: name of the torrent, basic info like size, play button,
     // cast buttons if available, and delete
     const classes = ['torrent']
+
+    if (compact) {
+      classes.push('compact');
+    }
+
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
@@ -78,19 +86,18 @@ module.exports = class TorrentList extends React.Component {
 
   // Show name, download status, % complete
   renderTorrentMetadata (torrentSummary) {
+    const state = this.props.state 
+    const compact = state.compactListView
     const name = torrentSummary.name || 'Loading torrent...'
-    const elements = [(
-      <div key='name' className='name ellipsis'>{name}</div>
-    )]
-
+   
     // If it's downloading/seeding then show progress info
     const prog = torrentSummary.progress
     let progElems
     if (torrentSummary.error) {
-      progElems = [getErrorMessage(torrentSummary)]
+      progElems = [getErrorMessage(torrentSummary, !compact)]
     } else if (torrentSummary.status !== 'paused' && prog) {
       progElems = [
-        renderDownloadCheckbox(),
+        // renderDownloadCheckbox(),
         renderTorrentStatus(),
         renderProgressBar(),
         renderPercentProgress(),
@@ -101,15 +108,34 @@ module.exports = class TorrentList extends React.Component {
       ]
     } else {
       progElems = [
-        renderDownloadCheckbox(),
+        // renderDownloadCheckbox(),
         renderTorrentStatus()
       ]
     }
-    elements.push(
-      <div key='progress-info' className='ellipsis'>
+
+    const elements = []
+    if (compact) {
+      elements.push(
+        <div className='ellipsis'>
+          {renderDownloadCheckbox()}
+          <span>{name}</span>
+          {progElems}
+        </div>
+      )
+    }
+    else {
+      elements.push(
+        <div key='name' className='name ellipsis'>{name}</div>
+      )
+
+      elements.push(
+        <div key='progress-info' className='ellipsis'>
+        {renderDownloadCheckbox()}
         {progElems}
       </div>
-    )
+      )
+    }
+
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
 
@@ -223,11 +249,14 @@ module.exports = class TorrentList extends React.Component {
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
+    const state = this.props.state
+    const compact = state.compactListView
     const infoHash = torrentSummary.infoHash
 
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton
     if (!torrentSummary.error && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
+
       playButton = (
         <i
           key='play-button'
@@ -389,12 +418,12 @@ function stopPropagation (e) {
   e.stopPropagation()
 }
 
-function getErrorMessage (torrentSummary) {
+function getErrorMessage (torrentSummary, newline) {
   const err = torrentSummary.error
   if (err === 'path-missing') {
     return (
       <span>
-        Path missing.<br />
+        Path missing. {newline ? <br /> : null}
         Fix and restart the app, or delete the torrent.
       </span>
     )

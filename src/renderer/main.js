@@ -237,6 +237,8 @@ const dispatchHandlers = {
   'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
   'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
   'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
+  'viewList': () => { state.compactListView = false },
+  'compactViewList': () => { state.compactListView = true },
 
   'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
   'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),

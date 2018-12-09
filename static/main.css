@@ -332,10 +332,16 @@ textarea,
   animation: fadein 0.5s;
 }
 
+
 .torrent,
 .torrent-placeholder {
   height: 100px;
 }
+
+.torrent.compact {
+  height: 50px;
+}
+
 
 .torrent:not(:last-child) {
   border-bottom: 1px solid #282828;
@@ -348,6 +354,10 @@ textarea,
   right: 15px;
   width: calc(100% - 30px);
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
+}
+
+.torrent.compact .metadata {
+  top: 15px;
 }
 
 .torrent .metadata span:not(:last-child)::after {
@@ -376,10 +386,20 @@ textarea,
   font-size: 55px;
 }
 
+.torrent.compact .play {
+  top: 15px;
+  font-size: 24px;
+}
+
+
 .torrent .delete {
   position: absolute;
   top: 38px;
   right: 12px;
+}
+
+.torrent.compact .delete {
+  top: 15px;
 }
 
 .torrent .download {
