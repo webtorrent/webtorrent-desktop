@@ -44,31 +44,26 @@ class Header extends React.Component {
     if (state.location.url() !== 'home') return null
 
     const compact = state.compactListView
-    const listClasses = ['icon', 'view_list']
-    const compactClasses = ['icon', 'list']
     if (compact) {
-      compactClasses.push('disabled')
-    }
-    else {
-      listClasses.push('disabled')
-    }
-
-    return (
-      <span>
-        <i className={listClasses.join(' ')}
+      return (
+        <i className='icon view_list'
           title='List'
           onClick={dispatcher('viewList')}
           >
           view_list
         </i>
-        <i className={compactClasses.join(' ')}
+      )
+    }
+    else {
+      return (
+        <i className='icon list'
           title='Compact list'
           onClick={dispatcher('compactViewList')}
           >
           list
         </i>
-      </span>
-    )
+      )
+    }
   }
 
   getAddButton () {
