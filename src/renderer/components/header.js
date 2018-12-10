@@ -48,8 +48,7 @@ class Header extends React.Component {
       return (
         <i className='icon view_list'
           title='List'
-          onClick={dispatcher('viewList')}
-          >
+          onClick={dispatcher('viewList')}>
           view_list
         </i>
       )
@@ -58,8 +57,7 @@ class Header extends React.Component {
       return (
         <i className='icon list'
           title='Compact list'
-          onClick={dispatcher('compactViewList')}
-          >
+          onClick={dispatcher('compactViewList')}>
           list
         </i>
       )

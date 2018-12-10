@@ -61,10 +61,7 @@ module.exports = class TorrentList extends React.Component {
     // cast buttons if available, and delete
     const classes = ['torrent']
 
-    if (compact) {
-      classes.push('compact');
-    }
-
+    if (compact) { classes.push('compact') }
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
