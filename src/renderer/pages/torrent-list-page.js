@@ -97,7 +97,6 @@ module.exports = class TorrentList extends React.Component {
       progElems = [getErrorMessage(torrentSummary, !compact)]
     } else if (torrentSummary.status !== 'paused' && prog) {
       progElems = [
-        // renderDownloadCheckbox(),
         renderTorrentStatus(),
         renderProgressBar(),
         renderPercentProgress(),
@@ -108,7 +107,6 @@ module.exports = class TorrentList extends React.Component {
       ]
     } else {
       progElems = [
-        // renderDownloadCheckbox(),
         renderTorrentStatus()
       ]
     }
@@ -250,7 +248,6 @@ module.exports = class TorrentList extends React.Component {
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const state = this.props.state
-    const compact = state.compactListView
     const infoHash = torrentSummary.infoHash
 
     // Only show the play/dowload buttons for torrents that contain playable media
