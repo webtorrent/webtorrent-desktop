@@ -393,7 +393,7 @@ function getErrorMessage (torrentSummary) {
   const err = torrentSummary.error
   if (err === 'path-missing') {
     return (
-      <span>
+      <span key='path-missing'>
         Path missing.<br />
         Fix and restart the app, or delete the torrent.
       </span>
