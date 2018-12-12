@@ -1,13 +1,14 @@
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const RaisedButton = require('material-ui/RaisedButton').default
 
 class ShowMore extends React.Component {
   static get propTypes () {
     return {
-      defaultExpanded: React.PropTypes.bool,
-      hideLabel: React.PropTypes.string,
-      showLabel: React.PropTypes.string
+      defaultExpanded: PropTypes.bool,
+      hideLabel: PropTypes.string,
+      showLabel: PropTypes.string
     }
   }
 
