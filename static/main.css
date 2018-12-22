@@ -372,11 +372,17 @@ textarea,
 .torrent .play {
   position: absolute;
   top: 23px;
-  right: 45px;
+  right: 57px;
   font-size: 55px;
 }
 
 .torrent .delete {
+  position: absolute;
+  top: 38px;
+  right: 36px;
+}
+
+.torrent .deselect-all {
   position: absolute;
   top: 38px;
   right: 12px;

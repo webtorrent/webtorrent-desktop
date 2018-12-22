@@ -193,6 +193,17 @@ module.exports = class TorrentListController {
     }
   }
 
+  toggleTorrentAllFiles (infoHash, state) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    for (let i = 0; i < torrentSummary.selections.length; i++) {
+      torrentSummary.selections[i] = state
+    }
+
+    if (torrentSummary.status !== 'paused') {
+      ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
+    }
+  }
+
   confirmDeleteTorrent (infoHash, deleteData) {
     this.state.modal = {
       id: 'remove-torrent-modal',

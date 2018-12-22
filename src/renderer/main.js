@@ -243,6 +243,8 @@ const dispatchHandlers = {
   'resumeAllTorrents': () => controllers.torrentList().resumeAllTorrents(),
   'toggleTorrentFile': (infoHash, index) =>
     controllers.torrentList().toggleTorrentFile(infoHash, index),
+  'toggleTorrentAllFiles': (infoHash, state) =>
+    controllers.torrentList().toggleTorrentAllFiles(infoHash, state),
   'confirmDeleteTorrent': (infoHash, deleteData) =>
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
   'deleteTorrent': (infoHash, deleteData) =>

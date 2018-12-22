@@ -2,3 +2,5 @@ node_modules/
 build/
 dist/
 npm-debug.log*
+.DS_Store
+.idea/

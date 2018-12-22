@@ -224,6 +224,7 @@ module.exports = class TorrentList extends React.Component {
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
+    let isSelectedAll = torrentSummary.selections.every(elem => elem === false);
 
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton
@@ -247,7 +248,13 @@ module.exports = class TorrentList extends React.Component {
           className='icon delete'
           title='Remove torrent'
           onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
-          close
+          delete
+        </i>
+        <i
+          onClick={dispatcher('toggleTorrentAllFiles', infoHash, isSelectedAll)}
+          title={isSelectedAll ? 'Select All' : 'Deselect All'}
+          className='icon deselect-all'>
+          {isSelectedAll ? 'add' : 'close'}
         </i>
       </div>
     )
