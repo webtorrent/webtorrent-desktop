@@ -224,7 +224,11 @@ module.exports = class TorrentList extends React.Component {
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
-    let isSelectedAll = torrentSummary.selections.every(elem => elem === false);
+
+    let isSelectedAll = false
+    if (Array.isArray(torrentSummary.selections)) {
+      isSelectedAll = torrentSummary.selections.every(elem => elem === false);
+    }
 
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton
