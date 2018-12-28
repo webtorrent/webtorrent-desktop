@@ -374,9 +374,6 @@ function setupIpc () {
 
   ipcRenderer.send('ipcReady')
   
-  const sc = controllers.subtitles()
-  ipcRenderer.on('wt-addsubtitles', (e, ...args) => sc.addSubtitles(...args))
-
   State.on('stateSaved', () => ipcRenderer.send('stateSaved'))
 }
 

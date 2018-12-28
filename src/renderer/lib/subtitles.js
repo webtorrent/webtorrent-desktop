@@ -64,18 +64,17 @@ function streamChunk (file, start, end, chunkSize) {
   })
 }
 
-async function downloadSubtitle (movieFile, path) {
+async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
   const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize, movieFile.length, chunkSize)
-  const filepath = path + '/' + movieFile.path
+  const filepath = downloadsDirectory + '/' + movieFile.path
   const length = movieFile.length
   const hash = createSubtitleHash(length, first64kbytes, last64kbytes)
   const response = await querySubtitles(movieFile.length, hash, 'fin')
   const url = response[0]
-  const directory = path + '/'
   
-  return await downloadGzip(url, directory, response[1][0].SubFileName)
+  return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', response[1][0].SubFileName)
 }
 
 async function downloadGzip(url, directory, finalFilename){

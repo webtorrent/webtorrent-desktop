@@ -6,6 +6,7 @@ const parallel = require('run-parallel')
 const remote = electron.remote
 
 const { dispatch } = require('../lib/dispatcher')
+const request = require('request-promise-native')
 
 module.exports = class SubtitlesController {
   constructor (state) {
@@ -54,6 +55,7 @@ module.exports = class SubtitlesController {
         // Add the track
         if (trackIndex === -1) {
           trackIndex = subtitles.tracks.push(track) - 1
+          console.log("sub track added", track)
         }
 
         // If we're auto-selecting a track, try to find one in the user's language
@@ -67,11 +69,11 @@ module.exports = class SubtitlesController {
     })
   }
 
-  checkForSubtitles () {
+  async checkForSubtitles () {
     if (this.state.playing.type !== 'video') return
     const torrentSummary = this.state.getPlayingTorrentSummary()
     if (!torrentSummary || !torrentSummary.progress) return
-
+    
     torrentSummary.progress.files.forEach((fp, ix) => {
       if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
       const file = torrentSummary.files[ix]
@@ -79,8 +81,13 @@ module.exports = class SubtitlesController {
       const filePath = path.join(torrentSummary.path, file.path)
       this.addSubtitles([filePath], false)
     })
+    
+    const downloadedSubtitlePath = 'file:///' + torrentSummary.path + '/' + torrentSummary.name + '/subtitle.srt'
+    const downloadedSubtitle = await request(downloadedSubtitlePath)
+    
+    console.log('downloadedSubtitle', downloadedSubtitle)
   }
-
+  
   isSubtitle (file) {
     const name = typeof file === 'string' ? file : file.name
     const ext = path.extname(name).toLowerCase()

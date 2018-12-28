@@ -172,14 +172,8 @@ function addTorrentEvents (torrent) {
     const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
     
     if(movieFile !== undefined){
-      ipc.send('wt-warning', torrent.key, 'test1')
-      try{
-        const subtitleFilePath = await Subtitles.downloadSubtitle(movieFile, torrent.path)
-        ipc.send('wt-warning', torrent.key, 'test2:'+subtitleFilePath)
-        ipc.send('wt-addsubtitles', [subtitleFilePath], true)
-      }catch(e){
-        ipc.send('wt-error', torrent.key, e.toString())
-      }
+      await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name)
+      //ipc.send('wt-error', torrent.key, torrent)
     }
   }
   
