@@ -18,9 +18,7 @@ const crashReporter = require('../crash-reporter')
 const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
-const request = require('request-promise-native')
-const SubtitleHash = require("./lib/subtitle-hash")
-const streamToBuffer = require('stream-with-known-length-to-buffer')
+const Subtitles = require("./lib/subtitles")
 
 // Report when the process crashes
 crashReporter.init()
@@ -146,24 +144,6 @@ function createTorrent (torrentKey, options) {
   ipc.send('wt-new-torrent')
 }
 
-function querySubtitles (totalLength, subtitleHash, languageId){
-  return new Promise((resolve, reject) => {
-    //const url = 'https://rest.opensubtitles.org/search/query-'+encodeURIComponent(filename.toLowerCase())+'/sublanguageid-fin'
-    const url = 'https://rest.opensubtitles.org/search/moviebytesize-' + parseInt(totalLength, 10) + 
-      '/moviehash-' + encodeURIComponent(subtitleHash) + '/sublanguageid-' + encodeURIComponent(languageId)
-    
-    request({
-      url: url, 
-      headers: {
-        'User-Agent': 'Butter'
-      }
-    }).then(response => {
-      const responseObject = JSON.parse(response)
-      resolve([responseObject.length > 0 ? responseObject[0].SubDownloadLink : null, responseObject, url])
-    })
-  })
-}
-
 function addTorrentEvents (torrent) {
   torrent.on('warning', (err) =>
     ipc.send('wt-warning', torrent.key, err.message))
@@ -182,7 +162,7 @@ function addTorrentEvents (torrent) {
     updateTorrentProgress()
   }
   
-  function torrentReady () {
+  async function torrentReady () {
     const info = getTorrentInfo(torrent)
     ipc.send('wt-ready', torrent.key, info)
     ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info)
@@ -190,37 +170,17 @@ function addTorrentEvents (torrent) {
     updateTorrentProgress()
     
     const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
-
+    
     if(movieFile !== undefined){
-      const chunkSize = 64 * 1024
-      streamChunk(movieFile, 0, chunkSize, chunkSize).then((first64kbytes) => {
-        streamChunk(movieFile, movieFile.length - chunkSize, movieFile.length, chunkSize).then((last64kbytes) => {
-          const filepath = torrent.path + '/' + movieFile.path
-          const length = movieFile.length
-          const hash = SubtitleHash.createSubtitleHash(length, first64kbytes, last64kbytes)
-          
-          querySubtitles(movieFile.length, hash, 'fin').then(response => {
-            ipc.send('wt-addsubtitles', [response[0], response[2]], true)
-          })
-        })
-      })
+      ipc.send('wt-warning', torrent.key, 'test1')
+      try{
+        const subtitleFilePath = await Subtitles.downloadSubtitle(movieFile, torrent.path)
+        ipc.send('wt-warning', torrent.key, 'test2:'+subtitleFilePath)
+        ipc.send('wt-addsubtitles', [subtitleFilePath], true)
+      }catch(e){
+        ipc.send('wt-error', torrent.key, e.toString())
+      }
     }
-  }
-  
-  function streamChunk(file, start, end, chunkSize){
-    return new Promise((resolve, reject) => {
-      streamToBuffer(file.createReadStream({
-        start: start,
-        end: end
-      }), chunkSize, (error, buffer) => {
-        if (error) {
-          reject(err.message)
-          return
-        }
-        
-        resolve(buffer)
-      })
-    })
   }
   
   function torrentDone () {
