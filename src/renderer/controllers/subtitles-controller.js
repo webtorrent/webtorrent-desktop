@@ -32,7 +32,9 @@ module.exports = class SubtitlesController {
     subtitles.showMenu = !subtitles.showMenu
   }
 
-  addSubtitles (files, autoSelect) {
+  addSubtitles (files, autoSelect, torrent, info, filepath) {
+    console.log("addsub files", files, torrent, info, filepath)
+    
     // Subtitles are only supported when playing video files
     if (this.state.playing.type !== 'video') return
     if (files.length === 0) return
