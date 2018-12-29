@@ -77,7 +77,7 @@ module.exports = class SubtitlesController {
       const file = torrentSummary.files[ix]
       if (!this.isSubtitle(file.name)) return
       const filePath = path.join(torrentSummary.path, file.path)
-      const enable = Subtitles.getDownloadedSubtitleFileNames().includes(file.name)
+      const enable = Subtitles.getDownloadedSubtitleFileNames(torrentSummary.name).includes(file.name)
       this.addSubtitles([filePath], enable)
     })
   }

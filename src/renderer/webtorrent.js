@@ -73,8 +73,6 @@ let server = null
 // Used for diffing, so we only send progress updates when necessary
 let prevProgress = null
 
-let addedFiles = []
-
 init()
 
 function init () {
@@ -306,7 +304,7 @@ function getTorrentProgress () {
       length: torrent.length,
       bitfield: torrent.bitfield,
       files: fileProg,
-      addedFiles: addedFiles.splice(0)
+      addedFiles: (torrent.addedFiles === undefined ? [] : torrent.addedFiles.splice(0))
     }
   })
 
@@ -389,7 +387,7 @@ function addFileToTorrent (torrent, name, length, selections) {
   const offset = lastFile.offset + lastFile.length
   const file = new File(torrent, {
     name: name,
-    path: torrent.name + '/' + name,
+    path: name,
     length: length,
     offset: offset
   })
@@ -411,7 +409,8 @@ function addFileToTorrent (torrent, name, length, selections) {
     selections.push(false)
   }
 
-  addedFiles.push(file)
+  torrent.addedFiles = torrent.addedFiles || []
+  torrent.addedFiles.push(file)
 
   console.log('Added file to torrent', name)
 }
@@ -419,7 +418,7 @@ function addFileToTorrent (torrent, name, length, selections) {
 async function importDownloadedSubtitle (torrent, selections) {
   let imported = 0
 
-  for (let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames()) {
+  for (let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames(torrent.name)) {
     try {
       const stats = await statSubtitleFile(torrent, subtitleFileName)
       addFileToTorrent(torrent, subtitleFileName, stats.size, selections)
@@ -439,20 +438,17 @@ async function importDownloadedSubtitle (torrent, selections) {
 }
 
 async function statSubtitleFile (torrent, subtitleFileName) {
-  const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
+  const subtitleFilePath = torrent.path + '/' + subtitleFileName
   return fsp.stat(subtitleFilePath)
 }
 
 async function downloadSubtitles (torrent, selections) {
-  const movieFile = torrent.files.find(f => f.name.substr(-4) === '.mp4')
+  const movieFile = torrent.files.find(f => ['.mp4', '.mkv'].includes(f.name.substr(-4)))
 
   if (movieFile !== undefined) {
-    const downloadedSubtitleFileNames = Subtitles.getDownloadedSubtitleFileNames()
-
-    for (let i = 0; i < config.DL_SUBTITLE_LANGUAGES.length; i++) {
+    for (let lang of config.DL_SUBTITLE_LANGUAGES) {
       const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile,
-        torrent.path, torrent.name, config.DL_SUBTITLE_LANGUAGES[i],
-        downloadedSubtitleFileNames[i])
+        torrent.path, lang, Subtitles.createSubtitleFileName(torrent.name, lang))
 
       if (downloadedSubtitleFileName !== undefined) {
         const stats = await statSubtitleFile(torrent, downloadedSubtitleFileName)

@@ -6,6 +6,7 @@ module.exports = {
   querySubtitles,
   downloadGzip,
   downloadSubtitle,
+  createSubtitleFileName,
   getDownloadedSubtitleFileNames
 }
 
@@ -16,8 +17,12 @@ const request = require('request-promise-native')
 const { ungzip } = require('node-gzip')
 const config = require('../../config')
 
-function getDownloadedSubtitleFileNames () {
-  return config.DL_SUBTITLE_LANGUAGES.map(lang => 'subtitle-' + lang + '.srt')
+function createSubtitleFileName (torrentName, lang) {
+  return torrentName + '.' + encodeURIComponent(lang) + '.srt'
+}
+
+function getDownloadedSubtitleFileNames (torrentName) {
+  return config.DL_SUBTITLE_LANGUAGES.map(lang => createSubtitleFileName(torrentName, lang))
 }
 
 function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
@@ -72,8 +77,8 @@ function streamChunk (file, start, end, chunkSize) {
   })
 }
 
-async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory,
-  languageId, subtitleFileName) {
+async function downloadSubtitle (movieFile, downloadsDirectory,
+languageId, subtitleFileName) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
   const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize,
@@ -86,8 +91,8 @@ async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory
     const url = response[0]
 
     if (url !== null) {
-      console.log('Downloading subtitles')
-      return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/',
+      console.log('Downloading subtitles for ' + movieFile.name)
+      return await downloadGzip(url, downloadsDirectory + '/',
         subtitleFileName || response[1][0].SubFileName)
     }
 
@@ -113,7 +118,7 @@ async function downloadGzip (url, directory, finalFilename) {
   const extractedContents = await ungzip(contents)
 
   fs.writeFileSync(filepath, extractedContents)
-  console.log('Subtitle downloaded')
+  console.log('Subtitle downloaded', finalFilename)
 
   return finalFilename
 }
