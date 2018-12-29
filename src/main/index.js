@@ -38,7 +38,7 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // signal this instance and quit. Note: This feature creates a lock file in
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
-  
+
   app.requestSingleInstanceLock()
   app.on('second-instance', (event, argv, cwd) => {
     shouldQuit = true
@@ -170,18 +170,19 @@ function onOpen (e, torrentId) {
   }
 }
 
-function onAppOpen (newArgv) {
-  newArgv = sliceArgv(newArgv)
-
-  if (app.ipcReady) {
-    log('Second app instance opened, but was prevented:', newArgv)
-    windows.main.show()
-
-    processArgv(newArgv)
-  } else {
-    argv.push(...newArgv)
-  }
-}
+// linter: 'onAppOpen' is defined but never used
+//  function onAppOpen (newArgv) {
+//    newArgv = sliceArgv(newArgv)
+//
+//   if (app.ipcReady) {
+//     log('Second app instance opened, but was prevented:', newArgv)
+//     windows.main.show()
+//
+//      processArgv(newArgv)
+//    } else {
+//      argv.push(...newArgv)
+//   }
+//  }
 
 // Remove leading args.
 // Production: 1 arg, eg: /Applications/WebTorrent.app/Contents/MacOS/WebTorrent

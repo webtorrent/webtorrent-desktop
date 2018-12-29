@@ -1,3 +1,4 @@
+/* global BigInt:false */ // TODO: Remove this comment when eslint accepts BigInt
 module.exports = {
   createSubtitleHash,
   createSubtitleHashFromFile,
@@ -12,8 +13,7 @@ const fs = require('fs')
 const BigIntBuffer = require('bigint-buffer')
 const streamToBuffer = require('stream-with-known-length-to-buffer')
 const request = require('request-promise-native')
-const download = require('download-file')
-const {ungzip} = require('node-gzip')
+const { ungzip } = require('node-gzip')
 const config = require('../../config')
 
 function getDownloadedSubtitleFileNames () {
@@ -28,9 +28,11 @@ function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
   console.log('head', head)
   console.log('tail', tail)
 
-  // For some reason there are 3 additional chars at the beginning of the string, so we take those off
-  // Also we make sure that the string is always at least 16 chars by adding zero padding
-  return ("0".repeat(16) + (BigInt(totalLength) + head + tail).toString(16).substr(-16)).substr(-16)
+  /* For some reason there are 3 additional chars at the beginning of the string, so we
+  take those off. Also we make sure that the string is always at least 16 chars by adding
+  zero padding */
+  return ('0'.repeat(16) + (BigInt(totalLength) + head + tail)
+    .toString(16).substr(-16)).substr(-16)
 }
 
 function createSubtitleHashFromFile (filename, length) {
@@ -61,7 +63,7 @@ function streamChunk (file, start, end, chunkSize) {
       end: end
     }), chunkSize, (error, buffer) => {
       if (error) {
-        reject(err.message)
+        reject(error.message)
         return
       }
 
@@ -70,25 +72,27 @@ function streamChunk (file, start, end, chunkSize) {
   })
 }
 
-async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory, languageId, subtitleFileName) {
+async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory,
+  languageId, subtitleFileName) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
-  const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize, movieFile.length, chunkSize)
-  const filepath = downloadsDirectory + '/' + movieFile.path
+  const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize,
+    movieFile.length, chunkSize)
   const length = movieFile.length
   const hash = createSubtitleHash(length, first64kbytes, last64kbytes)
 
-  try{
+  try {
     const response = await querySubtitles(movieFile.length, hash, languageId)
     const url = response[0]
 
-    if(url !== null){
+    if (url !== null) {
       console.log('Downloading subtitles')
-      return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', subtitleFileName || response[1][0].SubFileName)
+      return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/',
+        subtitleFileName || response[1][0].SubFileName)
     }
 
     console.log('No subtitles found')
-  }catch(e){
+  } catch (e) {
     console.log('Failed to download subtitle from url', e)
   }
 }
@@ -96,7 +100,7 @@ async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory
 /**
 @throws exception
 */
-async function downloadGzip(url, directory, finalFilename){
+async function downloadGzip (url, directory, finalFilename) {
   const contents = await request({
     url: url,
     encoding: null,
@@ -114,12 +118,13 @@ async function downloadGzip(url, directory, finalFilename){
   return finalFilename
 }
 
-function querySubtitles (totalLength, subtitleHash, languageId){
+function querySubtitles (totalLength, subtitleHash, languageId) {
   console.log('Searching subtitles online for language', languageId)
 
   return new Promise((resolve, reject) => {
-    const url = 'https://rest.opensubtitles.org/search/moviebytesize-' + parseInt(totalLength, 10) +
-      '/moviehash-' + encodeURIComponent(subtitleHash) + '/sublanguageid-' + encodeURIComponent(languageId)
+    const url = 'https://rest.opensubtitles.org/search/moviebytesize-' +
+      parseInt(totalLength, 10) + '/moviehash-' + encodeURIComponent(subtitleHash) +
+      '/sublanguageid-' + encodeURIComponent(languageId)
 
     request({
       url: url,
@@ -128,7 +133,8 @@ function querySubtitles (totalLength, subtitleHash, languageId){
       }
     }).then(response => {
       const responseObject = JSON.parse(response)
-      resolve([responseObject.length > 0 ? responseObject[0].SubDownloadLink : null, responseObject, url])
+      resolve([responseObject.length > 0 ? responseObject[0].SubDownloadLink : null,
+        responseObject, url])
     }).catch((error) => reject(error))
   })
 }

@@ -373,7 +373,7 @@ function setupIpc () {
   ipcRenderer.on('wt-uncaught-error', (e, err) => telemetry.logUncaughtError('webtorrent', err))
 
   ipcRenderer.send('ipcReady')
-  
+
   State.on('stateSaved', () => ipcRenderer.send('stateSaved'))
 }
 

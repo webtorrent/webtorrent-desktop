@@ -1,7 +1,7 @@
 const presets = [
   [
-    "@babel/preset-react"
+    '@babel/preset-react'
   ]
-];
+]
 
-module.exports = { presets };
+module.exports = { presets }

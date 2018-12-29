@@ -58,8 +58,9 @@ function play (name) {
     audio.src = sound.url
   }
   audio.currentTime = 0
-  
+
   // TODO: Fix
-  // Error: Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD
+  /* Error: Uncaught (in promise) DOMException: play() failed because the user
+    didn't interact with the document first. https://goo.gl/xX8pDD */
   // audio.play()
 }

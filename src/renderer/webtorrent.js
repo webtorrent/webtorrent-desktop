@@ -19,9 +19,8 @@ const crashReporter = require('../crash-reporter')
 const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
-const Subtitles = require("./lib/subtitles")
+const Subtitles = require('./lib/subtitles')
 const File = require('webtorrent/lib/file')
-const BitField = require('bitfield')
 
 // Report when the process crashes
 crashReporter.init()
@@ -133,7 +132,7 @@ async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selec
   torrent.once('ready', async () => {
     const subtitleImported = await importDownloadedSubtitle(torrent, selections)
 
-    if(!subtitleImported && config.DL_SUBTITLE_LANGUAGES.length > 0){
+    if (!subtitleImported && config.DL_SUBTITLE_LANGUAGES.length > 0) {
       await downloadSubtitles(torrent, selections)
     }
 
@@ -158,7 +157,6 @@ function createTorrent (torrentKey, options) {
 }
 
 function addTorrentEvents (torrent) {
-  console.log("addtorrentevents")
   torrent.on('warning', (err) =>
     ipc.send('wt-warning', torrent.key, err.message))
   torrent.on('error', (err) =>
@@ -381,8 +379,8 @@ function getAudioMetadata (infoHash, index) {
     })
 }
 
-function addFileToTorrent(torrent, name, length, selections){
-  if(torrent.files.find(f => f.name === name) !== undefined){
+function addFileToTorrent (torrent, name, length, selections) {
+  if (torrent.files.find(f => f.name === name) !== undefined) {
     console.log('File already in torrent with name', name)
     return
   }
@@ -396,7 +394,7 @@ function addFileToTorrent(torrent, name, length, selections){
     offset: offset
   })
 
-  file.createReadStream = function(opts) {
+  file.createReadStream = function (opts) {
     return fs.createReadStream(torrent.path + '/' + file.path)
   }
 
@@ -406,11 +404,10 @@ function addFileToTorrent(torrent, name, length, selections){
     torrent.bitfield.set(i, true)
   }
 
-  //file.unselectable = true
   file.done = true
   torrent.files.push(file)
 
-  if(selections !== undefined){
+  if (selections !== undefined) {
     selections.push(false)
   }
 
@@ -419,20 +416,20 @@ function addFileToTorrent(torrent, name, length, selections){
   console.log('Added file to torrent', name)
 }
 
-async function importDownloadedSubtitle(torrent, selections){
+async function importDownloadedSubtitle (torrent, selections) {
   let imported = 0
 
-  for(let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames()){
-    try{
+  for (let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames()) {
+    try {
       const stats = await statSubtitleFile(torrent, subtitleFileName)
       addFileToTorrent(torrent, subtitleFileName, stats.size, selections)
       imported++
-    }catch(e){
-      // Downloaded subtitle file not found
+    } catch (e) {
+      // No downloaded subtitle file
     }
   }
 
-  if(imported > 0){
+  if (imported > 0) {
     console.log('Subtitle imported')
     return true
   }
@@ -441,22 +438,23 @@ async function importDownloadedSubtitle(torrent, selections){
   return false
 }
 
-async function statSubtitleFile(torrent, subtitleFileName){
+async function statSubtitleFile (torrent, subtitleFileName) {
   const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
-  return await fsp.stat(subtitleFilePath)
+  return fsp.stat(subtitleFilePath)
 }
 
-async function downloadSubtitles(torrent, selections){
-  const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
+async function downloadSubtitles (torrent, selections) {
+  const movieFile = torrent.files.find(f => f.name.substr(-4) === '.mp4')
 
-  if(movieFile !== undefined){
+  if (movieFile !== undefined) {
     const downloadedSubtitleFileNames = Subtitles.getDownloadedSubtitleFileNames()
 
-    for(let i = 0; i < config.DL_SUBTITLE_LANGUAGES.length; i++){
-      const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name,
-        config.DL_SUBTITLE_LANGUAGES[i], downloadedSubtitleFileNames[i])
+    for (let i = 0; i < config.DL_SUBTITLE_LANGUAGES.length; i++) {
+      const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile,
+        torrent.path, torrent.name, config.DL_SUBTITLE_LANGUAGES[i],
+        downloadedSubtitleFileNames[i])
 
-      if(downloadedSubtitleFileName !== undefined){
+      if (downloadedSubtitleFileName !== undefined) {
         const stats = await statSubtitleFile(torrent, downloadedSubtitleFileName)
         const length = stats.size
         addFileToTorrent(torrent, downloadedSubtitleFileName, length, selections)

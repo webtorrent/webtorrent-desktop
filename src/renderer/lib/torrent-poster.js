@@ -155,7 +155,8 @@ function torrentPosterFromVideo (torrent, cb) {
     video.src = url
 
     // TODO fix
-    // Error: Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD
+    /* Error: Uncaught (in promise) DOMException: play() failed because
+    the user didn't interact with the document first. https://goo.gl/xX8pDD */
     // video.play()
 
     function onCanPlay () {

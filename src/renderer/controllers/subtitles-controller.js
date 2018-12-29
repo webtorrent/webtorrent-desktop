@@ -6,8 +6,7 @@ const parallel = require('run-parallel')
 const remote = electron.remote
 
 const { dispatch } = require('../lib/dispatcher')
-const request = require('request-promise-native')
-const Subtitles = require("../lib/subtitles")
+const Subtitles = require('../lib/subtitles')
 
 module.exports = class SubtitlesController {
   constructor (state) {
@@ -35,8 +34,6 @@ module.exports = class SubtitlesController {
   }
 
   addSubtitles (files, autoSelect) {
-    console.log("addsub files", files, autoSelect)
-
     // Subtitles are only supported when playing video files
     if (this.state.playing.type !== 'video') return
     if (files.length === 0) return
@@ -56,7 +53,7 @@ module.exports = class SubtitlesController {
         // Add the track
         if (trackIndex === -1) {
           trackIndex = subtitles.tracks.push(track) - 1
-          console.log("sub track added", track)
+          console.log('sub track added', track)
         }
 
         // If we're auto-selecting a track, try to find one in the user's language

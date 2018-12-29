@@ -118,9 +118,9 @@ module.exports = class TorrentController {
       }
       torrentSummary.progress = p
 
-      if(torrentSummary.files !== undefined){
-        for(let addedFile of p.addedFiles.splice(0)){
-          if(torrentSummary.files.find(f => f.name === addedFile.name) === undefined){
+      if (torrentSummary.files !== undefined) {
+        for (let addedFile of p.addedFiles.splice(0)) {
+          if (torrentSummary.files.find(f => f.name === addedFile.name) === undefined) {
             torrentSummary.files.push(addedFile)
           }
         }
