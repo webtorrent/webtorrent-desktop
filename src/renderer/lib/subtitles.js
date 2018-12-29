@@ -17,11 +17,11 @@ const {ungzip} = require('node-gzip')
 function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
   const head = createHash(first64kbytes)
   const tail = createHash(last64kbytes)
-  
+
   console.log('bytesize', totalLength)
   console.log('head', head)
   console.log('tail', tail)
-  
+
   // For some reason there are 3 additional chars at the beginning of the string, so we take those off
   // Also we make sure that the string is always at least 16 chars by adding zero padding
   return ("0".repeat(16) + (BigInt(totalLength) + head + tail).toString(16).substr(-16)).substr(-16)
@@ -30,21 +30,21 @@ function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
 function createSubtitleHashFromFile (filename, length) {
   const buffer = fs.readFileSync(filename)
   const chunkSize = 64 * 1024 // 64 kB
-  
+
   const first64kbytes = buffer.slice(0, chunkSize)
   const last64kbytes = buffer.slice(buffer.length - chunkSize)
-  
+
   return createSubtitleHash(length || buffer.length, first64kbytes, last64kbytes)
 }
 
 function createHash (bytes) {
   let hash = BigInt(0)
-  
+
   bytes.forEach((b, i) => {
     const part = bytes.slice(8 * i, 8 * i + 8)
     hash += BigIntBuffer.toBigIntLE(part)
   })
-  
+
   return hash
 }
 
@@ -58,13 +58,13 @@ function streamChunk (file, start, end, chunkSize) {
         reject(err.message)
         return
       }
-      
+
       resolve(buffer)
     })
   })
 }
 
-async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory) {
+async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory, subtitleFileName) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
   const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize, movieFile.length, chunkSize)
@@ -73,35 +73,37 @@ async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory
   const hash = createSubtitleHash(length, first64kbytes, last64kbytes)
   const response = await querySubtitles(movieFile.length, hash, 'fin')
   const url = response[0]
-  
-  return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', response[1][0].SubFileName)
+
+  if(url !== null){
+    return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', subtitleFileName || response[1][0].SubFileName)
+  }
 }
 
 async function downloadGzip(url, directory, finalFilename){
   const contents = await request({
-    url: url, 
-    encoding: null
-    //headers: {
-    //  'User-Agent': 'Butter'
-    //}
+    url: url,
+    encoding: null,
+    headers: {
+      'User-Agent': 'Butter'
+    }
   })
-  
+
   const filepath = directory + finalFilename
   const extractedContents = await ungzip(contents)
-  
+
   fs.writeFileSync(filepath, extractedContents)
 
-  return filepath
+  return finalFilename
 }
 
 function querySubtitles (totalLength, subtitleHash, languageId){
   return new Promise((resolve, reject) => {
     //const url = 'https://rest.opensubtitles.org/search/query-'+encodeURIComponent(filename.toLowerCase())+'/sublanguageid-fin'
-    const url = 'https://rest.opensubtitles.org/search/moviebytesize-' + parseInt(totalLength, 10) + 
+    const url = 'https://rest.opensubtitles.org/search/moviebytesize-' + parseInt(totalLength, 10) +
       '/moviehash-' + encodeURIComponent(subtitleHash) + '/sublanguageid-' + encodeURIComponent(languageId)
-    
+
     request({
-      url: url, 
+      url: url,
       headers: {
         'User-Agent': 'Butter'
       }

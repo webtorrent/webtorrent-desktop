@@ -117,6 +117,7 @@ module.exports = class TorrentController {
         return
       }
       torrentSummary.progress = p
+      torrentSummary.files.push(...p.addedFiles)
     })
 
     // TODO: Find an efficient way to re-enable this line, which allows subtitle

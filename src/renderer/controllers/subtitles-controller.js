@@ -35,7 +35,7 @@ module.exports = class SubtitlesController {
 
   addSubtitles (files, autoSelect) {
     console.log("addsub files", files, autoSelect)
-    
+
     // Subtitles are only supported when playing video files
     if (this.state.playing.type !== 'video') return
     if (files.length === 0) return
@@ -73,21 +73,17 @@ module.exports = class SubtitlesController {
     if (this.state.playing.type !== 'video') return
     const torrentSummary = this.state.getPlayingTorrentSummary()
     if (!torrentSummary || !torrentSummary.progress) return
-    
+
     torrentSummary.progress.files.forEach((fp, ix) => {
       if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
       const file = torrentSummary.files[ix]
       if (!this.isSubtitle(file.name)) return
       const filePath = path.join(torrentSummary.path, file.path)
-      this.addSubtitles([filePath], false)
+      const enable = (file.name === 'subtitle.srt')
+      this.addSubtitles([filePath], enable)
     })
-    
-    const downloadedSubtitlePath = 'file:///' + torrentSummary.path + '/' + torrentSummary.name + '/subtitle.srt'
-    const downloadedSubtitle = await request(downloadedSubtitlePath)
-    
-    console.log('downloadedSubtitle', downloadedSubtitle)
   }
-  
+
   isSubtitle (file) {
     const name = typeof file === 'string' ? file : file.name
     const ext = path.extname(name).toLowerCase()

@@ -7,6 +7,7 @@ const deepEqual = require('deep-equal')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
+const fsp = fs.promises
 const mkdirp = require('mkdirp')
 const mm = require('music-metadata')
 const networkAddress = require('network-address')
@@ -19,6 +20,8 @@ const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 const Subtitles = require("./lib/subtitles")
+const File = require('webtorrent/lib/file')
+const BitField = require('bitfield')
 
 // Report when the process crashes
 crashReporter.init()
@@ -71,6 +74,8 @@ let server = null
 // Used for diffing, so we only send progress updates when necessary
 let prevProgress = null
 
+let addedFiles = []
+
 init()
 
 function init () {
@@ -120,12 +125,15 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
     fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
-
+  
   // Listen for ready event, progress notifications, etc
   addTorrentEvents(torrent)
 
   // Only download the files the user wants, not necessarily all files
-  torrent.once('ready', () => selectFiles(torrent, selections))
+  torrent.once('ready', async () => {
+    await downloadSubtitles(torrent, selections)
+    selectFiles(torrent, selections)
+  })
 }
 
 function stopTorrenting (infoHash) {
@@ -145,6 +153,7 @@ function createTorrent (torrentKey, options) {
 }
 
 function addTorrentEvents (torrent) {
+  console.log("addtorrentevents")
   torrent.on('warning', (err) =>
     ipc.send('wt-warning', torrent.key, err.message))
   torrent.on('error', (err) =>
@@ -161,22 +170,15 @@ function addTorrentEvents (torrent) {
 
     updateTorrentProgress()
   }
-  
+
   async function torrentReady () {
     const info = getTorrentInfo(torrent)
     ipc.send('wt-ready', torrent.key, info)
     ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info)
 
     updateTorrentProgress()
-    
-    const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
-    
-    if(movieFile !== undefined){
-      await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name)
-      //ipc.send('wt-error', torrent.key, torrent)
-    }
   }
-  
+
   function torrentDone () {
     const info = getTorrentInfo(torrent)
     ipc.send('wt-done', torrent.key, info)
@@ -300,7 +302,8 @@ function getTorrentProgress () {
       numPeers: torrent.numPeers,
       length: torrent.length,
       bitfield: torrent.bitfield,
-      files: fileProg
+      files: fileProg,
+      addedFiles: addedFiles.splice(0)
     }
   })
 
@@ -331,7 +334,7 @@ function startServerFromReadyTorrent (torrent, cb) {
       networkURL: 'http://' + networkAddress() + urlSuffix,
       networkAddress: networkAddress()
     }
-
+    console.log(info)
     ipc.send('wt-server-running', info)
     ipc.send('wt-server-' + torrent.infoHash, info)
   })
@@ -373,7 +376,72 @@ function getAudioMetadata (infoHash, index) {
     })
 }
 
-function selectFiles (torrentOrInfoHash, selections) {
+function addFileToTorrent(torrent, name, length, selections){
+  if(torrent.files.find(f => f.name === name) !== undefined){
+    console.log('File already in torrent with name', name)
+    return
+  }
+
+  const lastFile = torrent.files[torrent.files.length - 1]
+  const offset = lastFile.offset + lastFile.length
+  const file = new File(torrent, {
+    name: name,
+    path: torrent.name + '/' + name,
+    length: length,
+    offset: offset
+  })
+
+  file.createReadStream = function(opts) {
+    return fs.createReadStream(torrent.path + '/' + file.path)
+  }
+
+  torrent.bitfield.grow = Infinity
+
+  for (let i = file._startPiece; i <= file._endPiece; ++i) {
+    torrent.bitfield.set(i, true)
+  }
+
+  file.done = true
+  torrent.files.push(file)
+  selections.push(false)
+  addedFiles.push(file)
+
+  console.log('Added file to torrent', name)
+}
+
+function downloadSubtitles(torrent, selections){
+  return new Promise((resolve, reject) => {
+    console.log("bitfield", torrent.bitfield)
+    const subtitleFileName = 'subtitle.srt'
+    const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
+
+    fsp.stat(subtitleFilePath).then((stats) => {
+      console.log('Subtitle already downloaded as', subtitleFileName)
+      addFileToTorrent(torrent, subtitleFileName, stats.size, selections)
+      resolve()
+    }).catch(async () => {
+      // Subtitle file does not exist yet
+
+      const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
+
+      if(movieFile !== undefined){
+        const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name, subtitleFileName)
+
+        if(downloadedSubtitleFileName !== undefined){
+          const length = (await fsp.stat(subtitleFilePath)).size
+
+          addFileToTorrent(torrent, downloadedSubtitleFileName, length, selections)
+
+          console.log("torrentfiles", torrent.files)
+        }
+      }
+
+      resolve()
+    })
+  })
+}
+
+async function selectFiles (torrentOrInfoHash, selections) {
   // Get the torrent object
   let torrent
   if (typeof torrentOrInfoHash === 'string') {
