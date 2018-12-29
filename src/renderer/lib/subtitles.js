@@ -4,7 +4,8 @@ module.exports = {
   createHash,
   querySubtitles,
   downloadGzip,
-  downloadSubtitle
+  downloadSubtitle,
+  getDownloadedSubtitleFileNames
 }
 
 const fs = require('fs')
@@ -14,6 +15,10 @@ const request = require('request-promise-native')
 const download = require('download-file')
 const {ungzip} = require('node-gzip')
 const config = require('../../config')
+
+function getDownloadedSubtitleFileNames () {
+  return config.DL_SUBTITLE_LANGUAGES.map(lang => 'subtitle-' + lang + '.srt')
+}
 
 function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
   const head = createHash(first64kbytes)
@@ -65,7 +70,7 @@ function streamChunk (file, start, end, chunkSize) {
   })
 }
 
-async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory, subtitleFileName) {
+async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory, languageId, subtitleFileName) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
   const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize, movieFile.length, chunkSize)
@@ -74,15 +79,15 @@ async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory
   const hash = createSubtitleHash(length, first64kbytes, last64kbytes)
 
   try{
-    const response = await querySubtitles(movieFile.length, hash, config.DL_SUBTITLE_LANGUAGE)
+    const response = await querySubtitles(movieFile.length, hash, languageId)
     const url = response[0]
 
     if(url !== null){
       console.log('Downloading subtitles')
       return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', subtitleFileName || response[1][0].SubFileName)
-    }else{
-      console.log('No subtitles found')
     }
+
+    console.log('No subtitles found')
   }catch(e){
     console.log('Failed to download subtitle from url', e)
   }

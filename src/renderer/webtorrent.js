@@ -117,7 +117,7 @@ function listenToClientEvents () {
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc.
 // Returns a WebTorrent object. See https://git.io/vik9M
-function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
+async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 
   const torrent = client.add(torrentID, {
@@ -131,7 +131,9 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
 
   // Only download the files the user wants, not necessarily all files
   torrent.once('ready', async () => {
-    if(config.DL_SUBTITLE_LANGUAGE !== null){
+    const subtitleImported = await importDownloadedSubtitle(torrent, selections)
+
+    if(!subtitleImported && config.DL_SUBTITLE_LANGUAGES.length > 0){
       await downloadSubtitles(torrent, selections)
     }
 
@@ -337,7 +339,7 @@ function startServerFromReadyTorrent (torrent, cb) {
       networkURL: 'http://' + networkAddress() + urlSuffix,
       networkAddress: networkAddress()
     }
-    console.log(info)
+
     ipc.send('wt-server-running', info)
     ipc.send('wt-server-' + torrent.infoHash, info)
   })
@@ -417,33 +419,51 @@ function addFileToTorrent(torrent, name, length, selections){
   console.log('Added file to torrent', name)
 }
 
-function downloadSubtitles(torrent, selections){
-  return new Promise((resolve, reject) => {
-    const subtitleFileName = 'subtitle.srt'
-    const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
+async function importDownloadedSubtitle(torrent, selections){
+  let imported = 0
 
-    fsp.stat(subtitleFilePath).then((stats) => {
-      console.log('Subtitle already downloaded as', subtitleFileName)
+  for(let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames()){
+    try{
+      const stats = await statSubtitleFile(torrent, subtitleFileName)
       addFileToTorrent(torrent, subtitleFileName, stats.size, selections)
-      resolve()
-    }).catch(async () => {
-      // Subtitle file does not exist yet
+      imported++
+    }catch(e){
+      // Downloaded subtitle file not found
+    }
+  }
 
-      const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
+  if(imported > 0){
+    console.log('Subtitle imported')
+    return true
+  }
 
-      if(movieFile !== undefined){
-        const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name, subtitleFileName)
+  console.log('Subtitle not imported')
+  return false
+}
 
-        if(downloadedSubtitleFileName !== undefined){
-          const length = (await fsp.stat(subtitleFilePath)).size
+async function statSubtitleFile(torrent, subtitleFileName){
+  const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
+  return await fsp.stat(subtitleFilePath)
+}
 
-          addFileToTorrent(torrent, downloadedSubtitleFileName, length, selections)
-        }
+async function downloadSubtitles(torrent, selections){
+  const movieFile = torrent.files.find(f => f.name.substr(-4) === ".mp4")
+
+  if(movieFile !== undefined){
+    const downloadedSubtitleFileNames = Subtitles.getDownloadedSubtitleFileNames()
+
+    for(let i = 0; i < config.DL_SUBTITLE_LANGUAGES.length; i++){
+      const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile, torrent.path, torrent.name,
+        config.DL_SUBTITLE_LANGUAGES[i], downloadedSubtitleFileNames[i])
+
+      if(downloadedSubtitleFileName !== undefined){
+        const stats = await statSubtitleFile(torrent, downloadedSubtitleFileName)
+        const length = stats.size
+        addFileToTorrent(torrent, downloadedSubtitleFileName, length, selections)
+        return
       }
-
-      resolve()
-    })
-  })
+    }
+  }
 }
 
 async function selectFiles (torrentOrInfoHash, selections) {

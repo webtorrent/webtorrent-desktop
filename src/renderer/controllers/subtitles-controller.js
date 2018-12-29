@@ -7,6 +7,7 @@ const remote = electron.remote
 
 const { dispatch } = require('../lib/dispatcher')
 const request = require('request-promise-native')
+const Subtitles = require("../lib/subtitles")
 
 module.exports = class SubtitlesController {
   constructor (state) {
@@ -79,7 +80,7 @@ module.exports = class SubtitlesController {
       const file = torrentSummary.files[ix]
       if (!this.isSubtitle(file.name)) return
       const filePath = path.join(torrentSummary.path, file.path)
-      const enable = (file.name === 'subtitle.srt')
+      const enable = Subtitles.getDownloadedSubtitleFileNames().includes(file.name)
       this.addSubtitles([filePath], enable)
     })
   }

@@ -70,8 +70,10 @@ module.exports = {
 
   DEFAULT_DOWNLOAD_PATH: getDefaultDownloadPath(),
 
-  // specify lang code to auto download subtitles from online service, eg. "eng". Set null to disable
-  DL_SUBTITLE_LANGUAGE: null, 
+  // Specify lang code(s) to auto download subtitles from online service, eg. ["eng"].
+  // Multiple lang codes can be specified. If subtitle for first lang is not found,
+  // search is performed with second language and so on. Use empty array to disable
+  DL_SUBTITLE_LANGUAGES: [],
 
   GITHUB_URL: 'https://github.com/webtorrent/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/webtorrent/webtorrent-desktop/issues',
