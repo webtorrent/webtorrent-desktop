@@ -59,6 +59,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^9.0.0",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.6.11",
@@ -73,7 +74,7 @@
     "plist": "^3.0.1",
     "pngjs": "^3.0.0",
     "run-series": "^1.1.4",
-    "spectron": "^3.3.0",
+    "spectron": "^3.8.0",
     "standard": "*",
     "tape": "^4.9.1",
     "walk-sync": "^0.3.4"
