@@ -70,6 +70,9 @@ module.exports = {
 
   DEFAULT_DOWNLOAD_PATH: getDefaultDownloadPath(),
 
+  // specify lang code to auto download subtitles from online service, eg. "eng". Set null to disable
+  DL_SUBTITLE_LANGUAGE: null, 
+
   GITHUB_URL: 'https://github.com/webtorrent/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/webtorrent/webtorrent-desktop/issues',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/webtorrent/webtorrent-desktop/master',

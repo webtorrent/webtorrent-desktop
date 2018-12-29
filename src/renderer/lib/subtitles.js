@@ -13,6 +13,7 @@ const streamToBuffer = require('stream-with-known-length-to-buffer')
 const request = require('request-promise-native')
 const download = require('download-file')
 const {ungzip} = require('node-gzip')
+const config = require('../../config')
 
 function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
   const head = createHash(first64kbytes)
@@ -71,14 +72,25 @@ async function downloadSubtitle (movieFile, downloadsDirectory, torrentDirectory
   const filepath = downloadsDirectory + '/' + movieFile.path
   const length = movieFile.length
   const hash = createSubtitleHash(length, first64kbytes, last64kbytes)
-  const response = await querySubtitles(movieFile.length, hash, 'fin')
-  const url = response[0]
 
-  if(url !== null){
-    return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', subtitleFileName || response[1][0].SubFileName)
+  try{
+    const response = await querySubtitles(movieFile.length, hash, config.DL_SUBTITLE_LANGUAGE)
+    const url = response[0]
+
+    if(url !== null){
+      console.log('Downloading subtitles')
+      return await downloadGzip(url, downloadsDirectory + '/' + torrentDirectory + '/', subtitleFileName || response[1][0].SubFileName)
+    }else{
+      console.log('No subtitles found')
+    }
+  }catch(e){
+    console.log('Failed to download subtitle from url', e)
   }
 }
 
+/**
+@throws exception
+*/
 async function downloadGzip(url, directory, finalFilename){
   const contents = await request({
     url: url,
@@ -92,13 +104,15 @@ async function downloadGzip(url, directory, finalFilename){
   const extractedContents = await ungzip(contents)
 
   fs.writeFileSync(filepath, extractedContents)
+  console.log('Subtitle downloaded')
 
   return finalFilename
 }
 
 function querySubtitles (totalLength, subtitleHash, languageId){
+  console.log('Searching subtitles online for language', languageId)
+
   return new Promise((resolve, reject) => {
-    //const url = 'https://rest.opensubtitles.org/search/query-'+encodeURIComponent(filename.toLowerCase())+'/sublanguageid-fin'
     const url = 'https://rest.opensubtitles.org/search/moviebytesize-' + parseInt(totalLength, 10) +
       '/moviehash-' + encodeURIComponent(subtitleHash) + '/sublanguageid-' + encodeURIComponent(languageId)
 
@@ -110,6 +124,6 @@ function querySubtitles (totalLength, subtitleHash, languageId){
     }).then(response => {
       const responseObject = JSON.parse(response)
       resolve([responseObject.length > 0 ? responseObject[0].SubDownloadLink : null, responseObject, url])
-    })
+    }).catch((error) => reject(error))
   })
 }

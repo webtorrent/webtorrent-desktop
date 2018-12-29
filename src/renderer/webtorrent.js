@@ -125,13 +125,16 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
     fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
-  
+
   // Listen for ready event, progress notifications, etc
   addTorrentEvents(torrent)
 
   // Only download the files the user wants, not necessarily all files
   torrent.once('ready', async () => {
-    await downloadSubtitles(torrent, selections)
+    if(config.DL_SUBTITLE_LANGUAGE !== null){
+      await downloadSubtitles(torrent, selections)
+    }
+
     selectFiles(torrent, selections)
   })
 }
@@ -401,9 +404,14 @@ function addFileToTorrent(torrent, name, length, selections){
     torrent.bitfield.set(i, true)
   }
 
+  //file.unselectable = true
   file.done = true
   torrent.files.push(file)
-  selections.push(false)
+
+  if(selections !== undefined){
+    selections.push(false)
+  }
+
   addedFiles.push(file)
 
   console.log('Added file to torrent', name)
@@ -411,7 +419,6 @@ function addFileToTorrent(torrent, name, length, selections){
 
 function downloadSubtitles(torrent, selections){
   return new Promise((resolve, reject) => {
-    console.log("bitfield", torrent.bitfield)
     const subtitleFileName = 'subtitle.srt'
     const subtitleFilePath = torrent.path + '/' + torrent.name + '/' + subtitleFileName
 
@@ -431,8 +438,6 @@ function downloadSubtitles(torrent, selections){
           const length = (await fsp.stat(subtitleFilePath)).size
 
           addFileToTorrent(torrent, downloadedSubtitleFileName, length, selections)
-
-          console.log("torrentfiles", torrent.files)
         }
       }
 
