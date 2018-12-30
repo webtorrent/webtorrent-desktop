@@ -40,7 +40,7 @@ module.exports = class SubtitlesController {
     const subtitles = this.state.playing.subtitles
 
     // Read the files concurrently, then add all resulting subtitle tracks
-    const tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
+    const tasks = files.map((file) => (cb) => Subtitles.loadSubtitle(file).then(track => cb(null, track)))
     parallel(tasks, function (err, tracks) {
       if (err) return dispatch('error', err)
 
@@ -72,52 +72,15 @@ module.exports = class SubtitlesController {
     const torrentSummary = this.state.getPlayingTorrentSummary()
     if (!torrentSummary || !torrentSummary.progress) return
 
-    torrentSummary.progress.files.forEach((fp, ix) => {
-      if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
-      const file = torrentSummary.files[ix]
-      if (!this.isSubtitle(file.name)) return
+    Subtitles.getSubtitleFiles(torrentSummary.files).forEach(file => {
       const filePath = path.join(torrentSummary.path, file.path)
+
+      // User has configured these subtitle languages in config, so auto enable
       const enable = Subtitles.getDownloadedSubtitleFileNames(torrentSummary.name).includes(file.name)
+
       this.addSubtitles([filePath], enable)
     })
   }
-
-  isSubtitle (file) {
-    const name = typeof file === 'string' ? file : file.name
-    const ext = path.extname(name).toLowerCase()
-    return ext === '.srt' || ext === '.vtt'
-  }
-}
-
-function loadSubtitle (file, cb) {
-  // Lazy load to keep startup fast
-  const concat = require('simple-concat')
-  const LanguageDetect = require('languagedetect')
-  const srtToVtt = require('srt-to-vtt')
-
-  // Read the .SRT or .VTT file, parse it, add subtitle track
-  const filePath = file.path || file
-
-  const vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
-
-  concat(vttStream, function (err, buf) {
-    if (err) return dispatch('error', 'Can\'t parse subtitles file.')
-
-    // Detect what language the subtitles are in
-    const vttContents = buf.toString().replace(/(.*-->.*)/g, '')
-    let langDetected = (new LanguageDetect()).detect(vttContents, 2)
-    langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
-    langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
-
-    const track = {
-      buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
-      language: langDetected,
-      label: langDetected,
-      filePath: filePath
-    }
-
-    cb(null, track)
-  })
 }
 
 // Checks whether a language name like 'English' or 'German' matches the system

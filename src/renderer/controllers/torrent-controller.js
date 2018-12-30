@@ -4,6 +4,7 @@ const ipcRenderer = require('electron').ipcRenderer
 const TorrentSummary = require('../lib/torrent-summary')
 const sound = require('../lib/sound')
 const { dispatch } = require('../lib/dispatcher')
+const Subtitles = require('../lib/subtitles')
 
 module.exports = class TorrentController {
   constructor (state) {
@@ -99,7 +100,7 @@ module.exports = class TorrentController {
     dispatch('update')
   }
 
-  torrentProgress (progressInfo) {
+  async torrentProgress (progressInfo) {
     // Overall progress across all active torrents, 0 to 1, or -1 to hide the progress bar
     // Hide progress bar when client has no torrents, or progress is 100%
     const progress = (!progressInfo.hasActiveTorrents || progressInfo.progress === 1)
@@ -110,7 +111,7 @@ module.exports = class TorrentController {
     this.state.dock.progress = progress
 
     // Update progress for each individual torrent
-    progressInfo.torrents.forEach((p) => {
+    for (let p of progressInfo.torrents) {
       const torrentSummary = this.getTorrentSummary(p.torrentKey)
       if (!torrentSummary) {
         console.log('warning: got progress for missing torrent %s', p.torrentKey)
@@ -124,8 +125,15 @@ module.exports = class TorrentController {
             torrentSummary.files.push(addedFile)
           }
         }
+
+        // For backwards compatibility make sure we have .subtitles
+        if(torrentSummary.subtitles === undefined){
+          torrentSummary.subtitles = []
+        }
+
+        await checkIncludedSubtitles(torrentSummary)
       }
-    })
+    }
 
     // TODO: Find an efficient way to re-enable this line, which allows subtitle
     //       files which are completed after a video starts to play to be added
@@ -168,6 +176,22 @@ module.exports = class TorrentController {
   // Returns undefined if we don't know that infoHash
   getTorrentSummary (torrentKey) {
     return TorrentSummary.getByKey(this.state, torrentKey)
+  }
+}
+
+async function checkIncludedSubtitles (torrentSummary) {
+  for (let subtitleFile of Subtitles.getSubtitleFiles(torrentSummary.files)) {
+    if(!subtitleFile.subtitleLoaded){
+      subtitleFile.subtitleLoaded = true
+      const filePath = path.join(torrentSummary.path, subtitleFile.path)
+      console.log('load sub', subtitleFile.name, filePath)
+      const track = await Subtitles.loadSubtitle(filePath)
+      const lang = track.language.toLowerCase()
+
+      if(!torrentSummary.subtitles.includes(lang)){
+        torrentSummary.subtitles.push(lang)
+      }
+    }
   }
 }
 

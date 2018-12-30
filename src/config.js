@@ -75,6 +75,12 @@ module.exports = {
   // search is performed with second language and so on. Use empty array to disable
   DL_SUBTITLE_LANGUAGES: [],
 
+  // Subtitles are searched online only for these file extensions
+  MOVIE_FILETYPES: ['.avi', '.mp4', '.mkv'],
+
+  // Opensubtitles API requires registered UserAgent
+  OPENSUBTITLES_USERAGENT: 'Butter',
+
   GITHUB_URL: 'https://github.com/webtorrent/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/webtorrent/webtorrent-desktop/issues',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/webtorrent/webtorrent-desktop/master',

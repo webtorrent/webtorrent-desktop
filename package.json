@@ -67,6 +67,7 @@
     "electron-packager": "~8.5.1",
     "electron-winstaller": "^2.6.4",
     "gh-release": "^3.4.0",
+    "jsonfile": "^5.0.0",
     "minimist": "^1.2.0",
     "nobin-debian-installer": "0.0.10",
     "nodemon": "^1.18.8",

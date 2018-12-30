@@ -7,7 +7,9 @@ module.exports = {
   downloadGzip,
   downloadSubtitle,
   createSubtitleFileName,
-  getDownloadedSubtitleFileNames
+  getDownloadedSubtitleFileNames,
+  getSubtitleFiles,
+  loadSubtitle
 }
 
 const fs = require('fs')
@@ -16,6 +18,62 @@ const streamToBuffer = require('stream-with-known-length-to-buffer')
 const request = require('request-promise-native')
 const { ungzip } = require('node-gzip')
 const config = require('../../config')
+const path = require('path')
+
+function getSubtitleFiles (files) {
+  const subtitleFiles = []
+
+  files.forEach((fp, ix) => {
+    if (fp.numPieces !== fp.numPiecesPresent) return // ignore incomplete files
+    const file = files[ix]
+    if (isSubtitle(file.name)) {
+      subtitleFiles.push(file)
+    }
+  })
+
+  return subtitleFiles
+}
+
+function loadSubtitle (file) {
+  return new Promise((resolve, reject) => {
+    // Lazy load to keep startup fast
+    const concat = require('simple-concat')
+    const LanguageDetect = require('languagedetect')
+    const srtToVtt = require('srt-to-vtt')
+
+    // Read the .SRT or .VTT file, parse it, add subtitle track
+    const filePath = file.path || file
+    console.log('loadSubtitle filepath', filePath)
+    const vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
+
+    concat(vttStream, function (err, buf) {
+      if (err) return dispatch('error', 'Can\'t parse subtitles file.')
+
+      // Detect what language the subtitles are in
+      const vttContents = buf.toString().replace(/(.*-->.*|\d*)/g, '')
+      const langDetector = new LanguageDetect()
+      let langDetected = langDetector.detect(vttContents, 2)
+
+      langDetected = langDetected.length ? langDetected[0][0] : 'subtitle'
+      langDetected = langDetected.slice(0, 1).toUpperCase() + langDetected.slice(1)
+
+      const track = {
+        buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
+        language: langDetected,
+        label: langDetected,
+        filePath: filePath
+      }
+      console.log("sub resolve", track)
+      resolve(track)
+    })
+  })
+}
+
+function isSubtitle (file) {
+  const name = typeof file === 'string' ? file : file.name
+  const ext = path.extname(name).toLowerCase()
+  return ext === '.srt' || ext === '.vtt'
+}
 
 function createSubtitleFileName (torrentName, lang) {
   return torrentName + '.' + encodeURIComponent(lang) + '.srt'
@@ -134,7 +192,7 @@ function querySubtitles (totalLength, subtitleHash, languageId) {
     request({
       url: url,
       headers: {
-        'User-Agent': 'Butter'
+        'User-Agent': config.OPENSUBTITLES_USERAGENT
       }
     }).then(response => {
       const responseObject = JSON.parse(response)

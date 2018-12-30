@@ -122,6 +122,7 @@ async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selec
     fileModtimes: fileModtimes
   })
   torrent.key = torrentKey
+  torrent.searchingSubtitles = true
 
   // Listen for ready event, progress notifications, etc
   addTorrentEvents(torrent)
@@ -134,6 +135,7 @@ async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selec
       await downloadSubtitles(torrent, selections)
     }
 
+    torrent.searchingSubtitles = false
     selectFiles(torrent, selections)
   })
 }
@@ -304,7 +306,8 @@ function getTorrentProgress () {
       length: torrent.length,
       bitfield: torrent.bitfield,
       files: fileProg,
-      addedFiles: (torrent.addedFiles === undefined ? [] : torrent.addedFiles.splice(0))
+      addedFiles: (torrent.addedFiles === undefined ? [] : torrent.addedFiles.splice(0)),
+      searchingSubtitles: torrent.searchingSubtitles
     }
   })
 
@@ -418,10 +421,13 @@ function addFileToTorrent (torrent, name, length, selections) {
 async function importDownloadedSubtitle (torrent, selections) {
   let imported = 0
 
-  for (let subtitleFileName of Subtitles.getDownloadedSubtitleFileNames(torrent.name)) {
+  for (let lang of config.DL_SUBTITLE_LANGUAGES) {
+    const subtitleFileName = Subtitles.createSubtitleFileName(torrent.name, lang)
+
     try {
       const stats = await statSubtitleFile(torrent, subtitleFileName)
       addFileToTorrent(torrent, subtitleFileName, stats.size, selections)
+
       imported++
     } catch (e) {
       // No downloaded subtitle file
@@ -443,7 +449,7 @@ async function statSubtitleFile (torrent, subtitleFileName) {
 }
 
 async function downloadSubtitles (torrent, selections) {
-  const movieFile = torrent.files.find(f => ['.mp4', '.mkv'].includes(f.name.substr(-4)))
+  const movieFile = torrent.files.find(f => config.MOVIE_FILETYPES.includes(f.name.substr(-4)))
 
   if (movieFile !== undefined) {
     for (let lang of config.DL_SUBTITLE_LANGUAGES) {

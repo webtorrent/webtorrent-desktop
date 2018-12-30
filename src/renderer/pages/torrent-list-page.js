@@ -7,6 +7,7 @@ const LinearProgress = require('material-ui/LinearProgress').default
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const { dispatcher } = require('../lib/dispatcher')
+const Subtitles = require('../lib/subtitles')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -97,7 +98,8 @@ module.exports = class TorrentList extends React.Component {
         renderTotalProgress(),
         renderPeers(),
         renderSpeeds(),
-        renderEta()
+        renderEta(),
+        renderSubtitles()
       ]
     } else {
       progElems = [
@@ -201,6 +203,14 @@ module.exports = class TorrentList extends React.Component {
       const secondsStr = seconds + 's'
 
       return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+    }
+
+    function renderSubtitles () {
+      const subtitles = torrentSummary.subtitles || []
+
+      const subtitlesStr = prog.searchingSubtitles ? 'Searching subs...' :
+        (subtitles.length > 0 ? 'Subtitles: ' + subtitles.join(', ') : 'No subtitles')
+      return (<span key='subtitles'>{subtitlesStr}</span>)
     }
 
     function renderTorrentStatus () {

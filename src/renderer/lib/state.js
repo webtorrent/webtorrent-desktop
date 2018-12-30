@@ -167,7 +167,8 @@ function setupStateSaved (cb) {
       magnetURI: parseTorrent.toMagnetURI(parsedTorrent),
       files: parsedTorrent.files,
       selections: parsedTorrent.files.map((x) => true),
-      testID: t.testID
+      testID: t.testID,
+      subtitles: []
     }
   }
 }
