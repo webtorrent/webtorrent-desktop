@@ -123,7 +123,9 @@ function setupStateSaved (cb) {
       startup: false,
       autoAddTorrents: false,
       torrentsFolderPath: '',
-      highestPlaybackPriority: true
+      highestPlaybackPriority: true,
+      searchSubtitlesOnline: false,
+      subtitleLanguages: ['eng', null]
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],

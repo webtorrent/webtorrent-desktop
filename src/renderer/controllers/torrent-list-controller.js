@@ -37,8 +37,10 @@ module.exports = class TorrentListController {
 
     const torrentKey = this.state.nextTorrentKey++
     const path = this.state.saved.prefs.downloadPath
+    const prefs = this.state.saved.prefs
 
-    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path)
+    ipcRenderer.send('wt-start-torrenting', torrentKey, torrentId, path,
+      undefined, undefined, prefs.searchSubtitlesOnline, prefs.subtitleLanguages)
 
     dispatch('backToList')
   }
@@ -79,6 +81,7 @@ module.exports = class TorrentListController {
 
   // Starts downloading and/or seeding a given torrentSummary.
   startTorrentingSummary (torrentKey) {
+    const prefs = this.state.saved.prefs
     const s = TorrentSummary.getByKey(this.state, torrentKey)
     if (!s) throw new TorrentKeyNotFoundError(torrentKey)
 
@@ -110,7 +113,9 @@ module.exports = class TorrentListController {
         TorrentSummary.getTorrentId(s),
         s.path,
         s.fileModtimes,
-        s.selections)
+        s.selections,
+        prefs.searchSubtitlesOnline,
+        prefs.subtitleLanguages)
     }
   }
 

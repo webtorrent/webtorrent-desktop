@@ -70,11 +70,6 @@ module.exports = {
 
   DEFAULT_DOWNLOAD_PATH: getDefaultDownloadPath(),
 
-  // Specify lang code(s) to auto download subtitles from online service, eg. ['fin', 'eng'].
-  // Multiple lang codes can be specified. If subtitle for first lang is not found,
-  // search is performed with second language and so on. Use empty array to disable
-  DL_SUBTITLE_LANGUAGES: [],
-
   // Subtitles are searched online only for these file extensions
   MOVIE_FILETYPES: ['.avi', '.mp4', '.mkv'],
 

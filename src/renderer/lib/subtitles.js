@@ -82,8 +82,8 @@ function createSubtitleFileName (torrentName, lang) {
   return torrentName + '.' + encodeURIComponent(lang) + '.srt'
 }
 
-function getDownloadedSubtitleFileNames (torrentName) {
-  return config.DL_SUBTITLE_LANGUAGES.map(lang => createSubtitleFileName(torrentName, lang))
+function getDownloadedSubtitleFileNames (torrentName, subtitleLanguages) {
+  return subtitleLanguages.map(lang => createSubtitleFileName(torrentName, lang))
 }
 
 function createSubtitleHash (totalLength, first64kbytes, last64kbytes) {
@@ -151,7 +151,7 @@ async function downloadSubtitle (movieFile, downloadsDirectory, languageId, subt
     const url = response[0]
 
     if (url !== null) {
-      console.log('Downloading subtitles for ' + movieFile.name)
+      console.log('Downloading subtitles for ' + movieFile.name + ' with language ' + languageId)
       return await downloadGzip(url, downloadsDirectory + '/',
         subtitleFileName || response[1][0].SubFileName)
     }

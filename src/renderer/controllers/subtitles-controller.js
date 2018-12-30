@@ -79,7 +79,7 @@ module.exports = class SubtitlesController {
       const filePath = path.join(torrentSummary.path, file.path)
 
       // User has configured these subtitle languages in config, so auto enable
-      const enable = Subtitles.getDownloadedSubtitleFileNames(torrentSummary.name).includes(file.name)
+      const enable = Subtitles.getDownloadedSubtitleFileNames(torrentSummary.name, this.state.saved.prefs.subtitleLanguages).includes(file.name)
 
       this.addSubtitles([filePath], enable)
     })

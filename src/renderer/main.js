@@ -276,6 +276,8 @@ const dispatchHandlers = {
   'toggleSubtitlesMenu': () => controllers.subtitles().toggleSubtitlesMenu(),
   'checkForSubtitles': () => controllers.subtitles().checkForSubtitles(),
   'addSubtitles': (files, autoSelect) => controllers.subtitles().addSubtitles(files, autoSelect),
+  'setSubtitleLanguages': (languages) => ipcRenderer.send('wt-subtitle-languages', languages),
+  'setSearchSubtitles': (search) => ipcRenderer.send('wt-search-subtitles', search),
 
   // Local media: <video>, <audio>, external players
   'mediaStalled': () => controllers.media().mediaStalled(),

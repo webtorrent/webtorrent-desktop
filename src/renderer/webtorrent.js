@@ -73,13 +73,16 @@ let server = null
 // Used for diffing, so we only send progress updates when necessary
 let prevProgress = null
 
+let searchSubtitles = null
+let subtitleLanguages = null
+
 init()
 
 function init () {
   listenToClientEvents()
 
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
-    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
+  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections, searchSubtitlesOnline, subtitleLanguages) =>
+    startTorrenting(torrentKey, torrentID, path, fileModtimes, selections, searchSubtitlesOnline, subtitleLanguages))
   ipc.on('wt-stop-torrenting', (e, infoHash) =>
     stopTorrenting(infoHash))
   ipc.on('wt-create-torrent', (e, torrentKey, options) =>
@@ -96,7 +99,12 @@ function init () {
     stopServer())
   ipc.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
-
+  ipc.on('wt-search-subtitles', (e, infoHash, search) => {
+    searchSubtitles = search
+  })
+  ipc.on('wt-subtitle-languages', (e, infoHash, languages) => {
+    subtitleLanguages = languages
+  })
   ipc.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
@@ -114,9 +122,10 @@ function listenToClientEvents () {
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc.
 // Returns a WebTorrent object. See https://git.io/vik9M
-async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections) {
+async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections, searchSubs, subLanguages) {
   console.log('starting torrent %s: %s', torrentKey, torrentID)
-
+  searchSubtitles = searchSubs
+  subtitleLanguages = subLanguages
   const torrent = client.add(torrentID, {
     path: path,
     fileModtimes: fileModtimes
@@ -130,8 +139,8 @@ async function startTorrenting (torrentKey, torrentID, path, fileModtimes, selec
   // Only download the files the user wants, not necessarily all files
   torrent.once('ready', async () => {
     const subtitleImported = await importDownloadedSubtitle(torrent, selections)
-
-    if (!subtitleImported && config.DL_SUBTITLE_LANGUAGES.length > 0) {
+    console.log('searchSubtitles', searchSubtitles)
+    if (!subtitleImported && searchSubtitles) {
       await downloadSubtitles(torrent, selections)
     }
 
@@ -409,7 +418,7 @@ function addFileToTorrent (torrent, name, length, selections) {
   file.done = true
   torrent.files.push(file)
 
-  if (selections !== undefined) {
+  if (selections) {
     selections.push(false)
   }
 
@@ -422,7 +431,7 @@ function addFileToTorrent (torrent, name, length, selections) {
 async function importDownloadedSubtitle (torrent, selections) {
   let imported = 0
 
-  for (let lang of config.DL_SUBTITLE_LANGUAGES) {
+  for (let lang of subtitleLanguages) {
     const subtitleFileName = Subtitles.createSubtitleFileName(torrent.name, lang)
 
     try {
@@ -450,10 +459,11 @@ async function statSubtitleFile (torrent, subtitleFileName) {
 }
 
 async function downloadSubtitles (torrent, selections) {
+  console.log('Search subtitles with languages', subtitleLanguages)
   const movieFile = torrent.files.find(f => config.MOVIE_FILETYPES.includes(f.name.substr(-4)))
 
   if (movieFile !== undefined) {
-    for (let lang of config.DL_SUBTITLE_LANGUAGES) {
+    for (let lang of subtitleLanguages) {
       const downloadedSubtitleFileName = await Subtitles.downloadSubtitle(movieFile,
         torrent.path, lang, Subtitles.createSubtitleFileName(torrent.name, lang))
 
