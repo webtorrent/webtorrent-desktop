@@ -484,7 +484,7 @@ async function selectFiles (torrentOrInfoHash, selections) {
   // selection with individual selections for each file, so we can
   // select/deselect files later on
   if (!selections) {
-    selections = torrent.files.map((f) => (f.unselectable === true ? false : true))
+    selections = torrent.files.map((f) => (f.unselectable !== true))
   }
 
   // Selections specified incorrectly?
@@ -499,7 +499,7 @@ async function selectFiles (torrentOrInfoHash, selections) {
   // Add selections (individual files)
   for (let i = 0; i < selections.length; i++) {
     const file = torrent.files[i]
-    if(file.unselectable !== true){
+    if (file.unselectable !== true) {
       if (selections[i]) {
         file.select()
       } else {
