@@ -7,7 +7,6 @@ const LinearProgress = require('material-ui/LinearProgress').default
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const { dispatcher } = require('../lib/dispatcher')
-const Subtitles = require('../lib/subtitles')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -208,8 +207,8 @@ module.exports = class TorrentList extends React.Component {
     function renderSubtitles () {
       const subtitles = torrentSummary.subtitles || []
 
-      const subtitlesStr = prog.searchingSubtitles ? 'Searching subs...' :
-        (subtitles.length > 0 ? 'Subtitles: ' + subtitles.join(', ') : 'No subtitles')
+      const subtitlesStr = prog.searchingSubtitles ? 'Searching subs...'
+        : (subtitles.length > 0 ? 'Subtitles: ' + subtitles.join(', ') : 'No subtitles')
       return (<span key='subtitles'>{subtitlesStr}</span>)
     }
 

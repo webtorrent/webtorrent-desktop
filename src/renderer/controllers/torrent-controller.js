@@ -127,7 +127,7 @@ module.exports = class TorrentController {
         }
 
         // For backwards compatibility make sure we have .subtitles
-        if(torrentSummary.subtitles === undefined){
+        if (torrentSummary.subtitles === undefined) {
           torrentSummary.subtitles = []
         }
 
@@ -181,14 +181,14 @@ module.exports = class TorrentController {
 
 async function checkIncludedSubtitles (torrentSummary) {
   for (let subtitleFile of Subtitles.getSubtitleFiles(torrentSummary.files)) {
-    if(!subtitleFile.subtitleLoaded){
+    if (!subtitleFile.subtitleLoaded) {
       subtitleFile.subtitleLoaded = true
       const filePath = path.join(torrentSummary.path, subtitleFile.path)
       console.log('load sub', subtitleFile.name, filePath)
       const track = await Subtitles.loadSubtitle(filePath)
       const lang = track.language.toLowerCase()
 
-      if(!torrentSummary.subtitles.includes(lang)){
+      if (!torrentSummary.subtitles.includes(lang)) {
         torrentSummary.subtitles.push(lang)
       }
     }

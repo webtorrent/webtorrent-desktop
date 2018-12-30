@@ -1,5 +1,4 @@
 const electron = require('electron')
-const fs = require('fs')
 const path = require('path')
 const parallel = require('run-parallel')
 
@@ -40,7 +39,11 @@ module.exports = class SubtitlesController {
     const subtitles = this.state.playing.subtitles
 
     // Read the files concurrently, then add all resulting subtitle tracks
-    const tasks = files.map((file) => (cb) => Subtitles.loadSubtitle(file).then(track => cb(null, track)))
+    const tasks = files.map((file) => (cb) => {
+      // TODO use await and try/catch or something?
+      Subtitles.loadSubtitle(file).then(track => cb(null, track)).catch(error => cb(error, null))
+    })
+
     parallel(tasks, function (err, tracks) {
       if (err) return dispatch('error', err)
 

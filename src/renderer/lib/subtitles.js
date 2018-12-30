@@ -47,7 +47,10 @@ function loadSubtitle (file) {
     const vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
 
     concat(vttStream, function (err, buf) {
-      if (err) return dispatch('error', 'Can\'t parse subtitles file.')
+      if (err) {
+        reject(new Error('Can\'t parse subtitles file.'))
+        return
+      }
 
       // Detect what language the subtitles are in
       const vttContents = buf.toString().replace(/(.*-->.*|\d*)/g, '')
@@ -63,7 +66,7 @@ function loadSubtitle (file) {
         label: langDetected,
         filePath: filePath
       }
-      console.log("sub resolve", track)
+
       resolve(track)
     })
   })
@@ -135,8 +138,7 @@ function streamChunk (file, start, end, chunkSize) {
   })
 }
 
-async function downloadSubtitle (movieFile, downloadsDirectory,
-languageId, subtitleFileName) {
+async function downloadSubtitle (movieFile, downloadsDirectory, languageId, subtitleFileName) {
   const chunkSize = 64 * 1024
   const first64kbytes = await streamChunk(movieFile, 0, chunkSize, chunkSize)
   const last64kbytes = await streamChunk(movieFile, movieFile.length - chunkSize,
