@@ -405,6 +405,7 @@ function addFileToTorrent (torrent, name, length, selections) {
     torrent.bitfield.set(i, true)
   }
 
+  file.unselectable = true
   file.done = true
   torrent.files.push(file)
 
@@ -483,7 +484,7 @@ async function selectFiles (torrentOrInfoHash, selections) {
   // selection with individual selections for each file, so we can
   // select/deselect files later on
   if (!selections) {
-    selections = torrent.files.map((x) => true)
+    selections = torrent.files.map((f) => (f.unselectable === true ? false : true))
   }
 
   // Selections specified incorrectly?
@@ -498,11 +499,13 @@ async function selectFiles (torrentOrInfoHash, selections) {
   // Add selections (individual files)
   for (let i = 0; i < selections.length; i++) {
     const file = torrent.files[i]
-    if (selections[i]) {
-      file.select()
-    } else {
-      console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
-      file.deselect()
+    if(file.unselectable !== true){
+      if (selections[i]) {
+        file.select()
+      } else {
+        console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
+        file.deselect()
+      }
     }
   }
 }

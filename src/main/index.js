@@ -16,6 +16,8 @@ const windows = require('./windows')
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
 
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
+
 // Start the app without showing the main window when auto launching on login
 // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
 const hidden = argv.includes('--hidden') ||
