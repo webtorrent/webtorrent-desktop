@@ -81,7 +81,7 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'highestPlaybackPriority', isChecked)
   }
 
-  sortFilesByCheckboxes() {
+  sortFilesByCheckboxes () {
     const checked = this.props.state.saved.prefs.sortFilesBy
     return (
       <Preference>
@@ -101,7 +101,7 @@ class PreferencesPage extends React.Component {
     )
   }
 
-  handleSortFilesByChange(type, isChecked) {
+  handleSortFilesByChange (type, isChecked) {
     dispatch('updatePreferences', 'sortFilesBy', isChecked ? type : undefined)
   }
 

@@ -302,15 +302,15 @@ module.exports = class TorrentList extends React.Component {
     )
   }
 
-  getFileSortingFunction() {
-      switch (state.saved.prefs.sortFilesBy) {
-        case 'size':
-          return (a, b) => b.length - a.length
-        case 'name':
-          return (a, b) => a.name.localeCompare(b.name)
-        default:
-          return () => 0
-      }
+  getFileSortingFunction () {
+    switch (this.state.saved.prefs.sortFilesBy) {
+      case 'size':
+        return (a, b) => b.length - a.length
+      case 'name':
+        return (a, b) => a.name.localeCompare(b.name)
+      default:
+        return () => 0
+    }
   }
 
   // Show a single torrentSummary file in the details view for a single torrent
