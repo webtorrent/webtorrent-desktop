@@ -97,6 +97,7 @@ class PreferencesPage extends React.Component {
           label={'Sort by file size'}
           onCheck={(e, isChecked) => this.handleSortFilesByChange('size', isChecked)}
         />
+        <p>Choose how a torrent's files should be sorted.</p>
       </Preference>
     )
   }
