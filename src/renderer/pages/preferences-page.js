@@ -81,6 +81,30 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'highestPlaybackPriority', isChecked)
   }
 
+  sortFilesByCheckboxes() {
+    const checked = this.props.state.saved.prefs.sortFilesBy
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={checked === 'name'}
+          label={'Sort by file name'}
+          onCheck={(e, isChecked) => this.handleSortFilesByChange('name', isChecked)}
+        />
+        <Checkbox
+          className='control'
+          checked={checked === 'size'}
+          label={'Sort by file size'}
+          onCheck={(e, isChecked) => this.handleSortFilesByChange('size', isChecked)}
+        />
+      </Preference>
+    )
+  }
+
+  handleSortFilesByChange(type, isChecked) {
+    dispatch('updatePreferences', 'sortFilesBy', isChecked ? type : undefined)
+  }
+
   externalPlayerPathSelector () {
     const playerPath = this.props.state.saved.prefs.externalPlayerPath
     const playerName = this.props.state.getExternalPlayerName()
@@ -226,6 +250,9 @@ class PreferencesPage extends React.Component {
           {this.openExternalPlayerCheckbox()}
           {this.externalPlayerPathSelector()}
           {this.highestPlaybackPriorityCheckbox()}
+        </PreferencesSection>
+        <PreferencesSection title='File sorting'>
+          {this.sortFilesByCheckboxes()}
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
