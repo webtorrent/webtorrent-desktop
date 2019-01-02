@@ -280,8 +280,8 @@ module.exports = class TorrentList extends React.Component {
       // We do know the files. List them and show download stats for each one
       const fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
-        .sort(this.getFileSortingFunction())
         .map((file, index) => ({ file, index }))
+        .sort(this.getFileSortingFunction())
         .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
 
       filesElement = (
@@ -305,9 +305,9 @@ module.exports = class TorrentList extends React.Component {
   getFileSortingFunction () {
     switch (this.props.state.saved.prefs.sortFilesBy) {
       case 'size':
-        return (a, b) => b.length - a.length
+        return (a, b) => b.file.length - a.file.length
       case 'name':
-        return (a, b) => a.name.localeCompare(b.name)
+        return (a, b) => a.file.name.localeCompare(b.file.name)
       default:
         return () => 0
     }
