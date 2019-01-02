@@ -303,7 +303,7 @@ module.exports = class TorrentList extends React.Component {
   }
 
   getFileSortingFunction () {
-    switch (this.state.saved.prefs.sortFilesBy) {
+    switch (this.props.state.saved.prefs.sortFilesBy) {
       case 'size':
         return (a, b) => b.length - a.length
       case 'name':
