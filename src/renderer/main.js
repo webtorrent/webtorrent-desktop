@@ -74,6 +74,7 @@ function onState (err, _state) {
   window.dispatch = dispatch
 
   telemetry.init(state)
+  sound.init(state)
 
   // Log uncaught JS errors
   window.addEventListener(

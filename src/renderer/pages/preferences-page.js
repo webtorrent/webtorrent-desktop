@@ -26,6 +26,9 @@ class PreferencesPage extends React.Component {
 
     this.handleStartupChange =
       this.handleStartupChange.bind(this)
+
+    this.handlesoundNotificationsChange =
+      this.handlesoundNotificationsChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -205,6 +208,22 @@ class PreferencesPage extends React.Component {
     )
   }
 
+  soundNotificationsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.soundNotifications}
+          label={'Activate the notification sounds'}
+          onCheck={this.handlesoundNotificationsChange} />
+      </Preference>
+    )
+  }
+
+  handlesoundNotificationsChange (e, isChecked) {
+    dispatch('updatePreferences', 'soundNotifications', isChecked)
+  }
+
   handleSetDefaultApp () {
     dispatch('updatePreferences', 'isFileHandler', true)
   }
@@ -231,6 +250,9 @@ class PreferencesPage extends React.Component {
           {this.setDefaultAppButton()}
         </PreferencesSection>
         {this.setStartupSection()}
+        <PreferencesSection title='Miscellaneous'>
+          {this.soundNotificationsCheckbox()}
+        </PreferencesSection>
       </div>
     )
   }
