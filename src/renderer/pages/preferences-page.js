@@ -189,22 +189,20 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'startup', isChecked)
   }
 
-  setStartupSection () {
+  setStartupCheckbox () {
     if (config.IS_PORTABLE) {
       return
     }
 
     return (
-      <PreferencesSection title='Startup'>
-        <Preference>
-          <Checkbox
-            className='control'
-            checked={this.props.state.saved.prefs.startup}
-            label={'Open WebTorrent on startup.'}
-            onCheck={this.handleStartupChange}
-          />
-        </Preference>
-      </PreferencesSection>
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.startup}
+          label={'Open WebTorrent on startup'}
+          onCheck={this.handleStartupChange}
+        />
+      </Preference>
     )
   }
 
@@ -214,7 +212,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.soundNotifications}
-          label={'Activate the notification sounds'}
+          label={'Enable sounds'}
           onCheck={this.handlesoundNotificationsChange} />
       </Preference>
     )
@@ -249,8 +247,8 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
         </PreferencesSection>
-        {this.setStartupSection()}
-        <PreferencesSection title='Miscellaneous'>
+        <PreferencesSection title='General'>
+          {this.setStartupCheckbox()}
           {this.soundNotificationsCheckbox()}
         </PreferencesSection>
       </div>
