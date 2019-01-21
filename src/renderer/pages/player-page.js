@@ -735,7 +735,7 @@ function formatTime (time, total) {
   }
 
   const totalHours = Math.floor(total / 3600)
-  const totalMinutes = Math.floor(total % 3600 / 60)
+  const totalMinutes = Math.floor(total / 60)
   const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
   if (totalMinutes > 9) {
