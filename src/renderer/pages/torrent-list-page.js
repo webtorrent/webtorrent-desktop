@@ -12,8 +12,6 @@ module.exports = class TorrentList extends React.Component {
   render () {
     const state = this.props.state
 
-    
-
     const contents = []
     if (state.downloadPathStatus === 'missing') {
       contents.push(
@@ -83,10 +81,10 @@ module.exports = class TorrentList extends React.Component {
 
   // Show name, download status, % complete
   renderTorrentMetadata (torrentSummary) {
-    const state = this.props.state 
+    const state = this.props.state
     const compact = state.compactListView
     const name = torrentSummary.name || 'Loading torrent...'
-   
+
     // If it's downloading/seeding then show progress info
     const prog = torrentSummary.progress
     let progElems
@@ -117,20 +115,18 @@ module.exports = class TorrentList extends React.Component {
           {progElems}
         </div>
       )
-    }
-    else {
+    } else {
       elements.push(
         <div key='name' className='name ellipsis'>{name}</div>
       )
 
       elements.push(
         <div key='progress-info' className='ellipsis'>
-        {renderDownloadCheckbox()}
-        {progElems}
-      </div>
+          {renderDownloadCheckbox()}
+          {progElems}
+        </div>
       )
     }
-
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
 
@@ -244,13 +240,11 @@ module.exports = class TorrentList extends React.Component {
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
-    const state = this.props.state
     const infoHash = torrentSummary.infoHash
 
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton
     if (!torrentSummary.error && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-
       playButton = (
         <i
           key='play-button'

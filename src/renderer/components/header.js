@@ -40,7 +40,7 @@ class Header extends React.Component {
   }
 
   getListButton () {
-    const state = this.props.state 
+    const state = this.props.state
     if (state.location.url() !== 'home') return null
 
     const compact = state.compactListView
@@ -52,8 +52,7 @@ class Header extends React.Component {
           view_list
         </i>
       )
-    }
-    else {
+    } else {
       return (
         <i className='icon list'
           title='Compact list'
