@@ -158,6 +158,15 @@ The Mac app can only be packaged from **macOS**.
 
 The Linux app can be packaged from **any** platform.
 
+
+#### Recommended readings to start working in the app
+
+Electron:
+https://electronjs.org/docs/tutorial/quick-start
+
+React:
+https://reactjs.org/docs/getting-started.html
+
 ### Privacy
 
 WebTorrent Desktop collects some basic usage stats to help us make the app better.
