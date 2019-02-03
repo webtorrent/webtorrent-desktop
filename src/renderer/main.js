@@ -112,6 +112,10 @@ function onState (err, _state) {
     folderWatcher: createGetter(() => {
       const FolderWatcherController = require('./controllers/folder-watcher-controller')
       return new FolderWatcherController()
+    }),
+    playlists: createGetter(() => {
+      const PlaylistsController = require ('./controllers/playlists-controller')
+      return new PlaylistsController();
     })
   }
 
@@ -318,6 +322,12 @@ const dispatchHandlers = {
   'setTitle': (title) => { state.window.title = title },
   'resetTitle': () => { state.window.title = config.APP_WINDOW_TITLE },
 
+  //Playlists
+  'createPlaylist': (name) => controllers.playlists().createPlaylist(name),
+  'addAlbumToPlaylist': (infoHash, files) => controllers.playlists().addAlbumToPlaylist(infoHash, files),
+  'addSongToPlaylist': (infoHash, file) => controllers.playlists().addSongToPlaylist(infoHash, file),
+  'getAllPlaylists': (infoHash, file) => controllers.playlists().getAllPlaylists(),
+  
   // Everything else
   'onOpen': onOpen,
   'error': onError,
@@ -325,6 +335,7 @@ const dispatchHandlers = {
   'stateSave': () => State.save(state),
   'stateSaveImmediate': () => State.saveImmediate(state),
   'update': () => {} // No-op, just trigger an update
+  
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()

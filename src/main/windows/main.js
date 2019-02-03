@@ -47,6 +47,9 @@ function init (state, options) {
     y: initialBounds.y
   })
 
+  // Open the DevTools.
+  win.webContents.openDevTools()
+
   win.loadURL(config.WINDOW_MAIN)
 
   win.once('ready-to-show', () => {

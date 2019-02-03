@@ -10,6 +10,7 @@ const Header = require('../components/header')
 
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListPage = require('./torrent-list-page')
+const PlaylistList = require('./playlist-list')
 
 const Views = {
   'home': createGetter(() => TorrentListPage),
@@ -65,13 +66,16 @@ class App extends React.Component {
     if (!darkMuiTheme) {
       darkMuiTheme = getMuiTheme(darkBaseTheme)
     }
-
+    
     return (
       <MuiThemeProvider muiTheme={darkMuiTheme}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
           {this.getErrorPopover()}
-          <div key='content' className='content'>{this.getView()}</div>
+          <div key='content' className='content'>
+            <PlaylistList></PlaylistList>
+            {this.getView()}
+          </div>
           {this.getModal()}
         </div>
       </MuiThemeProvider>

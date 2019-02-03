@@ -27,6 +27,7 @@ module.exports = class TorrentList extends React.Component {
     const torrentElems = state.saved.torrents.map(
       (torrentSummary) => this.renderTorrent(torrentSummary)
     )
+    
     contents.push(...torrentElems)
     contents.push(
       <div key='torrent-placeholder' className='torrent-placeholder'>
@@ -60,6 +61,7 @@ module.exports = class TorrentList extends React.Component {
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
+    
     return (
       <div
         id={torrentSummary.testID && ('torrent-' + torrentSummary.testID)}
@@ -90,6 +92,7 @@ module.exports = class TorrentList extends React.Component {
       progElems = [getErrorMessage(torrentSummary)]
     } else if (torrentSummary.status !== 'paused' && prog) {
       progElems = [
+        renderAddAlbumToPlaylistButton(),
         renderDownloadCheckbox(),
         renderTorrentStatus(),
         renderProgressBar(),
@@ -112,6 +115,20 @@ module.exports = class TorrentList extends React.Component {
     )
 
     return (<div key='metadata' className='metadata'>{elements}</div>)
+
+
+    function renderAddAlbumToPlaylistButton () {
+      const infoHash = torrentSummary.infoHash
+      const files = torrentSummary.files
+
+      const addAlbumToPlaylistButton = (
+        <span
+          onClick={dispatcher('addAlbumToPlaylist', infoHash, files)}>
+          Add Album to Playlist
+        </span>
+      )
+      return (<span key='add-album-to-playlist'>{addAlbumToPlaylistButton}</span>)
+    }
 
     function renderDownloadCheckbox () {
       const infoHash = torrentSummary.infoHash
@@ -220,10 +237,12 @@ module.exports = class TorrentList extends React.Component {
     }
   }
 
+
   // Download button toggles between torrenting (DL/seed) and paused
   // Play button starts streaming the torrent immediately, unpausing if needed
   renderTorrentButtons (torrentSummary) {
     const infoHash = torrentSummary.infoHash
+    const files = torrentSummary.files
 
     // Only show the play/dowload buttons for torrents that contain playable media
     let playButton

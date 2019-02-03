@@ -86,6 +86,7 @@ module.exports = {
   ROOT_PATH: path.join(__dirname, '..'),
   STATIC_PATH: path.join(__dirname, '..', 'static'),
   TORRENT_PATH: path.join(getConfigPath(), 'Torrents'),
+  PLAYLIST_PATH: path.join(getConfigPath(), 'Playlists'),
 
   WINDOW_ABOUT: 'file://' + path.join(__dirname, '..', 'static', 'about.html'),
   WINDOW_MAIN: 'file://' + path.join(__dirname, '..', 'static', 'main.html'),

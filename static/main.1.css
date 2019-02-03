@@ -330,13 +330,11 @@ textarea,
   transition: -webkit-filter 0.1s ease-out;
   position: relative;
   animation: fadein 0.5s;
-  display: inline-grid
 }
 
 .torrent,
 .torrent-placeholder {
-  height: 200px;
-  width: 25%;
+  height: 100px;
 }
 
 .torrent:not(:last-child) {
@@ -470,10 +468,7 @@ body.drag .app::after {
  */
 
 .torrent.selected {
-  /* height: auto; */
-  height: 96vh;
-  width: 131vh;
-  display: block !important;
+  height: auto;
 }
 
 .torrent-details {

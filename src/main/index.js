@@ -223,4 +223,5 @@ function processArgv (argv) {
   if (torrentIds.length > 0) {
     windows.main.dispatch('onOpen', torrentIds)
   }
+  
 }
