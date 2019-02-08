@@ -42,6 +42,7 @@ module.exports = class PlaylistList extends React.Component {
 
   renderPlaylistsLists() {
     const playlists = dispatcher('getAllPlaylists')
+    console.log(123, playlists)
     const content = []
     // playlists.forEach((playlist) => {
     //   console.log(123, playlist)
@@ -56,7 +57,6 @@ module.exports = class PlaylistList extends React.Component {
       </div>
       
     )
-
   }
 
   //TODO: Ask why i can use this function instead of dispatcher in the onclick

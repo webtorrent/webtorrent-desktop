@@ -326,7 +326,7 @@ const dispatchHandlers = {
   'createPlaylist': (name) => controllers.playlists().createPlaylist(name),
   'addAlbumToPlaylist': (infoHash, files) => controllers.playlists().addAlbumToPlaylist(infoHash, files),
   'addSongToPlaylist': (infoHash, file) => controllers.playlists().addSongToPlaylist(infoHash, file),
-  'getAllPlaylists': (infoHash, file) => controllers.playlists().getAllPlaylists(),
+  'getAllPlaylists': () => controllers.playlists().getAllPlaylists(),
   
   // Everything else
   'onOpen': onOpen,

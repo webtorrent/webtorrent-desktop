@@ -1,5 +1,7 @@
 const electron = require('electron')
 const fs = require('fs')
+const path = require('path')
+const mkdirp = require('mkdirp')
 
 const config = require('../../config')
 
@@ -17,16 +19,21 @@ module.exports = class PlaylistsController {
                 playlists.push(file);
             });
             this.state.playlistsList = playlists;
+
         })
     }
 
     createPlaylist (name) {
         //We set the name of the playlist in the property called name in the first position.
         const headerPlaylist = {name, torrents: []}
-        fs.writeFile(`${config.PLAYLIST_PATH}/${name}.json`, JSON.stringify(headerPlaylist), (err) => {
-            if (err) throw err;
-            console.log('The playlist has been created');
-        });
+        const playlistPath = path.join(config.PLAYLIST_PATH, name + '.json')
+
+        mkdirp(config.PLAYLIST_PATH, function (_) {
+            fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), function (err) {
+                if (err) return console.log('error saving playlist file %s: %o', playlistPath, err)
+                console.log('The playlist has been created');
+            })
+        })
     }
 
     addAlbumToPlaylist (infohash, files) {
@@ -43,12 +50,12 @@ module.exports = class PlaylistsController {
             files
         })
 
-        const playlistName = this.playlist.name
-
-        fs.writeFile(`${config.PLAYLIST_PATH}/${playlistName}.json`, JSON.stringify(this.playlist), (err) => {
-            if (err) throw err;
-            console.log('The album has been added to the playlist');
-        });
-
+        const playlistPath = path.join(config.PLAYLIST_PATH, this.playlist.name + '.json')
+        mkdirp(config.PLAYLIST_PATH, function (_) {
+            fs.writeFile(playlistPath, JSON.stringify(this.playlist), function (err) {
+                if (err) return console.log('error saving album to playlist %s: %o', playlistPath, err)
+                console.log('The album has been added to the playlist');
+            })
+        })
     }
 }
