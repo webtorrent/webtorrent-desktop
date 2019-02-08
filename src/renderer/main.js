@@ -323,10 +323,11 @@ const dispatchHandlers = {
   'resetTitle': () => { state.window.title = config.APP_WINDOW_TITLE },
 
   //Playlists
-  'createPlaylist': (name) => controllers.playlists().createPlaylist(name),
+  'createPlaylist': (id) => controllers.playlists().createPlaylist(id),
   'addAlbumToPlaylist': (infoHash, files) => controllers.playlists().addAlbumToPlaylist(infoHash, files),
   'addSongToPlaylist': (infoHash, file) => controllers.playlists().addSongToPlaylist(infoHash, file),
   'getAllPlaylists': () => controllers.playlists().getAllPlaylists(),
+  'setPlaylist': (id) => controllers.playlists().setPlaylist(id),
   
   // Everything else
   'onOpen': onOpen,

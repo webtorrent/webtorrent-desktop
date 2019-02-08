@@ -10,7 +10,7 @@ const Header = require('../components/header')
 
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListPage = require('./torrent-list-page')
-const PlaylistList = require('./playlist-list')
+const PlaylistList = require('./playlist-list-page')
 
 const Views = {
   'home': createGetter(() => TorrentListPage),
