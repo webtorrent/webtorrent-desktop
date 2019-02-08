@@ -6,8 +6,8 @@ const mkdirp = require('mkdirp')
 const config = require('../../config')
 
 
-module.exports = class PlaylistsController {
-    constructor (state) {
+module.exports = class PlaylistListController {
+    constructor(state) {
         this.state = state
         //TODO: CREATE playlist.json as a default playlist
         // this.playlist = {"id":"playlist","torrents":[]}
@@ -25,15 +25,20 @@ module.exports = class PlaylistsController {
         })
     }
 
-    createPlaylist (id) {
+    checkIfPlaylistFileExists(path) {
+        return fs.existsSync(path);
+    }
+
+    createPlaylist(id) {
+        const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
+
         //Check if a playlist with the same name exists
-        const isPlaylistCreated = this.readPlaylistFile(id)
+        const isPlaylistCreated = this.checkIfPlaylistFileExists(playlistPath)
         if (isPlaylistCreated) return console.log('A playlist with the same name is already created: %s', id)
 
         //We set the id of the playlist in the property called id in the first position.
-        const headerPlaylist = {id, torrents: []}
-        const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
-        
+        const headerPlaylist = { id, torrents: [] }
+
         //TODO: SEE HOW CAN WE AVOID THE _this = this TO BE MORE FUZZY :)
         const _this = this;
         mkdirp(config.PLAYLIST_PATH, function (_) {
@@ -45,25 +50,25 @@ module.exports = class PlaylistsController {
         })
     }
 
-    setPlaylist (id) {
+    setPlaylist(id) {
         this.playlist = this.readPlaylistFile(id)
     }
 
     getPlaylistSelected() {
         //Just in case read the playlist from the file instead of the one in localStorage.
         const playlistSelected = JSON.parse(localStorage.getItem('idPlaylistSelected'))
-        
+
         return this.readPlaylistFile(playlistSelected.id)
     }
 
-    readPlaylistFile (id) {
+    readPlaylistFile(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
         const file = fs.readFileSync(playlistPath, 'utf8')
 
         return JSON.parse(file);
     }
 
-    addAlbumToPlaylist (infohash, files) {
+    addAlbumToPlaylist(infohash, files) {
         //First we search if the actual album is in the playlist, if it is we deleted it
         //And then add the whole album.
 
@@ -88,4 +93,27 @@ module.exports = class PlaylistsController {
             })
         })
     }
+
+    confirmDeletePlaylist(playlistId) {
+        console.log(this.state)
+        this.state.modal = {
+            id: 'remove-playlist-modal',
+            playlistId
+        }
+    }
+
+    deletePlaylist(id) {
+        const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
+        deleteFile(playlistPath);
+    }
+
+}
+
+//TODO: The same function is on torrent-list-controller.js refactor somehow
+// and share the function.
+function deleteFile(path) {
+    if (!path) return
+    fs.unlink(path, function (err) {
+        if (err) dispatch('error', err)
+    })
 }

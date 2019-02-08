@@ -113,9 +113,9 @@ function onState (err, _state) {
       const FolderWatcherController = require('./controllers/folder-watcher-controller')
       return new FolderWatcherController()
     }),
-    playlists: createGetter(() => {
-      const PlaylistsController = require ('./controllers/playlists-controller')
-      return new PlaylistsController();
+    playlistList: createGetter(() => {
+      const PlaylistListController = require ('./controllers/playlist-list-controller')
+      return new PlaylistListController(state);
     })
   }
 
@@ -323,11 +323,13 @@ const dispatchHandlers = {
   'resetTitle': () => { state.window.title = config.APP_WINDOW_TITLE },
 
   //Playlists
-  'createPlaylist': (id) => controllers.playlists().createPlaylist(id),
-  'addAlbumToPlaylist': (infoHash, files) => controllers.playlists().addAlbumToPlaylist(infoHash, files),
-  'addSongToPlaylist': (infoHash, file) => controllers.playlists().addSongToPlaylist(infoHash, file),
-  'getAllPlaylists': () => controllers.playlists().getAllPlaylists(),
-  'setPlaylist': (id) => controllers.playlists().setPlaylist(id),
+  'createPlaylist': (id) => controllers.playlistList().createPlaylist(id),
+  'addAlbumToPlaylist': (infoHash, files) => controllers.playlistList().addAlbumToPlaylist(infoHash, files),
+  'addSongToPlaylist': (infoHash, file) => controllers.playlistList().addSongToPlaylist(infoHash, file),
+  'getAllPlaylists': () => controllers.playlistList().getAllPlaylists(),
+  'setPlaylist': (id) => controllers.playlistList().setPlaylist(id),
+  'confirmDeletePlaylist': (id) => controllers.playlistList().confirmDeletePlaylist(id),
+  'deletePlaylist' : (id) => controllers.playlistList().deletePlaylist(id),
   
   // Everything else
   'onOpen': onOpen,

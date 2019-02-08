@@ -80,6 +80,13 @@ module.exports = class PlaylistList extends React.Component {
       content.push(
         <div key={id} onClick={id && dispatcher('setPlaylist', id)}>
           {id}
+          <i
+            key='delete-playlist-button'
+            className='icon delete'
+            title='Remove playlist'
+            onClick={dispatcher('confirmDeletePlaylist', id, false)}>
+            close
+          </i>
         </div>
       )
     })

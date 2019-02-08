@@ -24,6 +24,7 @@ const Modals = {
     () => require('../components/open-torrent-address-modal')
   ),
   'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
+  'remove-playlist-modal': createGetter(() => require('../components/remove-playlist-modal')),
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
   'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
 }
