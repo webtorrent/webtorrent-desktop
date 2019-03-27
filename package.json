@@ -41,7 +41,7 @@
     "react-dom": "^16.5.2",
     "rimraf": "^2.5.2",
     "run-parallel": "^1.1.6",
-    "semver": "^5.6.0",
+    "semver": "^6.0.0",
     "simple-concat": "^1.0.0",
     "simple-get": "^3.0.3",
     "srt-to-vtt": "^1.1.1",
