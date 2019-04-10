@@ -364,26 +364,26 @@ module.exports = class TorrentList extends React.Component {
     if (isOnPlaylist) {
       iconPlaylist = 'playlist_add_check'
       //TODO: CREAR DISPATCHERS DE VERDAD
-      handleClickPlaylist = dispatcher('playFile', infoHash, index)
+      handleClickPlaylist = dispatcher('removeFileToPlaylist', infoHash, file)
     }else {
       iconPlaylist = 'playlist_add' 
       //TODO: CREAR DISPATCHERS DE VERDAD
-      handleClickPlaylist = dispatcher('playFile', infoHash, index)
+      handleClickPlaylist = dispatcher('addSongToPlaylist', infoHash, file)
     }
     // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed
     let rowClass = ''
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return (
-      <tr key={index} onClick={handleClickPlaylist}>
-        <td className={'col-icon ' + rowClass}>
+      <tr key={index}>
+        <td className={'col-icon ' + rowClass} onClick={handleClickPlaylist}>
           <i className='icon'>{iconPlaylist}</i>
         </td>
-        <td className={'col-icon ' + rowClass}>
+        <td className={'col-icon ' + rowClass} onClick={handleClick}>
           {positionElem}
           <i className='icon'>{icon}</i>
         </td>
-        <td className={'col-name ' + rowClass}>
+        <td className={'col-name ' + rowClass} onClick={handleClick}>
           {file.name}
         </td>
         <td className={'col-progress ' + rowClass}>

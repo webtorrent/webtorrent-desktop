@@ -60,7 +60,7 @@ module.exports = class PlaylistListController {
         if (!playlistSelected) {
             playlistSelected = this.state.playlistsList[0].id
         }
-        
+
         //Just in case read the playlist from the file instead of the one in localStorage.
         let playlistContent = this.readPlaylistFile(playlistSelected.id);
         return playlistContent
@@ -68,27 +68,30 @@ module.exports = class PlaylistListController {
 
     readPlaylistFile(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
-        
-        let fileContents 
-        
+
+        let fileContents
+
         try {
-          fileContents = fs.readFileSync(playlistPath, 'utf8')
+            fileContents = fs.readFileSync(playlistPath, 'utf8')
         } catch (err) {
-          // Here you get the error when the file was not found,
-          // but you also get any other error
-          console.log(`${playlistPath}: File not found!, Returning an empty playlist.`);
-          return {"id":id, "torrents":[]}
+            // Here you get the error when the file was not found,
+            // but you also get any other error
+            console.log(`${playlistPath}: File not found!, Returning an empty playlist.`);
+            return { "id": id, "torrents": [] }
         }
 
         return JSON.parse(fileContents);
     }
 
+    getAlbumFromPlaylist(infohash) {
+        return this.playlist.torrents.find(item => item.infohash === infohash);
+    }
+
     addAlbumToPlaylist(infohash, files) {
         //First we search if the actual album is in the playlist, if it is we deleted it
         //And then add the whole album.
-
-        const albumInPlaylist = this.playlist.torrents.find(item => item.infohash === infohash);
-        if (albumInPlaylist) {
+        const albumOnPlaylist = this.getAlbumFromPlaylist(infohash)
+        if (albumOnPlaylist) {
             this.playlist.torrents = this.playlist.torrents.filter(item => item.infohash != infohash)
         }
 
@@ -98,13 +101,39 @@ module.exports = class PlaylistListController {
             files
         })
 
+        this.writePlaylistFile()
+    }
+
+    addSongToPlaylist(infohash, file) {
+
+        //First we search if the actual album is in the playlist, if it is 
+        //We add the song to the object, if not we create a the object
+        const albumOnPlaylist = this.getAlbumFromPlaylist(infohash)
+        if (albumOnPlaylist) {
+            albumOnPlaylist.files.push(file.name)
+    
+            //We set just unique values of the array to avoid repeated songs.
+            albumOnPlaylist.files = albumOnPlaylist.files.filter((v, i, a) => a.indexOf(v) === i);  
+        } else {
+            this.playlist.torrents.push({
+                infohash,
+                files: [file.name]
+            })
+        }
+
+        this.writePlaylistFile()
+    }
+
+    writePlaylistFile() {
         const playlistPath = path.join(config.PLAYLIST_PATH, this.playlist.id + '.json')
         const playlistString = JSON.stringify(this.playlist, null, 2)
 
+        // todo: delete _this please....
+        var _this = this
         mkdirp(config.PLAYLIST_PATH, function (_) {
             fs.writeFile(playlistPath, playlistString, function (err) {
                 if (err) return console.log('error saving album to playlist %s: %o', playlistPath, err)
-                console.log('The album has been added to the playlist');
+                console.log(`The playlist file ${_this.playlist.id}.json has been saved`);
             })
         })
     }
