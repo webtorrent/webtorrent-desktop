@@ -19,6 +19,19 @@
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
 </p>
 
+
+#### Recommended readings to start working in the app
+
+Electron (Framework to make native apps for Windows, OSX and Linux in Javascript):
+https://electronjs.org/docs/tutorial/quick-start
+
+React.js (Framework to work with Frontend UI):
+https://reactjs.org/docs/getting-started.html
+
+Material UI (React components that implement Google's Material Design.):
+https://material-ui.com/getting-started
+https://material.io/tools/icons/?style=baseline
+
 ## Install
 
 ### Recommended Install
@@ -77,6 +90,7 @@ $ npm run watch
 ```
 $ npm test
 ```
+
 
 ### Run integration tests
 

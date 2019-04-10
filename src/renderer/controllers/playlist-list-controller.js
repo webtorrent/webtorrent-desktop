@@ -41,7 +41,7 @@ module.exports = class PlaylistListController {
 
         //TODO: SEE HOW CAN WE AVOID THE _this = this TO BE MORE FUZZY :)
         const _this = this;
-        mkdirp(config.PLAYLIST_PATH, function (_) {
+        mkdirp(config.PLAYLIST_PATH, () => {
             fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), function (err) {
                 if (err) return console.log('error saving playlist file %s: %o', playlistPath, err)
                 console.log('The playlist has been created');
@@ -55,17 +55,32 @@ module.exports = class PlaylistListController {
     }
 
     getPlaylistSelected() {
-        //Just in case read the playlist from the file instead of the one in localStorage.
-        const playlistSelected = JSON.parse(localStorage.getItem('idPlaylistSelected'))
+        let playlistSelected = JSON.parse(localStorage.getItem('idPlaylistSelected'))
 
-        return this.readPlaylistFile(playlistSelected.id)
+        if (!playlistSelected) {
+            playlistSelected = this.state.playlistsList[0].id
+        }
+        
+        //Just in case read the playlist from the file instead of the one in localStorage.
+        let playlistContent = this.readPlaylistFile(playlistSelected.id);
+        return playlistContent
     }
 
     readPlaylistFile(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
-        const file = fs.readFileSync(playlistPath, 'utf8')
+        
+        let fileContents 
+        
+        try {
+          fileContents = fs.readFileSync(playlistPath, 'utf8')
+        } catch (err) {
+          // Here you get the error when the file was not found,
+          // but you also get any other error
+          console.log(`${playlistPath}: File not found!, Returning an empty playlist.`);
+          return {"id":id, "torrents":[]}
+        }
 
-        return JSON.parse(file);
+        return JSON.parse(fileContents);
     }
 
     addAlbumToPlaylist(infohash, files) {

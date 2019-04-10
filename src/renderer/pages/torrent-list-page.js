@@ -355,12 +355,30 @@ module.exports = class TorrentList extends React.Component {
         ? dispatcher('openItem', infoHash, index)
         : (e) => e.stopPropagation() // noop if file is not ready
     }
+
+    // TODO: Make a validation to know if is on playlist or not.
+    let iconPlaylist
+    let handleClickPlaylist
+    let isOnPlaylist = false
+
+    if (isOnPlaylist) {
+      iconPlaylist = 'playlist_add_check'
+      //TODO: CREAR DISPATCHERS DE VERDAD
+      handleClickPlaylist = dispatcher('playFile', infoHash, index)
+    }else {
+      iconPlaylist = 'playlist_add' 
+      //TODO: CREAR DISPATCHERS DE VERDAD
+      handleClickPlaylist = dispatcher('playFile', infoHash, index)
+    }
     // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed
     let rowClass = ''
     if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return (
-      <tr key={index} onClick={handleClick}>
+      <tr key={index} onClick={handleClickPlaylist}>
+        <td className={'col-icon ' + rowClass}>
+          <i className='icon'>{iconPlaylist}</i>
+        </td>
         <td className={'col-icon ' + rowClass}>
           {positionElem}
           <i className='icon'>{icon}</i>
