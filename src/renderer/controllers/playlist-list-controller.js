@@ -5,6 +5,15 @@ const mkdirp = require('mkdirp')
 
 const config = require('../../config')
 
+//TODO: The same function is on torrent-list-controller.js refactor somehow
+// and share the function.
+function deleteFile(path) {
+    if (!path) return
+    //We use sync here because I have a race conditoon when I try to delete the default playlist
+    fs.unlinkSync(path, function (err) {
+        if (err) dispatch('error', err)
+    })
+}
 
 module.exports = class PlaylistListController {
     constructor(state) {
@@ -12,17 +21,6 @@ module.exports = class PlaylistListController {
         //TODO: CREATE playlist.json as a default playlist
         // this.playlist = {"id":"playlist","torrents":[]}
         this.playlist = this.getPlaylistSelected();
-    }
-
-    getAllPlaylists() {
-        fs.readdir(config.PLAYLIST_PATH, (err, files) => {
-            const playlists = []
-            files.forEach(file => {
-                playlists.push(file);
-            });
-
-            this.state.playlistsList = playlists;
-        })
     }
 
     checkIfPlaylistFileExists(path) {
@@ -56,14 +54,12 @@ module.exports = class PlaylistListController {
 
     getPlaylistSelected() {
         let playlistSelected = JSON.parse(localStorage.getItem('idPlaylistSelected'))
-
         if (!playlistSelected) {
-            playlistSelected = this.state.playlistsList[0].id
+            playlistSelected = this.state.playlistsList[0]
         }
 
         //Just in case read the playlist from the file instead of the one in localStorage.
-        let playlistContent = this.readPlaylistFile(playlistSelected.id);
-        return playlistContent
+        return this.readPlaylistFile(playlistSelected);
     }
 
     readPlaylistFile(id) {
@@ -139,7 +135,6 @@ module.exports = class PlaylistListController {
     }
 
     confirmDeletePlaylist(playlistId) {
-        console.log(this.state)
         this.state.modal = {
             id: 'remove-playlist-modal',
             playlistId
@@ -149,15 +144,22 @@ module.exports = class PlaylistListController {
     deletePlaylist(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
         deleteFile(playlistPath);
+        
+        //We delete the playlist from the playlists array
+        this.state.playlistsList = this.state.playlistsList.filter(item => item !== id )
+
+        //If the playlist that we delete is the current selected one, unselect it
+        if (this.playlist.id === id) {
+
+            // If there is other playlist on the array, select the first one
+            // Otherwhise create a new one.
+            if (this.state.playlistsList.length > 0) {
+                this.setPlaylist(this.state.playlistsList[0])
+            } else {
+                this.createPlaylist('default')
     }
 
 }
+    }
 
-//TODO: The same function is on torrent-list-controller.js refactor somehow
-// and share the function.
-function deleteFile(path) {
-    if (!path) return
-    fs.unlink(path, function (err) {
-        if (err) dispatch('error', err)
-    })
 }
