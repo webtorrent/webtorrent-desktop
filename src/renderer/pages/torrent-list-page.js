@@ -375,7 +375,7 @@ module.exports = class TorrentList extends React.Component {
     if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
     return (
       <tr key={index}>
-        <td className={'col-icon'} onClick={handleClickPlaylist}>
+        <td className='col-icon' onClick={handleClickPlaylist}>
           <i className='icon'>{iconPlaylist}</i>
         </td>
         <td className={'col-icon ' + rowClass} onClick={handleClick}>

@@ -972,3 +972,7 @@ video::-webkit-media-text-track-container {
 .control * {
   cursor: default !important;
 }
+
+.playlist-selected {
+  color: yellowgreen;
+}

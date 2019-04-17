@@ -45,9 +45,15 @@ module.exports = class PlaylistList extends React.Component {
     //TODO: I do this because in the first initialization is undefined, patch for fix that, it should load allPlaylist before here.
     state.saved.allPlaylists = state.saved.allPlaylists || []
 
+    console.log(state.saved.playlistSelected)
+
     state.saved.allPlaylists.forEach((id) => {
+      let rowClass = ''
+      if (state.saved.playlistSelected.id === id) {
+        rowClass = 'playlist-selected'
+      }
       content.push(
-        <div key={id} onClick={id && dispatcher('setPlaylist', id)}>
+        <div key={id} className={rowClass} onClick={id && dispatcher('setPlaylist', id)}>
           {id}
           <i
             key='delete-playlist-button'

@@ -327,7 +327,6 @@ const dispatchHandlers = {
   'addAlbumToPlaylist': (infoHash, files) => controllers.playlistList().addAlbumToPlaylist(infoHash, files),
   'addSongToPlaylist': (infoHash, file) => controllers.playlistList().addSongToPlaylist(infoHash, file),
   'removeSongFromPlaylist': (infoHash, file) => controllers.playlistList().removeSongFromPlaylist(infoHash, file),
-  'getAllPlaylists': () => controllers.playlistList().getAllPlaylists(),
   'setPlaylist': (id) => controllers.playlistList().setPlaylist(id),
   'confirmDeletePlaylist': (id) => controllers.playlistList().confirmDeletePlaylist(id),
   'deletePlaylist' : (id) => controllers.playlistList().deletePlaylist(id),
