@@ -1,36 +1,15 @@
 const React = require('react')
 const { dispatcher } = require('../lib/dispatcher')
 
-//TODO : MOVE THIS FUNCTION TO THE CONTROLLER I DON'T KNOW HOW TO DO IT.
-const fs = require('fs')
-const config = require('../../config')
-
-function getAllPlaylists() {
-
-    var files = fs.readdirSync(config.PLAYLIST_PATH);
-
-    //We just want json files to avoid rubbish or system files.
-    files = files.filter(file => file.endsWith('.json'))
-
-    const playlists = []
-    files.forEach(file => {
-        file = file.replace('.json', '')
-        playlists.push(file);
-    });
-
-    this.state.playlistsList = playlists;
-    return playlists
-  }
-// ------
-
 module.exports = class PlaylistList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { playlistName: '' };
+    this.state = { createPlaylistNameInput: '' };
     this.handleChange = this.handleChange.bind(this)
   }
 
   render() {
+    const state = this.props.state
     const createPlaylist = this.renderCreatePlaylistInput()
     const playlistList = this.renderPlaylistsLists()
 
@@ -42,19 +21,18 @@ module.exports = class PlaylistList extends React.Component {
     )
   }
 
-
   renderCreatePlaylistInput() {
     return (
       <div>
         <input
-          value={this.state.playlistName}
+          value={this.state.createPlaylistNameInput}
           onChange={this.handleChange}
           placeholder="playlist's name">
         </input>
 
         <button
-          disabled={!this.state.playlistName}
-          onClick={dispatcher('createPlaylist', this.state.playlistName)}>
+          disabled={!this.state.createPlaylistNameInput}
+          onClick={dispatcher('createPlaylist', this.state.createPlaylistNameInput)}>
           Create new playlist
         </button>
       </div>
@@ -62,10 +40,9 @@ module.exports = class PlaylistList extends React.Component {
   }
 
   renderPlaylistsLists() {
-    this.state.allPlaylists = getAllPlaylists();
     const content = []
 
-    this.state.allPlaylists.forEach((id) => {
+    state.saved.allPlaylists.forEach((id) => {
       content.push(
         <div key={id} onClick={id && dispatcher('setPlaylist', id)}>
           {id}
@@ -84,11 +61,10 @@ module.exports = class PlaylistList extends React.Component {
       <div key="playlist-list">
         {content}
       </div>
-
     )
   }
 
   handleChange(event) {
-    this.setState({ playlistName: event.target.value });
+    this.setState({ createPlaylistNameInput: event.target.value });
   }
 }

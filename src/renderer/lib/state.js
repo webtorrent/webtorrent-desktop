@@ -79,7 +79,13 @@ function getDefaultState () {
     getPlayingTorrentSummary,
     getPlayingFileSummary,
     getExternalPlayerName,
-    shouldHidePlayerControls
+    shouldHidePlayerControls,
+
+
+    /*
+     * Playlists
+     */
+    allPlaylists: [],
   }
 }
 
