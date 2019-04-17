@@ -74,7 +74,7 @@ class App extends React.Component {
           <Header state={state} />
           {this.getErrorPopover()}
           <div key='content' className='content'>
-            <PlaylistList></PlaylistList>
+            <PlaylistList state={state}></PlaylistList>
             {this.getView()}
           </div>
           {this.getModal()}
