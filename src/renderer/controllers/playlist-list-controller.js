@@ -123,7 +123,7 @@ module.exports = class PlaylistListController {
         let albumOnPlaylist = this.getAlbumFromPlaylist(infoHash)
         albumOnPlaylist.files = albumOnPlaylist.files.filter(el => el !== file.name)
 
-        //If there are no more files in the playlist, delete album
+        //If there are no more files in the album, delete it
         if (albumOnPlaylist.files.length === 0) {
             this.state.saved.playlistSelected.torrents = this.state.saved.playlistSelected.torrents.filter(el => el.infoHash !== infoHash)
         }
