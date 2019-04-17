@@ -52,16 +52,15 @@ module.exports = class PlaylistListController {
         //We set the id of the playlist in the property called id in the first position.
         const headerPlaylist = { id, torrents: [] }
 
-        //TODO: SEE HOW CAN WE AVOID THE _this = this TO BE MORE FUZZY :)
-        const _this = this;
         mkdirp(config.PLAYLIST_PATH, () => {
-            fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), function (err) {
+            fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), (err) => {
                 if (err) return console.log('error saving playlist file %s: %o', playlistPath, err)
                 console.log('The playlist has been created');
-                _this.setPlaylist(id)
+                this.setPlaylist(id)
 
                 //TODO: Delete this from here and do it better?
-                _this.state.saved.allPlaylists = _this.getAllPlaylists()
+                //We are reloading the state of allPlaylist to render them
+                this.state.saved.allPlaylists = this.getAllPlaylists()
                 dispatch('stateSave')
             })
         })
@@ -69,17 +68,16 @@ module.exports = class PlaylistListController {
 
     setPlaylist(id) {
         this.state.saved.playlistSelected = this.readPlaylistFile(id)
-        dispatch('stateSave')
     }
 
     getPlaylistSelected() {
-        let playlistSelected = JSON.parse(localStorage.getItem('idPlaylistSelected'))
-        if (!playlistSelected) {
-            playlistSelected = this.state.saved.allPlaylists[0]
+        if (!this.state.saved.playlistSelected) {
+            this.state.saved.playlistSelected = this.state.saved.allPlaylists[0]
         }
-
+        
         //Just in case read the playlist from the file instead of the one in localStorage.
-        return this.readPlaylistFile(playlistSelected);
+        return this.readPlaylistFile(this.state.saved.playlistSelected.id);
+        // return this.state.saved.playlistSelected
     }
 
     readPlaylistFile(id) {
@@ -99,57 +97,69 @@ module.exports = class PlaylistListController {
         return JSON.parse(fileContents);
     }
 
-    getAlbumFromPlaylist(infohash) {
-        return this.state.saved.playlistSelected.torrents.find(item => item.infohash === infohash);
+    getAlbumFromPlaylist(infoHash) {
+        return this.state.saved.playlistSelected.torrents.find(item => item.infoHash === infoHash);
     }
 
-    addAlbumToPlaylist(infohash, files) {
+    addAlbumToPlaylist(infoHash, files) {
         //First we search if the actual album is in the playlist, if it is we deleted it
         //And then add the whole album.
-        const albumOnPlaylist = this.getAlbumFromPlaylist(infohash)
+        const albumOnPlaylist = this.getAlbumFromPlaylist(infoHash)
         if (albumOnPlaylist) {
-            this.state.saved.playlistSelected.torrents = this.state.saved.playlistSelected.torrents.filter(item => item.infohash != infohash)
+            this.state.saved.playlistSelected.torrents = this.state.saved.playlistSelected.torrents.filter(item => item.infoHash != infoHash)
         }
 
         files = files.map(item => item.name)
         this.state.saved.playlistSelected.torrents.push({
-            infohash,
+            infoHash,
             files
         })
 
         this.writePlaylistFile()
+        dispatch('stateSave')
     }
 
-    addSongToPlaylist(infohash, file) {
+    removeSongFromPlaylist(infoHash, file) {
+        let albumOnPlaylist = this.getAlbumFromPlaylist(infoHash)
+        albumOnPlaylist.files = albumOnPlaylist.files.filter(el => el !== file.name)
 
+        //If there are no more files in the playlist, delete album
+        if (albumOnPlaylist.files.length === 0) {
+            this.state.saved.playlistSelected.torrents = this.state.saved.playlistSelected.torrents.filter(el => el.infoHash !== infoHash)
+        }
+
+        this.writePlaylistFile();
+        dispatch('stateSave')
+    }
+
+    addSongToPlaylist(infoHash, file) {
         //First we search if the actual album is in the playlist, if it is 
         //We add the song to the object, if not we create a the object
-        const albumOnPlaylist = this.getAlbumFromPlaylist(infohash)
+        const albumOnPlaylist = this.getAlbumFromPlaylist(infoHash)
         if (albumOnPlaylist) {
             albumOnPlaylist.files.push(file.name)
     
             //We set just unique values of the array to avoid repeated songs.
-            albumOnPlaylist.files = albumOnPlaylist.files.filter((v, i, a) => a.indexOf(v) === i);  
+            albumOnPlaylist.files = albumOnPlaylist.files.filter((v, i, a) => a.indexOf(v) === i);
         } else {
             this.state.saved.playlistSelected.torrents.push({
-                infohash,
+                infoHash,
                 files: [file.name]
             })
         }
 
         this.writePlaylistFile()
+        dispatch('stateSave')
     }
 
     writePlaylistFile() {
         const playlistPath = path.join(config.PLAYLIST_PATH, this.state.saved.playlistSelected.id + '.json')
         const playlistString = JSON.stringify(this.state.saved.playlistSelected, null, 2)
 
-        // todo: delete _this please....
-        var _this = this
-        mkdirp(config.PLAYLIST_PATH, function (_) {
-            fs.writeFile(playlistPath, playlistString, function (err) {
+        mkdirp(config.PLAYLIST_PATH, () => {
+            fs.writeFile(playlistPath, playlistString, (err) => {
                 if (err) return console.log('error saving album to playlist %s: %o', playlistPath, err)
-                console.log(`The playlist file ${_this.state.saved.playlistSelected.id}.json has been saved`);
+                console.log(`The playlist file ${this.state.saved.playlistSelected.id}.json has been saved`);
             })
         })
     }

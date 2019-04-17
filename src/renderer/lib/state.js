@@ -120,6 +120,7 @@ function setupStateSaved (cb) {
   const fs = require('fs')
   const parseTorrent = require('parse-torrent')
 
+  //TODO: verify that allPlaylist is ok here.
   const saved = {
     prefs: {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
@@ -129,7 +130,8 @@ function setupStateSaved (cb) {
       startup: false,
       autoAddTorrents: false,
       torrentsFolderPath: '',
-      highestPlaybackPriority: true
+      highestPlaybackPriority: true,
+      allPlaylists: [],
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],

@@ -41,6 +41,9 @@ module.exports = class PlaylistList extends React.Component {
 
   renderPlaylistsLists() {
     const content = []
+  
+    //TODO: I do this because in the first initialization is undefined, patch for fix that, it should load allPlaylist before here.
+    state.saved.allPlaylists = state.saved.allPlaylists || []
 
     state.saved.allPlaylists.forEach((id) => {
       content.push(
