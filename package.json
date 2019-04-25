@@ -63,7 +63,7 @@
     "minimist": "^1.2.0",
     "nobin-debian-installer": "0.0.10",
     "nodemon": "^1.18.8",
-    "opn": "^5.4.0",
+    "opn": "^6.0.0",
     "plist": "^3.0.1",
     "pngjs": "^3.0.0",
     "run-series": "^1.1.4",
