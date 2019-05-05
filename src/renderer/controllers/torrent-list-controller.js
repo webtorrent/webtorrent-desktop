@@ -279,6 +279,16 @@ module.exports = class TorrentListController {
       enabled: torrentSummary.torrentFileName != null
     }))
 
+    menu.append(new electron.remote.MenuItem({
+      type: 'separator'
+    }))
+
+    const sortedByName = this.state.saved.prefs.sortByName
+    menu.append(new electron.remote.MenuItem({
+      label: `${sortedByName ? '✓ ' : ''}Sort by Name`,
+      click: () => dispatch('updatePreferences', 'sortByName', !sortedByName)
+    }))
+
     menu.popup(electron.remote.getCurrentWindow())
   }
 
