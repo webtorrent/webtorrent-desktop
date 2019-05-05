@@ -7,7 +7,7 @@ const LinearProgress = require('material-ui/LinearProgress').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
-const {dispatcher} = require('../lib/dispatcher')
+const { dispatcher } = require('../lib/dispatcher')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -148,7 +148,7 @@ module.exports = class TorrentList extends React.Component {
         }
       }
       return (
-        <div style={styles.wrapper}>
+        <div key='progress-bar' style={styles.wrapper}>
           <LinearProgress style={styles.progress} mode='determinate' value={progress} />
         </div>
       )
@@ -201,7 +201,7 @@ module.exports = class TorrentList extends React.Component {
       const minutesStr = (hours || minutes) ? minutes + 'm' : ''
       const secondsStr = seconds + 's'
 
-      return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+      return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
     }
 
     function renderTorrentStatus () {
@@ -217,7 +217,7 @@ module.exports = class TorrentList extends React.Component {
       } else { // torrentSummary.status is 'new' or something unexpected
         status = ''
       }
-      return (<span>{status}</span>)
+      return (<span key='torrent-status'>{status}</span>)
     }
   }
 
@@ -368,21 +368,21 @@ module.exports = class TorrentList extends React.Component {
 
   renderRadialProgressBar (fraction, cssClass) {
     const rotation = 360 * fraction
-    const transformFill = {transform: 'rotate(' + (rotation / 2) + 'deg)'}
-    const transformFix = {transform: 'rotate(' + rotation + 'deg)'}
+    const transformFill = { transform: 'rotate(' + (rotation / 2) + 'deg)' }
+    const transformFix = { transform: 'rotate(' + rotation + 'deg)' }
 
     return (
       <div key='radial-progress' className={'radial-progress ' + cssClass}>
-        <div key='circle' className='circle'>
-          <div key='mask-full' className='mask full' style={transformFill}>
-            <div key='fill' className='fill' style={transformFill} />
+        <div className='circle'>
+          <div className='mask full' style={transformFill}>
+            <div className='fill' style={transformFill} />
           </div>
-          <div key='mask-half' className='mask half'>
-            <div key='fill' className='fill' style={transformFill} />
-            <div key='fill-fix' className='fill fix' style={transformFix} />
+          <div className='mask half'>
+            <div className='fill' style={transformFill} />
+            <div className='fill fix' style={transformFix} />
           </div>
         </div>
-        <div key='inset' className='inset' />
+        <div className='inset' />
       </div>
     )
   }
@@ -396,7 +396,7 @@ function getErrorMessage (torrentSummary) {
   const err = torrentSummary.error
   if (err === 'path-missing') {
     return (
-      <span>
+      <span key='path-missing'>
         Path missing.<br />
         Fix and restart the app, or delete the torrent.
       </span>

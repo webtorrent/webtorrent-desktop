@@ -3,7 +3,7 @@ const ipcRenderer = require('electron').ipcRenderer
 
 const TorrentSummary = require('../lib/torrent-summary')
 const sound = require('../lib/sound')
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class TorrentController {
   constructor (state) {

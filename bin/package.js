@@ -449,51 +449,51 @@ function buildWin32 (cb) {
         usePackageJson: false,
         version: pkg.version
       })
-      .then(function () {
-        console.log(`Windows: Created ${destArch} installer.`)
+        .then(function () {
+          console.log(`Windows: Created ${destArch} installer.`)
 
-        /**
+          /**
          * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
          * versions of the app)
          */
-        fs.readdirSync(DIST_PATH)
-          .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
-          .forEach((filename) => {
-            fs.unlinkSync(path.join(DIST_PATH, filename))
-          })
+          fs.readdirSync(DIST_PATH)
+            .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
+            .forEach((filename) => {
+              fs.unlinkSync(path.join(DIST_PATH, filename))
+            })
 
-        if (destArch === 'ia32') {
-          console.log('Windows: Renaming ia32 installer files...')
+          if (destArch === 'ia32') {
+            console.log('Windows: Renaming ia32 installer files...')
 
-          // RELEASES -> RELEASES-ia32
-          const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
-          fs.renameSync(
-            path.join(DIST_PATH, 'RELEASES'),
-            relPath
-          )
+            // RELEASES -> RELEASES-ia32
+            const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
+            fs.renameSync(
+              path.join(DIST_PATH, 'RELEASES'),
+              relPath
+            )
 
-          // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
-          fs.renameSync(
-            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
-            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
-          )
+            // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
+            fs.renameSync(
+              path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
+              path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
+            )
 
-          // Change file name inside RELEASES-ia32 to match renamed file
-          const relContent = fs.readFileSync(relPath, 'utf8')
-          const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
-          fs.writeFileSync(relPath, relContent32)
+            // Change file name inside RELEASES-ia32 to match renamed file
+            const relContent = fs.readFileSync(relPath, 'utf8')
+            const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
+            fs.writeFileSync(relPath, relContent32)
 
-          if (relContent === relContent32) {
+            if (relContent === relContent32) {
             // Sanity check
-            throw new Error('Fixing RELEASES-ia32 failed. Replacement did not modify the file.')
+              throw new Error('Fixing RELEASES-ia32 failed. Replacement did not modify the file.')
+            }
+
+            console.log('Windows: Renamed ia32 installer files.')
           }
 
-          console.log('Windows: Renamed ia32 installer files.')
-        }
-
-        cb(null)
-      })
-      .catch(cb)
+          cb(null)
+        })
+        .catch(cb)
     }
 
     function packagePortable (filesPath, destArch, cb) {

@@ -2,8 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 
-const {dispatch} = require('../lib/dispatcher')
-const {TorrentKeyNotFoundError} = require('../lib/errors')
+const { dispatch } = require('../lib/dispatcher')
+const { TorrentKeyNotFoundError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
 
@@ -157,23 +157,24 @@ module.exports = class TorrentListController {
 
   prioritizeTorrent (infoHash) {
     this.state.saved.torrents
-    .filter((torrent) => { // We're interested in active torrents only.
-      return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
-    })
-    .map((torrent) => { // Pause all active torrents except the one that started playing.
-      if (infoHash === torrent.infoHash) return
+      .filter((torrent) => { // We're interested in active torrents only.
+        return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
+      })
+      .map((torrent) => { // Pause all active torrents except the one that started playing.
+        if (infoHash === torrent.infoHash) return
 
-      // Pause torrent without playing sounds.
-      this.pauseTorrent(torrent, false)
+        // Pause torrent without playing sounds.
+        this.pauseTorrent(torrent, false)
 
-      this.state.saved.torrentsToResume.push(torrent.infoHash)
-    })
+        this.state.saved.torrentsToResume.push(torrent.infoHash)
+      })
 
     console.log('Playback Priority: paused torrents: ', this.state.saved.torrentsToResume)
   }
 
   resumePausedTorrents () {
     console.log('Playback Priority: resuming paused torrents')
+    if (!this.state.saved.torrentsToResume || !this.state.saved.torrentsToResume.length) return
     this.state.saved.torrentsToResume.map((infoHash) => {
       this.toggleTorrent(infoHash)
     })
@@ -317,7 +318,7 @@ module.exports = class TorrentListController {
 function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
-    let ret = []
+    const ret = []
     paths.forEach(function (path) {
       findFilesRecursive([path], function (fileObjs) {
         ret.push(...fileObjs)

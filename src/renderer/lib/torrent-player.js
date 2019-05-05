@@ -8,6 +8,8 @@ module.exports = {
 
 const path = require('path')
 
+const mediaExtensions = require('./media-extensions')
+
 // Checks whether a fileSummary or file path is audio/video that we can play,
 // based on the file extension
 function isPlayable (file) {
@@ -16,30 +18,12 @@ function isPlayable (file) {
 
 // Checks whether a fileSummary or file path is playable video
 function isVideo (file) {
-  return [
-    '.avi',
-    '.m4v',
-    '.mkv',
-    '.mov',
-    '.mp4',
-    '.mpg',
-    '.ogv',
-    '.webm',
-    '.wmv'
-  ].includes(getFileExtension(file))
+  return mediaExtensions.video.includes(getFileExtension(file))
 }
 
 // Checks whether a fileSummary or file path is playable audio
 function isAudio (file) {
-  return [
-    '.aac',
-    '.ac3',
-    '.mp3',
-    '.ogg',
-    '.wav',
-    '.flac',
-    '.m4a'
-  ].includes(getFileExtension(file))
+  return mediaExtensions.audio.includes(getFileExtension(file))
 }
 
 // Checks if the argument is either:

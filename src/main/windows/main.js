@@ -57,7 +57,7 @@ function init (state, options) {
     win.setSheetOffset(config.UI_HEADER_HEIGHT)
   }
 
-  win.webContents.on('dom-ready', function () {
+  win.webContents.on('dom-ready', () => {
     menu.onToggleFullScreen(main.win.isFullScreen())
   })
 
@@ -73,27 +73,27 @@ function init (state, options) {
   win.on('hide', onWindowBlur)
   win.on('show', onWindowFocus)
 
-  win.on('enter-full-screen', function () {
+  win.on('enter-full-screen', () => {
     menu.onToggleFullScreen(true)
     send('fullscreenChanged', true)
     win.setMenuBarVisibility(false)
   })
 
-  win.on('leave-full-screen', function () {
+  win.on('leave-full-screen', () => {
     menu.onToggleFullScreen(false)
     send('fullscreenChanged', false)
     win.setMenuBarVisibility(true)
   })
 
-  win.on('move', debounce(function (e) {
+  win.on('move', debounce(e => {
     send('windowBoundsChanged', e.sender.getBounds())
   }, 1000))
 
-  win.on('resize', debounce(function (e) {
+  win.on('resize', debounce(e => {
     send('windowBoundsChanged', e.sender.getBounds())
   }, 1000))
 
-  win.on('close', function (e) {
+  win.on('close', e => {
     if (process.platform !== 'darwin') {
       const tray = require('../tray')
       if (!tray.hasTray()) {
@@ -138,37 +138,29 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log('setBounds: not setting bounds because we\'re in full screen')
+    log(`setBounds: not setting bounds because we're in full screen`)
     return
   }
 
   // Maximize or minimize, if the second argument is present
-  let willBeMaximized
-  if (maximize === true) {
-    if (!main.win.isMaximized()) {
-      log('setBounds: maximizing')
-      main.win.maximize()
-    }
-    willBeMaximized = true
-  } else if (maximize === false) {
-    if (main.win.isMaximized()) {
-      log('setBounds: unmaximizing')
-      main.win.unmaximize()
-    }
-    willBeMaximized = false
-  } else {
-    willBeMaximized = main.win.isMaximized()
+  if (maximize === true && !main.win.isMaximized()) {
+    log('setBounds: maximizing')
+    main.win.maximize()
+  } else if (maximize === false && main.win.isMaximized()) {
+    log('setBounds: unmaximizing')
+    main.win.unmaximize()
   }
 
+  const willBeMaximized = typeof maximize === 'boolean' ? maximize : main.win.isMaximized()
   // Assuming we're not maximized or maximizing, set the window size
   if (!willBeMaximized) {
-    log('setBounds: setting bounds to ' + JSON.stringify(bounds))
+    log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
       const scr = electron.screen.getDisplayMatching(main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
       bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
-      log('setBounds: centered to ' + JSON.stringify(bounds))
+      log(`setBounds: centered to ${JSON.stringify(bounds)}`)
     }
     // Resize the window's content area (so window border doesn't need to be taken
     // into account)

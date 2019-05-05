@@ -10,7 +10,7 @@ test('app runs', function (t) {
   setup.waitForLoad(app, t)
     .then(() => setup.screenshotCreateOrCompare(app, t, 'app-basic'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 require('./test-torrent-list')

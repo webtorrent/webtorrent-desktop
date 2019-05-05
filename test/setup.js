@@ -32,7 +32,7 @@ function createApp (t) {
     path: path.join(__dirname, '..', 'node_modules', '.bin',
       'electron' + (process.platform === 'win32' ? '.cmd' : '')),
     args: ['-r', path.join(__dirname, 'mocks.js'), path.join(__dirname, '..')],
-    env: {NODE_ENV: 'test'},
+    env: { NODE_ENV: 'test' },
     waitTimeout: 10e3
   })
 }
@@ -53,7 +53,7 @@ function waitForLoad (app, t, opts) {
   }).then(function () {
     return app.webContents.getTitle()
   }).then(function (title) {
-    // Note the window title is WebTorrent (BETA), this is the HTML <title>
+    // Note the window title is WebTorrent, this is the HTML <title>
     t.equal(title, 'Main Window', 'html title')
   })
 }

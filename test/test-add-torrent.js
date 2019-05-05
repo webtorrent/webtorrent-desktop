@@ -30,7 +30,7 @@ test('add-torrent', function (t) {
     .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'add-torrent-100-percent'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 test('create-torrent', function (t) {
@@ -40,10 +40,9 @@ test('create-torrent', function (t) {
     announce: [
       'udp://explodie.org:6969',
       'udp://tracker.coppersurfer.tk:6969',
+      'udp://tracker.empire-js.us:1337',
       'udp://tracker.leechers-paradise.org:6969',
-      'udp://tracker.openbittorrent.com:80',
       'udp://tracker.opentrackr.org:1337',
-      'udp://zer0day.ch:1337',
       'wss://tracker.btorrent.xyz',
       'wss://tracker.fastcast.nz',
       'wss://tracker.openwebtorrent.com'
@@ -84,5 +83,5 @@ test('create-torrent', function (t) {
       config.SAVED_TORRENT_FILE,
       expectedTorrent))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })

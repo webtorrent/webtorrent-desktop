@@ -1,6 +1,41 @@
 # WebTorrent Desktop Version History
 
-## v0.18.0
+## v0.20.0 - 2018-04-26
+
+### Added
+
+- Added support for additional audio extensions: 'aiff', 'ape', 'mp2', 'oga', 'opus', 'wma' (#1240)
+
+### Changed
+
+- Displaying filename while music metadata is being downloaded (#1361)
+- Improved the poster selection for audio/music based torrents (#1334)
+- Launch VLC player without the `--video-on-top` flag (#1286)
+
+### Fixed
+
+- Fix silently failing to open magnets links on Linux (#1367)
+
+## v0.19.0 - 2018-01-26
+
+### Added
+- Added watch folder feature: Automatically add new torrent files added to a folder on disk (#1154)
+- Added highest playback priority feature: pauses other active torrents when playback starts (#840)
+- Add 'Start Speaking' and 'Stop Speaking' menu item (Mac) (#439)
+- Add pinch-to-zoom gesture to enter/exit fullscreen (#1148)
+
+### Changed
+- [SECURITY] Mitigate Electron protocol handler issue (Windows)
+- Moved project from Feross's GitHub account to the WebTorrent GitHub organization
+- Updated to electron@1.6.16
+- Updated to material-ui@0.17
+- Treat .FLAC as playable audio (#1127)
+
+### Fixed
+- Fix time and duration so it doesn't bounce in the UI (#1233)
+- Fix 'About WebTorrent' menu location on Windows (#1120)
+
+## v0.18.0 - 2017-02-03
 
 ### Added
 - Add a new "Transfers" menu for pausing or resuming all torrents (#1027)
@@ -67,7 +102,7 @@
 ## v0.16.0 - 2016-09-18
 
 ### Added
-- **Windows 64-bit support!** ([#931](https://github.com/webtorrent/webtorrent-desktop/pull/931))
+- **Windows 64-bit support!** (#931)
   - Existing 32-bit users will update to 64-bit automatically in next release
   - 64-bit reduces likelihood of out-of-memory errors by increasing the address space
 

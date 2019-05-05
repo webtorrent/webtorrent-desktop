@@ -5,7 +5,7 @@ const zeroFill = require('zero-fill')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -160,6 +160,7 @@ function renderMedia (state) {
     } else {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
+      if (state.window.isFullScreen) dispatch('toggleFullScreen')
     }
   }
 
@@ -203,28 +204,41 @@ function renderOverlay (state) {
   )
 }
 
+/**
+ * Render track or disk number string
+ * @param common metadata.common part
+ * @param key should be either 'track' or 'disk'
+ * @return track or disk number metadata as JSX block
+ */
+function renderTrack (common, key) {
+  // Audio metadata: track-number
+  if (common[key] && common[key].no) {
+    let str = `${common[key].no}`
+    if (common[key].of) {
+      str += ` of ${common[key].of}`
+    }
+    const style = { textTransform: 'capitalize' }
+    return (
+      <div className={`audio-${key}`}>
+        <label style={style}>{key}</label> {str}
+      </div>
+    )
+  }
+}
+
 function renderAudioMetadata (state) {
   const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
-  const info = fileSummary.audioInfo
+  const common = fileSummary.audioInfo.common || {}
 
   // Get audio track info
-  let title = info.title
-  if (!title) {
-    title = fileSummary.name
-  }
-  let artist = info.artist && info.artist[0]
-  let album = info.album
-  if (album && info.year && !album.includes(info.year)) {
-    album += ' (' + info.year + ')'
-  }
-  let track
-  if (info.track && info.track.no && info.track.of) {
-    track = info.track.no + ' of ' + info.track.of
-  }
+  const title = common.title ? common.title : fileSummary.name
 
   // Show a small info box in the middle of the screen with title/album/etc
   const elems = []
+
+  // Audio metadata: artist(s)
+  const artist = common.artist || common.albumartist
   if (artist) {
     elems.push((
       <div key='artist' className='audio-artist'>
@@ -232,17 +246,86 @@ function renderAudioMetadata (state) {
       </div>
     ))
   }
-  if (album) {
+
+  // Audio metadata: disk & track-number
+  const count = ['track', 'disk']
+  count.forEach(key => {
+    const nrElem = renderTrack(common, key)
+    if (nrElem) {
+      elems.push(nrElem)
+    }
+  })
+
+  // Audio metadata: album
+  if (common.album) {
     elems.push((
       <div key='album' className='audio-album'>
-        <label>Album</label>{album}
+        <label>Album</label>{common.album}
       </div>
     ))
   }
-  if (track) {
+
+  // Audio metadata: year
+  if (common.year) {
     elems.push((
-      <div key='track' className='audio-track'>
-        <label>Track</label>{track}
+      <div key='year' className='audio-year'>
+        <label>Year</label>{common.year}
+      </div>
+    ))
+  }
+
+  // Audio metadata: release information (label & catalog-number)
+  if (common.label || common.catalognumber) {
+    const releaseInfo = []
+    if (common.label && common.catalognumber &&
+      common.label.length === common.catalognumber.length) {
+      // Assume labels & catalog-numbers are pairs
+      for (let n = 0; n < common.label.length; ++n) {
+        releaseInfo.push(common.label[0] + ' / ' + common.catalognumber[n])
+      }
+    } else {
+      if (common.label) {
+        releaseInfo.push(...common.label)
+      }
+      if (common.catalognumber) {
+        releaseInfo.push(...common.catalognumber)
+      }
+    }
+    elems.push((
+      <div key='release' className='audio-release'>
+        <label>Release</label>{ releaseInfo.join(', ') }
+      </div>
+    ))
+  }
+
+  // Audio metadata: format
+  const format = []
+  fileSummary.audioInfo.format = fileSummary.audioInfo.format || ''
+  if (fileSummary.audioInfo.format.dataformat) {
+    format.push(fileSummary.audioInfo.format.dataformat)
+  }
+  if (fileSummary.audioInfo.format.bitrate) {
+    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
+  }
+  if (fileSummary.audioInfo.format.sampleRate) {
+    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz') // 44.1 kHz
+  }
+  if (fileSummary.audioInfo.format.bitsPerSample) {
+    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+  }
+  if (format.length > 0) {
+    elems.push((
+      <div key='format' className='audio-format'>
+        <label>Format</label>{ format.join(', ') }
+      </div>
+    ))
+  }
+
+  // Audio metadata: comments
+  if (common.comment) {
+    elems.push((
+      <div key='comments' className='audio-comments'>
+        <label>Comments</label>{common.comment.join(' / ')}
       </div>
     ))
   }
@@ -273,7 +356,7 @@ function renderLoadingSpinner (state) {
 
   return (
     <div key='loading' className='media-stalled'>
-      <div key='loading-spinner' className='loading-spinner'>&nbsp;</div>
+      <div key='loading-spinner' className='loading-spinner' />
       <div key='loading-progress' className='loading-status ellipsis'>
         <span className='progress'>{fileProgress}%</span> downloaded
         <span> ↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
@@ -303,7 +386,7 @@ function renderCastScreen (state) {
     isCast = false
   } else if (state.playing.location === 'error') {
     castIcon = 'error_outline'
-    castType = 'Error'
+    castType = 'Unable to Play'
     isCast = false
   }
 
@@ -333,7 +416,7 @@ function renderCastScreen (state) {
 function renderCastOptions (state) {
   if (!state.devices.castMenu) return
 
-  const {location, devices} = state.devices.castMenu
+  const { location, devices } = state.devices.castMenu
   const player = state.devices[location]
 
   const items = devices.map(function (device, ix) {
@@ -456,9 +539,9 @@ function renderPlayerControls (state) {
 
   // Add the cast buttons. Icons for each cast type, connected/disconnected:
   const buttonIcons = {
-    'chromecast': {true: 'cast_connected', false: 'cast'},
-    'airplay': {true: 'airplay', false: 'airplay'},
-    'dlna': {true: 'tv', false: 'tv'}
+    'chromecast': { true: 'cast_connected', false: 'cast' },
+    'airplay': { true: 'airplay', false: 'airplay' },
+    'dlna': { true: 'tv', false: 'tv' }
   }
   castTypes.forEach(function (castType) {
     // Do we show this button (eg. the Chromecast button) at all?
@@ -497,9 +580,9 @@ function renderPlayerControls (state) {
   const volume = state.playing.volume
   const volumeIcon = 'volume_' + (
     volume === 0 ? 'off'
-    : volume < 0.3 ? 'mute'
-    : volume < 0.6 ? 'down'
-    : 'up')
+      : volume < 0.3 ? 'mute'
+        : volume < 0.6 ? 'down'
+          : 'up')
   const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
@@ -523,8 +606,8 @@ function renderPlayerControls (state) {
   ))
 
   // Show video playback progress
-  const currentTimeStr = formatTime(state.playing.currentTime)
-  const durationStr = formatTime(state.playing.duration)
+  const currentTimeStr = formatTime(state.playing.currentTime, state.playing.duration)
+  const durationStr = formatTime(state.playing.duration, state.playing.duration)
   elements.push((
     <span key='time' className='time float-left'>
       {currentTimeStr} / {durationStr}
@@ -613,7 +696,7 @@ function renderLoadingBar (state) {
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
     const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
-      parts.push({start: i - fileProg.startPiece, count: 1})
+      parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }
@@ -646,17 +729,19 @@ function cssBackgroundImageDarkGradient () {
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
-function formatTime (time) {
+function formatTime (time, total) {
   if (typeof time !== 'number' || Number.isNaN(time)) {
     return '0:00'
   }
 
-  let hours = Math.floor(time / 3600)
+  const totalHours = Math.floor(total / 3600)
+  const totalMinutes = Math.floor(total / 60)
+  const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (hours > 0) {
+  if (totalMinutes > 9) {
     minutes = zeroFill(2, minutes)
   }
-  let seconds = zeroFill(2, Math.floor(time % 60))
+  const seconds = zeroFill(2, Math.floor(time % 60))
 
-  return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds
+  return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }

@@ -1,6 +1,7 @@
 const colors = require('material-ui/styles/colors')
 const electron = require('electron')
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const remote = electron.remote
 
@@ -11,15 +12,15 @@ const TextField = require('material-ui/TextField').default
 // Uses the system Open File dialog.
 // You can't edit the text field directly.
 class PathSelector extends React.Component {
-  static get propTypes () {
+  static propTypes () {
     return {
-      className: React.PropTypes.string,
-      dialog: React.PropTypes.object,
-      displayValue: React.PropTypes.string,
-      id: React.PropTypes.string,
-      onChange: React.PropTypes.func,
-      title: React.PropTypes.string.isRequired,
-      value: React.PropTypes.string
+      className: PropTypes.string,
+      dialog: PropTypes.object,
+      displayValue: PropTypes.string,
+      id: PropTypes.string,
+      onChange: PropTypes.func,
+      title: PropTypes.string.isRequired,
+      value: PropTypes.string
     }
   }
 
@@ -64,7 +65,8 @@ class PathSelector extends React.Component {
     const textFieldStyle = {
       flex: '1'
     }
-    const text = this.props.displayValue || this.props.value
+
+    const text = this.props.displayValue || this.props.value || ''
     const buttonStyle = {
       marginLeft: 10
     }

@@ -5,7 +5,7 @@
  *   actually used because auto-prefixing is disabled with
  *   `darkBaseTheme.userAgent = false`. Return a fake object.
  */
-let Module = require('module')
+const Module = require('module')
 const _require = Module.prototype.require
 Module.prototype.require = function (id) {
   if (id === 'inline-style-prefixer') return {}
@@ -38,9 +38,6 @@ const TorrentPlayer = require('./lib/torrent-player')
 
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListController = require('./controllers/torrent-list-controller')
-
-// Required by Material UI -- adds `onTouchTap` event
-require('react-tap-event-plugin')()
 
 const App = require('./pages/app')
 
@@ -111,6 +108,10 @@ function onState (err, _state) {
     update: createGetter(() => {
       const UpdateController = require('./controllers/update-controller')
       return new UpdateController(state)
+    }),
+    folderWatcher: createGetter(() => {
+      const FolderWatcherController = require('./controllers/folder-watcher-controller')
+      return new FolderWatcherController()
     })
   }
 
@@ -296,6 +297,8 @@ const dispatchHandlers = {
   'preferences': () => controllers.prefs().show(),
   'updatePreferences': (key, value) => controllers.prefs().update(key, value),
   'checkDownloadPath': checkDownloadPath,
+  'startFolderWatcher': () => controllers.folderWatcher().start(),
+  'stopFolderWatcher': () => controllers.folderWatcher().stop(),
 
   // Update (check for new versions on Linux, where there's no auto updater)
   'updateAvailable': (version) => controllers.update().updateAvailable(version),
@@ -444,7 +447,7 @@ function setDimensions (dimensions) {
   )
 
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', {contentBounds: true, x: null, y: null, width, height})
+  ipcRenderer.send('setBounds', { contentBounds: true, x: null, y: null, width, height })
   state.playing.aspectRatio = aspectRatio
 }
 
@@ -452,6 +455,13 @@ function setDimensions (dimensions) {
 // via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
   if (!Array.isArray(files)) files = [ files ]
+
+  // File API seems to transform "magnet:?foo" in "magnet:///?foo"
+  // this is a sanitization
+  files = files.map(file => {
+    if (typeof file !== 'string') return file
+    return file.replace(/^magnet:\/+\?/i, 'magnet:?')
+  })
 
   const url = state.location.url()
   const allTorrents = files.every(TorrentPlayer.isTorrent)

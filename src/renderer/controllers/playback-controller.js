@@ -2,9 +2,9 @@ const electron = require('electron')
 const path = require('path')
 
 const Cast = require('../lib/cast')
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
-const {UnplayableFileError, UnplayableTorrentError} = require('../lib/errors')
+const { UnplayableFileError, UnplayableTorrentError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -102,10 +102,10 @@ module.exports = class PlaybackController {
     const state = this.state
     if (Playlist.hasNext(state) && state.playing.location !== 'external') {
       this.updatePlayer(
-          state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
-            if (err) dispatch('error', err)
-            else this.play()
-          })
+        state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
+          if (err) dispatch('error', err)
+          else this.play()
+        })
     }
   }
 
@@ -271,7 +271,7 @@ module.exports = class PlaybackController {
     state.playing.fileIndex = index
     state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
       : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-      : 'other'
+        : 'other'
 
     // pick up where we left off
     let jumpToTime = 0
@@ -292,7 +292,7 @@ module.exports = class PlaybackController {
     }
 
     function getAudioMetadata () {
-      if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+      if (state.playing.type === 'audio') {
         ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
       }
     }

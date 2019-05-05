@@ -6,7 +6,7 @@ test('video-streaming', function (t) {
 
   t.timeoutAfter(30e3)
   const app = setup.createApp()
-  setup.waitForLoad(app, t, {online: true})
+  setup.waitForLoad(app, t, { online: true })
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
     // Play Big Buck Bunny. Wait for it to start streaming.
     .then(() => app.client.moveToObject('.torrent'))
@@ -31,5 +31,5 @@ test('video-streaming', function (t) {
     // Take another screenshot to verify that the window resized correctly
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-return'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
