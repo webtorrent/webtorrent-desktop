@@ -531,6 +531,8 @@ function onKeydown (e) {
     dispatch('changePlaybackRate', 1)
   } else if (key === '<') {
     dispatch('changePlaybackRate', -1)
+  } else if (key === 'f') {
+    dispatch('toggleFullScreen')
   }
 
   update()
