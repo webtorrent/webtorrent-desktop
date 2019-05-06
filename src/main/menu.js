@@ -153,9 +153,7 @@ function getMenuTemplate () {
         {
           label: 'Full Screen',
           type: 'checkbox',
-          accelerator: process.platform === 'darwin'
-            ? 'Ctrl+Command+F'
-            : 'F11',
+          accelerator: 'F',
           click: () => windows.main.toggleFullScreen()
         },
         {
