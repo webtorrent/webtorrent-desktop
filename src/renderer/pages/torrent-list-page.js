@@ -289,7 +289,7 @@ module.exports = class TorrentList extends React.Component {
         fileRows = fileRows.sort((a, b) => sorter(a.file.name, b.file.name))
       }
 
-      fileRows = fileRows.map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
+      fileRows = fileRows.map((obj) => this.renderFileRow(torrentSummary, obj.file, obj.index))
 
       filesElement = (
         <div key='files' className='files'>
