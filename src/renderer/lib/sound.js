@@ -1,4 +1,5 @@
 module.exports = {
+  init,
   play
 }
 
@@ -7,6 +8,9 @@ const { InvalidSoundNameError } = require('./errors')
 const path = require('path')
 
 const VOLUME = 0.25
+
+// App state to access the soundNotifications preference
+let state
 
 /* Cache of Audio elements, for instant playback */
 const cache = {}
@@ -46,7 +50,15 @@ const sounds = {
   }
 }
 
+function init (appState) {
+  state = appState
+}
+
 function play (name) {
+  if (!state.saved.prefs.soundNotifications) {
+    return
+  }
+
   let audio = cache[name]
   if (!audio) {
     const sound = sounds[name]
