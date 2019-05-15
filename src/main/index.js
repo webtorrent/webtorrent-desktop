@@ -168,19 +168,6 @@ function onOpen (e, torrentId) {
   }
 }
 
-function onAppOpen (newArgv) {
-  newArgv = sliceArgv(newArgv)
-
-  if (app.ipcReady) {
-    log('Second app instance opened, but was prevented:', newArgv)
-    windows.main.show()
-
-    processArgv(newArgv)
-  } else {
-    argv.push(...newArgv)
-  }
-}
-
 // Remove leading args.
 // Production: 1 arg, eg: /Applications/WebTorrent.app/Contents/MacOS/WebTorrent
 // Development: 2 args, eg: electron .
