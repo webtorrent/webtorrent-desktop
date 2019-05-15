@@ -38,9 +38,9 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // signal this instance and quit. Note: This feature creates a lock file in
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
-  shouldQuit = app.makeSingleInstance(onAppOpen)
-  if (shouldQuit) {
+  if (!app.requestSingleInstanceLock()) {
     app.quit()
+    shouldQuit = true
   }
 }
 
