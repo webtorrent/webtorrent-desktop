@@ -40,7 +40,7 @@ function init (state, options) {
     minWidth: config.WINDOW_MIN_WIDTH,
     show: false,
     title: config.APP_WINDOW_TITLE,
-    titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
+    titleBarStyle: 'hiddenInset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: initialBounds.width,
     x: initialBounds.x,
