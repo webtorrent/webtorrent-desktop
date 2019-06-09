@@ -341,12 +341,14 @@ textarea,
   border-bottom: 1px solid #282828;
 }
 
+.torrent__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .torrent .metadata {
-  position: absolute;
-  top: 20px;
-  left: 15px;
-  right: 15px;
-  width: calc(100% - 30px);
+  padding: 20px 15px;
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
@@ -357,29 +359,18 @@ textarea,
   padding-right: 4px;
 }
 
-.torrent:hover .metadata {
-  width: calc(100% - 120px);
-}
-
 .torrent .torrent-controls {
-  display: none;
+  display: flex;
 }
 
-.torrent:hover .torrent-controls {
-  display: block;
+.torrent__action {
+  color: #fff;
+  background-color: transparent;
+  border: none;
 }
 
 .torrent .play {
-  position: absolute;
-  top: 23px;
-  right: 45px;
   font-size: 55px;
-}
-
-.torrent .delete {
-  position: absolute;
-  top: 38px;
-  right: 12px;
 }
 
 .torrent .download {
@@ -472,7 +463,7 @@ body.drag .app::after {
 }
 
 .torrent-details {
-  padding: 8em 0 20px 0;
+  padding: 20px 0;
 }
 
 .torrent-details .warning {

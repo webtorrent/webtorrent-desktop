@@ -68,8 +68,10 @@ module.exports = class TorrentList extends React.Component {
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
         onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
-        {this.renderTorrentMetadata(torrentSummary)}
-        {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
+        <div className='torrent__meta'>
+          {this.renderTorrentMetadata(torrentSummary)}
+          {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
+        </div>
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
         <hr />
       </div>
@@ -226,29 +228,39 @@ module.exports = class TorrentList extends React.Component {
     const infoHash = torrentSummary.infoHash
 
     // Only show the play/dowload buttons for torrents that contain playable media
-    let playButton
-    if (!torrentSummary.error && TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) {
-      playButton = (
-        <i
-          key='play-button'
-          title='Start streaming'
-          className={'icon play'}
+    const playButton = (!torrentSummary.error &&
+      TorrentPlayer.isPlayableTorrentSummary(torrentSummary)) ? (
+        <button
+          aria-label='Start streaming'
+          className='torrent__action'
           onClick={dispatcher('playFile', infoHash)}>
-          play_circle_outline
+          <i
+            key='play-button'
+            className='icon play'
+            aria-hidden='true'>
+            play_circle_outline
+          </i>
+        </button>
+      ) : null
+
+    const closeButton = (
+      <button
+        aria-label='Remove torrent'
+        className='torrent__action'
+        onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
+        <i
+          key='delete-button'
+          className='icon'
+          aria-hidden='true'>
+          close
         </i>
-      )
-    }
+      </button>
+    )
 
     return (
       <div className='torrent-controls'>
         {playButton}
-        <i
-          key='delete-button'
-          className='icon delete'
-          title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
-          close
-        </i>
+        {closeButton}
       </div>
     )
   }
