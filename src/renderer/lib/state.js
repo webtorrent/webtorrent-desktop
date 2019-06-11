@@ -128,6 +128,7 @@ function setupStateSaved (cb) {
       openExternalPlayer: false,
       externalPlayerPath: null,
       startup: false,
+      soundNotifications: true,
       autoAddTorrents: false,
       torrentsFolderPath: '',
       highestPlaybackPriority: true,

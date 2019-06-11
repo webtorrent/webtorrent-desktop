@@ -26,6 +26,9 @@ class PreferencesPage extends React.Component {
 
     this.handleStartupChange =
       this.handleStartupChange.bind(this)
+
+    this.handlesoundNotificationsChange =
+      this.handlesoundNotificationsChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -186,23 +189,37 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'startup', isChecked)
   }
 
-  setStartupSection () {
+  setStartupCheckbox () {
     if (config.IS_PORTABLE) {
       return
     }
 
     return (
-      <PreferencesSection title='Startup'>
-        <Preference>
-          <Checkbox
-            className='control'
-            checked={this.props.state.saved.prefs.startup}
-            label={'Open WebTorrent on startup.'}
-            onCheck={this.handleStartupChange}
-          />
-        </Preference>
-      </PreferencesSection>
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.startup}
+          label={'Open WebTorrent on startup'}
+          onCheck={this.handleStartupChange}
+        />
+      </Preference>
     )
+  }
+
+  soundNotificationsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.soundNotifications}
+          label={'Enable sounds'}
+          onCheck={this.handlesoundNotificationsChange} />
+      </Preference>
+    )
+  }
+
+  handlesoundNotificationsChange (e, isChecked) {
+    dispatch('updatePreferences', 'soundNotifications', isChecked)
   }
 
   handleSetDefaultApp () {
@@ -230,7 +247,10 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
         </PreferencesSection>
-        {this.setStartupSection()}
+        <PreferencesSection title='General'>
+          {this.setStartupCheckbox()}
+          {this.soundNotificationsCheckbox()}
+        </PreferencesSection>
       </div>
     )
   }
