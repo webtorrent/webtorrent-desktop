@@ -27,8 +27,8 @@ class PreferencesPage extends React.Component {
     this.handleStartupChange =
       this.handleStartupChange.bind(this)
 
-    this.handlesoundNotificationsChange =
-      this.handlesoundNotificationsChange.bind(this)
+    this.handleSoundNotificationsChange =
+      this.handleSoundNotificationsChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -213,12 +213,12 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={this.props.state.saved.prefs.soundNotifications}
           label={'Enable sounds'}
-          onCheck={this.handlesoundNotificationsChange} />
+          onCheck={this.handleSoundNotificationsChange} />
       </Preference>
     )
   }
 
-  handlesoundNotificationsChange (e, isChecked) {
+  handleSoundNotificationsChange (e, isChecked) {
     dispatch('updatePreferences', 'soundNotifications', isChecked)
   }
 
