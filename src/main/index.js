@@ -16,6 +16,9 @@ const windows = require('./windows')
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
 
+// allow electron/chromium to play startup sounds (without user interaction)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
+
 // Start the app without showing the main window when auto launching on login
 // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
 const hidden = argv.includes('--hidden') ||
@@ -31,6 +34,12 @@ if (process.platform === 'win32') {
   const squirrelWin32 = require('./squirrel-win32')
   shouldQuit = squirrelWin32.handleEvent(argv[0])
   argv = argv.filter((arg) => !arg.includes('--squirrel'))
+
+  if (shouldQuit) {
+    app.quit()
+  } else {
+    app.on('second-instance', (event, commandLine) => onAppOpen(commandLine))
+  }
 }
 
 if (!shouldQuit && !config.IS_PORTABLE) {
@@ -39,9 +48,14 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
   if (!app.requestSingleInstanceLock()) {
-    app.quit()
     shouldQuit = true
   }
+}
+
+if (shouldQuit) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
 }
 
 if (!shouldQuit) {
@@ -165,6 +179,19 @@ function onOpen (e, torrentId) {
     processArgv([ torrentId ])
   } else {
     argv.push(torrentId)
+  }
+}
+
+function onAppOpen (newArgv) {
+  newArgv = sliceArgv(newArgv)
+
+  if (app.ipcReady) {
+    log('Second app instance opened, but was prevented:', newArgv)
+    windows.main.show()
+
+    processArgv(newArgv)
+  } else {
+    argv.push(...newArgv)
   }
 }
 
