@@ -209,7 +209,7 @@ function toggleDevTools () {
   if (main.win.webContents.isDevToolsOpened()) {
     main.win.webContents.closeDevTools()
   } else {
-    main.win.webContents.openDevTools({ detach: true })
+    main.win.webContents.openDevTools({ mode: 'detach' })
   }
 }
 
