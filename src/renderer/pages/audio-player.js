@@ -15,11 +15,11 @@ module.exports = class Player extends React.Component {
     // If the video is on Chromecast or Airplay, show a title screen instead
     const state = this.props.state
     // const showVideo = state.playing.location === 'local'
-    // const showControls = state.playing.location !== 'external'
+		const showControls = state.playing.location !== 'external'
     return (
       <div>
         {renderMedia(state)}
-        {renderPlayerControls(state)}
+        {showControls ? renderPlayerControls(state) : null}
       </div>
     )
   }
@@ -83,6 +83,15 @@ function renderMedia (state) {
 		if (state.playing.setVolume !== null && isFinite(state.playing.setVolume)) {
 			mediaElement.volume = state.playing.setVolume
 			state.playing.setVolume = null
+		}
+
+		// Save video position
+		const file = state.getPlayingFileSummary()
+		console.log(23, file)
+
+		if (file) {
+			file.currentTime = state.playing.currentTime = mediaElement.currentTime
+			file.duration = state.playing.duration = mediaElement.duration
 		}
 
 		state.playing.volume = mediaElement.volume
@@ -398,41 +407,13 @@ function renderCastOptions (state) {
   )
 }
 
-function renderSubtitleOptions (state) {
-  const subtitles = state.playing.subtitles
-  if (!subtitles.tracks.length || !subtitles.showMenu) return
-
-  const items = subtitles.tracks.map(function (track, ix) {
-    const isSelected = state.playing.subtitles.selectedIndex === ix
-    return (
-      <li key={ix} onClick={dispatcher('selectSubtitle', ix)}>
-        <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
-        {track.label}
-      </li>
-    )
-  })
-
-  const noneSelected = state.playing.subtitles.selectedIndex === -1
-  const noneClass = 'radio_button_' + (noneSelected ? 'checked' : 'unchecked')
-  return (
-    <ul key='subtitle-options' className='options-list'>
-      {items}
-      <li onClick={dispatcher('selectSubtitle', -1)}>
-        <i className='icon'>{noneClass}</i>
-        None
-      </li>
-    </ul>
-  )
-}
 
 function renderPlayerControls (state) {
+	console.log('state', state)
+	console.log('positionPercent', 100 * state.playing.currentTime / state.playing.duration)
   const positionPercent = 100 * state.playing.currentTime / state.playing.duration
   const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
-  const captionsClass = state.playing.subtitles.tracks.length === 0
-    ? 'disabled'
-    : state.playing.subtitles.selectedIndex >= 0
-      ? 'active'
-      : ''
+
   const prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
@@ -445,6 +426,7 @@ function renderPlayerControls (state) {
         key='cursor'
         className='playback-cursor'
         style={playbackCursorStyle} />
+			pepe
       <div
         key='scrub-bar'
         className='scrub-bar'
@@ -474,26 +456,7 @@ function renderPlayerControls (state) {
       onClick={dispatcher('nextTrack')}>
       skip_next
     </i>,
-
-    <i
-      key='fullscreen'
-      className='icon fullscreen float-right'
-      onClick={dispatcher('toggleFullScreen')}>
-      {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
-    </i>
   ]
-
-  if (state.playing.type === 'video') {
-    // Show closed captions icon
-    elements.push((
-      <i
-        key='subtitles'
-        className={'icon closed-caption float-right ' + captionsClass}
-        onClick={handleSubtitles}>
-        closed_caption
-      </i>
-    ))
-  }
 
   // If we've detected a Chromecast or AppleTV, the user can play video there
   const castTypes = ['chromecast', 'airplay', 'dlna']
@@ -592,7 +555,6 @@ function renderPlayerControls (state) {
       onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
       {elements}
       {/* {renderCastOptions(state)} */}
-      {/* {renderSubtitleOptions(state)} */}
     </div>
   )
 
