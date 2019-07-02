@@ -17,7 +17,10 @@ module.exports = class Player extends React.Component {
     // const showVideo = state.playing.location === 'local'
 		const showControls = state.playing.location !== 'external'
     return (
-      <div>
+      <div
+        className='player'
+        onWheel={handleVolumeWheel}
+        onMouseMove={dispatcher('mediaMouseMoved')}>
         {renderMedia(state)}
         {showControls ? renderPlayerControls(state) : null}
       </div>
@@ -420,13 +423,11 @@ function renderPlayerControls (state) {
   const elements = [
 
     <div key='playback-bar' className='playback-bar'>
-			ASD
       {renderLoadingBar(state)}
       <div
         key='cursor'
         className='playback-cursor'
         style={playbackCursorStyle} />
-			pepe
       <div
         key='scrub-bar'
         className='scrub-bar'

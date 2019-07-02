@@ -76,9 +76,9 @@ class App extends React.Component {
           {this.getErrorPopover()}
           <div key='content' className='content'>
             <PlaylistList state={state}></PlaylistList>
-            <AudioPlayer state={state}></AudioPlayer>
             {this.getView()}
           </div>
+          <AudioPlayer state={state}></AudioPlayer>
           {this.getModal()}
         </div>
       </MuiThemeProvider>
