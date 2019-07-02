@@ -27,37 +27,22 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, restore the most recently viewed file or autoplay the first
   playFile (infoHash, index /* optional */) {
+    const state = this.state
+    const torrentSummary = TorrentSummary.getByKey(state, infoHash)
+
+    if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
+    if (index === undefined) return cb(new UnplayableTorrentError())
+
+    //First we close the player because if we don't do it,  the player is just being updated but the torrent will remain the same...
+    this.closePlayer()
+    this.startServer(torrentSummary)
+
     this.pauseActiveTorrents(infoHash)
 
-    const state = this.state
-    if (state.location.url() === 'player') {
-      this.updatePlayer(infoHash, index, false, (err) => {
-        if (err) dispatch('error', err)
-        else this.play()
-      })
-    } else {
-      let initialized = false
-      state.location.go({
-        url: 'player',
-        setup: (cb) => {
-          const torrentSummary = TorrentSummary.getByKey(state, infoHash)
-
-          if (index === undefined || initialized) index = torrentSummary.mostRecentFileIndex
-          if (index === undefined) index = torrentSummary.files.findIndex(TorrentPlayer.isPlayable)
-          if (index === undefined) return cb(new UnplayableTorrentError())
-
-          initialized = true
-
-          this.openPlayer(infoHash, index, (err) => {
-            if (!err) this.play()
-            cb(err)
-          })
-        },
-        destroy: () => this.closePlayer()
-      }, (err) => {
-        if (err) dispatch('error', err)
-      })
-    }
+    this.updatePlayer(infoHash, index, false, (err) => {
+      if (err) dispatch('error', err)
+      else this.play()
+    })
   }
 
   // Open a file in OS default app.
@@ -72,7 +57,6 @@ module.exports = class PlaybackController {
   // Toggle (play or pause) the currently playing media
   playPause () {
     const state = this.state
-    if (state.location.url() !== 'player') return
 
     // force rerendering if window is hidden,
     // in order to bypass `raf` and play/pause media immediately
@@ -274,15 +258,15 @@ module.exports = class PlaybackController {
         : 'other'
 
     // pick up where we left off
-    let jumpToTime = 0
-    if (resume && fileSummary.currentTime) {
-      const fraction = fileSummary.currentTime / fileSummary.duration
-      const secondsLeft = fileSummary.duration - fileSummary.currentTime
-      if (fraction < 0.9 && secondsLeft > 10) {
-        jumpToTime = fileSummary.currentTime
-      }
-    }
-    state.playing.jumpToTime = jumpToTime
+    // let jumpToTime = 0
+    // if (resume && fileSummary.currentTime) {
+    //   const fraction = fileSummary.currentTime / fileSummary.duration
+    //   const secondsLeft = fileSummary.duration - fileSummary.currentTime
+    //   if (fraction < 0.9 && secondsLeft > 10) {
+    //     jumpToTime = fileSummary.currentTime
+    //   }
+    // }
+    // state.playing.jumpToTime = jumpToTime
 
     // if it's audio, parse out the metadata (artist, title, etc)
     if (torrentSummary.status === 'paused') {
@@ -297,13 +281,13 @@ module.exports = class PlaybackController {
       }
     }
 
-    // if it's video, check for subtitles files that are done downloading
-    dispatch('checkForSubtitles')
+    // // if it's video, check for subtitles files that are done downloading
+    // dispatch('checkForSubtitles')
 
-    // enable previously selected subtitle track
-    if (fileSummary.selectedSubtitle) {
-      dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
-    }
+    // // enable previously selected subtitle track
+    // if (fileSummary.selectedSubtitle) {
+    //   dispatch('addSubtitles', [fileSummary.selectedSubtitle], true)
+    // }
 
     state.window.title = fileSummary.name
 
