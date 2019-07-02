@@ -11,6 +11,7 @@ const Header = require('../components/header')
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListPage = require('./torrent-list-page')
 const PlaylistList = require('./playlist-list-page')
+const AudioPlayer = require ('./audio-player')
 
 const Views = {
   'home': createGetter(() => TorrentListPage),
@@ -77,6 +78,7 @@ class App extends React.Component {
             <PlaylistList state={state}></PlaylistList>
             {this.getView()}
           </div>
+          <AudioPlayer state={state}></AudioPlayer>
           {this.getModal()}
         </div>
       </MuiThemeProvider>
