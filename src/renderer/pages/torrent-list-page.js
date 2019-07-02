@@ -8,6 +8,8 @@ const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const { dispatcher } = require('../lib/dispatcher')
 
+const mediaExtensions = require('../../renderer/lib/media-extensions')
+
 module.exports = class TorrentList extends React.Component {
   render() {
     const state = this.props.state
@@ -322,81 +324,86 @@ module.exports = class TorrentList extends React.Component {
 
   // Show a single torrentSummary file in the details view for a single torrent
   renderFileRow(torrentSummary, file, index) {
-    // First, find out how much of the file we've downloaded
-    // Are we even torrenting it?
-    const isSelected = torrentSummary.selections && torrentSummary.selections[index]
-    let isDone = false // Are we finished torrenting it?
-    let progress = ''
-    if (torrentSummary.progress && torrentSummary.progress.files &&
-      torrentSummary.progress.files[index]) {
-      const fileProg = torrentSummary.progress.files[index]
-      isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+    //First we do this validation to just show audio files in the lists and hide the non audio
+    //To make the list more accurate to our needs
+    if (mediaExtensions.audio.includes("." + file.name.split('.').pop())) {
+        // First, find out how much of the file we've downloaded
+        // Are we even torrenting it?
+        const isSelected = torrentSummary.selections && torrentSummary.selections[index]
+        let isDone = false // Are we finished torrenting it?
+        let progress = ''
+        if (torrentSummary.progress && torrentSummary.progress.files &&
+          torrentSummary.progress.files[index]) {
+          const fileProg = torrentSummary.progress.files[index]
+          isDone = fileProg.numPiecesPresent === fileProg.numPieces
+          progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+        }
+
+        // Second, for media files where we saved our position, show how far we got
+        // Refreex: We do not do this as is not neccesary for audio files
+        // let positionElem
+        // if (file.currentTime) {
+        //   // Radial progress bar. 0% = start from 0:00, 270% = 3/4 of the way thru
+        //   positionElem = this.renderRadialProgressBar(file.currentTime / file.duration)
+        // }
+
+        // Finally, render the file as a table row
+        const isPlayable = TorrentPlayer.isPlayable(file)
+        const infoHash = torrentSummary.infoHash
+        let icon
+        let handleClick
+        if (isPlayable) {
+          icon = 'play_arrow' /* playable? add option to play */
+          handleClick = dispatcher('playFile', infoHash, index)
+        } else {
+          icon = 'description' /* file icon, opens in OS default app */
+          handleClick = isDone
+            ? dispatcher('openItem', infoHash, index)
+            : (e) => e.stopPropagation() // noop if file is not ready
+        }
+
+        let iconPlaylist
+        let handleClickPlaylist
+        let isOnPlaylist = this.isFileOnPlaylist(infoHash, file)
+
+        if (isOnPlaylist) {
+          iconPlaylist = 'playlist_add_check'
+          handleClickPlaylist = dispatcher('removeSongFromPlaylist', infoHash, file)
+        } else {
+          iconPlaylist = 'playlist_add'
+          handleClickPlaylist = dispatcher('addSongToPlaylist', infoHash, file)
+        }
+        // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed
+        let rowClass = ''
+        if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
+        if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
+        return (
+          <tr key={index}>
+            <td className='col-icon' onClick={handleClickPlaylist}>
+              <i className='icon'>{iconPlaylist}</i>
+            </td>
+            <td className={'col-icon ' + rowClass} onClick={handleClick}>
+              {/* {positionElem} */}
+              <i className='icon'>{icon}</i>
+            </td>
+            <td className={'col-name ' + rowClass} onClick={handleClick}>
+              {file.name}
+            </td>
+            <td className={'col-progress ' + rowClass}>
+              {isSelected ? progress : ''}
+            </td>
+            <td className={'col-size ' + rowClass}>
+              {prettyBytes(file.length)}
+            </td>
+            <td className='col-select'
+              onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+              <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
+            </td>
+          </tr>
+        )
     }
 
-    // Second, for media files where we saved our position, show how far we got
-    let positionElem
-    if (file.currentTime) {
-      // Radial progress bar. 0% = start from 0:00, 270% = 3/4 of the way thru
-      positionElem = this.renderRadialProgressBar(file.currentTime / file.duration)
-    }
-
-    // Finally, render the file as a table row
-    const isPlayable = TorrentPlayer.isPlayable(file)
-    const infoHash = torrentSummary.infoHash
-    let icon
-    let handleClick
-    if (isPlayable) {
-      icon = 'play_arrow' /* playable? add option to play */
-      handleClick = dispatcher('playFile', infoHash, index)
-    } else {
-      icon = 'description' /* file icon, opens in OS default app */
-      handleClick = isDone
-        ? dispatcher('openItem', infoHash, index)
-        : (e) => e.stopPropagation() // noop if file is not ready
-    }
-
-    let iconPlaylist
-    let handleClickPlaylist
-    let isOnPlaylist = this.isFileOnPlaylist(infoHash, file)
-
-    if (isOnPlaylist) {
-      iconPlaylist = 'playlist_add_check'
-      //TODO: CREAR DISPATCHERS DE VERDAD
-      handleClickPlaylist = dispatcher('removeSongFromPlaylist', infoHash, file)
-    } else {
-      iconPlaylist = 'playlist_add'
-      //TODO: CREAR DISPATCHERS DE VERDAD
-      handleClickPlaylist = dispatcher('addSongToPlaylist', infoHash, file)
-    }
-    // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed
-    let rowClass = ''
-    if (!isSelected) rowClass = 'disabled' // File deselected, not being torrented
-    if (!isDone && !isPlayable) rowClass = 'disabled' // Can't open yet, can't stream
-    return (
-      <tr key={index}>
-        <td className='col-icon' onClick={handleClickPlaylist}>
-          <i className='icon'>{iconPlaylist}</i>
-        </td>
-        <td className={'col-icon ' + rowClass} onClick={handleClick}>
-          {positionElem}
-          <i className='icon'>{icon}</i>
-        </td>
-        <td className={'col-name ' + rowClass} onClick={handleClick}>
-          {file.name}
-        </td>
-        <td className={'col-progress ' + rowClass}>
-          {isSelected ? progress : ''}
-        </td>
-        <td className={'col-size ' + rowClass}>
-          {prettyBytes(file.length)}
-        </td>
-        <td className='col-select'
-          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
-          <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
-        </td>
-      </tr>
-    )
+    
   }
 
   isFileOnPlaylist(infoHash, file) {
