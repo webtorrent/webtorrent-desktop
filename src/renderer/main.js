@@ -458,7 +458,7 @@ function setDimensions (dimensions) {
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
 // via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
-  if (!Array.isArray(files)) files = [ files ]
+  if (!Array.isArray(files)) files = [files]
 
   // File API seems to transform "magnet:?foo" in "magnet:///?foo"
   // this is a sanitization
