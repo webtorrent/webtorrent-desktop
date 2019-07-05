@@ -34,7 +34,7 @@
     "mkdirp": "^0.5.1",
     "music-metadata": "^3.6.1",
     "network-address": "^1.1.0",
-    "parse-torrent": "^6.0.1",
+    "parse-torrent": "^7.0.0",
     "prettier-bytes": "^1.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
