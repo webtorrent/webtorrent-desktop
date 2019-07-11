@@ -111,7 +111,7 @@ module.exports = class TorrentList extends React.Component {
       elements.push(
         <div className='ellipsis'>
           {renderDownloadCheckbox()}
-          <span>{name}</span>
+          {name}
           {progElems}
         </div>
       )
@@ -233,6 +233,8 @@ module.exports = class TorrentList extends React.Component {
       } else { // torrentSummary.status is 'new' or something unexpected
         status = ''
       }
+
+      
       return (<span key='torrent-status'>{status}</span>)
     }
   }
