@@ -15,8 +15,8 @@ module.exports = class SubtitlesController {
   openSubtitles () {
     remote.dialog.showOpenDialog({
       title: 'Select a subtitles file.',
-      filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
-      properties: [ 'openFile' ]
+      filters: [{ name: 'Subtitles', extensions: ['vtt', 'srt'] }],
+      properties: ['openFile']
     }, (filenames) => {
       if (!Array.isArray(filenames)) return
       this.addSubtitles(filenames, true)

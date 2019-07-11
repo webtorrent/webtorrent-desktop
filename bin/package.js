@@ -198,16 +198,16 @@ function buildDarwin (cb) {
 
     infoPlist.CFBundleDocumentTypes = [
       {
-        CFBundleTypeExtensions: [ 'torrent' ],
+        CFBundleTypeExtensions: ['torrent'],
         CFBundleTypeIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleTypeName: 'BitTorrent Document',
         CFBundleTypeRole: 'Editor',
         LSHandlerRank: 'Owner',
-        LSItemContentTypes: [ 'org.bittorrent.torrent' ]
+        LSItemContentTypes: ['org.bittorrent.torrent']
       },
       {
         CFBundleTypeName: 'Any',
-        CFBundleTypeOSTypes: [ '****' ],
+        CFBundleTypeOSTypes: ['****'],
         CFBundleTypeRole: 'Editor',
         LSHandlerRank: 'Owner',
         LSTypeIsPackage: false
@@ -219,13 +219,13 @@ function buildDarwin (cb) {
         CFBundleTypeRole: 'Editor',
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
-        CFBundleURLSchemes: [ 'magnet' ]
+        CFBundleURLSchemes: ['magnet']
       },
       {
         CFBundleTypeRole: 'Editor',
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Stream-Magnet URL',
-        CFBundleURLSchemes: [ 'stream-magnet' ]
+        CFBundleURLSchemes: ['stream-magnet']
       }
     ]
 
@@ -242,7 +242,7 @@ function buildDarwin (cb) {
         UTTypeReferenceURL: 'http://www.bittorrent.org/beps/bep_0000.html',
         UTTypeTagSpecification: {
           'com.apple.ostype': 'TORR',
-          'public.filename-extension': [ 'torrent' ],
+          'public.filename-extension': ['torrent'],
           'public.mime-type': 'application/x-bittorrent'
         }
       }

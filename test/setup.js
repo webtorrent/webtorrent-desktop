@@ -53,7 +53,7 @@ function waitForLoad (app, t, opts) {
   }).then(function () {
     return app.webContents.getTitle()
   }).then(function (title) {
-    // Note the window title is WebTorrent (BETA), this is the HTML <title>
+    // Note the window title is WebTorrent, this is the HTML <title>
     t.equal(title, 'Main Window', 'html title')
   })
 }
@@ -205,7 +205,7 @@ function compareTorrentFile (t, pathActual, fieldsExpected) {
 function extractImportantFields (parsedTorrent) {
   const { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
-  return { infoHash, name, announce, urlList, comment, 'private': priv }
+  return { infoHash, name, announce, urlList, comment, private: priv }
 }
 
 function copy (pathFrom, pathTo) {
