@@ -236,7 +236,6 @@ module.exports = class TorrentList extends React.Component {
         status = ''
       }
 
-      
       return (<span key='torrent-status'>{status}</span>)
     }
   }
