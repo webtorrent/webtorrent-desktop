@@ -59,7 +59,7 @@ module.exports = class TorrentList extends React.Component {
     // cast buttons if available, and delete
     const classes = ['torrent']
 
-    if (compact) { classes.push('compact') }
+    if (compact && !isSelected) { classes.push('compact') }
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
     if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
@@ -82,8 +82,10 @@ module.exports = class TorrentList extends React.Component {
   // Show name, download status, % complete
   renderTorrentMetadata (torrentSummary) {
     const state = this.props.state
-    const compact = state.compactListView
+    const infoHash = torrentSummary.infoHash
+    const isSelected = infoHash && state.selectedInfoHash === infoHash
     const name = torrentSummary.name || 'Loading torrent...'
+    const compact = state.compactListView && !isSelected
 
     // If it's downloading/seeding then show progress info
     const prog = torrentSummary.progress
