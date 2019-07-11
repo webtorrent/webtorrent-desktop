@@ -357,7 +357,7 @@ textarea,
 }
 
 .torrent.compact .metadata {
-  top: 15px;
+  top: 14px;
 }
 
 .torrent .metadata span:not(:last-child)::after {
@@ -387,7 +387,7 @@ textarea,
 }
 
 .torrent.compact .play {
-  top: 15px;
+  top: 13px;
   font-size: 24px;
 }
 
@@ -399,7 +399,7 @@ textarea,
 }
 
 .torrent.compact .delete {
-  top: 15px;
+  top: 13px;
 }
 
 .torrent .download {
