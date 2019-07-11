@@ -39,9 +39,6 @@ const TorrentPlayer = require('./lib/torrent-player')
 // Perf optimization: Needed immediately, so do not lazy load it below
 const TorrentListController = require('./controllers/torrent-list-controller')
 
-// Required by Material UI -- adds `onTouchTap` event
-require('react-tap-event-plugin')()
-
 const App = require('./pages/app')
 
 // Electron apps have two processes: a main process (node) runs first and starts
