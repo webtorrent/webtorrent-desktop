@@ -12,10 +12,10 @@ const Header = require('../components/header')
 const TorrentListPage = require('./torrent-list-page')
 
 const Views = {
-  'home': createGetter(() => TorrentListPage),
-  'player': createGetter(() => require('./player-page')),
+  home: createGetter(() => TorrentListPage),
+  player: createGetter(() => require('./player-page')),
   'create-torrent': createGetter(() => require('./create-torrent-page')),
-  'preferences': createGetter(() => require('./preferences-page'))
+  preferences: createGetter(() => require('./preferences-page'))
 }
 
 const Modals = {
