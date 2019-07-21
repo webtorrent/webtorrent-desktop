@@ -308,7 +308,7 @@ function renderAudioMetadata (state) {
     format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
   }
   if (fileSummary.audioInfo.format.sampleRate) {
-    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz') // 44.1 kHz
+    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz')
   }
   if (fileSummary.audioInfo.format.bitsPerSample) {
     format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
