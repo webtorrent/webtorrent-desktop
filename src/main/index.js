@@ -34,12 +34,6 @@ if (process.platform === 'win32') {
   const squirrelWin32 = require('./squirrel-win32')
   shouldQuit = squirrelWin32.handleEvent(argv[0])
   argv = argv.filter((arg) => !arg.includes('--squirrel'))
-
-  if (shouldQuit) {
-    app.quit()
-  } else {
-    app.on('second-instance', (event, commandLine) => onAppOpen(commandLine))
-  }
 }
 
 if (!shouldQuit && !config.IS_PORTABLE) {
@@ -55,14 +49,11 @@ if (!shouldQuit && !config.IS_PORTABLE) {
 if (shouldQuit) {
   app.quit()
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
-}
-
-if (!shouldQuit) {
   init()
 }
 
 function init () {
+  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
   if (config.IS_PORTABLE) {
     const path = require('path')
     // Put all user data into the "Portable Settings" folder
