@@ -205,7 +205,7 @@ function compareTorrentFile (t, pathActual, fieldsExpected) {
 function extractImportantFields (parsedTorrent) {
   const { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
-  return { infoHash, name, announce, urlList, comment, 'private': priv }
+  return { infoHash, name, announce, urlList, comment, private: priv }
 }
 
 function copy (pathFrom, pathTo) {

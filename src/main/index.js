@@ -167,7 +167,7 @@ function onOpen (e, torrentId) {
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(() => windows.main.show(), 100)
 
-    processArgv([ torrentId ])
+    processArgv([torrentId])
   } else {
     argv.push(torrentId)
   }

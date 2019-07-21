@@ -42,7 +42,7 @@ function installDarwin () {
 
 function uninstallDarwin () {}
 
-const EXEC_COMMAND = [ process.execPath, '--' ]
+const EXEC_COMMAND = [process.execPath, '--']
 
 if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
