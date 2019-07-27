@@ -138,7 +138,7 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log(`setBounds: not setting bounds because we're in full screen`)
+    log('setBounds: not setting bounds because already in full screen mode')
     return
   }
 
