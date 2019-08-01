@@ -90,9 +90,8 @@ function renderMedia (state) {
 
 		// Save video position
 		const file = state.getPlayingFileSummary()
-		console.log(23, file)
 
-		if (file) {
+    if (file) {
 			file.currentTime = state.playing.currentTime = mediaElement.currentTime
 			file.duration = state.playing.duration = mediaElement.duration
 		}
@@ -412,8 +411,6 @@ function renderCastOptions (state) {
 
 
 function renderPlayerControls (state) {
-	console.log('state', state)
-	console.log('positionPercent', 100 * state.playing.currentTime / state.playing.duration)
   const positionPercent = 100 * state.playing.currentTime / state.playing.duration
   const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
 
@@ -605,7 +602,6 @@ function renderPlayerControls (state) {
 // can be 'spongey' / non-contiguous
 function renderLoadingBar (state) {
   if (config.IS_TEST) return // Don't integration test the loading bar. Screenshots won't match.
-console.log(123, state.getPlayingTorrentSummary())
 	const torrentSummary = state.getPlayingTorrentSummary()
 	if (!torrentSummary) return //If we don't have any torrent active return
 

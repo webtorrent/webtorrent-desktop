@@ -37,6 +37,12 @@ module.exports = class PlaylistListController {
         }
     }
 
+    addPlaylist(jsonPlaylistString) {
+        const playlist = JSON.parse(jsonPlaylistString)
+        //We create the playlist with the content
+        this.createPlaylist(playlist.id, playlist)
+    }
+
 
     getAllPlaylists() {
         var files = fs.readdirSync(config.PLAYLIST_PATH);
@@ -57,15 +63,20 @@ module.exports = class PlaylistListController {
         return fs.existsSync(path);
     }
 
-    createPlaylist(id) {
+    createPlaylist(id, playlistContent = null) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
 
         //Check if a playlist with the same name exists
         const isPlaylistCreated = this.checkIfPlaylistFileExists(playlistPath)
         if (isPlaylistCreated) return console.log('A playlist with the same name is already created: %s', id)
 
-        //We set the id of the playlist in the property called id in the first position.
-        const headerPlaylist = { id, torrents: [] }
+        let headerPlaylist;
+        if (playlistContent) {
+            headerPlaylist =  playlistContent
+        } else {
+            //We set the id of the playlist in the property called id in the first position.
+            headerPlaylist = { id, torrents: [] }
+        }
 
         mkdirp(config.PLAYLIST_PATH, () => {
             fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), (err) => {

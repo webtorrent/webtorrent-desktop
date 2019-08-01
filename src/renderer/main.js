@@ -327,14 +327,14 @@ const dispatchHandlers = {
   resetTitle: () => { state.window.title = config.APP_WINDOW_TITLE },
 
   //Playlists
-  'createPlaylist': (id) => controllers.playlistList().createPlaylist(id),
-  'addAlbumToPlaylist': (infoHash, files) => controllers.playlistList().addAlbumToPlaylist(infoHash, files),
-  'addSongToPlaylist': (infoHash, file) => controllers.playlistList().addSongToPlaylist(infoHash, file),
-  'removeSongFromPlaylist': (infoHash, file) => controllers.playlistList().removeSongFromPlaylist(infoHash, file),
-  'setPlaylist': (id) => controllers.playlistList().setPlaylist(id),
-  'confirmDeletePlaylist': (id) => controllers.playlistList().confirmDeletePlaylist(id),
-  'sharePlaylist': (id) => controllers.playlistList().sharePlaylist(id),
-  'deletePlaylist' : (id) => controllers.playlistList().deletePlaylist(id),
+  createPlaylist: (id) => controllers.playlistList().createPlaylist(id),
+  addAlbumToPlaylist: (infoHash, files) => controllers.playlistList().addAlbumToPlaylist(infoHash, files),
+  addSongToPlaylist: (infoHash, file) => controllers.playlistList().addSongToPlaylist(infoHash, file),
+  removeSongFromPlaylist: (infoHash, file) => controllers.playlistList().removeSongFromPlaylist(infoHash, file),
+  setPlaylist: (id) => controllers.playlistList().setPlaylist(id),
+  confirmDeletePlaylist: (id) => controllers.playlistList().confirmDeletePlaylist(id),
+  sharePlaylist: (id) => controllers.playlistList().sharePlaylist(id),
+  deletePlaylist : (id) => controllers.playlistList().deletePlaylist(id),
   
   // Everything else
   onOpen: onOpen,
@@ -518,9 +518,23 @@ function onError (err) {
 
 const editableHtmlTags = new Set(['input', 'textarea'])
 
+function isJson(str) {
+  try {
+      JSON.parse(str);
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+
 function onPaste (e) {
   if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
-  controllers.torrentList().addTorrent(electron.clipboard.readText())
+  pasteValue = electron.clipboard.readText()
+  if (isJson(pasteValue)) {
+    controllers.playlistList().addPlaylist(pasteValue)
+  } else {
+    controllers.torrentList().addTorrent(pasteValue)
+  }
 
   update()
 }
