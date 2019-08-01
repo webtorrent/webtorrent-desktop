@@ -9,23 +9,18 @@ module.exports = class SharePlaylistModal extends React.Component {
     const state = this.props.state
     return (
       <div className='share-playlist-modal'>
-        <p><strong>A new version of WebTorrent is available: v{state.modal.version}</strong></p>
-        <p>
-          We have an auto-updater for Windows and Mac.
-          We don't have one for Linux yet, so you'll have to download the new version manually.
-        </p>
+        <p><strong>Copy this content and share your playlist with your friends! Share it just doing paste wherever you want{state.modal.version}</strong></p>
+        <textarea readOnly value={JSON.stringify(state.saved.playlistSelected)}></textarea>
         <ModalOKCancel
-          cancelText='SKIP THIS RELEASE'
+          cancelText='Close'
           onCancel={handleSkip}
-          okText='SHOW DOWNLOAD PAGE'
+          okText='Copy to clipboard'
           onOK={handleShow} />
       </div>
     )
 
     function handleShow () {
-      // TODO: use the GitHub urls from config.js
-      electron.shell.openExternal('https://github.com/webtorrent/webtorrent-desktop/releases')
-      dispatch('exitModal')
+      electron.clipboard.writeText(JSON.stringify(state.saved.playlistSelected))
     }
 
     function handleSkip () {
