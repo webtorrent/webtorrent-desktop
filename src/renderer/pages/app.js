@@ -14,10 +14,10 @@ const PlaylistList = require('./playlist-list-page')
 const AudioPlayer = require ('./audio-player')
 
 const Views = {
-  'home': createGetter(() => TorrentListPage),
-  'player': createGetter(() => require('./player-page')),
+  home: createGetter(() => TorrentListPage),
+  player: createGetter(() => require('./player-page')),
   'create-torrent': createGetter(() => require('./create-torrent-page')),
-  'preferences': createGetter(() => require('./preferences-page'))
+  preferences: createGetter(() => require('./preferences-page'))
 }
 
 const Modals = {

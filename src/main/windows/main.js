@@ -40,7 +40,7 @@ function init (state, options) {
     minWidth: config.WINDOW_MIN_WIDTH,
     show: false,
     title: config.APP_WINDOW_TITLE,
-    titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
+    titleBarStyle: 'hiddenInset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: initialBounds.width,
     x: initialBounds.x,
@@ -141,7 +141,7 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log(`setBounds: not setting bounds because we're in full screen`)
+    log('setBounds: not setting bounds because already in full screen mode')
     return
   }
 
@@ -212,7 +212,7 @@ function toggleDevTools () {
   if (main.win.webContents.isDevToolsOpened()) {
     main.win.webContents.closeDevTools()
   } else {
-    main.win.webContents.openDevTools({ detach: true })
+    main.win.webContents.openDevTools({ mode: 'detach' })
   }
 }
 

@@ -239,92 +239,92 @@ function updateElectron () {
 
 const dispatchHandlers = {
   // Torrent list: creating, deleting, selecting torrents
-  'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
-  'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
-  'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
+  openTorrentFile: () => ipcRenderer.send('openTorrentFile'),
+  openFiles: () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
+  openTorrentAddress: () => { state.modal = { id: 'open-torrent-address-modal' } },
 
-  'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
-  'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),
-  'createTorrent': (options) => controllers.torrentList().createTorrent(options),
-  'toggleTorrent': (infoHash) => controllers.torrentList().toggleTorrent(infoHash),
-  'pauseAllTorrents': () => controllers.torrentList().pauseAllTorrents(),
-  'resumeAllTorrents': () => controllers.torrentList().resumeAllTorrents(),
-  'toggleTorrentFile': (infoHash, index) =>
+  addTorrent: (torrentId) => controllers.torrentList().addTorrent(torrentId),
+  showCreateTorrent: (paths) => controllers.torrentList().showCreateTorrent(paths),
+  createTorrent: (options) => controllers.torrentList().createTorrent(options),
+  toggleTorrent: (infoHash) => controllers.torrentList().toggleTorrent(infoHash),
+  pauseAllTorrents: () => controllers.torrentList().pauseAllTorrents(),
+  resumeAllTorrents: () => controllers.torrentList().resumeAllTorrents(),
+  toggleTorrentFile: (infoHash, index) =>
     controllers.torrentList().toggleTorrentFile(infoHash, index),
-  'confirmDeleteTorrent': (infoHash, deleteData) =>
+  confirmDeleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
-  'deleteTorrent': (infoHash, deleteData) =>
+  deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
-  'toggleSelectTorrent': (infoHash) =>
+  toggleSelectTorrent: (infoHash) =>
     controllers.torrentList().toggleSelectTorrent(infoHash),
-  'openTorrentContextMenu': (infoHash) =>
+  openTorrentContextMenu: (infoHash) =>
     controllers.torrentList().openTorrentContextMenu(infoHash),
-  'startTorrentingSummary': (torrentKey) =>
+  startTorrentingSummary: (torrentKey) =>
     controllers.torrentList().startTorrentingSummary(torrentKey),
-  'saveTorrentFileAs': (torrentKey) =>
+  saveTorrentFileAs: (torrentKey) =>
     controllers.torrentList().saveTorrentFileAs(torrentKey),
-  'prioritizeTorrent': (infoHash) => controllers.torrentList().prioritizeTorrent(infoHash),
-  'resumePausedTorrents': () => controllers.torrentList().resumePausedTorrents(),
+  prioritizeTorrent: (infoHash) => controllers.torrentList().prioritizeTorrent(infoHash),
+  resumePausedTorrents: () => controllers.torrentList().resumePausedTorrents(),
 
   // Playback
-  'playFile': (infoHash, index) => controllers.playback().playFile(infoHash, index),
-  'playPause': () => controllers.playback().playPause(),
-  'nextTrack': () => controllers.playback().nextTrack(),
-  'previousTrack': () => controllers.playback().previousTrack(),
-  'skip': (time) => controllers.playback().skip(time),
-  'skipTo': (time) => controllers.playback().skipTo(time),
-  'changePlaybackRate': (dir) => controllers.playback().changePlaybackRate(dir),
-  'changeVolume': (delta) => controllers.playback().changeVolume(delta),
-  'setVolume': (vol) => controllers.playback().setVolume(vol),
-  'openItem': (infoHash, index) => controllers.playback().openItem(infoHash, index),
+  playFile: (infoHash, index) => controllers.playback().playFile(infoHash, index),
+  playPause: () => controllers.playback().playPause(),
+  nextTrack: () => controllers.playback().nextTrack(),
+  previousTrack: () => controllers.playback().previousTrack(),
+  skip: (time) => controllers.playback().skip(time),
+  skipTo: (time) => controllers.playback().skipTo(time),
+  changePlaybackRate: (dir) => controllers.playback().changePlaybackRate(dir),
+  changeVolume: (delta) => controllers.playback().changeVolume(delta),
+  setVolume: (vol) => controllers.playback().setVolume(vol),
+  openItem: (infoHash, index) => controllers.playback().openItem(infoHash, index),
 
   // Subtitles
-  'openSubtitles': () => controllers.subtitles().openSubtitles(),
-  'selectSubtitle': (index) => controllers.subtitles().selectSubtitle(index),
-  'toggleSubtitlesMenu': () => controllers.subtitles().toggleSubtitlesMenu(),
-  'checkForSubtitles': () => controllers.subtitles().checkForSubtitles(),
-  'addSubtitles': (files, autoSelect) => controllers.subtitles().addSubtitles(files, autoSelect),
+  openSubtitles: () => controllers.subtitles().openSubtitles(),
+  selectSubtitle: (index) => controllers.subtitles().selectSubtitle(index),
+  toggleSubtitlesMenu: () => controllers.subtitles().toggleSubtitlesMenu(),
+  checkForSubtitles: () => controllers.subtitles().checkForSubtitles(),
+  addSubtitles: (files, autoSelect) => controllers.subtitles().addSubtitles(files, autoSelect),
 
   // Local media: <video>, <audio>, external players
-  'mediaStalled': () => controllers.media().mediaStalled(),
-  'mediaError': (err) => controllers.media().mediaError(err),
-  'mediaSuccess': () => controllers.media().mediaSuccess(),
-  'mediaTimeUpdate': () => controllers.media().mediaTimeUpdate(),
-  'mediaMouseMoved': () => controllers.media().mediaMouseMoved(),
-  'mediaControlsMouseEnter': () => controllers.media().controlsMouseEnter(),
-  'mediaControlsMouseLeave': () => controllers.media().controlsMouseLeave(),
-  'openExternalPlayer': () => controllers.media().openExternalPlayer(),
-  'externalPlayerNotFound': () => controllers.media().externalPlayerNotFound(),
+  mediaStalled: () => controllers.media().mediaStalled(),
+  mediaError: (err) => controllers.media().mediaError(err),
+  mediaSuccess: () => controllers.media().mediaSuccess(),
+  mediaTimeUpdate: () => controllers.media().mediaTimeUpdate(),
+  mediaMouseMoved: () => controllers.media().mediaMouseMoved(),
+  mediaControlsMouseEnter: () => controllers.media().controlsMouseEnter(),
+  mediaControlsMouseLeave: () => controllers.media().controlsMouseLeave(),
+  openExternalPlayer: () => controllers.media().openExternalPlayer(),
+  externalPlayerNotFound: () => controllers.media().externalPlayerNotFound(),
 
   // Remote casting: Chromecast, Airplay, etc
-  'toggleCastMenu': (deviceType) => lazyLoadCast().toggleMenu(deviceType),
-  'selectCastDevice': (index) => lazyLoadCast().selectDevice(index),
-  'stopCasting': () => lazyLoadCast().stop(),
+  toggleCastMenu: (deviceType) => lazyLoadCast().toggleMenu(deviceType),
+  selectCastDevice: (index) => lazyLoadCast().selectDevice(index),
+  stopCasting: () => lazyLoadCast().stop(),
 
   // Preferences screen
-  'preferences': () => controllers.prefs().show(),
-  'updatePreferences': (key, value) => controllers.prefs().update(key, value),
-  'checkDownloadPath': checkDownloadPath,
-  'startFolderWatcher': () => controllers.folderWatcher().start(),
-  'stopFolderWatcher': () => controllers.folderWatcher().stop(),
+  preferences: () => controllers.prefs().show(),
+  updatePreferences: (key, value) => controllers.prefs().update(key, value),
+  checkDownloadPath: checkDownloadPath,
+  startFolderWatcher: () => controllers.folderWatcher().start(),
+  stopFolderWatcher: () => controllers.folderWatcher().stop(),
 
   // Update (check for new versions on Linux, where there's no auto updater)
-  'updateAvailable': (version) => controllers.update().updateAvailable(version),
-  'skipVersion': (version) => controllers.update().skipVersion(version),
+  updateAvailable: (version) => controllers.update().updateAvailable(version),
+  skipVersion: (version) => controllers.update().skipVersion(version),
 
   // Navigation between screens (back, forward, ESC, etc)
-  'exitModal': () => { state.modal = null },
-  'backToList': backToList,
-  'escapeBack': escapeBack,
-  'back': () => state.location.back(),
-  'forward': () => state.location.forward(),
-  'cancel': () => state.location.cancel(),
+  exitModal: () => { state.modal = null },
+  backToList: backToList,
+  escapeBack: escapeBack,
+  back: () => state.location.back(),
+  forward: () => state.location.forward(),
+  cancel: () => state.location.cancel(),
 
   // Controlling the window
-  'setDimensions': setDimensions,
-  'toggleFullScreen': (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
-  'setTitle': (title) => { state.window.title = title },
-  'resetTitle': () => { state.window.title = config.APP_WINDOW_TITLE },
+  setDimensions: setDimensions,
+  toggleFullScreen: (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
+  setTitle: (title) => { state.window.title = title },
+  resetTitle: () => { state.window.title = config.APP_WINDOW_TITLE },
 
   //Playlists
   'createPlaylist': (id) => controllers.playlistList().createPlaylist(id),
@@ -336,13 +336,12 @@ const dispatchHandlers = {
   'deletePlaylist' : (id) => controllers.playlistList().deletePlaylist(id),
   
   // Everything else
-  'onOpen': onOpen,
-  'error': onError,
-  'uncaughtError': (proc, err) => telemetry.logUncaughtError(proc, err),
-  'stateSave': () => State.save(state),
-  'stateSaveImmediate': () => State.saveImmediate(state),
-  'update': () => {} // No-op, just trigger an update
-  
+  onOpen: onOpen,
+  error: onError,
+  uncaughtError: (proc, err) => telemetry.logUncaughtError(proc, err),
+  stateSave: () => State.save(state),
+  stateSaveImmediate: () => State.saveImmediate(state),
+  update: () => {} // No-op, just trigger an update
 }
 
 // Events from the UI never modify state directly. Instead they call dispatch()
@@ -472,7 +471,7 @@ function setDimensions (dimensions) {
 // Called when the user adds files (.torrent, files to seed, subtitles) to the app
 // via any method (drag-drop, drag to app icon, command line)
 function onOpen (files) {
-  if (!Array.isArray(files)) files = [ files ]
+  if (!Array.isArray(files)) files = [files]
 
   // File API seems to transform "magnet:?foo" in "magnet:///?foo"
   // this is a sanitization
