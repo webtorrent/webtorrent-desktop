@@ -407,6 +407,7 @@ module.exports = class TorrentList extends React.Component {
   }
 
   isFileOnPlaylist(infoHash, file) {
+    if (!state.saved.playlistSelected) return;
     let album = state.saved.playlistSelected.torrents.find(el => el.infoHash == infoHash)
     if (album) {
       let fileOnPlaylist = album.files.find(el => el === file.name)
