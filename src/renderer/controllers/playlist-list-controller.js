@@ -15,12 +15,28 @@ function deleteFile(path) {
     })
 }
 
+function getRandomWord() {
+    const words = ['argentumonline', 'metroid', 'pikachu', 'zelda', 'mario', 'goku', 'windowssucks']
+    return words[Math.floor(Math.random() * words.length)];   
+}
+
 module.exports = class PlaylistListController {
     constructor(state) {
         this.state = state
+
+        if (!fs.existsSync(config.PLAYLIST_PATH)) {
+            fs.mkdirSync(config.PLAYLIST_PATH);
+        }
+
         this.state.saved.allPlaylists = this.getAllPlaylists()
-        this.state.saved.playlistSelected = this.getPlaylistSelected()
+
+        // We create a default playlist in case does not exist.
+        if (this.state.saved.allPlaylists.length === 0) {
+            const playlistName = getRandomWord()
+            this.state.saved.allPlaylists[0] = this.createPlaylist(playlistName) 
+        }
     }
+
 
     getAllPlaylists() {
         var files = fs.readdirSync(config.PLAYLIST_PATH);
@@ -170,6 +186,13 @@ module.exports = class PlaylistListController {
         }
     }
 
+    sharePlaylist(playlistId) {
+        this.state.modal = {
+            id: 'share-playlist-modal',
+            playlistId
+        }
+    }
+
     deletePlaylist(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
         deleteFile(playlistPath);
@@ -185,7 +208,8 @@ module.exports = class PlaylistListController {
             if (this.state.saved.allPlaylists.length > 0) {
                 this.setPlaylist(this.state.saved.allPlaylists[0])
             } else {
-                this.createPlaylist('default')
+                const playlistName = getRandomWord();
+                this.createPlaylist(playlistName)
             }             
         }
         dispatch('stateSave')

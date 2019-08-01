@@ -60,6 +60,13 @@ module.exports = class PlaylistList extends React.Component {
             onClick={dispatcher('confirmDeletePlaylist', id, false)}>
             close
           </i>
+          <i
+            key='share-playlist-button'
+            className='icon share'
+            title='Share playlist'
+            onClick={dispatcher('sharePlaylist', id, false)}>
+            share
+          </i>
         </div>
       )
     })

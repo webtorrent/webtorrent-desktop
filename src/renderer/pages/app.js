@@ -26,6 +26,7 @@ const Modals = {
   ),
   'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
   'remove-playlist-modal': createGetter(() => require('../components/remove-playlist-modal')),
+  'share-playlist-modal': createGetter(() => require('../components/share-playlist-modal')),  
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
   'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
 }
