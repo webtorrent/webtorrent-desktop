@@ -530,8 +530,25 @@ function isJson(str) {
 function onPaste (e) {
   if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   pasteValue = electron.clipboard.readText()
+
+  //First we check if is Json or not to add a playlist or a torrent
   if (isJson(pasteValue)) {
-    controllers.playlistList().addPlaylist(pasteValue)
+
+    // If is playlist we parse the json and then we check if is a valid playlist
+    // asking if they have a property torrents and id
+    let playlistObj = JSON.parse(pasteValue)
+    if (playlistObj.id && playlistObj.torrents) {
+
+      // Then we verify if has some content otherwhise we don't want it
+      if (!playlistObj.torrents.length > 0) return onError('You cannot add an empty playlist')
+      controllers.playlistList().addPlaylist(playlistObj)
+      
+      playlistObj.torrents.forEach(el => {
+        controllers.torrentList().addTorrent(el.infoHash)
+      })
+    }
+    
+    
   } else {
     controllers.torrentList().addTorrent(pasteValue)
   }

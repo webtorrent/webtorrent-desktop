@@ -37,10 +37,13 @@ module.exports = class PlaylistListController {
         }
     }
 
-    addPlaylist(jsonPlaylistString) {
-        const playlist = JSON.parse(jsonPlaylistString)
+    addPlaylist(playlist) {
         //We create the playlist with the content
         this.createPlaylist(playlist.id, playlist)
+
+        playlist.torrents.forEach(torrent => {
+            torrent.infoHash
+        })
     }
 
 
@@ -68,7 +71,9 @@ module.exports = class PlaylistListController {
 
         //Check if a playlist with the same name exists
         const isPlaylistCreated = this.checkIfPlaylistFileExists(playlistPath)
-        if (isPlaylistCreated) return console.log('A playlist with the same name is already created: %s', id)
+        if (isPlaylistCreated) {
+            return dispatch('error', 'A playlist with the same name is already created: ' + id)
+        } 
 
         let headerPlaylist;
         if (playlistContent) {
@@ -80,7 +85,7 @@ module.exports = class PlaylistListController {
 
         mkdirp(config.PLAYLIST_PATH, () => {
             fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), (err) => {
-                if (err) return console.log('error saving playlist file %s: %o', playlistPath, err)
+                if (err) return dispatch('error', `Error saving playlist file ${playlistPath} ${err}`)
                 console.log('The playlist has been created');
                 this.setPlaylist(id)
 

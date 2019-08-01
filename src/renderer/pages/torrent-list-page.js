@@ -34,6 +34,7 @@ module.exports = class TorrentList extends React.Component {
     contents.push(
       <div key='torrent-placeholder' className='torrent-placeholder'>
         <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+        <span className='ellipsis'>Paste a playlist here to start listening to your music</span>
       </div>
     )
 
