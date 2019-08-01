@@ -203,9 +203,10 @@ module.exports = class PlaylistListController {
     }
 
     sharePlaylist(playlistId) {
+        
         this.state.modal = {
             id: 'share-playlist-modal',
-            playlistId
+            playlistToShare: this.readPlaylistFile(playlistId)
         }
     }
 
