@@ -11,20 +11,6 @@ class Header extends React.Component {
         onMouseEnter={dispatcher('mediaControlsMouseEnter')}
         onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
         {this.getTitle()}
-        <div className='nav left float-left'>
-          <i
-            className={'icon back ' + (loc.hasBack() ? '' : 'disabled')}
-            title='Back'
-            onClick={dispatcher('back')}>
-            chevron_left
-          </i>
-          <i
-            className={'icon forward ' + (loc.hasForward() ? '' : 'disabled')}
-            title='Forward'
-            onClick={dispatcher('forward')}>
-            chevron_right
-          </i>
-        </div>
         <div className='nav right float-right'>
           {this.getAddButton()}
         </div>
@@ -42,12 +28,15 @@ class Header extends React.Component {
     const state = this.props.state
     if (state.location.url() !== 'home') return null
     return (
-      <i
-        className='icon add'
-        title='Add torrent'
-        onClick={dispatcher('openFiles')}>
-        add
-      </i>
+      <div onClick={dispatcher('openFiles')}>
+        <span>Add torrent or playlist</span>
+        <i
+          className='icon add'
+          title='Add torrent or playlist'>
+          add
+        </i>
+      </div>
+      
     )
   }
 }

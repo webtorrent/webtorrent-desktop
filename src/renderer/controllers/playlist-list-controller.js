@@ -4,6 +4,7 @@ const mkdirp = require('mkdirp')
 const config = require('../../config')
 
 const { dispatch } = require('../lib/dispatcher')
+const { readPlaylistFile } = require('../lib/playlist-refreex')
 
 //TODO: The same function is on torrent-list-controller.js refactor somehow
 // and share the function.
@@ -32,20 +33,31 @@ module.exports = class PlaylistListController {
 
         // We create a default playlist in case does not exist.
         if (this.state.saved.allPlaylists.length === 0) {
-            const playlistName = getRandomWord()
-            this.state.saved.allPlaylists[0] = this.createPlaylist(playlistName) 
+            const playlistId = getRandomWord()
+            this.state.saved.allPlaylists[0] = this.createPlaylist(playlistId) 
         }
     }
 
-    addPlaylist(playlist) {
+    addPlaylistWithContent(playlist) {
         //We create the playlist with the content
-        this.createPlaylist(playlist.id, playlist)
+        const playlistPath = path.join(config.PLAYLIST_PATH, playlist.id + '.json')
+        
+        //Check if a playlist with the same name exists
+        const isPlaylistCreated = this.checkIfPlaylistFileExists(playlistPath)
+        if (isPlaylistCreated) {
+            return dispatch('error', 'A playlist with the same name is already created: ' + playlistPath)
+        } 
 
-        playlist.torrents.forEach(torrent => {
-            torrent.infoHash
+        mkdirp(config.PLAYLIST_PATH, () => {
+            fs.writeFile(playlistPath, JSON.stringify(playlist, null, 2), (err) => {
+                if (err) return dispatch('error', `Error adding playlist file ${playlistPath} ${err}`)
+                console.log('The playlist has been created with the content :)');
+
+                //We are reloading the state of allPlaylist to render them
+                this.state.saved.allPlaylists = this.getAllPlaylists()
+            })
         })
     }
-
 
     getAllPlaylists() {
         var files = fs.readdirSync(config.PLAYLIST_PATH);
@@ -66,26 +78,19 @@ module.exports = class PlaylistListController {
         return fs.existsSync(path);
     }
 
-    createPlaylist(id, playlistContent = null) {
+    createPlaylist(id) {
         const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
 
         //Check if a playlist with the same name exists
         const isPlaylistCreated = this.checkIfPlaylistFileExists(playlistPath)
-        if (isPlaylistCreated) {
-            return dispatch('error', 'A playlist with the same name is already created: ' + id)
-        } 
+        if (isPlaylistCreated) return console.log('A playlist with the same name is already created: %s', id)
 
-        let headerPlaylist;
-        if (playlistContent) {
-            headerPlaylist =  playlistContent
-        } else {
-            //We set the id of the playlist in the property called id in the first position.
-            headerPlaylist = { id, torrents: [] }
-        }
+        //We set the id of the playlist in the property called id in the first position.
+        const headerPlaylist = { id, torrents: [] }
 
         mkdirp(config.PLAYLIST_PATH, () => {
             fs.writeFile(playlistPath, JSON.stringify(headerPlaylist), (err) => {
-                if (err) return dispatch('error', `Error saving playlist file ${playlistPath} ${err}`)
+                if (err) return console.log('error saving playlist file %s: %o', playlistPath, err)
                 console.log('The playlist has been created');
                 this.setPlaylist(id)
 
@@ -98,7 +103,7 @@ module.exports = class PlaylistListController {
     }
 
     setPlaylist(id) {
-        this.state.saved.playlistSelected = this.readPlaylistFile(id)
+        this.state.saved.playlistSelected = readPlaylistFile(id)
     }
 
     getPlaylistSelected() {
@@ -107,25 +112,7 @@ module.exports = class PlaylistListController {
         }
         
         //Just in case read the playlist from the file instead of the one in localStorage.
-        return this.readPlaylistFile(this.state.saved.playlistSelected.id);
-        // return this.state.saved.playlistSelected
-    }
-
-    readPlaylistFile(id) {
-        const playlistPath = path.join(config.PLAYLIST_PATH, id + '.json')
-
-        let fileContents
-
-        try {
-            fileContents = fs.readFileSync(playlistPath, 'utf8')
-        } catch (err) {
-            // Here you get the error when the file was not found,
-            // but you also get any other error
-            console.log(`${playlistPath}: File not found!, Returning an empty playlist.`);
-            return { "id": id, "torrents": [] }
-        }
-
-        return JSON.parse(fileContents);
+        return readPlaylistFile(this.state.saved.playlistSelected.id);
     }
 
     getAlbumFromPlaylist(infoHash) {
@@ -206,7 +193,7 @@ module.exports = class PlaylistListController {
         
         this.state.modal = {
             id: 'share-playlist-modal',
-            playlistToShare: this.readPlaylistFile(playlistId)
+            playlistToShare: readPlaylistFile(playlistId)
         }
     }
 
@@ -225,8 +212,8 @@ module.exports = class PlaylistListController {
             if (this.state.saved.allPlaylists.length > 0) {
                 this.setPlaylist(this.state.saved.allPlaylists[0])
             } else {
-                const playlistName = getRandomWord();
-                this.createPlaylist(playlistName)
+                const playlistId = getRandomWord();
+                this.createPlaylist(playlistId)
             }             
         }
         dispatch('stateSave')

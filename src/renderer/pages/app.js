@@ -17,7 +17,8 @@ const Views = {
   home: createGetter(() => TorrentListPage),
   player: createGetter(() => require('./player-page')),
   'create-torrent': createGetter(() => require('./create-torrent-page')),
-  preferences: createGetter(() => require('./preferences-page'))
+  preferences: createGetter(() => require('./preferences-page')),
+  'search-torrents-page': createGetter(() => require('./search-torrents-page')),
 }
 
 const Modals = {
