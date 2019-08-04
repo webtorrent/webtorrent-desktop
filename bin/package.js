@@ -71,11 +71,11 @@ function build () {
 const all = {
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on Mac.
-  'app-copyright': config.APP_COPYRIGHT,
+  appCopyright: config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
   // property on Windows, and `CFBundleShortVersionString` on Mac.
-  'app-version': pkg.version,
+  appVersion: pkg.version,
 
   // Package the application's source code into an archive, using Electron's archive
   // format. Mitigates issues around long path names on Windows and slightly speeds up
@@ -89,7 +89,7 @@ const all = {
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on Mac. Note: Windows requires the build version to
   // start with a number. We're using the version of the underlying WebTorrent library.
-  'build-version': require('webtorrent/package.json').version,
+  buildVersion: require('webtorrent/package.json').version,
 
   // The application source directory.
   dir: config.ROOT_PATH,
@@ -123,14 +123,14 @@ const darwin = {
   arch: 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
-  'app-bundle-id': 'io.webtorrent.webtorrent',
+  appBundleId: 'io.webtorrent.webtorrent',
 
   // The application category type, as shown in the Finder via "View" -> "Arrange by
   // Application Category" when viewing the Applications directory (Mac only).
-  'app-category-type': 'public.app-category.utilities',
+  appCategoryType: 'public.app-category.utilities',
 
   // The bundle identifier to use in the application helper's plist (Mac only).
-  'helper-bundle-id': 'io.webtorrent.webtorrent-helper',
+  helperBundleId: 'io.webtorrent.webtorrent-helper',
 
   // Application icon.
   icon: config.APP_ICON + '.icns'
