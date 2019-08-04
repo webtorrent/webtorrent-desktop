@@ -1,5 +1,34 @@
 # WebTorrent Desktop Version History
 
+## v0.21.0 - 2019-08
+
+### Added
+
+- Add YouTube style hotkeys [\#1579](https://github.com/webtorrent/webtorrent-desktop/pull/1579) ([dsernst](https://github.com/dsernst))
+- Toggle sound notifications on/off [\#1536](https://github.com/webtorrent/webtorrent-desktop/pull/1536) ([adriantombu](https://github.com/adriantombu))
+- Ability to play MPEG-4 Audio Book \(.m4b\) [\#1450](https://github.com/webtorrent/webtorrent-desktop/pull/1450) ([Borewit](https://github.com/Borewit))
+- Add support for subtitles on Chromecast [\#1165](https://github.com/webtorrent/webtorrent-desktop/pull/1165) ([janza](https://github.com/janza))
+
+### Changed
+
+- Update to Electron 4 [\#1590](https://github.com/webtorrent/webtorrent-desktop/pull/1590) ([Borewit](https://github.com/Borewit))
+- Remove '\(BETA\)' from app window title [\#1562](https://github.com/webtorrent/webtorrent-desktop/pull/1562) ([dsernst](https://github.com/dsernst))
+- Update React (v16) and Material-UI (v0.20) [\#1483](https://github.com/webtorrent/webtorrent-desktop/pull/1483) ([mathiasvr](https://github.com/mathiasvr))
+- Show audio track and disk number [\#1454](https://github.com/webtorrent/webtorrent-desktop/pull/1454) ([Borewit](https://github.com/Borewit))
+- Asynchronous music metadata updates while streaming [\#1449](https://github.com/webtorrent/webtorrent-desktop/pull/1449) ([Borewit](https://github.com/Borewit))
+- If torrent is not private, leave private flag unset [\#1411](https://github.com/webtorrent/webtorrent-desktop/pull/1411) ([feross](https://github.com/feross))
+- Improve audio poster selection: [\#1368](https://github.com/webtorrent/webtorrent-desktop/pull/1368) ([Borewit](https://github.com/Borewit))
+- Save preferences immediately when changed [\#1042](https://github.com/webtorrent/webtorrent-desktop/pull/1042) ([Flet](https://github.com/Flet))
+
+### Fixed
+
+- Ensure that the minutes field in playback indicator is zero-padded. [\#1506](https://github.com/webtorrent/webtorrent-desktop/pull/1506) ([bnjmnt4n](https://github.com/bnjmnt4n))
+- Bug Fix: Empty Array Reduce [\#1494](https://github.com/webtorrent/webtorrent-desktop/pull/1494) ([clujin](https://github.com/clujin))
+- Fix startup problems [\#1419](https://github.com/webtorrent/webtorrent-desktop/pull/1419) ([Borewit](https://github.com/Borewit))
+- Add back loading spinner for player page. [\#1311](https://github.com/webtorrent/webtorrent-desktop/pull/1311) ([bnjmnt4n](https://github.com/bnjmnt4n))
+- Fix Linux desktop file [\#1309](https://github.com/webtorrent/webtorrent-desktop/pull/1309) ([bilelmoussaoui](https://github.com/bilelmoussaoui))
+
+
 ## v0.20.0 - 2018-04-26
 
 ### Added
