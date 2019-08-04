@@ -135,43 +135,18 @@ function setAspectRatio (aspectRatio) {
  * Change the size of the window.
  * TODO: Clean this up? Seems overly complicated.
  */
-function setBounds (bounds, maximize) {
-  // Do nothing in fullscreen
-  if (!main.win || main.win.isFullScreen()) {
-    log('setBounds: not setting bounds because already in full screen mode')
-    return
+function setBounds (bounds) {
+  // X and Y not specified? By default, center on current screen
+  if (bounds.x === null && bounds.y === null) {
+    const display = electron.screen.getDisplayMatching(main.win.getBounds())
+
+    bounds.x = Math.round(display.bounds.x + (display.bounds.width / 2) - (bounds.width / 2))
+    bounds.y = Math.round(display.bounds.y + (display.bounds.height / 2) - (bounds.height / 2))
   }
 
-  // Maximize or minimize, if the second argument is present
-  if (maximize === true && !main.win.isMaximized()) {
-    log('setBounds: maximizing')
-    main.win.maximize()
-  } else if (maximize === false && main.win.isMaximized()) {
-    log('setBounds: unmaximizing')
-    main.win.unmaximize()
-  }
+  log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
 
-  const willBeMaximized = typeof maximize === 'boolean' ? maximize : main.win.isMaximized()
-  // Assuming we're not maximized or maximizing, set the window size
-  if (!willBeMaximized) {
-    log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
-    if (bounds.x === null && bounds.y === null) {
-      // X and Y not specified? By default, center on current screen
-      const scr = electron.screen.getDisplayMatching(main.win.getBounds())
-      bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
-      bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
-      log(`setBounds: centered to ${JSON.stringify(bounds)}`)
-    }
-    // Resize the window's content area (so window border doesn't need to be taken
-    // into account)
-    if (bounds.contentBounds) {
-      main.win.setContentBounds(bounds, true)
-    } else {
-      main.win.setBounds(bounds, true)
-    }
-  } else {
-    log('setBounds: not setting bounds because of window maximization')
-  }
+  main.win.setBounds(bounds, true)
 }
 
 /**
