@@ -120,21 +120,21 @@ function init () {
    */
 
   ipc.on('startFolderWatcher', function () {
-    if (!modules['folderWatcher']) {
+    if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
     }
 
-    modules['folderWatcher'].start()
+    modules.folderWatcher.start()
   })
 
   ipc.on('stopFolderWatcher', function () {
-    if (!modules['folderWatcher']) {
+    if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
     }
 
-    modules['folderWatcher'].stop()
+    modules.folderWatcher.stop()
   })
 
   /**

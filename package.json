@@ -16,11 +16,11 @@
     "arch": "^2.0.0",
     "auto-launch": "^5.0.5",
     "bitfield": "^1.0.2",
-    "capture-frame": "^2.0.0",
+    "capture-frame": "^3.0.0",
     "chokidar": "^2.0.4",
     "chromecasts": "^1.9.1",
     "cp-file": "^7.0.0",
-    "create-torrent": "^3.33.0",
+    "create-torrent": "^4.0.0",
     "debounce": "^1.0.0",
     "deep-equal": "^1.0.1",
     "dlnacasts": "^0.1.0",
@@ -34,7 +34,7 @@
     "mkdirp": "^0.5.1",
     "music-metadata": "^4.2.0",
     "network-address": "^1.1.0",
-    "parse-torrent": "^6.0.1",
+    "parse-torrent": "^7.0.0",
     "prettier-bytes": "^1.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
@@ -51,11 +51,11 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "babel-eslint": "^9.0.0",
+    "babel-eslint": "^10.0.2",
     "buble": "^0.19.6",
     "cross-zip": "^2.0.1",
-    "depcheck": "^0.7.2",
-    "electron": "^1.8.8",
+    "depcheck": "^0.8.0",
+    "electron": "^4.0.0",
     "electron-osx-sign": "^0.4.11",
     "electron-packager": "~8.5.1",
     "electron-winstaller": "^2.6.4",
@@ -70,7 +70,7 @@
     "spectron": "^3.3.0",
     "standard": "*",
     "tape": "^4.9.1",
-    "walk-sync": "^1.1.3"
+    "walk-sync": "^2.0.2"
   },
   "engines": {
     "node": ">=4.0.0"
