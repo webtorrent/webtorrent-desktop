@@ -119,7 +119,7 @@ const darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build x64 binaries only.
+  // Build x64 binary only.
   arch: 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
@@ -140,8 +140,8 @@ const win32 = {
   // Build for Windows.
   platform: 'win32',
 
-  // Build ia32 and x64 binaries.
-  arch: ['ia32', 'x64'],
+  // Build x64 binary only.
+  arch: 'x64',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   win32metadata: {
@@ -174,8 +174,8 @@ const linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build ia32 and x64 binaries.
-  arch: ['ia32', 'x64']
+  // Build x64 binary onle.
+  arch: 'x64'
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
@@ -396,21 +396,17 @@ function buildWin32 (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
-      const destArch = filesPath.split('-').pop()
-
       if (argv.package === 'exe' || argv.package === 'all') {
-        tasks.push((cb) => packageInstaller(filesPath, destArch, cb))
+        tasks.push((cb) => packageInstaller(filesPath, cb))
       }
       if (argv.package === 'portable' || argv.package === 'all') {
-        tasks.push((cb) => packagePortable(filesPath, destArch, cb))
+        tasks.push((cb) => packagePortable(filesPath, cb))
       }
     })
     series(tasks, cb)
 
-    function packageInstaller (filesPath, destArch, cb) {
-      console.log(`Windows: Creating ${destArch} installer...`)
-
-      const archStr = destArch === 'ia32' ? '-ia32' : ''
+    function packageInstaller (filesPath, cb) {
+      console.log(`Windows: Creating installer...`)
 
       installer.createWindowsInstaller({
         appDirectory: filesPath,
@@ -423,26 +419,17 @@ function buildWin32 (cb) {
         noMsi: true,
         outputDirectory: DIST_PATH,
         productName: config.APP_NAME,
-        /**
-         * Only create delta updates for the Windows x64 build because 90% of our
-         * users have Windows x64 and the delta files take a *very* long time to
-         * generate. Also, the ia32 files on GitHub have non-standard Squirrel
-         * names (i.e. RELEASES-ia32 instead of RELEASES) and so Squirrel won't
-         * find them unless we proxy the requests.
-         */
         // TODO: Re-enable Windows 64-bit delta updates when we confirm that they
         //       work correctly in the presence of the "ia32" .nupkg files. I
         //       (feross) noticed them listed in the 64-bit RELEASES file and
         //       manually edited them out for the v0.17 release. Shipping only
         //       full updates for now will work fine, with no ill-effects.
-        // remoteReleases: destArch === 'x64'
-        //   ? config.GITHUB_URL
-        //   : undefined,
+        // remoteReleases: config.GITHUB_URL,
         /**
          * If you hit a "GitHub API rate limit exceeded" error, set this token!
          */
         // remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
-        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + archStr + '.exe',
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
         setupIcon: config.APP_ICON + '.ico',
         signWithParams: signWithParams,
         title: config.APP_NAME,
@@ -450,7 +437,7 @@ function buildWin32 (cb) {
         version: pkg.version
       })
         .then(function () {
-          console.log(`Windows: Created ${destArch} installer.`)
+          console.log(`Windows: Created installer.`)
 
           /**
          * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
@@ -462,42 +449,13 @@ function buildWin32 (cb) {
               fs.unlinkSync(path.join(DIST_PATH, filename))
             })
 
-          if (destArch === 'ia32') {
-            console.log('Windows: Renaming ia32 installer files...')
-
-            // RELEASES -> RELEASES-ia32
-            const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
-            fs.renameSync(
-              path.join(DIST_PATH, 'RELEASES'),
-              relPath
-            )
-
-            // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
-            fs.renameSync(
-              path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
-              path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
-            )
-
-            // Change file name inside RELEASES-ia32 to match renamed file
-            const relContent = fs.readFileSync(relPath, 'utf8')
-            const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
-            fs.writeFileSync(relPath, relContent32)
-
-            if (relContent === relContent32) {
-            // Sanity check
-              throw new Error('Fixing RELEASES-ia32 failed. Replacement did not modify the file.')
-            }
-
-            console.log('Windows: Renamed ia32 installer files.')
-          }
-
           cb(null)
         })
         .catch(cb)
     }
 
-    function packagePortable (filesPath, destArch, cb) {
-      console.log(`Windows: Creating ${destArch} portable app...`)
+    function packagePortable (filesPath, cb) {
+      console.log(`Windows: Creating portable app...`)
 
       const portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
@@ -508,13 +466,11 @@ function buildWin32 (cb) {
       const tempPath = path.join(portablePath, 'Temp')
       mkdirp.sync(tempPath)
 
-      const archStr = destArch === 'ia32' ? '-ia32' : ''
-
       const inPath = path.join(DIST_PATH, path.basename(filesPath))
-      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log(`Windows: Created ${destArch} portable app.`)
+      console.log(`Windows: Created portable app.`)
       cb(null)
     }
   })
@@ -528,21 +484,19 @@ function buildLinux (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
-      const destArch = filesPath.split('-').pop()
-
       if (argv.package === 'deb' || argv.package === 'all') {
-        tasks.push((cb) => packageDeb(filesPath, destArch, cb))
+        tasks.push((cb) => packageDeb(filesPath, cb))
       }
       if (argv.package === 'zip' || argv.package === 'all') {
-        tasks.push((cb) => packageZip(filesPath, destArch, cb))
+        tasks.push((cb) => packageZip(filesPath, cb))
       }
     })
     series(tasks, cb)
   })
 
-  function packageDeb (filesPath, destArch, cb) {
+  function packageDeb (filesPath, cb) {
     // Create .deb file for Debian-based platforms
-    console.log(`Linux: Creating ${destArch} deb...`)
+    console.log(`Linux: Creating deb...`)
 
     const deb = require('nobin-debian-installer')()
     const destPath = path.join('/opt', pkg.name)
@@ -550,7 +504,7 @@ function buildLinux (cb) {
     deb.pack({
       package: pkg,
       info: {
-        arch: destArch === 'x64' ? 'amd64' : 'i386',
+        arch: 'amd64',
         targetDir: DIST_PATH,
         depends: 'gconf2, libgtk2.0-0, libnss3, libxss1',
         scripts: {
@@ -570,22 +524,20 @@ function buildLinux (cb) {
       cwd: path.join(config.STATIC_PATH, 'linux', 'share')
     }], function (err) {
       if (err) return cb(err)
-      console.log(`Linux: Created ${destArch} deb.`)
+      console.log(`Linux: Created deb.`)
       cb(null)
     })
   }
 
-  function packageZip (filesPath, destArch, cb) {
+  function packageZip (filesPath, cb) {
     // Create .zip file for Linux
-    console.log(`Linux: Creating ${destArch} zip...`)
-
-    const archStr = destArch === 'ia32' ? '-ia32' : ''
+    console.log(`Linux: Creating zip...`)
 
     const inPath = path.join(DIST_PATH, path.basename(filesPath))
-    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
+    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux.zip')
     zip.zipSync(inPath, outPath)
 
-    console.log(`Linux: Created ${destArch} zip.`)
+    console.log(`Linux: Created zip.`)
     cb(null)
   }
 }
