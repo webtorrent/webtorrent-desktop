@@ -43,6 +43,9 @@ function init (state, options) {
     titleBarStyle: 'hiddenInset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: initialBounds.width,
+    webPreferences: {
+      nodeIntegration: true
+    },
     x: initialBounds.x,
     y: initialBounds.y
   })
