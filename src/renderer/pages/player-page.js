@@ -1,3 +1,5 @@
+/* global HTMLMediaElement */
+
 const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
@@ -115,6 +117,8 @@ function renderMedia (state) {
     }
   }
 
+  console.log('rendering src', Playlist.getCurrentLocalURL(state))
+
   // Create the <audio> or <video> tag
   const MediaTagName = state.playing.type
   const mediaTag = (
@@ -127,7 +131,8 @@ function renderMedia (state) {
       onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
-      onCanPlay={onCanPlay}>
+      onCanPlay={onCanPlay}
+    >
       {trackTags}
     </MediaTagName>
   )
@@ -166,6 +171,7 @@ function renderMedia (state) {
 
   function onCanPlay (e) {
     const elem = e.target
+    if (elem.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) return
     if (state.playing.type === 'video' &&
       elem.webkitVideoDecodedByteCount === 0) {
       dispatch('mediaError', 'Video codec unsupported')

@@ -74,7 +74,7 @@ function reset () {
 
 // Track screen resolution
 function getScreenInfo () {
-  return electron.screen.getAllDisplays().map((screen) => ({
+  return electron.remote.screen.getAllDisplays().map((screen) => ({
     width: screen.size.width,
     height: screen.size.height,
     scaleFactor: screen.scaleFactor
