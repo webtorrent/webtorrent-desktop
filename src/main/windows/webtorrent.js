@@ -25,6 +25,9 @@ function init () {
     skipTaskbar: true,
     title: 'webtorrent-hidden-window',
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true
+    },
     width: 150
   })
 

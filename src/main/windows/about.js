@@ -24,6 +24,9 @@ function init () {
     skipTaskbar: true,
     title: 'About ' + config.APP_WINDOW_TITLE,
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true
+    },
     width: 300
   })
 
