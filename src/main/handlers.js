@@ -355,7 +355,7 @@ function uninstallLinux () {
     'applications',
     'webtorrent-desktop.desktop'
   )
-  rimraf(desktopFilePath)
+  rimraf.sync(desktopFilePath)
 
   const iconFilePath = path.join(
     os.homedir(),
@@ -364,5 +364,5 @@ function uninstallLinux () {
     'icons',
     'webtorrent-desktop.png'
   )
-  rimraf(iconFilePath)
+  rimraf.sync(iconFilePath)
 }
