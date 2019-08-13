@@ -13,6 +13,8 @@ const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
 
+const WEBTORRENT_VERSION = require('webtorrent/package.json').version
+
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
 
@@ -95,6 +97,12 @@ function init () {
       windows.main.dispatch('uncaughtError', 'main', error)
     })
   }
+
+  // Enable app logging into default directory, i.e. /Library/Logs/WebTorrent
+  // on Mac, %APPDATA% on Windows, $XDG_CONFIG_HOME or ~/.config on Linux.
+  app.setAppLogsPath()
+
+  app.userAgentFallback = `WebTorrent/${WEBTORRENT_VERSION} (https://webtorrent.io)`
 
   app.on('open-file', onOpen)
   app.on('open-url', onOpen)
