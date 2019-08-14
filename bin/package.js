@@ -175,7 +175,7 @@ const linux = {
   platform: 'linux',
 
   // Build ia32 and x64 binaries.
-  arch: ['ia32', 'x64']
+  arch: ['ia32', 'x64', 'arm64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
