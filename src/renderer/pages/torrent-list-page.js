@@ -67,7 +67,8 @@ module.exports = class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}
+      >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
@@ -130,7 +131,8 @@ module.exports = class TorrentList extends React.Component {
           }}
           checked={isActive}
           onClick={stopPropagation}
-          onCheck={dispatcher('toggleTorrent', infoHash)} />
+          onCheck={dispatcher('toggleTorrent', infoHash)}
+        />
       )
     }
 
@@ -233,7 +235,8 @@ module.exports = class TorrentList extends React.Component {
           key='play-button'
           title='Start streaming'
           className={'icon play'}
-          onClick={dispatcher('playFile', infoHash)}>
+          onClick={dispatcher('playFile', infoHash)}
+        >
           play_circle_outline
         </i>
       )
@@ -246,7 +249,8 @@ module.exports = class TorrentList extends React.Component {
           key='delete-button'
           className='icon delete'
           title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
+          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}
+        >
           close
         </i>
       </div>
@@ -357,7 +361,8 @@ module.exports = class TorrentList extends React.Component {
         </td>
         <td
           className='col-select'
-          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+          onClick={dispatcher('toggleTorrentFile', infoHash, index)}
+        >
           <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>

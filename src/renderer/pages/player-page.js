@@ -22,7 +22,8 @@ module.exports = class Player extends React.Component {
       <div
         className='player'
         onWheel={handleVolumeWheel}
-        onMouseMove={dispatcher('mediaMouseMoved')}>
+        onMouseMove={dispatcher('mediaMouseMoved')}
+      >
         {showVideo ? renderMedia(state) : renderCastScreen(state)}
         {showControls ? renderPlayerControls(state) : null}
       </div>
@@ -112,7 +113,8 @@ function renderMedia (state) {
           default={isSelected ? 'default' : ''}
           label={track.label}
           type='subtitles'
-          src={track.buffer} />
+          src={track.buffer}
+        />
       )
     }
   }
@@ -140,7 +142,8 @@ function renderMedia (state) {
     <div
       key='letterbox'
       className='letterbox'
-      onMouseMove={dispatcher('mediaMouseMoved')}>
+      onMouseMove={dispatcher('mediaMouseMoved')}
+    >
       {mediaTag}
       {renderOverlay(state)}
     </div>
@@ -490,41 +493,47 @@ function renderPlayerControls (state) {
       <div
         key='cursor'
         className='playback-cursor'
-        style={playbackCursorStyle} />
+        style={playbackCursorStyle}
+      />
       <div
         key='scrub-bar'
         className='scrub-bar'
         draggable='true'
         onDragStart={handleDragStart}
         onClick={handleScrub}
-        onDrag={handleScrub} />
+        onDrag={handleScrub}
+      />
     </div>,
 
     <i
       key='skip-previous'
       className={'icon skip-previous float-left ' + prevClass}
-      onClick={dispatcher('previousTrack')}>
+      onClick={dispatcher('previousTrack')}
+    >
       skip_previous
     </i>,
 
     <i
       key='play'
       className='icon play-pause float-left'
-      onClick={dispatcher('playPause')}>
+      onClick={dispatcher('playPause')}
+    >
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>,
 
     <i
       key='skip-next'
       className={'icon skip-next float-left ' + nextClass}
-      onClick={dispatcher('nextTrack')}>
+      onClick={dispatcher('nextTrack')}
+    >
       skip_next
     </i>,
 
     <i
       key='fullscreen'
       className='icon fullscreen float-right'
-      onClick={dispatcher('toggleFullScreen')}>
+      onClick={dispatcher('toggleFullScreen')}
+    >
       {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
     </i>
   ]
@@ -535,7 +544,8 @@ function renderPlayerControls (state) {
       <i
         key='subtitles'
         className={'icon closed-caption float-right ' + captionsClass}
-        onClick={handleSubtitles}>
+        onClick={handleSubtitles}
+      >
         closed_caption
       </i>
     ))
@@ -579,7 +589,8 @@ function renderPlayerControls (state) {
       <i
         key={castType}
         className={'icon device float-right ' + buttonClass}
-        onClick={buttonHandler}>
+        onClick={buttonHandler}
+      >
         {buttonIcon}
       </i>
     ))
@@ -602,7 +613,8 @@ function renderPlayerControls (state) {
     <div key='volume' className='volume float-left'>
       <i
         className='icon volume-icon float-left'
-        onMouseDown={handleVolumeMute}>
+        onMouseDown={handleVolumeMute}
+      >
         {volumeIcon}
       </i>
       <input
@@ -610,7 +622,8 @@ function renderPlayerControls (state) {
         type='range' min='0' max='1' step='0.05'
         value={volume}
         onChange={handleVolumeScrub}
-        style={volumeStyle} />
+        style={volumeStyle}
+      />
     </div>
   ))
 
@@ -636,7 +649,8 @@ function renderPlayerControls (state) {
     <div
       key='controls' className='controls'
       onMouseEnter={dispatcher('mediaControlsMouseEnter')}
-      onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
+      onMouseLeave={dispatcher('mediaControlsMouseLeave')}
+    >
       {elements}
       {renderCastOptions(state)}
       {renderSubtitleOptions(state)}

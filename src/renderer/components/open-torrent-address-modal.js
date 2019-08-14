@@ -15,13 +15,15 @@ module.exports = class OpenTorrentAddressModal extends React.Component {
             className='control'
             ref={(c) => { this.torrentURL = c }}
             fullWidth
-            onKeyDown={handleKeyDown.bind(this)} />
+            onKeyDown={handleKeyDown.bind(this)}
+          />
         </div>
         <ModalOKCancel
           cancelText='CANCEL'
           onCancel={dispatcher('exitModal')}
           okText='OK'
-          onOK={handleOK.bind(this)} />
+          onOK={handleOK.bind(this)}
+        />
       </div>
     )
   }

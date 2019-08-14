@@ -41,7 +41,8 @@ class PreferencesPage extends React.Component {
           }}
           onChange={this.handleDownloadPathChange}
           title='Download location'
-          value={this.props.state.saved.prefs.downloadPath} />
+          value={this.props.state.saved.prefs.downloadPath}
+        />
       </Preference>
     )
   }
@@ -57,7 +58,8 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={!this.props.state.saved.prefs.openExternalPlayer}
           label={'Play torrent media files using WebTorrent'}
-          onCheck={this.handleOpenExternalPlayerChange} />
+          onCheck={this.handleOpenExternalPlayerChange}
+        />
       </Preference>
     )
   }
@@ -103,7 +105,8 @@ class PreferencesPage extends React.Component {
           displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={playerPath ? path.dirname(playerPath) : null} />
+          value={playerPath ? path.dirname(playerPath) : null}
+        />
       </Preference>
     )
   }
@@ -156,7 +159,8 @@ class PreferencesPage extends React.Component {
           displayValue={torrentsFolderPath || ''}
           onChange={this.handletorrentsFolderPathChange}
           title='Folder to watch'
-          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null} />
+          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null}
+        />
       </Preference>
     )
   }
@@ -180,7 +184,8 @@ class PreferencesPage extends React.Component {
         <RaisedButton
           className='control'
           onClick={this.handleSetDefaultApp}
-          label='Make WebTorrent the default' />
+          label='Make WebTorrent the default'
+        />
       </Preference>
     )
   }
@@ -213,7 +218,8 @@ class PreferencesPage extends React.Component {
           className='control'
           checked={this.props.state.saved.prefs.soundNotifications}
           label={'Enable sounds'}
-          onCheck={this.handleSoundNotificationsChange} />
+          onCheck={this.handleSoundNotificationsChange}
+        />
       </Preference>
     )
   }
