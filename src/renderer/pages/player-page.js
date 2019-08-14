@@ -366,7 +366,7 @@ function renderLoadingSpinner (state) {
     <div key='loading' className='media-stalled'>
       <div key='loading-spinner' className='loading-spinner' />
       <div key='loading-progress' className='loading-status ellipsis'>
-        <span className='progress'>{fileProgress}%</span> downloaded
+        <span><span className='progress'>{fileProgress}%</span> downloaded</span>
         <span> ↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
         <span> ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
@@ -433,6 +433,7 @@ function renderCastOptions (state) {
     return (
       <li key={ix} onClick={dispatcher('selectCastDevice', ix)}>
         <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        {' '}
         {name}
       </li>
     )
