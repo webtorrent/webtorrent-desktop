@@ -76,9 +76,11 @@ class PathSelector extends React.Component {
         <div className='label' style={labelStyle}>
           {this.props.title}:
         </div>
-        <TextField className='control' disabled id={id} value={text}
+        <TextField
+          className='control' disabled id={id} value={text}
           inputStyle={textareaStyle} style={textFieldStyle} />
-        <RaisedButton className='control' label='Change' onClick={this.handleClick}
+        <RaisedButton
+          className='control' label='Change' onClick={this.handleClick}
           style={buttonStyle} />
       </div>
     )

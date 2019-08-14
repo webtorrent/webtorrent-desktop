@@ -88,7 +88,8 @@ class App extends React.Component {
       return (<div key={i} className='error'>{error.message}</div>)
     })
     return (
-      <div key='errors'
+      <div
+        key='errors'
         className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
         <div key='title' className='title'>Error</div>
         {errorElems}

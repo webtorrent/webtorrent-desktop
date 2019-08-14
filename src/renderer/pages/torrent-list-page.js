@@ -355,7 +355,8 @@ module.exports = class TorrentList extends React.Component {
         <td className={'col-size ' + rowClass}>
           {prettyBytes(file.length)}
         </td>
-        <td className='col-select'
+        <td
+          className='col-select'
           onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
           <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>

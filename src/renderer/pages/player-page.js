@@ -632,7 +632,8 @@ function renderPlayerControls (state) {
   }
 
   return (
-    <div key='controls' className='controls'
+    <div
+      key='controls' className='controls'
       onMouseEnter={dispatcher('mediaControlsMouseEnter')}
       onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
       {elements}
