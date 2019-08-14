@@ -18,7 +18,8 @@ function torrentPoster (torrent, cb) {
   const bestScore = ['audio', 'video', 'image'].map(mediaType => {
     return {
       type: mediaType,
-      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType]) }
+      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
+    }
   }).sort((a, b) => { // sort descending on size
     return b.size - a.size
   })[0]

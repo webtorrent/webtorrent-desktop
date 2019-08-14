@@ -345,12 +345,14 @@ function getAudioMetadata (infoHash, index) {
   const metadata = { title: file.name }
   ipc.send('wt-audio-metadata', infoHash, index, metadata)
 
-  const options = { native: false,
+  const options = {
+    native: false,
     skipCovers: true,
     fileSize: file.length,
     observer: event => {
       ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
-    } }
+    }
+  }
   const onMetaData = file.done
     // If completed; use direct file access
     ? mm.parseFile(path.join(torrent.path, file.path), options)
