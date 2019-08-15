@@ -105,7 +105,7 @@ class PreferencesPage extends React.Component {
           displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={playerPath ? path.dirname(playerPath) : null}
+          value={playerPath ? path.dirname(playerPath) : ''}
         />
       </Preference>
     )
@@ -159,7 +159,7 @@ class PreferencesPage extends React.Component {
           displayValue={torrentsFolderPath || ''}
           onChange={this.handleTorrentsFolderPathChange}
           title='Folder to watch'
-          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null}
+          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : ''}
         />
       </Preference>
     )
