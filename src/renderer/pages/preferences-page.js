@@ -157,7 +157,7 @@ class PreferencesPage extends React.Component {
             properties: ['openDirectory']
           }}
           displayValue={torrentsFolderPath || ''}
-          onChange={this.handletorrentsFolderPathChange}
+          onChange={this.handleTorrentsFolderPathChange}
           title='Folder to watch'
           value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null}
         />
@@ -165,7 +165,7 @@ class PreferencesPage extends React.Component {
     )
   }
 
-  handletorrentsFolderPathChange (filePath) {
+  handleTorrentsFolderPathChange (filePath) {
     dispatch('updatePreferences', 'torrentsFolderPath', filePath)
   }
 
