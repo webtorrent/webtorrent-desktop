@@ -300,7 +300,7 @@ function renderAudioMetadata (state) {
     }
     elems.push((
       <div key='release' className='audio-release'>
-        <label>Release</label>{ releaseInfo.join(', ') }
+        <label>Release</label>{releaseInfo.join(', ')}
       </div>
     ))
   }
@@ -327,7 +327,7 @@ function renderAudioMetadata (state) {
   if (format.length > 0) {
     elems.push((
       <div key='format' className='audio-format'>
-        <label>Format</label>{ format.join(', ') }
+        <label>Format</label>{format.join(', ')}
       </div>
     ))
   }
