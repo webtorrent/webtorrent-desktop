@@ -57,7 +57,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={!this.props.state.saved.prefs.openExternalPlayer}
-          label={'Play torrent media files using WebTorrent'}
+          label='Play torrent media files using WebTorrent'
           onCheck={this.handleOpenExternalPlayerChange}
         />
       </Preference>
@@ -74,7 +74,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.highestPlaybackPriority}
-          label={'Highest Playback Priority'}
+          label='Highest Playback Priority'
           onCheck={this.handleHighestPlaybackPriorityChange}
         />
         <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
@@ -121,7 +121,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.autoAddTorrents}
-          label={'Watch for new .torrent files and add them immediately'}
+          label='Watch for new .torrent files and add them immediately'
           onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
         />
       </Preference>
@@ -204,7 +204,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.startup}
-          label={'Open WebTorrent on startup'}
+          label='Open WebTorrent on startup'
           onCheck={this.handleStartupChange}
         />
       </Preference>
@@ -217,7 +217,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.soundNotifications}
-          label={'Enable sounds'}
+          label='Enable sounds'
           onCheck={this.handleSoundNotificationsChange}
         />
       </Preference>

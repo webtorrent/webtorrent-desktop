@@ -234,7 +234,7 @@ module.exports = class TorrentList extends React.Component {
         <i
           key='play-button'
           title='Start streaming'
-          className={'icon play'}
+          className='icon play'
           onClick={dispatcher('playFile', infoHash)}
         >
           play_circle_outline
