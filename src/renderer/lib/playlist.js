@@ -38,7 +38,7 @@ function getPreviousIndex (state) {
 
 function getCurrentLocalURL (state) {
   return state.server
-    ? state.server.localURL + '/' + state.playing.fileIndex + '/' + state.window.title
+    ? state.server.localURL + '/' + state.playing.fileIndex + '/' + encodeURIComponent(state.playing.fileName)
     : ''
 }
 
