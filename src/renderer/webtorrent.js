@@ -12,7 +12,6 @@ const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
-const zeroFill = require('zero-fill')
 
 const crashReporter = require('../crash-reporter')
 const config = require('../config')
@@ -41,10 +40,9 @@ const VERSION = require('../../package.json').version
  *   '0.16.1' -> '0016'
  *   '1.2.5' -> '0102'
  */
-const VERSION_STR = VERSION.match(/([0-9]+)/g)
-  .slice(0, 2)
-  .map((v) => zeroFill(2, v))
-  .join('')
+const VERSION_STR = VERSION
+  .replace(/\d*./g, v => `0${v % 100}`.slice(-2))
+  .slice(0, 4)
 
 /**
  * Version prefix string (used in peer ID). WebTorrent uses the Azureus-style
