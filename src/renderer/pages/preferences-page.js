@@ -1,4 +1,3 @@
-const path = require('path')
 const React = require('react')
 const PropTypes = require('prop-types')
 
@@ -102,10 +101,9 @@ class PreferencesPage extends React.Component {
             title: 'Select media player app',
             properties: ['openFile']
           }}
-          displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={playerPath ? path.dirname(playerPath) : null}
+          value={playerPath}
         />
       </Preference>
     )
@@ -139,11 +137,11 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'autoAddTorrents', isChecked)
 
     if (isChecked) {
-      dispatch('startFolderWatcher', null)
+      dispatch('startFolderWatcher')
       return
     }
 
-    dispatch('stopFolderWatcher', null)
+    dispatch('stopFolderWatcher')
   }
 
   torrentsFolderPathSelector () {
@@ -156,10 +154,9 @@ class PreferencesPage extends React.Component {
             title: 'Select folder to watch for new torrents',
             properties: ['openDirectory']
           }}
-          displayValue={torrentsFolderPath || ''}
           onChange={this.handleTorrentsFolderPathChange}
           title='Folder to watch'
-          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null}
+          value={torrentsFolderPath}
         />
       </Preference>
     )
