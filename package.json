@@ -51,7 +51,7 @@
     "zero-fill": "^2.2.3"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.2",
+    "babel-eslint": "^10.0.3",
     "buble": "^0.19.6",
     "cross-zip": "^2.0.1",
     "depcheck": "^0.8.0",
