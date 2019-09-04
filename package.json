@@ -22,7 +22,7 @@
     "cp-file": "^7.0.0",
     "create-torrent": "^4.0.0",
     "debounce": "^1.0.0",
-    "deep-equal": "^1.0.1",
+    "deep-equal": "^1.1.0",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^5.0.1",
     "es6-error": "^4.0.0",
