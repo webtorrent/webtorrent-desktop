@@ -46,7 +46,7 @@
     "simple-get": "^3.0.3",
     "srt-to-vtt": "^1.1.1",
     "vlc-command": "^1.0.1",
-    "webtorrent": "0.x",
+    "webtorrent": ">=0.107.6",
     "winreg": "^1.2.0",
     "zero-fill": "^2.2.3"
   },
