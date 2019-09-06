@@ -88,7 +88,7 @@
   "license": "MIT",
   "main": "index.js",
   "optionalDependencies": {
-    "appdmg": "^0.4.3"
+    "appdmg": "^0.6.0"
   },
   "private": true,
   "productName": "WebTorrent",
