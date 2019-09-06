@@ -39,7 +39,6 @@ const argv = minimist(process.argv.slice(2), {
 function build () {
   console.log('Reinstalling node_modules...')
   rimraf.sync(NODE_MODULES_PATH)
-  cp.execSync('npm dedupe', { stdio: 'inherit' })
   cp.execSync('npm ci', { stdio: 'inherit' })
 
   console.log('Nuking dist/ and build/...')
