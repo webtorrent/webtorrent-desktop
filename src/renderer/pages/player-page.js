@@ -3,7 +3,6 @@
 const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
-const zeroFill = require('zero-fill')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
@@ -762,10 +761,10 @@ function formatTime (time, total) {
   const totalMinutes = Math.floor(total / 60)
   const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (totalMinutes > 9) {
-    minutes = zeroFill(2, minutes)
+  if (totalMinutes > 9 && minutes < 10) {
+    minutes = '0' + minutes
   }
-  const seconds = zeroFill(2, Math.floor(time % 60))
+  const seconds = `0${Math.floor(time % 60)}`.slice(-2)
 
   return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }
