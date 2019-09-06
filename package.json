@@ -47,8 +47,7 @@
     "srt-to-vtt": "^1.1.3",
     "vlc-command": "^1.2.0",
     "webtorrent": ">=0.107.7",
-    "winreg": "^1.2.4",
-    "zero-fill": "^2.2.3"
+    "winreg": "^1.2.4"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
