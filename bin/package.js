@@ -186,8 +186,7 @@ function buildDarwin (cb) {
   const plist = require('plist')
 
   console.log('Mac: Packaging electron...')
-  electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
-    if (err) return cb(err)
+  electronPackager(Object.assign({}, all, darwin)).then(function (buildPath) {
     console.log('Mac: Packaged electron. ' + buildPath)
 
     const appPath = path.join(buildPath[0], config.APP_NAME + '.app')
@@ -356,6 +355,8 @@ function buildDarwin (cb) {
         cb(null)
       })
     }
+  }).catch(function (err) {
+    cb(err)
   })
 }
 
@@ -376,8 +377,7 @@ function buildWin32 (cb) {
     CERT_PATH = path.join(os.homedir(), 'Desktop')
   }
 
-  electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
-    if (err) return cb(err)
+  electronPackager(Object.assign({}, all, win32)).then(function (buildPath) {
     console.log('Windows: Packaged electron. ' + buildPath)
 
     let signWithParams
@@ -406,7 +406,7 @@ function buildWin32 (cb) {
     series(tasks, cb)
 
     function packageInstaller (filesPath, cb) {
-      console.log(`Windows: Creating installer...`)
+      console.log('Windows: Creating installer...')
 
       installer.createWindowsInstaller({
         appDirectory: filesPath,
@@ -437,7 +437,7 @@ function buildWin32 (cb) {
         version: pkg.version
       })
         .then(function () {
-          console.log(`Windows: Created installer.`)
+          console.log('Windows: Created installer.')
 
           /**
          * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
@@ -455,7 +455,7 @@ function buildWin32 (cb) {
     }
 
     function packagePortable (filesPath, cb) {
-      console.log(`Windows: Creating portable app...`)
+      console.log('Windows: Creating portable app...')
 
       const portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
@@ -470,16 +470,18 @@ function buildWin32 (cb) {
       const outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log(`Windows: Created portable app.`)
+      console.log('Windows: Created portable app.')
       cb(null)
     }
+  }).catch(function (err) {
+    cb(err)
   })
 }
 
 function buildLinux (cb) {
   console.log('Linux: Packaging electron...')
-  electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
-    if (err) return cb(err)
+
+  electronPackager(Object.assign({}, all, linux)).then(function (buildPath) {
     console.log('Linux: Packaged electron. ' + buildPath)
 
     const tasks = []
@@ -492,11 +494,13 @@ function buildLinux (cb) {
       }
     })
     series(tasks, cb)
+  }).catch(function (err) {
+    cb(err)
   })
 
   function packageDeb (filesPath, cb) {
     // Create .deb file for Debian-based platforms
-    console.log(`Linux: Creating deb...`)
+    console.log('Linux: Creating deb...')
 
     const deb = require('nobin-debian-installer')()
     const destPath = path.join('/opt', pkg.name)
@@ -524,20 +528,20 @@ function buildLinux (cb) {
       cwd: path.join(config.STATIC_PATH, 'linux', 'share')
     }], function (err) {
       if (err) return cb(err)
-      console.log(`Linux: Created deb.`)
+      console.log('Linux: Created deb.')
       cb(null)
     })
   }
 
   function packageZip (filesPath, cb) {
     // Create .zip file for Linux
-    console.log(`Linux: Creating zip...`)
+    console.log('Linux: Creating zip...')
 
     const inPath = path.join(DIST_PATH, path.basename(filesPath))
     const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux.zip')
     zip.zipSync(inPath, outPath)
 
-    console.log(`Linux: Created zip.`)
+    console.log('Linux: Created zip.')
     cb(null)
   }
 }
