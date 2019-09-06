@@ -58,7 +58,7 @@
     "electron": "~6.0.7",
     "electron-osx-sign": "^0.4.12",
     "electron-packager": "^14.0.5",
-    "electron-winstaller": "^2.6.4",
+    "electron-winstaller": "^4.0.0",
     "gh-release": "^3.5.0",
     "minimist": "^1.2.0",
     "nobin-debian-installer": "0.0.10",
