@@ -1,0 +1,26 @@
+[Desktop Entry]
+Type=Application
+<% if (version) { %>Version=<%= version %><% } %>
+Name=<%= productName %>
+<% if (genericName) { %>GenericName=<%= genericName %><% } %>
+<% if (description) { %>Comment=<%= description %><% } %>
+Icon=<%= name %>
+<% if (name) { %>Exec=<%= name %> %U<% } %>
+Terminal=false
+Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
+<% if (mimeType && mimeType.length) { %>MimeType=<%= mimeType.join(';') %>;<% } %>
+<% if (categories && categories.length) { %>Categories=<%= categories.join(';') %>;<% } %>
+StartupNotify=true
+<% if (name) { %>StartupWMClass=<%= name %> <% } %>
+
+[Desktop Action CreateNewTorrent]
+Name=Create New Torrent...
+<% if (name) { %>Exec=<%= name %> -n <% } %>
+
+[Desktop Action OpenTorrentFile]
+Name=Open Torrent File...
+<% if (name) { %>Exec=<%= name %> -o <% } %>
+
+[Desktop Action OpenTorrentAddress]
+Name=Open Torrent Address...
+<% if (name) { %>Exec=<%= name %> -u <% } %>
