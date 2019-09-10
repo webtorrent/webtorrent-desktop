@@ -358,11 +358,15 @@ function getAudioMetadata (infoHash, index) {
     : mm.parseStream(file.createReadStream(), file.name, options)
 
   onMetaData
-    .then(() => {
-      console.log(`metadata for file='${file.name}' completed.`)
-    }).catch(function (err) {
-      return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-    })
+    .then(
+      () => console.log(`metadata for file='${file.name}' completed.`),
+      err => {
+        console.log(
+          `error getting audio metadata for ${infoHash}:${index}`,
+          err
+        )
+      }
+    )
 }
 
 function selectFiles (torrentOrInfoHash, selections) {

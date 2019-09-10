@@ -151,8 +151,10 @@ function setupStateSaved (cb) {
   })
 
   Promise.all(tasks)
-    .then(() => cb(null, saved))
-    .catch(err => cb(err))
+    .then(
+      () => cb(null, saved),
+      err => cb(err)
+    )
 
   function createTorrentObject (t) {
     // TODO: Doing several fs.readFileSync calls during first startup is not ideal
