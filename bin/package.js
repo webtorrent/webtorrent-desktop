@@ -517,14 +517,10 @@ function buildLinux (cb) {
       desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
     }
 
-    installer(options)
-      .then(function () {
-        console.log('Linux: Created deb.')
-        cb(null)
-      })
-      .catch(function (err) {
-        cb(err)
-      })
+    installer(options).then(
+      () => cb(null),
+      (err) => cb(err)
+    )
   }
 
   function packageZip (filesPath, cb) {
