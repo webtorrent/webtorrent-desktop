@@ -518,7 +518,10 @@ function buildLinux (cb) {
     }
 
     installer(options).then(
-      () => cb(null),
+      () => {
+        console.log('Linux: Created deb.')
+        cb(null)
+      },
       (err) => cb(err)
     )
   }
