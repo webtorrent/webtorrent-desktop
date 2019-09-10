@@ -11,7 +11,7 @@
     "url": "https://github.com/webtorrent/webtorrent-desktop/issues"
   },
   "dependencies": {
-    "airplayer": "^2.0.0",
+    "airplayer": "github:webtorrent/airplayer#fix-security",
     "application-config": "^1.0.1",
     "arch": "^2.1.1",
     "auto-launch": "^5.0.5",
