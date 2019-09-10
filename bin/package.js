@@ -501,35 +501,29 @@ function buildLinux (cb) {
     // Create .deb file for Debian-based platforms
     console.log('Linux: Creating deb...')
 
-    const deb = require('nobin-debian-installer')()
-    const destPath = path.join('/opt', pkg.name)
+    const installer = require('electron-installer-debian')
 
-    deb.pack({
-      package: pkg,
-      info: {
-        arch: 'amd64',
-        targetDir: DIST_PATH,
-        depends: 'gconf2, libgtk2.0-0, libnss3, libxss1',
-        scripts: {
-          postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
-          prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
-        }
-      }
-    }, [{
-      src: ['./**'],
-      dest: destPath,
-      expand: true,
-      cwd: filesPath
-    }, {
-      src: ['./**'],
-      dest: path.join('/usr', 'share'),
-      expand: true,
-      cwd: path.join(config.STATIC_PATH, 'linux', 'share')
-    }], function (err) {
-      if (err) return cb(err)
-      console.log('Linux: Created deb.')
-      cb(null)
-    })
+    const options = {
+      src: filesPath + '/',
+      dest: DIST_PATH,
+      arch: 'amd64',
+      bin: 'WebTorrent',
+      icon: {
+        '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
+        '256x256': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png')
+      },
+      categories: ['Network', 'FileTransfer', 'P2P'],
+      mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+    }
+
+    installer(options).then(
+      () => {
+        console.log('Linux: Created deb.')
+        cb(null)
+      },
+      (err) => cb(err)
+    )
   }
 
   function packageZip (filesPath, cb) {
