@@ -147,7 +147,7 @@ function addTorrentEvents (torrent) {
   torrent.on('error', (err) =>
     ipc.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
-    ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+    ipc.send('wt-parsed', torrent.key, torrent.infoHash, torrent.magnetURI))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
