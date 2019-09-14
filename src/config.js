@@ -1,9 +1,10 @@
 const appConfig = require('application-config')('WebTorrent')
+appConfig.filePath = appConfig.filePath.replace('\\Local\\', '\\Roaming\\')
 const path = require('path')
 const electron = require('electron')
 const arch = require('arch')
 
-console.log('electron appData: ', (electron.remote ? electron.remote : electron).app.getPath('appData'))
+// console.log('electron appData: ', (electron.remote ? electron.remote : electron).app.getPath('appData'))
 console.log('appConfig.filePath', appConfig.filePath)
 
 const APP_NAME = 'WebTorrent'
