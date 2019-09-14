@@ -34,12 +34,12 @@ module.exports = {
   CONFIG_PATH: getConfigPath(),
 
   DEFAULT_TORRENTS: [
-    {
-      testID: 'bbb',
-      name: 'Big Buck Bunny',
-      posterFileName: 'bigBuckBunny.jpg',
-      torrentFileName: 'bigBuckBunny.torrent'
-    },
+    // {
+    //   testID: 'bbb',
+    //   name: 'Big Buck Bunny',
+    //   posterFileName: 'bigBuckBunny.jpg',
+    //   torrentFileName: 'bigBuckBunny.torrent'
+    // },
     {
       testID: 'cosmos',
       name: 'Cosmos Laundromat (Preview)',
