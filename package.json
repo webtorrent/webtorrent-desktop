@@ -100,6 +100,7 @@
     "build": "buble src --output build",
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
+    "install-system-deps": "brew install fakeroot dpkg",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "prepublish": "npm run build",

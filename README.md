@@ -158,6 +158,11 @@ The Mac app can only be packaged from **macOS**.
 
 The Linux app can be packaged from **any** platform.
 
+If packaging from Mac, install system dependencies with Homebrew by running:
+
+```
+npm run install-system-deps
+```
 
 #### Recommended readings to start working in the app
 
