@@ -110,9 +110,8 @@ function getDefaultPlayState () {
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function setupStateSaved (cb) {
-  const cpFile = require('cp-file')
-  const fs = require('fs')
+function setupStateSaved () {
+  const { copyFileSync, mkdirSync, readFileSync } = require('fs')
   const parseTorrent = require('parse-torrent')
 
   const saved = {
@@ -132,33 +131,28 @@ function setupStateSaved (cb) {
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */
   }
 
-  const tasks = []
+  // TODO: Doing several sync calls during first startup is not ideal
+  mkdirSync(config.POSTER_PATH, { recursive: true })
+  mkdirSync(config.TORRENT_PATH, { recursive: true })
 
   config.DEFAULT_TORRENTS.forEach((t, i) => {
     const infoHash = saved.torrents[i].infoHash
-    tasks.push(
-      cpFile(
-        path.join(config.STATIC_PATH, t.posterFileName),
-        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
-      )
+    // TODO: Doing several sync calls during first startup is not ideal
+    copyFileSync(
+      path.join(config.STATIC_PATH, t.posterFileName),
+      path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
     )
-    tasks.push(
-      cpFile(
-        path.join(config.STATIC_PATH, t.torrentFileName),
-        path.join(config.TORRENT_PATH, infoHash + '.torrent')
-      )
+    copyFileSync(
+      path.join(config.STATIC_PATH, t.torrentFileName),
+      path.join(config.TORRENT_PATH, infoHash + '.torrent')
     )
   })
 
-  Promise.all(tasks)
-    .then(
-      () => cb(null, saved),
-      err => cb(err)
-    )
+  return saved
 
   function createTorrentObject (t) {
-    // TODO: Doing several fs.readFileSync calls during first startup is not ideal
-    const torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
+    // TODO: Doing several sync calls during first startup is not ideal
+    const torrent = readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
     const parsedTorrent = parseTorrent(torrent)
 
     return {
@@ -207,10 +201,14 @@ function load (cb) {
   appConfig.read(function (err, saved) {
     if (err || !saved.version) {
       console.log('Missing config file: Creating new one')
-      setupStateSaved(onSavedState)
-    } else {
-      onSavedState(null, saved)
+      try {
+        saved = setupStateSaved()
+      } catch (err) {
+        onSavedState(err)
+        return
+      }
     }
+    onSavedState(null, saved)
   })
 
   function onSavedState (err, saved) {
