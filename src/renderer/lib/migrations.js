@@ -35,7 +35,7 @@ function run (state) {
 }
 
 function migrate_0_7_0 (saved) {
-  const cpFile = require('cp-file')
+  const { copyFileSync } = require('fs')
   const path = require('path')
 
   saved.torrents.forEach(function (ts) {
@@ -57,7 +57,7 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) cpFile.sync(src, dst)
+      if (src !== dst) copyFileSync(src, dst)
 
       delete ts.torrentPath
       ts.torrentFileName = infoHash + '.torrent'
@@ -72,7 +72,7 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.POSTER_PATH, infoHash + extension)
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) cpFile.sync(src, dst)
+      if (src !== dst) copyFileSync(src, dst)
 
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
@@ -156,7 +156,7 @@ function migrate_0_17_2 (saved) {
   // folders/files that end in a trailing dot (.) or space are not deletable from
   // Windows Explorer. See: https://github.com/webtorrent/webtorrent-desktop/issues/905
 
-  const cpFile = require('cp-file')
+  const { copyFileSync } = require('fs')
   const rimraf = require('rimraf')
 
   const OLD_NAME = 'The WIRED CD - Rip. Sample. Mash. Share.'
@@ -191,7 +191,7 @@ function migrate_0_17_2 (saved) {
   ts.posterFileName = NEW_HASH + '.jpg'
 
   rimraf.sync(path.join(config.TORRENT_PATH, ts.torrentFileName))
-  cpFile.sync(
+  copyFileSync(
     path.join(config.STATIC_PATH, 'wiredCd.torrent'),
     path.join(config.TORRENT_PATH, NEW_HASH + '.torrent')
   )

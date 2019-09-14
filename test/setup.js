@@ -1,5 +1,5 @@
 const Application = require('spectron').Application
-const cpFile = require('cp-file')
+const { copyFileSync } = require('fs')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
@@ -221,7 +221,7 @@ function extractImportantFields (parsedTorrent) {
 
 function copy (pathFrom, pathTo) {
   try {
-    cpFile.sync(pathFrom, pathTo)
+    copyFileSync(pathFrom, pathTo)
   } catch (err) {
     // Windows lets us create files and folders under C:\Windows\Temp,
     // but when you try to `copySync` into one of those folders, you get EPERM
