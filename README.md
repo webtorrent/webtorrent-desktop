@@ -97,7 +97,7 @@ comparing each one to a reference. Why screenshots?
   https://github.com/blog/817-behold-image-view-modes
 
 For MacOS, you'll need a Retina screen for the integration tests to pass. Your screen should have
-the same resolution as a 2016 12" Macbook.
+the same resolution as a 2018 MacBook Pro 13".
 
 For Windows, you'll need Windows 10 with a 1366x768 screen.
 
