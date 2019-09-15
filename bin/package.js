@@ -488,6 +488,9 @@ function buildLinux (cb) {
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, cb))
       }
+      if (argv.package === 'rpm' || argv.package === 'all') {
+        tasks.push((cb) => packageRpm(filesPath, cb))
+      }
       if (argv.package === 'zip' || argv.package === 'all') {
         tasks.push((cb) => packageZip(filesPath, cb))
       }
@@ -520,6 +523,35 @@ function buildLinux (cb) {
     installer(options).then(
       () => {
         console.log('Linux: Created deb.')
+        cb(null)
+      },
+      (err) => cb(err)
+    )
+  }
+
+  function packageRpm (filesPath, cb) {
+    // Create .rpm file for RedHat-based platforms
+    console.log('Linux: Creating rpm...')
+
+    const installer = require('electron-installer-redhat')
+
+    const options = {
+      src: filesPath + '/',
+      dest: DIST_PATH,
+      arch: 'amd64',
+      bin: 'WebTorrent',
+      icon: {
+        '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
+        '256x256': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png')
+      },
+      categories: ['Network', 'FileTransfer', 'P2P'],
+      mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+    }
+
+    installer(options).then(
+      () => {
+        console.log('Linux: Created rpm.')
         cb(null)
       },
       (err) => cb(err)
