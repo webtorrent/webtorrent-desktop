@@ -7,6 +7,16 @@
     "email": "feross@webtorrent.io",
     "url": "https://webtorrent.io"
   },
+  "babel": {
+    "plugins": [
+      [
+        "@babel/plugin-transform-react-jsx",
+        {
+          "useBuiltIns": true
+        }
+      ]
+    ]
+  },
   "bugs": {
     "url": "https://github.com/webtorrent/webtorrent-desktop/issues"
   },
@@ -47,6 +57,9 @@
     "winreg": "^1.2.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/plugin-transform-react-jsx": "^7.3.0",
     "babel-eslint": "^10.1.0",
     "buble": "^0.20.0",
     "cross-zip": "^3.1.0",
@@ -96,7 +109,7 @@
     "url": "git://github.com/webtorrent/webtorrent-desktop.git"
   },
   "scripts": {
-    "build": "buble src --target chrome:71 --output build",
+    "build": "babel src --out-dir build",
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
     "install-system-deps": "brew install fakeroot dpkg rpm",
