@@ -173,8 +173,8 @@ const linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build x64 binary onle.
-  arch: 'x64'
+  // Build x64 and arm64 binaries.
+  arch: ['x64', 'arm64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
