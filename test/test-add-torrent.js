@@ -47,10 +47,8 @@ test('create-torrent', function (t) {
       'wss://tracker.fastcast.nz',
       'wss://tracker.openwebtorrent.com'
     ],
-    comment: undefined,
-    infoHash: '4b087858a32e31a0d313b5f9e0a2e13c08c5403f',
+    infoHash: 'b31a80b3dd807c2fdde4c4da1a0db6123fa35883',
     name: 'tmp.jpg',
-    private: false,
     urlList: []
   }
 
