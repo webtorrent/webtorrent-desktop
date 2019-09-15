@@ -65,9 +65,9 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Create React event handlers only once
-    this.setIsPrivate = (_, isPrivate) => this.setState({ isPrivate })
-    this.setComment = (_, comment) => this.setState({ comment })
-    this.setTrackers = (_, trackers) => this.setState({ trackers })
+    this.handleSetIsPrivate = (_, isPrivate) => this.setState({ isPrivate })
+    this.handleSetComment = (_, comment) => this.setState({ comment })
+    this.handleSetTrackers = (_, trackers) => this.setState({ trackers })
     this.handleSubmit = handleSubmit.bind(this)
   }
 
@@ -146,7 +146,7 @@ class CreateTorrentPage extends React.Component {
             className='torrent-is-private control'
             style={{ display: '' }}
             checked={this.state.isPrivate}
-            onCheck={this.setIsPrivate}
+            onCheck={this.handleSetIsPrivate}
           />
         </div>
         <div key='trackers' className='torrent-attribute'>
@@ -159,7 +159,7 @@ class CreateTorrentPage extends React.Component {
             rows={2}
             rowsMax={10}
             value={this.state.trackers}
-            onChange={this.setTrackers}
+            onChange={this.handleSetTrackers}
           />
         </div>
         <div key='comment' className='torrent-attribute'>
@@ -173,7 +173,7 @@ class CreateTorrentPage extends React.Component {
             rows={2}
             rowsMax={10}
             value={this.state.comment}
-            onChange={this.setComment}
+            onChange={this.handleSetComment}
           />
         </div>
         <div key='files' className='torrent-attribute'>

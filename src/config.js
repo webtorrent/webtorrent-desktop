@@ -73,8 +73,10 @@ module.exports = {
   GITHUB_URL: 'https://github.com/webtorrent/webtorrent-desktop',
   GITHUB_URL_ISSUES: 'https://github.com/webtorrent/webtorrent-desktop/issues',
   GITHUB_URL_RAW: 'https://raw.githubusercontent.com/webtorrent/webtorrent-desktop/master',
+  GITHUB_URL_RELEASES: 'https://github.com/webtorrent/webtorrent-desktop/releases',
 
   HOME_PAGE_URL: 'https://webtorrent.io',
+  TWITTER_PAGE_URL: 'https://twitter.com/WebTorrentApp',
 
   IS_PORTABLE: IS_PORTABLE,
   IS_PRODUCTION: IS_PRODUCTION,

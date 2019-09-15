@@ -1,4 +1,3 @@
-const path = require('path')
 const React = require('react')
 const PropTypes = require('prop-types')
 
@@ -57,7 +56,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={!this.props.state.saved.prefs.openExternalPlayer}
-          label={'Play torrent media files using WebTorrent'}
+          label='Play torrent media files using WebTorrent'
           onCheck={this.handleOpenExternalPlayerChange}
         />
       </Preference>
@@ -74,7 +73,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.highestPlaybackPriority}
-          label={'Highest Playback Priority'}
+          label='Highest Playback Priority'
           onCheck={this.handleHighestPlaybackPriorityChange}
         />
         <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
@@ -102,10 +101,9 @@ class PreferencesPage extends React.Component {
             title: 'Select media player app',
             properties: ['openFile']
           }}
-          displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={playerPath ? path.dirname(playerPath) : null}
+          value={playerPath}
         />
       </Preference>
     )
@@ -121,7 +119,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.autoAddTorrents}
-          label={'Watch for new .torrent files and add them immediately'}
+          label='Watch for new .torrent files and add them immediately'
           onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
         />
       </Preference>
@@ -139,11 +137,11 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'autoAddTorrents', isChecked)
 
     if (isChecked) {
-      dispatch('startFolderWatcher', null)
+      dispatch('startFolderWatcher')
       return
     }
 
-    dispatch('stopFolderWatcher', null)
+    dispatch('stopFolderWatcher')
   }
 
   torrentsFolderPathSelector () {
@@ -156,16 +154,15 @@ class PreferencesPage extends React.Component {
             title: 'Select folder to watch for new torrents',
             properties: ['openDirectory']
           }}
-          displayValue={torrentsFolderPath || ''}
-          onChange={this.handletorrentsFolderPathChange}
+          onChange={this.handleTorrentsFolderPathChange}
           title='Folder to watch'
-          value={torrentsFolderPath ? path.dirname(torrentsFolderPath) : null}
+          value={torrentsFolderPath}
         />
       </Preference>
     )
   }
 
-  handletorrentsFolderPathChange (filePath) {
+  handleTorrentsFolderPathChange (filePath) {
     dispatch('updatePreferences', 'torrentsFolderPath', filePath)
   }
 
@@ -204,7 +201,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.startup}
-          label={'Open WebTorrent on startup'}
+          label='Open WebTorrent on startup'
           onCheck={this.handleStartupChange}
         />
       </Preference>
@@ -217,7 +214,7 @@ class PreferencesPage extends React.Component {
         <Checkbox
           className='control'
           checked={this.props.state.saved.prefs.soundNotifications}
-          label={'Enable sounds'}
+          label='Enable sounds'
           onCheck={this.handleSoundNotificationsChange}
         />
       </Preference>
