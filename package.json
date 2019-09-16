@@ -97,7 +97,7 @@
     "url": "git://github.com/webtorrent/webtorrent-desktop.git"
   },
   "scripts": {
-    "build": "buble src --output build",
+    "build": "buble src --target chrome:71 --output build",
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
     "install-system-deps": "brew install fakeroot dpkg rpmbuild",

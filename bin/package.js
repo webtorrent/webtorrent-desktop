@@ -173,8 +173,8 @@ const linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build x64 binary onle.
-  arch: 'x64'
+  // Build x64 and arm64 binaries.
+  arch: ['x64', 'arm64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
@@ -485,14 +485,21 @@ function buildLinux (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
+      let destArch = filesPath.split('-').pop()
+
+      // Linux convention for 'x64' is 'amd64'
+      if (destArch === 'x64') {
+        destArch = 'amd64'
+      }
+
       if (argv.package === 'deb' || argv.package === 'all') {
-        tasks.push((cb) => packageDeb(filesPath, cb))
+        tasks.push((cb) => packageDeb(filesPath, destArch, cb))
       }
       if (argv.package === 'rpm' || argv.package === 'all') {
-        tasks.push((cb) => packageRpm(filesPath, cb))
+        tasks.push((cb) => packageRpm(filesPath, destArch, cb))
       }
       if (argv.package === 'zip' || argv.package === 'all') {
-        tasks.push((cb) => packageZip(filesPath, cb))
+        tasks.push((cb) => packageZip(filesPath, destArch, cb))
       }
     })
     series(tasks, cb)
@@ -500,16 +507,16 @@ function buildLinux (cb) {
     cb(err)
   })
 
-  function packageDeb (filesPath, cb) {
+  function packageDeb (filesPath, destArch, cb) {
     // Create .deb file for Debian-based platforms
-    console.log('Linux: Creating deb...')
+    console.log(`Linux: Creating ${destArch} deb...`)
 
     const installer = require('electron-installer-debian')
 
     const options = {
       src: filesPath + '/',
       dest: DIST_PATH,
-      arch: 'amd64',
+      arch: destArch,
       bin: 'WebTorrent',
       icon: {
         '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
@@ -522,23 +529,23 @@ function buildLinux (cb) {
 
     installer(options).then(
       () => {
-        console.log('Linux: Created deb.')
+        console.log(`Linux: Created ${destArch} deb.`)
         cb(null)
       },
       (err) => cb(err)
     )
   }
 
-  function packageRpm (filesPath, cb) {
+  function packageRpm (filesPath, destArch, cb) {
     // Create .rpm file for RedHat-based platforms
-    console.log('Linux: Creating rpm...')
+    console.log(`Linux: Creating ${destArch} rpm...`)
 
     const installer = require('electron-installer-redhat')
 
     const options = {
       src: filesPath + '/',
       dest: DIST_PATH,
-      arch: 'amd64',
+      arch: destArch,
       bin: 'WebTorrent',
       icon: {
         '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
@@ -551,22 +558,22 @@ function buildLinux (cb) {
 
     installer(options).then(
       () => {
-        console.log('Linux: Created rpm.')
+        console.log(`Linux: Created ${destArch} rpm.`)
         cb(null)
       },
       (err) => cb(err)
     )
   }
 
-  function packageZip (filesPath, cb) {
+  function packageZip (filesPath, destArch, cb) {
     // Create .zip file for Linux
-    console.log('Linux: Creating zip...')
+    console.log(`Linux: Creating ${destArch} zip...`)
 
     const inPath = path.join(DIST_PATH, path.basename(filesPath))
-    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux.zip')
+    const outPath = path.join(DIST_PATH, `${BUILD_NAME}-linux-${destArch}.zip`)
     zip.zipSync(inPath, outPath)
 
-    console.log('Linux: Created zip.')
+    console.log(`Linux: Created ${destArch} zip.`)
     cb(null)
   }
 }
