@@ -485,12 +485,7 @@ function buildLinux (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
-      let destArch = filesPath.split('-').pop()
-
-      // Linux convention for 'x64' is 'amd64'
-      if (destArch === 'x64') {
-        destArch = 'amd64'
-      }
+      const destArch = filesPath.split('-').pop()
 
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, destArch, cb))
@@ -508,6 +503,11 @@ function buildLinux (cb) {
   })
 
   function packageDeb (filesPath, destArch, cb) {
+    // Linux convention for Debian based 'x64' is 'amd64'
+    if (destArch === 'x64') {
+      destArch = 'amd64'
+    }
+
     // Create .deb file for Debian-based platforms
     console.log(`Linux: Creating ${destArch} deb...`)
 
@@ -537,6 +537,11 @@ function buildLinux (cb) {
   }
 
   function packageRpm (filesPath, destArch, cb) {
+    // Linux convention for RedHat based 'x64' is 'x86_64'
+    if (destArch === 'x64') {
+      destArch = 'x86_64'
+    }
+
     // Create .rpm file for RedHat-based platforms
     console.log(`Linux: Creating ${destArch} rpm...`)
 
