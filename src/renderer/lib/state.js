@@ -119,7 +119,7 @@ function setupStateSaved () {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
       openExternalPlayer: false,
-      externalPlayerPath: null,
+      externalPlayerPath: '',
       startup: false,
       soundNotifications: true,
       autoAddTorrents: false,
@@ -207,6 +207,8 @@ function load (cb) {
         onSavedState(err)
         return
       }
+    } else if (saved.prefs.externalPlayerPath == null) {
+      saved.prefs.externalPlayerPath = ''
     }
     onSavedState(null, saved)
   })
