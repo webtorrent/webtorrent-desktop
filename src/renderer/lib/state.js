@@ -119,7 +119,7 @@ function setupStateSaved () {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
       openExternalPlayer: false,
-      externalPlayerPath: null,
+      externalPlayerPath: '',
       startup: false,
       soundNotifications: true,
       autoAddTorrents: false,
