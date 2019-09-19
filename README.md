@@ -125,6 +125,7 @@ The following optional arguments are available:
 - `--sign` - Sign the application (Mac, Windows)
 - `--package=[type]` - Package single output type.
    - `deb` - Debian package
+   - `rpm` - RedHat package
    - `zip` - Linux zip file
    - `dmg` - Mac disk image
    - `exe` - Windows installer

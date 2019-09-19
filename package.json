@@ -87,7 +87,8 @@
   "main": "index.js",
   "optionalDependencies": {
     "appdmg": "^0.6.0",
-    "electron-installer-debian": "^2.0.0"
+    "electron-installer-debian": "^2.0.0",
+    "electron-installer-redhat": "^2.0.0"
   },
   "private": true,
   "productName": "WebTorrent",
@@ -99,7 +100,7 @@
     "build": "buble src --target chrome:71 --output build",
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
-    "install-system-deps": "brew install fakeroot dpkg",
+    "install-system-deps": "brew install fakeroot dpkg rpm",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "start": "npm run build && electron .",

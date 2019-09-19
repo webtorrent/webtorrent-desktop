@@ -485,15 +485,13 @@ function buildLinux (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
-      let destArch = filesPath.split('-').pop()
-
-      // Linux convention for 'x64' is 'amd64'
-      if (destArch === 'x64') {
-        destArch = 'amd64'
-      }
+      const destArch = filesPath.split('-').pop()
 
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, destArch, cb))
+      }
+      if (argv.package === 'rpm' || argv.package === 'all') {
+        tasks.push((cb) => packageRpm(filesPath, destArch, cb))
       }
       if (argv.package === 'zip' || argv.package === 'all') {
         tasks.push((cb) => packageZip(filesPath, destArch, cb))
@@ -505,6 +503,11 @@ function buildLinux (cb) {
   })
 
   function packageDeb (filesPath, destArch, cb) {
+    // Linux convention for Debian based 'x64' is 'amd64'
+    if (destArch === 'x64') {
+      destArch = 'amd64'
+    }
+
     // Create .deb file for Debian-based platforms
     console.log(`Linux: Creating ${destArch} deb...`)
 
@@ -527,6 +530,40 @@ function buildLinux (cb) {
     installer(options).then(
       () => {
         console.log(`Linux: Created ${destArch} deb.`)
+        cb(null)
+      },
+      (err) => cb(err)
+    )
+  }
+
+  function packageRpm (filesPath, destArch, cb) {
+    // Linux convention for RedHat based 'x64' is 'x86_64'
+    if (destArch === 'x64') {
+      destArch = 'x86_64'
+    }
+
+    // Create .rpm file for RedHat-based platforms
+    console.log(`Linux: Creating ${destArch} rpm...`)
+
+    const installer = require('electron-installer-redhat')
+
+    const options = {
+      src: filesPath + '/',
+      dest: DIST_PATH,
+      arch: destArch,
+      bin: 'WebTorrent',
+      icon: {
+        '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
+        '256x256': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png')
+      },
+      categories: ['Network', 'FileTransfer', 'P2P'],
+      mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+    }
+
+    installer(options).then(
+      () => {
+        console.log(`Linux: Created ${destArch} rpm.`)
         cb(null)
       },
       (err) => cb(err)
