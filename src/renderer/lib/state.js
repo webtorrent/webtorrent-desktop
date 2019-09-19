@@ -207,8 +207,6 @@ function load (cb) {
         onSavedState(err)
         return
       }
-    } else if (saved.prefs.externalPlayerPath == null) {
-      saved.prefs.externalPlayerPath = ''
     }
     onSavedState(null, saved)
   })
