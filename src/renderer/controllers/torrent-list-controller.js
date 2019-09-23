@@ -227,6 +227,22 @@ module.exports = class TorrentListController {
     sound.play('DELETE')
   }
 
+  confirmClearCompletedTorrents () {
+    this.state.modal = {
+      id: 'clear-completed-modal'
+    }
+  }
+
+  clearCompletedTorrents () {
+    this.state.saved.torrents
+      .filter(
+        torrentSummary =>
+          torrentSummary.progress &&
+          torrentSummary.progress.progress === 1
+      )
+      .forEach(torrentSummary => this.deleteTorrent(torrentSummary.infoHash, false))
+  }
+
   toggleSelectTorrent (infoHash) {
     if (this.state.selectedInfoHash === infoHash) {
       this.state.selectedInfoHash = null
