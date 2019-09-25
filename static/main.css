@@ -623,6 +623,11 @@ body.drag .app::after {
   margin-top: 6px;
 }
 
+.player .controls .icon.multi-audio {
+  font-size: 26px;
+  margin-top: 6px;
+}
+
 .player .controls .icon.fullscreen {
   font-size: 26px;
   margin-right: 15px;

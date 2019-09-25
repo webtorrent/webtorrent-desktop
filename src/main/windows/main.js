@@ -44,7 +44,8 @@ function init (state, options) {
     useContentSize: true, // Specify web page size without OS chrome
     width: initialBounds.width,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      experimentalFeatures: true
     },
     x: initialBounds.x,
     y: initialBounds.y

@@ -97,6 +97,13 @@ function renderMedia (state) {
       delete file.selectedSubtitle
     }
 
+    // Switch to selected audio track
+    const audioTracks = mediaElement.audioTracks || []
+    for (let j = 0; j < audioTracks.length; j++) {
+      const isSelectedTrack = j === state.playing.audioTracks.selectedIndex
+      audioTracks[j].enabled = isSelectedTrack
+    }
+
     state.playing.volume = mediaElement.volume
   }
 
@@ -157,6 +164,20 @@ function renderMedia (state) {
       height: video.videoHeight
     }
     dispatch('setDimensions', dimensions)
+
+    if (video.audioTracks) {
+      // set audioTracks
+      const tracks = []
+      for (let i = 0; i < video.audioTracks.length; i++) {
+        tracks.push({
+          label: video.audioTracks[i].label || `Track ${i + 1}`,
+          language: video.audioTracks[i].language
+        })
+      }
+
+      state.playing.audioTracks.tracks = tracks
+      state.playing.audioTracks.selectedIndex = 0
+    }
   }
 
   function onEnded (e) {
@@ -475,6 +496,27 @@ function renderSubtitleOptions (state) {
   )
 }
 
+function renderAudioTrackOptions (state) {
+  const audioTracks = state.playing.audioTracks
+  if (!audioTracks.tracks.length || !audioTracks.showMenu) return
+
+  const items = audioTracks.tracks.map(function (track, ix) {
+    const isSelected = state.playing.audioTracks.selectedIndex === ix
+    return (
+      <li key={ix} onClick={dispatcher('selectAudioTrack', ix)}>
+        <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
+        {track.label}
+      </li>
+    )
+  })
+
+  return (
+    <ul key='audio-track-options' className='options-list'>
+      {items}
+    </ul>
+  )
+}
+
 function renderPlayerControls (state) {
   const positionPercent = 100 * state.playing.currentTime / state.playing.duration
   const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
@@ -483,6 +525,9 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  const multiAudioClass = state.playing.audioTracks.tracks.length > 1
+    ? 'active'
+    : 'disabled'
   const prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
@@ -546,6 +591,14 @@ function renderPlayerControls (state) {
         onClick={handleSubtitles}
       >
         closed_caption
+      </i>
+    ), (
+      <i
+        key='audio-tracks'
+        className={'icon multi-audio float-right ' + multiAudioClass}
+        onClick={handleAudioTracks}
+      >
+        library_music
       </i>
     ))
   }
@@ -653,6 +706,7 @@ function renderPlayerControls (state) {
       {elements}
       {renderCastOptions(state)}
       {renderSubtitleOptions(state)}
+      {renderAudioTrackOptions(state)}
     </div>
   )
 
@@ -695,6 +749,10 @@ function renderPlayerControls (state) {
     } else {
       dispatch('toggleSubtitlesMenu')
     }
+  }
+
+  function handleAudioTracks (e) {
+    dispatch('toggleAudioTracksMenu')
   }
 }
 
