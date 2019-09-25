@@ -1,5 +1,3 @@
-/* global HTMLMediaElement */
-
 const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
@@ -56,6 +54,14 @@ function renderMedia (state) {
       mediaElement.pause()
     } else if (!state.playing.isPaused && mediaElement.paused) {
       mediaElement.play()
+        .then(() => {
+          dispatch('mediaSuccess')
+        })
+        .catch((err) => {
+          if (err.name === 'NotSupportedError') {
+            dispatch('mediaError', 'Codec unsupported')
+          }
+        })
     }
     // When the user clicks or drags on the progress bar, jump to that position
     if (state.playing.jumpToTime != null) {
@@ -127,10 +133,8 @@ function renderMedia (state) {
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
       onStalled={dispatcher('mediaStalled')}
-      onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
-      onCanPlay={onCanPlay}
     >
       {trackTags}
     </MediaTagName>
@@ -166,20 +170,6 @@ function renderMedia (state) {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
       if (state.window.isFullScreen) dispatch('toggleFullScreen')
-    }
-  }
-
-  function onCanPlay (e) {
-    const elem = e.target
-    if (elem.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) return
-    if (state.playing.type === 'video' &&
-      elem.webkitVideoDecodedByteCount === 0) {
-      dispatch('mediaError', 'Video codec unsupported')
-    } else if (elem.webkitAudioDecodedByteCount === 0) {
-      dispatch('mediaError', 'Audio codec unsupported')
-    } else {
-      dispatch('mediaSuccess')
-      elem.play()
     }
   }
 }
