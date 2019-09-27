@@ -316,7 +316,7 @@ module.exports = class TorrentList extends React.Component {
         torrentSummary.progress.files[index]) {
       const fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+      progress = Math.floor(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
     // Second, for media files where we saved our position, show how far we got
