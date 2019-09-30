@@ -149,6 +149,12 @@ install [XQuartz](http://www.xquartz.org/), then run:
 brew install wine
 ```
 
+Also to generate the .exe setup we need to install [Mono](https://www.mono-project.com/) 
+
+```
+brew install mono
+```
+
 (Requires the [Homebrew](http://brew.sh/) package manager.)
 
 #### Mac build notes
@@ -164,7 +170,6 @@ If packaging from Mac, install system dependencies with Homebrew by running:
 ```
 npm run install-system-deps
 ```
-
 #### Recommended readings to start working in the app
 
 Electron (Framework to make native apps for Windows, OSX and Linux in Javascript):
