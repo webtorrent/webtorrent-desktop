@@ -142,17 +142,12 @@ The Windows app can be packaged from **any** platform.
 Note: Windows code signing only works from **Windows**, for now.
 
 Note: To package the Windows app from non-Windows platforms,
-[Wine](https://www.winehq.org/) needs to be installed. For example on Mac, first
-install [XQuartz](http://www.xquartz.org/), then run:
+[Wine](https://www.winehq.org/) and [Mono](https://www.mono-project.com/) need
+to be installed. For example on Mac, first install
+[XQuartz](http://www.xquartz.org/), then run:
 
 ```
-brew install wine
-```
-
-Also to generate the .exe setup we need to install [Mono](https://www.mono-project.com/) 
-
-```
-brew install mono
+brew install wine mono
 ```
 
 (Requires the [Homebrew](http://brew.sh/) package manager.)
