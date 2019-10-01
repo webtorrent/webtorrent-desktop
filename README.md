@@ -142,11 +142,12 @@ The Windows app can be packaged from **any** platform.
 Note: Windows code signing only works from **Windows**, for now.
 
 Note: To package the Windows app from non-Windows platforms,
-[Wine](https://www.winehq.org/) needs to be installed. For example on Mac, first
-install [XQuartz](http://www.xquartz.org/), then run:
+[Wine](https://www.winehq.org/) and [Mono](https://www.mono-project.com/) need
+to be installed. For example on Mac, first install
+[XQuartz](http://www.xquartz.org/), then run:
 
 ```
-brew install wine
+brew install wine mono
 ```
 
 (Requires the [Homebrew](http://brew.sh/) package manager.)
@@ -164,7 +165,6 @@ If packaging from Mac, install system dependencies with Homebrew by running:
 ```
 npm run install-system-deps
 ```
-
 #### Recommended readings to start working in the app
 
 Electron (Framework to make native apps for Windows, OSX and Linux in Javascript):
