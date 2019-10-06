@@ -212,7 +212,9 @@ module.exports = class TorrentList extends React.Component {
         else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
         else status = 'Paused'
       } else if (torrentSummary.status === 'downloading') {
-        status = 'Downloading'
+        if (!torrentSummary.progress) status = ''
+        else if (!torrentSummary.progress.ready) status = 'Verifying'
+        else status = 'Downloading'
       } else if (torrentSummary.status === 'seeding') {
         status = 'Seeding'
       } else { // torrentSummary.status is 'new' or something unexpected
