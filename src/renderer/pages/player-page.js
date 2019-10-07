@@ -109,9 +109,9 @@ function renderMedia (state) {
       trackTags.push(
         <track
           key={i}
-          default={isSelected ? 'default' : ''}
+          default={isSelected}
           label={track.label}
-          type='subtitles'
+          kind='subtitles'
           src={track.buffer}
         />
       )
@@ -497,7 +497,7 @@ function renderPlayerControls (state) {
       <div
         key='scrub-bar'
         className='scrub-bar'
-        draggable='true'
+        draggable
         onDragStart={handleDragStart}
         onClick={handleScrub}
         onDrag={handleScrub}

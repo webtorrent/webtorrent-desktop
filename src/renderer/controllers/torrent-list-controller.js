@@ -279,7 +279,7 @@ module.exports = class TorrentListController {
       enabled: torrentSummary.torrentFileName != null
     }))
 
-    menu.popup(electron.remote.getCurrentWindow())
+    menu.popup({ window: electron.remote.getCurrentWindow() })
   }
 
   // Takes a torrentSummary or torrentKey
@@ -323,7 +323,7 @@ function findFilesRecursive (paths, cb_) {
       findFilesRecursive([path], function (fileObjs) {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
-          ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
+          ret.sort((a, b) => a.path < b.path ? -1 : Number(a.path > b.path))
           cb_(ret)
         }
       })

@@ -74,7 +74,7 @@ function getLargestFileByExtension (torrent, extensions) {
  * Filter file on a list extension, can be used to find al image files
  * @param torrent Torrent to filter files from
  * @param extensions File extensions to filter on
- * @returns {number} Array of torrent file objects matching one of the given extensions
+ * @returns {Array} Array of torrent file objects matching one of the given extensions
  */
 function filterOnExtension (torrent, extensions) {
   return torrent.files.filter(file => {
