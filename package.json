@@ -103,7 +103,7 @@
     "install-system-deps": "brew install fakeroot dpkg rpm",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
-    "start": "npm run build && electron .",
+    "start": "npm run build && electron --no-sandbox .",
     "test": "standard && depcheck --ignores=standard,babel-eslint --ignore-dirs=build,dist && node ./bin/extra-lint.js",
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
