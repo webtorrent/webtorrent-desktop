@@ -54,14 +54,10 @@ function renderMedia (state) {
       mediaElement.pause()
     } else if (!state.playing.isPaused && mediaElement.paused) {
       mediaElement.play()
-        .then(() => {
-          dispatch('mediaSuccess')
-        })
-        .catch((err) => {
-          if (err.name === 'NotSupportedError') {
-            dispatch('mediaError', 'Codec unsupported')
-          }
-        })
+        .then(
+          () => dispatch('mediaSuccess'),
+          () => dispatch('mediaError', 'Codec unsupported')
+        )
     }
     // When the user clicks or drags on the progress bar, jump to that position
     if (state.playing.jumpToTime != null) {
