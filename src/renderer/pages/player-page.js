@@ -56,7 +56,7 @@ function renderMedia (state) {
       mediaElement.play()
         .then(
           () => dispatch('mediaSuccess'),
-          () => dispatch('mediaError', 'Codec unsupported')
+          err => dispatch('mediaError', err.name === 'NotSupportedError' ? 'Codec unsupported' : `${err.name}: ${err.message}`)
         )
     }
     // When the user clicks or drags on the progress bar, jump to that position
