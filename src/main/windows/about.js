@@ -25,7 +25,8 @@ function init () {
     title: 'About ' + config.APP_WINDOW_TITLE,
     useContentSize: true,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableBlinkFeatures: 'AudioVideoTracks'
     },
     width: 300
   })

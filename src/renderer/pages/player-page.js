@@ -54,13 +54,6 @@ function renderMedia (state) {
       mediaElement.pause()
     } else if (!state.playing.isPaused && mediaElement.paused) {
       mediaElement.play()
-        .then(
-          () => dispatch('mediaSuccess'),
-          (err) => {
-            console.error(`Error playing mediaElement: ${err.name}`)
-            dispatch('mediaError', 'Codec unsupported')
-          }
-        )
     }
     // When the user clicks or drags on the progress bar, jump to that position
     if (state.playing.jumpToTime != null) {
@@ -132,6 +125,7 @@ function renderMedia (state) {
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
       onStalled={dispatcher('mediaStalled')}
+      onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
     >
@@ -151,15 +145,38 @@ function renderMedia (state) {
     </div>
   )
 
-  // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
-    if (state.playing.type !== 'video') return
-    const video = e.target
-    const dimensions = {
-      width: video.videoWidth,
-      height: video.videoHeight
+    const mediaElement = e.target
+
+    // check if we can decode video and audio track
+    if (state.playing.type === 'video') {
+      if (mediaElement.videoTracks.length === 0) {
+        dispatch('mediaError', 'Video codec unsupported')
+      }
+
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+
+      const dimensions = {
+        width: mediaElement.videoWidth,
+        height: mediaElement.videoHeight
+      }
+
+      // As soon as we know the video dimensions, resize the window
+      dispatch('setDimensions', dimensions)
     }
-    dispatch('setDimensions', dimensions)
+
+    // check if we can decode audio track
+    if (state.playing.type === 'audio') {
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+    }
   }
 
   function onEnded (e) {
