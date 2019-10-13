@@ -105,6 +105,11 @@ function getDefaultPlayState () {
       selectedIndex: -1, /* current subtitle track */
       showMenu: false /* popover menu, above the video */
     },
+    audioTracks: {
+      tracks: [],
+      selectedIndex: 0, /* current audio track */
+      showMenu: false /* popover menu, above the video */
+    },
     aspectRatio: 0 /* aspect ratio of the video */
   }
 }
