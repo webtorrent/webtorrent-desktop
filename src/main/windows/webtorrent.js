@@ -26,7 +26,8 @@ function init () {
     title: 'webtorrent-hidden-window',
     useContentSize: true,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableBlinkFeatures: 'AudioVideoTracks'
     },
     width: 150
   })

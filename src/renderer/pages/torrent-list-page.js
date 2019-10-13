@@ -212,7 +212,9 @@ module.exports = class TorrentList extends React.Component {
         else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
         else status = 'Paused'
       } else if (torrentSummary.status === 'downloading') {
-        status = 'Downloading'
+        if (!torrentSummary.progress) status = ''
+        else if (!torrentSummary.progress.ready) status = 'Verifying'
+        else status = 'Downloading'
       } else if (torrentSummary.status === 'seeding') {
         status = 'Seeding'
       } else { // torrentSummary.status is 'new' or something unexpected
@@ -316,7 +318,7 @@ module.exports = class TorrentList extends React.Component {
         torrentSummary.progress.files[index]) {
       const fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+      progress = Math.floor(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
     // Second, for media files where we saved our position, show how far we got

@@ -45,7 +45,7 @@ function init (state, options) {
     width: initialBounds.width,
     webPreferences: {
       nodeIntegration: true,
-      experimentalFeatures: true
+      enableBlinkFeatures: 'AudioVideoTracks'
     },
     x: initialBounds.x,
     y: initialBounds.y
