@@ -60,7 +60,7 @@
     "gh-release": "^3.5.0",
     "minimist": "^1.2.0",
     "nodemon": "^1.19.2",
-    "open": "^6.4.0",
+    "open": "^7.0.0",
     "plist": "^3.0.1",
     "pngjs": "^3.4.0",
     "run-series": "^1.1.8",
