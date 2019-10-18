@@ -4,6 +4,7 @@ const prettyBytes = require('prettier-bytes')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
+const StreamInfo = require('../lib/stream-info')
 const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
 
@@ -55,6 +56,7 @@ function renderMedia (state) {
     } else if (!state.playing.isPaused && mediaElement.paused) {
       mediaElement.play()
     }
+
     // When the user clicks or drags on the progress bar, jump to that position
     if (state.playing.jumpToTime != null) {
       mediaElement.currentTime = state.playing.jumpToTime
@@ -152,16 +154,18 @@ function renderMedia (state) {
     </div>
   )
 
-  function onLoadedMetadata (e) {
+  async function onLoadedMetadata (e) {
     const mediaElement = e.target
+
+    const streamInfo = await StreamInfo.getStreamInfo(mediaElement.src)
 
     // check if we can decode video and audio track
     if (state.playing.type === 'video') {
-      if (mediaElement.videoTracks.length === 0) {
+      if (streamInfo.video > mediaElement.videoTracks.length) {
         dispatch('mediaError', 'Video codec unsupported')
       }
 
-      if (mediaElement.audioTracks.length === 0) {
+      if (streamInfo.audio > mediaElement.audioTracks.length) {
         dispatch('mediaError', 'Audio codec unsupported')
       }
 
@@ -196,6 +200,8 @@ function renderMedia (state) {
 
       dispatch('mediaSuccess')
     }
+
+    mediaElement.play()
   }
 
   function onEnded (e) {
