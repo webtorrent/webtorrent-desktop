@@ -32,7 +32,6 @@ function init (state, options) {
 
   const win = main.win = new electron.BrowserWindow({
     backgroundColor: '#282828',
-    backgroundThrottling: false, // do not throttle animations/timers when page is background
     darkTheme: true, // Forces dark theme (GTK+3)
     height: initialBounds.height,
     icon: getIconPath(), // Window icon (Windows, Linux)

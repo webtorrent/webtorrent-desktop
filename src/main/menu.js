@@ -357,8 +357,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          role: 'services',
-          submenu: []
+          role: 'services'
         },
         {
           type: 'separator'

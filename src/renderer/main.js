@@ -559,7 +559,7 @@ function onBlur () {
 }
 
 function onVisibilityChange () {
-  state.window.isVisible = !document.webkitHidden
+  state.window.isVisible = !document.hidden
 }
 
 function onFullscreenChanged (e, isFullScreen) {
