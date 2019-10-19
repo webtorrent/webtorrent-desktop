@@ -221,6 +221,23 @@ class PreferencesPage extends React.Component {
     )
   }
 
+  minimizeToTrayCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.minimizeToTray}
+          label='Minimize to tray'
+          onCheck={this.handleMinimizeToTrayChange}
+          />
+      </Preference>
+    )
+  }
+
+  handleMinimizeToTrayChange (e, isChecked) {
+    dispatch('updatePreferences', 'minimizeToTray', isChecked)
+  }
+
   handleSoundNotificationsChange (e, isChecked) {
     dispatch('updatePreferences', 'soundNotifications', isChecked)
   }
@@ -253,6 +270,7 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='General'>
           {this.setStartupCheckbox()}
           {this.soundNotificationsCheckbox()}
+          {this.minimizeToTrayCheckbox()}
         </PreferencesSection>
       </div>
     )

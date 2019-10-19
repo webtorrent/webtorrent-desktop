@@ -99,7 +99,7 @@ function init (state, options) {
   win.on('close', e => {
     if (process.platform !== 'darwin') {
       const tray = require('../tray')
-      if (!tray.hasTray()) {
+      if (!tray.hasTray() || !state.saved.prefs.minimizeToTray) {
         app.quit()
         return
       }
