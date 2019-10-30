@@ -174,7 +174,7 @@ React.js (Framework to work with Frontend UI):
 https://reactjs.org/docs/getting-started.html
 
 Material UI (React components that implement Google's Material Design.):
-https://material-ui.com/getting-started
+https://material-ui.com/getting-started/installation
 
 ### Privacy
 
