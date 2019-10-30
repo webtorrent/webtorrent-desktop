@@ -15,7 +15,7 @@ function init () {
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,
-    height: 170,
+    height: 220,
     icon: getIconPath(),
     maximizable: false,
     minimizable: false,
