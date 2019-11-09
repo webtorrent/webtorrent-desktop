@@ -299,15 +299,15 @@ module.exports = class TorrentListController {
       ]
     }
 
-    electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
-      console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
-      if (!savePath) return // They clicked Cancel
-      const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-      fs.readFile(torrentPath, function (err, torrentFile) {
+    const savePath = electron.remote.dialog.showSaveDialogSync(win, opts)
+
+    console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
+    if (!savePath) return // They clicked Cancel
+    const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
+    fs.readFile(torrentPath, function (err, torrentFile) {
+      if (err) return dispatch('error', err)
+      fs.writeFile(savePath, torrentFile, function (err) {
         if (err) return dispatch('error', err)
-        fs.writeFile(savePath, torrentFile, function (err) {
-          if (err) return dispatch('error', err)
-        })
       })
     })
   }
