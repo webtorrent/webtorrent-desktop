@@ -296,13 +296,14 @@ module.exports = class TorrentListController {
       filters: [
         { name: 'Torrent Files', extensions: ['torrent'] },
         { name: 'All Files', extensions: ['*'] }
-      ]
+      ],
+      buttonLabel: 'Save'
     }
 
     const savePath = electron.remote.dialog.showSaveDialogSync(win, opts)
 
-    console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
     if (!savePath) return // They clicked Cancel
+    console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
     const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
     fs.readFile(torrentPath, function (err, torrentFile) {
       if (err) return dispatch('error', err)
