@@ -33,11 +33,12 @@ function init () {
 
   win.loadURL(config.WINDOW_ABOUT)
 
-  // No menu on the About window
-  win.setMenu(null)
-
   win.once('ready-to-show', function () {
     win.show()
+    // No menu on the About window
+    // Hack: BrowserWindow removeMenu method not working on electron@7
+    // https://github.com/electron/electron/issues/21088
+    win.setMenuBarVisibility(false)
   })
 
   win.once('closed', function () {
