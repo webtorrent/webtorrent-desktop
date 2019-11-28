@@ -32,7 +32,7 @@
     <p>
       Version <script>document.write(require('../package.json').version)</script>
       (<script>document.write(require('webtorrent/package.json').version)</script>)
-      (<script>document.write(process.arch === 'x64' ? '64-bit' : '32-bit')</script>)
+      (<script>document.write(process.arch)</script>)
     </p>
     <p><script>document.write(require('../build/config').APP_COPYRIGHT)</script></p>
   </body>
