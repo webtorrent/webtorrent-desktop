@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "airplayer": "github:webtorrent/airplayer#fix-security",
-    "application-config": "^1.0.1",
+    "application-config": "^2.0.0",
     "arch": "^2.1.1",
     "auto-launch": "^5.0.5",
     "bitfield": "^3.0.0",

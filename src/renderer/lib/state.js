@@ -202,19 +202,20 @@ function shouldHidePlayerControls () {
     this.playing.playbackRate === 1
 }
 
-function load (cb) {
-  appConfig.read(function (err, saved) {
-    if (err || !saved.version) {
-      console.log('Missing config file: Creating new one')
-      try {
-        saved = setupStateSaved()
-      } catch (err) {
-        onSavedState(err)
-        return
-      }
+async function load (cb) {
+  let saved = await appConfig.read()
+
+  if (!saved || !saved.version) {
+    console.log('Missing config file: Creating new one')
+    try {
+      saved = setupStateSaved()
+    } catch (err) {
+      onSavedState(err)
+      return
     }
-    onSavedState(null, saved)
-  })
+  }
+
+  onSavedState(null, saved)
 
   function onSavedState (err, saved) {
     if (err) return cb(err)
@@ -232,7 +233,7 @@ function load (cb) {
 }
 
 // Write state.saved to the JSON state file
-function saveImmediate (state, cb) {
+async function saveImmediate (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
 
   // Clean up, so that we're not saving any pending state
@@ -255,8 +256,10 @@ function saveImmediate (state, cb) {
       return torrent
     })
 
-  appConfig.write(copy, (err) => {
-    if (err) console.error(err)
-    else State.emit('stateSaved')
-  })
+  try {
+    await appConfig.write(copy)
+    State.emit('stateSaved')
+  } catch (err) {
+    console.error(err)
+  }
 }
