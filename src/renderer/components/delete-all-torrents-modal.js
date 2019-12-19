@@ -18,7 +18,8 @@ module.exports = class DeleteAllTorrentsModal extends React.Component {
           cancelText='CANCEL'
           onCancel={dispatcher('exitModal')}
           okText={buttonText}
-          onOK={handleRemove} />
+          onOK={handleRemove}
+        />
       </div>
     )
 
