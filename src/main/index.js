@@ -13,8 +13,13 @@ const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
 
+const WEBTORRENT_VERSION = require('webtorrent/package.json').version
+
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
+
+// allow electron/chromium to play startup sounds (without user interaction)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 
 // Start the app without showing the main window when auto launching on login
 // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
@@ -38,17 +43,19 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // signal this instance and quit. Note: This feature creates a lock file in
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
-  shouldQuit = app.makeSingleInstance(onAppOpen)
-  if (shouldQuit) {
-    app.quit()
+  if (!app.requestSingleInstanceLock()) {
+    shouldQuit = true
   }
 }
 
-if (!shouldQuit) {
+if (shouldQuit) {
+  app.quit()
+} else {
   init()
 }
 
 function init () {
+  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
   if (config.IS_PORTABLE) {
     const path = require('path')
     // Put all user data into the "Portable Settings" folder
@@ -90,6 +97,12 @@ function init () {
       windows.main.dispatch('uncaughtError', 'main', error)
     })
   }
+
+  // Enable app logging into default directory, i.e. /Library/Logs/WebTorrent
+  // on Mac, %APPDATA% on Windows, $XDG_CONFIG_HOME or ~/.config on Linux.
+  app.setAppLogsPath()
+
+  app.userAgentFallback = `WebTorrent/${WEBTORRENT_VERSION} (https://webtorrent.io)`
 
   app.on('open-file', onOpen)
   app.on('open-url', onOpen)
@@ -162,7 +175,7 @@ function onOpen (e, torrentId) {
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(() => windows.main.show(), 100)
 
-    processArgv([ torrentId ])
+    processArgv([torrentId])
   } else {
     argv.push(torrentId)
   }
@@ -192,7 +205,7 @@ function sliceArgv (argv) {
 }
 
 function processArgv (argv) {
-  let torrentIds = []
+  const torrentIds = []
   argv.forEach(function (arg) {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed

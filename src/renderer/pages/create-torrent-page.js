@@ -65,9 +65,9 @@ class CreateTorrentPage extends React.Component {
     }
 
     // Create React event handlers only once
-    this.setIsPrivate = (_, isPrivate) => this.setState({ isPrivate })
-    this.setComment = (_, comment) => this.setState({ comment })
-    this.setTrackers = (_, trackers) => this.setState({ trackers })
+    this.handleSetIsPrivate = (_, isPrivate) => this.setState({ isPrivate })
+    this.handleSetComment = (_, comment) => this.setState({ comment })
+    this.handleSetTrackers = (_, trackers) => this.setState({ trackers })
     this.handleSubmit = handleSubmit.bind(this)
   }
 
@@ -94,7 +94,8 @@ class CreateTorrentPage extends React.Component {
             marginBottom: 10
           }}
           hideLabel='Hide advanced settings...'
-          showLabel='Show advanced settings...'>
+          showLabel='Show advanced settings...'
+        >
           {this.renderAdvanced()}
         </ShowMore>
         <div className='float-right'>
@@ -104,12 +105,14 @@ class CreateTorrentPage extends React.Component {
             style={{
               marginRight: 10
             }}
-            onClick={dispatcher('cancel')} />
+            onClick={dispatcher('cancel')}
+          />
           <RaisedButton
             className='control create-torrent-button'
             label='Create Torrent'
             primary
-            onClick={this.handleSubmit} />
+            onClick={this.handleSubmit}
+          />
         </div>
       </div>
     )
@@ -143,7 +146,8 @@ class CreateTorrentPage extends React.Component {
             className='torrent-is-private control'
             style={{ display: '' }}
             checked={this.state.isPrivate}
-            onCheck={this.setIsPrivate} />
+            onCheck={this.handleSetIsPrivate}
+          />
         </div>
         <div key='trackers' className='torrent-attribute'>
           <label>Trackers:</label>
@@ -155,7 +159,8 @@ class CreateTorrentPage extends React.Component {
             rows={2}
             rowsMax={10}
             value={this.state.trackers}
-            onChange={this.setTrackers} />
+            onChange={this.handleSetTrackers}
+          />
         </div>
         <div key='comment' className='torrent-attribute'>
           <label>Comment:</label>
@@ -168,7 +173,8 @@ class CreateTorrentPage extends React.Component {
             rows={2}
             rowsMax={10}
             value={this.state.comment}
-            onChange={this.setComment} />
+            onChange={this.handleSetComment}
+          />
         </div>
         <div key='files' className='torrent-attribute'>
           <label>Files:</label>

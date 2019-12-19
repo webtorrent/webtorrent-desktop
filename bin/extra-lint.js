@@ -18,13 +18,6 @@ files.forEach(function (file) {
   lines.forEach(function (line, i) {
     let error
 
-    // Consistent JSX tag closing
-    if (line.match(/' {2}\/> *$/) ||
-      line.match('[^ ]/> *$') ||
-      line.match(' > *$')) {
-      error = 'JSX tag spacing'
-    }
-
     // No lines over 100 characters
     if (line.length > 100) {
       error = 'Line >100 chars'
@@ -35,7 +28,7 @@ files.forEach(function (file) {
     }
 
     if (error) {
-      let name = path.basename(file)
+      const name = path.basename(file)
       console.log('%s:%d - %s:\n%s', name, i + 1, error, line)
       hasErrors = true
     }

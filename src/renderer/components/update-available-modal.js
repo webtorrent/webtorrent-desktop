@@ -18,7 +18,8 @@ module.exports = class UpdateAvailableModal extends React.Component {
           cancelText='SKIP THIS RELEASE'
           onCancel={handleSkip}
           okText='SHOW DOWNLOAD PAGE'
-          onOK={handleShow} />
+          onOK={handleShow}
+        />
       </div>
     )
 

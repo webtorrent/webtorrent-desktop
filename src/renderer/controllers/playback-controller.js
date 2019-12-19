@@ -269,6 +269,7 @@ module.exports = class PlaybackController {
     // update state
     state.playing.infoHash = infoHash
     state.playing.fileIndex = index
+    state.playing.fileName = fileSummary.name
     state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
       : TorrentPlayer.isAudio(fileSummary) ? 'audio'
         : 'other'

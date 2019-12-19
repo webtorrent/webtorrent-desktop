@@ -13,7 +13,6 @@ const config = require('../../config')
 function init () {
   const win = webtorrent.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
-    backgroundThrottling: false, // do not throttle animations/timers when page is background
     center: true,
     fullscreen: false,
     fullscreenable: false,
@@ -25,6 +24,10 @@ function init () {
     skipTaskbar: true,
     title: 'webtorrent-hidden-window',
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true,
+      enableBlinkFeatures: 'AudioVideoTracks'
+    },
     width: 150
   })
 
@@ -56,6 +59,6 @@ function toggleDevTools () {
     webtorrent.win.webContents.closeDevTools()
     webtorrent.win.hide()
   } else {
-    webtorrent.win.webContents.openDevTools({ detach: true })
+    webtorrent.win.webContents.openDevTools({ mode: 'detach' })
   }
 }

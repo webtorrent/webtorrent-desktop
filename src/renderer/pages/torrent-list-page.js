@@ -67,7 +67,8 @@ module.exports = class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}
+      >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
@@ -130,7 +131,8 @@ module.exports = class TorrentList extends React.Component {
           }}
           checked={isActive}
           onClick={stopPropagation}
-          onCheck={dispatcher('toggleTorrent', infoHash)} />
+          onCheck={dispatcher('toggleTorrent', infoHash)}
+        />
       )
     }
 
@@ -147,7 +149,7 @@ module.exports = class TorrentList extends React.Component {
         }
       }
       return (
-        <div style={styles.wrapper}>
+        <div key='progress-bar' style={styles.wrapper}>
           <LinearProgress style={styles.progress} mode='determinate' value={progress} />
         </div>
       )
@@ -200,7 +202,7 @@ module.exports = class TorrentList extends React.Component {
       const minutesStr = (hours || minutes) ? minutes + 'm' : ''
       const secondsStr = seconds + 's'
 
-      return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+      return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
     }
 
     function renderTorrentStatus () {
@@ -210,7 +212,9 @@ module.exports = class TorrentList extends React.Component {
         else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
         else status = 'Paused'
       } else if (torrentSummary.status === 'downloading') {
-        status = 'Downloading'
+        if (!torrentSummary.progress) status = ''
+        else if (!torrentSummary.progress.ready) status = 'Verifying'
+        else status = 'Downloading'
       } else if (torrentSummary.status === 'seeding') {
         status = 'Seeding'
       } else { // torrentSummary.status is 'new' or something unexpected
@@ -232,8 +236,9 @@ module.exports = class TorrentList extends React.Component {
         <i
           key='play-button'
           title='Start streaming'
-          className={'icon play'}
-          onClick={dispatcher('playFile', infoHash)}>
+          className='icon play'
+          onClick={dispatcher('playFile', infoHash)}
+        >
           play_circle_outline
         </i>
       )
@@ -246,7 +251,8 @@ module.exports = class TorrentList extends React.Component {
           key='delete-button'
           className='icon delete'
           title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
+          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}
+        >
           close
         </i>
       </div>
@@ -312,7 +318,7 @@ module.exports = class TorrentList extends React.Component {
         torrentSummary.progress.files[index]) {
       const fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+      progress = Math.floor(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
     // Second, for media files where we saved our position, show how far we got
@@ -355,8 +361,10 @@ module.exports = class TorrentList extends React.Component {
         <td className={'col-size ' + rowClass}>
           {prettyBytes(file.length)}
         </td>
-        <td className='col-select'
-          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+        <td
+          className='col-select'
+          onClick={dispatcher('toggleTorrentFile', infoHash, index)}
+        >
           <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>
@@ -370,16 +378,16 @@ module.exports = class TorrentList extends React.Component {
 
     return (
       <div key='radial-progress' className={'radial-progress ' + cssClass}>
-        <div key='circle' className='circle'>
-          <div key='mask-full' className='mask full' style={transformFill}>
-            <div key='fill' className='fill' style={transformFill} />
+        <div className='circle'>
+          <div className='mask full' style={transformFill}>
+            <div className='fill' style={transformFill} />
           </div>
-          <div key='mask-half' className='mask half'>
-            <div key='fill' className='fill' style={transformFill} />
-            <div key='fill-fix' className='fill fix' style={transformFix} />
+          <div className='mask half'>
+            <div className='fill' style={transformFill} />
+            <div className='fill fix' style={transformFix} />
           </div>
         </div>
-        <div key='inset' className='inset' />
+        <div className='inset' />
       </div>
     )
   }
@@ -393,7 +401,7 @@ function getErrorMessage (torrentSummary) {
   const err = torrentSummary.error
   if (err === 'path-missing') {
     return (
-      <span>
+      <span key='path-missing'>
         Path missing.<br />
         Fix and restart the app, or delete the torrent.
       </span>

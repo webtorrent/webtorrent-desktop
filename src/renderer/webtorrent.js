@@ -12,7 +12,6 @@ const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
-const zeroFill = require('zero-fill')
 
 const crashReporter = require('../crash-reporter')
 const config = require('../config')
@@ -41,10 +40,9 @@ const VERSION = require('../../package.json').version
  *   '0.16.1' -> '0016'
  *   '1.2.5' -> '0102'
  */
-const VERSION_STR = VERSION.match(/([0-9]+)/g)
-  .slice(0, 2)
-  .map((v) => zeroFill(2, v))
-  .join('')
+const VERSION_STR = VERSION
+  .replace(/\d*./g, v => `0${v % 100}`.slice(-2))
+  .slice(0, 4)
 
 /**
  * Version prefix string (used in peer ID). WebTorrent uses the Azureus-style
@@ -149,7 +147,7 @@ function addTorrentEvents (torrent) {
   torrent.on('error', (err) =>
     ipc.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
-    ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+    ipc.send('wt-parsed', torrent.key, torrent.infoHash, torrent.magnetURI))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
@@ -345,12 +343,14 @@ function getAudioMetadata (infoHash, index) {
   const metadata = { title: file.name }
   ipc.send('wt-audio-metadata', infoHash, index, metadata)
 
-  const options = { native: false,
+  const options = {
+    native: false,
     skipCovers: true,
     fileSize: file.length,
     observer: event => {
       ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
-    } }
+    }
+  }
   const onMetaData = file.done
     // If completed; use direct file access
     ? mm.parseFile(path.join(torrent.path, file.path), options)
@@ -358,11 +358,15 @@ function getAudioMetadata (infoHash, index) {
     : mm.parseStream(file.createReadStream(), file.name, options)
 
   onMetaData
-    .then(() => {
-      console.log(`metadata for file='${file.name}' completed.`)
-    }).catch(function (err) {
-      return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-    })
+    .then(
+      () => console.log(`metadata for file='${file.name}' completed.`),
+      err => {
+        console.log(
+          `error getting audio metadata for ${infoHash}:${index}`,
+          err
+        )
+      }
+    )
 }
 
 function selectFiles (torrentOrInfoHash, selections) {

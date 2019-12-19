@@ -74,7 +74,7 @@ function reset () {
 
 // Track screen resolution
 function getScreenInfo () {
-  return electron.screen.getAllDisplays().map((screen) => ({
+  return electron.remote.screen.getAllDisplays().map((screen) => ({
     width: screen.size.width,
     height: screen.size.height,
     scaleFactor: screen.scaleFactor
@@ -98,7 +98,7 @@ function getSystemInfo () {
 function getTorrentStats (state) {
   const count = state.saved.torrents.length
   let sizeMB = 0
-  let byStatus = {
+  const byStatus = {
     new: { count: 0, sizeMB: 0 },
     downloading: { count: 0, sizeMB: 0 },
     seeding: { count: 0, sizeMB: 0 },

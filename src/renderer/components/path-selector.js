@@ -1,6 +1,9 @@
+const path = require('path')
+
 const colors = require('material-ui/styles/colors')
 const electron = require('electron')
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const remote = electron.remote
 
@@ -11,15 +14,14 @@ const TextField = require('material-ui/TextField').default
 // Uses the system Open File dialog.
 // You can't edit the text field directly.
 class PathSelector extends React.Component {
-  static get propTypes () {
+  static propTypes () {
     return {
-      className: React.PropTypes.string,
-      dialog: React.PropTypes.object,
-      displayValue: React.PropTypes.string,
-      id: React.PropTypes.string,
-      onChange: React.PropTypes.func,
-      title: React.PropTypes.string.isRequired,
-      value: React.PropTypes.string
+      className: PropTypes.string,
+      dialog: PropTypes.object,
+      id: PropTypes.string,
+      onChange: PropTypes.func,
+      title: PropTypes.string.isRequired,
+      value: PropTypes.string
     }
   }
 
@@ -30,18 +32,13 @@ class PathSelector extends React.Component {
 
   handleClick () {
     const opts = Object.assign({
-      defaultPath: this.props.value,
-      properties: [ 'openFile', 'openDirectory' ]
+      defaultPath: path.dirname(this.props.value || ''),
+      properties: ['openFile', 'openDirectory']
     }, this.props.dialog)
 
-    remote.dialog.showOpenDialog(
-      remote.getCurrentWindow(),
-      opts,
-      (filenames) => {
-        if (!Array.isArray(filenames)) return
-        this.props.onChange && this.props.onChange(filenames[0])
-      }
-    )
+    const filenames = remote.dialog.showOpenDialogSync(remote.getCurrentWindow(), opts)
+    if (!Array.isArray(filenames)) return
+    this.props.onChange && this.props.onChange(filenames[0])
   }
 
   render () {
@@ -64,7 +61,7 @@ class PathSelector extends React.Component {
     const textFieldStyle = {
       flex: '1'
     }
-    const text = this.props.displayValue || this.props.value
+    const text = this.props.value || ''
     const buttonStyle = {
       marginLeft: 10
     }
@@ -74,10 +71,14 @@ class PathSelector extends React.Component {
         <div className='label' style={labelStyle}>
           {this.props.title}:
         </div>
-        <TextField className='control' disabled id={id} value={text}
-          inputStyle={textareaStyle} style={textFieldStyle} />
-        <RaisedButton className='control' label='Change' onClick={this.handleClick}
-          style={buttonStyle} />
+        <TextField
+          className='control' disabled id={id} value={text}
+          inputStyle={textareaStyle} style={textFieldStyle}
+        />
+        <RaisedButton
+          className='control' label='Change' onClick={this.handleClick}
+          style={buttonStyle}
+        />
       </div>
     )
   }

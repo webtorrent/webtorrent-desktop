@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
 const { CONFIG_PATH } = require('../src/config')
-const opn = require('opn')
+const open = require('open')
 
-opn(CONFIG_PATH)
+open(CONFIG_PATH)

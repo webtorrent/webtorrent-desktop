@@ -311,6 +311,13 @@ function getMenuTemplate () {
           }
         },
         {
+          label: 'Release Notes',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL_RELEASES)
+          }
+        },
+        {
           label: 'Contribute on GitHub',
           click: () => {
             const shell = require('./shell')
@@ -325,6 +332,13 @@ function getMenuTemplate () {
           click: () => {
             const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL_ISSUES)
+          }
+        },
+        {
+          label: 'Follow us on Twitter',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.TWITTER_PAGE_URL)
           }
         }
       ]
@@ -351,8 +365,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          role: 'services',
-          submenu: []
+          role: 'services'
         },
         {
           type: 'separator'

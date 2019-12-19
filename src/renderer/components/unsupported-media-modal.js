@@ -28,7 +28,8 @@ module.exports = class UnsupportedMediaModal extends React.Component {
           cancelText='CANCEL'
           onCancel={dispatcher('backToList')}
           okText={actionText}
-          onOK={onAction} />
+          onOK={onAction}
+        />
         <p className='error-text'>{errorMessage}</p>
       </div>
     )

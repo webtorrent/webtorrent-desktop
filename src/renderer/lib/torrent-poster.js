@@ -5,6 +5,8 @@ const path = require('path')
 
 const mediaExtensions = require('./media-extensions')
 
+const msgNoSuitablePoster = 'Cannot generate a poster from any files in the torrent'
+
 function torrentPoster (torrent, cb) {
   // First, try to use a poster image if available
   const posterFile = torrent.files.filter(function (file) {
@@ -16,14 +18,15 @@ function torrentPoster (torrent, cb) {
   const bestScore = ['audio', 'video', 'image'].map(mediaType => {
     return {
       type: mediaType,
-      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType]) }
+      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
+    }
   }).sort((a, b) => { // sort descending on size
     return b.size - a.size
   })[0]
 
   if (bestScore.size === 0) {
     // Admit defeat, no video, audio or image had a significant presence
-    return cb(new Error('Cannot generate a poster from any files in the torrent'))
+    return cb(new Error(msgNoSuitablePoster))
   }
 
   // Based on which media type is dominant we select the corresponding poster function
@@ -71,7 +74,7 @@ function getLargestFileByExtension (torrent, extensions) {
  * Filter file on a list extension, can be used to find al image files
  * @param torrent Torrent to filter files from
  * @param extensions File extensions to filter on
- * @returns {number} Array of torrent file objects matching one of the given extensions
+ * @returns {Array} Array of torrent file objects matching one of the given extensions
  */
 function filterOnExtension (torrent, extensions) {
   return torrent.files.filter(file => {
@@ -96,7 +99,7 @@ function scoreAudioCoverFile (imgFile) {
     spectrogram: -80
   }
 
-  for (let keyword in relevanceScore) {
+  for (const keyword in relevanceScore) {
     if (fileName === keyword) {
       return relevanceScore[keyword]
     }
@@ -109,6 +112,8 @@ function scoreAudioCoverFile (imgFile) {
 
 function torrentPosterFromAudio (torrent, cb) {
   const imageFiles = filterOnExtension(torrent, mediaExtensions.image)
+
+  if (imageFiles.length === 0) return cb(new Error(msgNoSuitablePoster))
 
   const bestCover = imageFiles.map(file => {
     return {
@@ -128,8 +133,6 @@ function torrentPosterFromAudio (torrent, cb) {
     }
     return b
   })
-
-  if (!bestCover) return cb(new Error('Generated poster contains no data'))
 
   const extname = path.extname(bestCover.file.name)
   bestCover.file.getBuffer((err, buf) => cb(err, buf, extname))
@@ -172,7 +175,7 @@ function torrentPosterFromVideo (torrent, cb) {
 
       server.destroy()
 
-      if (buf.length === 0) return cb(new Error('Generated poster contains no data'))
+      if (buf.length === 0) return cb(new Error(msgNoSuitablePoster))
 
       cb(null, buf, '.jpg')
     }

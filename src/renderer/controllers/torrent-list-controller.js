@@ -291,7 +291,7 @@ module.exports = class TorrentListController {
       enabled: torrentSummary.torrentFileName != null
     }))
 
-    menu.popup(electron.remote.getCurrentWindow())
+    menu.popup({ window: electron.remote.getCurrentWindow() })
   }
 
   // Takes a torrentSummary or torrentKey
@@ -308,18 +308,19 @@ module.exports = class TorrentListController {
       filters: [
         { name: 'Torrent Files', extensions: ['torrent'] },
         { name: 'All Files', extensions: ['*'] }
-      ]
+      ],
+      buttonLabel: 'Save'
     }
 
-    electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
-      console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
-      if (!savePath) return // They clicked Cancel
-      const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-      fs.readFile(torrentPath, function (err, torrentFile) {
+    const savePath = electron.remote.dialog.showSaveDialogSync(win, opts)
+
+    if (!savePath) return // They clicked Cancel
+    console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
+    const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
+    fs.readFile(torrentPath, function (err, torrentFile) {
+      if (err) return dispatch('error', err)
+      fs.writeFile(savePath, torrentFile, function (err) {
         if (err) return dispatch('error', err)
-        fs.writeFile(savePath, torrentFile, function (err) {
-          if (err) return dispatch('error', err)
-        })
       })
     })
   }
@@ -330,12 +331,12 @@ module.exports = class TorrentListController {
 function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
-    let ret = []
+    const ret = []
     paths.forEach(function (path) {
       findFilesRecursive([path], function (fileObjs) {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
-          ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
+          ret.sort((a, b) => a.path < b.path ? -1 : Number(a.path > b.path))
           cb_(ret)
         }
       })
