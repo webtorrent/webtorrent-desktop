@@ -31,7 +31,7 @@
     "location-history": "^1.1.1",
     "material-ui": "^0.20.2",
     "mkdirp": "^0.5.1",
-    "music-metadata": "4.9.2",
+    "music-metadata": "6.0.1",
     "network-address": "^1.1.2",
     "parse-torrent": "^7.0.1",
     "prettier-bytes": "^1.0.4",
