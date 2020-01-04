@@ -21,7 +21,6 @@
     "chromecasts": "^1.9.1",
     "create-torrent": "^4.4.1",
     "debounce": "^1.2.0",
-    "deep-equal": "^1.1.0",
     "dlnacasts": "^0.1.0",
     "drag-drop": "^6.0.0",
     "es6-error": "^4.1.1",

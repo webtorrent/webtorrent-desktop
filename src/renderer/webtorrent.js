@@ -3,7 +3,7 @@
 console.time('init')
 
 const crypto = require('crypto')
-const deepEqual = require('deep-equal')
+const util = require('util')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
@@ -249,7 +249,7 @@ function generateTorrentPoster (torrentKey) {
 function updateTorrentProgress () {
   const progress = getTorrentProgress()
   // TODO: diff torrent-by-torrent, not once for the whole update
-  if (prevProgress && deepEqual(progress, prevProgress, { strict: true })) {
+  if (prevProgress && util.isDeepStrictEqual(progress, prevProgress)) {
     return /* don't send heavy object if it hasn't changed */
   }
   ipc.send('wt-progress', progress)
