@@ -255,6 +255,10 @@ const dispatchHandlers = {
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
   deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
+  confirmDeleteAllTorrents: (deleteData) =>
+    controllers.torrentList().confirmDeleteAllTorrents(deleteData),
+  deleteAllTorrents: (deleteData) =>
+    controllers.torrentList().deleteAllTorrents(deleteData),
   toggleSelectTorrent: (infoHash) =>
     controllers.torrentList().toggleSelectTorrent(infoHash),
   openTorrentContextMenu: (infoHash) =>

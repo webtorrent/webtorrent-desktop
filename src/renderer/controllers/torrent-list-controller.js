@@ -201,26 +201,38 @@ module.exports = class TorrentListController {
     }
   }
 
+  confirmDeleteAllTorrents (deleteData) {
+    this.state.modal = {
+      id: 'delete-all-torrents-modal',
+      deleteData
+    }
+  }
+
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
-    ipcRenderer.send('wt-stop-torrenting', infoHash)
-
     const index = this.state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
 
     if (index > -1) {
       const summary = this.state.saved.torrents[index]
-
-      // remove torrent and poster file
-      deleteFile(TorrentSummary.getTorrentPath(summary))
-      deleteFile(TorrentSummary.getPosterPath(summary))
-
-      // optionally delete the torrent data
-      if (deleteData) moveItemToTrash(summary)
+      deleteTorrentFile(summary, deleteData)
 
       // remove torrent from saved list
       this.state.saved.torrents.splice(index, 1)
       dispatch('stateSave')
+
+      // prevent user from going forward to a deleted torrent
+      this.state.location.clearForward('player')
+      sound.play('DELETE')
+    } else {
+      throw new TorrentKeyNotFoundError(infoHash)
     }
+  }
+
+  deleteAllTorrents (deleteData) {
+    this.state.saved.torrents.forEach((summary) => deleteTorrentFile(summary, deleteData))
+
+    this.state.saved.torrents = []
+    dispatch('stateSave')
 
     // prevent user from going forward to a deleted torrent
     this.state.location.clearForward('player')
@@ -286,7 +298,7 @@ module.exports = class TorrentListController {
   // Shows a Save File dialog, then saves the .torrent file wherever the user requests
   saveTorrentFileAs (torrentKey) {
     const torrentSummary = TorrentSummary.getByKey(this.state, torrentKey)
-    if (!torrentSummary) throw new Error('Missing torrentKey: ' + torrentKey)
+    if (!torrentSummary) throw new TorrentKeyNotFoundError(torrentKey)
     const downloadPath = this.state.saved.prefs.downloadPath
     const newFileName = path.parse(torrentSummary.name).name + '.torrent'
     const win = electron.remote.getCurrentWindow()
@@ -371,4 +383,15 @@ function moveItemToTrash (torrentSummary) {
 
 function showItemInFolder (torrentSummary) {
   ipcRenderer.send('showItemInFolder', TorrentSummary.getFileOrFolder(torrentSummary))
+}
+
+function deleteTorrentFile (torrentSummary, deleteData) {
+  ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+
+  // remove torrent and poster file
+  deleteFile(TorrentSummary.getTorrentPath(torrentSummary))
+  deleteFile(TorrentSummary.getPosterPath(torrentSummary))
+
+  // optionally delete the torrent data
+  if (deleteData) moveItemToTrash(torrentSummary)
 }
