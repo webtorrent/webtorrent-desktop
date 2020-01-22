@@ -87,7 +87,7 @@
   "optionalDependencies": {
     "appdmg": "^0.6.0",
     "electron-installer-debian": "^2.0.1",
-    "electron-installer-redhat": "^2.0.0"
+    "electron-installer-redhat": "^3.0.0"
   },
   "private": true,
   "productName": "WebTorrent",
