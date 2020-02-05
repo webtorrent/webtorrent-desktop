@@ -12,13 +12,15 @@ module.exports = class ModalOKCancel extends React.Component {
           className='control cancel'
           style={cancelStyle}
           label={cancelText}
-          onClick={onCancel} />
+          onClick={onCancel}
+        />
         <RaisedButton
           className='control ok'
           primary
           label={okText}
           onClick={onOK}
-          autoFocus />
+          autoFocus
+        />
       </div>
     )
   }

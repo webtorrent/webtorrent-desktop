@@ -1,5 +1,5 @@
 const Application = require('spectron').Application
-const cpFile = require('cp-file')
+const { copyFileSync } = require('fs')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
@@ -28,10 +28,15 @@ module.exports = {
 // Returns a promise that resolves to a Spectron Application once the app has loaded.
 // Takes a Tape test. Makes some basic assertions to verify that the app loaded correctly.
 function createApp (t) {
+  const userDataDir = process.platform === 'win32'
+    ? path.join('C:\\Windows\\Temp', 'WebTorrentTest')
+    : path.join('/tmp', 'WebTorrentTest')
+
   return new Application({
     path: path.join(__dirname, '..', 'node_modules', '.bin',
       'electron' + (process.platform === 'win32' ? '.cmd' : '')),
     args: ['-r', path.join(__dirname, 'mocks.js'), path.join(__dirname, '..')],
+    chromeDriverArgs: [`--user-data-dir=${userDataDir}`],
     env: { NODE_ENV: 'test' },
     waitTimeout: 10e3
   })
@@ -78,6 +83,12 @@ function endTest (app, t, err) {
 // Otherwise, create the reference screenshot: test/screenshots/<platform>/<name>.png
 function screenshotCreateOrCompare (app, t, name) {
   const ssDir = path.join(__dirname, 'screenshots', process.platform)
+
+  // check that path exists otherwise create it
+  if (!fs.existsSync(ssDir)) {
+    fs.mkdirSync(ssDir)
+  }
+
   const ssPath = path.join(ssDir, name + '.png')
   let ssBuf
 
@@ -205,12 +216,12 @@ function compareTorrentFile (t, pathActual, fieldsExpected) {
 function extractImportantFields (parsedTorrent) {
   const { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
-  return { infoHash, name, announce, urlList, comment, 'private': priv }
+  return { infoHash, name, announce, urlList, comment, private: priv }
 }
 
 function copy (pathFrom, pathTo) {
   try {
-    cpFile.sync(pathFrom, pathTo)
+    copyFileSync(pathFrom, pathTo)
   } catch (err) {
     // Windows lets us create files and folders under C:\Windows\Temp,
     // but when you try to `copySync` into one of those folders, you get EPERM

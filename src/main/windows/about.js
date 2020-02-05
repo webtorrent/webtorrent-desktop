@@ -15,7 +15,7 @@ function init () {
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,
-    height: 170,
+    height: 250,
     icon: getIconPath(),
     maximizable: false,
     minimizable: false,
@@ -24,16 +24,21 @@ function init () {
     skipTaskbar: true,
     title: 'About ' + config.APP_WINDOW_TITLE,
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true,
+      enableBlinkFeatures: 'AudioVideoTracks'
+    },
     width: 300
   })
 
   win.loadURL(config.WINDOW_ABOUT)
 
-  // No menu on the About window
-  win.setMenu(null)
-
   win.once('ready-to-show', function () {
     win.show()
+    // No menu on the About window
+    // Hack: BrowserWindow removeMenu method not working on electron@7
+    // https://github.com/electron/electron/issues/21088
+    win.setMenuBarVisibility(false)
   })
 
   win.once('closed', function () {

@@ -12,7 +12,7 @@
 <h4 align="center">The streaming torrent app. For Mac, Windows, and Linux.</h4>
 
 <p align="center">
-  <a href="https://gitter.im/webtorrent/webtorrent"><img src="https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg" alt="gitter"></a>
+  <a href="https://discord.gg/cnXkm4Z"><img src="https://img.shields.io/discord/612575111718895616" alt="discord"></a>
   <a href="https://travis-ci.org/webtorrent/webtorrent-desktop"><img src="https://img.shields.io/travis/webtorrent/webtorrent-desktop/master.svg" alt="travis"></a>
   <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/webtorrent/webtorrent-desktop.svg" alt="github release version"></a>
   <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/downloads/webtorrent/webtorrent-desktop/total.svg" alt="github release downloads"></a>
@@ -97,7 +97,7 @@ comparing each one to a reference. Why screenshots?
   https://github.com/blog/817-behold-image-view-modes
 
 For MacOS, you'll need a Retina screen for the integration tests to pass. Your screen should have
-the same resolution as a 2016 12" Macbook.
+the same resolution as a 2018 MacBook Pro 13".
 
 For Windows, you'll need Windows 10 with a 1366x768 screen.
 
@@ -125,6 +125,7 @@ The following optional arguments are available:
 - `--sign` - Sign the application (Mac, Windows)
 - `--package=[type]` - Package single output type.
    - `deb` - Debian package
+   - `rpm` - RedHat package
    - `zip` - Linux zip file
    - `dmg` - Mac disk image
    - `exe` - Windows installer
@@ -141,11 +142,12 @@ The Windows app can be packaged from **any** platform.
 Note: Windows code signing only works from **Windows**, for now.
 
 Note: To package the Windows app from non-Windows platforms,
-[Wine](https://www.winehq.org/) needs to be installed. For example on Mac, first
-install [XQuartz](http://www.xquartz.org/), then run:
+[Wine](https://www.winehq.org/) and [Mono](https://www.mono-project.com/) need
+to be installed. For example on Mac, first install
+[XQuartz](http://www.xquartz.org/), then run:
 
 ```
-brew install wine
+brew install wine mono
 ```
 
 (Requires the [Homebrew](http://brew.sh/) package manager.)
@@ -157,6 +159,22 @@ The Mac app can only be packaged from **macOS**.
 #### Linux build notes
 
 The Linux app can be packaged from **any** platform.
+
+If packaging from Mac, install system dependencies with Homebrew by running:
+
+```
+npm run install-system-deps
+```
+#### Recommended readings to start working in the app
+
+Electron (Framework to make native apps for Windows, OSX and Linux in Javascript):
+https://electronjs.org/docs/tutorial/quick-start
+
+React.js (Framework to work with Frontend UI):
+https://reactjs.org/docs/getting-started.html
+
+Material UI (React components that implement Google's Material Design.):
+https://material-ui.com/getting-started/installation
 
 ### Privacy
 

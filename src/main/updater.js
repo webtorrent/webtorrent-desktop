@@ -72,6 +72,6 @@ function initDarwinWin32 () {
     (e, notes, name, date, url) => log(`Update downloaded: ${name}: ${url}`)
   )
 
-  electron.autoUpdater.setFeedURL(AUTO_UPDATE_URL)
+  electron.autoUpdater.setFeedURL({ url: AUTO_UPDATE_URL })
   electron.autoUpdater.checkForUpdates()
 }

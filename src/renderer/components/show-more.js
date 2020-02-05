@@ -45,7 +45,8 @@ class ShowMore extends React.Component {
         <RaisedButton
           className='control'
           onClick={this.handleClick}
-          label={label} />
+          label={label}
+        />
       </div>
     )
   }

@@ -50,7 +50,5 @@ function onResponse (err, res, data) {
     title: data.title,
     message: data.message,
     detail: data.detail
-  }, noop)
+  })
 }
-
-function noop () {}

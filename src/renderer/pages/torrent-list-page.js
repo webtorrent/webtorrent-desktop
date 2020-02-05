@@ -67,7 +67,8 @@ module.exports = class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}
+      >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
@@ -130,7 +131,8 @@ module.exports = class TorrentList extends React.Component {
           }}
           checked={isActive}
           onClick={stopPropagation}
-          onCheck={dispatcher('toggleTorrent', infoHash)} />
+          onCheck={dispatcher('toggleTorrent', infoHash)}
+        />
       )
     }
 
@@ -210,7 +212,9 @@ module.exports = class TorrentList extends React.Component {
         else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
         else status = 'Paused'
       } else if (torrentSummary.status === 'downloading') {
-        status = 'Downloading'
+        if (!torrentSummary.progress) status = ''
+        else if (!torrentSummary.progress.ready) status = 'Verifying'
+        else status = 'Downloading'
       } else if (torrentSummary.status === 'seeding') {
         status = 'Seeding'
       } else { // torrentSummary.status is 'new' or something unexpected
@@ -232,8 +236,9 @@ module.exports = class TorrentList extends React.Component {
         <i
           key='play-button'
           title='Start streaming'
-          className={'icon play'}
-          onClick={dispatcher('playFile', infoHash)}>
+          className='icon play'
+          onClick={dispatcher('playFile', infoHash)}
+        >
           play_circle_outline
         </i>
       )
@@ -246,7 +251,8 @@ module.exports = class TorrentList extends React.Component {
           key='delete-button'
           className='icon delete'
           title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
+          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}
+        >
           close
         </i>
       </div>
@@ -319,7 +325,7 @@ module.exports = class TorrentList extends React.Component {
         torrentSummary.progress.files[index]) {
       const fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+      progress = Math.floor(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
     // Second, for media files where we saved our position, show how far we got
@@ -362,8 +368,10 @@ module.exports = class TorrentList extends React.Component {
         <td className={'col-size ' + rowClass}>
           {prettyBytes(file.length)}
         </td>
-        <td className='col-select'
-          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+        <td
+          className='col-select'
+          onClick={dispatcher('toggleTorrentFile', infoHash, index)}
+        >
           <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>

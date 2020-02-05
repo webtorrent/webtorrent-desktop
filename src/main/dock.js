@@ -34,7 +34,7 @@ function setBadge (count) {
   if (process.platform === 'darwin' ||
       (process.platform === 'linux' && app.isUnityRunning())) {
     log(`setBadge: ${count}`)
-    app.setBadgeCount(Number(count))
+    app.badgeCount = Number(count)
   }
 }
 

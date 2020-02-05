@@ -1,0 +1,26 @@
+[Desktop Entry]
+Type=Application
+<% if (version) { %>Version=<%= version %><% } %>
+Name=<%= productName %>
+<% if (genericName) { %>GenericName=<%= genericName %><% } %>
+<% if (description) { %>Comment=<%= description %><% } %>
+Icon=<%= name %>
+<% if (name) { %>Exec=<%= name %> --no-sandbox %U<% } %><%/*HACK: --no-sandbox fixes an Electron 6 bug. See: #1703*/%>
+Terminal=false
+Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
+<% if (mimeType && mimeType.length) { %>MimeType=<%= mimeType.join(';') %>;<% } %>
+<% if (categories && categories.length) { %>Categories=<%= categories.join(';') %>;<% } %>
+StartupNotify=true
+<% if (name) { %>StartupWMClass=<%= name %> <% } %>
+
+[Desktop Action CreateNewTorrent]
+Name=Create New Torrent...
+<% if (name) { %>Exec=<%= name %> --no-sandbox -n <% } %><%/*HACK: --no-sandbox fixes an Electron 6 bug. See: #1703*/%>
+
+[Desktop Action OpenTorrentFile]
+Name=Open Torrent File...
+<% if (name) { %>Exec=<%= name %> --no-sandbox -o <% } %><%/*HACK: --no-sandbox fixes an Electron 6 bug. See: #1703*/%>
+
+[Desktop Action OpenTorrentAddress]
+Name=Open Torrent Address...
+<% if (name) { %>Exec=<%= name %> --no-sandbox -u <% } %><%/*HACK: --no-sandbox fixes an Electron 6 bug. See: #1703*/%>

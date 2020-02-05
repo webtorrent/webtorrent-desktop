@@ -288,6 +288,14 @@ function getMenuTemplate () {
         {
           label: 'Resume All',
           click: () => windows.main.dispatch('resumeAllTorrents')
+        },
+        {
+          label: 'Remove All From List',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', false)
+        },
+        {
+          label: 'Remove All Data Files',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', true)
         }
       ]
     },
@@ -300,6 +308,13 @@ function getMenuTemplate () {
           click: () => {
             const shell = require('./shell')
             shell.openExternal(config.HOME_PAGE_URL)
+          }
+        },
+        {
+          label: 'Release Notes',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL_RELEASES)
           }
         },
         {
@@ -317,6 +332,13 @@ function getMenuTemplate () {
           click: () => {
             const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL_ISSUES)
+          }
+        },
+        {
+          label: 'Follow us on Twitter',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.TWITTER_PAGE_URL)
           }
         }
       ]
@@ -343,8 +365,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          role: 'services',
-          submenu: []
+          role: 'services'
         },
         {
           type: 'separator'
