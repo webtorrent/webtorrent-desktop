@@ -33,7 +33,6 @@
     "material-ui": "^0.20.2",
     "mkdirp": "^0.5.1",
     "music-metadata": "^3.6.1",
-    "natsort": "^1.0.6",
     "network-address": "^1.1.0",
     "parse-torrent": "^6.0.1",
     "prettier-bytes": "^1.0.1",
