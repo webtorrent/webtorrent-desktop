@@ -7,26 +7,20 @@ const config = require('../config')
 const path = require('path')
 
 function install () {
-  if (process.platform === 'darwin') {
-    installDarwin()
-  }
-  if (process.platform === 'win32') {
-    installWin32()
-  }
-  if (process.platform === 'linux') {
-    installLinux()
+  switch (process.platform) {
+    case 'darwin': installDarwin()
+      break
+    case 'win32': installWin32()
+      break
   }
 }
 
 function uninstall () {
-  if (process.platform === 'darwin') {
-    uninstallDarwin()
-  }
-  if (process.platform === 'win32') {
-    uninstallWin32()
-  }
-  if (process.platform === 'linux') {
-    uninstallLinux()
+  switch (process.platform) {
+    case 'darwin': uninstallDarwin()
+      break
+    case 'win32': uninstallWin32()
+      break
   }
 }
 
@@ -44,7 +38,7 @@ function installDarwin () {
 
 function uninstallDarwin () {}
 
-const EXEC_COMMAND = [ process.execPath ]
+const EXEC_COMMAND = [process.execPath, '--']
 
 if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
@@ -108,37 +102,37 @@ function installWin32 () {
     setProtocol()
 
     function setProtocol (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
       protocolKey.set('', Registry.REG_SZ, name, setURLProtocol)
     }
 
     function setURLProtocol (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
       protocolKey.set('URL Protocol', Registry.REG_SZ, '', setIcon)
     }
 
     function setIcon (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const iconKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol + '\\DefaultIcon'
+        key: `\\Software\\Classes\\${protocol}\\DefaultIcon`
       })
       iconKey.set('', Registry.REG_SZ, icon, setCommand)
     }
 
     function setCommand (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const commandKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${protocol}\\shell\\open\\command`
       })
       commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
     }
   }
 
@@ -163,43 +157,43 @@ function installWin32 () {
     function setExt () {
       const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
       extKey.set('', Registry.REG_SZ, id, setId)
     }
 
     function setId (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const idKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id
+        key: `\\Software\\Classes\\${id}`
       })
       idKey.set('', Registry.REG_SZ, name, setIcon)
     }
 
     function setIcon (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const iconKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id + '\\DefaultIcon'
+        key: `\\Software\\Classes\\${id}\\DefaultIcon`
       })
       iconKey.set('', Registry.REG_SZ, icon, setCommand)
     }
 
     function setCommand (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
 
       const commandKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + id + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${id}\\shell\\open\\command`
       })
       commandKey.set('', Registry.REG_SZ, `${commandToArgs(command)} "%1"`, done)
     }
 
     function done (err) {
-      if (err) log.error(err.message)
+      if (err) return log.error(err.message)
     }
   }
 }
@@ -217,9 +211,9 @@ function uninstallWin32 () {
     function getCommand () {
       const commandKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + protocol + '\\shell\\open\\command'
+        key: `\\Software\\Classes\\${protocol}\\shell\\open\\command`
       })
-      commandKey.get('', function (err, item) {
+      commandKey.get('', (err, item) => {
         if (!err && item.value.indexOf(commandToArgs(command)) >= 0) {
           destroyProtocol()
         }
@@ -229,9 +223,9 @@ function uninstallWin32 () {
     function destroyProtocol () {
       const protocolKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + protocol
+        key: `\\Software\\Classes\\${protocol}`
       })
-      protocolKey.destroy(function () {})
+      protocolKey.destroy(() => {})
     }
   }
 
@@ -241,7 +235,7 @@ function uninstallWin32 () {
     function eraseId () {
       const idKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + id
+        key: `\\Software\\Classes\\${id}`
       })
       idKey.destroy(getExt)
     }
@@ -249,9 +243,9 @@ function uninstallWin32 () {
     function getExt () {
       const extKey = new Registry({
         hive: Registry.HKCU,
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
-      extKey.get('', function (err, item) {
+      extKey.get('', (err, item) => {
         if (!err && item.value === id) {
           destroyExt()
         }
@@ -261,109 +255,13 @@ function uninstallWin32 () {
     function destroyExt () {
       const extKey = new Registry({
         hive: Registry.HKCU, // HKEY_CURRENT_USER
-        key: '\\Software\\Classes\\' + ext
+        key: `\\Software\\Classes\\${ext}`
       })
-      extKey.destroy(function () {})
+      extKey.destroy(() => {})
     }
   }
 }
 
 function commandToArgs (command) {
   return command.map((arg) => `"${arg}"`).join(' ')
-}
-
-function installLinux () {
-  const fs = require('fs')
-  const os = require('os')
-  const path = require('path')
-
-  const config = require('../config')
-  const log = require('./log')
-
-  // Do not install in user dir if running on system
-  if (/^\/opt/.test(process.execPath)) return
-
-  installDesktopFile()
-  installIconFile()
-
-  function installDesktopFile () {
-    const templatePath = path.join(
-      config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop'
-    )
-    fs.readFile(templatePath, 'utf8', writeDesktopFile)
-  }
-
-  function writeDesktopFile (err, desktopFile) {
-    if (err) return log.error(err.message)
-
-    const appPath = config.IS_PRODUCTION
-      ? path.dirname(process.execPath)
-      : config.ROOT_PATH
-
-    desktopFile = desktopFile.replace(/\$APP_NAME/g, config.APP_NAME)
-    desktopFile = desktopFile.replace(/\$APP_PATH/g, appPath)
-    desktopFile = desktopFile.replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
-    desktopFile = desktopFile.replace(/\$TRY_EXEC_PATH/g, process.execPath)
-
-    const desktopFilePath = path.join(
-      os.homedir(),
-      '.local',
-      'share',
-      'applications',
-      'webtorrent-desktop.desktop'
-    )
-    fs.mkdirp(path.dirname(desktopFilePath))
-    fs.writeFile(desktopFilePath, desktopFile, function (err) {
-      if (err) return log.error(err.message)
-    })
-  }
-
-  function installIconFile () {
-    const iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
-    fs.readFile(iconStaticPath, writeIconFile)
-  }
-
-  function writeIconFile (err, iconFile) {
-    if (err) return log.error(err.message)
-
-    const mkdirp = require('mkdirp')
-
-    const iconFilePath = path.join(
-      os.homedir(),
-      '.local',
-      'share',
-      'icons',
-      'webtorrent-desktop.png'
-    )
-    mkdirp(path.dirname(iconFilePath), (err) => {
-      if (err) return log.error(err.message)
-      fs.writeFile(iconFilePath, iconFile, (err) => {
-        if (err) log.error(err.message)
-      })
-    })
-  }
-}
-
-function uninstallLinux () {
-  const os = require('os')
-  const path = require('path')
-  const rimraf = require('rimraf')
-
-  const desktopFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'applications',
-    'webtorrent-desktop.desktop'
-  )
-  rimraf(desktopFilePath)
-
-  const iconFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'icons',
-    'webtorrent-desktop.png'
-  )
-  rimraf(iconFilePath)
 }

@@ -2,8 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const electron = require('electron')
 
-const {dispatch} = require('../lib/dispatcher')
-const {TorrentKeyNotFoundError} = require('../lib/errors')
+const { dispatch } = require('../lib/dispatcher')
+const { TorrentKeyNotFoundError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentSummary = require('../lib/torrent-summary')
 
@@ -121,11 +121,10 @@ module.exports = class TorrentListController {
       torrentSummary.status = 'new'
       this.startTorrentingSummary(torrentSummary.torrentKey)
       sound.play('ENABLE')
-    } else {
-      torrentSummary.status = 'paused'
-      ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
-      sound.play('DISABLE')
+      return
     }
+
+    this.pauseTorrent(torrentSummary, true)
   }
 
   pauseAllTorrents () {
@@ -149,6 +148,41 @@ module.exports = class TorrentListController {
     sound.play('ENABLE')
   }
 
+  pauseTorrent (torrentSummary, playSound) {
+    torrentSummary.status = 'paused'
+    ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+
+    if (playSound) sound.play('DISABLE')
+  }
+
+  prioritizeTorrent (infoHash) {
+    this.state.saved.torrents
+      .filter((torrent) => { // We're interested in active torrents only.
+        return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
+      })
+      .map((torrent) => { // Pause all active torrents except the one that started playing.
+        if (infoHash === torrent.infoHash) return
+
+        // Pause torrent without playing sounds.
+        this.pauseTorrent(torrent, false)
+
+        this.state.saved.torrentsToResume.push(torrent.infoHash)
+      })
+
+    console.log('Playback Priority: paused torrents: ', this.state.saved.torrentsToResume)
+  }
+
+  resumePausedTorrents () {
+    console.log('Playback Priority: resuming paused torrents')
+    if (!this.state.saved.torrentsToResume || !this.state.saved.torrentsToResume.length) return
+    this.state.saved.torrentsToResume.map((infoHash) => {
+      this.toggleTorrent(infoHash)
+    })
+
+    // reset paused torrents
+    this.state.saved.torrentsToResume = []
+  }
+
   toggleTorrentFile (infoHash, index) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     torrentSummary.selections[index] = !torrentSummary.selections[index]
@@ -167,26 +201,38 @@ module.exports = class TorrentListController {
     }
   }
 
+  confirmDeleteAllTorrents (deleteData) {
+    this.state.modal = {
+      id: 'delete-all-torrents-modal',
+      deleteData
+    }
+  }
+
   // TODO: use torrentKey, not infoHash
   deleteTorrent (infoHash, deleteData) {
-    ipcRenderer.send('wt-stop-torrenting', infoHash)
-
     const index = this.state.saved.torrents.findIndex((x) => x.infoHash === infoHash)
 
     if (index > -1) {
       const summary = this.state.saved.torrents[index]
-
-      // remove torrent and poster file
-      deleteFile(TorrentSummary.getTorrentPath(summary))
-      deleteFile(TorrentSummary.getPosterPath(summary))
-
-      // optionally delete the torrent data
-      if (deleteData) moveItemToTrash(summary)
+      deleteTorrentFile(summary, deleteData)
 
       // remove torrent from saved list
       this.state.saved.torrents.splice(index, 1)
       dispatch('stateSave')
+
+      // prevent user from going forward to a deleted torrent
+      this.state.location.clearForward('player')
+      sound.play('DELETE')
+    } else {
+      throw new TorrentKeyNotFoundError(infoHash)
     }
+  }
+
+  deleteAllTorrents (deleteData) {
+    this.state.saved.torrents.forEach((summary) => deleteTorrentFile(summary, deleteData))
+
+    this.state.saved.torrents = []
+    dispatch('stateSave')
 
     // prevent user from going forward to a deleted torrent
     this.state.location.clearForward('player')
@@ -245,14 +291,14 @@ module.exports = class TorrentListController {
       enabled: torrentSummary.torrentFileName != null
     }))
 
-    menu.popup(electron.remote.getCurrentWindow())
+    menu.popup({ window: electron.remote.getCurrentWindow() })
   }
 
   // Takes a torrentSummary or torrentKey
   // Shows a Save File dialog, then saves the .torrent file wherever the user requests
   saveTorrentFileAs (torrentKey) {
     const torrentSummary = TorrentSummary.getByKey(this.state, torrentKey)
-    if (!torrentSummary) throw new Error('Missing torrentKey: ' + torrentKey)
+    if (!torrentSummary) throw new TorrentKeyNotFoundError(torrentKey)
     const downloadPath = this.state.saved.prefs.downloadPath
     const newFileName = path.parse(torrentSummary.name).name + '.torrent'
     const win = electron.remote.getCurrentWindow()
@@ -262,18 +308,19 @@ module.exports = class TorrentListController {
       filters: [
         { name: 'Torrent Files', extensions: ['torrent'] },
         { name: 'All Files', extensions: ['*'] }
-      ]
+      ],
+      buttonLabel: 'Save'
     }
 
-    electron.remote.dialog.showSaveDialog(win, opts, function (savePath) {
-      console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
-      if (!savePath) return // They clicked Cancel
-      const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-      fs.readFile(torrentPath, function (err, torrentFile) {
+    const savePath = electron.remote.dialog.showSaveDialogSync(win, opts)
+
+    if (!savePath) return // They clicked Cancel
+    console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
+    const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
+    fs.readFile(torrentPath, function (err, torrentFile) {
+      if (err) return dispatch('error', err)
+      fs.writeFile(savePath, torrentFile, function (err) {
         if (err) return dispatch('error', err)
-        fs.writeFile(savePath, torrentFile, function (err) {
-          if (err) return dispatch('error', err)
-        })
       })
     })
   }
@@ -281,16 +328,16 @@ module.exports = class TorrentListController {
 
 // Recursively finds {name, path, size} for all files in a folder
 // Calls `cb` on success, calls `onError` on failure
-function findFilesRecursive (paths, cb) {
+function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
-    let ret = []
+    const ret = []
     paths.forEach(function (path) {
       findFilesRecursive([path], function (fileObjs) {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
-          ret.sort((a, b) => a.path < b.path ? -1 : a.path > b.path)
-          cb(ret)
+          ret.sort((a, b) => a.path < b.path ? -1 : Number(a.path > b.path))
+          cb_(ret)
         }
       })
     })
@@ -304,7 +351,7 @@ function findFilesRecursive (paths, cb) {
     // Files: return name, path, and size
     if (!stat.isDirectory()) {
       const filePath = fileOrFolder
-      return cb([{
+      return cb_([{
         name: path.basename(filePath),
         path: filePath,
         size: stat.size
@@ -316,7 +363,7 @@ function findFilesRecursive (paths, cb) {
     fs.readdir(folderPath, function (err, fileNames) {
       if (err) return dispatch('error', err)
       const paths = fileNames.map((fileName) => path.join(folderPath, fileName))
-      findFilesRecursive(paths, cb)
+      findFilesRecursive(paths, cb_)
     })
   })
 }
@@ -336,4 +383,15 @@ function moveItemToTrash (torrentSummary) {
 
 function showItemInFolder (torrentSummary) {
   ipcRenderer.send('showItemInFolder', TorrentSummary.getFileOrFolder(torrentSummary))
+}
+
+function deleteTorrentFile (torrentSummary, deleteData) {
+  ipcRenderer.send('wt-stop-torrenting', torrentSummary.infoHash)
+
+  // remove torrent and poster file
+  deleteFile(TorrentSummary.getTorrentPath(torrentSummary))
+  deleteFile(TorrentSummary.getPosterPath(torrentSummary))
+
+  // optionally delete the torrent data
+  if (deleteData) moveItemToTrash(torrentSummary)
 }

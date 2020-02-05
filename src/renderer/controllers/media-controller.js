@@ -1,4 +1,4 @@
-const {ipcRenderer} = require('electron')
+const { ipcRenderer } = require('electron')
 const telemetry = require('../lib/telemetry')
 const Playlist = require('../lib/playlist')
 

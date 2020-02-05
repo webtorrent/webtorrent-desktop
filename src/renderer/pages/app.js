@@ -12,10 +12,10 @@ const Header = require('../components/header')
 const TorrentListPage = require('./torrent-list-page')
 
 const Views = {
-  'home': createGetter(() => TorrentListPage),
-  'player': createGetter(() => require('./player-page')),
+  home: createGetter(() => TorrentListPage),
+  player: createGetter(() => require('./player-page')),
   'create-torrent': createGetter(() => require('./create-torrent-page')),
-  'preferences': createGetter(() => require('./preferences-page'))
+  preferences: createGetter(() => require('./preferences-page'))
 }
 
 const Modals = {
@@ -24,7 +24,9 @@ const Modals = {
   ),
   'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
-  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal'))
+  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal')),
+  'delete-all-torrents-modal':
+      createGetter(() => require('../components/delete-all-torrents-modal'))
 }
 
 const SnackBars = {
@@ -93,8 +95,10 @@ class App extends React.Component {
       return (<div key={i} className='error'>{error.message}</div>)
     })
     return (
-      <div key='errors'
-        className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}>
+      <div
+        key='errors'
+        className={'error-popover ' + (hasErrors ? 'visible' : 'hidden')}
+      >
         <div key='title' className='title'>Error</div>
         {errorElems}
       </div>

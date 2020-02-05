@@ -5,7 +5,7 @@ const parallel = require('run-parallel')
 
 const remote = electron.remote
 
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class SubtitlesController {
   constructor (state) {
@@ -13,14 +13,13 @@ module.exports = class SubtitlesController {
   }
 
   openSubtitles () {
-    remote.dialog.showOpenDialog({
+    const filenames = remote.dialog.showOpenDialogSync({
       title: 'Select a subtitles file.',
-      filters: [ { name: 'Subtitles', extensions: ['vtt', 'srt'] } ],
-      properties: [ 'openFile' ]
-    }, (filenames) => {
-      if (!Array.isArray(filenames)) return
-      this.addSubtitles(filenames, true)
+      filters: [{ name: 'Subtitles', extensions: ['vtt', 'srt'] }],
+      properties: ['openFile']
     })
+    if (!Array.isArray(filenames)) return
+    this.addSubtitles(filenames, true)
   }
 
   selectSubtitle (ix) {

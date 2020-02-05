@@ -1,6 +1,6 @@
 const appConfig = require('application-config')('WebTorrent')
 const path = require('path')
-const {EventEmitter} = require('events')
+const { EventEmitter } = require('events')
 
 const config = require('../../config')
 
@@ -88,6 +88,7 @@ function getDefaultPlayState () {
   return {
     infoHash: null, /* the info hash of the torrent we're playing */
     fileIndex: null, /* the zero-based index within the torrent */
+    fileName: null, /* name of the file that is playing */
     location: 'local', /* 'local', 'chromecast', 'airplay' */
     type: null, /* 'audio' or 'video', could be 'other' if ever support eg streaming to VLC */
     currentTime: 0, /* seconds */
@@ -104,55 +105,59 @@ function getDefaultPlayState () {
       selectedIndex: -1, /* current subtitle track */
       showMenu: false /* popover menu, above the video */
     },
+    audioTracks: {
+      tracks: [],
+      selectedIndex: 0, /* current audio track */
+      showMenu: false /* popover menu, above the video */
+    },
     aspectRatio: 0 /* aspect ratio of the video */
   }
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function setupStateSaved (cb) {
-  const cpFile = require('cp-file')
-  const fs = require('fs')
+function setupStateSaved () {
+  const { copyFileSync, mkdirSync, readFileSync } = require('fs')
   const parseTorrent = require('parse-torrent')
-  const parallel = require('run-parallel')
 
   const saved = {
     prefs: {
       downloadPath: config.DEFAULT_DOWNLOAD_PATH,
       isFileHandler: false,
       openExternalPlayer: false,
-      externalPlayerPath: null,
-      startup: false
+      externalPlayerPath: '',
+      startup: false,
+      soundNotifications: true,
+      autoAddTorrents: false,
+      torrentsFolderPath: '',
+      highestPlaybackPriority: true
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
+    torrentsToResume: [],
     version: config.APP_VERSION /* make sure we can upgrade gracefully later */
   }
 
-  const tasks = []
+  // TODO: Doing several sync calls during first startup is not ideal
+  mkdirSync(config.POSTER_PATH, { recursive: true })
+  mkdirSync(config.TORRENT_PATH, { recursive: true })
 
-  config.DEFAULT_TORRENTS.map(function (t, i) {
+  config.DEFAULT_TORRENTS.forEach((t, i) => {
     const infoHash = saved.torrents[i].infoHash
-    tasks.push(function (cb) {
-      cpFile(
-        path.join(config.STATIC_PATH, t.posterFileName),
-        path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
-      ).then(cb).catch(cb)
-    })
-    tasks.push(function (cb) {
-      cpFile(
-        path.join(config.STATIC_PATH, t.torrentFileName),
-        path.join(config.TORRENT_PATH, infoHash + '.torrent')
-      ).then(cb).catch(cb)
-    })
+    // TODO: Doing several sync calls during first startup is not ideal
+    copyFileSync(
+      path.join(config.STATIC_PATH, t.posterFileName),
+      path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
+    )
+    copyFileSync(
+      path.join(config.STATIC_PATH, t.torrentFileName),
+      path.join(config.TORRENT_PATH, infoHash + '.torrent')
+    )
   })
 
-  parallel(tasks, function (err) {
-    if (err) return cb(err)
-    cb(null, saved)
-  })
+  return saved
 
   function createTorrentObject (t) {
-    // TODO: Doing several fs.readFileSync calls during first startup is not ideal
-    const torrent = fs.readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
+    // TODO: Doing several sync calls during first startup is not ideal
+    const torrent = readFileSync(path.join(config.STATIC_PATH, t.torrentFileName))
     const parsedTorrent = parseTorrent(torrent)
 
     return {
@@ -197,15 +202,20 @@ function shouldHidePlayerControls () {
     this.playing.playbackRate === 1
 }
 
-function load (cb) {
-  appConfig.read(function (err, saved) {
-    if (err || !saved.version) {
-      console.log('Missing config file: Creating new one')
-      setupStateSaved(onSavedState)
-    } else {
-      onSavedState(null, saved)
+async function load (cb) {
+  let saved = await appConfig.read()
+
+  if (!saved || !saved.version) {
+    console.log('Missing config file: Creating new one')
+    try {
+      saved = setupStateSaved()
+    } catch (err) {
+      onSavedState(err)
+      return
     }
-  })
+  }
+
+  onSavedState(null, saved)
 
   function onSavedState (err, saved) {
     if (err) return cb(err)
@@ -223,7 +233,7 @@ function load (cb) {
 }
 
 // Write state.saved to the JSON state file
-function saveImmediate (state, cb) {
+async function saveImmediate (state, cb) {
   console.log('Saving state to ' + appConfig.filePath)
 
   // Clean up, so that we're not saving any pending state
@@ -234,7 +244,7 @@ function saveImmediate (state, cb) {
     .filter((x) => x.infoHash)
     .map(function (x) {
       const torrent = {}
-      for (let key in x) {
+      for (const key in x) {
         if (key === 'progress' || key === 'torrentKey') {
           continue // Don't save progress info or key for the webtorrent process
         }
@@ -246,8 +256,10 @@ function saveImmediate (state, cb) {
       return torrent
     })
 
-  appConfig.write(copy, (err) => {
-    if (err) console.error(err)
-    else State.emit('stateSaved')
-  })
+  try {
+    await appConfig.write(copy)
+    State.emit('stateSaved')
+  } catch (err) {
+    console.error(err)
+  }
 }

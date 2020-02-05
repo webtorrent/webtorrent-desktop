@@ -2,9 +2,9 @@ const electron = require('electron')
 const path = require('path')
 
 const Cast = require('../lib/cast')
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 const telemetry = require('../lib/telemetry')
-const {UnplayableFileError, UnplayableTorrentError} = require('../lib/errors')
+const { UnplayableFileError, UnplayableTorrentError } = require('../lib/errors')
 const sound = require('../lib/sound')
 const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
@@ -27,6 +27,8 @@ module.exports = class PlaybackController {
   // * Stream, if not already fully downloaded
   // * If no file index is provided, restore the most recently viewed file or autoplay the first
   playFile (infoHash, index /* optional */) {
+    this.pauseActiveTorrents(infoHash)
+
     const state = this.state
     if (state.location.url() === 'player') {
       this.updatePlayer(infoHash, index, false, (err) => {
@@ -84,15 +86,26 @@ module.exports = class PlaybackController {
     else this.pause()
   }
 
+  pauseActiveTorrents (infoHash) {
+    // Playback Priority: pause all active torrents if needed.
+    if (!this.state.saved.prefs.highestPlaybackPriority) return
+
+    // Do not pause active torrents if playing a fully downloaded torrent.
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    if (torrentSummary.status === 'seeding') return
+
+    dispatch('prioritizeTorrent', infoHash)
+  }
+
   // Play next file in list (if any)
   nextTrack () {
     const state = this.state
     if (Playlist.hasNext(state) && state.playing.location !== 'external') {
       this.updatePlayer(
-          state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
-            if (err) dispatch('error', err)
-            else this.play()
-          })
+        state.playing.infoHash, Playlist.getNextIndex(state), false, (err) => {
+          if (err) dispatch('error', err)
+          else this.play()
+        })
     }
   }
 
@@ -256,9 +269,10 @@ module.exports = class PlaybackController {
     // update state
     state.playing.infoHash = infoHash
     state.playing.fileIndex = index
+    state.playing.fileName = fileSummary.name
     state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
       : TorrentPlayer.isAudio(fileSummary) ? 'audio'
-      : 'other'
+        : 'other'
 
     // pick up where we left off
     let jumpToTime = 0
@@ -279,7 +293,7 @@ module.exports = class PlaybackController {
     }
 
     function getAudioMetadata () {
-      if (state.playing.type === 'audio' && !fileSummary.audioInfo) {
+      if (state.playing.type === 'audio') {
         ipcRenderer.send('wt-get-audio-metadata', torrentSummary.infoHash, index)
       }
     }
@@ -340,6 +354,11 @@ module.exports = class PlaybackController {
     ipcRenderer.send('wt-stop-server')
 
     ipcRenderer.send('onPlayerClose')
+
+    // Playback Priority: resume previously paused downloads.
+    if (this.state.saved.prefs.highestPlaybackPriority) {
+      dispatch('resumePausedTorrents')
+    }
 
     this.update()
   }

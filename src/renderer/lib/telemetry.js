@@ -74,7 +74,7 @@ function reset () {
 
 // Track screen resolution
 function getScreenInfo () {
-  return electron.screen.getAllDisplays().map((screen) => ({
+  return electron.remote.screen.getAllDisplays().map((screen) => ({
     width: screen.size.width,
     height: screen.size.height,
     scaleFactor: screen.scaleFactor
@@ -98,7 +98,7 @@ function getSystemInfo () {
 function getTorrentStats (state) {
   const count = state.saved.torrents.length
   let sizeMB = 0
-  let byStatus = {
+  const byStatus = {
     new: { count: 0, sizeMB: 0 },
     downloading: { count: 0, sizeMB: 0 },
     seeding: { count: 0, sizeMB: 0 },
@@ -121,7 +121,7 @@ function getTorrentStats (state) {
   }
 
   // Then, round all the counts and sums to the nearest power of 2
-  const ret = roundTorrentStats({count, sizeMB})
+  const ret = roundTorrentStats({ count, sizeMB })
   ret.byStatus = {
     new: roundTorrentStats(byStatus.new),
     downloading: roundTorrentStats(byStatus.downloading),
@@ -198,7 +198,7 @@ function logUncaughtError (procName, e) {
   // Log the app version *at the time of the error*
   const version = config.APP_VERSION
 
-  telemetry.uncaughtErrors.push({process: procName, message, stack, version})
+  telemetry.uncaughtErrors.push({ process: procName, message, stack, version })
 }
 
 // Turns a DOM element into a string, eg "DIV.my-class.visible"

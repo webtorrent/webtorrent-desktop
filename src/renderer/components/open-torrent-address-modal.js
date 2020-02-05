@@ -1,8 +1,10 @@
 const React = require('react')
 const TextField = require('material-ui/TextField').default
+const { clipboard } = require('electron')
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
+const { isMagnetLink } = require('../lib/torrent-player')
 
 module.exports = class OpenTorrentAddressModal extends React.Component {
   render () {
@@ -15,19 +17,27 @@ module.exports = class OpenTorrentAddressModal extends React.Component {
             className='control'
             ref={(c) => { this.torrentURL = c }}
             fullWidth
-            onKeyDown={handleKeyDown.bind(this)} />
+            onKeyDown={handleKeyDown.bind(this)}
+          />
         </div>
         <ModalOKCancel
           cancelText='CANCEL'
           onCancel={dispatcher('exitModal')}
           okText='OK'
-          onOK={handleOK.bind(this)} />
+          onOK={handleOK.bind(this)}
+        />
       </div>
     )
   }
 
   componentDidMount () {
     this.torrentURL.input.focus()
+    const clipboardContent = clipboard.readText()
+
+    if (isMagnetLink(clipboardContent)) {
+      this.torrentURL.input.value = clipboardContent
+      this.torrentURL.input.select()
+    }
   }
 }
 

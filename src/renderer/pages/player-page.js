@@ -1,11 +1,10 @@
 const React = require('react')
 const Bitfield = require('bitfield')
 const prettyBytes = require('prettier-bytes')
-const zeroFill = require('zero-fill')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
@@ -20,7 +19,8 @@ module.exports = class Player extends React.Component {
       <div
         className='player'
         onWheel={handleVolumeWheel}
-        onMouseMove={dispatcher('mediaMouseMoved')}>
+        onMouseMove={dispatcher('mediaMouseMoved')}
+      >
         {showVideo ? renderMedia(state) : renderCastScreen(state)}
         {showControls ? renderPlayerControls(state) : null}
       </div>
@@ -95,6 +95,13 @@ function renderMedia (state) {
       delete file.selectedSubtitle
     }
 
+    // Switch to selected audio track
+    const audioTracks = mediaElement.audioTracks || []
+    for (let j = 0; j < audioTracks.length; j++) {
+      const isSelectedTrack = j === state.playing.audioTracks.selectedIndex
+      audioTracks[j].enabled = isSelectedTrack
+    }
+
     state.playing.volume = mediaElement.volume
   }
 
@@ -107,10 +114,11 @@ function renderMedia (state) {
       trackTags.push(
         <track
           key={i}
-          default={isSelected ? 'default' : ''}
+          default={isSelected}
           label={track.label}
-          type='subtitles'
-          src={track.buffer} />
+          kind='subtitles'
+          src={track.buffer}
+        />
       )
     }
   }
@@ -127,7 +135,7 @@ function renderMedia (state) {
       onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
-      onCanPlay={onCanPlay}>
+    >
       {trackTags}
     </MediaTagName>
   )
@@ -137,21 +145,57 @@ function renderMedia (state) {
     <div
       key='letterbox'
       className='letterbox'
-      onMouseMove={dispatcher('mediaMouseMoved')}>
+      onMouseMove={dispatcher('mediaMouseMoved')}
+    >
       {mediaTag}
       {renderOverlay(state)}
     </div>
   )
 
-  // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
-    if (state.playing.type !== 'video') return
-    const video = e.target
-    const dimensions = {
-      width: video.videoWidth,
-      height: video.videoHeight
+    const mediaElement = e.target
+
+    // check if we can decode video and audio track
+    if (state.playing.type === 'video') {
+      if (mediaElement.videoTracks.length === 0) {
+        dispatch('mediaError', 'Video codec unsupported')
+      }
+
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+
+      const dimensions = {
+        width: mediaElement.videoWidth,
+        height: mediaElement.videoHeight
+      }
+
+      // As soon as we know the video dimensions, resize the window
+      dispatch('setDimensions', dimensions)
+
+      // set audioTracks
+      const tracks = []
+      for (let i = 0; i < mediaElement.audioTracks.length; i++) {
+        tracks.push({
+          label: mediaElement.audioTracks[i].label || `Track ${i + 1}`,
+          language: mediaElement.audioTracks[i].language
+        })
+      }
+
+      state.playing.audioTracks.tracks = tracks
+      state.playing.audioTracks.selectedIndex = 0
     }
-    dispatch('setDimensions', dimensions)
+
+    // check if we can decode audio track
+    if (state.playing.type === 'audio') {
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+    }
   }
 
   function onEnded (e) {
@@ -160,19 +204,7 @@ function renderMedia (state) {
     } else {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
-    }
-  }
-
-  function onCanPlay (e) {
-    const elem = e.target
-    if (state.playing.type === 'video' &&
-      elem.webkitVideoDecodedByteCount === 0) {
-      dispatch('mediaError', 'Video codec unsupported')
-    } else if (elem.webkitAudioDecodedByteCount === 0) {
-      dispatch('mediaError', 'Audio codec unsupported')
-    } else {
-      dispatch('mediaSuccess')
-      elem.play()
+      if (state.window.isFullScreen) dispatch('toggleFullScreen')
     }
   }
 }
@@ -203,28 +235,41 @@ function renderOverlay (state) {
   )
 }
 
+/**
+ * Render track or disk number string
+ * @param common metadata.common part
+ * @param key should be either 'track' or 'disk'
+ * @return track or disk number metadata as JSX block
+ */
+function renderTrack (common, key) {
+  // Audio metadata: track-number
+  if (common[key] && common[key].no) {
+    let str = `${common[key].no}`
+    if (common[key].of) {
+      str += ` of ${common[key].of}`
+    }
+    const style = { textTransform: 'capitalize' }
+    return (
+      <div className={`audio-${key}`}>
+        <label style={style}>{key}</label> {str}
+      </div>
+    )
+  }
+}
+
 function renderAudioMetadata (state) {
   const fileSummary = state.getPlayingFileSummary()
   if (!fileSummary.audioInfo) return
-  const info = fileSummary.audioInfo
+  const common = fileSummary.audioInfo.common || {}
 
   // Get audio track info
-  let title = info.title
-  if (!title) {
-    title = fileSummary.name
-  }
-  let artist = info.artist && info.artist[0]
-  let album = info.album
-  if (album && info.year && !album.includes(info.year)) {
-    album += ' (' + info.year + ')'
-  }
-  let track
-  if (info.track && info.track.no && info.track.of) {
-    track = info.track.no + ' of ' + info.track.of
-  }
+  const title = common.title ? common.title : fileSummary.name
 
   // Show a small info box in the middle of the screen with title/album/etc
   const elems = []
+
+  // Audio metadata: artist(s)
+  const artist = common.artist || common.albumartist
   if (artist) {
     elems.push((
       <div key='artist' className='audio-artist'>
@@ -232,17 +277,90 @@ function renderAudioMetadata (state) {
       </div>
     ))
   }
-  if (album) {
+
+  // Audio metadata: disk & track-number
+  const count = ['track', 'disk']
+  count.forEach(key => {
+    const nrElem = renderTrack(common, key)
+    if (nrElem) {
+      elems.push(nrElem)
+    }
+  })
+
+  // Audio metadata: album
+  if (common.album) {
     elems.push((
       <div key='album' className='audio-album'>
-        <label>Album</label>{album}
+        <label>Album</label>{common.album}
       </div>
     ))
   }
-  if (track) {
+
+  // Audio metadata: year
+  if (common.year) {
     elems.push((
-      <div key='track' className='audio-track'>
-        <label>Track</label>{track}
+      <div key='year' className='audio-year'>
+        <label>Year</label>{common.year}
+      </div>
+    ))
+  }
+
+  // Audio metadata: release information (label & catalog-number)
+  if (common.label || common.catalognumber) {
+    const releaseInfo = []
+    if (common.label && common.catalognumber &&
+      common.label.length === common.catalognumber.length) {
+      // Assume labels & catalog-numbers are pairs
+      for (let n = 0; n < common.label.length; ++n) {
+        releaseInfo.push(common.label[0] + ' / ' + common.catalognumber[n])
+      }
+    } else {
+      if (common.label) {
+        releaseInfo.push(...common.label)
+      }
+      if (common.catalognumber) {
+        releaseInfo.push(...common.catalognumber)
+      }
+    }
+    elems.push((
+      <div key='release' className='audio-release'>
+        <label>Release</label>{releaseInfo.join(', ')}
+      </div>
+    ))
+  }
+
+  // Audio metadata: format
+  const format = []
+  fileSummary.audioInfo.format = fileSummary.audioInfo.format || ''
+  if (fileSummary.audioInfo.format.container) {
+    format.push(fileSummary.audioInfo.format.container)
+  }
+  if (fileSummary.audioInfo.format.codec &&
+    fileSummary.audioInfo.format.container !== fileSummary.audioInfo.format.codec) {
+    format.push(fileSummary.audioInfo.format.codec)
+  }
+  if (fileSummary.audioInfo.format.bitrate) {
+    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
+  }
+  if (fileSummary.audioInfo.format.sampleRate) {
+    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz')
+  }
+  if (fileSummary.audioInfo.format.bitsPerSample) {
+    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+  }
+  if (format.length > 0) {
+    elems.push((
+      <div key='format' className='audio-format'>
+        <label>Format</label>{format.join(', ')}
+      </div>
+    ))
+  }
+
+  // Audio metadata: comments
+  if (common.comment) {
+    elems.push((
+      <div key='comments' className='audio-comments'>
+        <label>Comments</label>{common.comment.join(' / ')}
       </div>
     ))
   }
@@ -273,9 +391,9 @@ function renderLoadingSpinner (state) {
 
   return (
     <div key='loading' className='media-stalled'>
-      <div key='loading-spinner' className='loading-spinner'>&nbsp;</div>
+      <div key='loading-spinner' className='loading-spinner' />
       <div key='loading-progress' className='loading-status ellipsis'>
-        <span className='progress'>{fileProgress}%</span> downloaded
+        <span><span className='progress'>{fileProgress}%</span> downloaded</span>
         <span> ↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
         <span> ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
@@ -303,7 +421,7 @@ function renderCastScreen (state) {
     isCast = false
   } else if (state.playing.location === 'error') {
     castIcon = 'error_outline'
-    castType = 'Error'
+    castType = 'Unable to Play'
     isCast = false
   }
 
@@ -333,7 +451,7 @@ function renderCastScreen (state) {
 function renderCastOptions (state) {
   if (!state.devices.castMenu) return
 
-  const {location, devices} = state.devices.castMenu
+  const { location, devices } = state.devices.castMenu
   const player = state.devices[location]
 
   const items = devices.map(function (device, ix) {
@@ -342,6 +460,7 @@ function renderCastOptions (state) {
     return (
       <li key={ix} onClick={dispatcher('selectCastDevice', ix)}>
         <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        {' '}
         {name}
       </li>
     )
@@ -381,6 +500,27 @@ function renderSubtitleOptions (state) {
   )
 }
 
+function renderAudioTrackOptions (state) {
+  const audioTracks = state.playing.audioTracks
+  if (!audioTracks.tracks.length || !audioTracks.showMenu) return
+
+  const items = audioTracks.tracks.map(function (track, ix) {
+    const isSelected = state.playing.audioTracks.selectedIndex === ix
+    return (
+      <li key={ix} onClick={dispatcher('selectAudioTrack', ix)}>
+        <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
+        {track.label}
+      </li>
+    )
+  })
+
+  return (
+    <ul key='audio-track-options' className='options-list'>
+      {items}
+    </ul>
+  )
+}
+
 function renderPlayerControls (state) {
   const positionPercent = 100 * state.playing.currentTime / state.playing.duration
   const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
@@ -389,6 +529,9 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  const multiAudioClass = state.playing.audioTracks.tracks.length > 1
+    ? 'active'
+    : 'disabled'
   const prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
@@ -398,41 +541,47 @@ function renderPlayerControls (state) {
       <div
         key='cursor'
         className='playback-cursor'
-        style={playbackCursorStyle} />
+        style={playbackCursorStyle}
+      />
       <div
         key='scrub-bar'
         className='scrub-bar'
-        draggable='true'
+        draggable
         onDragStart={handleDragStart}
         onClick={handleScrub}
-        onDrag={handleScrub} />
+        onDrag={handleScrub}
+      />
     </div>,
 
     <i
       key='skip-previous'
       className={'icon skip-previous float-left ' + prevClass}
-      onClick={dispatcher('previousTrack')}>
+      onClick={dispatcher('previousTrack')}
+    >
       skip_previous
     </i>,
 
     <i
       key='play'
       className='icon play-pause float-left'
-      onClick={dispatcher('playPause')}>
+      onClick={dispatcher('playPause')}
+    >
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>,
 
     <i
       key='skip-next'
       className={'icon skip-next float-left ' + nextClass}
-      onClick={dispatcher('nextTrack')}>
+      onClick={dispatcher('nextTrack')}
+    >
       skip_next
     </i>,
 
     <i
       key='fullscreen'
       className='icon fullscreen float-right'
-      onClick={dispatcher('toggleFullScreen')}>
+      onClick={dispatcher('toggleFullScreen')}
+    >
       {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
     </i>
   ]
@@ -443,8 +592,17 @@ function renderPlayerControls (state) {
       <i
         key='subtitles'
         className={'icon closed-caption float-right ' + captionsClass}
-        onClick={handleSubtitles}>
+        onClick={handleSubtitles}
+      >
         closed_caption
+      </i>
+    ), (
+      <i
+        key='audio-tracks'
+        className={'icon multi-audio float-right ' + multiAudioClass}
+        onClick={handleAudioTracks}
+      >
+        library_music
       </i>
     ))
   }
@@ -456,9 +614,9 @@ function renderPlayerControls (state) {
 
   // Add the cast buttons. Icons for each cast type, connected/disconnected:
   const buttonIcons = {
-    'chromecast': {true: 'cast_connected', false: 'cast'},
-    'airplay': {true: 'airplay', false: 'airplay'},
-    'dlna': {true: 'tv', false: 'tv'}
+    chromecast: { true: 'cast_connected', false: 'cast' },
+    airplay: { true: 'airplay', false: 'airplay' },
+    dlna: { true: 'tv', false: 'tv' }
   }
   castTypes.forEach(function (castType) {
     // Do we show this button (eg. the Chromecast button) at all?
@@ -487,7 +645,8 @@ function renderPlayerControls (state) {
       <i
         key={castType}
         className={'icon device float-right ' + buttonClass}
-        onClick={buttonHandler}>
+        onClick={buttonHandler}
+      >
         {buttonIcon}
       </i>
     ))
@@ -497,9 +656,9 @@ function renderPlayerControls (state) {
   const volume = state.playing.volume
   const volumeIcon = 'volume_' + (
     volume === 0 ? 'off'
-    : volume < 0.3 ? 'mute'
-    : volume < 0.6 ? 'down'
-    : 'up')
+      : volume < 0.3 ? 'mute'
+        : volume < 0.6 ? 'down'
+          : 'up')
   const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
@@ -510,7 +669,8 @@ function renderPlayerControls (state) {
     <div key='volume' className='volume float-left'>
       <i
         className='icon volume-icon float-left'
-        onMouseDown={handleVolumeMute}>
+        onMouseDown={handleVolumeMute}
+      >
         {volumeIcon}
       </i>
       <input
@@ -518,13 +678,14 @@ function renderPlayerControls (state) {
         type='range' min='0' max='1' step='0.05'
         value={volume}
         onChange={handleVolumeScrub}
-        style={volumeStyle} />
+        style={volumeStyle}
+      />
     </div>
   ))
 
   // Show video playback progress
-  const currentTimeStr = formatTime(state.playing.currentTime)
-  const durationStr = formatTime(state.playing.duration)
+  const currentTimeStr = formatTime(state.playing.currentTime, state.playing.duration)
+  const durationStr = formatTime(state.playing.duration, state.playing.duration)
   elements.push((
     <span key='time' className='time float-left'>
       {currentTimeStr} / {durationStr}
@@ -541,12 +702,15 @@ function renderPlayerControls (state) {
   }
 
   return (
-    <div key='controls' className='controls'
+    <div
+      key='controls' className='controls'
       onMouseEnter={dispatcher('mediaControlsMouseEnter')}
-      onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
+      onMouseLeave={dispatcher('mediaControlsMouseLeave')}
+    >
       {elements}
       {renderCastOptions(state)}
       {renderSubtitleOptions(state)}
+      {renderAudioTrackOptions(state)}
     </div>
   )
 
@@ -590,6 +754,10 @@ function renderPlayerControls (state) {
       dispatch('toggleSubtitlesMenu')
     }
   }
+
+  function handleAudioTracks (e) {
+    dispatch('toggleAudioTracksMenu')
+  }
 }
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
@@ -613,7 +781,7 @@ function renderLoadingBar (state) {
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
     const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
-      parts.push({start: i - fileProg.startPiece, count: 1})
+      parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {
       parts[parts.length - 1].count++
     }
@@ -646,17 +814,19 @@ function cssBackgroundImageDarkGradient () {
     'rgba(0,0,0,0.4) 0%, rgba(0,0,0,1) 100%)'
 }
 
-function formatTime (time) {
+function formatTime (time, total) {
   if (typeof time !== 'number' || Number.isNaN(time)) {
     return '0:00'
   }
 
-  let hours = Math.floor(time / 3600)
+  const totalHours = Math.floor(total / 3600)
+  const totalMinutes = Math.floor(total / 60)
+  const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (hours > 0) {
-    minutes = zeroFill(2, minutes)
+  if (totalMinutes > 9 && minutes < 10) {
+    minutes = '0' + minutes
   }
-  let seconds = zeroFill(2, Math.floor(time % 60))
+  const seconds = `0${Math.floor(time % 60)}`.slice(-2)
 
-  return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds
+  return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }

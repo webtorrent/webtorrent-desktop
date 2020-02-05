@@ -13,8 +13,13 @@ const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
 
+const WEBTORRENT_VERSION = require('webtorrent/package.json').version
+
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
+
+// allow electron/chromium to play startup sounds (without user interaction)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 
 // Start the app without showing the main window when auto launching on login
 // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
@@ -38,17 +43,19 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // signal this instance and quit. Note: This feature creates a lock file in
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
-  shouldQuit = app.makeSingleInstance(onAppOpen)
-  if (shouldQuit) {
-    app.quit()
+  if (!app.requestSingleInstanceLock()) {
+    shouldQuit = true
   }
 }
 
-if (!shouldQuit) {
+if (shouldQuit) {
+  app.quit()
+} else {
   init()
 }
 
 function init () {
+  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
   if (config.IS_PORTABLE) {
     const path = require('path')
     // Put all user data into the "Portable Settings" folder
@@ -72,21 +79,30 @@ function init () {
     if (err) throw err
 
     isReady = true
+    const state = results.state
 
-    windows.main.init(results.state, {hidden: hidden})
+    windows.main.init(state, { hidden: hidden })
     windows.webtorrent.init()
     menu.init()
 
     // To keep app startup fast, some code is delayed.
-    setTimeout(delayedInit, config.DELAYED_INIT)
+    setTimeout(() => {
+      delayedInit(state)
+    }, config.DELAYED_INIT)
 
     // Report uncaught exceptions
     process.on('uncaughtException', (err) => {
       console.error(err)
-      const error = {message: err.message, stack: err.stack}
+      const error = { message: err.message, stack: err.stack }
       windows.main.dispatch('uncaughtError', 'main', error)
     })
   }
+
+  // Enable app logging into default directory, i.e. /Library/Logs/WebTorrent
+  // on Mac, %APPDATA% on Windows, $XDG_CONFIG_HOME or ~/.config on Linux.
+  app.setAppLogsPath()
+
+  app.userAgentFallback = `WebTorrent/${WEBTORRENT_VERSION} (https://webtorrent.io)`
 
   app.on('open-file', onOpen)
   app.on('open-url', onOpen)
@@ -121,16 +137,23 @@ function init () {
   })
 }
 
-function delayedInit () {
+function delayedInit (state) {
   if (app.isQuitting) return
 
   const announcement = require('./announcement')
   const dock = require('./dock')
   const updater = require('./updater')
+  const FolderWatcher = require('./folder-watcher')
+  const folderWatcher = new FolderWatcher({ window: windows.main, state })
 
   announcement.init()
   dock.init()
   updater.init()
+
+  ipc.setModule('folderWatcher', folderWatcher)
+  if (folderWatcher.isEnabled()) {
+    folderWatcher.start()
+  }
 
   if (process.platform === 'win32') {
     const userTasks = require('./user-tasks')
@@ -152,7 +175,7 @@ function onOpen (e, torrentId) {
     // Electron issue: https://github.com/atom/electron/issues/4338
     setTimeout(() => windows.main.show(), 100)
 
-    processArgv([ torrentId ])
+    processArgv([torrentId])
   } else {
     argv.push(torrentId)
   }
@@ -178,11 +201,11 @@ function onAppOpen (newArgv) {
 function sliceArgv (argv) {
   return argv.slice(config.IS_PRODUCTION ? 1
     : config.IS_TEST ? 4
-    : 2)
+      : 2)
 }
 
 function processArgv (argv) {
-  let torrentIds = []
+  const torrentIds = []
   argv.forEach(function (arg) {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed
@@ -198,7 +221,7 @@ function processArgv (argv) {
       // Ignore hidden argument, already being handled
     } else if (arg.startsWith('-psn')) {
       // Ignore Mac launchd "process serial number" argument
-      // Issue: https://github.com/feross/webtorrent-desktop/issues/214
+      // Issue: https://github.com/webtorrent/webtorrent-desktop/issues/214
     } else if (arg.startsWith('--')) {
       // Ignore Spectron flags
     } else if (arg === 'data:,') {

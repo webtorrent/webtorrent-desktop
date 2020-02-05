@@ -1,5 +1,5 @@
-const path = require('path')
 const React = require('react')
+const PropTypes = require('prop-types')
 
 const colors = require('material-ui/styles/colors')
 const Checkbox = require('material-ui/Checkbox').default
@@ -7,7 +7,7 @@ const RaisedButton = require('material-ui/RaisedButton').default
 const Heading = require('../components/heading')
 const PathSelector = require('../components/path-selector')
 
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 const config = require('../../config')
 
 class PreferencesPage extends React.Component {
@@ -25,6 +25,9 @@ class PreferencesPage extends React.Component {
 
     this.handleStartupChange =
       this.handleStartupChange.bind(this)
+
+    this.handleSoundNotificationsChange =
+      this.handleSoundNotificationsChange.bind(this)
   }
 
   downloadPathSelector () {
@@ -33,11 +36,12 @@ class PreferencesPage extends React.Component {
         <PathSelector
           dialog={{
             title: 'Select download directory',
-            properties: [ 'openDirectory' ]
+            properties: ['openDirectory']
           }}
           onChange={this.handleDownloadPathChange}
           title='Download location'
-          value={this.props.state.unsaved.prefs.downloadPath} />
+          value={this.props.state.saved.prefs.downloadPath}
+        />
       </Preference>
     )
   }
@@ -51,9 +55,10 @@ class PreferencesPage extends React.Component {
       <Preference>
         <Checkbox
           className='control'
-          checked={!this.props.state.unsaved.prefs.openExternalPlayer}
-          label={'Play torrent media files using WebTorrent'}
-          onCheck={this.handleOpenExternalPlayerChange} />
+          checked={!this.props.state.saved.prefs.openExternalPlayer}
+          label='Play torrent media files using WebTorrent'
+          onCheck={this.handleOpenExternalPlayerChange}
+        />
       </Preference>
     )
   }
@@ -62,11 +67,29 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'openExternalPlayer', !isChecked)
   }
 
+  highestPlaybackPriorityCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.highestPlaybackPriority}
+          label='Highest Playback Priority'
+          onCheck={this.handleHighestPlaybackPriorityChange}
+        />
+        <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
+      </Preference>
+    )
+  }
+
+  handleHighestPlaybackPriorityChange (e, isChecked) {
+    dispatch('updatePreferences', 'highestPlaybackPriority', isChecked)
+  }
+
   externalPlayerPathSelector () {
-    const playerPath = this.props.state.unsaved.prefs.externalPlayerPath
+    const playerPath = this.props.state.saved.prefs.externalPlayerPath
     const playerName = this.props.state.getExternalPlayerName()
 
-    const description = this.props.state.unsaved.prefs.openExternalPlayer
+    const description = this.props.state.saved.prefs.openExternalPlayer
       ? `Torrent media files will always play in ${playerName}.`
       : `Torrent media files will play in ${playerName} if WebTorrent cannot play them.`
 
@@ -76,12 +99,12 @@ class PreferencesPage extends React.Component {
         <PathSelector
           dialog={{
             title: 'Select media player app',
-            properties: [ 'openFile' ]
+            properties: ['openFile']
           }}
-          displayValue={playerName}
           onChange={this.handleExternalPlayerPathChange}
           title='External player'
-          value={playerPath ? path.dirname(playerPath) : null} />
+          value={playerPath}
+        />
       </Preference>
     )
   }
@@ -90,8 +113,61 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'externalPlayerPath', filePath)
   }
 
+  autoAddTorrentsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.autoAddTorrents}
+          label='Watch for new .torrent files and add them immediately'
+          onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
+        />
+      </Preference>
+    )
+  }
+
+  handleAutoAddTorrentsChange (e, isChecked) {
+    const torrentsFolderPath = this.props.state.saved.prefs.torrentsFolderPath
+    if (isChecked && !torrentsFolderPath) {
+      alert('Select a torrents folder first.') // eslint-disable-line
+      e.preventDefault()
+      return
+    }
+
+    dispatch('updatePreferences', 'autoAddTorrents', isChecked)
+
+    if (isChecked) {
+      dispatch('startFolderWatcher')
+      return
+    }
+
+    dispatch('stopFolderWatcher')
+  }
+
+  torrentsFolderPathSelector () {
+    const torrentsFolderPath = this.props.state.saved.prefs.torrentsFolderPath
+
+    return (
+      <Preference>
+        <PathSelector
+          dialog={{
+            title: 'Select folder to watch for new torrents',
+            properties: ['openDirectory']
+          }}
+          onChange={this.handleTorrentsFolderPathChange}
+          title='Folder to watch'
+          value={torrentsFolderPath}
+        />
+      </Preference>
+    )
+  }
+
+  handleTorrentsFolderPathChange (filePath) {
+    dispatch('updatePreferences', 'torrentsFolderPath', filePath)
+  }
+
   setDefaultAppButton () {
-    const isFileHandler = this.props.state.unsaved.prefs.isFileHandler
+    const isFileHandler = this.props.state.saved.prefs.isFileHandler
     if (isFileHandler) {
       return (
         <Preference>
@@ -105,7 +181,8 @@ class PreferencesPage extends React.Component {
         <RaisedButton
           className='control'
           onClick={this.handleSetDefaultApp}
-          label='Make WebTorrent the default' />
+          label='Make WebTorrent the default'
+        />
       </Preference>
     )
   }
@@ -114,23 +191,38 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'startup', isChecked)
   }
 
-  setStartupSection () {
+  setStartupCheckbox () {
     if (config.IS_PORTABLE) {
       return
     }
 
     return (
-      <PreferencesSection title='Startup'>
-        <Preference>
-          <Checkbox
-            className='control'
-            checked={this.props.state.unsaved.prefs.startup}
-            label={'Open WebTorrent on startup.'}
-            onCheck={this.handleStartupChange}
-          />
-        </Preference>
-      </PreferencesSection>
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.startup}
+          label='Open WebTorrent on startup'
+          onCheck={this.handleStartupChange}
+        />
+      </Preference>
     )
+  }
+
+  soundNotificationsCheckbox () {
+    return (
+      <Preference>
+        <Checkbox
+          className='control'
+          checked={this.props.state.saved.prefs.soundNotifications}
+          label='Enable sounds'
+          onCheck={this.handleSoundNotificationsChange}
+        />
+      </Preference>
+    )
+  }
+
+  handleSoundNotificationsChange (e, isChecked) {
+    dispatch('updatePreferences', 'soundNotifications', isChecked)
   }
 
   handleSetDefaultApp () {
@@ -145,17 +237,23 @@ class PreferencesPage extends React.Component {
     }
     return (
       <div style={style}>
-        <PreferencesSection title='Downloads'>
+        <PreferencesSection title='Folders'>
           {this.downloadPathSelector()}
+          {this.autoAddTorrentsCheckbox()}
+          {this.torrentsFolderPathSelector()}
         </PreferencesSection>
         <PreferencesSection title='Playback'>
           {this.openExternalPlayerCheckbox()}
           {this.externalPlayerPathSelector()}
+          {this.highestPlaybackPriorityCheckbox()}
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
         </PreferencesSection>
-        {this.setStartupSection()}
+        <PreferencesSection title='General'>
+          {this.setStartupCheckbox()}
+          {this.soundNotificationsCheckbox()}
+        </PreferencesSection>
       </div>
     )
   }
@@ -164,7 +262,7 @@ class PreferencesPage extends React.Component {
 class PreferencesSection extends React.Component {
   static get propTypes () {
     return {
-      title: React.PropTypes.string
+      title: PropTypes.string
     }
   }
 

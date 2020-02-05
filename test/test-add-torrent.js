@@ -30,7 +30,7 @@ test('add-torrent', function (t) {
     .then(() => app.client.moveToObject('.torrent'))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'add-torrent-100-percent'))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })
 
 test('create-torrent', function (t) {
@@ -38,19 +38,17 @@ test('create-torrent', function (t) {
 
   const expectedTorrent = {
     announce: [
-      'udp://exodus.desync.com:6969',
+      'udp://explodie.org:6969',
       'udp://tracker.coppersurfer.tk:6969',
-      'udp://tracker.internetwarriors.net:1337',
+      'udp://tracker.empire-js.us:1337',
       'udp://tracker.leechers-paradise.org:6969',
-      'udp://tracker.openbittorrent.com:80',
+      'udp://tracker.opentrackr.org:1337',
       'wss://tracker.btorrent.xyz',
       'wss://tracker.fastcast.nz',
       'wss://tracker.openwebtorrent.com'
     ],
-    comment: undefined,
-    infoHash: '4b087858a32e31a0d313b5f9e0a2e13c08c5403f',
+    infoHash: 'b31a80b3dd807c2fdde4c4da1a0db6123fa35883',
     name: 'tmp.jpg',
-    private: false,
     urlList: []
   }
 
@@ -83,5 +81,5 @@ test('create-torrent', function (t) {
       config.SAVED_TORRENT_FILE,
       expectedTorrent))
     .then(() => setup.endTest(app, t),
-          (err) => setup.endTest(app, t, err || 'error'))
+      (err) => setup.endTest(app, t, err || 'error'))
 })

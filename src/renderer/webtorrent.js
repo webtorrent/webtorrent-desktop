@@ -3,20 +3,19 @@
 console.time('init')
 
 const crypto = require('crypto')
-const deepEqual = require('deep-equal')
+const util = require('util')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
-const musicmetadata = require('musicmetadata')
+const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
-const zeroFill = require('zero-fill')
 
 const crashReporter = require('../crash-reporter')
 const config = require('../config')
-const {TorrentKeyNotFoundError} = require('./lib/errors')
+const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 
 // Report when the process crashes
@@ -41,10 +40,9 @@ const VERSION = require('../../package.json').version
  *   '0.16.1' -> '0016'
  *   '1.2.5' -> '0102'
  */
-const VERSION_STR = VERSION.match(/([0-9]+)/g)
-  .slice(0, 2)
-  .map((v) => zeroFill(2, v))
-  .join('')
+const VERSION_STR = VERSION
+  .replace(/\d*./g, v => `0${v % 100}`.slice(-2))
+  .slice(0, 4)
 
 /**
  * Version prefix string (used in peer ID). WebTorrent uses the Azureus-style
@@ -97,8 +95,8 @@ function init () {
   ipc.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
-    ipc.send('wt-uncaught-error', {message: e.error.message, stack: e.error.stack}),
-    true)
+    ipc.send('wt-uncaught-error', { message: e.error.message, stack: e.error.stack }),
+  true)
 
   setInterval(updateTorrentProgress, 1000)
   console.timeEnd('init')
@@ -128,6 +126,7 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
 }
 
 function stopTorrenting (infoHash) {
+  console.log('--- STOP TORRENTING: ', infoHash)
   const torrent = client.get(infoHash)
   if (torrent) torrent.destroy()
 }
@@ -148,7 +147,7 @@ function addTorrentEvents (torrent) {
   torrent.on('error', (err) =>
     ipc.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
-    ipc.send('wt-infohash', torrent.key, torrent.infoHash))
+    ipc.send('wt-parsed', torrent.key, torrent.infoHash, torrent.magnetURI))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
@@ -250,7 +249,7 @@ function generateTorrentPoster (torrentKey) {
 function updateTorrentProgress () {
   const progress = getTorrentProgress()
   // TODO: diff torrent-by-torrent, not once for the whole update
-  if (prevProgress && deepEqual(progress, prevProgress, {strict: true})) {
+  if (prevProgress && util.isDeepStrictEqual(progress, prevProgress)) {
     return /* don't send heavy object if it hasn't changed */
   }
   ipc.send('wt-progress', progress)
@@ -319,7 +318,8 @@ function startServerFromReadyTorrent (torrent, cb) {
     const info = {
       torrentKey: torrent.key,
       localURL: 'http://localhost' + urlSuffix,
-      networkURL: 'http://' + networkAddress() + urlSuffix
+      networkURL: 'http://' + networkAddress() + urlSuffix,
+      networkAddress: networkAddress()
     }
 
     ipc.send('wt-server-running', info)
@@ -333,16 +333,43 @@ function stopServer () {
   server = null
 }
 
+console.log('Initializing...')
+
 function getAudioMetadata (infoHash, index) {
   const torrent = client.get(infoHash)
   const file = torrent.files[index]
-  musicmetadata(file.createReadStream(), function (err, info) {
-    if (err) return console.log('error getting audio metadata for ' + infoHash + ':' + index, err)
-    const { artist, album, albumartist, title, year, track, disk, genre } = info
-    const importantInfo = { artist, album, albumartist, title, year, track, disk, genre }
-    console.log('got audio metadata for %s: %o', file.name, importantInfo)
-    ipc.send('wt-audio-metadata', infoHash, index, importantInfo)
-  })
+
+  // Set initial matadata to display the filename first.
+  const metadata = { title: file.name }
+  ipc.send('wt-audio-metadata', infoHash, index, metadata)
+
+  const options = {
+    native: false,
+    skipCovers: true,
+    fileSize: file.length,
+    observer: event => {
+      ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
+    }
+  }
+  const onMetadata = file.done
+    // If completed; use direct file access
+    ? mm.parseFile(path.join(torrent.path, file.path), options)
+    // otherwise stream
+    : mm.parseStream(file.createReadStream(), file.name, options)
+
+  onMetadata
+    .then(
+      metadata => {
+        ipc.send('wt-audio-metadata', infoHash, index, metadata)
+        console.log(`metadata for file='${file.name}' completed.`)
+      },
+      err => {
+        console.log(
+          `error getting audio metadata for ${infoHash}:${index}`,
+          err
+        )
+      }
+    )
 }
 
 function selectFiles (torrentOrInfoHash, selections) {

@@ -2,7 +2,7 @@ const React = require('react')
 const electron = require('electron')
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class UpdateAvailableModal extends React.Component {
   render () {
@@ -18,12 +18,14 @@ module.exports = class UpdateAvailableModal extends React.Component {
           cancelText='SKIP THIS RELEASE'
           onCancel={handleSkip}
           okText='SHOW DOWNLOAD PAGE'
-          onOK={handleShow} />
+          onOK={handleShow}
+        />
       </div>
     )
 
     function handleShow () {
-      electron.shell.openExternal('https://github.com/feross/webtorrent-desktop/releases')
+      // TODO: use the GitHub urls from config.js
+      electron.shell.openExternal('https://github.com/webtorrent/webtorrent-desktop/releases')
       dispatch('exitModal')
     }
 

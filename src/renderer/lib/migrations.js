@@ -28,13 +28,15 @@ function run (state) {
   if (semver.lt(version, '0.14.0')) migrate_0_14_0(saved)
   if (semver.lt(version, '0.17.0')) migrate_0_17_0(saved)
   if (semver.lt(version, '0.17.2')) migrate_0_17_2(saved)
+  if (semver.lt(version, '0.21.0')) migrate_0_21_0(saved)
+  if (semver.lt(version, '0.21.1')) migrate_0_21_1(saved)
 
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
 }
 
 function migrate_0_7_0 (saved) {
-  const cpFile = require('cp-file')
+  const { copyFileSync } = require('fs')
   const path = require('path')
 
   saved.torrents.forEach(function (ts) {
@@ -56,7 +58,7 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.TORRENT_PATH, infoHash + '.torrent')
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) cpFile.sync(src, dst)
+      if (src !== dst) copyFileSync(src, dst)
 
       delete ts.torrentPath
       ts.torrentFileName = infoHash + '.torrent'
@@ -71,14 +73,14 @@ function migrate_0_7_0 (saved) {
       dst = path.join(config.POSTER_PATH, infoHash + extension)
       // Synchronous FS calls aren't ideal, but probably OK in a migration
       // that only runs once
-      if (src !== dst) cpFile.sync(src, dst)
+      if (src !== dst) copyFileSync(src, dst)
 
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
     }
 
     // Fix exception caused by incorrect file ordering.
-    // https://github.com/feross/webtorrent-desktop/pull/604#issuecomment-222805214
+    // https://github.com/webtorrent/webtorrent-desktop/pull/604#issuecomment-222805214
     delete ts.defaultPlayFileIndex
     delete ts.files
     delete ts.selections
@@ -111,7 +113,7 @@ function migrate_0_12_0 (saved) {
 
   // Undo a terrible bug where clicking Play on a default torrent on a fresh
   // install results in a "path missing" error
-  // See https://github.com/feross/webtorrent-desktop/pull/806
+  // See https://github.com/webtorrent/webtorrent-desktop/pull/806
   const defaultTorrentFiles = [
     '6a9759bffd5c0af65319979fb7832189f4f3c35d.torrent',
     '88594aaacbde40ef3e2510c47374ec0aa396c08e.torrent',
@@ -153,9 +155,9 @@ function migrate_0_17_0 (saved) {
 function migrate_0_17_2 (saved) {
   // Remove the trailing dot (.) from the Wired CD torrent name, since
   // folders/files that end in a trailing dot (.) or space are not deletable from
-  // Windows Explorer. See: https://github.com/feross/webtorrent-desktop/issues/905
+  // Windows Explorer. See: https://github.com/webtorrent/webtorrent-desktop/issues/905
 
-  const cpFile = require('cp-file')
+  const { copyFileSync } = require('fs')
   const rimraf = require('rimraf')
 
   const OLD_NAME = 'The WIRED CD - Rip. Sample. Mash. Share.'
@@ -190,7 +192,7 @@ function migrate_0_17_2 (saved) {
   ts.posterFileName = NEW_HASH + '.jpg'
 
   rimraf.sync(path.join(config.TORRENT_PATH, ts.torrentFileName))
-  cpFile.sync(
+  copyFileSync(
     path.join(config.STATIC_PATH, 'wiredCd.torrent'),
     path.join(config.TORRENT_PATH, NEW_HASH + '.torrent')
   )
@@ -204,5 +206,18 @@ function migrate_0_17_2 (saved) {
         path.join(ts.path, NEW_NAME)
       )
     } catch (err) {}
+  }
+}
+
+function migrate_0_21_0 (saved) {
+  if (saved.prefs.soundNotifications == null) {
+    // The app used to always have sound notifications enabled
+    saved.prefs.soundNotifications = true
+  }
+}
+
+function migrate_0_21_1 (saved) {
+  if (saved.prefs.externalPlayerPath == null) {
+    saved.prefs.externalPlayerPath = ''
   }
 }

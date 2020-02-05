@@ -7,7 +7,7 @@ const path = require('path')
 let hasErrors = false
 
 // Find all Javascript source files
-const files = walkSync('src', {globs: ['**/*.js']})
+const files = walkSync('src', { globs: ['**/*.js'] })
 console.log('Running extra-lint on ' + files.length + ' files...')
 
 // Read each file, line by line
@@ -17,13 +17,6 @@ files.forEach(function (file) {
 
   lines.forEach(function (line, i) {
     let error
-
-    // Consistent JSX tag closing
-    if (line.match(/' {2}\/> *$/) ||
-      line.match('[^ ]/> *$') ||
-      line.match(' > *$')) {
-      error = 'JSX tag spacing'
-    }
 
     // No lines over 100 characters
     if (line.length > 100) {
@@ -35,7 +28,7 @@ files.forEach(function (file) {
     }
 
     if (error) {
-      let name = path.basename(file)
+      const name = path.basename(file)
       console.log('%s:%d - %s:\n%s', name, i + 1, error, line)
       hasErrors = true
     }

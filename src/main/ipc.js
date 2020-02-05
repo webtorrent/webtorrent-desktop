@@ -1,5 +1,6 @@
 module.exports = {
-  init
+  init,
+  setModule
 }
 
 const electron = require('electron')
@@ -12,6 +13,14 @@ const windows = require('./windows')
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 const messageQueueMainToWebTorrent = []
+
+// Will hold modules injected from the app that will be used on fired
+// IPC events.
+const modules = {}
+
+function setModule (name, module) {
+  modules[name] = module
+}
 
 function init () {
   const ipc = electron.ipcMain
@@ -58,7 +67,7 @@ function init () {
   })
 
   /**
-   * Events
+   * Player Events
    */
 
   ipc.on('onPlayerOpen', function () {
@@ -104,6 +113,28 @@ function init () {
 
     powerSaveBlocker.disable()
     thumbar.onPlayerPause()
+  })
+
+  /**
+   * Folder Watcher Events
+   */
+
+  ipc.on('startFolderWatcher', function () {
+    if (!modules.folderWatcher) {
+      log('IPC ERR: folderWatcher module is not defined.')
+      return
+    }
+
+    modules.folderWatcher.start()
+  })
+
+  ipc.on('stopFolderWatcher', function () {
+    if (!modules.folderWatcher) {
+      log('IPC ERR: folderWatcher module is not defined.')
+      return
+    }
+
+    modules.folderWatcher.stop()
   })
 
   /**
@@ -166,8 +197,8 @@ function init () {
   ipc.on('checkForExternalPlayer', function (e, path) {
     const externalPlayer = require('./external-player')
 
-    externalPlayer.checkInstall(path, function (isInstalled) {
-      windows.main.send('checkForExternalPlayer', isInstalled)
+    externalPlayer.checkInstall(path, function (err) {
+      windows.main.send('checkForExternalPlayer', !err)
     })
   })
 

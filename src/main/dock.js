@@ -4,7 +4,7 @@ module.exports = {
   setBadge
 }
 
-const {app, Menu} = require('electron')
+const { app, Menu } = require('electron')
 
 const dialog = require('./dialog')
 const log = require('./log')
@@ -32,9 +32,9 @@ function downloadFinished (path) {
  */
 function setBadge (count) {
   if (process.platform === 'darwin' ||
-      process.platform === 'linux' && app.isUnityRunning()) {
+      (process.platform === 'linux' && app.isUnityRunning())) {
     log(`setBadge: ${count}`)
-    app.setBadgeCount(Number(count))
+    app.badgeCount = Number(count)
   }
 }
 

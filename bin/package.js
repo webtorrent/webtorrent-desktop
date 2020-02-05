@@ -21,6 +21,7 @@ const pkg = require('../package.json')
 const BUILD_NAME = config.APP_NAME + '-v' + config.APP_VERSION
 const BUILD_PATH = path.join(config.ROOT_PATH, 'build')
 const DIST_PATH = path.join(config.ROOT_PATH, 'dist')
+const NODE_MODULES_PATH = path.join(config.ROOT_PATH, 'node_modules')
 
 const argv = minimist(process.argv.slice(2), {
   boolean: [
@@ -36,6 +37,11 @@ const argv = minimist(process.argv.slice(2), {
 })
 
 function build () {
+  console.log('Reinstalling node_modules...')
+  rimraf.sync(NODE_MODULES_PATH)
+  cp.execSync('npm ci', { stdio: 'inherit' })
+
+  console.log('Nuking dist/ and build/...')
   rimraf.sync(DIST_PATH)
   rimraf.sync(BUILD_PATH)
 
@@ -64,11 +70,11 @@ function build () {
 const all = {
   // The human-readable copyright line for the app. Maps to the `LegalCopyright` metadata
   // property on Windows, and `NSHumanReadableCopyright` on Mac.
-  'app-copyright': config.APP_COPYRIGHT,
+  appCopyright: config.APP_COPYRIGHT,
 
   // The release version of the application. Maps to the `ProductVersion` metadata
   // property on Windows, and `CFBundleShortVersionString` on Mac.
-  'app-version': pkg.version,
+  appVersion: pkg.version,
 
   // Package the application's source code into an archive, using Electron's archive
   // format. Mitigates issues around long path names on Windows and slightly speeds up
@@ -82,7 +88,7 @@ const all = {
   // The build version of the application. Maps to the FileVersion metadata property on
   // Windows, and CFBundleVersion on Mac. Note: Windows requires the build version to
   // start with a number. We're using the version of the underlying WebTorrent library.
-  'build-version': require('webtorrent/package.json').version,
+  buildVersion: require('webtorrent/package.json').version,
 
   // The application source directory.
   dir: config.ROOT_PATH,
@@ -104,26 +110,26 @@ const all = {
   // "devDependencies" before starting to package the app.
   prune: true,
 
-  // The Electron version with which the app is built (without the leading 'v')
-  version: require('electron/package.json').version
+  // The Electron version that the app is built with (without the leading 'v')
+  electronVersion: require('electron/package.json').version
 }
 
 const darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build x64 binaries only.
+  // Build x64 binary only.
   arch: 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
-  'app-bundle-id': 'io.webtorrent.webtorrent',
+  appBundleId: 'io.webtorrent.webtorrent',
 
   // The application category type, as shown in the Finder via "View" -> "Arrange by
   // Application Category" when viewing the Applications directory (Mac only).
-  'app-category-type': 'public.app-category.utilities',
+  appCategoryType: 'public.app-category.utilities',
 
   // The bundle identifier to use in the application helper's plist (Mac only).
-  'helper-bundle-id': 'io.webtorrent.webtorrent-helper',
+  helperBundleId: 'io.webtorrent.webtorrent-helper',
 
   // Application icon.
   icon: config.APP_ICON + '.icns'
@@ -133,8 +139,8 @@ const win32 = {
   // Build for Windows.
   platform: 'win32',
 
-  // Build ia32 and x64 binaries.
-  arch: ['ia32', 'x64'],
+  // Build x64 binary only.
+  arch: 'x64',
 
   // Object hash of application metadata to embed into the executable (Windows only)
   win32metadata: {
@@ -167,8 +173,8 @@ const linux = {
   // Build for Linux.
   platform: 'linux',
 
-  // Build ia32 and x64 binaries.
-  arch: ['ia32', 'x64']
+  // Build x64 and arm64 binaries.
+  arch: ['x64', 'arm64']
 
   // Note: Application icon for Linux is specified via the BrowserWindow `icon` option.
 }
@@ -179,8 +185,7 @@ function buildDarwin (cb) {
   const plist = require('plist')
 
   console.log('Mac: Packaging electron...')
-  electronPackager(Object.assign({}, all, darwin), function (err, buildPath) {
-    if (err) return cb(err)
+  electronPackager(Object.assign({}, all, darwin)).then(function (buildPath) {
     console.log('Mac: Packaged electron. ' + buildPath)
 
     const appPath = path.join(buildPath[0], config.APP_NAME + '.app')
@@ -191,16 +196,16 @@ function buildDarwin (cb) {
 
     infoPlist.CFBundleDocumentTypes = [
       {
-        CFBundleTypeExtensions: [ 'torrent' ],
+        CFBundleTypeExtensions: ['torrent'],
         CFBundleTypeIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleTypeName: 'BitTorrent Document',
         CFBundleTypeRole: 'Editor',
         LSHandlerRank: 'Owner',
-        LSItemContentTypes: [ 'org.bittorrent.torrent' ]
+        LSItemContentTypes: ['org.bittorrent.torrent']
       },
       {
         CFBundleTypeName: 'Any',
-        CFBundleTypeOSTypes: [ '****' ],
+        CFBundleTypeOSTypes: ['****'],
         CFBundleTypeRole: 'Editor',
         LSHandlerRank: 'Owner',
         LSTypeIsPackage: false
@@ -212,13 +217,13 @@ function buildDarwin (cb) {
         CFBundleTypeRole: 'Editor',
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Magnet URL',
-        CFBundleURLSchemes: [ 'magnet' ]
+        CFBundleURLSchemes: ['magnet']
       },
       {
         CFBundleTypeRole: 'Editor',
         CFBundleURLIconFile: path.basename(config.APP_FILE_ICON) + '.icns',
         CFBundleURLName: 'BitTorrent Stream-Magnet URL',
-        CFBundleURLSchemes: [ 'stream-magnet' ]
+        CFBundleURLSchemes: ['stream-magnet']
       }
     ]
 
@@ -235,7 +240,7 @@ function buildDarwin (cb) {
         UTTypeReferenceURL: 'http://www.bittorrent.org/beps/bep_0000.html',
         UTTypeTagSpecification: {
           'com.apple.ostype': 'TORR',
-          'public.filename-extension': [ 'torrent' ],
+          'public.filename-extension': ['torrent'],
           'public.mime-type': 'application/x-bittorrent'
         }
       }
@@ -349,6 +354,8 @@ function buildDarwin (cb) {
         cb(null)
       })
     }
+  }).catch(function (err) {
+    cb(err)
   })
 }
 
@@ -369,8 +376,7 @@ function buildWin32 (cb) {
     CERT_PATH = path.join(os.homedir(), 'Desktop')
   }
 
-  electronPackager(Object.assign({}, all, win32), function (err, buildPath) {
-    if (err) return cb(err)
+  electronPackager(Object.assign({}, all, win32)).then(function (buildPath) {
     console.log('Windows: Packaged electron. ' + buildPath)
 
     let signWithParams
@@ -389,21 +395,17 @@ function buildWin32 (cb) {
 
     const tasks = []
     buildPath.forEach(function (filesPath) {
-      const destArch = filesPath.split('-').pop()
-
       if (argv.package === 'exe' || argv.package === 'all') {
-        tasks.push((cb) => packageInstaller(filesPath, destArch, cb))
+        tasks.push((cb) => packageInstaller(filesPath, cb))
       }
       if (argv.package === 'portable' || argv.package === 'all') {
-        tasks.push((cb) => packagePortable(filesPath, destArch, cb))
+        tasks.push((cb) => packagePortable(filesPath, cb))
       }
     })
     series(tasks, cb)
 
-    function packageInstaller (filesPath, destArch, cb) {
-      console.log(`Windows: Creating ${destArch} installer...`)
-
-      const archStr = destArch === 'ia32' ? '-ia32' : ''
+    function packageInstaller (filesPath, cb) {
+      console.log('Windows: Creating installer...')
 
       installer.createWindowsInstaller({
         appDirectory: filesPath,
@@ -416,81 +418,43 @@ function buildWin32 (cb) {
         noMsi: true,
         outputDirectory: DIST_PATH,
         productName: config.APP_NAME,
-        /**
-         * Only create delta updates for the Windows x64 build because 90% of our
-         * users have Windows x64 and the delta files take a *very* long time to
-         * generate. Also, the ia32 files on GitHub have non-standard Squirrel
-         * names (i.e. RELEASES-ia32 instead of RELEASES) and so Squirrel won't
-         * find them unless we proxy the requests.
-         */
         // TODO: Re-enable Windows 64-bit delta updates when we confirm that they
         //       work correctly in the presence of the "ia32" .nupkg files. I
         //       (feross) noticed them listed in the 64-bit RELEASES file and
         //       manually edited them out for the v0.17 release. Shipping only
         //       full updates for now will work fine, with no ill-effects.
-        // remoteReleases: destArch === 'x64'
-        //   ? config.GITHUB_URL
-        //   : undefined,
+        // remoteReleases: config.GITHUB_URL,
         /**
          * If you hit a "GitHub API rate limit exceeded" error, set this token!
          */
         // remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
-        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + archStr + '.exe',
+        setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
         setupIcon: config.APP_ICON + '.ico',
         signWithParams: signWithParams,
         title: config.APP_NAME,
         usePackageJson: false,
         version: pkg.version
       })
-      .then(function () {
-        console.log(`Windows: Created ${destArch} installer.`)
+        .then(function () {
+          console.log('Windows: Created installer.')
 
-        /**
+          /**
          * Delete extraneous Squirrel files (i.e. *.nupkg delta files for older
          * versions of the app)
          */
-        fs.readdirSync(DIST_PATH)
-          .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
-          .forEach((filename) => {
-            fs.unlinkSync(path.join(DIST_PATH, filename))
-          })
+          fs.readdirSync(DIST_PATH)
+            .filter((name) => name.endsWith('.nupkg') && !name.includes(pkg.version))
+            .forEach((filename) => {
+              fs.unlinkSync(path.join(DIST_PATH, filename))
+            })
 
-        if (destArch === 'ia32') {
-          console.log('Windows: Renaming ia32 installer files...')
-
-          // RELEASES -> RELEASES-ia32
-          const relPath = path.join(DIST_PATH, 'RELEASES-ia32')
-          fs.renameSync(
-            path.join(DIST_PATH, 'RELEASES'),
-            relPath
-          )
-
-          // WebTorrent-vX.X.X-full.nupkg -> WebTorrent-vX.X.X-ia32-full.nupkg
-          fs.renameSync(
-            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-full.nupkg`),
-            path.join(DIST_PATH, `${config.APP_NAME}-${config.APP_VERSION}-ia32-full.nupkg`)
-          )
-
-          // Change file name inside RELEASES-ia32 to match renamed file
-          const relContent = fs.readFileSync(relPath, 'utf8')
-          const relContent32 = relContent.replace('full.nupkg', 'ia32-full.nupkg')
-          fs.writeFileSync(relPath, relContent32)
-
-          if (relContent === relContent32) {
-            // Sanity check
-            throw new Error('Fixing RELEASES-ia32 failed. Replacement did not modify the file.')
-          }
-
-          console.log('Windows: Renamed ia32 installer files.')
-        }
-
-        cb(null)
-      })
-      .catch(cb)
+          cb(null)
+        })
+        .catch(cb)
     }
 
-    function packagePortable (filesPath, destArch, cb) {
-      console.log(`Windows: Creating ${destArch} portable app...`)
+    function packagePortable (filesPath, cb) {
+      console.log('Windows: Creating portable app...')
 
       const portablePath = path.join(filesPath, 'Portable Settings')
       mkdirp.sync(portablePath)
@@ -501,22 +465,22 @@ function buildWin32 (cb) {
       const tempPath = path.join(portablePath, 'Temp')
       mkdirp.sync(tempPath)
 
-      const archStr = destArch === 'ia32' ? '-ia32' : ''
-
       const inPath = path.join(DIST_PATH, path.basename(filesPath))
-      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win' + archStr + '.zip')
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
       zip.zipSync(inPath, outPath)
 
-      console.log(`Windows: Created ${destArch} portable app.`)
+      console.log('Windows: Created portable app.')
       cb(null)
     }
+  }).catch(function (err) {
+    cb(err)
   })
 }
 
 function buildLinux (cb) {
   console.log('Linux: Packaging electron...')
-  electronPackager(Object.assign({}, all, linux), function (err, buildPath) {
-    if (err) return cb(err)
+
+  electronPackager(Object.assign({}, all, linux)).then(function (buildPath) {
     console.log('Linux: Packaged electron. ' + buildPath)
 
     const tasks = []
@@ -526,56 +490,92 @@ function buildLinux (cb) {
       if (argv.package === 'deb' || argv.package === 'all') {
         tasks.push((cb) => packageDeb(filesPath, destArch, cb))
       }
+      if (argv.package === 'rpm' || argv.package === 'all') {
+        tasks.push((cb) => packageRpm(filesPath, destArch, cb))
+      }
       if (argv.package === 'zip' || argv.package === 'all') {
         tasks.push((cb) => packageZip(filesPath, destArch, cb))
       }
     })
     series(tasks, cb)
+  }).catch(function (err) {
+    cb(err)
   })
 
   function packageDeb (filesPath, destArch, cb) {
+    // Linux convention for Debian based 'x64' is 'amd64'
+    if (destArch === 'x64') {
+      destArch = 'amd64'
+    }
+
     // Create .deb file for Debian-based platforms
     console.log(`Linux: Creating ${destArch} deb...`)
 
-    const deb = require('nobin-debian-installer')()
-    const destPath = path.join('/opt', pkg.name)
+    const installer = require('electron-installer-debian')
 
-    deb.pack({
-      package: pkg,
-      info: {
-        arch: destArch === 'x64' ? 'amd64' : 'i386',
-        targetDir: DIST_PATH,
-        depends: 'gconf2, libgtk2.0-0, libnss3, libxss1',
-        scripts: {
-          postinst: path.join(config.STATIC_PATH, 'linux', 'postinst'),
-          prerm: path.join(config.STATIC_PATH, 'linux', 'prerm')
-        }
-      }
-    }, [{
-      src: ['./**'],
-      dest: destPath,
-      expand: true,
-      cwd: filesPath
-    }, {
-      src: ['./**'],
-      dest: path.join('/usr', 'share'),
-      expand: true,
-      cwd: path.join(config.STATIC_PATH, 'linux', 'share')
-    }], function (err) {
-      if (err) return cb(err)
-      console.log(`Linux: Created ${destArch} deb.`)
-      cb(null)
-    })
+    const options = {
+      src: filesPath + '/',
+      dest: DIST_PATH,
+      arch: destArch,
+      bin: 'WebTorrent',
+      icon: {
+        '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
+        '256x256': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png')
+      },
+      categories: ['Network', 'FileTransfer', 'P2P'],
+      mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+    }
+
+    installer(options).then(
+      () => {
+        console.log(`Linux: Created ${destArch} deb.`)
+        cb(null)
+      },
+      (err) => cb(err)
+    )
+  }
+
+  function packageRpm (filesPath, destArch, cb) {
+    // Linux convention for RedHat based 'x64' is 'x86_64'
+    if (destArch === 'x64') {
+      destArch = 'x86_64'
+    }
+
+    // Create .rpm file for RedHat-based platforms
+    console.log(`Linux: Creating ${destArch} rpm...`)
+
+    const installer = require('electron-installer-redhat')
+
+    const options = {
+      src: filesPath + '/',
+      dest: DIST_PATH,
+      arch: destArch,
+      bin: 'WebTorrent',
+      icon: {
+        '48x48': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/48x48/apps/webtorrent-desktop.png'),
+        '256x256': path.join(config.STATIC_PATH, 'linux/share/icons/hicolor/256x256/apps/webtorrent-desktop.png')
+      },
+      categories: ['Network', 'FileTransfer', 'P2P'],
+      mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+    }
+
+    installer(options).then(
+      () => {
+        console.log(`Linux: Created ${destArch} rpm.`)
+        cb(null)
+      },
+      (err) => cb(err)
+    )
   }
 
   function packageZip (filesPath, destArch, cb) {
     // Create .zip file for Linux
     console.log(`Linux: Creating ${destArch} zip...`)
 
-    const archStr = destArch === 'ia32' ? '-ia32' : ''
-
     const inPath = path.join(DIST_PATH, path.basename(filesPath))
-    const outPath = path.join(DIST_PATH, BUILD_NAME + '-linux' + archStr + '.zip')
+    const outPath = path.join(DIST_PATH, `${BUILD_NAME}-linux-${destArch}.zip`)
     zip.zipSync(inPath, outPath)
 
     console.log(`Linux: Created ${destArch} zip.`)

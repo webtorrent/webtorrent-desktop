@@ -24,6 +24,10 @@ function init () {
     skipTaskbar: true,
     title: 'webtorrent-hidden-window',
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true,
+      enableBlinkFeatures: 'AudioVideoTracks'
+    },
     width: 150
   })
 
@@ -55,6 +59,6 @@ function toggleDevTools () {
     webtorrent.win.webContents.closeDevTools()
     webtorrent.win.hide()
   } else {
-    webtorrent.win.webContents.openDevTools({ detach: true })
+    webtorrent.win.webContents.openDevTools({ mode: 'detach' })
   }
 }

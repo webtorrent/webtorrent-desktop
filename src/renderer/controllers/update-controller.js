@@ -1,4 +1,4 @@
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 // Controls the UI checking for new versions of the app, prompting install
 module.exports = class UpdateController {

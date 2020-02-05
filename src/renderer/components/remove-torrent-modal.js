@@ -1,7 +1,7 @@
 const React = require('react')
 
 const ModalOKCancel = require('./modal-ok-cancel')
-const {dispatch, dispatcher} = require('../lib/dispatcher')
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 
 module.exports = class RemoveTorrentModal extends React.Component {
   render () {
@@ -18,7 +18,8 @@ module.exports = class RemoveTorrentModal extends React.Component {
           cancelText='CANCEL'
           onCancel={dispatcher('exitModal')}
           okText={buttonText}
-          onOK={handleRemove} />
+          onOK={handleRemove}
+        />
       </div>
     )
 
