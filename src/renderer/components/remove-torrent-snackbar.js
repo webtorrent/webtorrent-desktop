@@ -2,32 +2,36 @@ const React = require('react')
 
 const Snackbar = require('material-ui/Snackbar').default
 
-const {dispatch} = require('../lib/dispatcher')
+const { dispatch } = require('../lib/dispatcher')
 
 module.exports = class RemoveTorrentSnackbar extends React.Component {
+  componentDidMount () {
+    dispatch('deleteTorrent', this.props.state.snackbar.infoHash)
+  }
+
   render () {
     const state = this.props.state
-    const message = state.snackbar.deleteData
-      ? 'Torrent and data file removed'
-      : 'Torrent removed'
 
-    dispatch('deleteTorrent', state.snackbar.infoHash, false)
-    let open = true
     return (
       <Snackbar
-        action={message}
-        onActionTouchTap={handleUndo}
-        onRequestClose={handleRemove}
-        autoHideDuration={4000}
-        open={open} />
+        message='Torrent removed'
+        action='Undo'
+        autoHideDuration={5000}
+        onActionClick={handleUndo(state.snackbar.magnetURI)}
+        onRequestClose={clearSnackbar}
+        open
+      />
     )
 
-    function handleUndo () {
-      dispatch('addTorrent', state.snackbar.infoHash)
+    function handleUndo (magnetURI) {
+      return function () {
+        dispatch('addTorrent', magnetURI)
+        dispatch('clearSnackbar')
+      }
     }
 
-    function handleRemove () {
-      dispatch('deleteTorrent', state.snackbar.infoHash, state.snackbar.deleteData)
+    function clearSnackbar () {
+      dispatch('clearSnackbar')
     }
   }
 }
