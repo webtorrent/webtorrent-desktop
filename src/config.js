@@ -23,7 +23,7 @@ module.exports = {
   CRASH_REPORT_URL: 'https://webtorrent.io/desktop/crash-report',
   TELEMETRY_URL: 'https://webtorrent.io/desktop/telemetry',
 
-  APP_COPYRIGHT: `Copyright © 2014-${(new Date()).getFullYear()} ${APP_TEAM}`,
+  APP_COPYRIGHT: `Copyright © 2014-${new Date().getFullYear()} ${APP_TEAM}`,
   APP_FILE_ICON: path.join(__dirname, '..', 'static', 'WebTorrentFile'),
   APP_ICON: path.join(__dirname, '..', 'static', 'WebTorrent'),
   APP_NAME: APP_NAME,
