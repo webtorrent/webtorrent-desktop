@@ -4,7 +4,6 @@ console.time('init')
 
 const crypto = require('crypto')
 const util = require('util')
-const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
@@ -23,11 +22,6 @@ crashReporter.init()
 
 // Send & receive messages from the main window
 const ipc = electron.ipcRenderer
-
-// Force use of webtorrent trackers on all torrents
-global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
-  .map((arr) => arr[0])
-  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 /**
  * WebTorrent version.
