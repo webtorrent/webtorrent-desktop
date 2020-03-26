@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
-    "buble": "^0.19.8",
+    "buble": "^0.20.0",
     "cross-zip": "^2.1.6",
     "depcheck": "^0.9.0",
     "electron": "~7.1.0",
