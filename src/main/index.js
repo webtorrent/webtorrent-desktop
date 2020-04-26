@@ -81,7 +81,7 @@ function init () {
     isReady = true
     const state = results.state
 
-    windows.main.init(state, { hidden: hidden })
+    windows.main.init(state, { hidden })
     windows.webtorrent.init()
     menu.init()
 

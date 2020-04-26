@@ -26,9 +26,9 @@ module.exports = {
   APP_COPYRIGHT: `Copyright © 2014-${new Date().getFullYear()} ${APP_TEAM}`,
   APP_FILE_ICON: path.join(__dirname, '..', 'static', 'WebTorrentFile'),
   APP_ICON: path.join(__dirname, '..', 'static', 'WebTorrent'),
-  APP_NAME: APP_NAME,
-  APP_TEAM: APP_TEAM,
-  APP_VERSION: APP_VERSION,
+  APP_NAME,
+  APP_TEAM,
+  APP_VERSION,
   APP_WINDOW_TITLE: APP_NAME,
 
   CONFIG_PATH: getConfigPath(),
@@ -78,9 +78,9 @@ module.exports = {
   HOME_PAGE_URL: 'https://webtorrent.io',
   TWITTER_PAGE_URL: 'https://twitter.com/WebTorrentApp',
 
-  IS_PORTABLE: IS_PORTABLE,
-  IS_PRODUCTION: IS_PRODUCTION,
-  IS_TEST: IS_TEST,
+  IS_PORTABLE,
+  IS_PRODUCTION,
+  IS_TEST,
 
   OS_SYSARCH: arch() === 'x64' ? 'x64' : 'ia32',
 
@@ -100,8 +100,8 @@ module.exports = {
   WINDOW_MIN_HEIGHT: UI_HEADER_HEIGHT + (UI_TORRENT_HEIGHT * 2), // header + 2 torrents
   WINDOW_MIN_WIDTH: 425,
 
-  UI_HEADER_HEIGHT: UI_HEADER_HEIGHT,
-  UI_TORRENT_HEIGHT: UI_TORRENT_HEIGHT
+  UI_HEADER_HEIGHT,
+  UI_TORRENT_HEIGHT
 }
 
 function getConfigPath () {

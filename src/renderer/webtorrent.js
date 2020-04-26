@@ -113,8 +113,8 @@ function startTorrenting (torrentKey, torrentID, path, fileModtimes, selections)
   console.log('starting torrent %s: %s', torrentKey, torrentID)
 
   const torrent = client.add(torrentID, {
-    path: path,
-    fileModtimes: fileModtimes
+    path,
+    fileModtimes
   })
   torrent.key = torrentKey
 

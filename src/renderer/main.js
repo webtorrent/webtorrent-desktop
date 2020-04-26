@@ -312,7 +312,7 @@ const dispatchHandlers = {
   // Preferences screen
   preferences: () => controllers.prefs().show(),
   updatePreferences: (key, value) => controllers.prefs().update(key, value),
-  checkDownloadPath: checkDownloadPath,
+  checkDownloadPath,
   startFolderWatcher: () => controllers.folderWatcher().start(),
   stopFolderWatcher: () => controllers.folderWatcher().stop(),
 
@@ -322,20 +322,20 @@ const dispatchHandlers = {
 
   // Navigation between screens (back, forward, ESC, etc)
   exitModal: () => { state.modal = null },
-  backToList: backToList,
-  escapeBack: escapeBack,
+  backToList,
+  escapeBack,
   back: () => state.location.back(),
   forward: () => state.location.forward(),
   cancel: () => state.location.cancel(),
 
   // Controlling the window
-  setDimensions: setDimensions,
+  setDimensions,
   toggleFullScreen: (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
   setTitle: (title) => { state.window.title = title },
   resetTitle: () => { state.window.title = config.APP_WINDOW_TITLE },
 
   // Everything else
-  onOpen: onOpen,
+  onOpen,
   error: onError,
   uncaughtError: (proc, err) => telemetry.logUncaughtError(proc, err),
   stateSave: () => State.save(state),

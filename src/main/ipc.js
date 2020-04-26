@@ -235,8 +235,8 @@ function init () {
       } else {
         // Queue message for webtorrent window, it hasn't finished loading yet
         messageQueueMainToWebTorrent.push({
-          name: name,
-          args: args
+          name,
+          args
         })
         log('webtorrent: queueing %s', name)
       }

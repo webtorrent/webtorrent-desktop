@@ -430,7 +430,7 @@ function buildWin32 (cb) {
         // remoteToken: process.env.WEBTORRENT_GITHUB_API_TOKEN,
         setupExe: config.APP_NAME + 'Setup-v' + config.APP_VERSION + '.exe',
         setupIcon: config.APP_ICON + '.ico',
-        signWithParams: signWithParams,
+        signWithParams,
         title: config.APP_NAME,
         usePackageJson: false,
         version: pkg.version
