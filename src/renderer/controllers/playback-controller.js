@@ -158,16 +158,18 @@ module.exports = class PlaybackController {
     else this.state.playing.jumpToTime = time
   }
 
-  preview (time, x) {
-    if (!Number.isFinite(time)) {
-      console.error('Tried to skip to a non-finite time ' + time)
+  // Show video preview
+  preview (x) {
+    if (!Number.isFinite(x)) {
+      console.error('Tried to preview a non-finite position ' + x)
       return console.trace()
     }
-    this.state.playing.preview = { time, x }
+    this.state.playing.previewXCoord = x
   }
 
+  // Hide video preview
   clearPreview () {
-    this.state.playing.preview = null
+    this.state.playing.previewXCoord = null
   }
 
   // Change playback speed. 1 = faster, -1 = slower

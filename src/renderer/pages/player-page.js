@@ -728,12 +728,10 @@ function renderPlayerControls (state) {
 
   // Handles a scrub hover (preview another position in the video)
   function handleScrubPreview (e) {
+    // Only show for videos
     if (!e.clientX || state.playing.type !== 'video') return
     dispatch('mediaMouseMoved')
-    const windowWidth = document.querySelector('body').clientWidth
-    const fraction = e.clientX / windowWidth
-    const position = fraction * state.playing.duration /* seconds */
-    dispatch('preview', position, e.clientX)
+    dispatch('preview', e.clientX)
   }
 
   function clearPreview (e) {
@@ -779,27 +777,36 @@ function renderPlayerControls (state) {
 }
 
 function renderPreview (state) {
-  let { preview } = state.playing
-  if (!preview) {
-    preview = { x: 0, time: 0, hide: true }
-  }
+  const { previewXCoord = null } = state.playing
+
+  // Calculate time from x-coord as fraction of track width
+  const windowWidth = document.querySelector('body').clientWidth
+  const fraction = previewXCoord / windowWidth
+  const time = fraction * state.playing.duration /* seconds */
 
   const height = 70
-  let width
+  let width = 0
 
   const previewEl = document.querySelector('video#preview')
-  if (previewEl !== null && !preview.hide) {
-    previewEl.currentTime = preview.time
+  if (previewEl !== null && previewXCoord !== null) {
+    previewEl.currentTime = time
+
+    // Auto adjust width to maintain video aspect ratio
     width = Math.floor((previewEl.videoWidth / previewEl.videoHeight) * height)
   }
 
-  const windowWidth = document.querySelector('body').clientWidth
-  const xPos = Math.min(Math.max(preview.x - (width / 2), 5), windowWidth - width - 5)
+  // Center preview window on mouse cursor,
+  // while avoiding falling off the left or right edges
+  const xPos = Math.min(Math.max(previewXCoord - (width / 2), 5), windowWidth - width - 5)
 
   return (
     <div
-      key='preview'
-      style={{ position: 'absolute', bottom: 50, left: xPos, display: preview.hide && 'none' }}
+      key='preview' style={{
+        position: 'absolute',
+        bottom: 50,
+        left: xPos,
+        display: previewXCoord == null && 'none' // Hide preview when XCoord unset
+      }}
     >
       <div style={{ width, height, backgroundColor: 'black' }}>
         <video
@@ -813,7 +820,7 @@ function renderPreview (state) {
           textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee'
         }}
       >
-        {formatTime(preview.time, state.playing.duration)}
+        {formatTime(time, state.playing.duration)}
       </p>
     </div>
   )
