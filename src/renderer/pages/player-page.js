@@ -728,7 +728,7 @@ function renderPlayerControls (state) {
 
   // Handles a scrub hover (preview another position in the video)
   function handleScrubPreview (e) {
-    if (!e.clientX) return
+    if (!e.clientX || state.playing.type !== 'video') return
     dispatch('mediaMouseMoved')
     const windowWidth = document.querySelector('body').clientWidth
     const fraction = e.clientX / windowWidth
