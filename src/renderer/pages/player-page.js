@@ -549,7 +549,7 @@ function renderPlayerControls (state) {
         key='scrub-bar'
         className='scrub-bar'
         draggable
-        onMouseOver={handleScrubPreview}
+        onMouseMove={handleScrubPreview}
         onMouseOut={clearPreview}
         onDragStart={handleDragStart}
         onClick={handleScrub}
@@ -779,18 +779,32 @@ function renderPlayerControls (state) {
 }
 
 function renderPreview (state) {
-  if (!state.playing.preview) {
-    return null
+  let { preview } = state.playing
+  if (!preview) {
+    preview = { x: 0, time: 0, hide: true }
   }
 
-  const width = 118
+  const height = 70
+  let width
 
-  const xPos = Math.max(state.playing.preview.x - (width / 2), 5)
+  const previewEl = document.querySelector('video#preview')
+  if (previewEl !== null && !preview.hide) {
+    previewEl.currentTime = preview.time
+    width = (previewEl.videoWidth / previewEl.videoHeight) * height
+  }
+
+  const windowWidth = document.querySelector('body').clientWidth
+  const xPos = Math.min(Math.max(preview.x - (width / 2), 5), windowWidth - width - 5)
 
   return (
-    <div style={{ position: 'absolute', bottom: 50, left: xPos }}>
-      <div style={{ width, height: 70, backgroundColor: 'blue', border: '2px solid lightgrey', borderRadius: 2 }} />
-      <p style={{ textAlign: 'center', margin: 5 }}>{formatTime(state.playing.preview.time, state.playing.duration)}</p>
+    <div style={{ position: 'absolute', bottom: 50, left: xPos, display: preview.hide && 'none' }} key='preview'>
+      <div style={{ width, height, backgroundColor: 'black', border: '2px solid lightgrey', borderRadius: 2 }}>
+        <video
+          src={Playlist.getCurrentLocalURL(state)}
+          id='preview'
+        />
+      </div>
+      <p style={{ textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee' }}>{formatTime(preview.time, state.playing.duration)}</p>
     </div>
   )
 }
