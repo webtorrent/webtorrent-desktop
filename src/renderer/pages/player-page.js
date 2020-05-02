@@ -790,7 +790,7 @@ function renderPreview (state) {
   const previewEl = document.querySelector('video#preview')
   if (previewEl !== null && !preview.hide) {
     previewEl.currentTime = preview.time
-    width = (previewEl.videoWidth / previewEl.videoHeight) * height
+    width = Math.floor((previewEl.videoWidth / previewEl.videoHeight) * height)
   }
 
   const windowWidth = document.querySelector('body').clientWidth
@@ -798,10 +798,11 @@ function renderPreview (state) {
 
   return (
     <div style={{ position: 'absolute', bottom: 50, left: xPos, display: preview.hide && 'none' }} key='preview'>
-      <div style={{ width, height, backgroundColor: 'black', border: '2px solid lightgrey', borderRadius: 2 }}>
+      <div style={{ width, height, backgroundColor: 'black' }}>
         <video
           src={Playlist.getCurrentLocalURL(state)}
           id='preview'
+          style={{ border: '1px solid lightgrey', borderRadius: 2 }}
         />
       </div>
       <p style={{ textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee' }}>{formatTime(preview.time, state.playing.duration)}</p>
