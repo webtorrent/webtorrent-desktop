@@ -797,7 +797,10 @@ function renderPreview (state) {
   const xPos = Math.min(Math.max(preview.x - (width / 2), 5), windowWidth - width - 5)
 
   return (
-    <div style={{ position: 'absolute', bottom: 50, left: xPos, display: preview.hide && 'none' }} key='preview'>
+    <div
+      key='preview'
+      style={{ position: 'absolute', bottom: 50, left: xPos, display: preview.hide && 'none' }}
+    >
       <div style={{ width, height, backgroundColor: 'black' }}>
         <video
           src={Playlist.getCurrentLocalURL(state)}
@@ -805,7 +808,13 @@ function renderPreview (state) {
           style={{ border: '1px solid lightgrey', borderRadius: 2 }}
         />
       </div>
-      <p style={{ textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee' }}>{formatTime(preview.time, state.playing.duration)}</p>
+      <p
+        style={{
+          textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee'
+        }}
+      >
+        {formatTime(preview.time, state.playing.duration)}
+      </p>
     </div>
   )
 }
