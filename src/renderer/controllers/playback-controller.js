@@ -158,6 +158,18 @@ module.exports = class PlaybackController {
     else this.state.playing.jumpToTime = time
   }
 
+  preview (time, x) {
+    if (!Number.isFinite(time)) {
+      console.error('Tried to skip to a non-finite time ' + time)
+      return console.trace()
+    }
+    this.state.playing.preview = { time, x }
+  }
+
+  clearPreview () {
+    this.state.playing.preview = null
+  }
+
   // Change playback speed. 1 = faster, -1 = slower
   // Playback speed ranges from 16 (fast forward) to 1 (normal playback)
   // to 0.25 (quarter-speed playback), then goes to -0.25, -0.5, -1, -2, etc

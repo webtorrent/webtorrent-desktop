@@ -536,6 +536,8 @@ function renderPlayerControls (state) {
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   const elements = [
+    renderPreview(state),
+
     <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
@@ -547,6 +549,8 @@ function renderPlayerControls (state) {
         key='scrub-bar'
         className='scrub-bar'
         draggable
+        onMouseOver={handleScrubPreview}
+        onMouseOut={clearPreview}
         onDragStart={handleDragStart}
         onClick={handleScrub}
         onDrag={handleScrub}
@@ -722,6 +726,20 @@ function renderPlayerControls (state) {
     }
   }
 
+  // Handles a scrub hover (preview another position in the video)
+  function handleScrubPreview (e) {
+    if (!e.clientX) return
+    dispatch('mediaMouseMoved')
+    const windowWidth = document.querySelector('body').clientWidth
+    const fraction = e.clientX / windowWidth
+    const position = fraction * state.playing.duration /* seconds */
+    dispatch('preview', position, e.clientX)
+  }
+
+  function clearPreview (e) {
+    dispatch('clearPreview')
+  }
+
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
     if (!e.clientX) return
@@ -758,6 +776,23 @@ function renderPlayerControls (state) {
   function handleAudioTracks (e) {
     dispatch('toggleAudioTracksMenu')
   }
+}
+
+function renderPreview (state) {
+  if (!state.playing.preview) {
+    return null
+  }
+
+  const width = 118
+
+  const xPos = Math.max(state.playing.preview.x - (width / 2), 5)
+
+  return (
+    <div style={{ position: 'absolute', bottom: 50, left: xPos }}>
+      <div style={{ width, height: 70, backgroundColor: 'blue', border: '2px solid lightgrey', borderRadius: 2 }} />
+      <p style={{ textAlign: 'center', margin: 5 }}>{formatTime(state.playing.preview.time, state.playing.duration)}</p>
+    </div>
+  )
 }
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
