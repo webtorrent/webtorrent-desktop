@@ -117,7 +117,7 @@ function torrentPosterFromAudio (torrent, cb) {
 
   const bestCover = imageFiles.map(file => {
     return {
-      file: file,
+      file,
       score: scoreAudioCoverFile(file)
     }
   }).reduce((a, b) => {

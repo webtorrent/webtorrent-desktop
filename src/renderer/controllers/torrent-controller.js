@@ -25,7 +25,7 @@ module.exports = class TorrentController {
       }
 
       torrentSummary = {
-        torrentKey: torrentKey,
+        torrentKey,
         status: 'new'
       }
       torrents.unshift(torrentSummary)
