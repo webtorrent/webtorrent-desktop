@@ -3,12 +3,10 @@ module.exports = {
 }
 
 const cp = require('child_process')
-const electron = require('electron')
+const { app } = require('electron')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-
-const app = electron.app
 
 const handlers = require('./handlers')
 

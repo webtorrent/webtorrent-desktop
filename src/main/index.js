@@ -1,7 +1,6 @@
 console.time('init')
 
-const electron = require('electron')
-const app = electron.app
+const { app, ipcMain } = require('electron')
 
 const parallel = require('run-parallel')
 
@@ -63,8 +62,6 @@ function init () {
     // Put Electron crash files, etc. into the "Portable Settings\Temp" folder
     app.setPath('temp', path.join(config.CONFIG_PATH, 'Temp'))
   }
-
-  const ipcMain = electron.ipcMain
 
   let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready

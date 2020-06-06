@@ -6,12 +6,12 @@ const webtorrent = module.exports = {
   win: null
 }
 
-const electron = require('electron')
+const { app, BrowserWindow } = require('electron')
 
 const config = require('../../config')
 
 function init () {
-  const win = webtorrent.win = new electron.BrowserWindow({
+  const win = webtorrent.win = new BrowserWindow({
     backgroundColor: '#1E1E1E',
     center: true,
     fullscreen: false,
@@ -35,7 +35,7 @@ function init () {
 
   // Prevent killing the WebTorrent process
   win.on('close', function (e) {
-    if (electron.app.isQuitting) {
+    if (app.isQuitting) {
       return
     }
     e.preventDefault()
