@@ -8,7 +8,6 @@ const cp = require('child_process')
 const electronPackager = require('electron-packager')
 const fs = require('fs')
 const minimist = require('minimist')
-const mkdirp = require('mkdirp')
 const os = require('os')
 const path = require('path')
 const rimraf = require('rimraf')
@@ -457,13 +456,13 @@ function buildWin32 (cb) {
       console.log('Windows: Creating portable app...')
 
       const portablePath = path.join(filesPath, 'Portable Settings')
-      mkdirp.sync(portablePath)
+      fs.mkdirSync(portablePath, { recursive: true })
 
       const downloadsPath = path.join(portablePath, 'Downloads')
-      mkdirp.sync(downloadsPath)
+      fs.mkdirSync(downloadsPath, { recursive: true })
 
       const tempPath = path.join(portablePath, 'Temp')
-      mkdirp.sync(tempPath)
+      fs.mkdirSync(tempPath, { recursive: true })
 
       const inPath = path.join(DIST_PATH, path.basename(filesPath))
       const outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')

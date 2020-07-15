@@ -7,7 +7,6 @@ const util = require('util')
 const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
@@ -216,7 +215,7 @@ function saveTorrentFile (torrentKey) {
     }
 
     // Otherwise, save the .torrent file, under the app config folder
-    mkdirp(config.TORRENT_PATH, function (_) {
+    fs.mkdir(config.TORRENT_PATH, { recursive: true }, function (_) {
       fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
@@ -233,7 +232,7 @@ function generateTorrentPoster (torrentKey) {
   torrentPoster(torrent, function (err, buf, extension) {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    mkdirp(config.POSTER_PATH, function (err) {
+    fs.mkdir(config.POSTER_PATH, { recursive: true }, function (err) {
       if (err) return console.log('error creating poster dir: %o', err)
       const posterFileName = torrent.infoHash + extension
       const posterFilePath = path.join(config.POSTER_PATH, posterFileName)

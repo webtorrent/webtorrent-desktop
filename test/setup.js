@@ -1,7 +1,6 @@
 const Application = require('spectron').Application
 const { copyFileSync } = require('fs')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
 const path = require('path')
 const PNG = require('pngjs').PNG
@@ -158,8 +157,8 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
 function resetTestDataDir () {
   rimraf.sync(config.TEST_DIR)
   // Create TEST_DIR as well as /Downloads and /Desktop
-  mkdirp.sync(config.TEST_DIR_DOWNLOAD)
-  mkdirp.sync(config.TEST_DIR_DESKTOP)
+  fs.mkdirSync(config.TEST_DIR_DOWNLOAD, { recursive: true })
+  fs.mkdirSync(config.TEST_DIR_DESKTOP, { recursive: true })
 }
 
 function deleteTestDataDir () {
