@@ -280,7 +280,7 @@ const dispatchHandlers = {
   changePlaybackRate: (dir) => controllers.playback().changePlaybackRate(dir),
   changeVolume: (delta) => controllers.playback().changeVolume(delta),
   setVolume: (vol) => controllers.playback().setVolume(vol),
-  openItem: (infoHash, index) => controllers.playback().openItem(infoHash, index),
+  openPath: (infoHash, index) => controllers.playback().openPath(infoHash, index),
 
   // Subtitles
   openSubtitles: () => controllers.subtitles().openSubtitles(),

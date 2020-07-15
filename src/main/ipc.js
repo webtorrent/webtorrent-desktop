@@ -141,9 +141,9 @@ function init () {
    * Shell
    */
 
-  ipc.on('openItem', (e, ...args) => {
+  ipc.on('openPath', (e, ...args) => {
     const shell = require('./shell')
-    shell.openItem(...args)
+    shell.openPath(...args)
   })
   ipc.on('showItemInFolder', (e, ...args) => {
     const shell = require('./shell')
