@@ -51,9 +51,9 @@
     "buble": "^0.20.0",
     "cross-zip": "^3.1.0",
     "depcheck": "^1.0.0",
-    "electron": "~7.2.4",
-    "electron-osx-sign": "^0.4.14",
-    "electron-packager": "^14.0.6",
+    "electron": "~9.1.0",
+    "electron-osx-sign": "^0.4.17",
+    "electron-packager": "^15.0.0",
     "electron-winstaller": "^4.0.1",
     "gh-release": "^3.5.0",
     "minimist": "^1.2.5",
@@ -62,7 +62,7 @@
     "plist": "^3.0.1",
     "pngjs": "^3.4.0",
     "run-series": "^1.1.8",
-    "spectron": "^9.0.0",
+    "spectron": "^11.1.0",
     "standard": "*",
     "tape": "^4.11.0",
     "walk-sync": "^2.2.0"
@@ -85,8 +85,8 @@
   "main": "index.js",
   "optionalDependencies": {
     "appdmg": "^0.6.0",
-    "electron-installer-debian": "^2.0.1",
-    "electron-installer-redhat": "^2.0.0"
+    "electron-installer-debian": "^3.1.0",
+    "electron-installer-redhat": "^3.1.0"
   },
   "private": true,
   "productName": "WebTorrent",
