@@ -52,7 +52,7 @@
     "buble": "^0.19.8",
     "cross-zip": "^3.0.0",
     "depcheck": "^0.9.0",
-    "electron": "~7.1.0",
+    "electron": "~7.2.4",
     "electron-osx-sign": "^0.4.14",
     "electron-packager": "^14.0.6",
     "electron-winstaller": "^4.0.0",
