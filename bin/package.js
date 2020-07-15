@@ -36,7 +36,7 @@ const argv = minimist(process.argv.slice(2), {
 })
 
 function build () {
-  console.log('Reinstalling node_modules...')
+  console.log('Installing node_modules...')
   rimraf.sync(NODE_MODULES_PATH)
   cp.execSync('npm ci', { stdio: 'inherit' })
 
