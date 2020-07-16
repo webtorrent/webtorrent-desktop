@@ -4,10 +4,13 @@
 
 🔒 This release contains a critical security fix. Please update as soon as possible.
 
+### Added
+
+- Add macOS Notarization [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
+
 ### Changed
 
 - Update to Electron 10 beta [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
-- Add macOS Notarization [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
 
 ## v0.22.0 - 2020-07-15
 
