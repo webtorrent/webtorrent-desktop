@@ -4,26 +4,26 @@
 
 ### Added
 
-- Add support for multiple audio tracks [\#1712](https://github.com/webtorrent/webtorrent-desktop/pull/1712) ([hicom150])(https://github.com/hicom150)
-- Improve codec unsupported detection [\#1711](https://github.com/webtorrent/webtorrent-desktop/pull/1711) ([hicom150])(https://github.com/hicom150)
-- Report when files are being verified [\#1717](https://github.com/webtorrent/webtorrent-desktop/pull/1717) ([pR0Ps])(https://github.com/pR0Ps)
-- Add rpm package creation support [\#1694](https://github.com/webtorrent/webtorrent-desktop/pull/1694) ([hicom150])(https://github.com/hicom150)
+- Linux `.rpm` packages and `arm64` builds are now available! [\#1694](https://github.com/webtorrent/webtorrent-desktop/pull/1694) ([hicom150](https://github.com/hicom150))
+- Add support for multiple audio tracks [\#1712](https://github.com/webtorrent/webtorrent-desktop/pull/1712) ([hicom150](https://github.com/hicom150))
+- Improve codec unsupported detection [\#1711](https://github.com/webtorrent/webtorrent-desktop/pull/1711) ([hicom150](https://github.com/hicom150))
+- Report when files are being verified [\#1717](https://github.com/webtorrent/webtorrent-desktop/pull/1717) ([pR0Ps](https://github.com/pR0Ps))
 - Support additional audio files: MPEG-Layer-2, Musepack, Matroska audio, WavePack [\#1772](https://github.com/webtorrent/webtorrent-desktop/pull/1772)
 - Update to Electron 9 [\#1729](https://github.com/webtorrent/webtorrent-desktop/pull/1729) [\#1832](https://github.com/webtorrent/webtorrent-desktop/issues/1832)
 
 ### Changed
 
-- Update to music-metadata 4.8.0 [\#1719](https://github.com/webtorrent/webtorrent-desktop/pull/1719) ([Borewit])(https://github.com/Borewit)
-- Update Windows build documentation [\#1715](https://github.com/webtorrent/webtorrent-desktop/pull/1715) ([RecoX])(https://github.com/RecoX)
+- Update to music-metadata 4.8.0 [\#1719](https://github.com/webtorrent/webtorrent-desktop/pull/1719) ([Borewit](https://github.com/Borewit))
+- Update Windows build documentation [\#1715](https://github.com/webtorrent/webtorrent-desktop/pull/1715) ([RecoX](https://github.com/RecoX))
 - Remove unneeded dependencies
 
 ### Fixed
 
-- Fix a few type errors [\#1720](https://github.com/webtorrent/webtorrent-desktop/pull/1720) ([mathiasvr])(https://github.com/mathiasvr)
-- Fix electron SUID sandbox error [\#1707](https://github.com/webtorrent/webtorrent-desktop/pull/1707) ([hicom150])(https://github.com/hicom150)
-- Fix percentage rounding error [\#1716](https://github.com/webtorrent/webtorrent-desktop/pull/1716) ([pR0Ps])(https://github.com/pR0Ps)
-- Fix path-selector in preferences page [\#1702](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([314eter])(https://github.com/314eter)
-- Fix path-selector in preferences page [\#1704](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([mathiasvr])(https://github.com/mathiasvr)
+- Fix a few type errors [\#1720](https://github.com/webtorrent/webtorrent-desktop/pull/1720) ([mathiasvr](https://github.com/mathiasvr))
+- Fix electron SUID sandbox error [\#1707](https://github.com/webtorrent/webtorrent-desktop/pull/1707) ([hicom150](https://github.com/hicom150))
+- Fix percentage rounding error [\#1716](https://github.com/webtorrent/webtorrent-desktop/pull/1716) ([pR0Ps](https://github.com/pR0Ps))
+- Fix path-selector in preferences page [\#1702](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([314eter](https://github.com/314eter))
+- Fix path-selector in preferences page [\#1704](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([mathiasvr](https://github.com/mathiasvr))
 - Fix: Increase height of 'About' window [\#1737](https://github.com/webtorrent/webtorrent-desktop/pull/1737)
 - Fix "Save Torrent File As..." [\#1743](https://github.com/webtorrent/webtorrent-desktop/pull/1743)
 
