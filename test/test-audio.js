@@ -12,7 +12,7 @@ test('audio-streaming', function (t) {
     .then(() => app.client.moveToObject('#torrent-wired'))
     .then(() => setup.wait())
     .then(() => app.client.click('#torrent-wired .icon.play'))
-    .then(() => app.client.waitUntilTextExists('.player', 'The Wired CD'))
+    .then(() => app.client.waitUntilTextExists('.player', 'Beastie Boys'))
     // Pause. Skip to two seconds in. Wait another two seconds for it to load.
     .then(() => app.webContents.executeJavaScript('dispatch("playPause")'))
     .then(() => app.webContents.executeJavaScript('dispatch("skipTo", 2)'))
@@ -45,6 +45,7 @@ test('audio-streaming', function (t) {
     // Back. Return to torrent list
     .then(() => app.client.click('.back'))
     .then(() => app.client.waitUntilTextExists('.torrent-list', 'Big Buck Bunny'))
+    .then(() => app.client.waitUntilTextExists('.torrent-list', 'Seeding', 60e3))
     .then(() => setup.screenshotCreateOrCompare(app, t, 'play-torrent-wired-list'))
     // Forward. Should play again where we left off (should not stay paused)
     .then(() => app.client.click('.forward'))
