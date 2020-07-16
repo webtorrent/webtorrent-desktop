@@ -12,13 +12,9 @@ const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
 
-const crashReporter = require('../crash-reporter')
 const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
-
-// Report when the process crashes
-crashReporter.init()
 
 // Send & receive messages from the main window
 const ipc = electron.ipcRenderer

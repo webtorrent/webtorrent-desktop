@@ -14,9 +14,6 @@ Module.prototype.require = function (id) {
 
 console.time('init')
 
-const crashReporter = require('../crash-reporter')
-crashReporter.init()
-
 // Perf optimization: Start asynchronously read on config file before all the
 // blocking require() calls below.
 
