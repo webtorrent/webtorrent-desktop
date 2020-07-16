@@ -46,6 +46,11 @@
 
   ```
   npm run package -- darwin --sign
+  ```
+
+  Move the `.zip` and `.dmg` file somewhere because the next step wipes the `dist/` folder away.
+
+  ```
   npm run package -- linux --sign
   ```
 
