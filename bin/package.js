@@ -266,6 +266,7 @@ function buildDarwin (cb) {
 
     function signApp (cb) {
       const sign = require('electron-osx-sign')
+      const { notarize } = require('electron-notarize')
 
       /*
        * Sign the app with Apple Developer ID certificates. We sign the app for 2 reasons:
@@ -281,16 +282,37 @@ function buildDarwin (cb) {
        *   - Membership in the Apple Developer Program
        */
       const signOpts = {
+        verbose: true,
         app: appPath,
         platform: 'darwin',
-        verbose: true
+        identity: 'Developer ID Application: WebTorrent, LLC (5MAMC8G3L8)',
+        hardenedRuntime: true,
+        entitlements: path.join(config.ROOT_PATH, 'bin', 'darwin-entitlements.plist'),
+        'entitlements-inherit': path.join(config.ROOT_PATH, 'bin', 'darwin-entitlements.plist'),
+        'signature-flags': 'library'
+      }
+
+      const notarizeOpts = {
+        appBundleId: darwin.appBundleId,
+        appPath,
+        appleId: 'feross@feross.org',
+        appleIdPassword: '@keychain:AC_PASSWORD'
       }
 
       console.log('Mac: Signing app...')
       sign(signOpts, function (err) {
         if (err) return cb(err)
         console.log('Mac: Signed app.')
-        cb(null)
+
+        console.log('Mac: Notarizing app...')
+        notarize(notarizeOpts).then(
+          function () {
+            console.log('Mac: Notarized app.')
+            cb(null)
+          },
+          function (err) {
+            cb(err)
+          })
       })
     }
 
