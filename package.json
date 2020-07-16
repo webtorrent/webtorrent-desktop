@@ -60,11 +60,11 @@
     "nodemon": "^2.0.4",
     "open": "^7.0.4",
     "plist": "^3.0.1",
-    "pngjs": "^3.4.0",
+    "pngjs": "^5.0.0",
     "run-series": "^1.1.8",
     "spectron": "~11.0.0",
     "standard": "*",
-    "tape": "^4.11.0",
+    "tape": "^5.0.1",
     "walk-sync": "^2.2.0"
   },
   "engines": {
