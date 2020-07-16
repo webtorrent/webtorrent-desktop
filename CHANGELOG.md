@@ -1,5 +1,13 @@
 # WebTorrent Desktop Version History
 
+## v0.23.0 - 2020-07-15
+
+This release contains a critical security fix.
+
+### Changed
+
+- Update to Electron 10 beta [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834)
+
 ## v0.22.0 - 2020-07-15
 
 ### Added
@@ -9,10 +17,10 @@
 - Improve codec unsupported detection [\#1711](https://github.com/webtorrent/webtorrent-desktop/pull/1711) ([hicom150](https://github.com/hicom150))
 - Report when files are being verified [\#1717](https://github.com/webtorrent/webtorrent-desktop/pull/1717) ([pR0Ps](https://github.com/pR0Ps))
 - Support additional audio files: MPEG-Layer-2, Musepack, Matroska audio, WavePack [\#1772](https://github.com/webtorrent/webtorrent-desktop/pull/1772)
-- Update to Electron 9 [\#1729](https://github.com/webtorrent/webtorrent-desktop/pull/1729) [\#1832](https://github.com/webtorrent/webtorrent-desktop/issues/1832)
 
 ### Changed
 
+- Update to Electron 9 [\#1729](https://github.com/webtorrent/webtorrent-desktop/pull/1729) [\#1832](https://github.com/webtorrent/webtorrent-desktop/issues/1832)
 - Update to music-metadata 4.8.0 [\#1719](https://github.com/webtorrent/webtorrent-desktop/pull/1719) ([Borewit](https://github.com/Borewit))
 - Update Windows build documentation [\#1715](https://github.com/webtorrent/webtorrent-desktop/pull/1715) ([RecoX](https://github.com/RecoX))
 - Remove unneeded dependencies
