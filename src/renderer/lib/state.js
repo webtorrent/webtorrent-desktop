@@ -3,6 +3,7 @@ const path = require('path')
 const { EventEmitter } = require('events')
 
 const config = require('../../config')
+const defaultAnnounceList = require('create-torrent').announceList
 
 const SAVE_DEBOUNCE_INTERVAL = 1000
 
@@ -79,6 +80,7 @@ function getDefaultState () {
     getPlayingTorrentSummary,
     getPlayingFileSummary,
     getExternalPlayerName,
+    getGlobalTrackers,
     shouldHidePlayerControls
   }
 }
@@ -129,7 +131,8 @@ function setupStateSaved () {
       soundNotifications: true,
       autoAddTorrents: false,
       torrentsFolderPath: '',
-      highestPlaybackPriority: true
+      highestPlaybackPriority: true,
+      globalTrackers: ['aaa']
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],
@@ -200,6 +203,14 @@ function shouldHidePlayerControls () {
     !this.playing.isPaused &&
     this.playing.location === 'local' &&
     this.playing.playbackRate === 1
+}
+
+function getGlobalTrackers () {
+  const trackers = this.saved.prefs.globalTrackers
+  if (!trackers) {
+    return defaultAnnounceList
+  }
+  return trackers
 }
 
 async function load (cb) {

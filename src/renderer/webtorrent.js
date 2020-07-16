@@ -4,7 +4,6 @@ console.time('init')
 
 const crypto = require('crypto')
 const util = require('util')
-const defaultAnnounceList = require('create-torrent').announceList
 const electron = require('electron')
 const fs = require('fs')
 const mm = require('music-metadata')
@@ -16,13 +15,17 @@ const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 
+const State = require('./lib/state')
+State.load((err, state) => {
+  if (err) return onError(err)
+
+  global.WEBTORRENT_ANNOUNCE = state.getGlobalTrackers()
+
+  init()
+})
+
 // Send & receive messages from the main window
 const ipc = electron.ipcRenderer
-
-// Force use of webtorrent trackers on all torrents
-global.WEBTORRENT_ANNOUNCE = defaultAnnounceList
-  .map((arr) => arr[0])
-  .filter((url) => url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0)
 
 /**
  * WebTorrent version.
@@ -62,8 +65,6 @@ let server = null
 
 // Used for diffing, so we only send progress updates when necessary
 let prevProgress = null
-
-init()
 
 function init () {
   listenToClientEvents()
