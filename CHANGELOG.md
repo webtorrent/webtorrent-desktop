@@ -2,13 +2,16 @@
 
 ## v0.23.0 - 2020-07-15
 
-This release contains a critical security fix.
+🔒 This release contains a critical security fix. Please update as soon as possible.
 
 ### Changed
 
-- Update to Electron 10 beta [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834)
+- Update to Electron 10 beta [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
+- Add macOS Notarization [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
 
 ## v0.22.0 - 2020-07-15
+
+❤️✨ A new version of WebTorrent Desktop is out! ❤️✨
 
 ### Added
 
@@ -23,7 +26,7 @@ This release contains a critical security fix.
 - Update to Electron 9 [\#1729](https://github.com/webtorrent/webtorrent-desktop/pull/1729) [\#1832](https://github.com/webtorrent/webtorrent-desktop/issues/1832)
 - Update to music-metadata 4.8.0 [\#1719](https://github.com/webtorrent/webtorrent-desktop/pull/1719) ([Borewit](https://github.com/Borewit))
 - Update Windows build documentation [\#1715](https://github.com/webtorrent/webtorrent-desktop/pull/1715) ([RecoX](https://github.com/RecoX))
-- Remove unneeded dependencies
+- Remove unneeded dependencies ([feross](https://github.com/feross))
 
 ### Fixed
 
@@ -32,8 +35,8 @@ This release contains a critical security fix.
 - Fix percentage rounding error [\#1716](https://github.com/webtorrent/webtorrent-desktop/pull/1716) ([pR0Ps](https://github.com/pR0Ps))
 - Fix path-selector in preferences page [\#1702](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([314eter](https://github.com/314eter))
 - Fix path-selector in preferences page [\#1704](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([mathiasvr](https://github.com/mathiasvr))
-- Fix: Increase height of 'About' window [\#1737](https://github.com/webtorrent/webtorrent-desktop/pull/1737)
-- Fix "Save Torrent File As..." [\#1743](https://github.com/webtorrent/webtorrent-desktop/pull/1743)
+- Fix: Increase height of 'About' window [\#1737](https://github.com/webtorrent/webtorrent-desktop/pull/1737) ([akaustav](https://github.com/akaustav))
+- Fix "Save Torrent File As..." [\#1743](https://github.com/webtorrent/webtorrent-desktop/pull/1743) ([gpatarin](https://github.com/gpatarin))
 
 ## v0.21.0 - 2019-09-14
 
