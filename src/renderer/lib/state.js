@@ -3,7 +3,7 @@ const path = require('path')
 const { EventEmitter } = require('events')
 
 const config = require('../../config')
-const defaultAnnounceList = require('create-torrent').announceList
+const defaultAnnounceList = require('create-torrent').announceList.map((arr) => arr[0])
 
 const SAVE_DEBOUNCE_INTERVAL = 1000
 
@@ -132,7 +132,7 @@ function setupStateSaved () {
       autoAddTorrents: false,
       torrentsFolderPath: '',
       highestPlaybackPriority: true,
-      globalTrackers: ['aaa']
+      globalTrackers: defaultAnnounceList
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
     torrentsToResume: [],
