@@ -153,9 +153,7 @@ function getMenuTemplate () {
         {
           label: 'Full Screen',
           type: 'checkbox',
-          accelerator: process.platform === 'darwin'
-            ? 'Ctrl+Command+F'
-            : 'F11',
+          accelerator: 'F',
           click: () => windows.main.toggleFullScreen()
         },
         {
@@ -224,13 +222,13 @@ function getMenuTemplate () {
         },
         {
           label: 'Increase Volume',
-          accelerator: 'CmdOrCtrl+Up',
+          accelerator: 'Up',
           click: () => windows.main.dispatch('changeVolume', 0.1),
           enabled: false
         },
         {
           label: 'Decrease Volume',
-          accelerator: 'CmdOrCtrl+Down',
+          accelerator: 'Down',
           click: () => windows.main.dispatch('changeVolume', -0.1),
           enabled: false
         },
@@ -239,18 +237,14 @@ function getMenuTemplate () {
         },
         {
           label: 'Step Forward',
-          accelerator: process.platform === 'darwin'
-            ? 'CmdOrCtrl+Alt+Right'
-            : 'Alt+Right',
-          click: () => windows.main.dispatch('skip', 10),
+          accelerator: 'Right',
+          click: () => windows.main.dispatch('skip', 5),
           enabled: false
         },
         {
           label: 'Step Backward',
-          accelerator: process.platform === 'darwin'
-            ? 'CmdOrCtrl+Alt+Left'
-            : 'Alt+Left',
-          click: () => windows.main.dispatch('skip', -10),
+          accelerator: 'Left',
+          click: () => windows.main.dispatch('skip', -5),
           enabled: false
         },
         {
@@ -258,13 +252,13 @@ function getMenuTemplate () {
         },
         {
           label: 'Increase Speed',
-          accelerator: 'CmdOrCtrl+=',
+          accelerator: '>',
           click: () => windows.main.dispatch('changePlaybackRate', 1),
           enabled: false
         },
         {
           label: 'Decrease Speed',
-          accelerator: 'CmdOrCtrl+-',
+          accelerator: '<',
           click: () => windows.main.dispatch('changePlaybackRate', -1),
           enabled: false
         },

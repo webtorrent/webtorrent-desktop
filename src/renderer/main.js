@@ -149,9 +149,6 @@ function onState (err, _state) {
   // ...same thing if you paste a torrent
   document.addEventListener('paste', onPaste)
 
-  // Add YouTube style hotkey shortcuts
-  window.addEventListener('keydown', onKeydown)
-
   const debouncedFullscreenToggle = debounce(function () {
     dispatch('toggleFullScreen')
   }, 1000, true)
@@ -516,34 +513,6 @@ const editableHtmlTags = new Set(['input', 'textarea'])
 function onPaste (e) {
   if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
-
-  update()
-}
-
-function onKeydown (e) {
-  const key = e.key
-
-  if (key === 'ArrowLeft') {
-    dispatch('skip', -5)
-  } else if (key === 'ArrowRight') {
-    dispatch('skip', 5)
-  } else if (key === 'ArrowUp') {
-    dispatch('changeVolume', 0.1)
-  } else if (key === 'ArrowDown') {
-    dispatch('changeVolume', -0.1)
-  } else if (key === 'j') {
-    dispatch('skip', -10)
-  } else if (key === 'l') {
-    dispatch('skip', 10)
-  } else if (key === 'k') {
-    dispatch('playPause')
-  } else if (key === '>') {
-    dispatch('changePlaybackRate', 1)
-  } else if (key === '<') {
-    dispatch('changePlaybackRate', -1)
-  } else if (key === 'f') {
-    dispatch('toggleFullScreen')
-  }
 
   update()
 }
