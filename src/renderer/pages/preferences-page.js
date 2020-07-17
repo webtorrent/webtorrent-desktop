@@ -269,6 +269,7 @@ class PreferencesPage extends React.Component {
       .filter((s) => s !== '')
 
     dispatch('updatePreferences', 'globalTrackers', announceList)
+    dispatch('updateGlobalTrackers', announceList)
   }
 
   render () {

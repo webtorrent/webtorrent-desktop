@@ -15,15 +15,6 @@ const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
 
-const State = require('./lib/state')
-State.load((err, state) => {
-  if (err) return onError(err)
-
-  global.WEBTORRENT_ANNOUNCE = state.getGlobalTrackers()
-
-  init()
-})
-
 // Send & receive messages from the main window
 const ipc = electron.ipcRenderer
 
@@ -66,9 +57,13 @@ let server = null
 // Used for diffing, so we only send progress updates when necessary
 let prevProgress = null
 
+init()
+
 function init () {
   listenToClientEvents()
 
+  ipc.on('wt-set-global-trackers', (e, globalTrackers) =>
+    setGlobalTrackers(globalTrackers))
   ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
     startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
   ipc.on('wt-stop-torrenting', (e, infoHash) =>
@@ -101,6 +96,11 @@ function init () {
 function listenToClientEvents () {
   client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
   client.on('error', (err) => ipc.send('wt-error', null, err.message))
+}
+
+// Sets the default trackers
+function setGlobalTrackers (globalTrackers) {
+  global.WEBTORRENT_ANNOUNCE = globalTrackers
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc.
