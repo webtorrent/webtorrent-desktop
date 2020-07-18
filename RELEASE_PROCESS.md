@@ -46,6 +46,11 @@
 
   ```
   npm run package -- darwin --sign
+  ```
+
+  Move the `.zip` and `.dmg` file somewhere because the next step wipes the `dist/` folder away.
+
+  ```
   npm run package -- linux --sign
   ```
 
@@ -100,10 +105,10 @@ Before a release, check that the following basic use cases work correctly:
   - Ensure that sintel.mp4 gets downloaded to `~/Downloads`.
 
 2. Check that the auto-updater works
-  - Open the console and check for the line "No update available" to indicate
+  - Open the console and check for the line "No update available" to indicate that the auto-updater is working.
 
 3. Add a new .torrent file via drag-and-drop.
-  - Ensure that it gets added to the list and starts downloading
+  - Ensure that it gets added to the list and starts downloading.
 
 4. Remove a torrent from the client
   - Ensure that the file is removed from `~/Downloads`

@@ -26,7 +26,8 @@ function init () {
     useContentSize: true,
     webPreferences: {
       nodeIntegration: true,
-      enableBlinkFeatures: 'AudioVideoTracks'
+      enableBlinkFeatures: 'AudioVideoTracks',
+      enableRemoteModule: true
     },
     width: 150
   })

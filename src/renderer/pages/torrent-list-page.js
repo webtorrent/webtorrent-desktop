@@ -284,10 +284,17 @@ module.exports = class TorrentList extends React.Component {
       )
     } else {
       // We do know the files. List them and show download stats for each one
-      const fileRows = torrentSummary.files
+      const sortByName = this.props.state.saved.prefs.sortByName
+      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+      let fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
-        .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
+
+      if (sortByName) {
+        fileRows = fileRows.sort((a, b) => collator.compare(a.file.name, b.file.name))
+      }
+
+      fileRows = fileRows.map((obj) => this.renderFileRow(torrentSummary, obj.file, obj.index))
 
       filesElement = (
         <div key='files' className='files'>
@@ -339,7 +346,7 @@ module.exports = class TorrentList extends React.Component {
     } else {
       icon = 'description' /* file icon, opens in OS default app */
       handleClick = isDone
-        ? dispatcher('openItem', infoHash, index)
+        ? dispatcher('openPath', infoHash, index)
         : (e) => e.stopPropagation() // noop if file is not ready
     }
     // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed

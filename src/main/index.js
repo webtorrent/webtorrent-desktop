@@ -3,10 +3,13 @@ console.time('init')
 const electron = require('electron')
 const app = electron.app
 
+// Start crash reporter early, so it takes effect for child processes
+const crashReporter = require('../crash-reporter')
+crashReporter.init()
+
 const parallel = require('run-parallel')
 
 const config = require('../config')
-const crashReporter = require('../crash-reporter')
 const ipc = require('./ipc')
 const log = require('./log')
 const menu = require('./menu')
@@ -81,7 +84,7 @@ function init () {
     isReady = true
     const state = results.state
 
-    windows.main.init(state, { hidden: hidden })
+    windows.main.init(state, { hidden })
     windows.webtorrent.init()
     menu.init()
 
@@ -108,10 +111,6 @@ function init () {
   app.on('open-url', onOpen)
 
   ipc.init()
-
-  app.once('will-finish-launching', function () {
-    crashReporter.init()
-  })
 
   app.once('ipcReady', function () {
     log('Command line args:', argv)

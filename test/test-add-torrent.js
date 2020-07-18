@@ -38,18 +38,19 @@ test('create-torrent', function (t) {
 
   const expectedTorrent = {
     announce: [
-      'udp://explodie.org:6969',
-      'udp://tracker.coppersurfer.tk:6969',
-      'udp://tracker.empire-js.us:1337',
       'udp://tracker.leechers-paradise.org:6969',
+      'udp://tracker.coppersurfer.tk:6969',
       'udp://tracker.opentrackr.org:1337',
+      'udp://explodie.org:6969',
+      'udp://tracker.empire-js.us:1337',
       'wss://tracker.btorrent.xyz',
-      'wss://tracker.fastcast.nz',
       'wss://tracker.openwebtorrent.com'
     ],
     infoHash: 'b31a80b3dd807c2fdde4c4da1a0db6123fa35883',
     name: 'tmp.jpg',
-    urlList: []
+    urlList: [],
+    comment: undefined,
+    private: undefined
   }
 
   // Set up the files to seed
@@ -77,9 +78,7 @@ test('create-torrent', function (t) {
       'dispatch("saveTorrentFileAs", 6)'))
     .then(() => setup.wait())
     // Mock saves to <temp folder>/Desktop/saved.torrent
-    .then(() => setup.compareTorrentFile(t,
-      config.SAVED_TORRENT_FILE,
-      expectedTorrent))
+    .then(() => setup.compareTorrentFile(t, config.SAVED_TORRENT_FILE, expectedTorrent))
     .then(() => setup.endTest(app, t),
       (err) => setup.endTest(app, t, err || 'error'))
 })

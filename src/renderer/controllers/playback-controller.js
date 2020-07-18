@@ -61,12 +61,12 @@ module.exports = class PlaybackController {
   }
 
   // Open a file in OS default app.
-  openItem (infoHash, index) {
+  openPath (infoHash, index) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const filePath = path.join(
       torrentSummary.path,
       torrentSummary.files[index].path)
-    ipcRenderer.send('openItem', filePath)
+    ipcRenderer.send('openPath', filePath)
   }
 
   // Toggle (play or pause) the currently playing media

@@ -26,7 +26,7 @@ module.exports = class MediaController {
       ipcRenderer.once('checkForExternalPlayer', function (e, isInstalled) {
         state.modal = {
           id: 'unsupported-media-modal',
-          error: error,
+          error,
           externalPlayerInstalled: isInstalled
         }
       })

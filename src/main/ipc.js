@@ -141,9 +141,9 @@ function init () {
    * Shell
    */
 
-  ipc.on('openItem', (e, ...args) => {
+  ipc.on('openPath', (e, ...args) => {
     const shell = require('./shell')
-    shell.openItem(...args)
+    shell.openPath(...args)
   })
   ipc.on('showItemInFolder', (e, ...args) => {
     const shell = require('./shell')
@@ -235,8 +235,8 @@ function init () {
       } else {
         // Queue message for webtorrent window, it hasn't finished loading yet
         messageQueueMainToWebTorrent.push({
-          name: name,
-          args: args
+          name,
+          args
         })
         log('webtorrent: queueing %s', name)
       }

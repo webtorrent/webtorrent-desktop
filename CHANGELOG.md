@@ -1,6 +1,47 @@
 # WebTorrent Desktop Version History
 
-## v0.21.0 - 2019-08
+## v0.23.0 - 2020-07-15
+
+🔒 This release contains a critical security fix. Please update as soon as possible.
+
+### Added
+
+- Add macOS Notarization [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
+
+### Changed
+
+- Update to Electron 10 beta [\#1834](https://github.com/webtorrent/webtorrent-desktop/pull/1834) ([feross](https://github.com/feross))
+
+## v0.22.0 - 2020-07-15
+
+❤️✨ A new version of WebTorrent Desktop is out! ❤️✨
+
+### Added
+
+- Linux `.rpm` packages and `arm64` builds are now available! [\#1694](https://github.com/webtorrent/webtorrent-desktop/pull/1694) ([hicom150](https://github.com/hicom150))
+- Add support for multiple audio tracks [\#1712](https://github.com/webtorrent/webtorrent-desktop/pull/1712) ([hicom150](https://github.com/hicom150))
+- Improve codec unsupported detection [\#1711](https://github.com/webtorrent/webtorrent-desktop/pull/1711) ([hicom150](https://github.com/hicom150))
+- Report when files are being verified [\#1717](https://github.com/webtorrent/webtorrent-desktop/pull/1717) ([pR0Ps](https://github.com/pR0Ps))
+- Support additional audio files: MPEG-Layer-2, Musepack, Matroska audio, WavePack [\#1772](https://github.com/webtorrent/webtorrent-desktop/pull/1772)
+
+### Changed
+
+- Update to Electron 9 [\#1729](https://github.com/webtorrent/webtorrent-desktop/pull/1729) [\#1832](https://github.com/webtorrent/webtorrent-desktop/issues/1832)
+- Update to music-metadata 4.8.0 [\#1719](https://github.com/webtorrent/webtorrent-desktop/pull/1719) ([Borewit](https://github.com/Borewit))
+- Update Windows build documentation [\#1715](https://github.com/webtorrent/webtorrent-desktop/pull/1715) ([RecoX](https://github.com/RecoX))
+- Remove unneeded dependencies ([feross](https://github.com/feross))
+
+### Fixed
+
+- Fix a few type errors [\#1720](https://github.com/webtorrent/webtorrent-desktop/pull/1720) ([mathiasvr](https://github.com/mathiasvr))
+- Fix electron SUID sandbox error [\#1707](https://github.com/webtorrent/webtorrent-desktop/pull/1707) ([hicom150](https://github.com/hicom150))
+- Fix percentage rounding error [\#1716](https://github.com/webtorrent/webtorrent-desktop/pull/1716) ([pR0Ps](https://github.com/pR0Ps))
+- Fix path-selector in preferences page [\#1702](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([314eter](https://github.com/314eter))
+- Fix path-selector in preferences page [\#1704](https://github.com/webtorrent/webtorrent-desktop/pull/1702) ([mathiasvr](https://github.com/mathiasvr))
+- Fix: Increase height of 'About' window [\#1737](https://github.com/webtorrent/webtorrent-desktop/pull/1737) ([akaustav](https://github.com/akaustav))
+- Fix "Save Torrent File As..." [\#1743](https://github.com/webtorrent/webtorrent-desktop/pull/1743) ([gpatarin](https://github.com/gpatarin))
+
+## v0.21.0 - 2019-09-14
 
 ### Added
 

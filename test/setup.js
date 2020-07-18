@@ -1,7 +1,6 @@
 const Application = require('spectron').Application
 const { copyFileSync } = require('fs')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
 const path = require('path')
 const PNG = require('pngjs').PNG
@@ -97,22 +96,24 @@ function screenshotCreateOrCompare (app, t, name) {
   } catch (err) {
     ssBuf = Buffer.alloc(0)
   }
-  return wait().then(function () {
-    return app.browserWindow.capturePage()
-  }).then(function (buffer) {
-    if (ssBuf.length === 0) {
-      console.log('Saving screenshot ' + ssPath)
-      fs.writeFileSync(ssPath, buffer)
-    } else {
-      const match = compareIgnoringTransparency(buffer, ssBuf)
-      t.ok(match, 'screenshot comparison ' + name)
-      if (!match) {
-        const ssFailedPath = path.join(ssDir, name + '-failed.png')
-        console.log('Saving screenshot, failed comparison: ' + ssFailedPath)
-        fs.writeFileSync(ssFailedPath, buffer)
+
+  return app.browserWindow.focus()
+    .then(() => wait())
+    .then(() => app.browserWindow.capturePage())
+    .then(function (buffer) {
+      if (ssBuf.length === 0) {
+        console.log('Saving screenshot ' + ssPath)
+        fs.writeFileSync(ssPath, buffer)
+      } else {
+        const match = compareIgnoringTransparency(buffer, ssBuf)
+        t.ok(match, 'screenshot comparison ' + name)
+        if (!match) {
+          const ssFailedPath = path.join(ssDir, name + '-failed.png')
+          console.log('Saving screenshot, failed comparison: ' + ssFailedPath)
+          fs.writeFileSync(ssFailedPath, buffer)
+        }
       }
-    }
-  })
+    })
 }
 
 // Compares two PNGs, ignoring any transparent regions in bufExpected.
@@ -158,8 +159,8 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
 function resetTestDataDir () {
   rimraf.sync(config.TEST_DIR)
   // Create TEST_DIR as well as /Downloads and /Desktop
-  mkdirp.sync(config.TEST_DIR_DOWNLOAD)
-  mkdirp.sync(config.TEST_DIR_DESKTOP)
+  fs.mkdirSync(config.TEST_DIR_DOWNLOAD, { recursive: true })
+  fs.mkdirSync(config.TEST_DIR_DESKTOP, { recursive: true })
 }
 
 function deleteTestDataDir () {
@@ -178,6 +179,7 @@ function compareDownloadFolder (t, dirname, filenames) {
     }
     const expectedSorted = filenames.slice().sort()
     const actualSorted = actualFilenames.slice().sort()
+    console.log(actualSorted)
     t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
   } catch (err) {
     if (err.code === 'ENOENT') {
@@ -210,12 +212,14 @@ function compareTorrentFiles (t, pathActual, pathExpected) {
 function compareTorrentFile (t, pathActual, fieldsExpected) {
   const bufActual = fs.readFileSync(pathActual)
   const fieldsActual = extractImportantFields(parseTorrent(bufActual))
+  if (Array.isArray(fieldsExpected.announce)) fieldsExpected.announce.sort()
   t.deepEqual(fieldsActual, fieldsExpected, 'torrent contents: ' + pathActual)
 }
 
 function extractImportantFields (parsedTorrent) {
-  const { infoHash, name, announce, urlList, comment } = parsedTorrent
+  let { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
+  announce = announce.slice().sort()
   return { infoHash, name, announce, urlList, comment, private: priv }
 }
 

@@ -29,7 +29,7 @@ function run (state) {
   if (semver.lt(version, '0.17.0')) migrate_0_17_0(saved)
   if (semver.lt(version, '0.17.2')) migrate_0_17_2(saved)
   if (semver.lt(version, '0.21.0')) migrate_0_21_0(saved)
-  if (semver.lt(version, '0.21.1')) migrate_0_21_1(saved)
+  if (semver.lt(version, '0.22.0')) migrate_0_22_0(saved)
 
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
@@ -216,7 +216,7 @@ function migrate_0_21_0 (saved) {
   }
 }
 
-function migrate_0_21_1 (saved) {
+function migrate_0_22_0 (saved) {
   if (saved.prefs.externalPlayerPath == null) {
     saved.prefs.externalPlayerPath = ''
   }

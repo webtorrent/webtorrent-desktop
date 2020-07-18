@@ -55,7 +55,7 @@ module.exports = class TorrentListController {
     if (files.length === 0 || typeof files[0] !== 'string') {
       this.state.location.go({
         url: 'create-torrent',
-        files: files,
+        files,
         setup: (cb) => {
           this.state.window.title = 'Create New Torrent'
           cb(null)
@@ -296,6 +296,16 @@ module.exports = class TorrentListController {
       label: 'Save Torrent File As...',
       click: () => dispatch('saveTorrentFileAs', torrentSummary.torrentKey),
       enabled: torrentSummary.torrentFileName != null
+    }))
+
+    menu.append(new electron.remote.MenuItem({
+      type: 'separator'
+    }))
+
+    const sortedByName = this.state.saved.prefs.sortByName
+    menu.append(new electron.remote.MenuItem({
+      label: `${sortedByName ? '✓ ' : ''}Sort by Name`,
+      click: () => dispatch('updatePreferences', 'sortByName', !sortedByName)
     }))
 
     menu.popup({ window: electron.remote.getCurrentWindow() })
