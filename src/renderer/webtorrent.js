@@ -343,7 +343,10 @@ function getAudioMetadata (infoHash, index) {
     skipCovers: true,
     fileSize: file.length,
     observer: event => {
-      ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
+      ipc.send('wt-audio-metadata', infoHash, index, {
+        common: metadata.common,
+        format: metadata.format
+      })
     }
   }
   const onMetadata = file.done
