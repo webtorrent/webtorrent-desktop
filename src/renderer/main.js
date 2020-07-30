@@ -521,6 +521,9 @@ function onPaste (e) {
 }
 
 function onKeydown (e) {
+  // prevent event fire on user input elements
+  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+
   const key = e.key
 
   if (key === 'ArrowLeft') {
