@@ -17,12 +17,12 @@ let proc = null
 function checkInstall (playerPath, cb) {
   // check for VLC if external player has not been specified by the user
   // otherwise assume the player is installed
-  if (playerPath == null) return vlcCommand(cb)
+  if (!playerPath) return vlcCommand(cb)
   process.nextTick(() => cb(null))
 }
 
 function spawn (playerPath, url, title) {
-  if (playerPath != null) return spawnExternal(playerPath, [url])
+  if (playerPath) return spawnExternal(playerPath, [url])
 
   // Try to find and use VLC if external player is not specified
   vlcCommand((err, vlcPath) => {
