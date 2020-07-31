@@ -735,6 +735,7 @@ function renderPlayerControls (state) {
   }
 
   function clearPreview (e) {
+    if (state.playing.type !== 'video') return
     dispatch('clearPreview')
   }
 
