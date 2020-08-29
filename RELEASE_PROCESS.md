@@ -105,5 +105,5 @@
   Create a pull request in [webtorrent.io](https://github.com/webtorrent/webtorrent.io). Update
   `config.js`, updating the desktop app version.
 
-  As soon as this PR is merged, Jenkins will automatically redeploy the WebTorrent website, and
+  Once this PR is merged and Feross redeploys the WebTorrent website,
   hundreds of thousands of users around the world will start auto updating. **Merge with care.**
