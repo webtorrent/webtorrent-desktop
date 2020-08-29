@@ -11,7 +11,7 @@ Actions=CreateNewTorrent;OpenTorrentFile;OpenTorrentAddress;
 <% if (mimeType && mimeType.length) { %>MimeType=<%= mimeType.join(';') %>;<% } %>
 <% if (categories && categories.length) { %>Categories=<%= categories.join(';') %>;<% } %>
 StartupNotify=true
-<% if (name) { %>StartupWMClass=<%= name %> <% } %>
+StartupWMClass=<%= productName %>
 
 [Desktop Action CreateNewTorrent]
 Name=Create New Torrent...
