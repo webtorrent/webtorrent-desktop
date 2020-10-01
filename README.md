@@ -182,7 +182,7 @@ WebTorrent Desktop collects some basic usage stats to help us make the app bette
 For example, we track how well the play button works. How often does it succeed?
 Time out? Show a missing codec error?
 
-The app never sends any personally identifying information, nor does it track which
+The app never sends any personally identifying information, nor track which
 torrents you add.
 
 ## License
