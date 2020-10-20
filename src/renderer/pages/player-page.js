@@ -536,6 +536,8 @@ function renderPlayerControls (state) {
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   const elements = [
+    renderPreview(state),
+
     <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
@@ -547,6 +549,8 @@ function renderPlayerControls (state) {
         key='scrub-bar'
         className='scrub-bar'
         draggable
+        onMouseMove={handleScrubPreview}
+        onMouseOut={clearPreview}
         onDragStart={handleDragStart}
         onClick={handleScrub}
         onDrag={handleScrub}
@@ -722,6 +726,19 @@ function renderPlayerControls (state) {
     }
   }
 
+  // Handles a scrub hover (preview another position in the video)
+  function handleScrubPreview (e) {
+    // Only show for videos
+    if (!e.clientX || state.playing.type !== 'video') return
+    dispatch('mediaMouseMoved')
+    dispatch('preview', e.clientX)
+  }
+
+  function clearPreview (e) {
+    if (state.playing.type !== 'video') return
+    dispatch('clearPreview')
+  }
+
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
     if (!e.clientX) return
@@ -758,6 +775,56 @@ function renderPlayerControls (state) {
   function handleAudioTracks (e) {
     dispatch('toggleAudioTracksMenu')
   }
+}
+
+function renderPreview (state) {
+  const { previewXCoord = null } = state.playing
+
+  // Calculate time from x-coord as fraction of track width
+  const windowWidth = document.querySelector('body').clientWidth
+  const fraction = previewXCoord / windowWidth
+  const time = fraction * state.playing.duration /* seconds */
+
+  const height = 70
+  let width = 0
+
+  const previewEl = document.querySelector('video#preview')
+  if (previewEl !== null && previewXCoord !== null) {
+    previewEl.currentTime = time
+
+    // Auto adjust width to maintain video aspect ratio
+    width = Math.floor((previewEl.videoWidth / previewEl.videoHeight) * height)
+  }
+
+  // Center preview window on mouse cursor,
+  // while avoiding falling off the left or right edges
+  const xPos = Math.min(Math.max(previewXCoord - (width / 2), 5), windowWidth - width - 5)
+
+  return (
+    <div
+      key='preview' style={{
+        position: 'absolute',
+        bottom: 50,
+        left: xPos,
+        display: previewXCoord == null && 'none' // Hide preview when XCoord unset
+      }}
+    >
+      <div style={{ width, height, backgroundColor: 'black' }}>
+        <video
+          src={Playlist.getCurrentLocalURL(state)}
+          id='preview'
+          style={{ border: '1px solid lightgrey', borderRadius: 2 }}
+        />
+      </div>
+      <p
+        style={{
+          textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee'
+        }}
+      >
+        {formatTime(time, state.playing.duration)}
+      </p>
+    </div>
+  )
 }
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
