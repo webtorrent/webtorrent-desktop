@@ -659,10 +659,14 @@ function renderPlayerControls (state) {
   // Render volume slider
   const volume = state.playing.volume
   const volumeIcon = 'volume_' + (
-    volume === 0 ? 'off'
-      : volume < 0.3 ? 'mute'
-        : volume < 0.6 ? 'down'
-          : 'up')
+    volume === 0
+      ? 'off'
+      : volume < 0.3
+        ? 'mute'
+        : volume < 0.6
+          ? 'down'
+          : 'up'
+  )
   const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
