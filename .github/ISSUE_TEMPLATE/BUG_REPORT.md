@@ -2,19 +2,46 @@
 name: "🐞 Bug report"
 about: Report an issue with this software
 title: ''
-labels: ''
-assignees: ''
+labels: 'Bug'
+assignees: '@feross'
 
----
+```
+DO NOT POST LINKS OR REFERENCES TO COPYRIGHTED CONTENT IN YOUR ISSUE TNX.
+Note: (put an "X" inside the item OR check the box after)**
+```
 
-<!-- DO NOT POST LINKS OR REFERENCES TO COPYRIGHTED CONTENT IN YOUR ISSUE. -->
+# What is the purpose of this pull request?
+- 1.) 
+- 2.)
+- 3.)
 
-**What version of WebTorrent Desktop are you using?**
+# Operating system ?:
+ - [ ] iOS
+ - [ ] Linux
+ - [ ] OSX
+ - [ ] Windows
 
-**What operating system and version?**
+**What changes did you make? (Give an overview)**
 
-**What happened?**
+ - [ ] Documentation update
+ - [ ] Bug fix
+ - [ ] New feature
+ - [ ] Other, please explain:
 
-**What did you expect to happen?**
 
-**Are you willing to submit a pull request to fix this bug?**
+# Which issue (if any) does this pull request address?
+- 1.) 
+- 2.)
+- 3.)
+# Is there anything you'd like reviewers to focus on?
+- 1.) 
+- 2.)
+- 3.)
+
+
+
+
+
+Todo:
+- [ ] Windows UWP
+- [ ] Android
