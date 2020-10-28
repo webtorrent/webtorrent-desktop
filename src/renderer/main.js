@@ -130,7 +130,7 @@ function onState (err, _state) {
   resumeTorrents()
 
   // Initialize ReactDOM
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  ReactDOM.render(<App state={state} ref={elem => { app = elem }} />, document.querySelector('#body'))
 
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
