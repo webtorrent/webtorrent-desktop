@@ -1,5 +1,5 @@
 const React = require('react')
-const Bitfield = require('bitfield')
+const BitField = require('bitfield').default
 const prettyBytes = require('prettier-bytes')
 
 const TorrentSummary = require('../lib/torrent-summary')
@@ -850,7 +850,7 @@ function renderLoadingBar (state) {
   const parts = []
   let lastPiecePresent = false
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
-    const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+    const partPresent = BitField.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
       parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {
