@@ -27,7 +27,8 @@ function init () {
     webPreferences: {
       nodeIntegration: true,
       enableBlinkFeatures: 'AudioVideoTracks',
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      backgroundThrottling: false
     },
     width: 150
   })

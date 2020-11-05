@@ -45,7 +45,8 @@ function init (state, options) {
     webPreferences: {
       nodeIntegration: true,
       enableBlinkFeatures: 'AudioVideoTracks',
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      backgroundThrottling: false
     },
     x: initialBounds.x,
     y: initialBounds.y
