@@ -545,7 +545,17 @@ function buildLinux (cb) {
       },
       categories: ['Network', 'FileTransfer', 'P2P'],
       mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
-      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs'),
+      lintianOverrides: [
+        'unstripped-binary-or-object',
+        'embedded-library',
+        'missing-dependency-on-libc',
+        'changelog-file-missing-in-native-package',
+        'description-synopsis-is-duplicated',
+        'setuid-binary',
+        'binary-without-manpage',
+        'shlib-with-executable-bit'
+      ]
     }
 
     installer(options).then(
