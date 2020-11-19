@@ -391,7 +391,5 @@ function isCasting (state) {
 
 function restoreBounds (state) {
   ipcRenderer.send('setAspectRatio', 0)
-  if (state.window.bounds) {
-    ipcRenderer.send('setBounds', state.window.bounds, false)
-  }
+  ipcRenderer.send('setBounds', state.window.bounds)
 }

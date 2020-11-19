@@ -432,20 +432,15 @@ function resumeTorrents () {
 
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
-  // Don't modify the window size if it's already maximized
-  if (electron.remote.getCurrentWindow().isMaximized()) {
-    state.window.bounds = null
-    return
-  }
+  const currentWindow = electron.remote.getCurrentWindow()
 
   // Save the bounds of the window for later. See restoreBounds()
-  state.window.bounds = {
-    x: window.screenX,
-    y: window.screenY,
-    width: window.outerWidth,
-    height: window.outerHeight
+  state.window.bounds = currentWindow.getBounds()
+
+  // Don't modify the window size if it's already maximized
+  if (currentWindow.isMaximized() || currentWindow.isFullScreen()) {
+    return
   }
-  state.window.wasMaximized = electron.remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   const screenWidth = window.screen.width
@@ -465,7 +460,8 @@ function setDimensions (dimensions) {
   )
 
   ipcRenderer.send('setAspectRatio', aspectRatio)
-  ipcRenderer.send('setBounds', { contentBounds: true, x: null, y: null, width, height })
+  ipcRenderer.send('setBounds', { x: null, y: null, width, height })
+
   state.playing.aspectRatio = aspectRatio
 }
 
