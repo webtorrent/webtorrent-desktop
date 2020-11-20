@@ -59,12 +59,12 @@ module.exports = class PlaybackController {
   }
 
   // Open a file in OS default app.
-  openItem (infoHash, index) {
+  openPath (infoHash, index) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const filePath = path.join(
       torrentSummary.path,
       torrentSummary.files[index].path)
-    ipcRenderer.send('openItem', filePath)
+    ipcRenderer.send('openPath', filePath)
   }
 
   // Toggle (play or pause) the currently playing media
@@ -154,6 +154,20 @@ module.exports = class PlaybackController {
     }
     if (isCasting(this.state)) Cast.seek(time)
     else this.state.playing.jumpToTime = time
+  }
+
+  // Show video preview
+  preview (x) {
+    if (!Number.isFinite(x)) {
+      console.error('Tried to preview a non-finite position ' + x)
+      return console.trace()
+    }
+    this.state.playing.previewXCoord = x
+  }
+
+  // Hide video preview
+  clearPreview () {
+    this.state.playing.previewXCoord = null
   }
 
   // Change playback speed. 1 = faster, -1 = slower
@@ -268,8 +282,10 @@ module.exports = class PlaybackController {
     state.playing.infoHash = infoHash
     state.playing.fileIndex = index
     state.playing.fileName = fileSummary.name
-    state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-      : TorrentPlayer.isAudio(fileSummary) ? 'audio'
+    state.playing.type = TorrentPlayer.isVideo(fileSummary)
+      ? 'video'
+      : TorrentPlayer.isAudio(fileSummary)
+        ? 'audio'
         : 'other'
 
     // pick up where we left off

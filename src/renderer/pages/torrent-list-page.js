@@ -346,7 +346,7 @@ module.exports = class TorrentList extends React.Component {
     } else {
       icon = 'description' /* file icon, opens in OS default app */
       handleClick = isDone
-        ? dispatcher('openItem', infoHash, index)
+        ? dispatcher('openPath', infoHash, index)
         : (e) => e.stopPropagation() // noop if file is not ready
     }
     // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed

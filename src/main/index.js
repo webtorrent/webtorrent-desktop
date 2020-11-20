@@ -2,10 +2,13 @@ console.time('init')
 
 const { app, ipcMain } = require('electron')
 
+// Start crash reporter early, so it takes effect for child processes
+const crashReporter = require('../crash-reporter')
+crashReporter.init()
+
 const parallel = require('run-parallel')
 
 const config = require('../config')
-const crashReporter = require('../crash-reporter')
 const ipc = require('./ipc')
 const log = require('./log')
 const menu = require('./menu')
@@ -106,10 +109,6 @@ function init () {
 
   ipc.init()
 
-  app.once('will-finish-launching', function () {
-    crashReporter.init()
-  })
-
   app.once('ipcReady', function () {
     log('Command line args:', argv)
     processArgv(argv)
@@ -196,9 +195,13 @@ function onAppOpen (newArgv) {
 // Development: 2 args, eg: electron .
 // Test: 4 args, eg: electron -r .../mocks.js .
 function sliceArgv (argv) {
-  return argv.slice(config.IS_PRODUCTION ? 1
-    : config.IS_TEST ? 4
-      : 2)
+  return argv.slice(
+    config.IS_PRODUCTION
+      ? 1
+      : config.IS_TEST
+        ? 4
+        : 2
+  )
 }
 
 function processArgv (argv) {

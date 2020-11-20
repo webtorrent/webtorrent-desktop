@@ -8,7 +8,6 @@ const cp = require('child_process')
 const electronPackager = require('electron-packager')
 const fs = require('fs')
 const minimist = require('minimist')
-const mkdirp = require('mkdirp')
 const os = require('os')
 const path = require('path')
 const rimraf = require('rimraf')
@@ -37,7 +36,7 @@ const argv = minimist(process.argv.slice(2), {
 })
 
 function build () {
-  console.log('Reinstalling node_modules...')
+  console.log('Installing node_modules...')
   rimraf.sync(NODE_MODULES_PATH)
   cp.execSync('npm ci', { stdio: 'inherit' })
 
@@ -267,6 +266,7 @@ function buildDarwin (cb) {
 
     function signApp (cb) {
       const sign = require('electron-osx-sign')
+      const { notarize } = require('electron-notarize')
 
       /*
        * Sign the app with Apple Developer ID certificates. We sign the app for 2 reasons:
@@ -282,16 +282,37 @@ function buildDarwin (cb) {
        *   - Membership in the Apple Developer Program
        */
       const signOpts = {
+        verbose: true,
         app: appPath,
         platform: 'darwin',
-        verbose: true
+        identity: 'Developer ID Application: WebTorrent, LLC (5MAMC8G3L8)',
+        hardenedRuntime: true,
+        entitlements: path.join(config.ROOT_PATH, 'bin', 'darwin-entitlements.plist'),
+        'entitlements-inherit': path.join(config.ROOT_PATH, 'bin', 'darwin-entitlements.plist'),
+        'signature-flags': 'library'
+      }
+
+      const notarizeOpts = {
+        appBundleId: darwin.appBundleId,
+        appPath,
+        appleId: 'feross@feross.org',
+        appleIdPassword: '@keychain:AC_PASSWORD'
       }
 
       console.log('Mac: Signing app...')
       sign(signOpts, function (err) {
         if (err) return cb(err)
         console.log('Mac: Signed app.')
-        cb(null)
+
+        console.log('Mac: Notarizing app...')
+        notarize(notarizeOpts).then(
+          function () {
+            console.log('Mac: Notarized app.')
+            cb(null)
+          },
+          function (err) {
+            cb(err)
+          })
       })
     }
 
@@ -457,13 +478,13 @@ function buildWin32 (cb) {
       console.log('Windows: Creating portable app...')
 
       const portablePath = path.join(filesPath, 'Portable Settings')
-      mkdirp.sync(portablePath)
+      fs.mkdirSync(portablePath, { recursive: true })
 
       const downloadsPath = path.join(portablePath, 'Downloads')
-      mkdirp.sync(downloadsPath)
+      fs.mkdirSync(downloadsPath, { recursive: true })
 
       const tempPath = path.join(portablePath, 'Temp')
-      mkdirp.sync(tempPath)
+      fs.mkdirSync(tempPath, { recursive: true })
 
       const inPath = path.join(DIST_PATH, path.basename(filesPath))
       const outPath = path.join(DIST_PATH, BUILD_NAME + '-win.zip')
@@ -524,7 +545,17 @@ function buildLinux (cb) {
       },
       categories: ['Network', 'FileTransfer', 'P2P'],
       mimeType: ['application/x-bittorrent', 'x-scheme-handler/magnet', 'x-scheme-handler/stream-magnet'],
-      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs')
+      desktopTemplate: path.join(config.STATIC_PATH, 'linux/webtorrent-desktop.ejs'),
+      lintianOverrides: [
+        'unstripped-binary-or-object',
+        'embedded-library',
+        'missing-dependency-on-libc',
+        'changelog-file-missing-in-native-package',
+        'description-synopsis-is-duplicated',
+        'setuid-binary',
+        'binary-without-manpage',
+        'shlib-with-executable-bit'
+      ]
     }
 
     installer(options).then(

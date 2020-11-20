@@ -1,6 +1,6 @@
 module.exports = {
   openExternal,
-  openItem,
+  openPath,
   showItemInFolder,
   moveItemToTrash
 }
@@ -19,9 +19,10 @@ function openExternal (url) {
 /**
  * Open the given file in the desktop’s default manner.
  */
-function openItem (path) {
-  log(`openItem: ${path}`)
-  shell.openItem(path)
+
+function openPath (path) {
+  log(`openPath: ${path}`)
+  shell.openPath(path)
 }
 
 /**

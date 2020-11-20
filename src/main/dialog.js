@@ -34,13 +34,13 @@ function openSeedDirectory () {
   log('openSeedDirectory')
   const opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder for the torrent.',
-      properties: ['openFile', 'openDirectory']
-    }
+        title: 'Select a file or folder for the torrent.',
+        properties: ['openFile', 'openDirectory']
+      }
     : {
-      title: 'Select a folder for the torrent.',
-      properties: ['openDirectory']
-    }
+        title: 'Select a folder for the torrent.',
+        properties: ['openDirectory']
+      }
   showOpenSeed(opts)
 }
 
@@ -53,13 +53,13 @@ function openFiles () {
   log('openFiles')
   const opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder to add.',
-      properties: ['openFile', 'openDirectory']
-    }
+        title: 'Select a file or folder to add.',
+        properties: ['openFile', 'openDirectory']
+      }
     : {
-      title: 'Select a file to add.',
-      properties: ['openFile']
-    }
+        title: 'Select a file to add.',
+        properties: ['openFile']
+      }
   setTitle(opts.title)
   const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
   resetTitle()

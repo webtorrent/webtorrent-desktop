@@ -158,7 +158,7 @@ module.exports = class TorrentListController {
       .filter((torrent) => { // We're interested in active torrents only.
         return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
       })
-      .map((torrent) => { // Pause all active torrents except the one that started playing.
+      .forEach((torrent) => { // Pause all active torrents except the one that started playing.
         if (infoHash === torrent.infoHash) return
 
         // Pause torrent without playing sounds.
@@ -173,7 +173,7 @@ module.exports = class TorrentListController {
   resumePausedTorrents () {
     console.log('Playback Priority: resuming paused torrents')
     if (!this.state.saved.torrentsToResume || !this.state.saved.torrentsToResume.length) return
-    this.state.saved.torrentsToResume.map((infoHash) => {
+    this.state.saved.torrentsToResume.forEach((infoHash) => {
       this.toggleTorrent(infoHash)
     })
 
