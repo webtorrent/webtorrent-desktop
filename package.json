@@ -41,7 +41,7 @@
     "material-ui": "^0.20.2",
     "music-metadata": "^7.5.0",
     "network-address": "^1.1.2",
-    "parse-torrent": "^8.0.0",
+    "parse-torrent": "^9.1.0",
     "prettier-bytes": "^1.0.4",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
