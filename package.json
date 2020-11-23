@@ -61,7 +61,6 @@
     "@babel/core": "^7.6.0",
     "@babel/eslint-parser": "^7.12.1",
     "@babel/plugin-transform-react-jsx": "^7.3.0",
-    "buble": "^0.20.0",
     "cross-zip": "^3.1.0",
     "depcheck": "^1.2.0",
     "electron": "~11.0.0",
