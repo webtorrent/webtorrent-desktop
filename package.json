@@ -77,8 +77,7 @@
     "run-series": "^1.1.9",
     "spectron": "~12.0.0",
     "standard": "*",
-    "tape": "^5.0.1",
-    "walk-sync": "^2.2.0"
+    "tape": "^5.0.1"
   },
   "engines": {
     "node": ">=4.0.0"
@@ -115,7 +114,7 @@
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "start": "npm run build && electron --no-sandbox .",
-    "test": "standard && depcheck --ignores=standard,@babel/eslint-parser --ignore-dirs=build,dist && node ./bin/extra-lint.js",
+    "test": "standard && depcheck --ignores=standard,@babel/eslint-parser --ignore-dirs=build,dist",
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/"
