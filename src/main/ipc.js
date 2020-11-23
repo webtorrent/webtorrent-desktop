@@ -137,7 +137,6 @@ function init () {
    * Shell
    */
 
-
   ipcMain.on('openPath', (e, ...args) => {
     const shell = require('./shell')
     shell.openPath(...args)
