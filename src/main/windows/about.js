@@ -4,14 +4,14 @@ const about = module.exports = {
 }
 
 const config = require('../../config')
-const electron = require('electron')
+const { BrowserWindow } = require('electron')
 
 function init () {
   if (about.win) {
     return about.win.show()
   }
 
-  const win = about.win = new electron.BrowserWindow({
+  const win = about.win = new BrowserWindow({
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,

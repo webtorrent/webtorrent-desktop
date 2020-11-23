@@ -8,10 +8,8 @@ module.exports.error = error
  * where they can be viewed in Developer Tools.
  */
 
-const electron = require('electron')
+const { app } = require('electron')
 const windows = require('./windows')
-
-const app = electron.app
 
 function log (...args) {
   if (app.ipcReady) {

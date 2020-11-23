@@ -1,4 +1,4 @@
-const electron = require('electron')
+const { ipcRenderer } = require('electron')
 const path = require('path')
 
 const Cast = require('../lib/cast')
@@ -10,8 +10,6 @@ const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const State = require('../lib/state')
-
-const ipcRenderer = electron.ipcRenderer
 
 // Controls playback of torrents and files within torrents
 // both local (<video>,<audio>,external player) and remote (cast)

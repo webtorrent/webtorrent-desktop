@@ -25,8 +25,7 @@ function uninstall () {
 }
 
 function installDarwin () {
-  const electron = require('electron')
-  const app = electron.app
+  const { app } = require('electron')
 
   // On Mac, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.

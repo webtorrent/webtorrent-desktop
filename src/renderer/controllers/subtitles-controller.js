@@ -1,9 +1,7 @@
-const electron = require('electron')
+const { remote } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const parallel = require('run-parallel')
-
-const remote = electron.remote
 
 const { dispatch } = require('../lib/dispatcher')
 
