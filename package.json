@@ -39,7 +39,7 @@
     "languagedetect": "^2.0.0",
     "location-history": "^1.1.2",
     "material-ui": "^0.20.2",
-    "music-metadata": "^7.5.0",
+    "music-metadata": "^7.5.1",
     "network-address": "^1.1.2",
     "parse-torrent": "^9.1.0",
     "prettier-bytes": "^1.0.4",
