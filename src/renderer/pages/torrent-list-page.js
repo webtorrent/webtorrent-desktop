@@ -198,9 +198,9 @@ module.exports = class TorrentList extends React.Component {
 
       // Only display hours and minutes if they are greater than 0 but always
       // display minutes if hours is being displayed
-      const hoursStr = hours ? hours + 'h' : ''
-      const minutesStr = (hours || minutes) ? minutes + 'm' : ''
-      const secondsStr = seconds + 's'
+      const hoursStr = hours ? hours + ' h' : ''
+      const minutesStr = (hours || minutes) ? minutes + ' min' : ''
+      const secondsStr = seconds + ' s'
 
       return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
     }
