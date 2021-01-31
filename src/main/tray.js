@@ -50,7 +50,7 @@ function checkLinuxTraySupport (cb) {
   const cp = require('child_process')
 
   // Check that libappindicator libraries are installed in system.
-  cp.exec('ls /usr/lib*/libappindicator*', function (err, stdout) {
+  cp.exec('ldconfig -p | grep libappindicator', function (err, stdout) {
     if (err) return cb(err)
     cb(null)
   })
