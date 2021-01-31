@@ -49,18 +49,10 @@ function initWin32 () {
 function checkLinuxTraySupport (cb) {
   const cp = require('child_process')
 
-  // Check that we're on Ubuntu (or another debian system) and that we have
-  // libappindicator1. If WebTorrent was installed from the deb file, we should
-  // always have it. If it was installed from the zip file, we might not.
-  cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
+  // Check that libappindicator libraries are installed in system.
+  cp.exec('ls /usr/lib*/libappindicator*', function (err, stdout) {
     if (err) return cb(err)
-    // Unfortunately there's no cleaner way, as far as I can tell, to check
-    // whether a debian package is installed:
-    if (stdout.endsWith('\tinstall\n')) {
-      cb(null)
-    } else {
-      cb(new Error('debian package not installed'))
-    }
+    cb(null)
   })
 }
 
