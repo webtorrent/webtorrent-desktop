@@ -44,7 +44,7 @@ function initWin32 () {
 }
 
 /**
- * Check for libappindicator1 support before creating tray icon
+ * Check for libappindicator support before creating tray icon.
  */
 function checkLinuxTraySupport (cb) {
   const cp = require('child_process')
