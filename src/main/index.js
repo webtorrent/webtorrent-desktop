@@ -1,7 +1,6 @@
 console.time('init')
 
-const electron = require('electron')
-const app = electron.app
+const { app, ipcMain } = require('electron')
 
 // Start crash reporter early, so it takes effect for child processes
 const crashReporter = require('../crash-reporter')
@@ -66,8 +65,6 @@ function init () {
     // Put Electron crash files, etc. into the "Portable Settings\Temp" folder
     app.setPath('temp', path.join(config.CONFIG_PATH, 'Temp'))
   }
-
-  const ipcMain = electron.ipcMain
 
   let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
@@ -198,9 +195,13 @@ function onAppOpen (newArgv) {
 // Development: 2 args, eg: electron .
 // Test: 4 args, eg: electron -r .../mocks.js .
 function sliceArgv (argv) {
-  return argv.slice(config.IS_PRODUCTION ? 1
-    : config.IS_TEST ? 4
-      : 2)
+  return argv.slice(
+    config.IS_PRODUCTION
+      ? 1
+      : config.IS_TEST
+        ? 4
+        : 2
+  )
 }
 
 function processArgv (argv) {

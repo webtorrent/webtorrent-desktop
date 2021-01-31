@@ -130,7 +130,10 @@ function onState (err, _state) {
   resumeTorrents()
 
   // Initialize ReactDOM
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  ReactDOM.render(
+    <App state={state} ref={elem => { app = elem }} />,
+    document.querySelector('#body')
+  )
 
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
@@ -274,6 +277,8 @@ const dispatchHandlers = {
   previousTrack: () => controllers.playback().previousTrack(),
   skip: (time) => controllers.playback().skip(time),
   skipTo: (time) => controllers.playback().skipTo(time),
+  preview: (x) => controllers.playback().preview(x),
+  clearPreview: () => controllers.playback().clearPreview(),
   changePlaybackRate: (dir) => controllers.playback().changePlaybackRate(dir),
   changeVolume: (delta) => controllers.playback().changeVolume(delta),
   setVolume: (vol) => controllers.playback().setVolume(vol),

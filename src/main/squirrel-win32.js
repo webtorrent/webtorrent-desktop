@@ -2,11 +2,10 @@ module.exports = {
   handleEvent
 }
 
+const { app } = require('electron')
+
 const path = require('path')
 const spawn = require('child_process').spawn
-const electron = require('electron')
-
-const app = electron.app
 
 const handlers = require('./handlers')
 

@@ -2,7 +2,7 @@ module.exports = {
   init
 }
 
-const electron = require('electron')
+const { dialog } = require('electron')
 
 const config = require('../config')
 const log = require('./log')
@@ -44,7 +44,7 @@ function onResponse (err, res, data) {
     }
   }
 
-  electron.dialog.showMessageBox({
+  dialog.showMessageBox({
     type: 'info',
     buttons: ['OK'],
     title: data.title,

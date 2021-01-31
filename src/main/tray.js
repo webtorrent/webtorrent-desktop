@@ -4,9 +4,7 @@ module.exports = {
   setWindowFocus
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, Tray, Menu } = require('electron')
 
 const config = require('../config')
 const windows = require('./windows')
@@ -67,7 +65,7 @@ function checkLinuxTraySupport (cb) {
 }
 
 function createTray () {
-  tray = new electron.Tray(getIconPath())
+  tray = new Tray(getIconPath())
 
   // On Windows, left click opens the app, right click opens the context menu.
   // On Linux, any click (left or right) opens the context menu.
@@ -78,7 +76,7 @@ function createTray () {
 }
 
 function updateTrayMenu () {
-  const contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  const contextMenu = Menu.buildFromTemplate(getMenuTemplate())
   tray.setContextMenu(contextMenu)
 }
 

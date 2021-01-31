@@ -3,9 +3,7 @@ module.exports = {
   setModule
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, ipcMain } = require('electron')
 
 const log = require('./log')
 const menu = require('./menu')
@@ -23,14 +21,12 @@ function setModule (name, module) {
 }
 
 function init () {
-  const ipc = electron.ipcMain
-
-  ipc.once('ipcReady', function (e) {
+  ipcMain.once('ipcReady', function (e) {
     app.ipcReady = true
     app.emit('ipcReady')
   })
 
-  ipc.once('ipcReadyWebTorrent', function (e) {
+  ipcMain.once('ipcReadyWebTorrent', function (e) {
     app.ipcReadyWebTorrent = true
     log('sending %d queued messages from the main win to the webtorrent window',
       messageQueueMainToWebTorrent.length)
@@ -44,11 +40,11 @@ function init () {
    * Dialog
    */
 
-  ipc.on('openTorrentFile', () => {
+  ipcMain.on('openTorrentFile', () => {
     const dialog = require('./dialog')
     dialog.openTorrentFile()
   })
-  ipc.on('openFiles', () => {
+  ipcMain.on('openFiles', () => {
     const dialog = require('./dialog')
     dialog.openFiles()
   })
@@ -57,11 +53,11 @@ function init () {
    * Dock
    */
 
-  ipc.on('setBadge', (e, ...args) => {
+  ipcMain.on('setBadge', (e, ...args) => {
     const dock = require('./dock')
     dock.setBadge(...args)
   })
-  ipc.on('downloadFinished', (e, ...args) => {
+  ipcMain.on('downloadFinished', (e, ...args) => {
     const dock = require('./dock')
     dock.downloadFinished(...args)
   })
@@ -70,7 +66,7 @@ function init () {
    * Player Events
    */
 
-  ipc.on('onPlayerOpen', function () {
+  ipcMain.on('onPlayerOpen', function () {
     const powerSaveBlocker = require('./power-save-blocker')
     const shortcuts = require('./shortcuts')
     const thumbar = require('./thumbar')
@@ -81,14 +77,14 @@ function init () {
     thumbar.enable()
   })
 
-  ipc.on('onPlayerUpdate', function (e, ...args) {
+  ipcMain.on('onPlayerUpdate', function (e, ...args) {
     const thumbar = require('./thumbar')
 
     menu.onPlayerUpdate(...args)
     thumbar.onPlayerUpdate(...args)
   })
 
-  ipc.on('onPlayerClose', function () {
+  ipcMain.on('onPlayerClose', function () {
     const powerSaveBlocker = require('./power-save-blocker')
     const shortcuts = require('./shortcuts')
     const thumbar = require('./thumbar')
@@ -99,7 +95,7 @@ function init () {
     thumbar.disable()
   })
 
-  ipc.on('onPlayerPlay', function () {
+  ipcMain.on('onPlayerPlay', function () {
     const powerSaveBlocker = require('./power-save-blocker')
     const thumbar = require('./thumbar')
 
@@ -107,7 +103,7 @@ function init () {
     thumbar.onPlayerPlay()
   })
 
-  ipc.on('onPlayerPause', function () {
+  ipcMain.on('onPlayerPause', function () {
     const powerSaveBlocker = require('./power-save-blocker')
     const thumbar = require('./thumbar')
 
@@ -119,7 +115,7 @@ function init () {
    * Folder Watcher Events
    */
 
-  ipc.on('startFolderWatcher', function () {
+  ipcMain.on('startFolderWatcher', function () {
     if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
@@ -128,7 +124,7 @@ function init () {
     modules.folderWatcher.start()
   })
 
-  ipc.on('stopFolderWatcher', function () {
+  ipcMain.on('stopFolderWatcher', function () {
     if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
@@ -141,15 +137,15 @@ function init () {
    * Shell
    */
 
-  ipc.on('openPath', (e, ...args) => {
+  ipcMain.on('openPath', (e, ...args) => {
     const shell = require('./shell')
     shell.openPath(...args)
   })
-  ipc.on('showItemInFolder', (e, ...args) => {
+  ipcMain.on('showItemInFolder', (e, ...args) => {
     const shell = require('./shell')
     shell.showItemInFolder(...args)
   })
-  ipc.on('moveItemToTrash', (e, ...args) => {
+  ipcMain.on('moveItemToTrash', (e, ...args) => {
     const shell = require('./shell')
     shell.moveItemToTrash(...args)
   })
@@ -158,7 +154,7 @@ function init () {
    * File handlers
    */
 
-  ipc.on('setDefaultFileHandler', (e, flag) => {
+  ipcMain.on('setDefaultFileHandler', (e, flag) => {
     const handlers = require('./handlers')
 
     if (flag) handlers.install()
@@ -169,7 +165,7 @@ function init () {
    * Auto start on login
    */
 
-  ipc.on('setStartup', (e, flag) => {
+  ipcMain.on('setStartup', (e, flag) => {
     const startup = require('./startup')
 
     if (flag) startup.install()
@@ -182,19 +178,19 @@ function init () {
 
   const main = windows.main
 
-  ipc.on('setAspectRatio', (e, ...args) => main.setAspectRatio(...args))
-  ipc.on('setBounds', (e, ...args) => main.setBounds(...args))
-  ipc.on('setProgress', (e, ...args) => main.setProgress(...args))
-  ipc.on('setTitle', (e, ...args) => main.setTitle(...args))
-  ipc.on('show', () => main.show())
-  ipc.on('toggleFullScreen', (e, ...args) => main.toggleFullScreen(...args))
-  ipc.on('setAllowNav', (e, ...args) => menu.setAllowNav(...args))
+  ipcMain.on('setAspectRatio', (e, ...args) => main.setAspectRatio(...args))
+  ipcMain.on('setBounds', (e, ...args) => main.setBounds(...args))
+  ipcMain.on('setProgress', (e, ...args) => main.setProgress(...args))
+  ipcMain.on('setTitle', (e, ...args) => main.setTitle(...args))
+  ipcMain.on('show', () => main.show())
+  ipcMain.on('toggleFullScreen', (e, ...args) => main.toggleFullScreen(...args))
+  ipcMain.on('setAllowNav', (e, ...args) => menu.setAllowNav(...args))
 
   /**
    * External Media Player
    */
 
-  ipc.on('checkForExternalPlayer', function (e, path) {
+  ipcMain.on('checkForExternalPlayer', function (e, path) {
     const externalPlayer = require('./external-player')
 
     externalPlayer.checkInstall(path, function (err) {
@@ -202,7 +198,7 @@ function init () {
     })
   })
 
-  ipc.on('openExternalPlayer', (e, ...args) => {
+  ipcMain.on('openExternalPlayer', (e, ...args) => {
     const externalPlayer = require('./external-player')
     const thumbar = require('./thumbar')
 
@@ -211,7 +207,7 @@ function init () {
     externalPlayer.spawn(...args)
   })
 
-  ipc.on('quitExternalPlayer', () => {
+  ipcMain.on('quitExternalPlayer', () => {
     const externalPlayer = require('./external-player')
     externalPlayer.kill()
   })
@@ -220,8 +216,8 @@ function init () {
    * Message passing
    */
 
-  const oldEmit = ipc.emit
-  ipc.emit = function (name, e, ...args) {
+  const oldEmit = ipcMain.emit
+  ipcMain.emit = function (name, e, ...args) {
     // Relay messages between the main window and the WebTorrent hidden window
     if (name.startsWith('wt-') && !app.isQuitting) {
       if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
@@ -244,6 +240,6 @@ function init () {
     }
 
     // Emit all other events normally
-    oldEmit.call(ipc, name, e, ...args)
+    oldEmit.call(ipcMain, name, e, ...args)
   }
 }

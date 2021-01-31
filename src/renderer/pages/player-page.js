@@ -1,5 +1,5 @@
 const React = require('react')
-const Bitfield = require('bitfield')
+const BitField = require('bitfield').default
 const prettyBytes = require('prettier-bytes')
 
 const TorrentSummary = require('../lib/torrent-summary')
@@ -427,14 +427,67 @@ function renderCastScreen (state) {
 
   const isStarting = state.playing.location.endsWith('-pending')
   const castName = state.playing.castName
+  const fileName = state.getPlayingFileSummary().name || ''
   let castStatus
   if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
+  const prog = state.getPlayingTorrentSummary().progress || {}
+
   // Show a nice title image, if possible
   const style = {
     backgroundImage: cssBackgroundImagePoster(state)
+  }
+
+  function renderEta (total, downloaded) {
+    const missing = (total || 0) - (downloaded || 0)
+    const downloadSpeed = prog.downloadSpeed || 0
+    if (downloadSpeed === 0 || missing === 0) return
+
+    const rawEta = missing / downloadSpeed
+    const hours = Math.floor(rawEta / 3600) % 24
+    const minutes = Math.floor(rawEta / 60) % 60
+    const seconds = Math.floor(rawEta % 60)
+
+    const hoursStr = hours ? hours + 'h' : ''
+    const minutesStr = (hours || minutes) ? minutes + 'm' : ''
+    const secondsStr = seconds + 's'
+
+    return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+  }
+
+  function renderDownloadProgress () {
+    if (!prog.files) return
+
+    const fileProg = prog.files[state.playing.fileIndex]
+    const fileProgress = fileProg.numPiecesPresent / fileProg.numPieces
+    const fileLength = state.getPlayingFileSummary().length
+    const fileDownloaded = fileProgress * fileLength
+
+    const progress = Math.round(100 * fileProgress)
+    const total = prettyBytes(fileLength)
+    const completed = prettyBytes(fileDownloaded)
+
+    const downloadSpeed = prettyBytes(prog.downloadSpeed || 0)
+    const uploadSpeed = prettyBytes(prog.uploadSpeed || 0)
+
+    let sizes
+    if (fileProgress < 1) {
+      sizes = <span> | {completed} / {total}</span>
+    } else {
+      sizes = <span> | {completed}</span>
+    }
+
+    return (
+      <div key='download-progress'>
+        <span className='progress'>{progress}% downloaded {sizes}</span>
+        <br />
+        <span>↓ {downloadSpeed}/s ↑ {uploadSpeed}/s | {prog.numPeers || 0} peer(s)</span>
+        <br />
+        {renderEta(fileLength, fileDownloaded)}
+      </div>
+    )
   }
 
   return (
@@ -443,6 +496,8 @@ function renderCastScreen (state) {
         <i className='icon'>{castIcon}</i>
         <div key='type' className='cast-type'>{castType}</div>
         <div key='status' className='cast-status'>{castStatus}</div>
+        <div key='name' className='name'>{fileName}</div>
+        {renderDownloadProgress()}
       </div>
     </div>
   )
@@ -536,6 +591,8 @@ function renderPlayerControls (state) {
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   const elements = [
+    renderPreview(state),
+
     <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
@@ -547,6 +604,8 @@ function renderPlayerControls (state) {
         key='scrub-bar'
         className='scrub-bar'
         draggable
+        onMouseMove={handleScrubPreview}
+        onMouseOut={clearPreview}
         onDragStart={handleDragStart}
         onClick={handleScrub}
         onDrag={handleScrub}
@@ -655,10 +714,14 @@ function renderPlayerControls (state) {
   // Render volume slider
   const volume = state.playing.volume
   const volumeIcon = 'volume_' + (
-    volume === 0 ? 'off'
-      : volume < 0.3 ? 'mute'
-        : volume < 0.6 ? 'down'
-          : 'up')
+    volume === 0
+      ? 'off'
+      : volume < 0.3
+        ? 'mute'
+        : volume < 0.6
+          ? 'down'
+          : 'up'
+  )
   const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
@@ -722,6 +785,19 @@ function renderPlayerControls (state) {
     }
   }
 
+  // Handles a scrub hover (preview another position in the video)
+  function handleScrubPreview (e) {
+    // Only show for videos
+    if (!e.clientX || state.playing.type !== 'video') return
+    dispatch('mediaMouseMoved')
+    dispatch('preview', e.clientX)
+  }
+
+  function clearPreview (e) {
+    if (state.playing.type !== 'video') return
+    dispatch('clearPreview')
+  }
+
   // Handles a click or drag to scrub (jump to another position in the video)
   function handleScrub (e) {
     if (!e.clientX) return
@@ -760,6 +836,56 @@ function renderPlayerControls (state) {
   }
 }
 
+function renderPreview (state) {
+  const { previewXCoord = null } = state.playing
+
+  // Calculate time from x-coord as fraction of track width
+  const windowWidth = document.querySelector('body').clientWidth
+  const fraction = previewXCoord / windowWidth
+  const time = fraction * state.playing.duration /* seconds */
+
+  const height = 70
+  let width = 0
+
+  const previewEl = document.querySelector('video#preview')
+  if (previewEl !== null && previewXCoord !== null) {
+    previewEl.currentTime = time
+
+    // Auto adjust width to maintain video aspect ratio
+    width = Math.floor((previewEl.videoWidth / previewEl.videoHeight) * height)
+  }
+
+  // Center preview window on mouse cursor,
+  // while avoiding falling off the left or right edges
+  const xPos = Math.min(Math.max(previewXCoord - (width / 2), 5), windowWidth - width - 5)
+
+  return (
+    <div
+      key='preview' style={{
+        position: 'absolute',
+        bottom: 50,
+        left: xPos,
+        display: previewXCoord == null && 'none' // Hide preview when XCoord unset
+      }}
+    >
+      <div style={{ width, height, backgroundColor: 'black' }}>
+        <video
+          src={Playlist.getCurrentLocalURL(state)}
+          id='preview'
+          style={{ border: '1px solid lightgrey', borderRadius: 2 }}
+        />
+      </div>
+      <p
+        style={{
+          textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee'
+        }}
+      >
+        {formatTime(time, state.playing.duration)}
+      </p>
+    </div>
+  )
+}
+
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
 // can be 'spongey' / non-contiguous
 function renderLoadingBar (state) {
@@ -779,7 +905,7 @@ function renderLoadingBar (state) {
   const parts = []
   let lastPiecePresent = false
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
-    const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+    const partPresent = BitField.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
       parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {

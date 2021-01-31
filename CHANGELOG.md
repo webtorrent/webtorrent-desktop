@@ -19,7 +19,7 @@
 
 ## v0.23.0 - 2020-07-15
 
-🔒 This release contains a critical security fix. Please update as soon as possible.
+🔒 This release contains a critical security fix. Please update as soon as possible. [\#1837](https://github.com/webtorrent/webtorrent-desktop/issues/1837#issuecomment-729320901)
 
 ### Added
 
