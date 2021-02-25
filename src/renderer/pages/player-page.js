@@ -764,7 +764,7 @@ function renderPlayerControls (state) {
     ))
   }
 
-  const emptyImage = new Image(0,0)
+  const emptyImage = new Image(0, 0)
   emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'
   function handleDragStart (e) {
     if (e.dataTransfer) {
