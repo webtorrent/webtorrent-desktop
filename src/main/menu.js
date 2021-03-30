@@ -8,9 +8,7 @@ module.exports = {
   onToggleFullScreen
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, Menu } = require('electron')
 
 const config = require('../config')
 const windows = require('./windows')
@@ -18,8 +16,8 @@ const windows = require('./windows')
 let menu = null
 
 function init () {
-  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
-  electron.Menu.setApplicationMenu(menu)
+  menu = Menu.buildFromTemplate(getMenuTemplate())
+  Menu.setApplicationMenu(menu)
 }
 
 function togglePlaybackControls (flag) {

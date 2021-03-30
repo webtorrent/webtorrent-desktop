@@ -14,10 +14,8 @@ const main = module.exports = {
   win: null
 }
 
-const electron = require('electron')
+const { app, BrowserWindow, screen } = require('electron')
 const debounce = require('debounce')
-
-const app = electron.app
 
 const config = require('../../config')
 const log = require('../log')
@@ -30,7 +28,7 @@ function init (state, options) {
 
   const initialBounds = Object.assign(config.WINDOW_INITIAL_BOUNDS, state.saved.bounds)
 
-  const win = main.win = new electron.BrowserWindow({
+  const win = main.win = new BrowserWindow({
     backgroundColor: '#282828',
     darkTheme: true, // Forces dark theme (GTK+3)
     height: initialBounds.height,
@@ -45,7 +43,8 @@ function init (state, options) {
     webPreferences: {
       nodeIntegration: true,
       enableBlinkFeatures: 'AudioVideoTracks',
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      backgroundThrottling: false
     },
     x: initialBounds.x,
     y: initialBounds.y
@@ -161,7 +160,7 @@ function setBounds (bounds, maximize) {
     log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
-      const scr = electron.screen.getDisplayMatching(main.win.getBounds())
+      const scr = screen.getDisplayMatching(main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
       bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
       log(`setBounds: centered to ${JSON.stringify(bounds)}`)

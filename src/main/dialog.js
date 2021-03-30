@@ -6,7 +6,7 @@ module.exports = {
   openFiles
 }
 
-const electron = require('electron')
+const { dialog } = require('electron')
 
 const log = require('./log')
 const windows = require('./windows')
@@ -61,7 +61,7 @@ function openFiles () {
         properties: ['openFile']
       }
   setTitle(opts.title)
-  const selectedPaths = electron.dialog.showOpenDialogSync(windows.main.win, opts)
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
   resetTitle()
   if (!Array.isArray(selectedPaths)) return
   windows.main.dispatch('onOpen', selectedPaths)
@@ -79,7 +79,7 @@ function openTorrentFile () {
     properties: ['openFile', 'multiSelections']
   }
   setTitle(opts.title)
-  const selectedPaths = electron.dialog.showOpenDialogSync(windows.main.win, opts)
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
   resetTitle()
   if (!Array.isArray(selectedPaths)) return
   selectedPaths.forEach(function (selectedPath) {
@@ -114,7 +114,7 @@ function resetTitle () {
  */
 function showOpenSeed (opts) {
   setTitle(opts.title)
-  const selectedPaths = electron.dialog.showOpenDialogSync(windows.main.win, opts)
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
   resetTitle()
   if (!Array.isArray(selectedPaths)) return
   windows.main.dispatch('showCreateTorrent', selectedPaths)

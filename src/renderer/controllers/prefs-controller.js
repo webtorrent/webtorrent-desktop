@@ -1,5 +1,5 @@
 const { dispatch } = require('../lib/dispatcher')
-const ipcRenderer = require('electron').ipcRenderer
+const { ipcRenderer } = require('electron')
 
 // Controls the Preferences screen
 module.exports = class PrefsController {

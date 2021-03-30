@@ -558,6 +558,13 @@ body.drag .app::after {
   width: 100%;
 }
 
+.player .name {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.5em;
+  margin-bottom: 6px;
+}
+
 /*
  * PLAYER CONTROLS
  */
