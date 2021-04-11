@@ -35,7 +35,7 @@ Download the latest version of WebTorrent Desktop from
 - Use [Homebrew-Cask](https://github.com/caskroom/homebrew-cask) to install from the command line:
 
   ```
-  $ brew cask install webtorrent
+  $ brew install --cask webtorrent
   ```
 
 - Try the (unstable) development version by cloning the Git repository. See the
