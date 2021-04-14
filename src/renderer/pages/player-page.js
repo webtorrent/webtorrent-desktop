@@ -340,13 +340,13 @@ function renderAudioMetadata (state) {
     format.push(fileSummary.audioInfo.format.codec)
   }
   if (fileSummary.audioInfo.format.bitrate) {
-    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
+    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbit/s') // 128 kbit/s
   }
   if (fileSummary.audioInfo.format.sampleRate) {
     format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz')
   }
   if (fileSummary.audioInfo.format.bitsPerSample) {
-    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+    format.push(fileSummary.audioInfo.format.bitsPerSample + '-bit')
   }
   if (format.length > 0) {
     elems.push((
@@ -450,9 +450,9 @@ function renderCastScreen (state) {
     const minutes = Math.floor(rawEta / 60) % 60
     const seconds = Math.floor(rawEta % 60)
 
-    const hoursStr = hours ? hours + 'h' : ''
-    const minutesStr = (hours || minutes) ? minutes + 'm' : ''
-    const secondsStr = seconds + 's'
+    const hoursStr = hours ? hours + ' h' : ''
+    const minutesStr = (hours || minutes) ? minutes + ' min' : ''
+    const secondsStr = seconds + ' s'
 
     return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
   }
