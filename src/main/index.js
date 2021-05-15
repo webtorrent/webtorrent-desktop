@@ -81,9 +81,9 @@ function init () {
     isReady = true
     const state = results.state
 
+    menu.init()
     windows.main.init(state, { hidden })
     windows.webtorrent.init()
-    menu.init()
 
     // To keep app startup fast, some code is delayed.
     setTimeout(() => {

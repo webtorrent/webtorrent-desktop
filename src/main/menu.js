@@ -74,6 +74,8 @@ function getMenuItem (label) {
     })
     if (menuItem) return menuItem
   }
+  
+  return {}
 }
 
 function getMenuTemplate () {
