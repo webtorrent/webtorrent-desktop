@@ -121,5 +121,10 @@
   },
   "standard": {
     "parser": "@babel/eslint-parser"
+  },
+  "renovate": {
+    "extends": [
+      "github>webtorrent/renovate-config"
+    ]
   }
 }
