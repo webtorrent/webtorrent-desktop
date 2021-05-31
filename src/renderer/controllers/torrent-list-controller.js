@@ -227,6 +227,11 @@ module.exports = class TorrentListController {
   }
 
   deleteAllTorrents (deleteData) {
+    // go back to list before the current playing torrent is deleted
+    if (this.state.location.url() === 'player') {
+      dispatch('backToList')
+    }
+
     this.state.saved.torrents.forEach((summary) => deleteTorrentFile(summary, deleteData))
 
     this.state.saved.torrents = []
