@@ -75,7 +75,7 @@
     "plist": "3.0.1",
     "pngjs": "6.0.0",
     "run-series": "1.1.9",
-    "spectron": "12.0.0",
+    "spectron": "15.0.0",
     "standard": "*",
     "tape": "5.2.2"
   },
