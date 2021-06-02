@@ -129,7 +129,7 @@ function renderMedia (state) {
     <MediaTagName
       src={Playlist.getCurrentLocalURL(state)}
       onDoubleClick={dispatcher('toggleFullScreen')}
-      onClick={() => { state.playing.isPaused = !state.playing.isPaused }}
+      onClick={dispatcher('playPause')}
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
       onStalled={dispatcher('mediaStalled')}
