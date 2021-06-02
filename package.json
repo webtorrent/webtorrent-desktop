@@ -47,7 +47,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
-    "run-parallel": "1.1.10",
+    "run-parallel": "1.2.0",
     "semver": "7.3.5",
     "simple-concat": "1.0.1",
     "simple-get": "4.0.0",
