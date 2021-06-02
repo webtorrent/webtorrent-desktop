@@ -80,7 +80,8 @@
     "tape": "5.2.2"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": "^16.0.0",
+    "npm": "^7.10.0"
   },
   "homepage": "https://webtorrent.io",
   "keywords": [
