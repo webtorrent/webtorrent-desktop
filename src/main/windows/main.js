@@ -42,6 +42,7 @@ function init (state, options) {
     width: initialBounds.width,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       enableBlinkFeatures: 'AudioVideoTracks',
       enableRemoteModule: true,
       backgroundThrottling: false
