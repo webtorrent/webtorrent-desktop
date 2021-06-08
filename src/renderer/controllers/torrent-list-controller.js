@@ -302,6 +302,18 @@ module.exports = class TorrentListController {
     menu.popup({ window: remote.getCurrentWindow() })
   }
 
+  openTorrentListContextMenu () {
+    const menu = new remote.Menu()
+
+    menu.append(new remote.MenuItem({
+      label: 'Paste Torrent Address',
+      accelerator: 'CmdOrCtrl+V',
+      role: 'paste'
+    }))
+
+    menu.popup({ window: remote.getCurrentWindow() })
+  }
+
   // Takes a torrentSummary or torrentKey
   // Shows a Save File dialog, then saves the .torrent file wherever the user requests
   saveTorrentFileAs (torrentKey) {

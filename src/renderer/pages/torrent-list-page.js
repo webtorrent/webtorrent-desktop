@@ -35,7 +35,11 @@ module.exports = class TorrentList extends React.Component {
     )
 
     return (
-      <div key='torrent-list' className='torrent-list'>
+      <div
+        key='torrent-list'
+        className='torrent-list'
+        onContextMenu={dispatcher('openTorrentListContextMenu')}
+      >
         {contents}
       </div>
     )
