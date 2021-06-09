@@ -255,8 +255,7 @@ const dispatchHandlers = {
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
   deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
-  openTorrentListContextMenu: () =>
-    controllers.torrentList().openTorrentListContextMenu(),
+  openTorrentListContextMenu: () => onPaste(),
   confirmDeleteAllTorrents: (deleteData) =>
     controllers.torrentList().confirmDeleteAllTorrents(deleteData),
   deleteAllTorrents: (deleteData) =>
@@ -521,7 +520,7 @@ function onError (err) {
 const editableHtmlTags = new Set(['input', 'textarea'])
 
 function onPaste (e) {
-  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+  if (e && editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
 
   update()
