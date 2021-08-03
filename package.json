@@ -71,7 +71,7 @@
     "gh-release": "6.0.0",
     "minimist": "1.2.5",
     "nodemon": "2.0.12",
-    "open": "8.2.0",
+    "open": "8.2.1",
     "plist": "3.0.2",
     "pngjs": "6.0.0",
     "run-series": "1.1.9",
