@@ -227,7 +227,7 @@ module.exports = class TorrentListController {
   }
 
   deleteAllTorrents (deleteData) {
-    // go back to list before the current playing torrent is deleted
+    // Go back to list before the current playing torrent is deleted
     if (this.state.location.url() === 'player') {
       dispatch('backToList')
     }
