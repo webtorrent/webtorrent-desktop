@@ -1,20 +1,27 @@
 console.time('init')
 
-const electron = require('electron')
-const app = electron.app
+const { app, ipcMain } = require('electron')
+
+// Start crash reporter early, so it takes effect for child processes
+const crashReporter = require('../crash-reporter')
+crashReporter.init()
 
 const parallel = require('run-parallel')
 
 const config = require('../config')
-const crashReporter = require('../crash-reporter')
 const ipc = require('./ipc')
 const log = require('./log')
 const menu = require('./menu')
 const State = require('../renderer/lib/state')
 const windows = require('./windows')
 
+const WEBTORRENT_VERSION = require('webtorrent/package.json').version
+
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
+
+// allow electron/chromium to play startup sounds (without user interaction)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 
 // Start the app without showing the main window when auto launching on login
 // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
@@ -38,17 +45,19 @@ if (!shouldQuit && !config.IS_PORTABLE) {
   // signal this instance and quit. Note: This feature creates a lock file in
   // %APPDATA%\Roaming\WebTorrent so we do not do it for the Portable App since
   // we want to be "silent" as well as "portable".
-  shouldQuit = app.makeSingleInstance(onAppOpen)
-  if (shouldQuit) {
-    app.quit()
+  if (!app.requestSingleInstanceLock()) {
+    shouldQuit = true
   }
 }
 
-if (!shouldQuit) {
+if (shouldQuit) {
+  app.quit()
+} else {
   init()
 }
 
 function init () {
+  app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
   if (config.IS_PORTABLE) {
     const path = require('path')
     // Put all user data into the "Portable Settings" folder
@@ -56,8 +65,6 @@ function init () {
     // Put Electron crash files, etc. into the "Portable Settings\Temp" folder
     app.setPath('temp', path.join(config.CONFIG_PATH, 'Temp'))
   }
-
-  const ipcMain = electron.ipcMain
 
   let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
@@ -74,9 +81,9 @@ function init () {
     isReady = true
     const state = results.state
 
-    windows.main.init(state, { hidden: hidden })
-    windows.webtorrent.init()
     menu.init()
+    windows.main.init(state, { hidden })
+    windows.webtorrent.init()
 
     // To keep app startup fast, some code is delayed.
     setTimeout(() => {
@@ -91,14 +98,16 @@ function init () {
     })
   }
 
+  // Enable app logging into default directory, i.e. /Library/Logs/WebTorrent
+  // on Mac, %APPDATA% on Windows, $XDG_CONFIG_HOME or ~/.config on Linux.
+  app.setAppLogsPath()
+
+  app.userAgentFallback = `WebTorrent/${WEBTORRENT_VERSION} (https://webtorrent.io)`
+
   app.on('open-file', onOpen)
   app.on('open-url', onOpen)
 
   ipc.init()
-
-  app.once('will-finish-launching', function () {
-    crashReporter.init()
-  })
 
   app.once('ipcReady', function () {
     log('Command line args:', argv)
@@ -186,9 +195,13 @@ function onAppOpen (newArgv) {
 // Development: 2 args, eg: electron .
 // Test: 4 args, eg: electron -r .../mocks.js .
 function sliceArgv (argv) {
-  return argv.slice(config.IS_PRODUCTION ? 1
-    : config.IS_TEST ? 4
-      : 2)
+  return argv.slice(
+    config.IS_PRODUCTION
+      ? 1
+      : config.IS_TEST
+        ? 4
+        : 2
+  )
 }
 
 function processArgv (argv) {

@@ -1,4 +1,4 @@
-const electron = require('electron')
+const { ipcRenderer } = require('electron')
 const path = require('path')
 
 const Cast = require('../lib/cast')
@@ -10,8 +10,6 @@ const TorrentPlayer = require('../lib/torrent-player')
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const State = require('../lib/state')
-
-const ipcRenderer = electron.ipcRenderer
 
 // Controls playback of torrents and files within torrents
 // both local (<video>,<audio>,external player) and remote (cast)
@@ -61,12 +59,12 @@ module.exports = class PlaybackController {
   }
 
   // Open a file in OS default app.
-  openItem (infoHash, index) {
+  openPath (infoHash, index) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const filePath = path.join(
       torrentSummary.path,
       torrentSummary.files[index].path)
-    ipcRenderer.send('openItem', filePath)
+    ipcRenderer.send('openPath', filePath)
   }
 
   // Toggle (play or pause) the currently playing media
@@ -156,6 +154,20 @@ module.exports = class PlaybackController {
     }
     if (isCasting(this.state)) Cast.seek(time)
     else this.state.playing.jumpToTime = time
+  }
+
+  // Show video preview
+  preview (x) {
+    if (!Number.isFinite(x)) {
+      console.error('Tried to preview a non-finite position ' + x)
+      return console.trace()
+    }
+    this.state.playing.previewXCoord = x
+  }
+
+  // Hide video preview
+  clearPreview () {
+    this.state.playing.previewXCoord = null
   }
 
   // Change playback speed. 1 = faster, -1 = slower
@@ -269,8 +281,11 @@ module.exports = class PlaybackController {
     // update state
     state.playing.infoHash = infoHash
     state.playing.fileIndex = index
-    state.playing.type = TorrentPlayer.isVideo(fileSummary) ? 'video'
-      : TorrentPlayer.isAudio(fileSummary) ? 'audio'
+    state.playing.fileName = fileSummary.name
+    state.playing.type = TorrentPlayer.isVideo(fileSummary)
+      ? 'video'
+      : TorrentPlayer.isAudio(fileSummary)
+        ? 'audio'
         : 'other'
 
     // pick up where we left off

@@ -35,7 +35,11 @@ module.exports = class TorrentList extends React.Component {
     )
 
     return (
-      <div key='torrent-list' className='torrent-list'>
+      <div
+        key='torrent-list'
+        className='torrent-list'
+        onContextMenu={dispatcher('openTorrentListContextMenu')}
+      >
         {contents}
       </div>
     )
@@ -70,7 +74,8 @@ module.exports = class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}>
+        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}
+      >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
         {isSelected ? this.renderTorrentDetails(torrentSummary) : null}
@@ -149,7 +154,8 @@ module.exports = class TorrentList extends React.Component {
           }}
           checked={isActive}
           onClick={stopPropagation}
-          onCheck={dispatcher('toggleTorrent', infoHash)} />
+          onCheck={dispatcher('toggleTorrent', infoHash)}
+        />
       )
     }
 
@@ -215,9 +221,9 @@ module.exports = class TorrentList extends React.Component {
 
       // Only display hours and minutes if they are greater than 0 but always
       // display minutes if hours is being displayed
-      const hoursStr = hours ? hours + 'h' : ''
-      const minutesStr = (hours || minutes) ? minutes + 'm' : ''
-      const secondsStr = seconds + 's'
+      const hoursStr = hours ? hours + ' h' : ''
+      const minutesStr = (hours || minutes) ? minutes + ' min' : ''
+      const secondsStr = seconds + ' s'
 
       return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
     }
@@ -229,7 +235,9 @@ module.exports = class TorrentList extends React.Component {
         else if (torrentSummary.progress.progress === 1) status = 'Not seeding'
         else status = 'Paused'
       } else if (torrentSummary.status === 'downloading') {
-        status = 'Downloading'
+        if (!torrentSummary.progress) status = ''
+        else if (!torrentSummary.progress.ready) status = 'Verifying'
+        else status = 'Downloading'
       } else if (torrentSummary.status === 'seeding') {
         status = 'Seeding'
       } else { // torrentSummary.status is 'new' or something unexpected
@@ -252,8 +260,9 @@ module.exports = class TorrentList extends React.Component {
         <i
           key='play-button'
           title='Start streaming'
-          className={'icon play'}
-          onClick={dispatcher('playFile', infoHash)}>
+          className='icon play'
+          onClick={dispatcher('playFile', infoHash)}
+        >
           play_circle_outline
         </i>
       )
@@ -266,7 +275,8 @@ module.exports = class TorrentList extends React.Component {
           key='delete-button'
           className='icon delete'
           title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}>
+          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}
+        >
           close
         </i>
       </div>
@@ -298,10 +308,17 @@ module.exports = class TorrentList extends React.Component {
       )
     } else {
       // We do know the files. List them and show download stats for each one
-      const fileRows = torrentSummary.files
+      const sortByName = this.props.state.saved.prefs.sortByName
+      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+      let fileRows = torrentSummary.files
         .filter((file) => !file.path.includes('/.____padding_file/'))
         .map((file, index) => ({ file, index }))
-        .map((object) => this.renderFileRow(torrentSummary, object.file, object.index))
+
+      if (sortByName) {
+        fileRows = fileRows.sort((a, b) => collator.compare(a.file.name, b.file.name))
+      }
+
+      fileRows = fileRows.map((obj) => this.renderFileRow(torrentSummary, obj.file, obj.index))
 
       filesElement = (
         <div key='files' className='files'>
@@ -332,7 +349,7 @@ module.exports = class TorrentList extends React.Component {
         torrentSummary.progress.files[index]) {
       const fileProg = torrentSummary.progress.files[index]
       isDone = fileProg.numPiecesPresent === fileProg.numPieces
-      progress = Math.round(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
+      progress = Math.floor(100 * fileProg.numPiecesPresent / fileProg.numPieces) + '%'
     }
 
     // Second, for media files where we saved our position, show how far we got
@@ -353,7 +370,7 @@ module.exports = class TorrentList extends React.Component {
     } else {
       icon = 'description' /* file icon, opens in OS default app */
       handleClick = isDone
-        ? dispatcher('openItem', infoHash, index)
+        ? dispatcher('openPath', infoHash, index)
         : (e) => e.stopPropagation() // noop if file is not ready
     }
     // TODO: add a css 'disabled' class to indicate that a file cannot be opened/streamed
@@ -375,8 +392,10 @@ module.exports = class TorrentList extends React.Component {
         <td className={'col-size ' + rowClass}>
           {prettyBytes(file.length)}
         </td>
-        <td className='col-select'
-          onClick={dispatcher('toggleTorrentFile', infoHash, index)}>
+        <td
+          className='col-select'
+          onClick={dispatcher('toggleTorrentFile', infoHash, index)}
+        >
           <i className='icon deselect-file'>{isSelected ? 'close' : 'add'}</i>
         </td>
       </tr>

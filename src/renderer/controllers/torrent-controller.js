@@ -1,5 +1,5 @@
 const path = require('path')
-const ipcRenderer = require('electron').ipcRenderer
+const { ipcRenderer } = require('electron')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const sound = require('../lib/sound')
@@ -10,7 +10,7 @@ module.exports = class TorrentController {
     this.state = state
   }
 
-  torrentInfoHash (torrentKey, infoHash) {
+  torrentParsed (torrentKey, infoHash, magnetURI) {
     let torrentSummary = this.getTorrentSummary(torrentKey)
     console.log('got infohash for %s torrent %s',
       torrentSummary ? 'existing' : 'new', torrentKey)
@@ -25,7 +25,7 @@ module.exports = class TorrentController {
       }
 
       torrentSummary = {
-        torrentKey: torrentKey,
+        torrentKey,
         status: 'new'
       }
       torrents.unshift(torrentSummary)
@@ -33,6 +33,7 @@ module.exports = class TorrentController {
     }
 
     torrentSummary.infoHash = infoHash
+    torrentSummary.magnetURI = magnetURI
     dispatch('update')
   }
 
@@ -62,7 +63,6 @@ module.exports = class TorrentController {
     torrentSummary.status = 'downloading'
     torrentSummary.name = torrentSummary.displayName || torrentInfo.name
     torrentSummary.path = torrentInfo.path
-    torrentSummary.magnetURI = torrentInfo.magnetURI
     // TODO: make torrentInfo immutable, save separately as torrentSummary.info
     // For now, check whether torrentSummary.files has already been set:
     const hasDetailedFileInfo = torrentSummary.files && torrentSummary.files[0].path

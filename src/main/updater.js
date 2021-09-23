@@ -2,7 +2,7 @@ module.exports = {
   init
 }
 
-const electron = require('electron')
+const { autoUpdater } = require('electron')
 const get = require('simple-get')
 
 const config = require('../config')
@@ -47,31 +47,31 @@ function onResponse (err, res, data) {
 }
 
 function initDarwinWin32 () {
-  electron.autoUpdater.on(
+  autoUpdater.on(
     'error',
     (err) => log.error(`Update error: ${err.message}`)
   )
 
-  electron.autoUpdater.on(
+  autoUpdater.on(
     'checking-for-update',
     () => log('Checking for update')
   )
 
-  electron.autoUpdater.on(
+  autoUpdater.on(
     'update-available',
     () => log('Update available')
   )
 
-  electron.autoUpdater.on(
+  autoUpdater.on(
     'update-not-available',
     () => log('No update available')
   )
 
-  electron.autoUpdater.on(
+  autoUpdater.on(
     'update-downloaded',
     (e, notes, name, date, url) => log(`Update downloaded: ${name}: ${url}`)
   )
 
-  electron.autoUpdater.setFeedURL(AUTO_UPDATE_URL)
-  electron.autoUpdater.checkForUpdates()
+  autoUpdater.setFeedURL({ url: AUTO_UPDATE_URL })
+  autoUpdater.checkForUpdates()
 }

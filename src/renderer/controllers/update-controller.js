@@ -13,7 +13,7 @@ module.exports = class UpdateController {
       console.log('new version skipped by user: v' + version)
       return
     }
-    this.state.modal = { id: 'update-available-modal', version: version }
+    this.state.modal = { id: 'update-available-modal', version }
   }
 
   // Don't show the modal again until the next version

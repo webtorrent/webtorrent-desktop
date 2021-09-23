@@ -6,7 +6,7 @@ module.exports = {
   openFiles
 }
 
-const electron = require('electron')
+const { dialog } = require('electron')
 
 const log = require('./log')
 const windows = require('./windows')
@@ -34,13 +34,13 @@ function openSeedDirectory () {
   log('openSeedDirectory')
   const opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder for the torrent.',
-      properties: ['openFile', 'openDirectory']
-    }
+        title: 'Select a file or folder for the torrent.',
+        properties: ['openFile', 'openDirectory']
+      }
     : {
-      title: 'Select a folder for the torrent.',
-      properties: ['openDirectory']
-    }
+        title: 'Select a folder for the torrent.',
+        properties: ['openDirectory']
+      }
   showOpenSeed(opts)
 }
 
@@ -53,19 +53,18 @@ function openFiles () {
   log('openFiles')
   const opts = process.platform === 'darwin'
     ? {
-      title: 'Select a file or folder to add.',
-      properties: ['openFile', 'openDirectory']
-    }
+        title: 'Select a file or folder to add.',
+        properties: ['openFile', 'openDirectory']
+      }
     : {
-      title: 'Select a file to add.',
-      properties: ['openFile']
-    }
+        title: 'Select a file to add.',
+        properties: ['openFile']
+      }
   setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('onOpen', selectedPaths)
-  })
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
+  resetTitle()
+  if (!Array.isArray(selectedPaths)) return
+  windows.main.dispatch('onOpen', selectedPaths)
 }
 
 /*
@@ -80,12 +79,11 @@ function openTorrentFile () {
     properties: ['openFile', 'multiSelections']
   }
   setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    selectedPaths.forEach(function (selectedPath) {
-      windows.main.dispatch('addTorrent', selectedPath)
-    })
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
+  resetTitle()
+  if (!Array.isArray(selectedPaths)) return
+  selectedPaths.forEach(function (selectedPath) {
+    windows.main.dispatch('addTorrent', selectedPath)
   })
 }
 
@@ -116,9 +114,8 @@ function resetTitle () {
  */
 function showOpenSeed (opts) {
   setTitle(opts.title)
-  electron.dialog.showOpenDialog(windows.main.win, opts, function (selectedPaths) {
-    resetTitle()
-    if (!Array.isArray(selectedPaths)) return
-    windows.main.dispatch('showCreateTorrent', selectedPaths)
-  })
+  const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
+  resetTitle()
+  if (!Array.isArray(selectedPaths)) return
+  windows.main.dispatch('showCreateTorrent', selectedPaths)
 }

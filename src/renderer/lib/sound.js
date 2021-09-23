@@ -55,6 +55,10 @@ function init (appState) {
 }
 
 function play (name) {
+  if (state == null) {
+    return
+  }
+
   if (!state.saved.prefs.soundNotifications) {
     return
   }

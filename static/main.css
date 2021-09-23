@@ -322,6 +322,10 @@ textarea,
  * TORRENT LIST
  */
 
+.torrent-list {
+  height: 100%;
+}
+
 .torrent {
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
@@ -578,6 +582,13 @@ body.drag .app::after {
   width: 100%;
 }
 
+.player .name {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.5em;
+  margin-bottom: 6px;
+}
+
 /*
  * PLAYER CONTROLS
  */
@@ -639,6 +650,11 @@ body.drag .app::after {
 }
 
 .player .controls .icon.closed-caption {
+  font-size: 26px;
+  margin-top: 6px;
+}
+
+.player .controls .icon.multi-audio {
   font-size: 26px;
   margin-top: 6px;
 }

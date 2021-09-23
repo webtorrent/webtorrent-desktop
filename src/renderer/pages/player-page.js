@@ -1,7 +1,6 @@
 const React = require('react')
-const Bitfield = require('bitfield')
+const BitField = require('bitfield').default
 const prettyBytes = require('prettier-bytes')
-const zeroFill = require('zero-fill')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
@@ -20,7 +19,8 @@ module.exports = class Player extends React.Component {
       <div
         className='player'
         onWheel={handleVolumeWheel}
-        onMouseMove={dispatcher('mediaMouseMoved')}>
+        onMouseMove={dispatcher('mediaMouseMoved')}
+      >
         {showVideo ? renderMedia(state) : renderCastScreen(state)}
         {showControls ? renderPlayerControls(state) : null}
       </div>
@@ -95,6 +95,13 @@ function renderMedia (state) {
       delete file.selectedSubtitle
     }
 
+    // Switch to selected audio track
+    const audioTracks = mediaElement.audioTracks || []
+    for (let j = 0; j < audioTracks.length; j++) {
+      const isSelectedTrack = j === state.playing.audioTracks.selectedIndex
+      audioTracks[j].enabled = isSelectedTrack
+    }
+
     state.playing.volume = mediaElement.volume
   }
 
@@ -107,10 +114,11 @@ function renderMedia (state) {
       trackTags.push(
         <track
           key={i}
-          default={isSelected ? 'default' : ''}
+          default={isSelected}
           label={track.label}
-          type='subtitles'
-          src={track.buffer} />
+          kind='subtitles'
+          src={track.buffer}
+        />
       )
     }
   }
@@ -121,13 +129,14 @@ function renderMedia (state) {
     <MediaTagName
       src={Playlist.getCurrentLocalURL(state)}
       onDoubleClick={dispatcher('toggleFullScreen')}
+      onClick={dispatcher('playPause')}
       onLoadedMetadata={onLoadedMetadata}
       onEnded={onEnded}
       onStalled={dispatcher('mediaStalled')}
       onError={dispatcher('mediaError')}
       onTimeUpdate={dispatcher('mediaTimeUpdate')}
       onEncrypted={dispatcher('mediaEncrypted')}
-      onCanPlay={onCanPlay}>
+    >
       {trackTags}
     </MediaTagName>
   )
@@ -137,21 +146,57 @@ function renderMedia (state) {
     <div
       key='letterbox'
       className='letterbox'
-      onMouseMove={dispatcher('mediaMouseMoved')}>
+      onMouseMove={dispatcher('mediaMouseMoved')}
+    >
       {mediaTag}
       {renderOverlay(state)}
     </div>
   )
 
-  // As soon as we know the video dimensions, resize the window
   function onLoadedMetadata (e) {
-    if (state.playing.type !== 'video') return
-    const video = e.target
-    const dimensions = {
-      width: video.videoWidth,
-      height: video.videoHeight
+    const mediaElement = e.target
+
+    // check if we can decode video and audio track
+    if (state.playing.type === 'video') {
+      if (mediaElement.videoTracks.length === 0) {
+        dispatch('mediaError', 'Video codec unsupported')
+      }
+
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+
+      const dimensions = {
+        width: mediaElement.videoWidth,
+        height: mediaElement.videoHeight
+      }
+
+      // As soon as we know the video dimensions, resize the window
+      dispatch('setDimensions', dimensions)
+
+      // set audioTracks
+      const tracks = []
+      for (let i = 0; i < mediaElement.audioTracks.length; i++) {
+        tracks.push({
+          label: mediaElement.audioTracks[i].label || `Track ${i + 1}`,
+          language: mediaElement.audioTracks[i].language
+        })
+      }
+
+      state.playing.audioTracks.tracks = tracks
+      state.playing.audioTracks.selectedIndex = 0
     }
-    dispatch('setDimensions', dimensions)
+
+    // check if we can decode audio track
+    if (state.playing.type === 'audio') {
+      if (mediaElement.audioTracks.length === 0) {
+        dispatch('mediaError', 'Audio codec unsupported')
+      }
+
+      dispatch('mediaSuccess')
+    }
   }
 
   function onEnded (e) {
@@ -161,19 +206,6 @@ function renderMedia (state) {
       // When the last video completes, pause the video instead of looping
       state.playing.isPaused = true
       if (state.window.isFullScreen) dispatch('toggleFullScreen')
-    }
-  }
-
-  function onCanPlay (e) {
-    const elem = e.target
-    if (state.playing.type === 'video' &&
-      elem.webkitVideoDecodedByteCount === 0) {
-      dispatch('mediaError', 'Video codec unsupported')
-    } else if (elem.webkitAudioDecodedByteCount === 0) {
-      dispatch('mediaError', 'Audio codec unsupported')
-    } else {
-      dispatch('mediaSuccess')
-      elem.play()
     }
   }
 }
@@ -293,7 +325,7 @@ function renderAudioMetadata (state) {
     }
     elems.push((
       <div key='release' className='audio-release'>
-        <label>Release</label>{ releaseInfo.join(', ') }
+        <label>Release</label>{releaseInfo.join(', ')}
       </div>
     ))
   }
@@ -301,22 +333,26 @@ function renderAudioMetadata (state) {
   // Audio metadata: format
   const format = []
   fileSummary.audioInfo.format = fileSummary.audioInfo.format || ''
-  if (fileSummary.audioInfo.format.dataformat) {
-    format.push(fileSummary.audioInfo.format.dataformat)
+  if (fileSummary.audioInfo.format.container) {
+    format.push(fileSummary.audioInfo.format.container)
+  }
+  if (fileSummary.audioInfo.format.codec &&
+    fileSummary.audioInfo.format.container !== fileSummary.audioInfo.format.codec) {
+    format.push(fileSummary.audioInfo.format.codec)
   }
   if (fileSummary.audioInfo.format.bitrate) {
-    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
+    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbit/s') // 128 kbit/s
   }
   if (fileSummary.audioInfo.format.sampleRate) {
-    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz') // 44.1 kHz
+    format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz')
   }
   if (fileSummary.audioInfo.format.bitsPerSample) {
-    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+    format.push(fileSummary.audioInfo.format.bitsPerSample + '-bit')
   }
   if (format.length > 0) {
     elems.push((
       <div key='format' className='audio-format'>
-        <label>Format</label>{ format.join(', ') }
+        <label>Format</label>{format.join(', ')}
       </div>
     ))
   }
@@ -358,7 +394,7 @@ function renderLoadingSpinner (state) {
     <div key='loading' className='media-stalled'>
       <div key='loading-spinner' className='loading-spinner' />
       <div key='loading-progress' className='loading-status ellipsis'>
-        <span className='progress'>{fileProgress}%</span> downloaded
+        <span><span className='progress'>{fileProgress}%</span> downloaded</span>
         <span> ↓ {prettyBytes(prog.downloadSpeed || 0)}/s</span>
         <span> ↑ {prettyBytes(prog.uploadSpeed || 0)}/s</span>
       </div>
@@ -392,14 +428,67 @@ function renderCastScreen (state) {
 
   const isStarting = state.playing.location.endsWith('-pending')
   const castName = state.playing.castName
+  const fileName = state.getPlayingFileSummary().name || ''
   let castStatus
   if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
+  const prog = state.getPlayingTorrentSummary().progress || {}
+
   // Show a nice title image, if possible
   const style = {
     backgroundImage: cssBackgroundImagePoster(state)
+  }
+
+  function renderEta (total, downloaded) {
+    const missing = (total || 0) - (downloaded || 0)
+    const downloadSpeed = prog.downloadSpeed || 0
+    if (downloadSpeed === 0 || missing === 0) return
+
+    const rawEta = missing / downloadSpeed
+    const hours = Math.floor(rawEta / 3600) % 24
+    const minutes = Math.floor(rawEta / 60) % 60
+    const seconds = Math.floor(rawEta % 60)
+
+    const hoursStr = hours ? hours + ' h' : ''
+    const minutesStr = (hours || minutes) ? minutes + ' min' : ''
+    const secondsStr = seconds + ' s'
+
+    return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+  }
+
+  function renderDownloadProgress () {
+    if (!prog.files) return
+
+    const fileProg = prog.files[state.playing.fileIndex]
+    const fileProgress = fileProg.numPiecesPresent / fileProg.numPieces
+    const fileLength = state.getPlayingFileSummary().length
+    const fileDownloaded = fileProgress * fileLength
+
+    const progress = Math.round(100 * fileProgress)
+    const total = prettyBytes(fileLength)
+    const completed = prettyBytes(fileDownloaded)
+
+    const downloadSpeed = prettyBytes(prog.downloadSpeed || 0)
+    const uploadSpeed = prettyBytes(prog.uploadSpeed || 0)
+
+    let sizes
+    if (fileProgress < 1) {
+      sizes = <span> | {completed} / {total}</span>
+    } else {
+      sizes = <span> | {completed}</span>
+    }
+
+    return (
+      <div key='download-progress'>
+        <span className='progress'>{progress}% downloaded {sizes}</span>
+        <br />
+        <span>↓ {downloadSpeed}/s ↑ {uploadSpeed}/s | {prog.numPeers || 0} peer(s)</span>
+        <br />
+        {renderEta(fileLength, fileDownloaded)}
+      </div>
+    )
   }
 
   return (
@@ -408,6 +497,8 @@ function renderCastScreen (state) {
         <i className='icon'>{castIcon}</i>
         <div key='type' className='cast-type'>{castType}</div>
         <div key='status' className='cast-status'>{castStatus}</div>
+        <div key='name' className='name'>{fileName}</div>
+        {renderDownloadProgress()}
       </div>
     </div>
   )
@@ -425,6 +516,7 @@ function renderCastOptions (state) {
     return (
       <li key={ix} onClick={dispatcher('selectCastDevice', ix)}>
         <i className='icon'>{isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</i>
+        {' '}
         {name}
       </li>
     )
@@ -464,6 +556,27 @@ function renderSubtitleOptions (state) {
   )
 }
 
+function renderAudioTrackOptions (state) {
+  const audioTracks = state.playing.audioTracks
+  if (!audioTracks.tracks.length || !audioTracks.showMenu) return
+
+  const items = audioTracks.tracks.map(function (track, ix) {
+    const isSelected = state.playing.audioTracks.selectedIndex === ix
+    return (
+      <li key={ix} onClick={dispatcher('selectAudioTrack', ix)}>
+        <i className='icon'>{'radio_button_' + (isSelected ? 'checked' : 'unchecked')}</i>
+        {track.label}
+      </li>
+    )
+  })
+
+  return (
+    <ul key='audio-track-options' className='options-list'>
+      {items}
+    </ul>
+  )
+}
+
 function renderPlayerControls (state) {
   const positionPercent = 100 * state.playing.currentTime / state.playing.duration
   const playbackCursorStyle = { left: 'calc(' + positionPercent + '% - 3px)' }
@@ -472,50 +585,63 @@ function renderPlayerControls (state) {
     : state.playing.subtitles.selectedIndex >= 0
       ? 'active'
       : ''
+  const multiAudioClass = state.playing.audioTracks.tracks.length > 1
+    ? 'active'
+    : 'disabled'
   const prevClass = Playlist.hasPrevious(state) ? '' : 'disabled'
   const nextClass = Playlist.hasNext(state) ? '' : 'disabled'
 
   const elements = [
+    renderPreview(state),
+
     <div key='playback-bar' className='playback-bar'>
       {renderLoadingBar(state)}
       <div
         key='cursor'
         className='playback-cursor'
-        style={playbackCursorStyle} />
+        style={playbackCursorStyle}
+      />
       <div
         key='scrub-bar'
         className='scrub-bar'
         draggable='true'
+        onMouseMove={handleScrubPreview}
+        onMouseOut={clearPreview}
         onDragStart={handleDragStart}
         onClick={handleScrub}
-        onDrag={handleScrub} />
+        onDrag={handleScrub}
+      />
     </div>,
 
     <i
       key='skip-previous'
       className={'icon skip-previous float-left ' + prevClass}
-      onClick={dispatcher('previousTrack')}>
+      onClick={dispatcher('previousTrack')}
+    >
       skip_previous
     </i>,
 
     <i
       key='play'
       className='icon play-pause float-left'
-      onClick={dispatcher('playPause')}>
+      onClick={dispatcher('playPause')}
+    >
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>,
 
     <i
       key='skip-next'
       className={'icon skip-next float-left ' + nextClass}
-      onClick={dispatcher('nextTrack')}>
+      onClick={dispatcher('nextTrack')}
+    >
       skip_next
     </i>,
 
     <i
       key='fullscreen'
       className='icon fullscreen float-right'
-      onClick={dispatcher('toggleFullScreen')}>
+      onClick={dispatcher('toggleFullScreen')}
+    >
       {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
     </i>
   ]
@@ -526,8 +652,17 @@ function renderPlayerControls (state) {
       <i
         key='subtitles'
         className={'icon closed-caption float-right ' + captionsClass}
-        onClick={handleSubtitles}>
+        onClick={handleSubtitles}
+      >
         closed_caption
+      </i>
+    ), (
+      <i
+        key='audio-tracks'
+        className={'icon multi-audio float-right ' + multiAudioClass}
+        onClick={handleAudioTracks}
+      >
+        library_music
       </i>
     ))
   }
@@ -570,7 +705,8 @@ function renderPlayerControls (state) {
       <i
         key={castType}
         className={'icon device float-right ' + buttonClass}
-        onClick={buttonHandler}>
+        onClick={buttonHandler}
+      >
         {buttonIcon}
       </i>
     ))
@@ -579,10 +715,14 @@ function renderPlayerControls (state) {
   // Render volume slider
   const volume = state.playing.volume
   const volumeIcon = 'volume_' + (
-    volume === 0 ? 'off'
-      : volume < 0.3 ? 'mute'
-        : volume < 0.6 ? 'down'
-          : 'up')
+    volume === 0
+      ? 'off'
+      : volume < 0.3
+        ? 'mute'
+        : volume < 0.6
+          ? 'down'
+          : 'up'
+  )
   const volumeStyle = {
     background: '-webkit-gradient(linear, left top, right top, ' +
       'color-stop(' + (volume * 100) + '%, #eee), ' +
@@ -593,7 +733,8 @@ function renderPlayerControls (state) {
     <div key='volume' className='volume float-left'>
       <i
         className='icon volume-icon float-left'
-        onMouseDown={handleVolumeMute}>
+        onMouseDown={handleVolumeMute}
+      >
         {volumeIcon}
       </i>
       <input
@@ -601,7 +742,8 @@ function renderPlayerControls (state) {
         type='range' min='0' max='1' step='0.05'
         value={volume}
         onChange={handleVolumeScrub}
-        style={volumeStyle} />
+        style={volumeStyle}
+      />
     </div>
   ))
 
@@ -623,22 +765,29 @@ function renderPlayerControls (state) {
     ))
   }
 
-  return (
-    <div key='controls' className='controls'
-      onMouseEnter={dispatcher('mediaControlsMouseEnter')}
-      onMouseLeave={dispatcher('mediaControlsMouseLeave')}>
-      {elements}
-      {renderCastOptions(state)}
-      {renderSubtitleOptions(state)}
-    </div>
-  )
-
+  const emptyImage = new window.Image(0, 0)
+  emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'
   function handleDragStart (e) {
-    // Prevent the cursor from changing, eg to a green + icon on Mac
     if (e.dataTransfer) {
       const dt = e.dataTransfer
+      // Prevent the cursor from changing, eg to a green + icon on Mac
       dt.effectAllowed = 'none'
+      // Prevent ghost image
+      dt.setDragImage(emptyImage, 0, 0)
     }
+  }
+
+  // Handles a scrub hover (preview another position in the video)
+  function handleScrubPreview (e) {
+    // Only show for videos
+    if (!e.clientX || state.playing.type !== 'video') return
+    dispatch('mediaMouseMoved')
+    dispatch('preview', e.clientX)
+  }
+
+  function clearPreview (e) {
+    if (state.playing.type !== 'video') return
+    dispatch('clearPreview')
   }
 
   // Handles a click or drag to scrub (jump to another position in the video)
@@ -673,6 +822,73 @@ function renderPlayerControls (state) {
       dispatch('toggleSubtitlesMenu')
     }
   }
+
+  function handleAudioTracks (e) {
+    dispatch('toggleAudioTracksMenu')
+  }
+
+  return (
+    <div
+      key='controls' className='controls'
+      onMouseEnter={dispatcher('mediaControlsMouseEnter')}
+      onMouseLeave={dispatcher('mediaControlsMouseLeave')}
+    >
+      {elements}
+      {renderCastOptions(state)}
+      {renderSubtitleOptions(state)}
+      {renderAudioTrackOptions(state)}
+    </div>
+  )
+}
+
+function renderPreview (state) {
+  const { previewXCoord = null } = state.playing
+
+  // Calculate time from x-coord as fraction of track width
+  const windowWidth = document.querySelector('body').clientWidth
+  const fraction = previewXCoord / windowWidth
+  const time = fraction * state.playing.duration /* seconds */
+
+  const height = 70
+  let width = 0
+
+  const previewEl = document.querySelector('video#preview')
+  if (previewEl !== null && previewXCoord !== null) {
+    previewEl.currentTime = time
+
+    // Auto adjust width to maintain video aspect ratio
+    width = Math.floor((previewEl.videoWidth / previewEl.videoHeight) * height)
+  }
+
+  // Center preview window on mouse cursor,
+  // while avoiding falling off the left or right edges
+  const xPos = Math.min(Math.max(previewXCoord - (width / 2), 5), windowWidth - width - 5)
+
+  return (
+    <div
+      key='preview' style={{
+        position: 'absolute',
+        bottom: 50,
+        left: xPos,
+        display: previewXCoord == null && 'none' // Hide preview when XCoord unset
+      }}
+    >
+      <div style={{ width, height, backgroundColor: 'black' }}>
+        <video
+          src={Playlist.getCurrentLocalURL(state)}
+          id='preview'
+          style={{ border: '1px solid lightgrey', borderRadius: 2 }}
+        />
+      </div>
+      <p
+        style={{
+          textAlign: 'center', margin: 5, textShadow: '0 0 2px rgba(0,0,0,.5)', color: '#eee'
+        }}
+      >
+        {formatTime(time, state.playing.duration)}
+      </p>
+    </div>
+  )
 }
 
 // Renders the loading bar. Shows which parts of the torrent are loaded, which
@@ -694,7 +910,7 @@ function renderLoadingBar (state) {
   const parts = []
   let lastPiecePresent = false
   for (let i = fileProg.startPiece; i <= fileProg.endPiece; i++) {
-    const partPresent = Bitfield.prototype.get.call(prog.bitfield, i)
+    const partPresent = BitField.prototype.get.call(prog.bitfield, i)
     if (partPresent && !lastPiecePresent) {
       parts.push({ start: i - fileProg.startPiece, count: 1 })
     } else if (partPresent) {
@@ -738,10 +954,10 @@ function formatTime (time, total) {
   const totalMinutes = Math.floor(total / 60)
   const hours = Math.floor(time / 3600)
   let minutes = Math.floor(time % 3600 / 60)
-  if (totalMinutes > 9) {
-    minutes = zeroFill(2, minutes)
+  if (totalMinutes > 9 && minutes < 10) {
+    minutes = '0' + minutes
   }
-  const seconds = zeroFill(2, Math.floor(time % 60))
+  const seconds = `0${Math.floor(time % 60)}`.slice(-2)
 
   return (totalHours > 0 ? hours + ':' : '') + minutes + ':' + seconds
 }

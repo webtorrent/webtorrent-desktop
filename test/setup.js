@@ -1,7 +1,6 @@
 const Application = require('spectron').Application
-const cpFile = require('cp-file')
+const { copyFileSync } = require('fs')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 const parseTorrent = require('parse-torrent')
 const path = require('path')
 const PNG = require('pngjs').PNG
@@ -28,10 +27,15 @@ module.exports = {
 // Returns a promise that resolves to a Spectron Application once the app has loaded.
 // Takes a Tape test. Makes some basic assertions to verify that the app loaded correctly.
 function createApp (t) {
+  const userDataDir = process.platform === 'win32'
+    ? path.join('C:\\Windows\\Temp', 'WebTorrentTest')
+    : path.join('/tmp', 'WebTorrentTest')
+
   return new Application({
     path: path.join(__dirname, '..', 'node_modules', '.bin',
       'electron' + (process.platform === 'win32' ? '.cmd' : '')),
     args: ['-r', path.join(__dirname, 'mocks.js'), path.join(__dirname, '..')],
+    chromeDriverArgs: [`--user-data-dir=${userDataDir}`],
     env: { NODE_ENV: 'test' },
     waitTimeout: 10e3
   })
@@ -78,6 +82,12 @@ function endTest (app, t, err) {
 // Otherwise, create the reference screenshot: test/screenshots/<platform>/<name>.png
 function screenshotCreateOrCompare (app, t, name) {
   const ssDir = path.join(__dirname, 'screenshots', process.platform)
+
+  // check that path exists otherwise create it
+  if (!fs.existsSync(ssDir)) {
+    fs.mkdirSync(ssDir)
+  }
+
   const ssPath = path.join(ssDir, name + '.png')
   let ssBuf
 
@@ -86,22 +96,24 @@ function screenshotCreateOrCompare (app, t, name) {
   } catch (err) {
     ssBuf = Buffer.alloc(0)
   }
-  return wait().then(function () {
-    return app.browserWindow.capturePage()
-  }).then(function (buffer) {
-    if (ssBuf.length === 0) {
-      console.log('Saving screenshot ' + ssPath)
-      fs.writeFileSync(ssPath, buffer)
-    } else {
-      const match = compareIgnoringTransparency(buffer, ssBuf)
-      t.ok(match, 'screenshot comparison ' + name)
-      if (!match) {
-        const ssFailedPath = path.join(ssDir, name + '-failed.png')
-        console.log('Saving screenshot, failed comparison: ' + ssFailedPath)
-        fs.writeFileSync(ssFailedPath, buffer)
+
+  return app.browserWindow.focus()
+    .then(() => wait())
+    .then(() => app.browserWindow.capturePage())
+    .then(function (buffer) {
+      if (ssBuf.length === 0) {
+        console.log('Saving screenshot ' + ssPath)
+        fs.writeFileSync(ssPath, buffer)
+      } else {
+        const match = compareIgnoringTransparency(buffer, ssBuf)
+        t.ok(match, 'screenshot comparison ' + name)
+        if (!match) {
+          const ssFailedPath = path.join(ssDir, name + '-failed.png')
+          console.log('Saving screenshot, failed comparison: ' + ssFailedPath)
+          fs.writeFileSync(ssFailedPath, buffer)
+        }
       }
-    }
-  })
+    })
 }
 
 // Compares two PNGs, ignoring any transparent regions in bufExpected.
@@ -147,8 +159,8 @@ function compareIgnoringTransparency (bufActual, bufExpected) {
 function resetTestDataDir () {
   rimraf.sync(config.TEST_DIR)
   // Create TEST_DIR as well as /Downloads and /Desktop
-  mkdirp.sync(config.TEST_DIR_DOWNLOAD)
-  mkdirp.sync(config.TEST_DIR_DESKTOP)
+  fs.mkdirSync(config.TEST_DIR_DOWNLOAD, { recursive: true })
+  fs.mkdirSync(config.TEST_DIR_DESKTOP, { recursive: true })
 }
 
 function deleteTestDataDir () {
@@ -167,6 +179,7 @@ function compareDownloadFolder (t, dirname, filenames) {
     }
     const expectedSorted = filenames.slice().sort()
     const actualSorted = actualFilenames.slice().sort()
+    console.log(actualSorted)
     t.deepEqual(actualSorted, expectedSorted, 'download folder contents: ' + dirname)
   } catch (err) {
     if (err.code === 'ENOENT') {
@@ -199,18 +212,20 @@ function compareTorrentFiles (t, pathActual, pathExpected) {
 function compareTorrentFile (t, pathActual, fieldsExpected) {
   const bufActual = fs.readFileSync(pathActual)
   const fieldsActual = extractImportantFields(parseTorrent(bufActual))
+  if (Array.isArray(fieldsExpected.announce)) fieldsExpected.announce.sort()
   t.deepEqual(fieldsActual, fieldsExpected, 'torrent contents: ' + pathActual)
 }
 
 function extractImportantFields (parsedTorrent) {
-  const { infoHash, name, announce, urlList, comment } = parsedTorrent
+  let { infoHash, name, announce, urlList, comment } = parsedTorrent
   const priv = parsedTorrent.private // private is a reserved word in JS
+  announce = announce.slice().sort()
   return { infoHash, name, announce, urlList, comment, private: priv }
 }
 
 function copy (pathFrom, pathTo) {
   try {
-    cpFile.sync(pathFrom, pathTo)
+    copyFileSync(pathFrom, pathTo)
   } catch (err) {
     // Windows lets us create files and folders under C:\Windows\Temp,
     // but when you try to `copySync` into one of those folders, you get EPERM

@@ -18,7 +18,8 @@ function torrentPoster (torrent, cb) {
   const bestScore = ['audio', 'video', 'image'].map(mediaType => {
     return {
       type: mediaType,
-      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType]) }
+      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
+    }
   }).sort((a, b) => { // sort descending on size
     return b.size - a.size
   })[0]
@@ -73,7 +74,7 @@ function getLargestFileByExtension (torrent, extensions) {
  * Filter file on a list extension, can be used to find al image files
  * @param torrent Torrent to filter files from
  * @param extensions File extensions to filter on
- * @returns {number} Array of torrent file objects matching one of the given extensions
+ * @returns {Array} Array of torrent file objects matching one of the given extensions
  */
 function filterOnExtension (torrent, extensions) {
   return torrent.files.filter(file => {
@@ -116,7 +117,7 @@ function torrentPosterFromAudio (torrent, cb) {
 
   const bestCover = imageFiles.map(file => {
     return {
-      file: file,
+      file,
       score: scoreAudioCoverFile(file)
     }
   }).reduce((a, b) => {
@@ -165,7 +166,8 @@ function torrentPosterFromVideo (torrent, cb) {
     function onSeeked () {
       video.removeEventListener('seeked', onSeeked)
 
-      const buf = captureFrame(video)
+      const frame = captureFrame(video)
+      const buf = frame && frame.image
 
       // unload video element
       video.pause()

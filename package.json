@@ -1,79 +1,87 @@
 {
   "name": "webtorrent-desktop",
   "description": "WebTorrent, the streaming torrent client. For Mac, Windows, and Linux.",
-  "version": "0.20.0",
+  "version": "0.24.0",
   "author": {
     "name": "WebTorrent, LLC",
     "email": "feross@webtorrent.io",
     "url": "https://webtorrent.io"
   },
+  "babel": {
+    "plugins": [
+      [
+        "@babel/plugin-transform-react-jsx",
+        {
+          "useBuiltIns": true
+        }
+      ]
+    ]
+  },
   "bugs": {
     "url": "https://github.com/webtorrent/webtorrent-desktop/issues"
   },
   "dependencies": {
-    "airplayer": "^2.0.0",
-    "application-config": "^1.0.0",
-    "arch": "^2.0.0",
-    "auto-launch": "^5.0.5",
-    "bitfield": "^1.0.2",
-    "capture-frame": "^3.0.0",
-    "chokidar": "^2.0.4",
-    "chromecasts": "^1.9.1",
-    "cp-file": "^7.0.0",
-    "create-torrent": "^4.0.0",
-    "debounce": "^1.0.0",
-    "deep-equal": "^1.0.1",
-    "dlnacasts": "^0.1.0",
-    "drag-drop": "^4.1.0",
-    "es6-error": "^4.0.0",
-    "fn-getter": "^1.0.0",
-    "iso-639-1": "^2.0.5",
-    "languagedetect": "^1.2.0",
-    "location-history": "^1.0.0",
-    "material-ui": "^0.20.2",
-    "mkdirp": "^0.5.1",
-    "music-metadata": "^3.6.1",
-    "network-address": "^1.1.0",
-    "parse-torrent": "^7.0.0",
-    "prettier-bytes": "^1.0.1",
-    "prop-types": "^15.6.2",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
-    "rimraf": "^2.5.2",
-    "run-parallel": "^1.1.6",
-    "semver": "^6.0.0",
-    "simple-concat": "^1.0.0",
-    "simple-get": "^3.0.3",
-    "srt-to-vtt": "^1.1.1",
-    "vlc-command": "^1.0.1",
-    "webtorrent": "0.x",
-    "winreg": "^1.2.0",
-    "zero-fill": "^2.2.3"
+    "airplayer": "github:webtorrent/airplayer#fix-security",
+    "application-config": "2.0.0",
+    "arch": "2.2.0",
+    "auto-launch": "5.0.5",
+    "bitfield": "4.0.0",
+    "capture-frame": "4.0.0",
+    "chokidar": "3.5.2",
+    "chromecasts": "1.10.1",
+    "create-torrent": "5.0.1",
+    "debounce": "1.2.1",
+    "dlnacasts": "0.1.0",
+    "drag-drop": "7.2.0",
+    "es6-error": "4.1.1",
+    "fn-getter": "1.0.0",
+    "iso-639-1": "2.1.9",
+    "languagedetect": "2.0.0",
+    "location-history": "1.1.2",
+    "material-ui": "0.20.2",
+    "music-metadata": "7.11.4",
+    "network-address": "1.1.2",
+    "parse-torrent": "9.1.4",
+    "prettier-bytes": "1.0.4",
+    "prop-types": "15.7.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rimraf": "3.0.2",
+    "run-parallel": "1.2.0",
+    "semver": "7.3.5",
+    "simple-concat": "1.0.1",
+    "simple-get": "4.0.0",
+    "srt-to-vtt": "1.1.3",
+    "vlc-command": "1.2.0",
+    "webtorrent": "1.5.5",
+    "winreg": "1.2.4"
   },
   "devDependencies": {
-    "babel-eslint": "^9.0.0",
-    "buble": "^0.19.6",
-    "cross-zip": "^2.0.1",
-    "depcheck": "^0.8.0",
-    "electron": "^1.8.8",
-    "electron-osx-sign": "^0.4.11",
-    "electron-packager": "~8.5.1",
-    "electron-winstaller": "^2.6.4",
-    "gh-release": "^3.4.0",
-    "minimist": "^1.2.0",
-    "nobin-debian-installer": "0.0.10",
-    "nodemon": "^1.18.8",
-    "opn": "^6.0.0",
-    "plist": "^3.0.1",
-    "pngjs": "^3.0.0",
-    "run-series": "^1.1.4",
-    "spectron": "^3.3.0",
+    "@babel/cli": "7.15.7",
+    "@babel/core": "7.15.5",
+    "@babel/eslint-parser": "7.15.7",
+    "@babel/plugin-transform-react-jsx": "7.14.9",
+    "cross-zip": "4.0.0",
+    "depcheck": "1.4.1",
+    "electron": "13.4.0",
+    "electron-notarize": "1.1.1",
+    "electron-osx-sign": "0.5.0",
+    "electron-packager": "15.4.0",
+    "electron-winstaller": "5.0.0",
+    "gh-release": "6.0.1",
+    "minimist": "1.2.5",
+    "nodemon": "2.0.12",
+    "open": "8.2.1",
+    "plist": "3.0.4",
+    "pngjs": "6.0.0",
+    "run-series": "1.1.9",
+    "spectron": "15.0.0",
     "standard": "*",
-    "tape": "^4.9.1",
-    "walk-sync": "^2.0.2"
+    "tape": "5.3.1"
   },
   "engines": {
-    "node": ">=4.0.0"
+    "node": "^16.0.0",
+    "npm": "^7.10.0"
   },
   "homepage": "https://webtorrent.io",
   "keywords": [
@@ -89,7 +97,9 @@
   "license": "MIT",
   "main": "index.js",
   "optionalDependencies": {
-    "appdmg": "^0.4.3"
+    "appdmg": "^0.6.0",
+    "electron-installer-debian": "^3.1.0",
+    "electron-installer-redhat": "^3.3.0"
   },
   "private": true,
   "productName": "WebTorrent",
@@ -98,19 +108,24 @@
     "url": "git://github.com/webtorrent/webtorrent-desktop.git"
   },
   "scripts": {
-    "build": "buble src --output build",
+    "build": "babel src --out-dir build",
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
+    "install-system-deps": "brew install fakeroot dpkg rpm",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
-    "prepublish": "npm run build",
-    "start": "npm run build && electron .",
-    "test": "standard && depcheck --ignores=standard,babel-eslint --ignore-dirs=build,dist && node ./bin/extra-lint.js",
+    "start": "npm run build && electron --no-sandbox .",
+    "test": "standard && depcheck --ignores=standard,@babel/eslint-parser --ignore-dirs=build,dist",
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/"
   },
   "standard": {
-    "parser": "babel-eslint"
+    "parser": "@babel/eslint-parser"
+  },
+  "renovate": {
+    "extends": [
+      "github>webtorrent/renovate-config"
+    ]
   }
 }

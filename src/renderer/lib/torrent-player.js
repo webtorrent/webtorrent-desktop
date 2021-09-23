@@ -3,6 +3,7 @@ module.exports = {
   isVideo,
   isAudio,
   isTorrent,
+  isMagnetLink,
   isPlayableTorrentSummary
 }
 
@@ -31,9 +32,15 @@ function isAudio (file) {
 // - a file object where obj.name is ends in .torrent
 // - a string that's a magnet link (magnet://...)
 function isTorrent (file) {
-  const isTorrentFile = getFileExtension(file) === '.torrent'
-  const isMagnet = typeof file === 'string' && /^(stream-)?magnet:/.test(file)
-  return isTorrentFile || isMagnet
+  return isTorrentFile(file) || isMagnetLink(file)
+}
+
+function isTorrentFile (file) {
+  return getFileExtension(file) === '.torrent'
+}
+
+function isMagnetLink (link) {
+  return typeof link === 'string' && /^(stream-)?magnet:/.test(link)
 }
 
 function getFileExtension (file) {

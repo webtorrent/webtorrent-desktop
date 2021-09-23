@@ -14,10 +14,8 @@ const main = module.exports = {
   win: null
 }
 
-const electron = require('electron')
+const { app, BrowserWindow, screen } = require('electron')
 const debounce = require('debounce')
-
-const app = electron.app
 
 const config = require('../../config')
 const log = require('../log')
@@ -30,9 +28,8 @@ function init (state, options) {
 
   const initialBounds = Object.assign(config.WINDOW_INITIAL_BOUNDS, state.saved.bounds)
 
-  const win = main.win = new electron.BrowserWindow({
+  const win = main.win = new BrowserWindow({
     backgroundColor: '#282828',
-    backgroundThrottling: false, // do not throttle animations/timers when page is background
     darkTheme: true, // Forces dark theme (GTK+3)
     height: initialBounds.height,
     icon: getIconPath(), // Window icon (Windows, Linux)
@@ -40,9 +37,16 @@ function init (state, options) {
     minWidth: config.WINDOW_MIN_WIDTH,
     show: false,
     title: config.APP_WINDOW_TITLE,
-    titleBarStyle: 'hidden-inset', // Hide title bar (Mac)
+    titleBarStyle: 'hiddenInset', // Hide title bar (Mac)
     useContentSize: true, // Specify web page size without OS chrome
     width: initialBounds.width,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableBlinkFeatures: 'AudioVideoTracks',
+      enableRemoteModule: true,
+      backgroundThrottling: false
+    },
     x: initialBounds.x,
     y: initialBounds.y
   })
@@ -138,7 +142,7 @@ function setAspectRatio (aspectRatio) {
 function setBounds (bounds, maximize) {
   // Do nothing in fullscreen
   if (!main.win || main.win.isFullScreen()) {
-    log(`setBounds: not setting bounds because we're in full screen`)
+    log('setBounds: not setting bounds because already in full screen mode')
     return
   }
 
@@ -157,7 +161,7 @@ function setBounds (bounds, maximize) {
     log(`setBounds: setting bounds to ${JSON.stringify(bounds)}`)
     if (bounds.x === null && bounds.y === null) {
       // X and Y not specified? By default, center on current screen
-      const scr = electron.screen.getDisplayMatching(main.win.getBounds())
+      const scr = screen.getDisplayMatching(main.win.getBounds())
       bounds.x = Math.round(scr.bounds.x + (scr.bounds.width / 2) - (bounds.width / 2))
       bounds.y = Math.round(scr.bounds.y + (scr.bounds.height / 2) - (bounds.height / 2))
       log(`setBounds: centered to ${JSON.stringify(bounds)}`)
@@ -209,7 +213,7 @@ function toggleDevTools () {
   if (main.win.webContents.isDevToolsOpened()) {
     main.win.webContents.closeDevTools()
   } else {
-    main.win.webContents.openDevTools({ detach: true })
+    main.win.webContents.openDevTools({ mode: 'detach' })
   }
 }
 

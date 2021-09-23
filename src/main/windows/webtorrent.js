@@ -6,14 +6,13 @@ const webtorrent = module.exports = {
   win: null
 }
 
-const electron = require('electron')
+const { app, BrowserWindow } = require('electron')
 
 const config = require('../../config')
 
 function init () {
-  const win = webtorrent.win = new electron.BrowserWindow({
+  const win = webtorrent.win = new BrowserWindow({
     backgroundColor: '#1E1E1E',
-    backgroundThrottling: false, // do not throttle animations/timers when page is background
     center: true,
     fullscreen: false,
     fullscreenable: false,
@@ -25,6 +24,13 @@ function init () {
     skipTaskbar: true,
     title: 'webtorrent-hidden-window',
     useContentSize: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableBlinkFeatures: 'AudioVideoTracks',
+      enableRemoteModule: true,
+      backgroundThrottling: false
+    },
     width: 150
   })
 
@@ -32,7 +38,7 @@ function init () {
 
   // Prevent killing the WebTorrent process
   win.on('close', function (e) {
-    if (electron.app.isQuitting) {
+    if (app.isQuitting) {
       return
     }
     e.preventDefault()
@@ -56,6 +62,6 @@ function toggleDevTools () {
     webtorrent.win.webContents.closeDevTools()
     webtorrent.win.hide()
   } else {
-    webtorrent.win.webContents.openDevTools({ detach: true })
+    webtorrent.win.webContents.openDevTools({ mode: 'detach' })
   }
 }

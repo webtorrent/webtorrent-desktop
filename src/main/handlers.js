@@ -12,8 +12,6 @@ function install () {
       break
     case 'win32': installWin32()
       break
-    case 'linux': installLinux()
-      break
   }
 }
 
@@ -23,14 +21,11 @@ function uninstall () {
       break
     case 'win32': uninstallWin32()
       break
-    case 'linux': uninstallLinux()
-      break
   }
 }
 
 function installDarwin () {
-  const electron = require('electron')
-  const app = electron.app
+  const { app } = require('electron')
 
   // On Mac, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.
@@ -268,101 +263,4 @@ function uninstallWin32 () {
 
 function commandToArgs (command) {
   return command.map((arg) => `"${arg}"`).join(' ')
-}
-
-function installLinux () {
-  const fs = require('fs')
-  const os = require('os')
-  const path = require('path')
-
-  const config = require('../config')
-  const log = require('./log')
-
-  // Do not install in user dir if running on system
-  if (/^\/opt/.test(process.execPath)) return
-
-  installDesktopFile()
-  installIconFile()
-
-  function installDesktopFile () {
-    const templatePath = path.join(
-      config.STATIC_PATH, 'linux', 'webtorrent-desktop.desktop'
-    )
-    fs.readFile(templatePath, 'utf8', writeDesktopFile)
-  }
-
-  function writeDesktopFile (err, desktopFile) {
-    if (err) return log.error(err.message)
-
-    const appPath = config.IS_PRODUCTION
-      ? path.dirname(process.execPath)
-      : config.ROOT_PATH
-
-    desktopFile = desktopFile
-      .replace(/\$APP_NAME/g, config.APP_NAME)
-      .replace(/\$APP_PATH/g, appPath)
-      .replace(/\$EXEC_PATH/g, EXEC_COMMAND.join(' '))
-      .replace(/\$TRY_EXEC_PATH/g, process.execPath)
-
-    const desktopFilePath = path.join(
-      os.homedir(),
-      '.local',
-      'share',
-      'applications',
-      'webtorrent-desktop.desktop'
-    )
-    fs.mkdirp(path.dirname(desktopFilePath))
-    fs.writeFile(desktopFilePath, desktopFile, err => {
-      if (err) return log.error(err.message)
-    })
-  }
-
-  function installIconFile () {
-    const iconStaticPath = path.join(config.STATIC_PATH, 'WebTorrent.png')
-    fs.readFile(iconStaticPath, writeIconFile)
-  }
-
-  function writeIconFile (err, iconFile) {
-    if (err) return log.error(err.message)
-
-    const mkdirp = require('mkdirp')
-
-    const iconFilePath = path.join(
-      os.homedir(),
-      '.local',
-      'share',
-      'icons',
-      'webtorrent-desktop.png'
-    )
-    mkdirp(path.dirname(iconFilePath), err => {
-      if (err) return log.error(err.message)
-      fs.writeFile(iconFilePath, iconFile, err => {
-        if (err) log.error(err.message)
-      })
-    })
-  }
-}
-
-function uninstallLinux () {
-  const os = require('os')
-  const path = require('path')
-  const rimraf = require('rimraf')
-
-  const desktopFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'applications',
-    'webtorrent-desktop.desktop'
-  )
-  rimraf(desktopFilePath)
-
-  const iconFilePath = path.join(
-    os.homedir(),
-    '.local',
-    'share',
-    'icons',
-    'webtorrent-desktop.png'
-  )
-  rimraf(iconFilePath)
 }

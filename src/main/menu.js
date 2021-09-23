@@ -8,9 +8,7 @@ module.exports = {
   onToggleFullScreen
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, Menu } = require('electron')
 
 const config = require('../config')
 const windows = require('./windows')
@@ -18,8 +16,8 @@ const windows = require('./windows')
 let menu = null
 
 function init () {
-  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
-  electron.Menu.setApplicationMenu(menu)
+  menu = Menu.buildFromTemplate(getMenuTemplate())
+  Menu.setApplicationMenu(menu)
 }
 
 function togglePlaybackControls (flag) {
@@ -76,6 +74,7 @@ function getMenuItem (label) {
     })
     if (menuItem) return menuItem
   }
+  return {}
 }
 
 function getMenuTemplate () {
@@ -288,6 +287,14 @@ function getMenuTemplate () {
         {
           label: 'Resume All',
           click: () => windows.main.dispatch('resumeAllTorrents')
+        },
+        {
+          label: 'Remove All From List',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', false)
+        },
+        {
+          label: 'Remove All Data Files',
+          click: () => windows.main.dispatch('confirmDeleteAllTorrents', true)
         }
       ]
     },
@@ -300,6 +307,13 @@ function getMenuTemplate () {
           click: () => {
             const shell = require('./shell')
             shell.openExternal(config.HOME_PAGE_URL)
+          }
+        },
+        {
+          label: 'Release Notes',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.GITHUB_URL_RELEASES)
           }
         },
         {
@@ -317,6 +331,13 @@ function getMenuTemplate () {
           click: () => {
             const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL_ISSUES)
+          }
+        },
+        {
+          label: 'Follow us on Twitter',
+          click: () => {
+            const shell = require('./shell')
+            shell.openExternal(config.TWITTER_PAGE_URL)
           }
         }
       ]
@@ -343,8 +364,7 @@ function getMenuTemplate () {
           type: 'separator'
         },
         {
-          role: 'services',
-          submenu: []
+          role: 'services'
         },
         {
           type: 'separator'

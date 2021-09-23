@@ -2,3 +2,8 @@ node_modules/
 build/
 dist/
 npm-debug.log*
+.vscode/
+
+# JetBrains IntelliJ IDEA project files
+.idea
+*.iml

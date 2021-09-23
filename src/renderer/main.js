@@ -14,9 +14,6 @@ Module.prototype.require = function (id) {
 
 console.time('init')
 
-const crashReporter = require('../crash-reporter')
-crashReporter.init()
-
 // Perf optimization: Start asynchronously read on config file before all the
 // blocking require() calls below.
 
@@ -99,6 +96,10 @@ function onState (err, _state) {
       const SubtitlesController = require('./controllers/subtitles-controller')
       return new SubtitlesController(state)
     }),
+    audioTracks: createGetter(() => {
+      const AudioTracksController = require('./controllers/audio-tracks-controller')
+      return new AudioTracksController(state)
+    }),
     torrent: createGetter(() => {
       const TorrentController = require('./controllers/torrent-controller')
       return new TorrentController(state)
@@ -129,7 +130,10 @@ function onState (err, _state) {
   resumeTorrents()
 
   // Initialize ReactDOM
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  ReactDOM.render(
+    <App state={state} ref={elem => { app = elem }} />,
+    document.querySelector('#body')
+  )
 
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
@@ -253,6 +257,11 @@ const dispatchHandlers = {
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
   deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
+  openTorrentListContextMenu: () => onPaste(),
+  confirmDeleteAllTorrents: (deleteData) =>
+    controllers.torrentList().confirmDeleteAllTorrents(deleteData),
+  deleteAllTorrents: (deleteData) =>
+    controllers.torrentList().deleteAllTorrents(deleteData),
   toggleSelectTorrent: (infoHash) =>
     controllers.torrentList().toggleSelectTorrent(infoHash),
   openTorrentContextMenu: (infoHash) =>
@@ -271,10 +280,12 @@ const dispatchHandlers = {
   previousTrack: () => controllers.playback().previousTrack(),
   skip: (time) => controllers.playback().skip(time),
   skipTo: (time) => controllers.playback().skipTo(time),
+  preview: (x) => controllers.playback().preview(x),
+  clearPreview: () => controllers.playback().clearPreview(),
   changePlaybackRate: (dir) => controllers.playback().changePlaybackRate(dir),
   changeVolume: (delta) => controllers.playback().changeVolume(delta),
   setVolume: (vol) => controllers.playback().setVolume(vol),
-  openItem: (infoHash, index) => controllers.playback().openItem(infoHash, index),
+  openPath: (infoHash, index) => controllers.playback().openPath(infoHash, index),
 
   // Subtitles
   openSubtitles: () => controllers.subtitles().openSubtitles(),
@@ -282,6 +293,10 @@ const dispatchHandlers = {
   toggleSubtitlesMenu: () => controllers.subtitles().toggleSubtitlesMenu(),
   checkForSubtitles: () => controllers.subtitles().checkForSubtitles(),
   addSubtitles: (files, autoSelect) => controllers.subtitles().addSubtitles(files, autoSelect),
+
+  // Audio Tracks
+  selectAudioTrack: (index) => controllers.audioTracks().selectAudioTrack(index),
+  toggleAudioTracksMenu: () => controllers.audioTracks().toggleAudioTracksMenu(),
 
   // Local media: <video>, <audio>, external players
   mediaStalled: () => controllers.media().mediaStalled(),
@@ -302,7 +317,7 @@ const dispatchHandlers = {
   // Preferences screen
   preferences: () => controllers.prefs().show(),
   updatePreferences: (key, value) => controllers.prefs().update(key, value),
-  checkDownloadPath: checkDownloadPath,
+  checkDownloadPath,
   startFolderWatcher: () => controllers.folderWatcher().start(),
   stopFolderWatcher: () => controllers.folderWatcher().stop(),
 
@@ -312,20 +327,20 @@ const dispatchHandlers = {
 
   // Navigation between screens (back, forward, ESC, etc)
   exitModal: () => { state.modal = null },
-  backToList: backToList,
-  escapeBack: escapeBack,
+  backToList,
+  escapeBack,
   back: () => state.location.back(),
   forward: () => state.location.forward(),
   cancel: () => state.location.cancel(),
 
   // Controlling the window
-  setDimensions: setDimensions,
+  setDimensions,
   toggleFullScreen: (setTo) => ipcRenderer.send('toggleFullScreen', setTo),
   setTitle: (title) => { state.window.title = title },
   resetTitle: () => { state.window.title = config.APP_WINDOW_TITLE },
 
   // Everything else
-  onOpen: onOpen,
+  onOpen,
   error: onError,
   uncaughtError: (proc, err) => telemetry.logUncaughtError(proc, err),
   stateSave: () => State.save(state),
@@ -362,7 +377,7 @@ function setupIpc () {
   ipcRenderer.on('windowBoundsChanged', onWindowBoundsChanged)
 
   const tc = controllers.torrent()
-  ipcRenderer.on('wt-infohash', (e, ...args) => tc.torrentInfoHash(...args))
+  ipcRenderer.on('wt-parsed', (e, ...args) => tc.torrentParsed(...args))
   ipcRenderer.on('wt-metadata', (e, ...args) => tc.torrentMetadata(...args))
   ipcRenderer.on('wt-done', (e, ...args) => tc.torrentDone(...args))
   ipcRenderer.on('wt-done', () => controllers.torrentList().resumePausedTorrents())
@@ -507,13 +522,16 @@ function onError (err) {
 const editableHtmlTags = new Set(['input', 'textarea'])
 
 function onPaste (e) {
-  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+  if (e && editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
 
   update()
 }
 
 function onKeydown (e) {
+  // prevent event fire on user input elements
+  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+
   const key = e.key
 
   if (key === 'ArrowLeft') {
@@ -553,7 +571,7 @@ function onBlur () {
 }
 
 function onVisibilityChange () {
-  state.window.isVisible = !document.webkitHidden
+  state.window.isVisible = !document.hidden
 }
 
 function onFullscreenChanged (e, isFullScreen) {

@@ -1,9 +1,7 @@
-const electron = require('electron')
+const { remote } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const parallel = require('run-parallel')
-
-const remote = electron.remote
 
 const { dispatch } = require('../lib/dispatcher')
 
@@ -13,14 +11,13 @@ module.exports = class SubtitlesController {
   }
 
   openSubtitles () {
-    remote.dialog.showOpenDialog({
+    const filenames = remote.dialog.showOpenDialogSync({
       title: 'Select a subtitles file.',
       filters: [{ name: 'Subtitles', extensions: ['vtt', 'srt'] }],
       properties: ['openFile']
-    }, (filenames) => {
-      if (!Array.isArray(filenames)) return
-      this.addSubtitles(filenames, true)
     })
+    if (!Array.isArray(filenames)) return
+    this.addSubtitles(filenames, true)
   }
 
   selectSubtitle (ix) {
@@ -110,7 +107,7 @@ function loadSubtitle (file, cb) {
       buffer: 'data:text/vtt;base64,' + buf.toString('base64'),
       language: langDetected,
       label: langDetected,
-      filePath: filePath
+      filePath
     }
 
     cb(null, track)
