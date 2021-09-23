@@ -604,7 +604,7 @@ function renderPlayerControls (state) {
       <div
         key='scrub-bar'
         className='scrub-bar'
-        draggable
+        draggable='true'
         onMouseMove={handleScrubPreview}
         onMouseOut={clearPreview}
         onDragStart={handleDragStart}
@@ -765,24 +765,15 @@ function renderPlayerControls (state) {
     ))
   }
 
-  return (
-    <div
-      key='controls' className='controls'
-      onMouseEnter={dispatcher('mediaControlsMouseEnter')}
-      onMouseLeave={dispatcher('mediaControlsMouseLeave')}
-    >
-      {elements}
-      {renderCastOptions(state)}
-      {renderSubtitleOptions(state)}
-      {renderAudioTrackOptions(state)}
-    </div>
-  )
-
+  const emptyImage = new window.Image(0, 0)
+  emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D'
   function handleDragStart (e) {
-    // Prevent the cursor from changing, eg to a green + icon on Mac
     if (e.dataTransfer) {
       const dt = e.dataTransfer
+      // Prevent the cursor from changing, eg to a green + icon on Mac
       dt.effectAllowed = 'none'
+      // Prevent ghost image
+      dt.setDragImage(emptyImage, 0, 0)
     }
   }
 
@@ -835,6 +826,19 @@ function renderPlayerControls (state) {
   function handleAudioTracks (e) {
     dispatch('toggleAudioTracksMenu')
   }
+
+  return (
+    <div
+      key='controls' className='controls'
+      onMouseEnter={dispatcher('mediaControlsMouseEnter')}
+      onMouseLeave={dispatcher('mediaControlsMouseLeave')}
+    >
+      {elements}
+      {renderCastOptions(state)}
+      {renderSubtitleOptions(state)}
+      {renderAudioTrackOptions(state)}
+    </div>
+  )
 }
 
 function renderPreview (state) {
