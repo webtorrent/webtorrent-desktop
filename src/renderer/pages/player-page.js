@@ -449,7 +449,7 @@ function renderCastScreen (state) {
 
     const etaStr = calculateEta(missing, downloadSpeed)
 
-    return (<span>{etaStr} remaining</span>)
+    return (<span>{etaStr}</span>)
   }
 
   function renderDownloadProgress () {
