@@ -6,6 +6,7 @@ const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
+const { calculateEta } = require('../lib/time')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 module.exports = class Player extends React.Component {
@@ -446,16 +447,9 @@ function renderCastScreen (state) {
     const downloadSpeed = prog.downloadSpeed || 0
     if (downloadSpeed === 0 || missing === 0) return
 
-    const rawEta = missing / downloadSpeed
-    const hours = Math.floor(rawEta / 3600) % 24
-    const minutes = Math.floor(rawEta / 60) % 60
-    const seconds = Math.floor(rawEta % 60)
+    const etaStr = calculateEta(missing, downloadSpeed)
 
-    const hoursStr = hours ? hours + ' h' : ''
-    const minutesStr = (hours || minutes) ? minutes + ' min' : ''
-    const secondsStr = seconds + ' s'
-
-    return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+    return (<span>{etaStr}</span>)
   }
 
   function renderDownloadProgress () {
