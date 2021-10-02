@@ -2,7 +2,7 @@ module.exports = {
   calculateEta
 }
 
-function calculateEta(missing, downloadSpeed) {
+function calculateEta (missing, downloadSpeed) {
   if (downloadSpeed === 0 || missing === 0) return
 
   const rawEta = missing / downloadSpeed
