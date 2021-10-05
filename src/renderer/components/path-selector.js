@@ -1,7 +1,7 @@
 const path = require('path')
 
 const colors = require('material-ui/styles/colors')
-const { remote } = require('electron')
+const remote = require('@electron/remote')
 const React = require('react')
 const PropTypes = require('prop-types')
 

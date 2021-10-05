@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const { ipcRenderer, remote, clipboard } = require('electron')
+const { ipcRenderer, clipboard } = require('electron')
+const remote = require('@electron/remote')
 
 const { dispatch } = require('../lib/dispatcher')
 const { TorrentKeyNotFoundError } = require('../lib/errors')
