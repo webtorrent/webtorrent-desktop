@@ -1,9 +1,7 @@
 console.time('init')
 
-const { app, ipcMain, webContents } = require('electron')
-const remoteMain = require('@electron/remote/main')
-remoteMain.initialize()
-remoteMain.enable(webContents)
+require('@electron/remote/main').initialize()
+const { app, ipcMain } = require('electron')
 
 // Start crash reporter early, so it takes effect for child processes
 const crashReporter = require('../crash-reporter')

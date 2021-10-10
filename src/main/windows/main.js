@@ -14,7 +14,7 @@ const main = module.exports = {
   win: null
 }
 
-const { app, BrowserWindow, screen } = require('electron')
+const { app, BrowserWindow, screen, webContents } = require('electron')
 const debounce = require('debounce')
 
 const config = require('../../config')
@@ -50,6 +50,7 @@ function init (state, options) {
     x: initialBounds.x,
     y: initialBounds.y
   })
+  require('@electron/remote/main').enable(win.webContents)
 
   win.loadURL(config.WINDOW_MAIN)
 
