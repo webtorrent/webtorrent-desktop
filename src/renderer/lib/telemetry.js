@@ -7,7 +7,7 @@ module.exports = {
   logPlayAttempt
 }
 
-const { remote } = require('electron')
+const remote = require('@electron/remote')
 
 const config = require('../../config')
 

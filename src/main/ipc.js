@@ -222,7 +222,8 @@ function init () {
   ipcMain.emit = function (name, e, ...args) {
     // Relay messages between the main window and the WebTorrent hidden window
     if (name.startsWith('wt-') && !app.isQuitting) {
-      if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
+      console.dir(e.sender.getTitle())
+      if (e.sender.getTitle() === 'WebTorrent Hidden Window') {
         // Send message to main window
         windows.main.send(name, ...args)
         log('webtorrent: got %s', name)

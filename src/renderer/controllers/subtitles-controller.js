@@ -1,4 +1,4 @@
-const { remote } = require('electron')
+const remote = require('@electron/remote')
 const fs = require('fs')
 const path = require('path')
 const parallel = require('run-parallel')
