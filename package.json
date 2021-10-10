@@ -21,6 +21,7 @@
     "url": "https://github.com/webtorrent/webtorrent-desktop/issues"
   },
   "dependencies": {
+    "@electron/remote": "2.0.1",
     "airplayer": "github:webtorrent/airplayer#fix-security",
     "application-config": "2.0.0",
     "arch": "2.2.0",
@@ -61,7 +62,6 @@
     "@babel/core": "7.15.8",
     "@babel/eslint-parser": "7.15.8",
     "@babel/plugin-transform-react-jsx": "7.14.9",
-    "@electron/remote": "2.0.1",
     "cross-zip": "4.0.0",
     "depcheck": "1.4.2",
     "electron": "15.1.2",
