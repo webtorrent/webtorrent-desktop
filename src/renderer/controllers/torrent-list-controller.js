@@ -157,7 +157,7 @@ module.exports = class TorrentListController {
   prioritizeTorrent (infoHash) {
     this.state.saved.torrents
       .filter(torrent => // We're interested in active torrents only.
-    ['downloading', 'seeding'].indexOf(torrent.status) !== -1)
+        ['downloading', 'seeding'].indexOf(torrent.status) !== -1)
       .forEach((torrent) => { // Pause all active torrents except the one that started playing.
         if (infoHash === torrent.infoHash) return
 

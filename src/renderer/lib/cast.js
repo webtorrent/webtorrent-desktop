@@ -19,10 +19,10 @@ const config = require('../../config')
 const { CastingError } = require('./errors')
 
 // Lazy load these for a ~300ms improvement in startup time
-let airplayer;
+let airplayer
 
-let chromecasts;
-let dlnacasts;
+let chromecasts
+let dlnacasts
 
 // App state. Cast modifies state.playing and state.errors in response to events
 let state
@@ -525,6 +525,6 @@ function setVolume (volume) {
   if (player) player.volume(volume, castCallback)
 }
 
-function castCallback(...args) {
+function castCallback (...args) {
   console.log('%s callback: %o', state.playing.location, args)
 }

@@ -54,7 +54,7 @@ module.exports = class SubtitlesController {
         if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
           subtitles.selectedIndex = trackIndex
         }
-      });
+      })
 
       // Finally, make sure no two tracks have the same label
       relabelSubtitles(subtitles)

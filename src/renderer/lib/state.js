@@ -12,7 +12,7 @@ const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
-  save(...args) {
+  save (...args) {
     // Perf optimization: Lazy-require debounce (and it's dependencies)
     const debounce = require('debounce')
     // After first State.save() invokation, future calls go straight to the

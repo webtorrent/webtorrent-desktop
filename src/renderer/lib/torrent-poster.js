@@ -17,7 +17,7 @@ function torrentPoster (torrent, cb) {
     type: mediaType,
     size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
   })).sort((a, b) => // sort descending on size
-  b.size - a.size)[0]
+    b.size - a.size)[0]
 
   if (bestScore.size === 0) {
     // Admit defeat, no video, audio or image had a significant presence
@@ -46,7 +46,7 @@ function calculateDataLengthByExtension (torrent, extensions) {
   if (files.length === 0) return 0
   return files
     .map(file => file.length)
-    .reduce((a, b) => a + b);
+    .reduce((a, b) => a + b)
 }
 
 /**
@@ -58,7 +58,7 @@ function calculateDataLengthByExtension (torrent, extensions) {
 function getLargestFileByExtension (torrent, extensions) {
   const files = filterOnExtension(torrent, extensions)
   if (files.length === 0) return undefined
-  return files.reduce((a, b) => a.length > b.length ? a : b);
+  return files.reduce((a, b) => a.length > b.length ? a : b)
 }
 
 /**
