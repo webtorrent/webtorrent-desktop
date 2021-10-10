@@ -14,7 +14,7 @@ const main = module.exports = {
   win: null
 }
 
-const { app, BrowserWindow, screen, webContents } = require('electron')
+const { app, BrowserWindow, screen } = require('electron')
 const debounce = require('debounce')
 
 const config = require('../../config')
@@ -66,7 +66,7 @@ function init (state, options) {
     menu.onToggleFullScreen(main.win.isFullScreen())
   })
 
-  win.webContents.on('will-navigate', (e, url) => {
+  win.webContents.on('will-navigate', (e) => {
     // Prevent drag-and-drop from navigating the Electron window, which can happen
     // before our drag-and-drop handlers have been initialized.
     e.preventDefault()
@@ -152,7 +152,7 @@ function setBounds (bounds, maximize) {
     log('setBounds: maximizing')
     main.win.maximize()
   } else if (maximize === false && main.win.isMaximized()) {
-    log('setBounds: unmaximizing')
+    log('setBounds: minimizing')
     main.win.unmaximize()
   }
 

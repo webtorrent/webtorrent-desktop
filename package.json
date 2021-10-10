@@ -29,7 +29,7 @@
     "bitfield": "4.0.0",
     "capture-frame": "4.0.0",
     "chokidar": "3.5.2",
-    "chromecasts": "1.10.2",
+    "chromecasts": "^1.10.2",
     "create-torrent": "5.0.1",
     "debounce": "1.2.1",
     "dlnacasts": "0.1.0",
@@ -54,17 +54,30 @@
     "simple-get": "4.0.0",
     "srt-to-vtt": "1.1.3",
     "vlc-command": "1.2.0",
+<<<<<<< HEAD
     "webtorrent": "1.5.6",
+=======
+    "webtorrent": "^1.5.6",
+>>>>>>> 9ce33b2 (fixes)
     "winreg": "1.2.4"
   },
   "devDependencies": {
     "@babel/cli": "7.15.7",
+<<<<<<< HEAD
     "@babel/core": "7.15.8",
     "@babel/eslint-parser": "7.15.8",
     "@babel/plugin-transform-react-jsx": "7.14.9",
     "cross-zip": "4.0.0",
     "depcheck": "1.4.1",
     "electron": "15.1.2",
+=======
+    "@babel/core": "^7.15.8",
+    "@babel/eslint-parser": "^7.15.8",
+    "@babel/plugin-transform-react-jsx": "7.14.9",
+    "cross-zip": "4.0.0",
+    "depcheck": "^1.4.2",
+    "electron": "^15.1.2",
+>>>>>>> 9ce33b2 (fixes)
     "electron-notarize": "1.1.1",
     "electron-osx-sign": "0.5.0",
     "electron-packager": "15.4.0",
@@ -72,17 +85,17 @@
     "gh-release": "6.0.1",
     "minimist": "1.2.5",
     "nodemon": "2.0.13",
-    "open": "8.2.1",
+    "open": "^8.3.0",
     "plist": "3.0.4",
     "pngjs": "6.0.0",
     "run-series": "1.1.9",
     "spectron": "15.0.0",
-    "standard": "*",
+    "standard": "^16.0.4",
     "tape": "5.3.1"
   },
   "engines": {
     "node": "^16.0.0",
-    "npm": "^7.10.0"
+    "npm": "^7.10.0 || ^8.0.0"
   },
   "homepage": "https://webtorrent.io",
   "keywords": [
