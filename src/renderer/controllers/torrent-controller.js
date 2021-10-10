@@ -177,7 +177,7 @@ function showDoneNotification (torrent) {
     silent: true
   })
 
-  notif.onclick = function () {
+  notif.onclick = () => {
     ipcRenderer.send('show')
   }
 

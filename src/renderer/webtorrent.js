@@ -79,7 +79,7 @@ function init () {
     getAudioMetadata(infoHash, index))
   ipcRenderer.on('wt-start-server', (e, infoHash) =>
     startServer(infoHash))
-  ipcRenderer.on('wt-stop-server', (e) =>
+  ipcRenderer.on('wt-stop-server', () =>
     stopServer())
   ipcRenderer.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
@@ -165,7 +165,7 @@ function addTorrentEvents (torrent) {
 
     updateTorrentProgress()
 
-    torrent.getFileModtimes(function (err, fileModtimes) {
+    torrent.getFileModtimes((err, fileModtimes) => {
       if (err) return onError(err)
       ipcRenderer.send('wt-file-modtimes', torrent.key, fileModtimes)
     })
@@ -200,7 +200,7 @@ function saveTorrentFile (torrentKey) {
   const torrent = getTorrent(torrentKey)
   const torrentPath = path.join(config.TORRENT_PATH, torrent.infoHash + '.torrent')
 
-  fs.access(torrentPath, fs.constants.R_OK, function (err) {
+  fs.access(torrentPath, fs.constants.R_OK, err => {
     const fileName = torrent.infoHash + '.torrent'
     if (!err) {
       // We've already saved the file
@@ -208,8 +208,8 @@ function saveTorrentFile (torrentKey) {
     }
 
     // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.TORRENT_PATH, { recursive: true }, function (_) {
-      fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
+    fs.mkdir(config.TORRENT_PATH, { recursive: true }, _ => {
+      fs.writeFile(torrentPath, torrent.torrentFile, err => {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
         return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
@@ -222,14 +222,14 @@ function saveTorrentFile (torrentKey) {
 // Auto chooses either a frame from a video file, an image, etc
 function generateTorrentPoster (torrentKey) {
   const torrent = getTorrent(torrentKey)
-  torrentPoster(torrent, function (err, buf, extension) {
+  torrentPoster(torrent, (err, buf, extension) => {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    fs.mkdir(config.POSTER_PATH, { recursive: true }, function (err) {
+    fs.mkdir(config.POSTER_PATH, { recursive: true }, err => {
       if (err) return console.log('error creating poster dir: %o', err)
       const posterFileName = torrent.infoHash + extension
       const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
-      fs.writeFile(posterFilePath, buf, function (err) {
+      fs.writeFile(posterFilePath, buf, err => {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster
         ipcRenderer.send('wt-poster', torrentKey, posterFileName)
@@ -251,15 +251,13 @@ function updateTorrentProgress () {
 function getTorrentProgress () {
   // First, track overall progress
   const progress = client.progress
-  const hasActiveTorrents = client.torrents.some(function (torrent) {
-    return torrent.progress !== 1
-  })
+  const hasActiveTorrents = client.torrents.some(torrent => torrent.progress !== 1)
 
   // Track progress for every file in each torrent
   // TODO: ideally this would be tracked by WebTorrent, which could do it
   // more efficiently than looping over torrent.bitfield
-  const torrentProg = client.torrents.map(function (torrent) {
-    const fileProg = torrent.files && torrent.files.map(function (file, index) {
+  const torrentProg = client.torrents.map(torrent => {
+    const fileProg = torrent.files && torrent.files.map(file => {
       const numPieces = file._endPiece - file._startPiece + 1
       let numPiecesPresent = 0
       for (let piece = file._startPiece; piece <= file._endPiece; piece++) {
@@ -299,12 +297,12 @@ function startServer (infoHash) {
   else torrent.once('ready', () => startServerFromReadyTorrent(torrent))
 }
 
-function startServerFromReadyTorrent (torrent, cb) {
+function startServerFromReadyTorrent (torrent) {
   if (server) return
 
   // start the streaming torrent-to-http server
   server = torrent.createServer()
-  server.listen(0, function () {
+  server.listen(0, () => {
     const port = server.address().port
     const urlSuffix = ':' + port
     const info = {
@@ -339,7 +337,7 @@ function getAudioMetadata (infoHash, index) {
     native: false,
     skipCovers: true,
     fileSize: file.length,
-    observer: event => {
+    observer: () => {
       ipcRenderer.send('wt-audio-metadata', infoHash, index, {
         common: metadata.common,
         format: metadata.format
@@ -384,7 +382,7 @@ function selectFiles (torrentOrInfoHash, selections) {
   // selection with individual selections for each file, so we can
   // select/deselect files later on
   if (!selections) {
-    selections = torrent.files.map((x) => true)
+    selections = new Array(torrent.files.length).fill(true)
   }
 
   // Selections specified incorrectly?
@@ -397,15 +395,15 @@ function selectFiles (torrentOrInfoHash, selections) {
   torrent.deselect(0, torrent.pieces.length - 1, false)
 
   // Add selections (individual files)
-  for (let i = 0; i < selections.length; i++) {
+  selections.forEach((selection, i) => {
     const file = torrent.files[i]
-    if (selections[i]) {
+    if (selection) {
       file.select()
     } else {
       console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
       file.deselect()
     }
-  }
+  })
 }
 
 // Gets a WebTorrent handle by torrentKey
@@ -423,7 +421,7 @@ function onError (err) {
 // TODO: remove this once the following bugs are fixed:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=490143
 // https://github.com/electron/electron/issues/7212
-window.testOfflineMode = function () {
+window.testOfflineMode = () => {
   console.log('Test, going OFFLINE')
   client = window.client = new WebTorrent({
     peerId: PEER_ID,

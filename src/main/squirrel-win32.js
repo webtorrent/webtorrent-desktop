@@ -12,7 +12,7 @@ const handlers = require('./handlers')
 const EXE_NAME = path.basename(process.execPath)
 const UPDATE_EXE = path.join(process.execPath, '..', '..', 'Update.exe')
 
-const run = function (args, done) {
+const run = (args, done) => {
   spawn(UPDATE_EXE, args, { detached: true })
     .on('close', done)
 }

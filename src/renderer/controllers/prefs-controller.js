@@ -13,7 +13,7 @@ module.exports = class PrefsController {
     const state = this.state
     state.location.go({
       url: 'preferences',
-      setup: function (cb) {
+      setup(cb) {
         // initialize preferences
         state.window.title = 'Preferences'
         ipcRenderer.send('setAllowNav', false)

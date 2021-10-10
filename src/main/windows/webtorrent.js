@@ -38,7 +38,7 @@ function init () {
   win.loadURL(config.WINDOW_WEBTORRENT)
 
   // Prevent killing the WebTorrent process
-  win.on('close', function (e) {
+  win.on('close', e => {
     if (app.isQuitting) {
       return
     }

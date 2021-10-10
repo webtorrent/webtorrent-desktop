@@ -12,13 +12,13 @@ const State = module.exports = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
-  save: function () {
+  save(...args) {
     // Perf optimization: Lazy-require debounce (and it's dependencies)
     const debounce = require('debounce')
     // After first State.save() invokation, future calls go straight to the
     // debounced function
     State.save = debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL)
-    State.save(...arguments)
+    State.save(...args)
   },
   saveImmediate
 })
@@ -242,7 +242,7 @@ async function saveImmediate (state, cb) {
   // reading the torrent file or file(s) to seed & don't have an infohash
   copy.torrents = copy.torrents
     .filter((x) => x.infoHash)
-    .map(function (x) {
+    .map(x => {
       const torrent = {}
       for (const key in x) {
         if (key === 'progress' || key === 'torrentKey') {
