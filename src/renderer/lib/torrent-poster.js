@@ -16,8 +16,7 @@ function torrentPoster (torrent, cb) {
   const bestScore = ['audio', 'video', 'image'].map(mediaType => ({
     type: mediaType,
     size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
-  })).sort((a, b) => // sort descending on size
-    b.size - a.size)[0]
+  })).sort((a, b) => b.size - a.size)[0] // sort descending on size
 
   if (bestScore.size === 0) {
     // Admit defeat, no video, audio or image had a significant presence

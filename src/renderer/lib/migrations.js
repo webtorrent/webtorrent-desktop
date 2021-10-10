@@ -61,9 +61,7 @@ function migrate_0_7_0 (saved) {
     // * Then, relative paths for the default torrents, eg '../static/sintel.torrent'
     // * Then, paths computed at runtime for default torrents, eg 'sintel.torrent'
     // * Finally, now we're getting rid of torrentPath altogether
-    let src
-
-    let dst
+    let src, dst
     if (ts.torrentPath) {
       if (path.isAbsolute(ts.torrentPath) || ts.torrentPath.startsWith('..')) {
         src = ts.torrentPath

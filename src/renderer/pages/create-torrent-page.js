@@ -40,9 +40,7 @@ class CreateTorrentPage extends React.Component {
 
     // Then, use the name of the base folder (or sole file, for a single file torrent)
     // as the default name. Show all files relative to the base folder.
-    let defaultName
-
-    let basePath
+    let defaultName, basePath
     if (files.length === 1) {
       // Single file torrent: /a/b/foo.jpg -> torrent name 'foo.jpg', path '/a/b'
       defaultName = files[0].name

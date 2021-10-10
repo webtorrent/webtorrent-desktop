@@ -19,10 +19,7 @@ const config = require('../../config')
 const { CastingError } = require('./errors')
 
 // Lazy load these for a ~300ms improvement in startup time
-let airplayer
-
-let chromecasts
-let dlnacasts
+let airplayer, chromecasts, dlnacasts
 
 // App state. Cast modifies state.playing and state.errors in response to events
 let state
