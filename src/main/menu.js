@@ -68,11 +68,9 @@ function onToggleFullScreen (flag) {
 }
 
 function getMenuItem (label) {
-  for (let i = 0; i < menu.items.length; i++) {
-    const menuItem = menu.items[i].submenu.items.find(function (item) {
-      return item.label === label
-    })
-    if (menuItem) return menuItem
+  for (const menuItem of menu.items) {
+    const submenuItem = menuItem.submenu.items.find(item => item.label === label)
+    if (submenuItem) return submenuItem
   }
   return {}
 }

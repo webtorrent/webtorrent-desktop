@@ -5,7 +5,7 @@ module.exports = {
 }
 
 const dispatchers = {}
-let _dispatch = function () {}
+let _dispatch = () => {}
 
 function setDispatch (dispatch) {
   _dispatch = dispatch
@@ -23,7 +23,7 @@ function dispatcher (...args) {
   const str = JSON.stringify(args)
   let handler = dispatchers[str]
   if (!handler) {
-    handler = dispatchers[str] = function (e) {
+    handler = dispatchers[str] = e => {
       // Do not propagate click to elements below the button
       e.stopPropagation()
 

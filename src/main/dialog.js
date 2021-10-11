@@ -82,7 +82,7 @@ function openTorrentFile () {
   const selectedPaths = dialog.showOpenDialogSync(windows.main.win, opts)
   resetTitle()
   if (!Array.isArray(selectedPaths)) return
-  selectedPaths.forEach(function (selectedPath) {
+  selectedPaths.forEach(selectedPath => {
     windows.main.dispatch('addTorrent', selectedPath)
   })
 }

@@ -54,17 +54,17 @@ function init (appState, callback) {
   state.devices.airplay = airplayPlayer()
 
   // Listen for devices: Chromecast, DLNA and Airplay
-  chromecasts.on('update', function (device) {
+  chromecasts.on('update', device => {
     // TODO: how do we tell if there are *no longer* any Chromecasts available?
     // From looking at the code, chromecasts.players only grows, never shrinks
     state.devices.chromecast.addDevice(device)
   })
 
-  dlnacasts.on('update', function (device) {
+  dlnacasts.on('update', device => {
     state.devices.dlna.addDevice(device)
   })
 
-  airplayer.on('update', function (device) {
+  airplayer.on('update', device => {
     state.devices.airplay.addDevice(device)
   })
 }
@@ -116,7 +116,7 @@ function chromecastPlayer () {
   }
 
   function addDevice (device) {
-    device.on('error', function (err) {
+    device.on('error', err => {
       if (device !== ret.device) return
       state.playing.location = 'local'
       state.errors.push({
@@ -125,7 +125,7 @@ function chromecastPlayer () {
       })
       update()
     })
-    device.on('disconnect', function () {
+    device.on('disconnect', () => {
       if (device !== ret.device) return
       state.playing.location = 'local'
       update()
@@ -145,7 +145,7 @@ function chromecastPlayer () {
           'Transfer-Encoding': 'chunked'
         })
         res.end(Buffer.from(selectedSubtitle.buffer.substr(21), 'base64'))
-      }).listen(0, function () {
+      }).listen(0, () => {
         const port = ret.subServer.address().port
         const subtitlesUrl = 'http://' + state.server.networkAddress + ':' + port + '/'
         callback(subtitlesUrl)
@@ -155,13 +155,13 @@ function chromecastPlayer () {
 
   function open () {
     const torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
-    serveSubtitles(function (subtitlesUrl) {
+    serveSubtitles(subtitlesUrl => {
       ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
         type: 'video/mp4',
         title: config.APP_NAME + ' - ' + torrentSummary.name,
         subtitles: subtitlesUrl ? [subtitlesUrl] : [],
         autoSubtitles: !!subtitlesUrl
-      }, function (err) {
+      }, err => {
         if (err) {
           state.playing.location = 'local'
           state.errors.push({
@@ -221,7 +221,7 @@ function airplayPlayer () {
   return ret
 
   function addDevice (player) {
-    player.on('event', function (event) {
+    player.on('event', event => {
       switch (event.state) {
         case 'loading':
           break
@@ -243,7 +243,7 @@ function airplayPlayer () {
   }
 
   function open () {
-    ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, function (err, res) {
+    ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, (err, res) => {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -270,7 +270,7 @@ function airplayPlayer () {
   }
 
   function status () {
-    ret.device.playbackInfo(function (err, res, status) {
+    ret.device.playbackInfo((err, res, status) => {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -317,7 +317,7 @@ function dlnaPlayer (player) {
   }
 
   function addDevice (device) {
-    device.on('error', function (err) {
+    device.on('error', err => {
       if (device !== ret.device) return
       state.playing.location = 'local'
       state.errors.push({
@@ -326,7 +326,7 @@ function dlnaPlayer (player) {
       })
       update()
     })
-    device.on('disconnect', function () {
+    device.on('disconnect', () => {
       if (device !== ret.device) return
       state.playing.location = 'local'
       update()
@@ -339,7 +339,7 @@ function dlnaPlayer (player) {
       type: 'video/mp4',
       title: config.APP_NAME + ' - ' + torrentSummary.name,
       seek: state.playing.currentTime > 10 ? state.playing.currentTime : 0
-    }, function (err) {
+    }, err => {
       if (err) {
         state.playing.location = 'local'
         state.errors.push({
@@ -374,7 +374,7 @@ function dlnaPlayer (player) {
   }
 
   function volume (volume, callback) {
-    ret.device.volume(volume, function (err) {
+    ret.device.volume(volume, err => {
       // quick volume update
       state.playing.volume = volume
       callback(err)
@@ -396,7 +396,7 @@ function handleStatus (err, status) {
 
 // Start polling cast device state, whenever we're connected
 function startStatusInterval () {
-  statusInterval = setInterval(function () {
+  statusInterval = setInterval(() => {
     const player = getPlayer()
     if (player) player.status()
   }, 1000)
@@ -454,7 +454,7 @@ function selectDevice (index) {
 function stop () {
   const player = getPlayer()
   if (player) {
-    player.stop(function () {
+    player.stop(() => {
       player.device = null
       stoppedCasting()
     })
@@ -522,6 +522,6 @@ function setVolume (volume) {
   if (player) player.volume(volume, castCallback)
 }
 
-function castCallback () {
-  console.log('%s callback: %o', state.playing.location, arguments)
+function castCallback (...args) {
+  console.log('%s callback: %o', state.playing.location, args)
 }
