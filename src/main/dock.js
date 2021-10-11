@@ -1,13 +1,8 @@
-module.exports = {
-  downloadFinished,
-  init,
-  setBadge
-}
+import electron from '../../electron.cjs'
+import * as dialog from './dialog.js'
+import log from './log.js'
 
-const { app, Menu } = require('electron')
-
-const dialog = require('./dialog')
-const log = require('./log')
+const { app, Menu } = electron
 
 /**
  * Add a right-click menu to the dock icon. (Mac)
@@ -57,3 +52,5 @@ function getMenuTemplate () {
     }
   ]
 }
+
+export default { downloadFinished, init, setBadge }

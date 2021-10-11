@@ -1,13 +1,10 @@
-module.exports = {
-  init,
-  setModule
-}
+import electron from '../../electron.cjs'
 
-const { app, ipcMain } = require('electron')
+import log from './log.js'
+import menu from './menu.js'
+import * as windows from './windows/index.js'
 
-const log = require('./log')
-const menu = require('./menu')
-const windows = require('./windows')
+const { app, ipcMain } = electron
 
 // Messages from the main process, to be sent once the WebTorrent process starts
 const messageQueueMainToWebTorrent = []
@@ -40,12 +37,12 @@ function init () {
    * Dialog
    */
 
-  ipcMain.on('openTorrentFile', () => {
-    const dialog = require('./dialog')
+  ipcMain.on('openTorrentFile', async () => {
+    const dialog = await import('./dialog')
     dialog.openTorrentFile()
   })
-  ipcMain.on('openFiles', () => {
-    const dialog = require('./dialog')
+  ipcMain.on('openFiles', async () => {
+    const dialog = await import('./dialog')
     dialog.openFiles()
   })
 
@@ -53,12 +50,12 @@ function init () {
    * Dock
    */
 
-  ipcMain.on('setBadge', (e, ...args) => {
-    const dock = require('./dock')
+  ipcMain.on('setBadge', async (e, ...args) => {
+    const dock = await import('./dock')
     dock.setBadge(...args)
   })
-  ipcMain.on('downloadFinished', (e, ...args) => {
-    const dock = require('./dock')
+  ipcMain.on('downloadFinished', async (e, ...args) => {
+    const dock = await import('./dock')
     dock.downloadFinished(...args)
   })
 
@@ -66,10 +63,10 @@ function init () {
    * Player Events
    */
 
-  ipcMain.on('onPlayerOpen', () => {
-    const powerSaveBlocker = require('./power-save-blocker')
-    const shortcuts = require('./shortcuts')
-    const thumbar = require('./thumbar')
+  ipcMain.on('onPlayerOpen', async () => {
+    const powerSaveBlocker = await import('./power-save-blocker')
+    const shortcuts = await import('./shortcuts')
+    const thumbar = await import('./thumbar')
 
     menu.togglePlaybackControls(true)
     powerSaveBlocker.enable()
@@ -77,17 +74,17 @@ function init () {
     thumbar.enable()
   })
 
-  ipcMain.on('onPlayerUpdate', (e, ...args) => {
-    const thumbar = require('./thumbar')
+  ipcMain.on('onPlayerUpdate', async (e, ...args) => {
+    const thumbar = await import('./thumbar')
 
     menu.onPlayerUpdate(...args)
     thumbar.onPlayerUpdate(...args)
   })
 
-  ipcMain.on('onPlayerClose', () => {
-    const powerSaveBlocker = require('./power-save-blocker')
-    const shortcuts = require('./shortcuts')
-    const thumbar = require('./thumbar')
+  ipcMain.on('onPlayerClose', async () => {
+    const powerSaveBlocker = await import('./power-save-blocker')
+    const shortcuts = await import('./shortcuts')
+    const thumbar = await import('./thumbar')
 
     menu.togglePlaybackControls(false)
     powerSaveBlocker.disable()
@@ -95,17 +92,17 @@ function init () {
     thumbar.disable()
   })
 
-  ipcMain.on('onPlayerPlay', () => {
-    const powerSaveBlocker = require('./power-save-blocker')
-    const thumbar = require('./thumbar')
+  ipcMain.on('onPlayerPlay', async () => {
+    const powerSaveBlocker = await import('./power-save-blocker')
+    const thumbar = await import('./thumbar')
 
     powerSaveBlocker.enable()
     thumbar.onPlayerPlay()
   })
 
-  ipcMain.on('onPlayerPause', () => {
-    const powerSaveBlocker = require('./power-save-blocker')
-    const thumbar = require('./thumbar')
+  ipcMain.on('onPlayerPause', async () => {
+    const powerSaveBlocker = await import('./power-save-blocker')
+    const thumbar = await import('./thumbar')
 
     powerSaveBlocker.disable()
     thumbar.onPlayerPause()
@@ -137,16 +134,16 @@ function init () {
    * Shell
    */
 
-  ipcMain.on('openPath', (e, ...args) => {
-    const shell = require('./shell')
+  ipcMain.on('openPath', async (e, ...args) => {
+    const shell = await import('./shell')
     shell.openPath(...args)
   })
-  ipcMain.on('showItemInFolder', (e, ...args) => {
-    const shell = require('./shell')
+  ipcMain.on('showItemInFolder', async (e, ...args) => {
+    const shell = await import('./shell')
     shell.showItemInFolder(...args)
   })
-  ipcMain.on('moveItemToTrash', (e, ...args) => {
-    const shell = require('./shell')
+  ipcMain.on('moveItemToTrash', async (e, ...args) => {
+    const shell = await import('./shell')
     shell.moveItemToTrash(...args)
   })
 
@@ -154,8 +151,8 @@ function init () {
    * File handlers
    */
 
-  ipcMain.on('setDefaultFileHandler', (e, flag) => {
-    const handlers = require('./handlers')
+  ipcMain.on('setDefaultFileHandler', async (e, flag) => {
+    const handlers = await import('./handlers')
 
     if (flag) handlers.install()
     else handlers.uninstall()
@@ -165,8 +162,8 @@ function init () {
    * Auto start on login
    */
 
-  ipcMain.on('setStartup', (e, flag) => {
-    const startup = require('./startup')
+  ipcMain.on('setStartup', async (e, flag) => {
+    const startup = await import('./startup')
 
     if (flag) startup.install()
     else startup.uninstall()
@@ -190,18 +187,18 @@ function init () {
    * External Media Player
    */
 
-  ipcMain.on('checkForExternalPlayer', (e, path) => {
-    const externalPlayer = require('./external-player')
+  ipcMain.on('checkForExternalPlayer', async (e, path) => {
+    const externalPlayer = await import('./external-player')
 
     externalPlayer.checkInstall(path, err => {
       windows.main.send('checkForExternalPlayer', !err)
     })
   })
 
-  ipcMain.on('openExternalPlayer', (e, ...args) => {
-    const externalPlayer = require('./external-player')
-    const shortcuts = require('./shortcuts')
-    const thumbar = require('./thumbar')
+  ipcMain.on('openExternalPlayer', async (e, ...args) => {
+    const externalPlayer = await import('./external-player')
+    const shortcuts = await import('./shortcuts')
+    const thumbar = await import('./thumbar')
 
     menu.togglePlaybackControls(false)
     shortcuts.disable()
@@ -209,8 +206,8 @@ function init () {
     externalPlayer.spawn(...args)
   })
 
-  ipcMain.on('quitExternalPlayer', () => {
-    const externalPlayer = require('./external-player')
+  ipcMain.on('quitExternalPlayer', async () => {
+    const externalPlayer = await import('./external-player')
     externalPlayer.kill()
   })
 
@@ -245,4 +242,11 @@ function init () {
     // Emit all other events normally
     oldEmit.call(ipcMain, name, e, ...args)
   }
+}
+
+export { init }
+export { setModule }
+export default {
+  init,
+  setModule
 }

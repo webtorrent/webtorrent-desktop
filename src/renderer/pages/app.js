@@ -1,32 +1,35 @@
-const colors = require('material-ui/styles/colors')
-const createGetter = require('fn-getter')
-const React = require('react')
-
-const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
-const getMuiTheme = require('material-ui/styles/getMuiTheme').default
-const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
-
-const Header = require('../components/header')
-
-// Perf optimization: Needed immediately, so do not lazy load it below
-const TorrentListPage = require('./torrent-list-page')
-
+import * as colors from 'material-ui/styles/colors'
+import createGetter from 'fn-getter'
+import * as React from 'react'
+import darkBaseTheme$0 from 'material-ui/styles/baseThemes/darkBaseTheme'
+import getMuiTheme$0 from 'material-ui/styles/getMuiTheme'
+import muiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import Header from '../components/header.js'
+import TorrentListPage from './torrent-list-page.js'
+import playerPage from './player-page.js'
+import createTorrentPage from './create-torrent-page.js'
+import preferencesPage from './preferences-page.js'
+import openTorrentAddressModal from '../components/open-torrent-address-modal.js'
+import removeTorrentModal from '../components/remove-torrent-modal.js'
+import updateAvailableModal from '../components/update-available-modal.js'
+import unsupportedMediaModal from '../components/unsupported-media-modal.js'
+import deleteAllTorrentsModal from '../components/delete-all-torrents-modal.js'
+const darkBaseTheme = { default: darkBaseTheme$0 }.default
+const getMuiTheme = getMuiTheme$0.default
+const MuiThemeProvider = muiThemeProvider.default
 const Views = {
   home: createGetter(() => TorrentListPage),
-  player: createGetter(() => require('./player-page')),
-  'create-torrent': createGetter(() => require('./create-torrent-page')),
-  preferences: createGetter(() => require('./preferences-page'))
+  player: createGetter(() => playerPage),
+  'create-torrent': createGetter(() => createTorrentPage),
+  preferences: createGetter(() => preferencesPage)
 }
 
 const Modals = {
-  'open-torrent-address-modal': createGetter(
-    () => require('../components/open-torrent-address-modal')
-  ),
-  'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
-  'update-available-modal': createGetter(() => require('../components/update-available-modal')),
-  'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal')),
-  'delete-all-torrents-modal':
-      createGetter(() => require('../components/delete-all-torrents-modal'))
+  'open-torrent-address-modal': createGetter(() => openTorrentAddressModal),
+  'remove-torrent-modal': createGetter(() => removeTorrentModal),
+  'update-available-modal': createGetter(() => updateAvailableModal),
+  'unsupported-media-modal': createGetter(() => unsupportedMediaModal),
+  'delete-all-torrents-modal': createGetter(() => deleteAllTorrentsModal)
 }
 
 const fontFamily = process.platform === 'win32'
@@ -45,7 +48,7 @@ darkBaseTheme.palette.accent3Color = colors.redA100
 let darkMuiTheme
 let lightMuiTheme
 
-class App extends React.Component {
+export default class App extends React.Component {
   render () {
     const state = this.props.state
 
@@ -98,12 +101,12 @@ class App extends React.Component {
     )
   }
 
-  getModal () {
+  async getModal () {
     const state = this.props.state
     if (!state.modal) return
 
     if (!lightMuiTheme) {
-      const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
+      const lightBaseTheme = (await import('material-ui/styles/baseThemes/lightBaseTheme')).default
       lightBaseTheme.fontFamily = fontFamily
       lightBaseTheme.userAgent = false
       lightMuiTheme = getMuiTheme(lightBaseTheme)
@@ -128,5 +131,3 @@ class App extends React.Component {
     return (<View state={state} />)
   }
 }
-
-module.exports = App

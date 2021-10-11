@@ -1,17 +1,18 @@
-const fs = require('fs')
-const path = require('path')
-const { ipcRenderer, clipboard } = require('electron')
-const remote = require('@electron/remote')
+import fs from 'fs'
+import path from 'path'
+import electron from 'electron'
+import remote from '@electron/remote'
 
-const { dispatch } = require('../lib/dispatcher')
-const { TorrentKeyNotFoundError } = require('../lib/errors')
-const sound = require('../lib/sound')
-const TorrentSummary = require('../lib/torrent-summary')
+import { dispatch } from '../lib/dispatcher.js'
+import { TorrentKeyNotFoundError } from '../lib/errors.js'
+import sound from '../lib/sound.js'
+import TorrentSummary from '../lib/torrent-summary.js'
+
+const { ipcRenderer, clipboard } = electron
 
 const instantIoRegex = /^(https:\/\/)?instant\.io\/#/
 
-// Controls the torrent list: creating, adding, deleting, & manipulating torrents
-module.exports = class TorrentListController {
+export default class TorrentListController {
   constructor (state) {
     this.state = state
   }

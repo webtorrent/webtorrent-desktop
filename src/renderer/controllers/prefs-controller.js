@@ -1,8 +1,7 @@
-const { dispatch } = require('../lib/dispatcher')
-const { ipcRenderer } = require('electron')
+import { dispatch } from '../lib/dispatcher.js'
+import { ipcRenderer } from 'electron'
 
-// Controls the Preferences screen
-module.exports = class PrefsController {
+export default class PrefsController {
   constructor (state, config) {
     this.state = state
     this.config = config

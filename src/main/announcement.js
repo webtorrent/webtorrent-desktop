@@ -1,11 +1,6 @@
-module.exports = {
-  init
-}
-
-const { dialog } = require('electron')
-
-const config = require('../config')
-const log = require('./log')
+import electron from '../../electron.cjs'
+import config from '../config.js'
+import log from './log.js'
 
 const ANNOUNCEMENT_URL =
   `${config.ANNOUNCEMENT_URL}?version=${config.APP_VERSION}&platform=${process.platform}`
@@ -24,8 +19,8 @@ const ANNOUNCEMENT_URL =
  *     "detail": "Please update to v0.xx as soon as possible..."
  *   }
  */
-function init () {
-  const get = require('simple-get')
+async function init () {
+  const { default: get } = await import('simple-get')
   get.concat(ANNOUNCEMENT_URL, onResponse)
 }
 
@@ -44,7 +39,7 @@ function onResponse (err, res, data) {
     }
   }
 
-  dialog.showMessageBox({
+  electron.dialog.showMessageBox({
     type: 'info',
     buttons: ['OK'],
     title: data.title,
@@ -52,3 +47,5 @@ function onResponse (err, res, data) {
     detail: data.detail
   })
 }
+
+export default { init }

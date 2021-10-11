@@ -1,16 +1,18 @@
-const React = require('react')
-const PropTypes = require('prop-types')
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import * as colors from 'material-ui/styles/colors'
+import checkbox from 'material-ui/Checkbox'
+import raisedButton from 'material-ui/RaisedButton'
 
-const colors = require('material-ui/styles/colors')
-const Checkbox = require('material-ui/Checkbox').default
-const RaisedButton = require('material-ui/RaisedButton').default
-const Heading = require('../components/heading')
-const PathSelector = require('../components/path-selector')
+import Heading from '../components/heading.js'
+import PathSelector from '../components/path-selector.js'
+import { dispatch } from '../lib/dispatcher.js'
+import config from '../../config.js'
 
-const { dispatch } = require('../lib/dispatcher')
-const config = require('../../config')
+const Checkbox = checkbox.default
+const RaisedButton = raisedButton.default
 
-class PreferencesPage extends React.Component {
+export default class PreferencesPage extends React.Component {
   constructor (props) {
     super(props)
 
@@ -286,5 +288,3 @@ class Preference extends React.Component {
     return (<div style={style}>{this.props.children}</div>)
   }
 }
-
-module.exports = PreferencesPage

@@ -1,15 +1,16 @@
-const React = require('react')
-const BitField = require('bitfield').default
-const prettyBytes = require('prettier-bytes')
+import * as React from 'react'
+import bitfield from 'bitfield'
+import prettyBytes from 'prettier-bytes'
 
-const TorrentSummary = require('../lib/torrent-summary')
-const Playlist = require('../lib/playlist')
-const { dispatch, dispatcher } = require('../lib/dispatcher')
-const config = require('../../config')
-const { calculateEta } = require('../lib/time')
+import TorrentSummary from '../lib/torrent-summary.js'
+import Playlist from '../lib/playlist.js'
+import { dispatch, dispatcher } from '../lib/dispatcher.js'
+import config from '../../config.js'
+import { calculateEta } from '../lib/time.js'
 
-// Shows a streaming video player. Standard features + Chromecast + Airplay
-module.exports = class Player extends React.Component {
+const BitField = bitfield.default
+
+export default class Player extends React.Component {
   render () {
     // Show the video as large as will fit in the window, play immediately
     // If the video is on Chromecast or Airplay, show a title screen instead

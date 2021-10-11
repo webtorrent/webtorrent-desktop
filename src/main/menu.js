@@ -1,23 +1,14 @@
-module.exports = {
-  init,
-  togglePlaybackControls,
-  setWindowFocus,
-  setAllowNav,
-  onPlayerUpdate,
-  onToggleAlwaysOnTop,
-  onToggleFullScreen
-}
-
-const { app, Menu } = require('electron')
-
-const config = require('../config')
-const windows = require('./windows')
+import electron from '../../electron.cjs'
+import config from '../config.js'
+import * as windows from './windows/index.js'
+import shell from './shell.js'
 
 let menu = null
 
 function init () {
-  menu = Menu.buildFromTemplate(getMenuTemplate())
-  Menu.setApplicationMenu(menu)
+  console.log('menu init')
+  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  electron.Menu.setApplicationMenu(menu)
 }
 
 function togglePlaybackControls (flag) {
@@ -85,24 +76,24 @@ function getMenuTemplate () {
             ? 'Create New Torrent...'
             : 'Create New Torrent from Folder...',
           accelerator: 'CmdOrCtrl+N',
-          click: () => {
-            const dialog = require('./dialog')
+          click: async () => {
+            const dialog = await import('./dialog')
             dialog.openSeedDirectory()
           }
         },
         {
           label: 'Open Torrent File...',
           accelerator: 'CmdOrCtrl+O',
-          click: () => {
-            const dialog = require('./dialog')
+          click: async () => {
+            const dialog = await import('./dialog')
             dialog.openTorrentFile()
           }
         },
         {
           label: 'Open Torrent Address...',
           accelerator: 'CmdOrCtrl+U',
-          click: () => {
-            const dialog = require('./dialog')
+          click: async () => {
+            const dialog = await import('./dialog')
             dialog.openTorrentAddress()
           }
         },
@@ -303,21 +294,18 @@ function getMenuTemplate () {
         {
           label: 'Learn more about ' + config.APP_NAME,
           click: () => {
-            const shell = require('./shell')
             shell.openExternal(config.HOME_PAGE_URL)
           }
         },
         {
           label: 'Release Notes',
           click: () => {
-            const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL_RELEASES)
           }
         },
         {
           label: 'Contribute on GitHub',
           click: () => {
-            const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL)
           }
         },
@@ -327,21 +315,18 @@ function getMenuTemplate () {
         {
           label: 'Report an Issue...',
           click: () => {
-            const shell = require('./shell')
             shell.openExternal(config.GITHUB_URL_ISSUES)
           }
         },
         {
           label: 'Follow us on Twitter',
           click: () => {
-            const shell = require('./shell')
             shell.openExternal(config.TWITTER_PAGE_URL)
           }
         }
       ]
     }
   ]
-
   if (process.platform === 'darwin') {
     // WebTorrent menu (Mac)
     template.unshift({
@@ -426,8 +411,8 @@ function getMenuTemplate () {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
       label: 'Create New Torrent from File...',
-      click: () => {
-        const dialog = require('./dialog')
+      click: async () => {
+        const dialog = await import('./dialog')
         dialog.openSeedFile()
       }
     })
@@ -460,9 +445,26 @@ function getMenuTemplate () {
     // File menu (Linux)
     template[0].submenu.push({
       label: 'Quit',
-      click: () => app.quit()
+      click: () => electron.app.quit()
     })
   }
 
   return template
+}
+
+export { init }
+export { togglePlaybackControls }
+export { setWindowFocus }
+export { setAllowNav }
+export { onPlayerUpdate }
+export { onToggleAlwaysOnTop }
+export { onToggleFullScreen }
+export default {
+  init,
+  togglePlaybackControls,
+  setWindowFocus,
+  setAllowNav,
+  onPlayerUpdate,
+  onToggleAlwaysOnTop,
+  onToggleFullScreen
 }

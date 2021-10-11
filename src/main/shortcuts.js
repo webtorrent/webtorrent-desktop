@@ -1,12 +1,7 @@
-module.exports = {
-  disable,
-  enable
-}
+import { globalShortcut } from 'electron'
+import * as windows from './windows'
 
-const { globalShortcut } = require('electron')
-const windows = require('./windows')
-
-function enable () {
+export function enable () {
   // Register play/pause media key, available on some keyboards.
   globalShortcut.register(
     'MediaPlayPause',
@@ -22,7 +17,7 @@ function enable () {
   )
 }
 
-function disable () {
+export function disable () {
   // Return the media key to the OS, so other apps can use it.
   globalShortcut.unregister('MediaPlayPause')
   globalShortcut.unregister('MediaNextTrack')

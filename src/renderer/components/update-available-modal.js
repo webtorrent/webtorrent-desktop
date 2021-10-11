@@ -1,10 +1,9 @@
-const React = require('react')
-const { shell } = require('electron')
+import * as React from 'react'
+import { shell } from 'electron'
+import ModalOKCancel from './modal-ok-cancel.js'
+import { dispatch } from '../lib/dispatcher.js'
 
-const ModalOKCancel = require('./modal-ok-cancel')
-const { dispatch } = require('../lib/dispatcher')
-
-module.exports = class UpdateAvailableModal extends React.Component {
+export default class UpdateAvailableModal extends React.Component {
   render () {
     const state = this.props.state
     return (

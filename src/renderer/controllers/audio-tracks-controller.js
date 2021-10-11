@@ -1,6 +1,6 @@
-const { dispatch } = require('../lib/dispatcher')
+import { dispatch } from '../lib/dispatcher.js'
 
-module.exports = class AudioTracksController {
+export default class AudioTracksController {
   constructor (state) {
     this.state = state
   }

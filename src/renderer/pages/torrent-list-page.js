@@ -1,15 +1,17 @@
-const React = require('react')
-const prettyBytes = require('prettier-bytes')
+import * as React from 'react'
+import prettyBytes from 'prettier-bytes'
+import checkbox from 'material-ui/Checkbox'
+import linearProgress from 'material-ui/LinearProgress'
 
-const Checkbox = require('material-ui/Checkbox').default
-const LinearProgress = require('material-ui/LinearProgress').default
+import TorrentSummary from '../lib/torrent-summary.js'
+import TorrentPlayer from '../lib/torrent-player.js'
+import { dispatcher } from '../lib/dispatcher.js'
+import { calculateEta } from '../lib/time.js'
 
-const TorrentSummary = require('../lib/torrent-summary')
-const TorrentPlayer = require('../lib/torrent-player')
-const { dispatcher } = require('../lib/dispatcher')
-const { calculateEta } = require('../lib/time')
+const Checkbox = checkbox.default
+const LinearProgress = linearProgress.default
 
-module.exports = class TorrentList extends React.Component {
+export default class TorrentList extends React.Component {
   render () {
     const state = this.props.state
 

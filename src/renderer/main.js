@@ -1,51 +1,43 @@
-/**
- * Perf optimization: Hook into require() to modify how certain modules load:
- *
- * - `inline-style-prefixer` (used by `material-ui`) takes ~40ms. It is not
- *   actually used because auto-prefixing is disabled with
- *   `darkBaseTheme.userAgent = false`. Return a fake object.
- */
-const Module = require('module')
-const _require = Module.prototype.require
-Module.prototype.require = function (id) {
-  if (id === 'inline-style-prefixer') return {}
-  return _require.apply(this, arguments)
-}
-
+/* eslint-disable import/first */
 console.time('init')
 
 // Perf optimization: Start asynchronously read on config file before all the
-// blocking require() calls below.
+// blocking import() calls below.
 
-const State = require('./lib/state')
+import State from './lib/state'
 State.load(onState)
 
-const createGetter = require('fn-getter')
-const debounce = require('debounce')
-const dragDrop = require('drag-drop')
-const electron = require('electron')
-const fs = require('fs')
-const React = require('react')
-const ReactDOM = require('react-dom')
+import createGetter from 'fn-getter'
+import remote from '@electron/remote'
+import debounce from 'debounce'
+import dragDrop from 'drag-drop'
+import electron from 'electron'
+import fs from 'fs'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 
-const config = require('../config')
-const telemetry = require('./lib/telemetry')
-const sound = require('./lib/sound')
-const TorrentPlayer = require('./lib/torrent-player')
+import config from '../config.js'
+import telemetry from './lib/telemetry.js'
+import sound from './lib/sound.js'
+import TorrentPlayer from './lib/torrent-player.js'
+import App from './pages/app.js'
+import { setDispatch } from './lib/dispatcher.js'
 
-// Perf optimization: Needed immediately, so do not lazy load it below
-const TorrentListController = require('./controllers/torrent-list-controller')
+import TorrentController from './controllers/torrent-controller.js'
+import AudioTracksController from './controllers/audio-tracks-controller.js'
+import SubtitlesController from './controllers/subtitles-controller.js'
+import PrefsController from './controllers/prefs-controller.js'
+import PlaybackController from './controllers/playback-controller.js'
+import MediaController from './controllers/media-controller.js'
+import TorrentListController from './controllers/torrent-list-controller.js'
+import UpdateController from './controllers/update-controller.js'
+import FolderWatcherController from './controllers/folder-watcher-controller.js'
 
-const App = require('./pages/app')
-
-// Electron apps have two processes: a main process (node) runs first and starts
-// a renderer process (essentially a Chrome window). We're in the renderer process,
-// and this IPC channel receives from and sends messages to the main process
-const ipcRenderer = electron.ipcRenderer
+const { clipboard, ipcRenderer } = electron
 
 // Yo-yo pattern: state object lives here and percolates down thru all the views.
 // Events come back up from the views via dispatch(...)
-require('./lib/dispatcher').setDispatch(dispatch)
+setDispatch(dispatch)
 
 // From dispatch(...), events are sent to one of the controllers
 let controllers = null
@@ -80,39 +72,15 @@ function onState (err, _state) {
 
   // Create controllers
   controllers = {
-    media: createGetter(() => {
-      const MediaController = require('./controllers/media-controller')
-      return new MediaController(state)
-    }),
-    playback: createGetter(() => {
-      const PlaybackController = require('./controllers/playback-controller')
-      return new PlaybackController(state, config, update)
-    }),
-    prefs: createGetter(() => {
-      const PrefsController = require('./controllers/prefs-controller')
-      return new PrefsController(state, config)
-    }),
-    subtitles: createGetter(() => {
-      const SubtitlesController = require('./controllers/subtitles-controller')
-      return new SubtitlesController(state)
-    }),
-    audioTracks: createGetter(() => {
-      const AudioTracksController = require('./controllers/audio-tracks-controller')
-      return new AudioTracksController(state)
-    }),
-    torrent: createGetter(() => {
-      const TorrentController = require('./controllers/torrent-controller')
-      return new TorrentController(state)
-    }),
+    media: createGetter(() => new MediaController(state)),
+    playback: createGetter(() => new PlaybackController(state, config, update)),
+    prefs: createGetter(() => new PrefsController(state, config)),
+    subtitles: createGetter(() => new SubtitlesController(state)),
+    audioTracks: createGetter(() => new AudioTracksController(state)),
+    torrent: createGetter(() => new TorrentController(state)),
     torrentList: createGetter(() => new TorrentListController(state)),
-    update: createGetter(() => {
-      const UpdateController = require('./controllers/update-controller')
-      return new UpdateController(state)
-    }),
-    folderWatcher: createGetter(() => {
-      const FolderWatcherController = require('./controllers/folder-watcher-controller')
-      return new FolderWatcherController()
-    })
+    update: createGetter(() => new UpdateController(state)),
+    folderWatcher: createGetter(() => new FolderWatcherController())
   }
 
   // Add first page to location history
@@ -169,7 +137,7 @@ function onState (err, _state) {
   window.addEventListener('focus', onFocus)
   window.addEventListener('blur', onBlur)
 
-  if (electron.remote.getCurrentWindow().isVisible()) {
+  if (remote.getCurrentWindow().isVisible()) {
     sound.play('STARTUP')
   }
 
@@ -199,9 +167,9 @@ function delayedInit () {
 }
 
 // Lazily loads Chromecast and Airplay support
-function lazyLoadCast () {
+async function lazyLoadCast () {
   if (!Cast) {
-    Cast = require('./lib/cast')
+    Cast = (await import('./lib/cast')).default
     Cast.init(state, update) // Search the local network for Chromecast and Airplays
   }
   return Cast
@@ -432,7 +400,7 @@ function resumeTorrents () {
 // Set window dimensions to match video dimensions or fill the screen
 function setDimensions (dimensions) {
   // Don't modify the window size if it's already maximized
-  if (electron.remote.getCurrentWindow().isMaximized()) {
+  if (remote.getCurrentWindow().isMaximized()) {
     state.window.bounds = null
     return
   }
@@ -444,7 +412,7 @@ function setDimensions (dimensions) {
     width: window.outerWidth,
     height: window.outerHeight
   }
-  state.window.wasMaximized = electron.remote.getCurrentWindow().isMaximized
+  state.window.wasMaximized = remote.getCurrentWindow().isMaximized
 
   // Limit window size to screen size
   const screenWidth = window.screen.width
@@ -519,7 +487,7 @@ const editableHtmlTags = new Set(['input', 'textarea'])
 
 function onPaste (e) {
   if (e && editableHtmlTags.has(e.target.tagName.toLowerCase())) return
-  controllers.torrentList().addTorrent(electron.clipboard.readText())
+  controllers.torrentList().addTorrent(clipboard.readText())
 
   update()
 }

@@ -1,9 +1,10 @@
-const React = require('react')
-const PropTypes = require('prop-types')
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import raisedButton from 'material-ui/RaisedButton'
 
-const RaisedButton = require('material-ui/RaisedButton').default
+const RaisedButton = raisedButton.default
 
-class ShowMore extends React.Component {
+export default class ShowMore extends React.Component {
   static get propTypes () {
     return {
       defaultExpanded: PropTypes.bool,
@@ -21,11 +22,9 @@ class ShowMore extends React.Component {
 
   constructor (props) {
     super(props)
-
     this.state = {
       expanded: !!this.props.defaultExpanded
     }
-
     this.handleClick = this.handleClick.bind(this)
   }
 
@@ -51,5 +50,3 @@ class ShowMore extends React.Component {
     )
   }
 }
-
-module.exports = ShowMore

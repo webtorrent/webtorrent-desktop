@@ -1,3 +1,3 @@
-exports.about = require('./about')
-exports.main = require('./main')
-exports.webtorrent = require('./webtorrent')
+export * from './about.js'
+export * from './main.js'
+export * from './webtorrent.js'

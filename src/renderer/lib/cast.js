@@ -1,40 +1,18 @@
-// The Cast module talks to Airplay and Chromecast
-// * Modifies state when things change
-// * Starts and stops casting, provides remote video controls
-module.exports = {
-  init,
-  toggleMenu,
-  selectDevice,
-  stop,
-  play,
-  pause,
-  seek,
-  setVolume,
-  setRate
-}
-
-const http = require('http')
-
-const config = require('../../config')
-const { CastingError } = require('./errors')
-
+import http from 'http'
+import config from '../src/config.js'
+import { CastingError } from './errors.js'
 // Lazy load these for a ~300ms improvement in startup time
 let airplayer, chromecasts, dlnacasts
-
 // App state. Cast modifies state.playing and state.errors in response to events
 let state
-
 // Callback to notify module users when state has changed
 let update
-
 // setInterval() for updating cast status
 let statusInterval = null
-
 // Start looking for cast devices on the local network
 function init (appState, callback) {
   state = appState
   update = callback
-
   // Don't actually cast during integration tests
   // (Otherwise you'd need a physical Chromecast + AppleTV + DLNA TV to run them.)
   if (config.IS_TEST) {
@@ -43,32 +21,26 @@ function init (appState, callback) {
     state.devices.dlna = testPlayer('dlna')
     return
   }
-
   // Load modules, scan the network for devices
   airplayer = require('airplayer')()
   chromecasts = require('chromecasts')()
   dlnacasts = require('dlnacasts')()
-
   state.devices.chromecast = chromecastPlayer()
   state.devices.dlna = dlnaPlayer()
   state.devices.airplay = airplayPlayer()
-
   // Listen for devices: Chromecast, DLNA and Airplay
   chromecasts.on('update', device => {
     // TODO: how do we tell if there are *no longer* any Chromecasts available?
     // From looking at the code, chromecasts.players only grows, never shrinks
     state.devices.chromecast.addDevice(device)
   })
-
   dlnacasts.on('update', device => {
     state.devices.dlna.addDevice(device)
   })
-
   airplayer.on('update', device => {
     state.devices.airplay.addDevice(device)
   })
 }
-
 // integration test player implementation
 function testPlayer (type) {
   return {
@@ -81,20 +53,17 @@ function testPlayer (type) {
     seek,
     volume
   }
-
   function getDevices () {
     return [{ name: type + '-1' }, { name: type + '-2' }]
   }
-
-  function open () {}
-  function play () {}
-  function pause () {}
-  function stop () {}
-  function status () {}
-  function seek () {}
-  function volume () {}
+  function open () { }
+  function play () { }
+  function pause () { }
+  function stop () { }
+  function status () { }
+  function seek () { }
+  function volume () { }
 }
-
 // chromecast player implementation
 function chromecastPlayer () {
   const ret = {
@@ -110,11 +79,9 @@ function chromecastPlayer () {
     volume
   }
   return ret
-
   function getDevices () {
     return chromecasts.players
   }
-
   function addDevice (device) {
     device.on('error', err => {
       if (device !== ret.device) return
@@ -131,7 +98,6 @@ function chromecastPlayer () {
       update()
     })
   }
-
   function serveSubtitles (callback) {
     const subtitles = state.playing.subtitles
     const selectedSubtitle = subtitles.tracks[subtitles.selectedIndex]
@@ -152,7 +118,6 @@ function chromecastPlayer () {
       })
     }
   }
-
   function open () {
     const torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
     serveSubtitles(subtitlesUrl => {
@@ -175,35 +140,28 @@ function chromecastPlayer () {
       })
     })
   }
-
   function play (callback) {
     ret.device.play(null, null, callback)
   }
-
   function pause (callback) {
     ret.device.pause(callback)
   }
-
   function stop (callback) {
     ret.device.stop(callback)
     if (ret.subServer) {
       ret.subServer.close()
     }
   }
-
   function status () {
     ret.device.status(handleStatus)
   }
-
   function seek (time, callback) {
     ret.device.seek(time, callback)
   }
-
   function volume (volume, callback) {
     ret.device.volume(volume, callback)
   }
 }
-
 // airplay player implementation
 function airplayPlayer () {
   const ret = {
@@ -219,7 +177,6 @@ function airplayPlayer () {
     volume
   }
   return ret
-
   function addDevice (player) {
     player.on('event', event => {
       switch (event.state) {
@@ -237,11 +194,9 @@ function airplayPlayer () {
       update()
     })
   }
-
   function getDevices () {
     return airplayer.players
   }
-
   function open () {
     ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, (err, res) => {
       if (err) {
@@ -256,19 +211,15 @@ function airplayPlayer () {
       update()
     })
   }
-
   function play (callback) {
     ret.device.resume(callback)
   }
-
   function pause (callback) {
     ret.device.pause(callback)
   }
-
   function stop (callback) {
     ret.device.stop(callback)
   }
-
   function status () {
     ret.device.playbackInfo((err, res, status) => {
       if (err) {
@@ -284,18 +235,15 @@ function airplayPlayer () {
       }
     })
   }
-
   function seek (time, callback) {
     ret.device.scrub(time, callback)
   }
-
   function volume (volume, callback) {
     // AirPlay doesn't support volume
     // TODO: We should just disable the volume slider
     state.playing.volume = volume
   }
 }
-
 // DLNA player implementation
 function dlnaPlayer (player) {
   const ret = {
@@ -311,11 +259,9 @@ function dlnaPlayer (player) {
     volume
   }
   return ret
-
   function getDevices () {
     return dlnacasts.players
   }
-
   function addDevice (device) {
     device.on('error', err => {
       if (device !== ret.device) return
@@ -332,7 +278,6 @@ function dlnaPlayer (player) {
       update()
     })
   }
-
   function open () {
     const torrentSummary = state.saved.torrents.find((x) => x.infoHash === state.playing.infoHash)
     ret.device.play(state.server.networkURL + '/' + state.playing.fileIndex, {
@@ -352,27 +297,21 @@ function dlnaPlayer (player) {
       update()
     })
   }
-
   function play (callback) {
     ret.device.play(null, null, callback)
   }
-
   function pause (callback) {
     ret.device.pause(callback)
   }
-
   function stop (callback) {
     ret.device.stop(callback)
   }
-
   function status () {
     ret.device.status(handleStatus)
   }
-
   function seek (time, callback) {
     ret.device.seek(time, callback)
   }
-
   function volume (volume, callback) {
     ret.device.volume(volume, err => {
       // quick volume update
@@ -381,19 +320,15 @@ function dlnaPlayer (player) {
     })
   }
 }
-
 function handleStatus (err, status) {
   if (err || !status) {
-    return console.log('error getting %s status: %o',
-      state.playing.location,
-      err || 'missing response')
+    return console.log('error getting %s status: %o', state.playing.location, err || 'missing response')
   }
   state.playing.isPaused = status.playerState === 'PAUSED'
   state.playing.currentTime = status.currentTime
   state.playing.volume = status.volume.muted ? 0 : status.volume.level
   update()
 }
-
 // Start polling cast device state, whenever we're connected
 function startStatusInterval () {
   statusInterval = setInterval(() => {
@@ -401,7 +336,6 @@ function startStatusInterval () {
     if (player) player.status()
   }, 1000)
 }
-
 /*
  * Shows the device menu for a given cast type ('chromecast', 'airplay', etc)
  * The menu lists eg. all Chromecasts detected; the user can click one to cast.
@@ -413,43 +347,33 @@ function toggleMenu (location) {
     state.devices.castMenu = null
     return
   }
-
   // Never cast to two devices at the same time
   if (state.playing.location !== 'local') {
-    throw new CastingError(
-      `You can't connect to ${location} when already connected to another device`
-    )
+    throw new CastingError(`You can't connect to ${location} when already connected to another device`)
   }
-
   // Find all cast devices of the given type
   const player = getPlayer(location)
   const devices = player ? player.getDevices() : []
   if (devices.length === 0) {
     throw new CastingError(`No ${location} devices available`)
   }
-
   // Show a menu
   state.devices.castMenu = { location, devices }
 }
-
 function selectDevice (index) {
   const { location, devices } = state.devices.castMenu
-
   // Start casting
   const player = getPlayer(location)
   player.device = devices[index]
   player.open()
-
   // Poll the casting device's status every few seconds
   startStatusInterval()
-
   // Show the Connecting... screen
   state.devices.castMenu = null
   state.playing.castName = devices[index].name
   state.playing.location = location + '-pending'
   update()
 }
-
 // Stops casting, move video back to local screen
 function stop () {
   const player = getPlayer()
@@ -463,7 +387,6 @@ function stop () {
     stoppedCasting()
   }
 }
-
 function stoppedCasting () {
   state.playing.location = 'local'
   state.playing.jumpToTime = Number.isFinite(state.playing.currentTime)
@@ -471,7 +394,6 @@ function stoppedCasting () {
     : 0
   update()
 }
-
 function getPlayer (location) {
   if (location) {
     return state.devices[location]
@@ -485,17 +407,14 @@ function getPlayer (location) {
     return null
   }
 }
-
 function play () {
   const player = getPlayer()
   if (player) player.play(castCallback)
 }
-
 function pause () {
   const player = getPlayer()
   if (player) player.pause(castCallback)
 }
-
 function setRate (rate) {
   let player
   let result = true
@@ -511,17 +430,34 @@ function setRate (rate) {
   }
   return result
 }
-
 function seek (time) {
   const player = getPlayer()
-  if (player) player.seek(time, castCallback)
+  if (player) { player.seek(time, castCallback) }
 }
-
 function setVolume (volume) {
   const player = getPlayer()
-  if (player) player.volume(volume, castCallback)
+  if (player) { player.volume(volume, castCallback) }
 }
-
 function castCallback (...args) {
   console.log('%s callback: %o', state.playing.location, args)
+}
+export { init }
+export { toggleMenu }
+export { selectDevice }
+export { stop }
+export { play }
+export { pause }
+export { seek }
+export { setVolume }
+export { setRate }
+export default {
+  init,
+  toggleMenu,
+  selectDevice,
+  stop,
+  play,
+  pause,
+  seek,
+  setVolume,
+  setRate
 }

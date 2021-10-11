@@ -1,9 +1,8 @@
-const React = require('react')
-const PropTypes = require('prop-types')
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import * as colors from 'material-ui/styles/colors'
 
-const colors = require('material-ui/styles/colors')
-
-class Heading extends React.Component {
+export default class Heading extends React.Component {
   static get propTypes () {
     return {
       level: PropTypes.number
@@ -31,5 +30,3 @@ class Heading extends React.Component {
     )
   }
 }
-
-module.exports = Heading

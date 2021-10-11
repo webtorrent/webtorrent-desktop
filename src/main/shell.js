@@ -1,12 +1,7 @@
-module.exports = {
-  openExternal,
-  openPath,
-  showItemInFolder,
-  moveItemToTrash
-}
+import electron from '../../electron.cjs'
+import log from './log.js'
 
-const { shell } = require('electron')
-const log = require('./log')
+const { shell } = electron
 
 /**
  * Open the given external protocol URL in the desktop’s default manner.
@@ -19,7 +14,6 @@ function openExternal (url) {
 /**
  * Open the given file in the desktop’s default manner.
  */
-
 function openPath (path) {
   log(`openPath: ${path}`)
   shell.openPath(path)
@@ -39,4 +33,11 @@ function showItemInFolder (path) {
 function moveItemToTrash (path) {
   log(`moveItemToTrash: ${path}`)
   shell.trashItem(path)
+}
+
+export default {
+  openExternal,
+  openPath,
+  showItemInFolder,
+  moveItemToTrash
 }

@@ -1,17 +1,10 @@
-module.exports = {
-  hasTray,
-  init,
-  setWindowFocus
-}
-
-const { app, Tray, Menu } = require('electron')
-
-const config = require('../config')
-const windows = require('./windows')
+import { app, Tray, Menu } from 'electron'
+import config from '../config.js'
+import * as windows from './windows'
 
 let tray
 
-function init () {
+export function init () {
   if (process.platform === 'linux') {
     initLinux()
   }
@@ -24,11 +17,11 @@ function init () {
 /**
  * Returns true if there a tray icon is active.
  */
-function hasTray () {
+export function hasTray () {
   return !!tray
 }
 
-function setWindowFocus (flag) {
+export function setWindowFocus (flag) {
   if (!tray) return
   updateTrayMenu()
 }
@@ -46,8 +39,8 @@ function initWin32 () {
 /**
  * Check for libappindicator support before creating tray icon.
  */
-function checkLinuxTraySupport (cb) {
-  const cp = require('child_process')
+async function checkLinuxTraySupport (cb) {
+  const cp = await import('child_process')
 
   // Check that libappindicator libraries are installed in system.
   cp.exec('ldconfig -p | grep libappindicator', (err, stdout) => {

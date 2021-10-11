@@ -1,20 +1,13 @@
-module.exports = {
-  openSeedFile,
-  openSeedDirectory,
-  openTorrentFile,
-  openTorrentAddress,
-  openFiles
-}
+import electron from '../../electron.cjs'
+import log from './log.js'
+import * as windows from './windows/index.js'
 
-const { dialog } = require('electron')
-
-const log = require('./log')
-const windows = require('./windows')
+const { dialog } = electron
 
 /**
  * Show open dialog to create a single-file torrent.
  */
-function openSeedFile () {
+export function openSeedFile () {
   if (!windows.main.win) return
   log('openSeedFile')
   const opts = {
@@ -29,7 +22,7 @@ function openSeedFile () {
  * Windows and Linux, open dialogs are for files *or* directories only, not both,
  * so this function shows a directory dialog on those platforms.
  */
-function openSeedDirectory () {
+export function openSeedDirectory () {
   if (!windows.main.win) return
   log('openSeedDirectory')
   const opts = process.platform === 'darwin'
@@ -48,7 +41,7 @@ function openSeedDirectory () {
  * Show flexible open dialog that supports selecting .torrent files to add, or
  * a file or folder to create a single-file or single-directory torrent.
  */
-function openFiles () {
+export function openFiles () {
   if (!windows.main.win) return
   log('openFiles')
   const opts = process.platform === 'darwin'
@@ -70,7 +63,7 @@ function openFiles () {
 /*
  * Show open dialog to open a .torrent file.
  */
-function openTorrentFile () {
+export function openTorrentFile () {
   if (!windows.main.win) return
   log('openTorrentFile')
   const opts = {
@@ -90,7 +83,7 @@ function openTorrentFile () {
 /*
  * Show modal dialog to open a torrent URL (magnet uri, http torrent link, etc.)
  */
-function openTorrentAddress () {
+export function openTorrentAddress () {
   log('openTorrentAddress')
   windows.main.dispatch('openTorrentAddress')
 }

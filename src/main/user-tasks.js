@@ -1,13 +1,9 @@
-module.exports = {
-  init
-}
-
-const { app } = require('electron')
+import { app } from 'electron'
 
 /**
  * Add a user task menu to the app icon on right-click. (Windows)
  */
-function init () {
+export function init () {
   if (process.platform !== 'win32') return
   app.setUserTasks(getUserTasks())
 }

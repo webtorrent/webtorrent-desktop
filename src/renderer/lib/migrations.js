@@ -1,14 +1,8 @@
 /* eslint-disable camelcase */
-
-module.exports = {
-  run
-}
-
-const fs = require('fs')
-const path = require('path')
-const semver = require('semver')
-
-const config = require('../../config')
+import fs, { copyFileSync } from 'fs'
+import path from 'path'
+import semver from 'semver'
+import config from '../../config.js'
 
 // Change `state.saved` (which will be saved back to config.json on exit) as
 // needed, for example to deal with config.json format changes across versions
@@ -41,17 +35,14 @@ function run (state) {
 
 // Whenever the app is updated,  re-install default handlers if the user has
 // enabled them.
-function installHandlers (saved) {
+async function installHandlers (saved) {
   if (saved.prefs.isFileHandler) {
-    const ipcRenderer = require('electron').ipcRenderer
+    const { ipcRenderer } = await import('electron')
     ipcRenderer.send('setDefaultFileHandler', true)
   }
 }
 
 function migrate_0_7_0 (saved) {
-  const { copyFileSync } = require('fs')
-  const path = require('path')
-
   saved.torrents.forEach(ts => {
     const infoHash = ts.infoHash
 
@@ -91,7 +82,6 @@ function migrate_0_7_0 (saved) {
       delete ts.posterURL
       ts.posterFileName = infoHash + extension
     }
-
     // Fix exception caused by incorrect file ordering.
     // https://github.com/webtorrent/webtorrent-desktop/pull/604#issuecomment-222805214
     delete ts.defaultPlayFileIndex
@@ -116,8 +106,8 @@ function migrate_0_11_0 (saved) {
   }
 }
 
-function migrate_0_12_0 (saved) {
-  const TorrentSummary = require('./torrent-summary')
+async function migrate_0_12_0 (saved) {
+  const TorrentSummary = await import('./torrent-summary')
 
   if (saved.prefs.openExternalPlayer == null && saved.prefs.playInVlc != null) {
     saved.prefs.openExternalPlayer = saved.prefs.playInVlc
@@ -169,10 +159,6 @@ function migrate_0_17_2 (saved) {
   // Remove the trailing dot (.) from the Wired CD torrent name, since
   // folders/files that end in a trailing dot (.) or space are not deletable from
   // Windows Explorer. See: https://github.com/webtorrent/webtorrent-desktop/issues/905
-
-  const { copyFileSync } = require('fs')
-  const rimraf = require('rimraf')
-
   const OLD_NAME = 'The WIRED CD - Rip. Sample. Mash. Share.'
   const NEW_NAME = 'The WIRED CD - Rip. Sample. Mash. Share'
 
@@ -202,7 +188,7 @@ function migrate_0_17_2 (saved) {
   } catch (err) {}
   ts.posterFileName = NEW_HASH + '.jpg'
 
-  rimraf.sync(path.join(config.TORRENT_PATH, ts.torrentFileName))
+  fs.rmdirSync(path.join(config.TORRENT_PATH, ts.torrentFileName))
   copyFileSync(
     path.join(config.STATIC_PATH, 'wiredCd.torrent'),
     path.join(config.TORRENT_PATH, NEW_HASH + '.torrent')
@@ -231,4 +217,8 @@ function migrate_0_22_0 (saved) {
   if (saved.prefs.externalPlayerPath == null) {
     saved.prefs.externalPlayerPath = ''
   }
+}
+
+export default {
+  run
 }
