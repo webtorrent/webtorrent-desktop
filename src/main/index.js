@@ -1,5 +1,6 @@
 console.time('init')
 
+require('@electron/remote/main').initialize()
 const { app, ipcMain } = require('electron')
 
 // Start crash reporter early, so it takes effect for child processes
@@ -109,13 +110,13 @@ function init () {
 
   ipc.init()
 
-  app.once('ipcReady', function () {
+  app.once('ipcReady', () => {
     log('Command line args:', argv)
     processArgv(argv)
     console.timeEnd('init')
   })
 
-  app.on('before-quit', function (e) {
+  app.on('before-quit', e => {
     if (app.isQuitting) return
 
     app.isQuitting = true
@@ -128,7 +129,7 @@ function init () {
     }, 4000) // quit after 4 secs, at most
   })
 
-  app.on('activate', function () {
+  app.on('activate', () => {
     if (isReady) windows.main.show()
   })
 }
@@ -206,7 +207,7 @@ function sliceArgv (argv) {
 
 function processArgv (argv) {
   const torrentIds = []
-  argv.forEach(function (arg) {
+  argv.forEach(arg => {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed
       const dialog = require('./dialog')

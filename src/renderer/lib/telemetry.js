@@ -7,7 +7,7 @@ module.exports = {
   logPlayAttempt
 }
 
-const { remote } = require('electron')
+const remote = require('@electron/remote')
 
 const config = require('../../config')
 
@@ -50,7 +50,7 @@ function send (state) {
     json: true
   }
 
-  get.post(opts, function (err, res) {
+  get.post(opts, (err, res) => {
     if (err) return console.error('Error sending telemetry', err)
     if (res.statusCode !== 200) {
       return console.error(`Error sending telemetry, status code: ${res.statusCode}`)
@@ -106,15 +106,14 @@ function getTorrentStats (state) {
   }
 
   // First, count torrents & total file size
-  for (let i = 0; i < count; i++) {
-    const t = state.saved.torrents[i]
-    const stat = byStatus[t.status]
-    if (!t || !t.files || !stat) continue
+  for (const torrent of state.saved.torrents) {
+    const stat = byStatus[torrent.status]
+    if (!torrent || !torrent.files || !stat) continue
     stat.count++
-    for (let j = 0; j < t.files.length; j++) {
-      const f = t.files[j]
-      if (!f || !f.length) continue
-      const fileSizeMB = f.length / (1 << 20)
+
+    for (const file of torrent.files) {
+      if (!file || !file.length) continue
+      const fileSizeMB = file.length / (1 << 20)
       sizeMB += fileSizeMB
       stat.sizeMB += fileSizeMB
     }
@@ -145,7 +144,7 @@ function roundPow2 (n) {
   if (n <= 0) return 0
   // Otherwise, return 1, 2, 4, 8, etc by rounding in log space
   const log2 = Math.log(n) / Math.log(2)
-  return Math.pow(2, Math.round(log2))
+  return 2 ** Math.round(log2)
 }
 
 // An uncaught error happened in the main process or in one of the windows

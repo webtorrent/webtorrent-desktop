@@ -38,5 +38,5 @@ function showItemInFolder (path) {
  */
 function moveItemToTrash (path) {
   log(`moveItemToTrash: ${path}`)
-  shell.moveItemToTrash(path)
+  shell.trashItem(path)
 }

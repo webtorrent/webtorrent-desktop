@@ -21,16 +21,16 @@ function setModule (name, module) {
 }
 
 function init () {
-  ipcMain.once('ipcReady', function (e) {
+  ipcMain.once('ipcReady', e => {
     app.ipcReady = true
     app.emit('ipcReady')
   })
 
-  ipcMain.once('ipcReadyWebTorrent', function (e) {
+  ipcMain.once('ipcReadyWebTorrent', e => {
     app.ipcReadyWebTorrent = true
     log('sending %d queued messages from the main win to the webtorrent window',
       messageQueueMainToWebTorrent.length)
-    messageQueueMainToWebTorrent.forEach(function (message) {
+    messageQueueMainToWebTorrent.forEach(message => {
       windows.webtorrent.send(message.name, ...message.args)
       log('webtorrent: sent queued %s', message.name)
     })
@@ -66,7 +66,7 @@ function init () {
    * Player Events
    */
 
-  ipcMain.on('onPlayerOpen', function () {
+  ipcMain.on('onPlayerOpen', () => {
     const powerSaveBlocker = require('./power-save-blocker')
     const shortcuts = require('./shortcuts')
     const thumbar = require('./thumbar')
@@ -77,14 +77,14 @@ function init () {
     thumbar.enable()
   })
 
-  ipcMain.on('onPlayerUpdate', function (e, ...args) {
+  ipcMain.on('onPlayerUpdate', (e, ...args) => {
     const thumbar = require('./thumbar')
 
     menu.onPlayerUpdate(...args)
     thumbar.onPlayerUpdate(...args)
   })
 
-  ipcMain.on('onPlayerClose', function () {
+  ipcMain.on('onPlayerClose', () => {
     const powerSaveBlocker = require('./power-save-blocker')
     const shortcuts = require('./shortcuts')
     const thumbar = require('./thumbar')
@@ -95,7 +95,7 @@ function init () {
     thumbar.disable()
   })
 
-  ipcMain.on('onPlayerPlay', function () {
+  ipcMain.on('onPlayerPlay', () => {
     const powerSaveBlocker = require('./power-save-blocker')
     const thumbar = require('./thumbar')
 
@@ -103,7 +103,7 @@ function init () {
     thumbar.onPlayerPlay()
   })
 
-  ipcMain.on('onPlayerPause', function () {
+  ipcMain.on('onPlayerPause', () => {
     const powerSaveBlocker = require('./power-save-blocker')
     const thumbar = require('./thumbar')
 
@@ -115,7 +115,7 @@ function init () {
    * Folder Watcher Events
    */
 
-  ipcMain.on('startFolderWatcher', function () {
+  ipcMain.on('startFolderWatcher', () => {
     if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
@@ -124,7 +124,7 @@ function init () {
     modules.folderWatcher.start()
   })
 
-  ipcMain.on('stopFolderWatcher', function () {
+  ipcMain.on('stopFolderWatcher', () => {
     if (!modules.folderWatcher) {
       log('IPC ERR: folderWatcher module is not defined.')
       return
@@ -190,10 +190,10 @@ function init () {
    * External Media Player
    */
 
-  ipcMain.on('checkForExternalPlayer', function (e, path) {
+  ipcMain.on('checkForExternalPlayer', (e, path) => {
     const externalPlayer = require('./external-player')
 
-    externalPlayer.checkInstall(path, function (err) {
+    externalPlayer.checkInstall(path, err => {
       windows.main.send('checkForExternalPlayer', !err)
     })
   })
@@ -219,10 +219,11 @@ function init () {
    */
 
   const oldEmit = ipcMain.emit
-  ipcMain.emit = function (name, e, ...args) {
+  ipcMain.emit = (name, e, ...args) => {
     // Relay messages between the main window and the WebTorrent hidden window
     if (name.startsWith('wt-') && !app.isQuitting) {
-      if (e.sender.browserWindowOptions.title === 'webtorrent-hidden-window') {
+      console.dir(e.sender.getTitle())
+      if (e.sender.getTitle() === 'WebTorrent Hidden Window') {
         // Send message to main window
         windows.main.send(name, ...args)
         log('webtorrent: got %s', name)

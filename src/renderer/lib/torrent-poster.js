@@ -9,20 +9,14 @@ const msgNoSuitablePoster = 'Cannot generate a poster from any files in the torr
 
 function torrentPoster (torrent, cb) {
   // First, try to use a poster image if available
-  const posterFile = torrent.files.filter(function (file) {
-    return /^poster\.(jpg|png|gif)$/.test(file.name)
-  })[0]
+  const posterFile = torrent.files.filter(file => /^poster\.(jpg|png|gif)$/.test(file.name))[0]
   if (posterFile) return extractPoster(posterFile, cb)
 
   // 'score' each media type based on total size present in torrent
-  const bestScore = ['audio', 'video', 'image'].map(mediaType => {
-    return {
-      type: mediaType,
-      size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
-    }
-  }).sort((a, b) => { // sort descending on size
-    return b.size - a.size
-  })[0]
+  const bestScore = ['audio', 'video', 'image'].map(mediaType => ({
+    type: mediaType,
+    size: calculateDataLengthByExtension(torrent, mediaExtensions[mediaType])
+  })).sort((a, b) => b.size - a.size)[0] // sort descending on size
 
   if (bestScore.size === 0) {
     // Admit defeat, no video, audio or image had a significant presence
@@ -51,9 +45,7 @@ function calculateDataLengthByExtension (torrent, extensions) {
   if (files.length === 0) return 0
   return files
     .map(file => file.length)
-    .reduce((a, b) => {
-      return a + b
-    })
+    .reduce((a, b) => a + b)
 }
 
 /**
@@ -65,9 +57,7 @@ function calculateDataLengthByExtension (torrent, extensions) {
 function getLargestFileByExtension (torrent, extensions) {
   const files = filterOnExtension(torrent, extensions)
   if (files.length === 0) return undefined
-  return files.reduce((a, b) => {
-    return a.length > b.length ? a : b
-  })
+  return files.reduce((a, b) => a.length > b.length ? a : b)
 }
 
 /**
@@ -115,12 +105,10 @@ function torrentPosterFromAudio (torrent, cb) {
 
   if (imageFiles.length === 0) return cb(new Error(msgNoSuitablePoster))
 
-  const bestCover = imageFiles.map(file => {
-    return {
-      file,
-      score: scoreAudioCoverFile(file)
-    }
-  }).reduce((a, b) => {
+  const bestCover = imageFiles.map(file => ({
+    file,
+    score: scoreAudioCoverFile(file)
+  })).reduce((a, b) => {
     if (a.score > b.score) {
       return a
     }
@@ -190,5 +178,5 @@ function torrentPosterFromImage (torrent, cb) {
 
 function extractPoster (file, cb) {
   const extname = path.extname(file.name)
-  file.getBuffer((err, buf) => { return cb(err, buf, extname) })
+  file.getBuffer((err, buf) => cb(err, buf, extname))
 }

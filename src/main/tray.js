@@ -34,7 +34,7 @@ function setWindowFocus (flag) {
 }
 
 function initLinux () {
-  checkLinuxTraySupport(function (err) {
+  checkLinuxTraySupport(err => {
     if (!err) createTray()
   })
 }
@@ -50,7 +50,7 @@ function checkLinuxTraySupport (cb) {
   const cp = require('child_process')
 
   // Check that libappindicator libraries are installed in system.
-  cp.exec('ldconfig -p | grep libappindicator', function (err, stdout) {
+  cp.exec('ldconfig -p | grep libappindicator', (err, stdout) => {
     if (err) return cb(err)
     cb(null)
   })

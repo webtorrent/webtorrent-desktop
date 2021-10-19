@@ -33,10 +33,11 @@ function init () {
     },
     width: 300
   })
+  require('@electron/remote/main').enable(win.webContents)
 
   win.loadURL(config.WINDOW_ABOUT)
 
-  win.once('ready-to-show', function () {
+  win.once('ready-to-show', () => {
     win.show()
     // No menu on the About window
     // Hack: BrowserWindow removeMenu method not working on electron@7
@@ -44,7 +45,7 @@ function init () {
     win.setMenuBarVisibility(false)
   })
 
-  win.once('closed', function () {
+  win.once('closed', () => {
     about.win = null
   })
 }

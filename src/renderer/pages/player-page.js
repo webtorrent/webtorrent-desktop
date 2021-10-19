@@ -6,6 +6,7 @@ const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
 const { dispatch, dispatcher } = require('../lib/dispatcher')
 const config = require('../../config')
+const { calculateEta } = require('../lib/time')
 
 // Shows a streaming video player. Standard features + Chromecast + Airplay
 module.exports = class Player extends React.Component {
@@ -108,8 +109,7 @@ function renderMedia (state) {
   // Add subtitles to the <video> tag
   const trackTags = []
   if (state.playing.subtitles.selectedIndex >= 0) {
-    for (let i = 0; i < state.playing.subtitles.tracks.length; i++) {
-      const track = state.playing.subtitles.tracks[i]
+    state.playing.subtitles.tracks.forEach((track, i) => {
       const isSelected = state.playing.subtitles.selectedIndex === i
       trackTags.push(
         <track
@@ -120,7 +120,7 @@ function renderMedia (state) {
           src={track.buffer}
         />
       )
-    }
+    })
   }
 
   // Create the <audio> or <video> tag
@@ -199,7 +199,7 @@ function renderMedia (state) {
     }
   }
 
-  function onEnded (e) {
+  function onEnded () {
     if (Playlist.hasNext(state)) {
       dispatch('nextTrack')
     } else {
@@ -446,16 +446,9 @@ function renderCastScreen (state) {
     const downloadSpeed = prog.downloadSpeed || 0
     if (downloadSpeed === 0 || missing === 0) return
 
-    const rawEta = missing / downloadSpeed
-    const hours = Math.floor(rawEta / 3600) % 24
-    const minutes = Math.floor(rawEta / 60) % 60
-    const seconds = Math.floor(rawEta % 60)
+    const etaStr = calculateEta(missing, downloadSpeed)
 
-    const hoursStr = hours ? hours + ' h' : ''
-    const minutesStr = (hours || minutes) ? minutes + ' min' : ''
-    const secondsStr = seconds + ' s'
-
-    return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+    return (<span>{etaStr}</span>)
   }
 
   function renderDownloadProgress () {
@@ -510,7 +503,7 @@ function renderCastOptions (state) {
   const { location, devices } = state.devices.castMenu
   const player = state.devices[location]
 
-  const items = devices.map(function (device, ix) {
+  const items = devices.map((device, ix) => {
     const isSelected = player.device === device
     const name = device.name
     return (
@@ -533,7 +526,7 @@ function renderSubtitleOptions (state) {
   const subtitles = state.playing.subtitles
   if (!subtitles.tracks.length || !subtitles.showMenu) return
 
-  const items = subtitles.tracks.map(function (track, ix) {
+  const items = subtitles.tracks.map((track, ix) => {
     const isSelected = state.playing.subtitles.selectedIndex === ix
     return (
       <li key={ix} onClick={dispatcher('selectSubtitle', ix)}>
@@ -560,7 +553,7 @@ function renderAudioTrackOptions (state) {
   const audioTracks = state.playing.audioTracks
   if (!audioTracks.tracks.length || !audioTracks.showMenu) return
 
-  const items = audioTracks.tracks.map(function (track, ix) {
+  const items = audioTracks.tracks.map((track, ix) => {
     const isSelected = state.playing.audioTracks.selectedIndex === ix
     return (
       <li key={ix} onClick={dispatcher('selectAudioTrack', ix)}>
@@ -678,7 +671,7 @@ function renderPlayerControls (state) {
     airplay: { true: 'airplay', false: 'airplay' },
     dlna: { true: 'tv', false: 'tv' }
   }
-  castTypes.forEach(function (castType) {
+  castTypes.forEach(castType => {
     // Do we show this button (eg. the Chromecast button) at all?
     const isCasting = state.playing.location.startsWith(castType)
     const player = state.devices[castType]
@@ -785,7 +778,7 @@ function renderPlayerControls (state) {
     dispatch('preview', e.clientX)
   }
 
-  function clearPreview (e) {
+  function clearPreview () {
     if (state.playing.type !== 'video') return
     dispatch('clearPreview')
   }
@@ -801,7 +794,7 @@ function renderPlayerControls (state) {
   }
 
   // Handles volume muting and Unmuting
-  function handleVolumeMute (e) {
+  function handleVolumeMute () {
     if (state.playing.volume === 0.0) {
       dispatch('setVolume', 1.0)
     } else {
@@ -823,7 +816,7 @@ function renderPlayerControls (state) {
     }
   }
 
-  function handleAudioTracks (e) {
+  function handleAudioTracks () {
     dispatch('toggleAudioTracksMenu')
   }
 
@@ -920,7 +913,7 @@ function renderLoadingBar (state) {
   }
 
   // Output some bars to show which parts of the file are loaded
-  const loadingBarElems = parts.map(function (part, i) {
+  const loadingBarElems = parts.map((part, i) => {
     const style = {
       left: (100 * part.start / fileProg.numPieces) + '%',
       width: (100 * part.count / fileProg.numPieces) + '%'

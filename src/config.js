@@ -1,6 +1,6 @@
 const appConfig = require('application-config')('WebTorrent')
 const path = require('path')
-const { app, remote } = require('electron')
+const { app } = require('electron')
 const arch = require('arch')
 
 const APP_NAME = 'WebTorrent'
@@ -126,7 +126,7 @@ function getPath (key) {
     return ''
   } else if (process.type === 'renderer') {
     // Electron renderer process
-    return remote.app.getPath(key)
+    return require('@electron/remote').app.getPath(key)
   } else {
     // Electron main process
     return app.getPath(key)

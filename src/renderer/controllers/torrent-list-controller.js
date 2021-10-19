@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const { ipcRenderer, remote, clipboard } = require('electron')
+const { ipcRenderer, clipboard } = require('electron')
+const remote = require('@electron/remote')
 
 const { dispatch } = require('../lib/dispatcher')
 const { TorrentKeyNotFoundError } = require('../lib/errors')
@@ -93,7 +94,7 @@ module.exports = class TorrentListController {
     if (!fileOrFolder) return start()
 
     // Existing torrent: check that the path is still there
-    fs.stat(fileOrFolder, function (err) {
+    fs.stat(fileOrFolder, err => {
       if (err) {
         s.error = 'path-missing'
         dispatch('backToList')
@@ -155,9 +156,7 @@ module.exports = class TorrentListController {
 
   prioritizeTorrent (infoHash) {
     this.state.saved.torrents
-      .filter((torrent) => { // We're interested in active torrents only.
-        return (['downloading', 'seeding'].indexOf(torrent.status) !== -1)
-      })
+      .filter(torrent => ['downloading', 'seeding'].includes(torrent.status)) // Active torrents only.
       .forEach((torrent) => { // Pause all active torrents except the one that started playing.
         if (infoHash === torrent.infoHash) return
 
@@ -330,9 +329,9 @@ module.exports = class TorrentListController {
     if (!savePath) return // They clicked Cancel
     console.log('Saving torrent ' + torrentKey + ' to ' + savePath)
     const torrentPath = TorrentSummary.getTorrentPath(torrentSummary)
-    fs.readFile(torrentPath, function (err, torrentFile) {
+    fs.readFile(torrentPath, (err, torrentFile) => {
       if (err) return dispatch('error', err)
-      fs.writeFile(savePath, torrentFile, function (err) {
+      fs.writeFile(savePath, torrentFile, err => {
         if (err) return dispatch('error', err)
       })
     })
@@ -345,8 +344,8 @@ function findFilesRecursive (paths, cb_) {
   if (paths.length > 1) {
     let numComplete = 0
     const ret = []
-    paths.forEach(function (path) {
-      findFilesRecursive([path], function (fileObjs) {
+    paths.forEach(path => {
+      findFilesRecursive([path], fileObjs => {
         ret.push(...fileObjs)
         if (++numComplete === paths.length) {
           ret.sort((a, b) => a.path < b.path ? -1 : Number(a.path > b.path))
@@ -358,7 +357,7 @@ function findFilesRecursive (paths, cb_) {
   }
 
   const fileOrFolder = paths[0]
-  fs.stat(fileOrFolder, function (err, stat) {
+  fs.stat(fileOrFolder, (err, stat) => {
     if (err) return dispatch('error', err)
 
     // Files: return name, path, and size
@@ -373,7 +372,7 @@ function findFilesRecursive (paths, cb_) {
 
     // Folders: recurse, make a list of all the files
     const folderPath = fileOrFolder
-    fs.readdir(folderPath, function (err, fileNames) {
+    fs.readdir(folderPath, (err, fileNames) => {
       if (err) return dispatch('error', err)
       const paths = fileNames.map((fileName) => path.join(folderPath, fileName))
       findFilesRecursive(paths, cb_)
@@ -383,7 +382,7 @@ function findFilesRecursive (paths, cb_) {
 
 function deleteFile (path) {
   if (!path) return
-  fs.unlink(path, function (err) {
+  fs.unlink(path, err => {
     if (err) dispatch('error', err)
   })
 }

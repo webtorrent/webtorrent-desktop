@@ -1,4 +1,4 @@
-const { remote } = require('electron')
+const remote = require('@electron/remote')
 const fs = require('fs')
 const path = require('path')
 const parallel = require('run-parallel')
@@ -37,12 +37,11 @@ module.exports = class SubtitlesController {
 
     // Read the files concurrently, then add all resulting subtitle tracks
     const tasks = files.map((file) => (cb) => loadSubtitle(file, cb))
-    parallel(tasks, function (err, tracks) {
+    parallel(tasks, (err, tracks) => {
       if (err) return dispatch('error', err)
 
-      for (let i = 0; i < tracks.length; i++) {
-        // No dupes allowed
-        const track = tracks[i]
+      // No dupes allowed
+      tracks.forEach((track, i) => {
         let trackIndex = subtitles.tracks.findIndex((t) =>
           track.filePath === t.filePath)
 
@@ -55,7 +54,7 @@ module.exports = class SubtitlesController {
         if (autoSelect && (i === 0 || isSystemLanguage(track.language))) {
           subtitles.selectedIndex = trackIndex
         }
-      }
+      })
 
       // Finally, make sure no two tracks have the same label
       relabelSubtitles(subtitles)
@@ -94,7 +93,7 @@ function loadSubtitle (file, cb) {
 
   const vttStream = fs.createReadStream(filePath).pipe(srtToVtt())
 
-  concat(vttStream, function (err, buf) {
+  concat(vttStream, (err, buf) => {
     if (err) return dispatch('error', 'Can\'t parse subtitles file.')
 
     // Detect what language the subtitles are in
@@ -127,7 +126,7 @@ function isSystemLanguage (language) {
 // Labels each track by language, eg 'German', 'English', 'English 2', ...
 function relabelSubtitles (subtitles) {
   const counts = {}
-  subtitles.tracks.forEach(function (track) {
+  subtitles.tracks.forEach(track => {
     const lang = track.language
     counts[lang] = (counts[lang] || 0) + 1
     track.label = counts[lang] > 1 ? (lang + ' ' + counts[lang]) : lang
