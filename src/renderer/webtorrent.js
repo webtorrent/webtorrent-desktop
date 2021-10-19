@@ -97,7 +97,7 @@ function listenToClientEvents () {
 
 // Sets the default trackers
 function setGlobalTrackers (globalTrackers) {
-  global.WEBTORRENT_ANNOUNCE = globalTrackers
+  globalThis.WEBTORRENT_ANNOUNCE = globalTrackers
 }
 
 // Starts a given TorrentID, which can be an infohash, magnet URI, etc.
