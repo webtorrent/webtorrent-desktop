@@ -74,17 +74,29 @@
 
 **This is the most important part.**
 
- - Manually download the binaries for each platform from Github.
+- Manually download the binaries for each platform from Github.
 
   **Do not use your locally built binaries.** Modern OSs treat executables differently if they've
   been downloaded, even though the files are byte for byte identical. This ensures that the
   codesigning worked and is valid.
 
-- Smoke test WebTorrent Desktop on each platform.
+- Smoke test WebTorrent Desktop on each platform. Before a release, check that the following basic use cases work correctly:
 
-  See Smoke Tests below for details. Open DevTools
-  on Windows and Mac, and ensure that the auto updater is running. If the auto updater does not
-  run, users will successfully auto update to this new version, and then be stuck there forever.
+  1. Click "Play" to stream a built-in torrent (e.g. Sintel)
+    - Ensure that seeking to undownloaded region works and plays immediately.
+    - Ensure that sintel.mp4 gets downloaded to `~/Downloads`.
+
+  2. Check that the auto-updater works
+    - Open the console and check for the line "No update available" to indicate that the auto-updater is working. (If the auto updater does not run, users will successfully auto update to this new version, and then be stuck there forever.)
+
+  3. Add a new .torrent file via drag-and-drop.
+    - Ensure that it gets added to the list and starts downloading.
+
+  4. Remove a torrent from the client
+    - Ensure that the file is removed from `~/Downloads`
+
+  5. Create and seed a new a torrent via drag-and-drop.
+    - Ensure that the torrent gets created and seeding begins.
 
 ### 4. Ship it
 
@@ -93,25 +105,5 @@
   Create a pull request in [webtorrent.io](https://github.com/webtorrent/webtorrent.io). Update
   `config.js`, updating the desktop app version.
 
-  As soon as this PR is merged, Jenkins will automatically redeploy the WebTorrent website, and
+  Once this PR is merged and Feross redeploys the WebTorrent website,
   hundreds of thousands of users around the world will start auto updating. **Merge with care.**
-
-## Smoke Tests
-
-Before a release, check that the following basic use cases work correctly:
-
-1. Click "Play" to stream a built-in torrent (e.g. Sintel)
-  - Ensure that seeking to undownloaded region works and plays immediately.
-  - Ensure that sintel.mp4 gets downloaded to `~/Downloads`.
-
-2. Check that the auto-updater works
-  - Open the console and check for the line "No update available" to indicate that the auto-updater is working.
-
-3. Add a new .torrent file via drag-and-drop.
-  - Ensure that it gets added to the list and starts downloading.
-
-4. Remove a torrent from the client
-  - Ensure that the file is removed from `~/Downloads`
-
-5. Create and seed a new a torrent via drag-and-drop.
-  - Ensure that the torrent gets created and seeding begins.

@@ -104,9 +104,7 @@ function onState (err, _state) {
       const TorrentController = require('./controllers/torrent-controller')
       return new TorrentController(state)
     }),
-    torrentList: createGetter(() => {
-      return new TorrentListController(state)
-    }),
+    torrentList: createGetter(() => new TorrentListController(state)),
     update: createGetter(() => {
       const UpdateController = require('./controllers/update-controller')
       return new UpdateController(state)
@@ -130,7 +128,10 @@ function onState (err, _state) {
   resumeTorrents()
 
   // Initialize ReactDOM
-  app = ReactDOM.render(<App state={state} />, document.querySelector('#body'))
+  ReactDOM.render(
+    <App state={state} ref={elem => { app = elem }} />,
+    document.querySelector('#body')
+  )
 
   // Calling update() updates the UI given the current state
   // Do this at least once a second to give every file in every torrentSummary
@@ -152,11 +153,11 @@ function onState (err, _state) {
   // Add YouTube style hotkey shortcuts
   window.addEventListener('keydown', onKeydown)
 
-  const debouncedFullscreenToggle = debounce(function () {
+  const debouncedFullscreenToggle = debounce(() => {
     dispatch('toggleFullScreen')
   }, 1000, true)
 
-  document.addEventListener('wheel', function (event) {
+  document.addEventListener('wheel', event => {
     // ctrlKey detects pinch to zoom, http://crbug.com/289887
     if (event.ctrlKey) {
       event.preventDefault()
@@ -254,6 +255,7 @@ const dispatchHandlers = {
     controllers.torrentList().confirmDeleteTorrentAndData(infoHash),
   deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
+  openTorrentListContextMenu: () => onPaste(),
   confirmDeleteAllTorrents: (deleteData) =>
     controllers.torrentList().confirmDeleteAllTorrents(deleteData),
   deleteAllTorrents: (deleteData) =>
@@ -276,6 +278,8 @@ const dispatchHandlers = {
   previousTrack: () => controllers.playback().previousTrack(),
   skip: (time) => controllers.playback().skip(time),
   skipTo: (time) => controllers.playback().skipTo(time),
+  preview: (x) => controllers.playback().preview(x),
+  clearPreview: () => controllers.playback().clearPreview(),
   changePlaybackRate: (dir) => controllers.playback().changePlaybackRate(dir),
   changeVolume: (delta) => controllers.playback().changeVolume(delta),
   setVolume: (vol) => controllers.playback().setVolume(vol),
@@ -397,7 +401,7 @@ function setupIpc () {
 function backToList () {
   // Exit any modals and screens with a back button
   state.modal = null
-  state.location.backToFirst(function () {
+  state.location.backToFirst(() => {
     // If we were already on the torrent list, scroll to the top
     const contentTag = document.querySelector('.content')
     if (contentTag) contentTag.scrollTop = 0
@@ -517,13 +521,16 @@ function onError (err) {
 const editableHtmlTags = new Set(['input', 'textarea'])
 
 function onPaste (e) {
-  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+  if (e && editableHtmlTags.has(e.target.tagName.toLowerCase())) return
   controllers.torrentList().addTorrent(electron.clipboard.readText())
 
   update()
 }
 
 function onKeydown (e) {
+  // prevent event fire on user input elements
+  if (editableHtmlTags.has(e.target.tagName.toLowerCase())) return
+
   const key = e.key
 
   if (key === 'ArrowLeft') {
@@ -584,7 +591,7 @@ function onWindowBoundsChanged (e, newBounds) {
 }
 
 function checkDownloadPath () {
-  fs.stat(state.saved.prefs.downloadPath, function (err, stat) {
+  fs.stat(state.saved.prefs.downloadPath, (err, stat) => {
     if (err) {
       state.downloadPathStatus = 'missing'
       return console.error(err)

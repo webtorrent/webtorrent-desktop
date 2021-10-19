@@ -1,0 +1,69 @@
+name: package
+on: 
+  workflow_dispatch:
+jobs:
+  package_linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm install
+    - run: npm run package -- linux
+    - uses: actions/upload-artifact@v2
+      with:
+        name: linux
+        path: |
+          dist/*.deb
+          dist/*.rpm
+          dist/*.zip
+  package_macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm install
+    - run: npm run package -- darwin
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos
+        path: |
+          dist/*.dmg
+          dist/*.zip
+  package_windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm install
+    - run: npm run package -- win32
+    - uses: actions/upload-artifact@v2
+      with:
+        name: windows
+        path: |
+          dist/*.exe
+          dist/*.nupkg
+          dist/*.zip

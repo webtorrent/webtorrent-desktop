@@ -31,15 +31,28 @@ function run (state) {
   if (semver.lt(version, '0.21.0')) migrate_0_21_0(saved)
   if (semver.lt(version, '0.22.0')) migrate_0_22_0(saved)
 
+  if (semver.lt(version, config.APP_VERSION)) {
+    installHandlers(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
+}
+
+// Whenever the app is updated,  re-install default handlers if the user has
+// enabled them.
+function installHandlers (saved) {
+  if (saved.prefs.isFileHandler) {
+    const ipcRenderer = require('electron').ipcRenderer
+    ipcRenderer.send('setDefaultFileHandler', true)
+  }
 }
 
 function migrate_0_7_0 (saved) {
   const { copyFileSync } = require('fs')
   const path = require('path')
 
-  saved.torrents.forEach(function (ts) {
+  saved.torrents.forEach(ts => {
     const infoHash = ts.infoHash
 
     // Replace torrentPath with torrentFileName
@@ -121,7 +134,7 @@ function migrate_0_12_0 (saved) {
     '02767050e0be2fd4db9a2ad6c12416ac806ed6ed.torrent',
     '3ba219a8634bf7bae3d848192b2da75ae995589d.torrent'
   ]
-  saved.torrents.forEach(function (torrentSummary) {
+  saved.torrents.forEach(torrentSummary => {
     if (!defaultTorrentFiles.includes(torrentSummary.torrentFileName)) return
     const fileOrFolder = TorrentSummary.getFileOrFolder(torrentSummary)
     if (!fileOrFolder) return
@@ -135,16 +148,16 @@ function migrate_0_12_0 (saved) {
 }
 
 function migrate_0_14_0 (saved) {
-  saved.torrents.forEach(function (ts) {
+  saved.torrents.forEach(ts => {
     delete ts.defaultPlayFileIndex
   })
 }
 
 function migrate_0_17_0 (saved) {
   // Fix a sad, sad bug that resulted in 100MB+ config.json files
-  saved.torrents.forEach(function (ts) {
+  saved.torrents.forEach(ts => {
     if (!ts.files) return
-    ts.files.forEach(function (file) {
+    ts.files.forEach(file => {
       if (!file.audioInfo || !file.audioInfo.picture) return
       // This contained a Buffer, which 30x'd in size when serialized to JSON
       delete file.audioInfo.picture
@@ -166,9 +179,7 @@ function migrate_0_17_2 (saved) {
   const OLD_HASH = '3ba219a8634bf7bae3d848192b2da75ae995589d'
   const NEW_HASH = 'a88fda5954e89178c372716a6a78b8180ed4dad3'
 
-  const ts = saved.torrents.find((ts) => {
-    return ts.infoHash === OLD_HASH
-  })
+  const ts = saved.torrents.find(ts => ts.infoHash === OLD_HASH)
 
   if (!ts) return // Wired CD torrent does not exist
 

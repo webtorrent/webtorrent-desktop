@@ -1,7 +1,7 @@
 console.time('init')
 
-const electron = require('electron')
-const app = electron.app
+require('@electron/remote/main').initialize()
+const { app, ipcMain } = require('electron')
 
 // Start crash reporter early, so it takes effect for child processes
 const crashReporter = require('../crash-reporter')
@@ -67,8 +67,6 @@ function init () {
     app.setPath('temp', path.join(config.CONFIG_PATH, 'Temp'))
   }
 
-  const ipcMain = electron.ipcMain
-
   let isReady = false // app ready, windows can be created
   app.ipcReady = false // main window has finished loading and IPC is ready
   app.isQuitting = false
@@ -84,9 +82,9 @@ function init () {
     isReady = true
     const state = results.state
 
+    menu.init()
     windows.main.init(state, { hidden })
     windows.webtorrent.init()
-    menu.init()
 
     // To keep app startup fast, some code is delayed.
     setTimeout(() => {
@@ -112,13 +110,13 @@ function init () {
 
   ipc.init()
 
-  app.once('ipcReady', function () {
+  app.once('ipcReady', () => {
     log('Command line args:', argv)
     processArgv(argv)
     console.timeEnd('init')
   })
 
-  app.on('before-quit', function (e) {
+  app.on('before-quit', e => {
     if (app.isQuitting) return
 
     app.isQuitting = true
@@ -131,7 +129,7 @@ function init () {
     }, 4000) // quit after 4 secs, at most
   })
 
-  app.on('activate', function () {
+  app.on('activate', () => {
     if (isReady) windows.main.show()
   })
 }
@@ -198,14 +196,18 @@ function onAppOpen (newArgv) {
 // Development: 2 args, eg: electron .
 // Test: 4 args, eg: electron -r .../mocks.js .
 function sliceArgv (argv) {
-  return argv.slice(config.IS_PRODUCTION ? 1
-    : config.IS_TEST ? 4
-      : 2)
+  return argv.slice(
+    config.IS_PRODUCTION
+      ? 1
+      : config.IS_TEST
+        ? 4
+        : 2
+  )
 }
 
 function processArgv (argv) {
   const torrentIds = []
-  argv.forEach(function (arg) {
+  argv.forEach(arg => {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed
       const dialog = require('./dialog')

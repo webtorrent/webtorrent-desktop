@@ -91,9 +91,7 @@ class App extends React.Component {
     const recentErrors = state.errors.filter((x) => now - x.time < 5000)
     const hasErrors = recentErrors.length > 0
 
-    const errorElems = recentErrors.map(function (error, i) {
-      return (<div key={i} className='error'>{error.message}</div>)
-    })
+    const errorElems = recentErrors.map((error, i) => <div key={i} className='error'>{error.message}</div>)
     return (
       <div
         key='errors'

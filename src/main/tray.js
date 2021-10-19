@@ -4,9 +4,7 @@ module.exports = {
   setWindowFocus
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, Tray, Menu } = require('electron')
 
 const config = require('../config')
 const windows = require('./windows')
@@ -36,7 +34,7 @@ function setWindowFocus (flag) {
 }
 
 function initLinux () {
-  checkLinuxTraySupport(function (err) {
+  checkLinuxTraySupport(err => {
     if (!err) createTray()
   })
 }
@@ -46,28 +44,20 @@ function initWin32 () {
 }
 
 /**
- * Check for libappindicator1 support before creating tray icon
+ * Check for libappindicator support before creating tray icon.
  */
 function checkLinuxTraySupport (cb) {
   const cp = require('child_process')
 
-  // Check that we're on Ubuntu (or another debian system) and that we have
-  // libappindicator1. If WebTorrent was installed from the deb file, we should
-  // always have it. If it was installed from the zip file, we might not.
-  cp.exec('dpkg --get-selections libappindicator1', function (err, stdout) {
+  // Check that libappindicator libraries are installed in system.
+  cp.exec('ldconfig -p | grep libappindicator', (err, stdout) => {
     if (err) return cb(err)
-    // Unfortunately there's no cleaner way, as far as I can tell, to check
-    // whether a debian package is installed:
-    if (stdout.endsWith('\tinstall\n')) {
-      cb(null)
-    } else {
-      cb(new Error('debian package not installed'))
-    }
+    cb(null)
   })
 }
 
 function createTray () {
-  tray = new electron.Tray(getIconPath())
+  tray = new Tray(getIconPath())
 
   // On Windows, left click opens the app, right click opens the context menu.
   // On Linux, any click (left or right) opens the context menu.
@@ -78,7 +68,7 @@ function createTray () {
 }
 
 function updateTrayMenu () {
-  const contextMenu = electron.Menu.buildFromTemplate(getMenuTemplate())
+  const contextMenu = Menu.buildFromTemplate(getMenuTemplate())
   tray.setContextMenu(contextMenu)
 }
 

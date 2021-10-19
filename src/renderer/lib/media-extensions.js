@@ -5,7 +5,7 @@ const mediaExtensions = {
     '.ogg', '.opus', '.spx', '.wma', '.wav', '.wv', '.wvp'],
   video: [
     '.avi', '.mp4', '.m4v', '.webm', '.mov', '.mkv', '.mpg', '.mpeg',
-    '.ogv', '.webm', '.wmv'],
+    '.ogv', '.webm', '.wmv', '.m2ts'],
   image: ['.gif', '.jpg', '.jpeg', '.png']
 }
 

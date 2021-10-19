@@ -1,8 +1,25 @@
 # WebTorrent Desktop Version History
 
+## v0.24.0 - 2020-08-28
+
+### Added
+
+- Support the `.m2ts` video container format ([hicom150](https://github.com/hicom150))
+
+### Changed
+
+- Update to Electron 10.1.0 [\#1864](https://github.com/webtorrent/webtorrent-desktop/pull/1864) ([feross](https://github.com/feross))
+- Update the Windows installer loading image [\#1841](https://github.com/webtorrent/webtorrent-desktop/pull/1841) ([alxhotel](https://github.com/alxhotel))
+
+### Fixed
+
+- Fix music metadata not showing up [\#1847](https://github.com/webtorrent/webtorrent-desktop/pull/1847) ([Borewit](https://github.com/Borewit))
+- Fix the "Play in VLC" functionality [\#1850](https://github.com/webtorrent/webtorrent-desktop/pull/1850) ([Hinara](https://github.com/Hinara))
+- Prevent shortcuts from activating when user input elements are focused [\#1840](https://github.com/webtorrent/webtorrent-desktop/pull/1840) ([subins2000](https://github.com/subins2000))
+
 ## v0.23.0 - 2020-07-15
 
-🔒 This release contains a critical security fix. Please update as soon as possible.
+🔒 This release contains a critical security fix. Please update as soon as possible. [\#1837](https://github.com/webtorrent/webtorrent-desktop/issues/1837#issuecomment-729320901)
 
 ### Added
 

@@ -5,7 +5,7 @@ module.exports = {
   moveItemToTrash
 }
 
-const electron = require('electron')
+const { shell } = require('electron')
 const log = require('./log')
 
 /**
@@ -13,15 +13,16 @@ const log = require('./log')
  */
 function openExternal (url) {
   log(`openExternal: ${url}`)
-  electron.shell.openExternal(url)
+  shell.openExternal(url)
 }
 
 /**
  * Open the given file in the desktop’s default manner.
  */
+
 function openPath (path) {
   log(`openPath: ${path}`)
-  electron.shell.openPath(path)
+  shell.openPath(path)
 }
 
 /**
@@ -29,7 +30,7 @@ function openPath (path) {
  */
 function showItemInFolder (path) {
   log(`showItemInFolder: ${path}`)
-  electron.shell.showItemInFolder(path)
+  shell.showItemInFolder(path)
 }
 
 /**
@@ -37,5 +38,5 @@ function showItemInFolder (path) {
  */
 function moveItemToTrash (path) {
   log(`moveItemToTrash: ${path}`)
-  electron.shell.moveItemToTrash(path)
+  shell.trashItem(path)
 }

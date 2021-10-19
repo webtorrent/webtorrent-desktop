@@ -8,9 +8,7 @@ module.exports = {
   onToggleFullScreen
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app, Menu } = require('electron')
 
 const config = require('../config')
 const windows = require('./windows')
@@ -18,8 +16,8 @@ const windows = require('./windows')
 let menu = null
 
 function init () {
-  menu = electron.Menu.buildFromTemplate(getMenuTemplate())
-  electron.Menu.setApplicationMenu(menu)
+  menu = Menu.buildFromTemplate(getMenuTemplate())
+  Menu.setApplicationMenu(menu)
 }
 
 function togglePlaybackControls (flag) {
@@ -70,12 +68,11 @@ function onToggleFullScreen (flag) {
 }
 
 function getMenuItem (label) {
-  for (let i = 0; i < menu.items.length; i++) {
-    const menuItem = menu.items[i].submenu.items.find(function (item) {
-      return item.label === label
-    })
-    if (menuItem) return menuItem
+  for (const menuItem of menu.items) {
+    const submenuItem = menuItem.submenu.items.find(item => item.label === label)
+    if (submenuItem) return submenuItem
   }
+  return {}
 }
 
 function getMenuTemplate () {

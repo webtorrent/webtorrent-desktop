@@ -4,14 +4,14 @@ const about = module.exports = {
 }
 
 const config = require('../../config')
-const electron = require('electron')
+const { BrowserWindow } = require('electron')
 
 function init () {
   if (about.win) {
     return about.win.show()
   }
 
-  const win = about.win = new electron.BrowserWindow({
+  const win = about.win = new BrowserWindow({
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,
@@ -26,15 +26,18 @@ function init () {
     useContentSize: true,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       enableBlinkFeatures: 'AudioVideoTracks',
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      backgroundThrottling: false
     },
     width: 300
   })
+  require('@electron/remote/main').enable(win.webContents)
 
   win.loadURL(config.WINDOW_ABOUT)
 
-  win.once('ready-to-show', function () {
+  win.once('ready-to-show', () => {
     win.show()
     // No menu on the About window
     // Hack: BrowserWindow removeMenu method not working on electron@7
@@ -42,7 +45,7 @@ function init () {
     win.setMenuBarVisibility(false)
   })
 
-  win.once('closed', function () {
+  win.once('closed', () => {
     about.win = null
   })
 }

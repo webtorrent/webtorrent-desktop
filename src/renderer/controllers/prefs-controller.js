@@ -1,5 +1,5 @@
 const { dispatch } = require('../lib/dispatcher')
-const ipcRenderer = require('electron').ipcRenderer
+const { ipcRenderer } = require('electron')
 
 // Controls the Preferences screen
 module.exports = class PrefsController {
@@ -13,7 +13,7 @@ module.exports = class PrefsController {
     const state = this.state
     state.location.go({
       url: 'preferences',
-      setup: function (cb) {
+      setup (cb) {
         // initialize preferences
         state.window.title = 'Preferences'
         ipcRenderer.send('setAllowNav', false)
