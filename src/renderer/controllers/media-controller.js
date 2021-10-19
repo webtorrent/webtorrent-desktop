@@ -23,7 +23,7 @@ module.exports = class MediaController {
       telemetry.logPlayAttempt('error')
       state.playing.location = 'error'
       ipcRenderer.send('checkForExternalPlayer', state.saved.prefs.externalPlayerPath)
-      ipcRenderer.once('checkForExternalPlayer', function (e, isInstalled) {
+      ipcRenderer.once('checkForExternalPlayer', (e, isInstalled) => {
         state.modal = {
           id: 'unsupported-media-modal',
           error,
@@ -56,7 +56,7 @@ module.exports = class MediaController {
     const state = this.state
     state.playing.location = 'external'
 
-    const onServerRunning = function () {
+    const onServerRunning = () => {
       state.playing.isReady = true
       telemetry.logPlayAttempt('external')
 

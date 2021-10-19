@@ -4,7 +4,7 @@ console.time('init')
 
 const crypto = require('crypto')
 const util = require('util')
-const electron = require('electron')
+const { ipcRenderer } = require('electron')
 const fs = require('fs')
 const mm = require('music-metadata')
 const networkAddress = require('network-address')
@@ -14,9 +14,6 @@ const WebTorrent = require('webtorrent')
 const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
-
-// Send & receive messages from the main window
-const ipc = electron.ipcRenderer
 
 /**
  * WebTorrent version.
@@ -62,31 +59,31 @@ init()
 function init () {
   listenToClientEvents()
 
-  ipc.on('wt-set-global-trackers', (e, globalTrackers) =>
+  ipcRenderer.on('wt-set-global-trackers', (e, globalTrackers) =>
     setGlobalTrackers(globalTrackers))
-  ipc.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
+  ipcRenderer.on('wt-start-torrenting', (e, torrentKey, torrentID, path, fileModtimes, selections) =>
     startTorrenting(torrentKey, torrentID, path, fileModtimes, selections))
-  ipc.on('wt-stop-torrenting', (e, infoHash) =>
+  ipcRenderer.on('wt-stop-torrenting', (e, infoHash) =>
     stopTorrenting(infoHash))
-  ipc.on('wt-create-torrent', (e, torrentKey, options) =>
+  ipcRenderer.on('wt-create-torrent', (e, torrentKey, options) =>
     createTorrent(torrentKey, options))
-  ipc.on('wt-save-torrent-file', (e, torrentKey) =>
+  ipcRenderer.on('wt-save-torrent-file', (e, torrentKey) =>
     saveTorrentFile(torrentKey))
-  ipc.on('wt-generate-torrent-poster', (e, torrentKey) =>
+  ipcRenderer.on('wt-generate-torrent-poster', (e, torrentKey) =>
     generateTorrentPoster(torrentKey))
-  ipc.on('wt-get-audio-metadata', (e, infoHash, index) =>
+  ipcRenderer.on('wt-get-audio-metadata', (e, infoHash, index) =>
     getAudioMetadata(infoHash, index))
-  ipc.on('wt-start-server', (e, infoHash) =>
+  ipcRenderer.on('wt-start-server', (e, infoHash) =>
     startServer(infoHash))
-  ipc.on('wt-stop-server', (e) =>
+  ipcRenderer.on('wt-stop-server', () =>
     stopServer())
-  ipc.on('wt-select-files', (e, infoHash, selections) =>
+  ipcRenderer.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
 
-  ipc.send('ipcReadyWebTorrent')
+  ipcRenderer.send('ipcReadyWebTorrent')
 
   window.addEventListener('error', (e) =>
-    ipc.send('wt-uncaught-error', { message: e.error.message, stack: e.error.stack }),
+    ipcRenderer.send('wt-uncaught-error', { message: e.error.message, stack: e.error.stack }),
   true)
 
   setInterval(updateTorrentProgress, 1000)
@@ -94,8 +91,8 @@ function init () {
 }
 
 function listenToClientEvents () {
-  client.on('warning', (err) => ipc.send('wt-warning', null, err.message))
-  client.on('error', (err) => ipc.send('wt-error', null, err.message))
+  client.on('warning', (err) => ipcRenderer.send('wt-warning', null, err.message))
+  client.on('error', (err) => ipcRenderer.send('wt-error', null, err.message))
 }
 
 // Sets the default trackers
@@ -134,44 +131,44 @@ function createTorrent (torrentKey, options) {
   const torrent = client.seed(paths, options)
   torrent.key = torrentKey
   addTorrentEvents(torrent)
-  ipc.send('wt-new-torrent')
+  ipcRenderer.send('wt-new-torrent')
 }
 
 function addTorrentEvents (torrent) {
   torrent.on('warning', (err) =>
-    ipc.send('wt-warning', torrent.key, err.message))
+    ipcRenderer.send('wt-warning', torrent.key, err.message))
   torrent.on('error', (err) =>
-    ipc.send('wt-error', torrent.key, err.message))
+    ipcRenderer.send('wt-error', torrent.key, err.message))
   torrent.on('infoHash', () =>
-    ipc.send('wt-parsed', torrent.key, torrent.infoHash, torrent.magnetURI))
+    ipcRenderer.send('wt-parsed', torrent.key, torrent.infoHash, torrent.magnetURI))
   torrent.on('metadata', torrentMetadata)
   torrent.on('ready', torrentReady)
   torrent.on('done', torrentDone)
 
   function torrentMetadata () {
     const info = getTorrentInfo(torrent)
-    ipc.send('wt-metadata', torrent.key, info)
+    ipcRenderer.send('wt-metadata', torrent.key, info)
 
     updateTorrentProgress()
   }
 
   function torrentReady () {
     const info = getTorrentInfo(torrent)
-    ipc.send('wt-ready', torrent.key, info)
-    ipc.send('wt-ready-' + torrent.infoHash, torrent.key, info)
+    ipcRenderer.send('wt-ready', torrent.key, info)
+    ipcRenderer.send('wt-ready-' + torrent.infoHash, torrent.key, info)
 
     updateTorrentProgress()
   }
 
   function torrentDone () {
     const info = getTorrentInfo(torrent)
-    ipc.send('wt-done', torrent.key, info)
+    ipcRenderer.send('wt-done', torrent.key, info)
 
     updateTorrentProgress()
 
-    torrent.getFileModtimes(function (err, fileModtimes) {
+    torrent.getFileModtimes((err, fileModtimes) => {
       if (err) return onError(err)
-      ipc.send('wt-file-modtimes', torrent.key, fileModtimes)
+      ipcRenderer.send('wt-file-modtimes', torrent.key, fileModtimes)
     })
   }
 }
@@ -204,19 +201,19 @@ function saveTorrentFile (torrentKey) {
   const torrent = getTorrent(torrentKey)
   const torrentPath = path.join(config.TORRENT_PATH, torrent.infoHash + '.torrent')
 
-  fs.access(torrentPath, fs.constants.R_OK, function (err) {
+  fs.access(torrentPath, fs.constants.R_OK, err => {
     const fileName = torrent.infoHash + '.torrent'
     if (!err) {
       // We've already saved the file
-      return ipc.send('wt-file-saved', torrentKey, fileName)
+      return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
     }
 
     // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.TORRENT_PATH, { recursive: true }, function (_) {
-      fs.writeFile(torrentPath, torrent.torrentFile, function (err) {
+    fs.mkdir(config.TORRENT_PATH, { recursive: true }, _ => {
+      fs.writeFile(torrentPath, torrent.torrentFile, err => {
         if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
         console.log('saved torrent file %s', torrentPath)
-        return ipc.send('wt-file-saved', torrentKey, fileName)
+        return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
       })
     })
   })
@@ -226,17 +223,17 @@ function saveTorrentFile (torrentKey) {
 // Auto chooses either a frame from a video file, an image, etc
 function generateTorrentPoster (torrentKey) {
   const torrent = getTorrent(torrentKey)
-  torrentPoster(torrent, function (err, buf, extension) {
+  torrentPoster(torrent, (err, buf, extension) => {
     if (err) return console.log('error generating poster: %o', err)
     // save it for next time
-    fs.mkdir(config.POSTER_PATH, { recursive: true }, function (err) {
+    fs.mkdir(config.POSTER_PATH, { recursive: true }, err => {
       if (err) return console.log('error creating poster dir: %o', err)
       const posterFileName = torrent.infoHash + extension
       const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
-      fs.writeFile(posterFilePath, buf, function (err) {
+      fs.writeFile(posterFilePath, buf, err => {
         if (err) return console.log('error saving poster: %o', err)
         // show the poster
-        ipc.send('wt-poster', torrentKey, posterFileName)
+        ipcRenderer.send('wt-poster', torrentKey, posterFileName)
       })
     })
   })
@@ -248,22 +245,20 @@ function updateTorrentProgress () {
   if (prevProgress && util.isDeepStrictEqual(progress, prevProgress)) {
     return /* don't send heavy object if it hasn't changed */
   }
-  ipc.send('wt-progress', progress)
+  ipcRenderer.send('wt-progress', progress)
   prevProgress = progress
 }
 
 function getTorrentProgress () {
   // First, track overall progress
   const progress = client.progress
-  const hasActiveTorrents = client.torrents.some(function (torrent) {
-    return torrent.progress !== 1
-  })
+  const hasActiveTorrents = client.torrents.some(torrent => torrent.progress !== 1)
 
   // Track progress for every file in each torrent
   // TODO: ideally this would be tracked by WebTorrent, which could do it
   // more efficiently than looping over torrent.bitfield
-  const torrentProg = client.torrents.map(function (torrent) {
-    const fileProg = torrent.files && torrent.files.map(function (file, index) {
+  const torrentProg = client.torrents.map(torrent => {
+    const fileProg = torrent.files && torrent.files.map(file => {
       const numPieces = file._endPiece - file._startPiece + 1
       let numPiecesPresent = 0
       for (let piece = file._startPiece; piece <= file._endPiece; piece++) {
@@ -303,12 +298,12 @@ function startServer (infoHash) {
   else torrent.once('ready', () => startServerFromReadyTorrent(torrent))
 }
 
-function startServerFromReadyTorrent (torrent, cb) {
+function startServerFromReadyTorrent (torrent) {
   if (server) return
 
   // start the streaming torrent-to-http server
   server = torrent.createServer()
-  server.listen(0, function () {
+  server.listen(0, () => {
     const port = server.address().port
     const urlSuffix = ':' + port
     const info = {
@@ -318,8 +313,8 @@ function startServerFromReadyTorrent (torrent, cb) {
       networkAddress: networkAddress()
     }
 
-    ipc.send('wt-server-running', info)
-    ipc.send('wt-server-' + torrent.infoHash, info)
+    ipcRenderer.send('wt-server-running', info)
+    ipcRenderer.send('wt-server-' + torrent.infoHash, info)
   })
 }
 
@@ -337,14 +332,17 @@ function getAudioMetadata (infoHash, index) {
 
   // Set initial matadata to display the filename first.
   const metadata = { title: file.name }
-  ipc.send('wt-audio-metadata', infoHash, index, metadata)
+  ipcRenderer.send('wt-audio-metadata', infoHash, index, metadata)
 
   const options = {
     native: false,
     skipCovers: true,
     fileSize: file.length,
-    observer: event => {
-      ipc.send('wt-audio-metadata', infoHash, index, event.metadata)
+    observer: () => {
+      ipcRenderer.send('wt-audio-metadata', infoHash, index, {
+        common: metadata.common,
+        format: metadata.format
+      })
     }
   }
   const onMetadata = file.done
@@ -356,7 +354,7 @@ function getAudioMetadata (infoHash, index) {
   onMetadata
     .then(
       metadata => {
-        ipc.send('wt-audio-metadata', infoHash, index, metadata)
+        ipcRenderer.send('wt-audio-metadata', infoHash, index, metadata)
         console.log(`metadata for file='${file.name}' completed.`)
       },
       err => {
@@ -385,7 +383,7 @@ function selectFiles (torrentOrInfoHash, selections) {
   // selection with individual selections for each file, so we can
   // select/deselect files later on
   if (!selections) {
-    selections = torrent.files.map((x) => true)
+    selections = new Array(torrent.files.length).fill(true)
   }
 
   // Selections specified incorrectly?
@@ -398,15 +396,15 @@ function selectFiles (torrentOrInfoHash, selections) {
   torrent.deselect(0, torrent.pieces.length - 1, false)
 
   // Add selections (individual files)
-  for (let i = 0; i < selections.length; i++) {
+  selections.forEach((selection, i) => {
     const file = torrent.files[i]
-    if (selections[i]) {
+    if (selection) {
       file.select()
     } else {
       console.log('deselecting file ' + i + ' of torrent ' + torrent.name)
       file.deselect()
     }
-  }
+  })
 }
 
 // Gets a WebTorrent handle by torrentKey
@@ -424,7 +422,7 @@ function onError (err) {
 // TODO: remove this once the following bugs are fixed:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=490143
 // https://github.com/electron/electron/issues/7212
-window.testOfflineMode = function () {
+window.testOfflineMode = () => {
   console.log('Test, going OFFLINE')
   client = window.client = new WebTorrent({
     peerId: PEER_ID,

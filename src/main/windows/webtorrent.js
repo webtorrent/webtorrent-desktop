@@ -6,12 +6,12 @@ const webtorrent = module.exports = {
   win: null
 }
 
-const electron = require('electron')
+const { app, BrowserWindow } = require('electron')
 
 const config = require('../../config')
 
 function init () {
-  const win = webtorrent.win = new electron.BrowserWindow({
+  const win = webtorrent.win = new BrowserWindow({
     backgroundColor: '#1E1E1E',
     center: true,
     fullscreen: false,
@@ -26,17 +26,20 @@ function init () {
     useContentSize: true,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       enableBlinkFeatures: 'AudioVideoTracks',
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      backgroundThrottling: false
     },
     width: 150
   })
+  require('@electron/remote/main').enable(win.webContents)
 
   win.loadURL(config.WINDOW_WEBTORRENT)
 
   // Prevent killing the WebTorrent process
-  win.on('close', function (e) {
-    if (electron.app.isQuitting) {
+  win.on('close', e => {
+    if (app.isQuitting) {
       return
     }
     e.preventDefault()

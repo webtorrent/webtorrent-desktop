@@ -1,5 +1,5 @@
 const path = require('path')
-const ipcRenderer = require('electron').ipcRenderer
+const { ipcRenderer } = require('electron')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const sound = require('../lib/sound')
@@ -177,7 +177,7 @@ function showDoneNotification (torrent) {
     silent: true
   })
 
-  notif.onclick = function () {
+  notif.onclick = () => {
     ipcRenderer.send('show')
   }
 

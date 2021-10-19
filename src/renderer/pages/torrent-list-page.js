@@ -7,6 +7,7 @@ const LinearProgress = require('material-ui/LinearProgress').default
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
 const { dispatcher } = require('../lib/dispatcher')
+const { calculateEta } = require('../lib/time')
 
 module.exports = class TorrentList extends React.Component {
   render () {
@@ -35,7 +36,11 @@ module.exports = class TorrentList extends React.Component {
     )
 
     return (
-      <div key='torrent-list' className='torrent-list'>
+      <div
+        key='torrent-list'
+        className='torrent-list'
+        onContextMenu={dispatcher('openTorrentListContextMenu')}
+      >
         {contents}
       </div>
     )
@@ -191,18 +196,9 @@ module.exports = class TorrentList extends React.Component {
       const downloadSpeed = prog.downloadSpeed
       if (downloadSpeed === 0 || missing === 0) return
 
-      const rawEta = missing / downloadSpeed
-      const hours = Math.floor(rawEta / 3600) % 24
-      const minutes = Math.floor(rawEta / 60) % 60
-      const seconds = Math.floor(rawEta % 60)
+      const etaStr = calculateEta(missing, downloadSpeed)
 
-      // Only display hours and minutes if they are greater than 0 but always
-      // display minutes if hours is being displayed
-      const hoursStr = hours ? hours + 'h' : ''
-      const minutesStr = (hours || minutes) ? minutes + 'm' : ''
-      const secondsStr = seconds + 's'
-
-      return (<span key='eta'>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+      return (<span key='eta'>{etaStr}</span>)
     }
 
     function renderTorrentStatus () {

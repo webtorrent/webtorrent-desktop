@@ -322,6 +322,10 @@ textarea,
  * TORRENT LIST
  */
 
+.torrent-list {
+  height: 100%;
+}
+
 .torrent {
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
@@ -556,6 +560,13 @@ body.drag .app::after {
 .player video {
   display: block;
   width: 100%;
+}
+
+.player .name {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.5em;
+  margin-bottom: 6px;
 }
 
 /*

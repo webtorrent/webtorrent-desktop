@@ -1,11 +1,9 @@
 const path = require('path')
 
 const colors = require('material-ui/styles/colors')
-const electron = require('electron')
+const remote = require('@electron/remote')
 const React = require('react')
 const PropTypes = require('prop-types')
-
-const remote = electron.remote
 
 const RaisedButton = require('material-ui/RaisedButton').default
 const TextField = require('material-ui/TextField').default

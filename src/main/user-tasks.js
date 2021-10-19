@@ -2,9 +2,7 @@ module.exports = {
   init
 }
 
-const electron = require('electron')
-
-const app = electron.app
+const { app } = require('electron')
 
 /**
  * Add a user task menu to the app icon on right-click. (Windows)
