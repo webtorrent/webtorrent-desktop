@@ -71,7 +71,7 @@
     "electron-winstaller": "5.0.0",
     "gh-release": "6.0.1",
     "minimist": "1.2.5",
-    "nodemon": "2.0.13",
+    "nodemon": "2.0.14",
     "open": "8.3.0",
     "plist": "3.0.4",
     "pngjs": "6.0.0",
