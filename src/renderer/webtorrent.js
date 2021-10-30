@@ -6,7 +6,6 @@ const crypto = require('crypto')
 const util = require('util')
 const defaultAnnounceList = require('create-torrent').announceList
 const { ipcRenderer } = require('electron')
-const fs = require('fs')
 const mm = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
@@ -15,6 +14,7 @@ const WebTorrent = require('webtorrent')
 const config = require('../config')
 const { TorrentKeyNotFoundError } = require('./lib/errors')
 const torrentPoster = require('./lib/torrent-poster')
+const { fileExists, mkdir, writeFile } = require('./lib/file-system')
 
 // Force use of webtorrent trackers on all torrents
 globalThis.WEBTORRENT_ANNOUNCE = defaultAnnounceList
@@ -196,45 +196,53 @@ function getTorrentFileInfo (file) {
 // Every time we resolve a magnet URI, save the torrent file so that we can use
 // it on next startup. Starting with the full torrent metadata will be faster
 // than re-fetching it from peers using ut_metadata.
-function saveTorrentFile (torrentKey) {
+async function saveTorrentFile (torrentKey) {
   const torrent = getTorrent(torrentKey)
   const torrentPath = path.join(config.TORRENT_PATH, torrent.infoHash + '.torrent')
+  const fileName = torrent.infoHash + '.torrent'
 
-  fs.access(torrentPath, fs.constants.R_OK, err => {
-    const fileName = torrent.infoHash + '.torrent'
-    if (!err) {
-      // We've already saved the file
-      return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
-    }
+  const torrentPathExists = await fileExists(torrentPath)
+  if (torrentPathExists) {
+    // We've already saved the file
+    return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
+  }
 
+  try {
     // Otherwise, save the .torrent file, under the app config folder
-    fs.mkdir(config.TORRENT_PATH, { recursive: true }, _ => {
-      fs.writeFile(torrentPath, torrent.torrentFile, err => {
-        if (err) return console.log('error saving torrent file %s: %o', torrentPath, err)
-        console.log('saved torrent file %s', torrentPath)
-        return ipcRenderer.send('wt-file-saved', torrentKey, fileName)
-      })
-    })
-  })
+    await mkdir(config.TORRENT_PATH, { recursive: true })
+    await writeFile(torrentPath, torrent.torrentFile)
+
+    console.log('saved torrent file %s', torrentPath)
+    ipcRenderer.send('wt-file-saved', torrentKey, fileName)
+  } catch (err) {
+    console.log('error saving torrent file %s: %o', torrentPath, err)
+  }
 }
 
 // Save a JPG that represents a torrent.
 // Auto chooses either a frame from a video file, an image, etc
 function generateTorrentPoster (torrentKey) {
   const torrent = getTorrent(torrentKey)
-  torrentPoster(torrent, (err, buf, extension) => {
+  torrentPoster(torrent, async (err, buf, extension) => {
     if (err) return console.log('error generating poster: %o', err)
-    // save it for next time
-    fs.mkdir(config.POSTER_PATH, { recursive: true }, err => {
-      if (err) return console.log('error creating poster dir: %o', err)
-      const posterFileName = torrent.infoHash + extension
-      const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
-      fs.writeFile(posterFilePath, buf, err => {
-        if (err) return console.log('error saving poster: %o', err)
-        // show the poster
-        ipcRenderer.send('wt-poster', torrentKey, posterFileName)
-      })
-    })
+
+    try {
+      // save it for next time
+      await mkdir(config.POSTER_PATH, { recursive: true })
+    } catch (err) {
+      return console.log('error creating poster dir: %o', err)
+    }
+
+    const posterFileName = torrent.infoHash + extension
+    const posterFilePath = path.join(config.POSTER_PATH, posterFileName)
+
+    try {
+      await writeFile(posterFilePath, buf)
+      // show the poster
+      ipcRenderer.send('wt-poster', torrentKey, posterFileName)
+    } catch (err) {
+      console.log('error saving poster: %o', err)
+    }
   })
 }
 
