@@ -78,7 +78,7 @@
     "run-series": "1.1.9",
     "spectron": "15.0.0",
     "standard": "16.0.4",
-    "tape": "5.3.2"
+    "tape": "5.4.0"
   },
   "engines": {
     "node": "^16.0.0",
