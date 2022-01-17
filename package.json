@@ -54,7 +54,7 @@
     "simple-get": "4.0.0",
     "srt-to-vtt": "1.1.3",
     "vlc-command": "1.2.0",
-    "webtorrent": "1.5.11",
+    "webtorrent": "1.6.0",
     "winreg": "1.2.4"
   },
   "devDependencies": {
