@@ -51,7 +51,7 @@
     "run-parallel": "1.2.0",
     "semver": "7.3.5",
     "simple-concat": "1.0.1",
-    "simple-get": "4.0.0",
+    "simple-get": "4.0.1",
     "srt-to-vtt": "1.1.3",
     "vlc-command": "1.2.0",
     "webtorrent": "1.7.1",
