@@ -21,7 +21,7 @@
     "url": "https://github.com/webtorrent/webtorrent-desktop/issues"
   },
   "dependencies": {
-    "@electron/remote": "2.0.1",
+    "@electron/remote": "2.0.4",
     "airplayer": "github:webtorrent/airplayer#fix-security",
     "application-config": "2.0.0",
     "arch": "2.2.0",
