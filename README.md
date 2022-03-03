@@ -147,7 +147,7 @@ to be installed. For example on Mac, first install
 [XQuartz](http://www.xquartz.org/), then run:
 
 ```
-brew install wine mono
+$ brew install wine mono
 ```
 
 (Requires the [Homebrew](http://brew.sh/) package manager.)
