@@ -198,8 +198,7 @@ function shouldHidePlayerControls () {
     new Date().getTime() - this.playing.mouseStationarySince > 2000 &&
     !this.playing.mouseInControls &&
     !this.playing.isPaused &&
-    this.playing.location === 'local' &&
-    this.playing.playbackRate === 1
+    this.playing.location === 'local'
 }
 
 async function load (cb) {
