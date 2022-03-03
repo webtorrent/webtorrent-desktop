@@ -21,7 +21,7 @@ class Header extends React.Component {
             onClick={dispatcher('back')}
             role='button'
             aria-disabled={!loc.hasBack()}
-            aria-label  ='Back'
+            aria-label='Back'
           >
             chevron_left
           </i>
