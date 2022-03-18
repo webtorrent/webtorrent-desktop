@@ -610,6 +610,8 @@ function renderPlayerControls (state) {
       key='skip-previous'
       className={'icon skip-previous float-left ' + prevClass}
       onClick={dispatcher('previousTrack')}
+      role='button'
+      aria-label='Previous track'
     >
       skip_previous
     </i>,
@@ -618,6 +620,8 @@ function renderPlayerControls (state) {
       key='play'
       className='icon play-pause float-left'
       onClick={dispatcher('playPause')}
+      role='button'
+      aria-label={state.playing.isPaused ? 'Play' : 'Pause'}
     >
       {state.playing.isPaused ? 'play_arrow' : 'pause'}
     </i>,
@@ -626,6 +630,8 @@ function renderPlayerControls (state) {
       key='skip-next'
       className={'icon skip-next float-left ' + nextClass}
       onClick={dispatcher('nextTrack')}
+      role='button'
+      aria-label='Next track'
     >
       skip_next
     </i>,
@@ -634,6 +640,8 @@ function renderPlayerControls (state) {
       key='fullscreen'
       className='icon fullscreen float-right'
       onClick={dispatcher('toggleFullScreen')}
+      role='button'
+      aria-label={state.window.isFullScreen ? 'Exit full screen' : 'Enter full screen'}
     >
       {state.window.isFullScreen ? 'fullscreen_exit' : 'fullscreen'}
     </i>
@@ -646,6 +654,8 @@ function renderPlayerControls (state) {
         key='subtitles'
         className={'icon closed-caption float-right ' + captionsClass}
         onClick={handleSubtitles}
+        role='button'
+        aria-label='Closed captions'
       >
         closed_caption
       </i>
@@ -727,6 +737,8 @@ function renderPlayerControls (state) {
       <i
         className='icon volume-icon float-left'
         onMouseDown={handleVolumeMute}
+        role='button'
+        aria-label='Mute'
       >
         {volumeIcon}
       </i>
