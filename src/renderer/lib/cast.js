@@ -144,7 +144,7 @@ function chromecastPlayer () {
           'Access-Control-Allow-Origin': '*',
           'Transfer-Encoding': 'chunked'
         })
-        res.end(Buffer.from(selectedSubtitle.buffer.substr(21), 'base64'))
+        res.end(Buffer.from(selectedSubtitle.buffer.slice(21), 'base64'))
       }).listen(0, () => {
         const port = ret.subServer.address().port
         const subtitlesUrl = 'http://' + state.server.networkAddress + ':' + port + '/'
