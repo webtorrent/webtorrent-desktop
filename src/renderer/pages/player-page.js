@@ -1,8 +1,6 @@
 const React = require('react')
 const BitField = require('bitfield').default
 const prettyBytes = require('prettier-bytes')
-const path = require('path')
-const fs = require('fs')
 
 const TorrentSummary = require('../lib/torrent-summary')
 const Playlist = require('../lib/playlist')
