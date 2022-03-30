@@ -70,7 +70,7 @@
     "electron-packager": "15.4.0",
     "electron-winstaller": "5.0.0",
     "gh-release": "6.0.3",
-    "minimist": "1.2.5",
+    "minimist": "1.2.6",
     "nodemon": "2.0.15",
     "open": "8.4.0",
     "plist": "3.0.5",
