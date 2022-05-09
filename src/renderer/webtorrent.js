@@ -1,20 +1,23 @@
+/* eslint-disable import/first */
 // To keep the UI snappy, we run WebTorrent in its own hidden window, a separate
 // process from the main window.
 console.time('init')
 
-const crypto = require('crypto')
-const util = require('util')
-const defaultAnnounceList = require('create-torrent').announceList
-const { ipcRenderer } = require('electron')
-const fs = require('fs')
-const mm = require('music-metadata')
-const networkAddress = require('network-address')
-const path = require('path')
-const WebTorrent = require('webtorrent')
+import crypto from 'crypto'
+import util from 'util'
+import { announceList as defaultAnnounceList } from 'create-torrent'
+import electron from 'electron'
+import fs from 'fs'
+import * as mm from 'music-metadata'
+import networkAddress from 'network-address'
+import path from 'path'
+import WebTorrent from 'webtorrent'
 
-const config = require('../config')
-const { TorrentKeyNotFoundError } = require('./lib/errors')
-const torrentPoster = require('./lib/torrent-poster')
+import config from '../config.js'
+import { TorrentKeyNotFoundError } from './lib/errors.js'
+import torrentPoster from './lib/torrent-poster.js'
+
+const { ipcRenderer } = electron
 
 // Force use of webtorrent trackers on all torrents
 globalThis.WEBTORRENT_ANNOUNCE = defaultAnnounceList
@@ -24,7 +27,7 @@ globalThis.WEBTORRENT_ANNOUNCE = defaultAnnounceList
 /**
  * WebTorrent version.
  */
-const VERSION = require('../../package.json').version
+const VERSION = JSON.parse(fs.readFileSync('package.json').toString()).version
 
 /**
  * Version number in Azureus-style. Generated from major and minor semver version.

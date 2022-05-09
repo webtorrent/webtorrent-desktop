@@ -1,6 +1,6 @@
-const { ipcRenderer } = require('electron')
+import { ipcRenderer } from 'electron'
 
-module.exports = class FolderWatcherController {
+export default class FolderWatcherController {
   start () {
     console.log('-- IPC: start folder watcher')
     ipcRenderer.send('startFolderWatcher')

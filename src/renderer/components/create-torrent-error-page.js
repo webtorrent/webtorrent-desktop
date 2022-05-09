@@ -1,8 +1,7 @@
-const React = require('react')
+import * as React from 'react'
+import { dispatcher } from '../lib/dispatcher.js'
 
-const { dispatcher } = require('../lib/dispatcher')
-
-module.exports = class CreateTorrentErrorPage extends React.Component {
+export default class CreateTorrentErrorPage extends React.Component {
   render () {
     return (
       <div className='create-torrent'>

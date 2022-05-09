@@ -1,20 +1,11 @@
-module.exports = {
-  init,
-  play
-}
-
-const config = require('../../config')
-const { InvalidSoundNameError } = require('./errors')
-const path = require('path')
-
+import config from '../src/config.js'
+import { InvalidSoundNameError } from './errors.js'
+import path from 'path'
 const VOLUME = 0.25
-
 // App state to access the soundNotifications preference
 let state
-
 /* Cache of Audio elements, for instant playback */
 const cache = {}
-
 const sounds = {
   ADD: {
     url: 'file://' + path.join(config.STATIC_PATH, 'sound', 'add.wav'),
@@ -49,20 +40,16 @@ const sounds = {
     volume: VOLUME
   }
 }
-
 function init (appState) {
   state = appState
 }
-
 function play (name) {
   if (state == null) {
     return
   }
-
   if (!state.saved.prefs.soundNotifications) {
     return
   }
-
   let audio = cache[name]
   if (!audio) {
     const sound = sounds[name]
@@ -75,4 +62,10 @@ function play (name) {
   }
   audio.currentTime = 0
   audio.play()
+}
+export { init }
+export { play }
+export default {
+  init,
+  play
 }

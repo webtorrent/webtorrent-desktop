@@ -1,12 +1,14 @@
-const React = require('react')
-const TextField = require('material-ui/TextField').default
-const { clipboard } = require('electron')
+import * as React from 'react'
+import textField from 'material-ui/TextField'
+import electron from 'electron'
+import ModalOKCancel from './modal-ok-cancel.js'
+import { dispatch, dispatcher } from '../lib/dispatcher.js'
+import { isMagnetLink } from '../lib/torrent-player.js'
 
-const ModalOKCancel = require('./modal-ok-cancel')
-const { dispatch, dispatcher } = require('../lib/dispatcher')
-const { isMagnetLink } = require('../lib/torrent-player')
+const TextField = textField.default
+const { clipboard } = electron
 
-module.exports = class OpenTorrentAddressModal extends React.Component {
+export default class OpenTorrentAddressModal extends React.Component {
   render () {
     return (
       <div className='open-torrent-address-modal'>

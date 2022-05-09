@@ -1,27 +1,19 @@
-module.exports = {
-  spawn,
-  kill,
-  checkInstall
-}
-
-const cp = require('child_process')
-const path = require('path')
-const vlcCommand = require('vlc-command')
-
-const log = require('./log')
-const windows = require('./windows')
-
+import cp from 'child_process'
+import path from 'path'
+import vlcCommand from 'vlc-command'
+import log from './log.js'
+import * as windows from './windows'
 // holds a ChildProcess while we're playing a video in an external player, null otherwise
 let proc = null
 
-function checkInstall (playerPath, cb) {
+export function checkInstall (playerPath, cb) {
   // check for VLC if external player has not been specified by the user
   // otherwise assume the player is installed
   if (!playerPath) return vlcCommand(cb)
   process.nextTick(() => cb(null))
 }
 
-function spawn (playerPath, url, title) {
+export function spawn (playerPath, url, title) {
   if (playerPath) return spawnExternal(playerPath, [url])
 
   // Try to find and use VLC if external player is not specified
@@ -37,7 +29,7 @@ function spawn (playerPath, url, title) {
   })
 }
 
-function kill () {
+export function kill () {
   if (!proc) return
   log(`Killing external player, pid ${proc.pid}`)
   proc.kill('SIGKILL') // kill -9

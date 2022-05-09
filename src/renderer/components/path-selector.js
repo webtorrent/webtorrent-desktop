@@ -1,17 +1,17 @@
-const path = require('path')
+import path from 'path'
+import * as colors from 'material-ui/styles/colors'
+import remote from '@electron/remote'
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import raisedButton from 'material-ui/RaisedButton'
+import textField from 'material-ui/TextField'
 
-const colors = require('material-ui/styles/colors')
-const remote = require('@electron/remote')
-const React = require('react')
-const PropTypes = require('prop-types')
-
-const RaisedButton = require('material-ui/RaisedButton').default
-const TextField = require('material-ui/TextField').default
-
+const RaisedButton = raisedButton.default
+const TextField = textField.default
 // Lets you pick a file or directory.
 // Uses the system Open File dialog.
 // You can't edit the text field directly.
-class PathSelector extends React.Component {
+export default class PathSelector extends React.Component {
   static propTypes () {
     return {
       className: PropTypes.string,
@@ -81,5 +81,3 @@ class PathSelector extends React.Component {
     )
   }
 }
-
-module.exports = PathSelector

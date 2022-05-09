@@ -1,17 +1,12 @@
-module.exports = {
-  install,
-  uninstall
-}
-
-const { APP_NAME } = require('../config')
-const AutoLaunch = require('auto-launch')
+import { APP_NAME } from '../config.js'
+import AutoLaunch from 'auto-launch'
 
 const appLauncher = new AutoLaunch({
   name: APP_NAME,
   isHidden: true
 })
 
-function install () {
+export function install () {
   return appLauncher
     .isEnabled()
     .then(enabled => {
@@ -19,7 +14,7 @@ function install () {
     })
 }
 
-function uninstall () {
+export function uninstall () {
   return appLauncher
     .isEnabled()
     .then(enabled => {

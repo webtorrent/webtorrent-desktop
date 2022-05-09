@@ -1,5 +1,6 @@
 {
   "name": "webtorrent-desktop",
+  "type": "module",
   "description": "WebTorrent, the streaming torrent client. For Mac, Windows, and Linux.",
   "version": "0.24.0",
   "author": {
@@ -96,7 +97,7 @@
     "webtorrent"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "index.cjs",
   "optionalDependencies": {
     "appdmg": "^0.6.0",
     "electron-installer-debian": "^3.1.0",

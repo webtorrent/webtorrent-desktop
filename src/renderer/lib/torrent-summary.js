@@ -1,21 +1,11 @@
-module.exports = {
-  getPosterPath,
-  getTorrentPath,
-  getByKey,
-  getTorrentId,
-  getFileOrFolder
-}
-
-const path = require('path')
-const config = require('../../config')
-
+import path from 'path'
+import config from '../src/config.js'
 // Expects a torrentSummary
 // Returns an absolute path to the torrent file, or null if unavailable
 function getTorrentPath (torrentSummary) {
   if (!torrentSummary || !torrentSummary.torrentFileName) return null
   return path.join(config.TORRENT_PATH, torrentSummary.torrentFileName)
 }
-
 // Expects a torrentSummary
 // Returns an absolute path to the poster image, or null if unavailable
 function getPosterPath (torrentSummary) {
@@ -25,7 +15,6 @@ function getPosterPath (torrentSummary) {
   // Backslashes in URLS in CSS cause bizarre string encoding issues
   return posterPath.replace(/\\/g, '/')
 }
-
 // Expects a torrentSummary
 // Returns a torrentID: filename, magnet URI, or infohash
 function getTorrentId (torrentSummary) {
@@ -36,15 +25,12 @@ function getTorrentId (torrentSummary) {
     return s.magnetURI || s.infoHash
   }
 }
-
 // Expects a torrentKey or infoHash
 // Returns the corresponding torrentSummary, or undefined
 function getByKey (state, torrentKey) {
   if (!torrentKey) return undefined
-  return state.saved.torrents.find((x) =>
-    x.torrentKey === torrentKey || x.infoHash === torrentKey)
+  return state.saved.torrents.find((x) => x.torrentKey === torrentKey || x.infoHash === torrentKey)
 }
-
 // Returns the path to either the file (in a single-file torrent) or the root
 // folder (in  multi-file torrent)
 // WARNING: assumes that multi-file torrents consist of a SINGLE folder.
@@ -55,4 +41,16 @@ function getFileOrFolder (torrentSummary) {
   if (!ts.path || !ts.files || ts.files.length === 0) return null
   const dirname = ts.files[0].path.split(path.sep)[0]
   return path.join(ts.path, dirname)
+}
+export { getPosterPath }
+export { getTorrentPath }
+export { getByKey }
+export { getTorrentId }
+export { getFileOrFolder }
+export default {
+  getPosterPath,
+  getTorrentPath,
+  getByKey,
+  getTorrentId,
+  getFileOrFolder
 }

@@ -1,10 +1,5 @@
-module.exports = {
-  enable,
-  disable
-}
-
-const { powerSaveBlocker } = require('electron')
-const log = require('./log')
+import { powerSaveBlocker } from 'electron'
+import log from './log.js'
 
 let blockId = 0
 
@@ -12,7 +7,7 @@ let blockId = 0
  * Block the system from entering low-power (sleep) mode or turning off the
  * display.
  */
-function enable () {
+export function enable () {
   if (powerSaveBlocker.isStarted(blockId)) {
     // If a power saver block already exists, do nothing.
     return
@@ -24,7 +19,7 @@ function enable () {
 /**
  * Stop blocking the system from entering low-power mode.
  */
-function disable () {
+export function disable () {
   if (!powerSaveBlocker.isStarted(blockId)) {
     // If a power saver block does not exist, do nothing.
     return

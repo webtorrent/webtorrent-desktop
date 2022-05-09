@@ -1,20 +1,21 @@
-const appConfig = require('application-config')('WebTorrent')
-const path = require('path')
-const { EventEmitter } = require('events')
+import applicationConfig from 'application-config'
+import path from 'path'
+import { EventEmitter } from 'events'
 
-const config = require('../../config')
+import config from '../../config.js'
 
+const appConfig = applicationConfig('WebTorrent')
 const SAVE_DEBOUNCE_INTERVAL = 1000
 
 appConfig.filePath = path.join(config.CONFIG_PATH, 'config.json')
 
-const State = module.exports = Object.assign(new EventEmitter(), {
+const State = Object.assign(new EventEmitter(), {
   getDefaultPlayState,
   load,
   // state.save() calls are rate-limited. Use state.saveImmediate() to skip limit.
-  save (...args) {
+  async save (...args) {
     // Perf optimization: Lazy-require debounce (and it's dependencies)
-    const debounce = require('debounce')
+    const debounce = await import('debounce')
     // After first State.save() invokation, future calls go straight to the
     // debounced function
     State.save = debounce(saveImmediate, SAVE_DEBOUNCE_INTERVAL)
@@ -23,8 +24,10 @@ const State = module.exports = Object.assign(new EventEmitter(), {
   saveImmediate
 })
 
-function getDefaultState () {
-  const LocationHistory = require('location-history')
+export default State
+
+async function getDefaultState () {
+  const { default: LocationHistory } = await import('location-history')
 
   return {
     /*
@@ -115,9 +118,9 @@ function getDefaultPlayState () {
 }
 
 /* If the saved state file doesn't exist yet, here's what we use instead */
-function setupStateSaved () {
-  const { copyFileSync, mkdirSync, readFileSync } = require('fs')
-  const parseTorrent = require('parse-torrent')
+async function setupStateSaved () {
+  const { copyFileSync, mkdirSync, readFileSync } = await import('fs')
+  const { default: parseTorrent } = await import('parse-torrent')
 
   const saved = {
     prefs: {
@@ -202,12 +205,13 @@ function shouldHidePlayerControls () {
 }
 
 async function load (cb) {
+  console.log('state load')
   let saved = await appConfig.read()
 
   if (!saved || !saved.version) {
     console.log('Missing config file: Creating new one')
     try {
-      saved = setupStateSaved()
+      saved = await setupStateSaved()
     } catch (err) {
       onSavedState(err)
       return
@@ -216,9 +220,9 @@ async function load (cb) {
 
   onSavedState(null, saved)
 
-  function onSavedState (err, saved) {
+  async function onSavedState (err, saved) {
     if (err) return cb(err)
-    const state = getDefaultState()
+    const state = await getDefaultState()
     state.saved = saved
 
     if (process.type === 'renderer') {
@@ -227,6 +231,7 @@ async function load (cb) {
       migrations.run(state)
     }
 
+    console.log('calling cb')
     cb(null, state)
   }
 }

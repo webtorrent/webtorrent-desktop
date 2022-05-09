@@ -1,13 +1,10 @@
-module.exports = {
-  init
-}
+import electron from '../../electron.cjs'
+import get from 'simple-get'
+import config from '../config.js'
+import log from './log.js'
+import * as windows from './windows/index.js'
 
-const { autoUpdater } = require('electron')
-const get = require('simple-get')
-
-const config = require('../config')
-const log = require('./log')
-const windows = require('./windows')
+const { autoUpdater } = electron
 
 const AUTO_UPDATE_URL = config.AUTO_UPDATE_URL +
   '?version=' + config.APP_VERSION +
@@ -21,6 +18,8 @@ function init () {
     initDarwinWin32()
   }
 }
+
+export default { init }
 
 // The Electron auto-updater does not support Linux yet, so manually check for
 // updates and show the user a modal notification.
@@ -49,7 +48,7 @@ function onResponse (err, res, data) {
 function initDarwinWin32 () {
   autoUpdater.on(
     'error',
-    (err) => log.error(`Update error: ${err.message}`)
+    (err) => log(`Update error: ${err.message}`)
   )
 
   autoUpdater.on(

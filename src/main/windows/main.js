@@ -1,4 +1,13 @@
-const main = module.exports = {
+import debounce from 'debounce'
+import electron from '../../../electron.cjs'
+import config from '../../config.js'
+import log from '../log.js'
+import menu from '../menu.js'
+import * as RemoteMain from '@electron/remote/main/index.js'
+
+const { app, BrowserWindow, screen } = electron
+
+export const main = {
   dispatch,
   hide,
   init,
@@ -13,13 +22,6 @@ const main = module.exports = {
   toggleFullScreen,
   win: null
 }
-
-const { app, BrowserWindow, screen } = require('electron')
-const debounce = require('debounce')
-
-const config = require('../../config')
-const log = require('../log')
-const menu = require('../menu')
 
 function init (state, options) {
   if (main.win) {
@@ -50,8 +52,8 @@ function init (state, options) {
     x: initialBounds.x,
     y: initialBounds.y
   })
-  require('@electron/remote/main').enable(win.webContents)
-
+  RemoteMain.enable(win.webContents)
+  console.log(config.WINDOW_MAIN)
   win.loadURL(config.WINDOW_MAIN)
 
   win.once('ready-to-show', () => {
@@ -98,10 +100,10 @@ function init (state, options) {
     send('windowBoundsChanged', e.sender.getBounds())
   }, 1000))
 
-  win.on('close', e => {
+  win.on('close', async e => {
     if (process.platform !== 'darwin') {
-      const tray = require('../tray')
-      if (!tray.hasTray()) {
+      const { hasTray } = await import('../tray.js')
+      if (!hasTray()) {
         app.quit()
         return
       }

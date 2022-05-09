@@ -1,12 +1,7 @@
-module.exports = {
-  install,
-  uninstall
-}
+import config from '../config.js'
+import path from 'path'
 
-const config = require('../config')
-const path = require('path')
-
-function install () {
+export function install () {
   switch (process.platform) {
     case 'darwin': installDarwin()
       break
@@ -15,7 +10,7 @@ function install () {
   }
 }
 
-function uninstall () {
+export function uninstall () {
   switch (process.platform) {
     case 'darwin': uninstallDarwin()
       break
@@ -24,9 +19,8 @@ function uninstall () {
   }
 }
 
-function installDarwin () {
-  const { app } = require('electron')
-
+async function installDarwin () {
+  const { app } = await import('electron')
   // On Mac, only protocols that are listed in `Info.plist` can be set as the
   // default handler at runtime.
   app.setAsDefaultProtocolClient('magnet')
@@ -43,33 +37,14 @@ if (!config.IS_PRODUCTION) {
   EXEC_COMMAND.push(config.ROOT_PATH)
 }
 
-function installWin32 () {
-  const Registry = require('winreg')
+async function installWin32 () {
+  const Registry = await import('wingreg')
+  const log = await import('./log')
 
-  const log = require('./log')
-
-  const iconPath = path.join(
-    process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico'
-  )
-  registerProtocolHandlerWin32(
-    'magnet',
-    'URL:BitTorrent Magnet URL',
-    iconPath,
-    EXEC_COMMAND
-  )
-  registerProtocolHandlerWin32(
-    'stream-magnet',
-    'URL:BitTorrent Stream-Magnet URL',
-    iconPath,
-    EXEC_COMMAND
-  )
-  registerFileHandlerWin32(
-    '.torrent',
-    'io.webtorrent.torrent',
-    'BitTorrent Document',
-    iconPath,
-    EXEC_COMMAND
-  )
+  const iconPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'static', 'WebTorrentFile.ico')
+  registerProtocolHandlerWin32('magnet', 'URL:BitTorrent Magnet URL', iconPath, EXEC_COMMAND)
+  registerProtocolHandlerWin32('stream-magnet', 'URL:BitTorrent Stream-Magnet URL', iconPath, EXEC_COMMAND)
+  registerFileHandlerWin32('.torrent', 'io.webtorrent.torrent', 'BitTorrent Document', iconPath, EXEC_COMMAND)
 
   /**
    * To add a protocol handler, the following keys must be added to the Windows registry:
@@ -197,9 +172,8 @@ function installWin32 () {
   }
 }
 
-function uninstallWin32 () {
-  const Registry = require('winreg')
-
+async function uninstallWin32 () {
+  const Registry = await import('winreg')
   unregisterProtocolHandlerWin32('magnet', EXEC_COMMAND)
   unregisterProtocolHandlerWin32('stream-magnet', EXEC_COMMAND)
   unregisterFileHandlerWin32('.torrent', 'io.webtorrent.torrent', EXEC_COMMAND)

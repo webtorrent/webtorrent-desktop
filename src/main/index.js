@@ -1,22 +1,25 @@
+/* eslint-disable import/first */
 console.time('init')
 
-require('@electron/remote/main').initialize()
-const { app, ipcMain } = require('electron')
+import * as RemoteMain from '@electron/remote/main/index.js'
+RemoteMain.initialize()
+import electron from '../../electron.cjs'
+const { app, ipcMain } = electron
 
 // Start crash reporter early, so it takes effect for child processes
-const crashReporter = require('../crash-reporter')
+import crashReporter from '../crash-reporter.js'
 crashReporter.init()
 
-const parallel = require('run-parallel')
+import fs from 'fs'
+import parallel from 'run-parallel'
+import config from '../config.js'
+import ipc from './ipc.js'
+import log from './log.js'
+import menu from './menu.js'
+import State from '../renderer/lib/state.js'
+import * as windows from './windows/index.js'
 
-const config = require('../config')
-const ipc = require('./ipc')
-const log = require('./log')
-const menu = require('./menu')
-const State = require('../renderer/lib/state')
-const windows = require('./windows')
-
-const WEBTORRENT_VERSION = require('webtorrent/package.json').version
+const WEBTORRENT_VERSION = JSON.parse(fs.readFileSync('node_modules/webtorrent/package.json').toString()).version
 
 let shouldQuit = false
 let argv = sliceArgv(process.argv)
@@ -54,13 +57,18 @@ if (!shouldQuit && !config.IS_PORTABLE) {
 if (shouldQuit) {
   app.quit()
 } else {
-  init()
+  init().catch(console.error)
 }
 
-function init () {
+async function init () {
+  console.log('index init')
+  app.whenReady().then(() => {
+    console.log('readyyyy')
+  })
   app.on('second-instance', (event, commandLine, workingDirectory) => onAppOpen(commandLine))
   if (config.IS_PORTABLE) {
-    const path = require('path')
+    console.log('is portable')
+    const path = await import('path')
     // Put all user data into the "Portable Settings" folder
     app.setPath('userData', config.CONFIG_PATH)
     // Put Electron crash files, etc. into the "Portable Settings\Temp" folder
@@ -72,7 +80,7 @@ function init () {
   app.isQuitting = false
 
   parallel({
-    appReady: (cb) => app.on('ready', () => cb(null)),
+    appReady: (cb) => app.whenReady().then(cb),
     state: (cb) => State.load(cb)
   }, onReady)
 
@@ -130,17 +138,18 @@ function init () {
   })
 
   app.on('activate', () => {
+    console.log('activate')
     if (isReady) windows.main.show()
   })
 }
 
-function delayedInit (state) {
+async function delayedInit (state) {
   if (app.isQuitting) return
 
-  const announcement = require('./announcement')
-  const dock = require('./dock')
-  const updater = require('./updater')
-  const FolderWatcher = require('./folder-watcher')
+  const { default: announcement } = await import('./announcement.js')
+  const { default: dock } = await import('./dock.js')
+  const { default: updater } = await import('./updater.js')
+  const { FolderWatcher } = await import('./folder-watcher.js')
   const folderWatcher = new FolderWatcher({ window: windows.main, state })
 
   announcement.init()
@@ -153,13 +162,13 @@ function delayedInit (state) {
   }
 
   if (process.platform === 'win32') {
-    const userTasks = require('./user-tasks')
+    const userTasks = await import('./user-tasks.js')
     userTasks.init()
   }
 
   if (process.platform !== 'darwin') {
-    const tray = require('./tray')
-    tray.init()
+    const { init: trayInit } = await import('./tray.js')
+    trayInit()
   }
 }
 
@@ -205,12 +214,12 @@ function sliceArgv (argv) {
   )
 }
 
-function processArgv (argv) {
+async function processArgv (argv) {
   const torrentIds = []
-  argv.forEach(arg => {
+  await Promise.all(argv.forEach(async arg => {
     if (arg === '-n' || arg === '-o' || arg === '-u') {
       // Critical path: Only load the 'dialog' package if it is needed
-      const dialog = require('./dialog')
+      const dialog = await import('./dialog')
       if (arg === '-n') {
         dialog.openSeedDirectory()
       } else if (arg === '-o') {
@@ -233,7 +242,7 @@ function processArgv (argv) {
       // running.
       torrentIds.push(arg)
     }
-  })
+  }))
   if (torrentIds.length > 0) {
     windows.main.dispatch('onOpen', torrentIds)
   }

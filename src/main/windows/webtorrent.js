@@ -1,4 +1,8 @@
-const webtorrent = module.exports = {
+import electron from '../../../electron.cjs'
+import config from '../../config.js'
+import * as RemoteMain from '@electron/remote/main/index.js'
+
+export const webtorrent = {
   init,
   send,
   show,
@@ -6,12 +10,8 @@ const webtorrent = module.exports = {
   win: null
 }
 
-const { app, BrowserWindow } = require('electron')
-
-const config = require('../../config')
-
 function init () {
-  const win = webtorrent.win = new BrowserWindow({
+  const win = webtorrent.win = new electron.BrowserWindow({
     backgroundColor: '#1E1E1E',
     center: true,
     fullscreen: false,
@@ -33,13 +33,11 @@ function init () {
     },
     width: 150
   })
-  require('@electron/remote/main').enable(win.webContents)
-
+  RemoteMain.enable(win.webContents)
   win.loadURL(config.WINDOW_WEBTORRENT)
-
   // Prevent killing the WebTorrent process
   win.on('close', e => {
-    if (app.isQuitting) {
+    if (electron.app.isQuitting) {
       return
     }
     e.preventDefault()

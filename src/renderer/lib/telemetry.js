@@ -1,24 +1,14 @@
-// Collects anonymous usage stats and uncaught errors
-// Reports back so that we can improve WebTorrent Desktop
-module.exports = {
-  init,
-  send,
-  logUncaughtError,
-  logPlayAttempt
-}
-
-const remote = require('@electron/remote')
-
-const config = require('../../config')
+import remote from '@electron/remote'
+import config from '../../config.js'
 
 let telemetry
 
-function init (state) {
+async function init (state) {
   telemetry = state.saved.telemetry
 
   // First app run
   if (!telemetry) {
-    const crypto = require('crypto')
+    const crypto = await import('crypto')
     telemetry = state.saved.telemetry = {
       userID: crypto.randomBytes(32).toString('hex') // 256-bit random ID
     }
@@ -26,7 +16,7 @@ function init (state) {
   }
 }
 
-function send (state) {
+async function send (state) {
   const now = new Date()
   telemetry.version = config.APP_VERSION
   telemetry.timestamp = now.toISOString()
@@ -42,7 +32,7 @@ function send (state) {
     return reset()
   }
 
-  const get = require('simple-get')
+  const get = await import('simple-get')
 
   const opts = {
     url: config.TELEMETRY_URL,
@@ -82,8 +72,8 @@ function getScreenInfo () {
 }
 
 // Track basic system info like OS version and amount of RAM
-function getSystemInfo () {
-  const os = require('os')
+async function getSystemInfo () {
+  const os = await import('os')
   return {
     osPlatform: process.platform,
     osRelease: os.type() + ' ' + os.release(),
@@ -219,4 +209,15 @@ function logPlayAttempt (result) {
   const attempts = telemetry.playAttempts
   attempts.total = (attempts.total || 0) + 1
   attempts[result] = (attempts[result] || 0) + 1
+}
+
+export { init }
+export { send }
+export { logUncaughtError }
+export { logPlayAttempt }
+export default {
+  init,
+  send,
+  logUncaughtError,
+  logPlayAttempt
 }

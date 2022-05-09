@@ -1,7 +1,7 @@
-const chokidar = require('chokidar')
-const log = require('./log')
+import * as chokidar from 'chokidar'
+import log from './log.js'
 
-class FolderWatcher {
+export class FolderWatcher {
   constructor ({ window, state }) {
     this.window = window
     this.state = state
@@ -46,5 +46,3 @@ class FolderWatcher {
     this.watching = false
   }
 }
-
-module.exports = FolderWatcher

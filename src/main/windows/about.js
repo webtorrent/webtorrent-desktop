@@ -1,17 +1,18 @@
-const about = module.exports = {
+import config from '../../config.js'
+import electron from '../../../electron.cjs'
+import * as RemoteMain from '@electron/remote/main/index.js'
+
+export const about = {
   init,
   win: null
 }
-
-const config = require('../../config')
-const { BrowserWindow } = require('electron')
 
 function init () {
   if (about.win) {
     return about.win.show()
   }
 
-  const win = about.win = new BrowserWindow({
+  const win = about.win = new electron.BrowserWindow({
     backgroundColor: '#ECECEC',
     center: true,
     fullscreen: false,
@@ -33,8 +34,7 @@ function init () {
     },
     width: 300
   })
-  require('@electron/remote/main').enable(win.webContents)
-
+  RemoteMain.enable(win.webContents)
   win.loadURL(config.WINDOW_ABOUT)
 
   win.once('ready-to-show', () => {

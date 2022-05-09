@@ -1,5 +1,7 @@
-module.exports = log
-module.exports.error = error
+import electron from '../../electron.cjs'
+import * as windows from './windows/index.js'
+
+const { app } = electron
 
 /**
  * In the main electron process, we do not use console.log() statements because they do
@@ -7,11 +9,7 @@ module.exports.error = error
  * version of the app. Instead use this module, which sends the logs to the main window
  * where they can be viewed in Developer Tools.
  */
-
-const { app } = require('electron')
-const windows = require('./windows')
-
-function log (...args) {
+export default function log (...args) {
   if (app.ipcReady) {
     windows.main.send('log', ...args)
   } else {
@@ -19,7 +17,7 @@ function log (...args) {
   }
 }
 
-function error (...args) {
+export function error (...args) {
   if (app.ipcReady) {
     windows.main.send('error', ...args)
   } else {
