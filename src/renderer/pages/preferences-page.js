@@ -4,6 +4,7 @@ const PropTypes = require('prop-types')
 const colors = require('material-ui/styles/colors')
 const Checkbox = require('material-ui/Checkbox').default
 const RaisedButton = require('material-ui/RaisedButton').default
+const TextField = require('material-ui/TextField').default
 const Heading = require('../components/heading')
 const PathSelector = require('../components/path-selector')
 
@@ -28,6 +29,15 @@ class PreferencesPage extends React.Component {
 
     this.handleSoundNotificationsChange =
       this.handleSoundNotificationsChange.bind(this)
+
+    this.handleSetGlobalTrackers =
+      this.handleSetGlobalTrackers.bind(this)
+
+    const globalTrackers = this.props.state.getGlobalTrackers().join('\n')
+
+    this.state = {
+      globalTrackers
+    }
   }
 
   downloadPathSelector () {
@@ -229,6 +239,39 @@ class PreferencesPage extends React.Component {
     dispatch('updatePreferences', 'isFileHandler', true)
   }
 
+  setGlobalTrackers () {
+    // Align the text fields
+    const textFieldStyle = { width: '100%' }
+    const textareaStyle = { margin: 0 }
+
+    return (
+      <Preference>
+        <TextField
+          className='torrent-trackers control'
+          style={textFieldStyle}
+          textareaStyle={textareaStyle}
+          multiLine
+          rows={2}
+          rowsMax={10}
+          value={this.state.globalTrackers}
+          onChange={this.handleSetGlobalTrackers}
+        />
+      </Preference>
+    )
+  }
+
+  handleSetGlobalTrackers (e, globalTrackers) {
+    this.setState({ globalTrackers })
+
+    const announceList = globalTrackers
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s !== '')
+
+    dispatch('updatePreferences', 'globalTrackers', announceList)
+    dispatch('updateGlobalTrackers', announceList)
+  }
+
   render () {
     const style = {
       color: colors.grey400,
@@ -253,6 +296,9 @@ class PreferencesPage extends React.Component {
         <PreferencesSection title='General'>
           {this.setStartupCheckbox()}
           {this.soundNotificationsCheckbox()}
+        </PreferencesSection>
+        <PreferencesSection title='Trackers'>
+          {this.setGlobalTrackers()}
         </PreferencesSection>
       </div>
     )

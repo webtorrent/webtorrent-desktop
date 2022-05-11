@@ -113,6 +113,10 @@ module.exports = class TorrentListController {
     }
   }
 
+  setGlobalTrackers (globalTrackers) {
+    ipcRenderer.send('wt-set-global-trackers', globalTrackers)
+  }
+
   // TODO: use torrentKey, not infoHash
   toggleTorrent (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
