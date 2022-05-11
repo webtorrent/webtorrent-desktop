@@ -35,6 +35,7 @@ module.exports = class Player extends React.Component {
     tag.pause()
     tag.src = ''
     tag.load()
+    navigator.mediaSession.metadata = null
   }
 }
 
@@ -51,6 +52,28 @@ function renderMedia (state) {
   // Get the <video> or <audio> tag
   const mediaElement = document.querySelector(state.playing.type)
   if (mediaElement !== null) {
+    if (navigator.mediaSession.metadata === null && mediaElement.played.length !== 0) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: state.playing.fileName,
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        dispatch('playPause')
+      })
+      navigator.mediaSession.setActionHandler("play", () => {
+        dispatch('playPause')
+      })
+      if (Playlist.hasNext(state)) {
+        navigator.mediaSession.setActionHandler("nexttrack", () => {
+          dispatch('nextTrack')
+        })
+      }
+      if (Playlist.hasPrevious(state)) {
+        navigator.mediaSession.setActionHandler("previoustrack", () => {
+          dispatch('previousTrack')
+        })
+      }
+    }
+    
     if (state.playing.isPaused && !mediaElement.paused) {
       mediaElement.pause()
     } else if (!state.playing.isPaused && mediaElement.paused) {
