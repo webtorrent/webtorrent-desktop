@@ -1,3 +1,5 @@
+/* globals MediaMetadata */
+
 const React = require('react')
 const BitField = require('bitfield').default
 const prettyBytes = require('prettier-bytes')
@@ -54,26 +56,26 @@ function renderMedia (state) {
   if (mediaElement !== null) {
     if (navigator.mediaSession.metadata === null && mediaElement.played.length !== 0) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: state.playing.fileName,
-      });
-      navigator.mediaSession.setActionHandler("pause", () => {
+        title: state.playing.fileName
+      })
+      navigator.mediaSession.setActionHandler('pause', () => {
         dispatch('playPause')
       })
-      navigator.mediaSession.setActionHandler("play", () => {
+      navigator.mediaSession.setActionHandler('play', () => {
         dispatch('playPause')
       })
       if (Playlist.hasNext(state)) {
-        navigator.mediaSession.setActionHandler("nexttrack", () => {
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
           dispatch('nextTrack')
         })
       }
       if (Playlist.hasPrevious(state)) {
-        navigator.mediaSession.setActionHandler("previoustrack", () => {
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
           dispatch('previousTrack')
         })
       }
     }
-    
+
     if (state.playing.isPaused && !mediaElement.paused) {
       mediaElement.pause()
     } else if (!state.playing.isPaused && mediaElement.paused) {
