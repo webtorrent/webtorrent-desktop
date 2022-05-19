@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@babel/cli": "7.17.10",
-    "@babel/core": "7.17.12",
+    "@babel/core": "7.18.0",
     "@babel/eslint-parser": "7.17.0",
     "@babel/plugin-transform-react-jsx": "7.17.12",
     "cross-zip": "4.0.0",
