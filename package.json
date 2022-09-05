@@ -59,9 +59,9 @@
   },
   "devDependencies": {
     "@babel/cli": "7.18.10",
-    "@babel/core": "7.18.13",
+    "@babel/core": "7.19.0",
     "@babel/eslint-parser": "7.18.9",
-    "@babel/plugin-transform-react-jsx": "7.18.10",
+    "@babel/plugin-transform-react-jsx": "7.19.0",
     "cross-zip": "4.0.0",
     "depcheck": "1.4.3",
     "electron": "15.5.7",
