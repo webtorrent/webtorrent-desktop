@@ -354,7 +354,7 @@ textarea,
   text-shadow: rgba(0, 0, 0, 0.5) 0 0 4px;
 }
 
-.torrent .metadata span:not(:last-child)::after {
+.torrent .metadata .ellipsis > span:not(:last-child):not(.control)::after {
   content: ' • ';
   opacity: 0.7;
   padding-left: 4px;

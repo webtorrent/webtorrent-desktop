@@ -16,6 +16,7 @@ module.exports = class DeleteAllTorrentsModal extends React.Component {
         <p><strong>{message}</strong></p>
         <ModalOKCancel
           cancelText='CANCEL'
+          color='secondary'
           onCancel={dispatcher('exitModal')}
           okText={buttonText}
           onOK={handleRemove}

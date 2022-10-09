@@ -1,10 +1,9 @@
-const colors = require('material-ui/styles/colors')
 const createGetter = require('fn-getter')
 const React = require('react')
 
-const darkBaseTheme = require('material-ui/styles/baseThemes/darkBaseTheme').default
-const getMuiTheme = require('material-ui/styles/getMuiTheme').default
-const MuiThemeProvider = require('material-ui/styles/MuiThemeProvider').default
+const { ThemeProvider, createTheme } = require('@material-ui/core/styles')
+const grey = require('@material-ui/core/colors/grey').default
+const red = require('@material-ui/core/colors/red').default
 
 const Header = require('../components/header')
 
@@ -33,17 +32,8 @@ const fontFamily = process.platform === 'win32'
   ? '"Segoe UI", sans-serif'
   : 'BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif'
 
-darkBaseTheme.fontFamily = fontFamily
-darkBaseTheme.userAgent = false
-darkBaseTheme.palette.primary1Color = colors.grey50
-darkBaseTheme.palette.primary2Color = colors.grey50
-darkBaseTheme.palette.primary3Color = colors.grey600
-darkBaseTheme.palette.accent1Color = colors.redA200
-darkBaseTheme.palette.accent2Color = colors.redA400
-darkBaseTheme.palette.accent3Color = colors.redA100
-
-let darkMuiTheme
-let lightMuiTheme
+let darkTheme
+let lightTheme
 
 class App extends React.Component {
   render () {
@@ -64,19 +54,66 @@ class App extends React.Component {
     if (state.window.isFocused) cls.push('is-focused')
     if (hideControls) cls.push('hide-video-controls')
 
-    if (!darkMuiTheme) {
-      darkMuiTheme = getMuiTheme(darkBaseTheme)
+    if (!darkTheme) {
+      darkTheme = createTheme({
+        overrides: {
+          MuiButton: {
+            contained: {
+              backgroundColor: '#303030',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: '#414141',
+                // Reset on touch devices, it doesn't add specificity
+                '@media (hover: none)': {
+                  backgroundColor: '#303030',
+                  color: 'white'
+                }
+              }
+            }
+          },
+          MuiCheckbox: {
+            root: {
+              padding: '0px',
+              marginRight: '16px'
+            }
+          },
+          MuiFormControlLabel: {
+            label: {
+              color: 'white',
+              fontSize: '0.875rem'
+            },
+            root: {
+              marginLeft: '0px',
+              marginRight: '0px'
+            }
+          }
+        },
+        palette: {
+          primary: {
+            main: grey['50']
+          },
+          secondary: {
+            main: grey['50']
+          },
+          type: 'dark'
+        },
+        typography: {
+          fontFamily
+        }
+      }, {
+        userAgent: false
+      })
     }
 
     return (
-      <MuiThemeProvider muiTheme={darkMuiTheme}>
+      <ThemeProvider theme={darkTheme}>
         <div className={'app ' + cls.join(' ')}>
           <Header state={state} />
           {this.getErrorPopover()}
           <div key='content' className='content'>{this.getView()}</div>
           {this.getModal()}
         </div>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
   }
 
@@ -102,23 +139,32 @@ class App extends React.Component {
     const state = this.props.state
     if (!state.modal) return
 
-    if (!lightMuiTheme) {
-      const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
-      lightBaseTheme.fontFamily = fontFamily
-      lightBaseTheme.userAgent = false
-      lightMuiTheme = getMuiTheme(lightBaseTheme)
+    if (!lightTheme) {
+      lightTheme = createTheme({
+        palette: {
+          secondary: {
+            main: red.A200
+          },
+          type: 'light'
+        },
+        typography: {
+          fontFamily
+        }
+      }, {
+        userAgent: false
+      })
     }
 
     const ModalContents = Modals[state.modal.id]()
     return (
-      <MuiThemeProvider muiTheme={lightMuiTheme}>
+      <ThemeProvider theme={lightTheme}>
         <div key='modal' className='modal'>
           <div key='modal-background' className='modal-background' />
           <div key='modal-content' className='modal-content'>
             <ModalContents state={state} />
           </div>
         </div>
-      </MuiThemeProvider>
+      </ThemeProvider>
     )
   }
 

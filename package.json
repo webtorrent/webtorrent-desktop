@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@electron/remote": "2.0.8",
+    "@material-ui/core": "4.12.4",
     "airplayer": "github:webtorrent/airplayer#fix-security",
     "application-config": "2.0.0",
     "arch": "2.2.0",
@@ -39,7 +40,6 @@
     "iso-639-1": "2.1.15",
     "languagedetect": "2.0.0",
     "location-history": "1.1.2",
-    "material-ui": "0.20.2",
     "music-metadata": "7.13.0",
     "network-address": "1.1.2",
     "parse-torrent": "9.1.5",
@@ -81,7 +81,7 @@
     "tape": "5.6.1"
   },
   "engines": {
-    "node": "^16.0.0",
+    "node": "^16.0.0 || ^18.0.0",
     "npm": "^7.10.0 || ^8.0.0"
   },
   "homepage": "https://webtorrent.io",
@@ -113,10 +113,12 @@
     "clean": "node ./bin/clean.js",
     "gh-release": "gh-release",
     "install-system-deps": "brew install fakeroot dpkg rpm",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
     "open-config": "node ./bin/open-config.js",
     "package": "node ./bin/package.js",
     "start": "npm run build && electron --no-sandbox .",
-    "test": "standard && depcheck --ignores=standard,@babel/eslint-parser --ignore-dirs=build,dist",
+    "test": "npm run lint && depcheck --ignores=standard,@babel/eslint-parser --ignore-dirs=build,dist",
     "test-integration": "npm run build && node ./test",
     "update-authors": "./bin/update-authors.sh",
     "watch": "nodemon --exec \"npm run start\" --ext js,css --ignore build/ --ignore dist/"

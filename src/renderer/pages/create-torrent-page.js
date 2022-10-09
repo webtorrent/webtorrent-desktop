@@ -3,16 +3,15 @@ const path = require('path')
 const prettyBytes = require('prettier-bytes')
 const React = require('react')
 
-const { dispatch, dispatcher } = require('../lib/dispatcher')
-
-const FlatButton = require('material-ui/FlatButton').default
-const RaisedButton = require('material-ui/RaisedButton').default
-const TextField = require('material-ui/TextField').default
-const Checkbox = require('material-ui/Checkbox').default
+const Button = require('@material-ui/core/Button').default
+const TextField = require('@material-ui/core/TextField').default
+const Checkbox = require('@material-ui/core/Checkbox').default
 
 const CreateTorrentErrorPage = require('../components/create-torrent-error-page')
 const Heading = require('../components/heading')
 const ShowMore = require('../components/show-more')
+
+const { dispatch, dispatcher } = require('../lib/dispatcher')
 
 // Shows a basic UI to create a torrent, from an already-selected file or folder.
 // Includes a "Show Advanced..." button and more advanced UI.
@@ -99,20 +98,23 @@ class CreateTorrentPage extends React.Component {
           {this.renderAdvanced()}
         </ShowMore>
         <div className='float-right'>
-          <FlatButton
+          <Button
             className='control cancel'
-            label='Cancel'
+            onClick={dispatcher('cancel')}
             style={{
               marginRight: 10
             }}
-            onClick={dispatcher('cancel')}
-          />
-          <RaisedButton
+          >
+            Cancel
+          </Button>
+          <Button
             className='control create-torrent-button'
-            label='Create Torrent'
-            primary
             onClick={this.handleSubmit}
-          />
+            color='primary'
+            variant='contained'
+          >
+            Create Torrent
+          </Button>
         </div>
       </div>
     )
@@ -134,10 +136,6 @@ class CreateTorrentPage extends React.Component {
       fileElems.push(<div key='more'>+ {files.length - maxFileElems} more</div>)
     }
 
-    // Align the text fields
-    const textFieldStyle = { width: '' }
-    const textareaStyle = { margin: 0 }
-
     return (
       <div key='advanced' className='create-torrent-advanced'>
         <div key='private' className='torrent-attribute'>
@@ -146,34 +144,32 @@ class CreateTorrentPage extends React.Component {
             className='torrent-is-private control'
             style={{ display: '' }}
             checked={this.state.isPrivate}
-            onCheck={this.handleSetIsPrivate}
+            onChange={this.handleSetIsPrivate}
           />
         </div>
         <div key='trackers' className='torrent-attribute'>
           <label>Trackers:</label>
           <TextField
             className='torrent-trackers control'
-            style={textFieldStyle}
-            textareaStyle={textareaStyle}
-            multiLine
-            rows={2}
-            rowsMax={10}
-            value={this.state.trackers}
+            fullWidth
+            maxRows={10}
+            minRows={2}
+            multiline
             onChange={this.handleSetTrackers}
+            value={this.state.trackers}
           />
         </div>
         <div key='comment' className='torrent-attribute'>
           <label>Comment:</label>
           <TextField
             className='torrent-comment control'
-            style={textFieldStyle}
-            textareaStyle={textareaStyle}
-            hintText='Optionally describe your torrent...'
-            multiLine
-            rows={2}
-            rowsMax={10}
-            value={this.state.comment}
+            fullWidth
+            maxRows={10}
+            minRows={2}
+            multiline
             onChange={this.handleSetComment}
+            placeholder='Optionally describe your torrent...'
+            value={this.state.comment}
           />
         </div>
         <div key='files' className='torrent-attribute'>

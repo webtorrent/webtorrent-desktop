@@ -1,10 +1,12 @@
 const React = require('react')
 const PropTypes = require('prop-types')
 
-const colors = require('material-ui/styles/colors')
-const Checkbox = require('material-ui/Checkbox').default
-const RaisedButton = require('material-ui/RaisedButton').default
-const TextField = require('material-ui/TextField').default
+const Button = require('@material-ui/core/Button').default
+const Checkbox = require('@material-ui/core/Checkbox').default
+const FormControlLabel = require('@material-ui/core/FormControlLabel').default
+const TextField = require('@material-ui/core/TextField').default
+const grey = require('@material-ui/core/colors/grey').default
+
 const Heading = require('../components/heading')
 const PathSelector = require('../components/path-selector')
 
@@ -63,11 +65,15 @@ class PreferencesPage extends React.Component {
   openExternalPlayerCheckbox () {
     return (
       <Preference>
-        <Checkbox
-          className='control'
-          checked={!this.props.state.saved.prefs.openExternalPlayer}
+        <FormControlLabel
+          control={
+            <Checkbox
+              className='control'
+              checked={!this.props.state.saved.prefs.openExternalPlayer}
+              onChange={this.handleOpenExternalPlayerChange}
+            />
+          }
           label='Play torrent media files using WebTorrent'
-          onCheck={this.handleOpenExternalPlayerChange}
         />
       </Preference>
     )
@@ -80,11 +86,15 @@ class PreferencesPage extends React.Component {
   highestPlaybackPriorityCheckbox () {
     return (
       <Preference>
-        <Checkbox
-          className='control'
-          checked={this.props.state.saved.prefs.highestPlaybackPriority}
+        <FormControlLabel
+          control={
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.highestPlaybackPriority}
+              onChange={this.handleHighestPlaybackPriorityChange}
+            />
+          }
           label='Highest Playback Priority'
-          onCheck={this.handleHighestPlaybackPriorityChange}
         />
         <p>Pauses all active torrents to allow playback to use all of the available bandwidth.</p>
       </Preference>
@@ -126,11 +136,15 @@ class PreferencesPage extends React.Component {
   autoAddTorrentsCheckbox () {
     return (
       <Preference>
-        <Checkbox
-          className='control'
-          checked={this.props.state.saved.prefs.autoAddTorrents}
+        <FormControlLabel
+          control={
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.autoAddTorrents}
+              onChange={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
+            />
+          }
           label='Watch for new .torrent files and add them immediately'
-          onCheck={(e, value) => { this.handleAutoAddTorrentsChange(e, value) }}
         />
       </Preference>
     )
@@ -188,11 +202,13 @@ class PreferencesPage extends React.Component {
     return (
       <Preference>
         <p>WebTorrent is not currently the default torrent app.</p>
-        <RaisedButton
+        <Button
           className='control'
           onClick={this.handleSetDefaultApp}
-          label='Make WebTorrent the default'
-        />
+          variant='contained'
+        >
+          Make WebTorrent the default
+        </Button>
       </Preference>
     )
   }
@@ -208,11 +224,15 @@ class PreferencesPage extends React.Component {
 
     return (
       <Preference>
-        <Checkbox
-          className='control'
-          checked={this.props.state.saved.prefs.startup}
+        <FormControlLabel
+          control={
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.startup}
+              onChange={this.handleStartupChange}
+            />
+          }
           label='Open WebTorrent on startup'
-          onCheck={this.handleStartupChange}
         />
       </Preference>
     )
@@ -221,11 +241,15 @@ class PreferencesPage extends React.Component {
   soundNotificationsCheckbox () {
     return (
       <Preference>
-        <Checkbox
-          className='control'
-          checked={this.props.state.saved.prefs.soundNotifications}
+        <FormControlLabel
+          control={
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.soundNotifications}
+              onChange={this.handleSoundNotificationsChange}
+            />
+          }
           label='Enable sounds'
-          onCheck={this.handleSoundNotificationsChange}
         />
       </Preference>
     )
@@ -240,21 +264,16 @@ class PreferencesPage extends React.Component {
   }
 
   setGlobalTrackers () {
-    // Align the text fields
-    const textFieldStyle = { width: '100%' }
-    const textareaStyle = { margin: 0 }
-
     return (
       <Preference>
         <TextField
           className='torrent-trackers control'
-          style={textFieldStyle}
-          textareaStyle={textareaStyle}
-          multiLine
-          rows={2}
-          rowsMax={10}
-          value={this.state.globalTrackers}
+          fullWidth
+          maxRows={10}
+          minRows={2}
+          multiline
           onChange={this.handleSetGlobalTrackers}
+          value={this.state.globalTrackers}
         />
       </Preference>
     )
@@ -274,7 +293,7 @@ class PreferencesPage extends React.Component {
 
   render () {
     const style = {
-      color: colors.grey400,
+      color: grey['400'],
       marginLeft: 25,
       marginRight: 25
     }

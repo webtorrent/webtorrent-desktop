@@ -1,8 +1,8 @@
 const React = require('react')
 const prettyBytes = require('prettier-bytes')
 
-const Checkbox = require('material-ui/Checkbox').default
-const LinearProgress = require('material-ui/LinearProgress').default
+const Checkbox = require('@material-ui/core/Checkbox').default
+const LinearProgress = require('@material-ui/core/LinearProgress').default
 
 const TorrentSummary = require('../lib/torrent-summary')
 const TorrentPlayer = require('../lib/torrent-player')
@@ -124,19 +124,19 @@ module.exports = class TorrentList extends React.Component {
       const isActive = ['downloading', 'seeding'].includes(torrentSummary.status)
       return (
         <Checkbox
-          key='download-button'
+          checked={isActive}
           className={'control download ' + torrentSummary.status}
+          key='download-button'
+          onChange={dispatcher('toggleTorrent', infoHash)}
+          onClick={stopPropagation}
           style={{
             display: 'inline-block',
-            width: 32
+            marginRight: '12px',
+            '& .MuiSvgIconRoot': {
+              width: '20px',
+              height: '20px'
+            }
           }}
-          iconStyle={{
-            width: 20,
-            height: 20
-          }}
-          checked={isActive}
-          onClick={stopPropagation}
-          onCheck={dispatcher('toggleTorrent', infoHash)}
         />
       )
     }
@@ -155,7 +155,7 @@ module.exports = class TorrentList extends React.Component {
       }
       return (
         <div key='progress-bar' style={styles.wrapper}>
-          <LinearProgress style={styles.progress} mode='determinate' value={progress} />
+          <LinearProgress style={styles.progress} value={progress} variant='determinate' />
         </div>
       )
     }
