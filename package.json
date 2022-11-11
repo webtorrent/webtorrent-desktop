@@ -68,7 +68,7 @@
     "electron-notarize": "1.2.2",
     "electron-osx-sign": "0.6.0",
     "electron-packager": "15.5.2",
-    "electron-winstaller": "5.0.0",
+    "electron-winstaller": "5.1.0",
     "gh-release": "6.0.4",
     "minimist": "1.2.7",
     "nodemon": "2.0.20",
