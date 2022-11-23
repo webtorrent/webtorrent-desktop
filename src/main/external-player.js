@@ -52,6 +52,13 @@ function spawnExternal (playerPath, args) {
     playerPath += `/Contents/MacOS/${path.basename(playerPath, '.app')}`
   }
 
+  var playerPathStr = playerPath.trim().split(/\s+/);
+
+  if (playerPath.length > 1) {
+    playerPath = playerPathStr.shift();
+    args = [...playerPathStr, ...args];
+  }
+
   proc = cp.spawn(playerPath, args, { stdio: 'ignore' })
 
   // If it works, close the modal after a second
