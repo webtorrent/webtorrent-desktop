@@ -23,7 +23,7 @@
   "dependencies": {
     "@electron/remote": "2.0.9",
     "airplayer": "github:webtorrent/airplayer#fix-security",
-    "application-config": "2.0.0",
+    "application-config": "3.0.0",
     "arch": "2.2.0",
     "auto-launch": "5.0.5",
     "bitfield": "4.1.0",
