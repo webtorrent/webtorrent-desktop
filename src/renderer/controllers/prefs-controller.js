@@ -39,9 +39,8 @@ module.exports = class PrefsController {
   applyDownloadSpeedLimit (speed) {
     ipcRenderer.send('wt-set-download-limit', speed)
   }
-  
+
   applyUploadSpeedLimit (speed) {
     ipcRenderer.send('wt-set-upload-limit', speed)
   }
-
 }

@@ -48,7 +48,6 @@ const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(9).toString('bas
 // client, as explained here: https://webtorrent.io/faq
 let client = window.client = new WebTorrent({ peerId: PEER_ID })
 
-
 // WebTorrent-to-HTTP streaming sever
 let server = null
 

@@ -406,13 +406,13 @@ function setupIpc () {
 }
 
 // Checks user config for speed limits and applies them to webtorrent.
-function applySpeedLimits() {
+function applySpeedLimits () {
   // Check if the user has set an upload speed limit in the prefstore
   if (state.saved.prefs.uploadSpeedLimitEnabled) {
     // Apply the saved speed limit
     controllers.prefs().applyUploadSpeedLimit(state.saved.prefs.uploadSpeedLimit)
   }
-  
+
   // Check if the user has set an upload speed limit in the prefstore
   if (state.saved.prefs.downloadSpeedLimitEnabled) {
     // Apply the saved speed limit
@@ -445,7 +445,6 @@ function escapeBack () {
 function setGlobalTrackers () {
   controllers.torrentList().setGlobalTrackers(state.getGlobalTrackers())
 }
-
 
 // function setUploadSpeedLimit (speed) {
 //   ipcRenderer.send('set-download-limit', speed)
