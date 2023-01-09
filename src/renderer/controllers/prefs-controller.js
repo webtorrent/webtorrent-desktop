@@ -35,4 +35,13 @@ module.exports = class PrefsController {
     dispatch('stateSaveImmediate')
     dispatch('checkDownloadPath')
   }
+
+  applyDownloadSpeedLimit (speed) {
+    ipcRenderer.send('wt-set-download-limit', speed)
+  }
+  
+  applyUploadSpeedLimit (speed) {
+    ipcRenderer.send('wt-set-upload-limit', speed)
+  }
+
 }

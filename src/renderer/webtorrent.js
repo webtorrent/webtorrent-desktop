@@ -48,6 +48,7 @@ const PEER_ID = Buffer.from(VERSION_PREFIX + crypto.randomBytes(9).toString('bas
 // client, as explained here: https://webtorrent.io/faq
 let client = window.client = new WebTorrent({ peerId: PEER_ID })
 
+
 // WebTorrent-to-HTTP streaming sever
 let server = null
 
@@ -79,6 +80,10 @@ function init () {
     stopServer())
   ipcRenderer.on('wt-select-files', (e, infoHash, selections) =>
     selectFiles(infoHash, selections))
+  ipcRenderer.on('wt-set-download-limit', (e, speed) =>
+    setDownloadSpeedLimit(speed))
+  ipcRenderer.on('wt-set-upload-limit', (e, speed) =>
+    setUploadSpeedLimit(speed))
 
   ipcRenderer.send('ipcReadyWebTorrent')
 
@@ -405,6 +410,20 @@ function selectFiles (torrentOrInfoHash, selections) {
       file.deselect()
     }
   })
+}
+
+function setDownloadSpeedLimit (speed) {
+  var nodeConsole = require('console');
+  var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+  myConsole.log('Setting download speed limit (bytes/second): ' + speed);
+  client.throttleDownload(speed)
+}
+
+function setUploadSpeedLimit (speed) {
+  var nodeConsole = require('console');
+  var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+  myConsole.log('Setting upload speed limit (bytes/second): ' + speed);
+  client.throttleUpload(speed)
 }
 
 // Gets a WebTorrent handle by torrentKey

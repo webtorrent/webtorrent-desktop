@@ -144,6 +144,9 @@ function onState (err, _state) {
   // Listen for messages from the main process
   setupIpc()
 
+  // Apply the user's stored speed limits if they exist.
+  applySpeedLimits()
+
   // Drag and drop files/text to start torrenting or seeding
   dragDrop('body', {
     onDrop: onOpen,
@@ -321,6 +324,10 @@ const dispatchHandlers = {
   startFolderWatcher: () => controllers.folderWatcher().start(),
   stopFolderWatcher: () => controllers.folderWatcher().stop(),
 
+  // Speed limits for transfers (in bytes per second)
+  updateDownloadSpeedLimit: (speed) => controllers.prefs().applyDownloadSpeedLimit(speed),
+  updateUploadSpeedLimit: (speed) => controllers.prefs().applyUploadSpeedLimit(speed),
+
   // Update (check for new versions on Linux, where there's no auto updater)
   updateAvailable: (version) => controllers.update().updateAvailable(version),
   skipVersion: (version) => controllers.update().skipVersion(version),
@@ -398,6 +405,21 @@ function setupIpc () {
   State.on('stateSaved', () => ipcRenderer.send('stateSaved'))
 }
 
+// Checks user config for speed limits and applies them to webtorrent.
+function applySpeedLimits() {
+  // Check if the user has set an upload speed limit in the prefstore
+  if (state.saved.prefs.uploadSpeedLimitEnabled) {
+    // Apply the saved speed limit
+    controllers.prefs().applyUploadSpeedLimit(state.saved.prefs.uploadSpeedLimit)
+  }
+  
+  // Check if the user has set an upload speed limit in the prefstore
+  if (state.saved.prefs.downloadSpeedLimitEnabled) {
+    // Apply the saved speed limit
+    controllers.prefs().applyDownloadSpeedLimit(state.saved.prefs.downloadSpeedLimit)
+  }
+}
+
 // Quits any modal popovers and returns to the torrent list screen
 function backToList () {
   // Exit any modals and screens with a back button
@@ -423,6 +445,11 @@ function escapeBack () {
 function setGlobalTrackers () {
   controllers.torrentList().setGlobalTrackers(state.getGlobalTrackers())
 }
+
+
+// function setUploadSpeedLimit (speed) {
+//   ipcRenderer.send('set-download-limit', speed)
+// }
 
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
