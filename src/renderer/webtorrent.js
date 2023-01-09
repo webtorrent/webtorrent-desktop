@@ -413,16 +413,16 @@ function selectFiles (torrentOrInfoHash, selections) {
 }
 
 function setDownloadSpeedLimit (speed) {
-  var nodeConsole = require('console');
-  var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
-  myConsole.log('Setting download speed limit (bytes/second): ' + speed);
+  // var nodeConsole = require('console');
+  // var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+  // myConsole.log('Setting download speed limit (bytes/second): ' + speed);
   client.throttleDownload(speed)
 }
 
 function setUploadSpeedLimit (speed) {
-  var nodeConsole = require('console');
-  var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
-  myConsole.log('Setting upload speed limit (bytes/second): ' + speed);
+  // var nodeConsole = require('console');
+  // var myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+  // myConsole.log('Setting upload speed limit (bytes/second): ' + speed);
   client.throttleUpload(speed)
 }
 
