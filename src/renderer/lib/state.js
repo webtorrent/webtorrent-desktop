@@ -134,8 +134,8 @@ function setupStateSaved () {
       highestPlaybackPriority: true,
       downloadSpeedLimitEnabled: false,
       uploadSpeedLimitEnabled: false,
-      downloadSpeedLimit: -1,
-      uploadSpeedLimit: -1,
+      downloadSpeedLimit: 1000000,
+      uploadSpeedLimit: 1000000,
       globalTrackers: defaultAnnounceList
     },
     torrents: config.DEFAULT_TORRENTS.map(createTorrentObject),
