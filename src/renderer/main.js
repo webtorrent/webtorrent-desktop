@@ -446,10 +446,6 @@ function setGlobalTrackers () {
   controllers.torrentList().setGlobalTrackers(state.getGlobalTrackers())
 }
 
-// function setUploadSpeedLimit (speed) {
-//   ipcRenderer.send('set-download-limit', speed)
-// }
-
 // Starts all torrents that aren't paused on program startup
 function resumeTorrents () {
   state.saved.torrents
