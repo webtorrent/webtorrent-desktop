@@ -306,7 +306,7 @@ class PreferencesPage extends React.Component {
     }
 
     // webtorrent limits are in bytes, but our UI is in Kilobytes.
-    // So we do a conversions in this file.
+    // So we do conversions in this file.
     return (
       <Preference>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
