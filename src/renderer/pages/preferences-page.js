@@ -287,8 +287,8 @@ class PreferencesPage extends React.Component {
   }
 
   speedLimits () {
-    const DLspeedLimitInKB = this.props.state.saved.prefs.downloadSpeedLimit / 1000
-    const ULspeedLimitInKB = this.props.state.saved.prefs.uploadSpeedLimit / 1000
+    const DLspeedLimitInKBPS = this.props.state.saved.prefs.downloadSpeedLimit / 1000
+    const ULspeedLimitInKBPS = this.props.state.saved.prefs.uploadSpeedLimit / 1000
 
     // Align the text fields
     const textareaStyle = {
@@ -324,7 +324,7 @@ class PreferencesPage extends React.Component {
               rows={1}
               rowsMax={1}
               type='number'
-              value={DLspeedLimitInKB}
+              value={DLspeedLimitInKBPS}
               onChange={this.handleDownloadSpeedLimitChange}
               disabled={!this.props.state.saved.prefs.downloadSpeedLimitEnabled}
             />
@@ -344,7 +344,7 @@ class PreferencesPage extends React.Component {
               rows={1}
               rowsMax={1}
               type='number'
-              value={ULspeedLimitInKB}
+              value={ULspeedLimitInKBPS}
               onChange={this.handleUploadSpeedLimitChange}
               disabled={!this.props.state.saved.prefs.uploadSpeedLimitEnabled}
             />
