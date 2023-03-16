@@ -74,7 +74,7 @@
     "nodemon": "2.0.21",
     "open": "8.4.2",
     "plist": "3.0.6",
-    "pngjs": "6.0.0",
+    "pngjs": "7.0.0",
     "run-series": "1.1.9",
     "spectron": "19.0.0",
     "standard": "17.0.0",
