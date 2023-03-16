@@ -69,7 +69,7 @@
     "electron-osx-sign": "0.6.0",
     "electron-packager": "15.5.2",
     "electron-winstaller": "5.1.0",
-    "gh-release": "6.0.4",
+    "gh-release": "7.0.2",
     "minimist": "1.2.8",
     "nodemon": "2.0.21",
     "open": "8.4.2",
