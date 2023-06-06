@@ -44,7 +44,6 @@ jobs:
         name: macos
         path: |
           dist/*.dmg
-          dist/*.zip
   package_windows:
     runs-on: windows-latest
     steps:
