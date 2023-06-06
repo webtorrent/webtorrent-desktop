@@ -41,6 +41,11 @@ Download the latest version of WebTorrent Desktop from
 - Try the (unstable) development version by cloning the Git repository. See the
   ["How to Contribute"](#how-to-contribute) instructions.
 
+### Developer Builds
+
+Builds from master branch can be [found here](https://nightly.link/webtorrent/webtorrent-desktop/workflows/package/master)
+
+
 ## Screenshots
 
 <p align="center">

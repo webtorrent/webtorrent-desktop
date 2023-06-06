@@ -1,7 +1,7 @@
 {
   "name": "webtorrent-desktop",
   "description": "WebTorrent, the streaming torrent client. For Mac, Windows, and Linux.",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "author": {
     "name": "WebTorrent, LLC",
     "email": "feross@webtorrent.io",
@@ -67,7 +67,7 @@
     "electron": "15.5.7",
     "electron-notarize": "1.2.2",
     "electron-osx-sign": "0.6.0",
-    "electron-packager": "15.5.2",
+    "electron-packager": "17.1.1",
     "electron-winstaller": "5.1.0",
     "gh-release": "7.0.2",
     "minimist": "1.2.8",

@@ -1,6 +1,6 @@
 name: package
-on: 
-  workflow_dispatch:
+on: push
+
 jobs:
   package_linux:
     runs-on: ubuntu-latest
