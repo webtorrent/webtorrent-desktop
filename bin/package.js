@@ -185,7 +185,6 @@ function buildDarwin (cb) {
 
   console.log('Mac: Packaging electron...')
   electronPackager(Object.assign({}, all, darwin)).then(function (buildPath) {
-
     buildPath.forEach(function (filesPath) {
       console.log('Mac: Packaged electron. ' + filesPath)
       const destArch = filesPath.split('-').pop()
