@@ -73,7 +73,7 @@
     "minimist": "1.2.8",
     "nodemon": "2.0.22",
     "open": "8.4.2",
-    "plist": "3.0.6",
+    "plist": "3.1.0",
     "pngjs": "7.0.0",
     "run-series": "1.1.9",
     "spectron": "19.0.0",
