@@ -116,9 +116,18 @@ function getDefaultPlayState () {
   }
 }
 
+function overwriteSync(fromPath, toPath) {
+  const { unlinkSync, copyFileSync } = require('fs')
+  try {
+    // if a previous startup failed, the file could still be write protected
+    unlinkSync(toPath)
+  } catch { }
+  copyFileSync(fromPath, toPath)
+}
+
 /* If the saved state file doesn't exist yet, here's what we use instead */
 function setupStateSaved () {
-  const { copyFileSync, mkdirSync, readFileSync } = require('fs')
+  const { mkdirSync, readFileSync } = require('fs')
   const parseTorrent = require('parse-torrent')
 
   const saved = {
@@ -146,11 +155,11 @@ function setupStateSaved () {
   config.DEFAULT_TORRENTS.forEach((t, i) => {
     const infoHash = saved.torrents[i].infoHash
     // TODO: Doing several sync calls during first startup is not ideal
-    copyFileSync(
+    overwriteSync(
       path.join(config.STATIC_PATH, t.posterFileName),
       path.join(config.POSTER_PATH, infoHash + path.extname(t.posterFileName))
     )
-    copyFileSync(
+    overwriteSync(
       path.join(config.STATIC_PATH, t.torrentFileName),
       path.join(config.TORRENT_PATH, infoHash + '.torrent')
     )
