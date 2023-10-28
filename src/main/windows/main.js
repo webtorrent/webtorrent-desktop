@@ -91,11 +91,11 @@ function init (state, options) {
   })
 
   win.on('move', debounce(e => {
-    send('windowBoundsChanged', e.sender.getBounds())
+    send('windowBoundsChanged', main.win.getBounds())
   }, 1000))
 
   win.on('resize', debounce(e => {
-    send('windowBoundsChanged', e.sender.getBounds())
+    send('windowBoundsChanged', main.win.getBounds())
   }, 1000))
 
   win.on('close', e => {
