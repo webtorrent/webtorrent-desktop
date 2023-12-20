@@ -47,7 +47,7 @@
     "prop-types": "15.8.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "rimraf": "4.4.0",
+    "rimraf": "4.4.1",
     "run-parallel": "1.2.0",
     "semver": "7.3.8",
     "simple-concat": "1.0.1",
