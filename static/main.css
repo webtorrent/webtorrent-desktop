@@ -321,11 +321,6 @@ textarea,
 /*
  * TORRENT LIST
  */
-
-.torrent-list {
-  height: 100%;
-}
-
 .torrent {
   background: linear-gradient(to bottom right, #4B79A1, #283E51);
   background-repeat: no-repeat;
@@ -568,6 +563,95 @@ body.drag .app::after {
   line-height: 1.5em;
   margin-bottom: 6px;
 }
+
+/*
+ * Catalog
+ */
+
+ .catalog-container{
+  display: grid;    
+  grid-template-columns: repeat(auto-fill, 200px);
+  justify-content: space-between;
+  padding: 10px;
+ }
+
+ .catalog-item {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  padding: 5px;
+ }
+
+ .catalog-item .catalog-item__title {
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 5px 0;
+ }
+
+ .catalog-item .catalog-item__title:hover {
+  cursor: pointer;
+ }
+
+ .catalog-item .catalog-item__cover-image { 
+  border-radius: 4px;
+  width: 100%;
+ }
+
+ .catalog-item__cover:hover .catalog-item__cover-image {
+  opacity: 0.4;
+ }
+
+ .catalog-item__cover {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.catalog-item__cover-overlay {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: all .1s ease;
+}
+
+.catalog-item__cover:hover .catalog-item__cover-overlay{
+  opacity: 1;
+  visibility: visible;
+  border: solid 4px #524feb;
+  border-radius: 4px;
+}
+
+.catalog-item__cover-overlay__rating{
+  display: flex;
+  width: 100%;
+  font-weight: bold;
+  position: absolute;
+  bottom: 0;
+  justify-content: space-between;
+  align-items: end;
+  padding: 4px;
+  font-size: larger;
+}
+
+
+.catalog-item__cover-overlay__controls{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.catalog-item__cover-overlay__controls button:hover {
+  background-color: rgba(0, 0, 0, 0.7)!important;
+ }
 
 /*
  * PLAYER CONTROLS

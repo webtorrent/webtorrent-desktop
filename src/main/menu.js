@@ -5,464 +5,470 @@ module.exports = {
   setAllowNav,
   onPlayerUpdate,
   onToggleAlwaysOnTop,
-  onToggleFullScreen
+  onToggleFullScreen,
+};
+
+const { app, Menu } = require("electron");
+
+const config = require("../config");
+const windows = require("./windows");
+
+let menu = null;
+
+function init() {
+  menu = Menu.buildFromTemplate(getMenuTemplate());
+  Menu.setApplicationMenu(menu);
 }
 
-const { app, Menu } = require('electron')
-
-const config = require('../config')
-const windows = require('./windows')
-
-let menu = null
-
-function init () {
-  menu = Menu.buildFromTemplate(getMenuTemplate())
-  Menu.setApplicationMenu(menu)
-}
-
-function togglePlaybackControls (flag) {
-  getMenuItem('Play/Pause').enabled = flag
-  getMenuItem('Skip Next').enabled = flag
-  getMenuItem('Skip Previous').enabled = flag
-  getMenuItem('Increase Volume').enabled = flag
-  getMenuItem('Decrease Volume').enabled = flag
-  getMenuItem('Step Forward').enabled = flag
-  getMenuItem('Step Backward').enabled = flag
-  getMenuItem('Increase Speed').enabled = flag
-  getMenuItem('Decrease Speed').enabled = flag
-  getMenuItem('Add Subtitles File...').enabled = flag
+function togglePlaybackControls(flag) {
+  getMenuItem("Play/Pause").enabled = flag;
+  getMenuItem("Skip Next").enabled = flag;
+  getMenuItem("Skip Previous").enabled = flag;
+  getMenuItem("Increase Volume").enabled = flag;
+  getMenuItem("Decrease Volume").enabled = flag;
+  getMenuItem("Step Forward").enabled = flag;
+  getMenuItem("Step Backward").enabled = flag;
+  getMenuItem("Increase Speed").enabled = flag;
+  getMenuItem("Decrease Speed").enabled = flag;
+  getMenuItem("Add Subtitles File...").enabled = flag;
 
   if (flag === false) {
-    getMenuItem('Skip Next').enabled = false
-    getMenuItem('Skip Previous').enabled = false
+    getMenuItem("Skip Next").enabled = false;
+    getMenuItem("Skip Previous").enabled = false;
   }
 }
 
-function onPlayerUpdate (hasNext, hasPrevious) {
-  getMenuItem('Skip Next').enabled = hasNext
-  getMenuItem('Skip Previous').enabled = hasPrevious
+function onPlayerUpdate(hasNext, hasPrevious) {
+  getMenuItem("Skip Next").enabled = hasNext;
+  getMenuItem("Skip Previous").enabled = hasPrevious;
 }
 
-function setWindowFocus (flag) {
-  getMenuItem('Full Screen').enabled = flag
-  getMenuItem('Float on Top').enabled = flag
+function setWindowFocus(flag) {
+  getMenuItem("Full Screen").enabled = flag;
+  getMenuItem("Float on Top").enabled = flag;
 }
 
 // Disallow opening more screens on top of the current one.
-function setAllowNav (flag) {
-  getMenuItem('Preferences').enabled = flag
-  if (process.platform === 'darwin') {
-    getMenuItem('Create New Torrent...').enabled = flag
+function setAllowNav(flag) {
+  getMenuItem("Preferences").enabled = flag;
+  if (process.platform === "darwin") {
+    getMenuItem("Create New Torrent...").enabled = flag;
   } else {
-    getMenuItem('Create New Torrent from Folder...').enabled = flag
-    getMenuItem('Create New Torrent from File...').enabled = flag
+    getMenuItem("Create New Torrent from Folder...").enabled = flag;
+    getMenuItem("Create New Torrent from File...").enabled = flag;
   }
 }
 
-function onToggleAlwaysOnTop (flag) {
-  getMenuItem('Float on Top').checked = flag
+function onToggleAlwaysOnTop(flag) {
+  getMenuItem("Float on Top").checked = flag;
 }
 
-function onToggleFullScreen (flag) {
-  getMenuItem('Full Screen').checked = flag
+function onToggleFullScreen(flag) {
+  getMenuItem("Full Screen").checked = flag;
 }
 
-function getMenuItem (label) {
+function getMenuItem(label) {
   for (const menuItem of menu.items) {
-    const submenuItem = menuItem.submenu.items.find(item => item.label === label)
-    if (submenuItem) return submenuItem
+    const submenuItem = menuItem.submenu.items.find(
+      (item) => item.label === label
+    );
+    if (submenuItem) return submenuItem;
   }
-  return {}
+  return {};
 }
 
-function getMenuTemplate () {
+function getMenuTemplate() {
   const template = [
     {
-      label: 'File',
+      label: "File",
       submenu: [
         {
-          label: process.platform === 'darwin'
-            ? 'Create New Torrent...'
-            : 'Create New Torrent from Folder...',
-          accelerator: 'CmdOrCtrl+N',
+          label:
+            process.platform === "darwin"
+              ? "Create New Torrent..."
+              : "Create New Torrent from Folder...",
+          accelerator: "CmdOrCtrl+N",
           click: () => {
-            const dialog = require('./dialog')
-            dialog.openSeedDirectory()
-          }
+            const dialog = require("./dialog");
+            dialog.openSeedDirectory();
+          },
         },
         {
-          label: 'Open Torrent File...',
-          accelerator: 'CmdOrCtrl+O',
+          label: "Open Torrent File...",
+          accelerator: "CmdOrCtrl+O",
           click: () => {
-            const dialog = require('./dialog')
-            dialog.openTorrentFile()
-          }
+            const dialog = require("./dialog");
+            dialog.openTorrentFile();
+          },
         },
         {
-          label: 'Open Torrent Address...',
-          accelerator: 'CmdOrCtrl+U',
+          label: "Open Torrent Address...",
+          accelerator: "CmdOrCtrl+U",
           click: () => {
-            const dialog = require('./dialog')
-            dialog.openTorrentAddress()
-          }
+            const dialog = require("./dialog");
+            dialog.openTorrentAddress();
+          },
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'close'
-        }
-      ]
+          role: "close",
+        },
+      ],
     },
     {
-      label: 'Edit',
+      label: "Edit",
       submenu: [
         {
-          role: 'undo'
+          role: "undo",
         },
         {
-          role: 'redo'
+          role: "redo",
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'cut'
+          role: "cut",
         },
         {
-          role: 'copy'
+          role: "copy",
         },
         {
-          label: 'Paste Torrent Address',
-          role: 'paste'
+          label: "Paste Torrent Address",
+          role: "paste",
         },
         {
-          role: 'delete'
+          role: "delete",
         },
         {
-          role: 'selectall'
-        }
-      ]
+          role: "selectall",
+        },
+      ],
     },
     {
-      label: 'View',
+      label: "View",
       submenu: [
         {
-          label: 'Full Screen',
-          type: 'checkbox',
-          accelerator: process.platform === 'darwin'
-            ? 'Ctrl+Command+F'
-            : 'F11',
-          click: () => windows.main.toggleFullScreen()
+          label: "Full Screen",
+          type: "checkbox",
+          accelerator: process.platform === "darwin" ? "Ctrl+Command+F" : "F11",
+          click: () => windows.main.toggleFullScreen(),
         },
         {
-          label: 'Float on Top',
-          type: 'checkbox',
-          click: () => windows.main.toggleAlwaysOnTop()
+          label: "Float on Top",
+          type: "checkbox",
+          click: () => windows.main.toggleAlwaysOnTop(),
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Go Back',
-          accelerator: 'Esc',
-          click: () => windows.main.dispatch('escapeBack')
+          label: "Go Back",
+          accelerator: "Esc",
+          click: () => windows.main.dispatch("escapeBack"),
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Developer',
+          label: "Developer",
           submenu: [
             {
-              label: 'Developer Tools',
-              accelerator: process.platform === 'darwin'
-                ? 'Alt+Command+I'
-                : 'Ctrl+Shift+I',
-              click: () => windows.main.toggleDevTools()
+              label: "Developer Tools",
+              accelerator:
+                process.platform === "darwin"
+                  ? "Alt+Command+I"
+                  : "Ctrl+Shift+I",
+              click: () => windows.main.toggleDevTools(),
             },
             {
-              label: 'Show WebTorrent Process',
-              accelerator: process.platform === 'darwin'
-                ? 'Alt+Command+P'
-                : 'Ctrl+Shift+P',
-              click: () => windows.webtorrent.toggleDevTools()
-            }
-          ]
-        }
-      ]
+              label: "Show WebTorrent Process",
+              accelerator:
+                process.platform === "darwin"
+                  ? "Alt+Command+P"
+                  : "Ctrl+Shift+P",
+              click: () => windows.webtorrent.toggleDevTools(),
+            },
+          ],
+        },
+      ],
     },
     {
-      label: 'Playback',
+      label: "Playback",
       submenu: [
         {
-          label: 'Play/Pause',
-          accelerator: 'Space',
-          click: () => windows.main.dispatch('playPause'),
-          enabled: false
+          label: "Play/Pause",
+          accelerator: "Space",
+          click: () => windows.main.dispatch("playPause"),
+          enabled: false,
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Skip Next',
-          accelerator: 'N',
-          click: () => windows.main.dispatch('nextTrack'),
-          enabled: false
+          label: "Skip Next",
+          accelerator: "N",
+          click: () => windows.main.dispatch("nextTrack"),
+          enabled: false,
         },
         {
-          label: 'Skip Previous',
-          accelerator: 'P',
-          click: () => windows.main.dispatch('previousTrack'),
-          enabled: false
+          label: "Skip Previous",
+          accelerator: "P",
+          click: () => windows.main.dispatch("previousTrack"),
+          enabled: false,
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Increase Volume',
-          accelerator: 'CmdOrCtrl+Up',
-          click: () => windows.main.dispatch('changeVolume', 0.1),
-          enabled: false
+          label: "Increase Volume",
+          accelerator: "CmdOrCtrl+Up",
+          click: () => windows.main.dispatch("changeVolume", 0.1),
+          enabled: false,
         },
         {
-          label: 'Decrease Volume',
-          accelerator: 'CmdOrCtrl+Down',
-          click: () => windows.main.dispatch('changeVolume', -0.1),
-          enabled: false
+          label: "Decrease Volume",
+          accelerator: "CmdOrCtrl+Down",
+          click: () => windows.main.dispatch("changeVolume", -0.1),
+          enabled: false,
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Step Forward',
-          accelerator: process.platform === 'darwin'
-            ? 'CmdOrCtrl+Alt+Right'
-            : 'Alt+Right',
-          click: () => windows.main.dispatch('skip', 10),
-          enabled: false
+          label: "Step Forward",
+          accelerator:
+            process.platform === "darwin" ? "CmdOrCtrl+Alt+Right" : "Alt+Right",
+          click: () => windows.main.dispatch("skip", 10),
+          enabled: false,
         },
         {
-          label: 'Step Backward',
-          accelerator: process.platform === 'darwin'
-            ? 'CmdOrCtrl+Alt+Left'
-            : 'Alt+Left',
-          click: () => windows.main.dispatch('skip', -10),
-          enabled: false
+          label: "Step Backward",
+          accelerator:
+            process.platform === "darwin" ? "CmdOrCtrl+Alt+Left" : "Alt+Left",
+          click: () => windows.main.dispatch("skip", -10),
+          enabled: false,
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Increase Speed',
-          accelerator: 'CmdOrCtrl+=',
-          click: () => windows.main.dispatch('changePlaybackRate', 1),
-          enabled: false
+          label: "Increase Speed",
+          accelerator: "CmdOrCtrl+=",
+          click: () => windows.main.dispatch("changePlaybackRate", 1),
+          enabled: false,
         },
         {
-          label: 'Decrease Speed',
-          accelerator: 'CmdOrCtrl+-',
-          click: () => windows.main.dispatch('changePlaybackRate', -1),
-          enabled: false
+          label: "Decrease Speed",
+          accelerator: "CmdOrCtrl+-",
+          click: () => windows.main.dispatch("changePlaybackRate", -1),
+          enabled: false,
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Add Subtitles File...',
-          click: () => windows.main.dispatch('openSubtitles'),
-          enabled: false
-        }
-      ]
+          label: "Add Subtitles File...",
+          click: () => windows.main.dispatch("openSubtitles"),
+          enabled: false,
+        },
+      ],
     },
     {
-      label: 'Transfers',
+      label: "Transfers",
       submenu: [
         {
-          label: 'Pause All',
-          click: () => windows.main.dispatch('pauseAllTorrents')
+          label: "Pause All",
+          click: () => windows.main.dispatch("pauseAllTorrents"),
         },
         {
-          label: 'Resume All',
-          click: () => windows.main.dispatch('resumeAllTorrents')
+          label: "Resume All",
+          click: () => windows.main.dispatch("resumeAllTorrents"),
         },
         {
-          label: 'Remove All From List',
-          click: () => windows.main.dispatch('confirmDeleteAllTorrents', false)
+          label: "Remove All From List",
+          click: () => windows.main.dispatch("confirmDeleteAllTorrents", false),
         },
         {
-          label: 'Remove All Data Files',
-          click: () => windows.main.dispatch('confirmDeleteAllTorrents', true)
-        }
-      ]
+          label: "Remove All Data Files",
+          click: () => windows.main.dispatch("confirmDeleteAllTorrents", true),
+        },
+      ],
     },
     {
-      label: 'Help',
-      role: 'help',
+      label: "Help",
+      role: "help",
       submenu: [
         {
-          label: 'Learn more about ' + config.APP_NAME,
+          label: "Learn more about " + config.APP_NAME,
           click: () => {
-            const shell = require('./shell')
-            shell.openExternal(config.HOME_PAGE_URL)
-          }
+            const shell = require("./shell");
+            shell.openExternal(config.HOME_PAGE_URL);
+          },
         },
         {
-          label: 'Release Notes',
+          label: "Release Notes",
           click: () => {
-            const shell = require('./shell')
-            shell.openExternal(config.GITHUB_URL_RELEASES)
-          }
+            const shell = require("./shell");
+            shell.openExternal(config.GITHUB_URL_RELEASES);
+          },
         },
         {
-          label: 'Contribute on GitHub',
+          label: "Contribute on GitHub",
           click: () => {
-            const shell = require('./shell')
-            shell.openExternal(config.GITHUB_URL)
-          }
+            const shell = require("./shell");
+            shell.openExternal(config.GITHUB_URL);
+          },
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Report an Issue...',
+          label: "Report an Issue...",
           click: () => {
-            const shell = require('./shell')
-            shell.openExternal(config.GITHUB_URL_ISSUES)
-          }
+            const shell = require("./shell");
+            shell.openExternal(config.GITHUB_URL_ISSUES);
+          },
         },
         {
-          label: 'Follow us on Twitter',
+          label: "Follow us on Twitter",
           click: () => {
-            const shell = require('./shell')
-            shell.openExternal(config.TWITTER_PAGE_URL)
-          }
-        }
-      ]
-    }
-  ]
+            const shell = require("./shell");
+            shell.openExternal(config.TWITTER_PAGE_URL);
+          },
+        },
+      ],
+    },
+    {
+      label: "Drop",
+      click: () => windows.main.dispatch("preferences"),
+    },
+  ];
 
-  if (process.platform === 'darwin') {
+  if (process.platform === "darwin") {
     // WebTorrent menu (Mac)
     template.unshift({
       label: config.APP_NAME,
       submenu: [
         {
-          role: 'about'
+          role: "about",
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          label: 'Preferences',
-          accelerator: 'Cmd+,',
-          click: () => windows.main.dispatch('preferences')
+          label: "Preferences",
+          accelerator: "Cmd+,",
+          click: () => windows.main.dispatch("preferences"),
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'services'
+          role: "services",
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'hide'
+          role: "hide",
         },
         {
-          role: 'hideothers'
+          role: "hideothers",
         },
         {
-          role: 'unhide'
+          role: "unhide",
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'quit'
-        }
-      ]
-    })
+          role: "quit",
+        },
+      ],
+    });
 
     // Edit menu (Mac)
     template[2].submenu.push(
       {
-        type: 'separator'
+        type: "separator",
       },
       {
-        label: 'Speech',
+        label: "Speech",
         submenu: [
           {
-            role: 'startspeaking'
+            role: "startspeaking",
           },
           {
-            role: 'stopspeaking'
-          }
-        ]
+            role: "stopspeaking",
+          },
+        ],
       }
-    )
+    );
 
     // Window menu (Mac)
     template.splice(6, 0, {
-      role: 'window',
+      role: "window",
       submenu: [
         {
-          role: 'minimize'
+          role: "minimize",
         },
         {
-          type: 'separator'
+          type: "separator",
         },
         {
-          role: 'front'
-        }
-      ]
-    })
+          role: "front",
+        },
+      ],
+    });
   }
 
   // On Windows and Linux, open dialogs do not support selecting both files and
   // folders and files, so add an extra menu item so there is one for each type.
-  if (process.platform === 'linux' || process.platform === 'win32') {
+  if (process.platform === "linux" || process.platform === "win32") {
     // File menu (Windows, Linux)
     template[0].submenu.unshift({
-      label: 'Create New Torrent from File...',
+      label: "Create New Torrent from File...",
       click: () => {
-        const dialog = require('./dialog')
-        dialog.openSeedFile()
-      }
-    })
+        const dialog = require("./dialog");
+        dialog.openSeedFile();
+      },
+    });
 
     // Edit menu (Windows, Linux)
     template[1].submenu.push(
       {
-        type: 'separator'
+        type: "separator",
       },
       {
-        label: 'Preferences',
-        accelerator: 'CmdOrCtrl+,',
-        click: () => windows.main.dispatch('preferences')
-      })
+        label: "Preferences",
+        accelerator: "CmdOrCtrl+,",
+        click: () => windows.main.dispatch("preferences"),
+      }
+    );
 
     // Help menu (Windows, Linux)
     template[5].submenu.push(
       {
-        type: 'separator'
+        type: "separator",
       },
       {
-        label: 'About ' + config.APP_NAME,
-        click: () => windows.about.init()
+        label: "About " + config.APP_NAME,
+        click: () => windows.about.init(),
       }
-    )
+    );
   }
   // Add "File > Quit" menu item so Linux distros where the system tray icon is
   // missing will have a way to quit the app.
-  if (process.platform === 'linux') {
+  if (process.platform === "linux") {
     // File menu (Linux)
     template[0].submenu.push({
-      label: 'Quit',
-      click: () => app.quit()
-    })
+      label: "Quit",
+      click: () => app.quit(),
+    });
   }
 
-  return template
+  return template;
 }
