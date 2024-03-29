@@ -70,8 +70,7 @@ table {
 }
 
 .app {
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
+  user-select: none;
   height: 100%;
   display: flex;
   flex-flow: column;
@@ -143,6 +142,7 @@ table {
  */
 
 .header {
+  -webkit-app-region: drag;
   background: rgb(40, 40, 40);
   border-bottom: 1px solid rgb(30, 30, 30);
   height: 38px; /* vertically center OS menu buttons (OS X) */
