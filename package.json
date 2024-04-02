@@ -62,7 +62,7 @@
     "@babel/core": "7.24.3",
     "@babel/eslint-parser": "7.24.1",
     "@babel/plugin-transform-react-jsx": "7.23.4",
-    "cross-zip": "4.0.0",
+    "cross-zip": "4.0.1",
     "depcheck": "1.4.7",
     "electron": "27.3.8",
     "electron-notarize": "1.2.2",
