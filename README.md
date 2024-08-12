@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://discord.gg/cnXkm4Z"><img src="https://img.shields.io/discord/612575111718895616" alt="discord"></a>
-  <a href="https://travis-ci.org/webtorrent/webtorrent-desktop"><img src="https://img.shields.io/travis/webtorrent/webtorrent-desktop/master.svg" alt="travis"></a>
+  <a href="https://github.com/webtorrent/webtorrent-desktop/actions/workflows/ci.yml"><img src="https://github.com/webtorrent/webtorrent-desktop/actions/workflows/ci.yml/badge.svg" alt="GitHub CI action"></a>
   <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/release/webtorrent/webtorrent-desktop.svg" alt="github release version"></a>
   <a href="https://github.com/webtorrent/webtorrent-desktop/releases"><img src="https://img.shields.io/github/downloads/webtorrent/webtorrent-desktop/total.svg" alt="github release downloads"></a>
   <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
