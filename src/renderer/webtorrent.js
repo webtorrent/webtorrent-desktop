@@ -6,7 +6,7 @@ const crypto = require('crypto')
 const util = require('util')
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
-const mm = require('music-metadata')
+const { loadMusicMetadata } = require('music-metadata')
 const networkAddress = require('network-address')
 const path = require('path')
 const WebTorrent = require('webtorrent')
@@ -345,25 +345,23 @@ function getAudioMetadata (infoHash, index) {
       })
     }
   }
-  const onMetadata = file.done
-    // If completed; use direct file access
-    ? mm.parseFile(path.join(torrent.path, file.path), options)
-    // otherwise stream
-    : mm.parseStream(file.createReadStream(), file.name, options)
 
-  onMetadata
-    .then(
-      metadata => {
-        ipcRenderer.send('wt-audio-metadata', infoHash, index, metadata)
-        console.log(`metadata for file='${file.name}' completed.`)
-      },
-      err => {
-        console.log(
-          `error getting audio metadata for ${infoHash}:${index}`,
-          err
-        )
-      }
+  loadMusicMetadata(mm => {
+    return file.done
+      // If completed; use direct file access
+      ? mm.parseFile(path.join(torrent.path, file.path), options)
+      // otherwise stream
+      : mm.parseStream(file.createReadStream(), file.name, options)
+  }).then(metadata => {
+    ipcRenderer.send('wt-audio-metadata', infoHash, index, metadata)
+    console.log(`metadata for file='${file.name}' completed.`)
+  },
+  err => {
+    console.log(
+      `error getting audio metadata for ${infoHash}:${index}`,
+      err
     )
+  })
 }
 
 function selectFiles (torrentOrInfoHash, selections) {
