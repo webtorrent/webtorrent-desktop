@@ -271,7 +271,9 @@ const dispatchHandlers = {
     controllers.torrentList().saveTorrentFileAs(torrentKey),
   prioritizeTorrent: (infoHash) => controllers.torrentList().prioritizeTorrent(infoHash),
   resumePausedTorrents: () => controllers.torrentList().resumePausedTorrents(),
-
+  selectAllFiles: (infoHash) => controllers.torrentList().selectAllFiles(infoHash),
+  deselectAllFiles: (infoHash) => controllers.torrentList().deselectAllFiles(infoHash),
+  
   // Playback
   playFile: (infoHash, index) => controllers.playback().playFile(infoHash, index),
   playPause: () => controllers.playback().playPause(),

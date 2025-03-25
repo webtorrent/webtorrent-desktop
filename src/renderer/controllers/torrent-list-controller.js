@@ -253,6 +253,33 @@ module.exports = class TorrentListController {
     }
   }
 
+  selectAllFiles (infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    if (!torrentSummary || !torrentSummary.files || !torrentSummary.selections) return
+  
+    // Set all selections to true
+    torrentSummary.selections = torrentSummary.files.map(() => true)
+  
+    // Update WebTorrent if the torrent is active
+    if (torrentSummary.status !== 'paused') {
+      ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
+    }
+  }
+  
+  deselectAllFiles (infoHash) {
+    const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
+    if (!torrentSummary || !torrentSummary.files || !torrentSummary.selections) return
+  
+    // Set all selections to false
+    torrentSummary.selections = torrentSummary.files.map(() => false)
+  
+    // Update WebTorrent if the torrent is active
+    if (torrentSummary.status !== 'paused') {
+      ipcRenderer.send('wt-select-files', infoHash, torrentSummary.selections)
+    }
+  }
+  
+
   openTorrentContextMenu (infoHash) {
     const torrentSummary = TorrentSummary.getByKey(this.state, infoHash)
     const menu = new remote.Menu()
@@ -269,6 +296,16 @@ module.exports = class TorrentListController {
 
     menu.append(new remote.MenuItem({
       type: 'separator'
+    }))
+
+    menu.append(new remote.MenuItem({
+      label: 'Select All Files',
+      click: () => this.selectAllFiles(torrentSummary.infoHash)
+    }))
+    
+    menu.append(new remote.MenuItem({
+      label: 'Deselect All Files',
+      click: () => this.deselectAllFiles(torrentSummary.infoHash)
     }))
 
     if (torrentSummary.files) {
