@@ -56,6 +56,7 @@ function getDefaultState () {
     modal: null, /* modal popover */
     errors: [], /* user-facing errors */
     nextTorrentKey: 1, /* identify torrents for IPC between the main and webtorrent windows */
+    searchFilter: '',
 
     /*
      * Saved state is read from and written to a file every time the app runs.

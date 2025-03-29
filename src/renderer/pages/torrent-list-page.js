@@ -14,6 +14,13 @@ module.exports = class TorrentList extends React.Component {
     const state = this.props.state
 
     const contents = []
+
+    contents.push(
+      <div key='search' className='search'>
+        <input type='text' placeholder='Search torrents...' className='search-bar' onChange={(e) => dispatcher('search', e.target.value)(e)} />
+      </div>
+    )
+
     if (state.downloadPathStatus === 'missing') {
       contents.push(
         <div key='torrent-missing-path'>
@@ -25,7 +32,15 @@ module.exports = class TorrentList extends React.Component {
         </div>
       )
     }
-    const torrentElems = state.saved.torrents.map(
+
+    const torrents = state.searchFilter
+      ? state.saved.torrents.filter(torrent => {
+        if (torrent.name) return torrent.name.toLowerCase().includes(state.searchFilter)
+        else return false
+      })
+      : state.saved.torrents
+
+    const torrentElems = torrents.map(
       (torrentSummary) => this.renderTorrent(torrentSummary)
     )
     contents.push(...torrentElems)

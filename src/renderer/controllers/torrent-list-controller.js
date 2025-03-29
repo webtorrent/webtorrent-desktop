@@ -340,6 +340,10 @@ module.exports = class TorrentListController {
       })
     })
   }
+
+  search (searchTerm) {
+    this.state.searchFilter = searchTerm.toLowerCase()
+  }
 }
 
 // Recursively finds {name, path, size} for all files in a folder
