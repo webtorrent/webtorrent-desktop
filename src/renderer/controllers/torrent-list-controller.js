@@ -341,8 +341,46 @@ module.exports = class TorrentListController {
     })
   }
 
-  search (searchTerm) {
-    this.state.searchFilter = searchTerm.toLowerCase()
+  async search (searchTerm) {
+    this.state.searchFilter = searchTerm.trim().toLowerCase()
+
+    this.state.searchResults = []
+
+    if (searchTerm.length === 0) {
+      this.state.searchLoading = false
+      return
+    }
+
+    if (!this.state.localSearch) {
+      this.state.lastSearch++
+      const lastSearch = this.state.lastSearch
+
+      this.state.searchLoading = true
+      await new Promise(res => setTimeout(res, 1000))
+      if (lastSearch === this.state.lastSearch) {
+        const responses = await Promise.all([fetch('https://torrents-csv.com/service/search?q=' + encodeURIComponent(this.state.searchFilter)), fetch('https://apibay.org/q.php?q=' + encodeURIComponent(this.state.searchFilter))])
+        const results1 = await responses[0].json().catch({torrents: []})
+        const results2 = await responses[1].json().catch([])
+        const torrents = [...results1.torrents, ...results2]
+        this.state.searchResults = torrents.filter((item, index, self) => index === self.findIndex(t => (t.info_hash ?? t.infohash) === (item.info_hash ?? t.infohash)));
+      }
+      this.state.searchLoading = false
+    }
+  }
+
+  async toggleSearch () {
+    this.state.localSearch = !this.state.localSearch
+    if (this.state.localSearch) this.state.searchResults = []
+    else {
+      if (this.state.searchFilter.length === 0) return
+      this.state.searchLoading = true
+      const responses = await Promise.all([fetch('https://torrents-csv.com/service/search?q=' + encodeURIComponent(this.state.searchFilter)), fetch('https://apibay.org/q.php?q=' + encodeURIComponent(this.state.searchFilter))])
+      const results1 = await responses[0].json()
+      const results2 = await responses[1].json()
+      const torrents = [...results1.torrents, ...results2]
+      this.state.searchResults = torrents.filter((item, index, self) => index === self.findIndex(t => (t.info_hash ?? t.infohash) === (item.info_hash ?? t.infohash)));
+      this.state.searchLoading = false
+    }
   }
 }
 

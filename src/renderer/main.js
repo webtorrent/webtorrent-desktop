@@ -258,6 +258,7 @@ const dispatchHandlers = {
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
   openTorrentListContextMenu: () => onPaste(),
   search: (el) => controllers.torrentList().search(el),
+  toggleSearch: () => controllers.torrentList().toggleSearch(),
   confirmDeleteAllTorrents: (deleteData) =>
     controllers.torrentList().confirmDeleteAllTorrents(deleteData),
   deleteAllTorrents: (deleteData) =>
