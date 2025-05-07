@@ -58,7 +58,7 @@
     "winreg": "1.2.4"
   },
   "devDependencies": {
-    "@babel/cli": "7.27.1",
+    "@babel/cli": "7.27.2",
     "@babel/core": "7.27.1",
     "@babel/eslint-parser": "7.27.1",
     "@babel/plugin-transform-react-jsx": "7.27.1",
