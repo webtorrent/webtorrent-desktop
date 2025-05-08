@@ -14,6 +14,14 @@ module.exports = class TorrentList extends React.Component {
     const state = this.props.state
 
     const contents = []
+
+    contents.push(
+      <div key='search' className='search'>
+        <input type='text' placeholder={`Search ${state.localSearch ? 'your' : 'all'} torrents...`} className='search-bar' onChange={(e) => dispatcher('search', e.target.value)(e)} />
+        <div className='search-toggle' onClick={dispatcher('toggleSearch')}>{state.localSearch ? '💻' : '🌐'}</div>
+      </div>
+    )
+
     if (state.downloadPathStatus === 'missing') {
       contents.push(
         <div key='torrent-missing-path'>
@@ -25,15 +33,30 @@ module.exports = class TorrentList extends React.Component {
         </div>
       )
     }
-    const torrentElems = state.saved.torrents.map(
-      (torrentSummary) => this.renderTorrent(torrentSummary)
-    )
+
+    if (!state.localSearch && state.searchFilter.length !== 0 && state.searchResults.length === 0) {
+      contents.push(<p>{state.searchLoading ? 'Loading...' : 'No Results'}</p>)
+    }
+
+    const torrents = state.searchFilter
+      ? state.saved.torrents.filter(torrent => {
+        if (torrent.name) return torrent.name.toLowerCase().includes(state.searchFilter)
+        else return false
+      })
+      : state.saved.torrents
+
+    const torrentElems = state.localSearch
+      ? torrents.map((torrentSummary) => this.renderTorrent(torrentSummary))
+      : state.searchResults.map((torrentSummary, i) => this.renderTorrent({ ...torrentSummary, torrentKey: i + 1, infoHash: ('infohash' in torrentSummary) ? torrentSummary.infohash : torrentSummary.info_hash }))
+
     contents.push(...torrentElems)
-    contents.push(
-      <div key='torrent-placeholder' className='torrent-placeholder'>
-        <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
-      </div>
-    )
+    if (state.localSearch) {
+      contents.push(
+        <div key='torrent-placeholder' className='torrent-placeholder'>
+          <span className='ellipsis'>Drop a torrent file here or paste a magnet link</span>
+        </div>
+      )
+    }
 
     return (
       <div
@@ -64,6 +87,7 @@ module.exports = class TorrentList extends React.Component {
     const classes = ['torrent']
     if (isSelected) classes.push('selected')
     if (!infoHash) classes.push('disabled')
+    if (!('path' in torrentSummary)) classes.push('torrent-small')
     if (!torrentSummary.torrentKey) throw new Error('Missing torrentKey')
     return (
       <div
@@ -72,7 +96,7 @@ module.exports = class TorrentList extends React.Component {
         style={style}
         className={classes.join(' ')}
         onContextMenu={infoHash && dispatcher('openTorrentContextMenu', infoHash)}
-        onClick={infoHash && dispatcher('toggleSelectTorrent', infoHash)}
+        onClick={'path' in torrentSummary ? infoHash && dispatcher('toggleSelectTorrent', infoHash) : dispatcher('addTorrent', infoHash)} 
       >
         {this.renderTorrentMetadata(torrentSummary)}
         {infoHash ? this.renderTorrentButtons(torrentSummary) : null}
@@ -94,7 +118,8 @@ module.exports = class TorrentList extends React.Component {
     let progElems
     if (torrentSummary.error) {
       progElems = [getErrorMessage(torrentSummary)]
-    } else if (torrentSummary.status !== 'paused' && prog) {
+    } else if (!('path' in torrentSummary)) progElems = []
+    else if (torrentSummary.status !== 'paused' && prog) {
       progElems = [
         renderDownloadCheckbox(),
         renderTorrentStatus(),
