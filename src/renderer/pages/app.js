@@ -22,11 +22,15 @@ const Modals = {
   'open-torrent-address-modal': createGetter(
     () => require('../components/open-torrent-address-modal')
   ),
-  'remove-torrent-modal': createGetter(() => require('../components/remove-torrent-modal')),
+  'remove-torrent-data-modal': createGetter(() => require('../components/remove-torrent-modal')),
   'update-available-modal': createGetter(() => require('../components/update-available-modal')),
   'unsupported-media-modal': createGetter(() => require('../components/unsupported-media-modal')),
   'delete-all-torrents-modal':
       createGetter(() => require('../components/delete-all-torrents-modal'))
+}
+
+const SnackBars = {
+  'remove-torrent-snackbar': createGetter(() => require('../components/remove-torrent-snackbar'))
 }
 
 const fontFamily = process.platform === 'win32'
@@ -75,6 +79,7 @@ class App extends React.Component {
           {this.getErrorPopover()}
           <div key='content' className='content'>{this.getView()}</div>
           {this.getModal()}
+          {this.getSnackBar()}
         </div>
       </MuiThemeProvider>
     )
@@ -95,6 +100,25 @@ class App extends React.Component {
         <div key='title' className='title'>Error</div>
         {errorElems}
       </div>
+    )
+  }
+
+  getSnackBar () {
+    const state = this.props.state
+    if (!state.snackbar) return
+
+    if (!lightMuiTheme) {
+      const lightBaseTheme = require('material-ui/styles/baseThemes/lightBaseTheme').default
+      lightBaseTheme.fontFamily = fontFamily
+      lightBaseTheme.userAgent = false
+      lightMuiTheme = getMuiTheme(lightBaseTheme)
+    }
+
+    const SnackBarContents = SnackBars[state.snackbar.id]()
+    return (
+      <MuiThemeProvider muiTheme={lightMuiTheme}>
+        <SnackBarContents state={state} />
+      </MuiThemeProvider>
     )
   }
 
