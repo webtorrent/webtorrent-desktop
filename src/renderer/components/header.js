@@ -37,6 +37,7 @@ class Header extends React.Component {
           </i>
         </div>
         <div className='nav right float-right'>
+          {this.getListButton()}
           {this.getAddButton()}
         </div>
       </div>
@@ -47,6 +48,30 @@ class Header extends React.Component {
     if (process.platform !== 'darwin') return null
     const state = this.props.state
     return (<div className='title ellipsis'>{state.window.title}</div>)
+  }
+
+  getListButton () {
+    const state = this.props.state
+    if (state.location.url() !== 'home') return null
+
+    const compact = state.compactListView
+    if (compact) {
+      return (
+        <i className='icon view_list'
+          title='List'
+          onClick={dispatcher('viewList')}>
+          view_list
+        </i>
+      )
+    } else {
+      return (
+        <i className='icon list'
+          title='Compact list'
+          onClick={dispatcher('compactViewList')}>
+          list
+        </i>
+      )
+    }
   }
 
   getAddButton () {
