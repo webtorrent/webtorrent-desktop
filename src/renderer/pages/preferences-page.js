@@ -35,6 +35,20 @@ class PreferencesPage extends React.Component {
 
     const globalTrackers = this.props.state.getGlobalTrackers().join('\n')
 
+    // Upload Speed limits
+    this.handleUploadSpeedLimitToggle =
+      this.handleUploadSpeedLimitToggle.bind(this)
+
+    this.handleUploadSpeedLimitChange =
+      this.handleUploadSpeedLimitChange.bind(this)
+
+    // Download Speed limits
+    this.handleDownloadSpeedLimitToggle =
+      this.handleDownloadSpeedLimitToggle.bind(this)
+
+    this.handleDownloadSpeedLimitChange =
+      this.handleDownloadSpeedLimitChange.bind(this)
+
     this.state = {
       globalTrackers
     }
@@ -272,6 +286,125 @@ class PreferencesPage extends React.Component {
     dispatch('updateGlobalTrackers', announceList)
   }
 
+  speedLimits () {
+    const DLspeedLimitInKBPS = this.props.state.saved.prefs.downloadSpeedLimit / 1000
+    const ULspeedLimitInKBPS = this.props.state.saved.prefs.uploadSpeedLimit / 1000
+
+    // Align the text fields
+    const textareaStyle = {
+      margin: 0
+      // marginTop: -40
+    }
+    const textFieldStyle = {
+      width: '25%',
+      marginTop: -12
+    }
+    const unitLabelStyle = {
+      marginTop: -0.01,
+      padding: 0.1,
+      marginLeft: 4
+    }
+
+    // webtorrent limits are in bytes, but our UI is in Kilobytes.
+    // So we do conversions in this file.
+    return (
+      <Preference>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'flex-start' }}>
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.downloadSpeedLimitEnabled}
+              label='Limit Download:'
+              onCheck={this.handleDownloadSpeedLimitToggle}
+            />
+            <TextField
+              className='control'
+              style={textFieldStyle}
+              textareaStyle={textareaStyle}
+              rows={1}
+              rowsMax={1}
+              type='number'
+              value={DLspeedLimitInKBPS}
+              onChange={this.handleDownloadSpeedLimitChange}
+              disabled={!this.props.state.saved.prefs.downloadSpeedLimitEnabled}
+            />
+            <p style={unitLabelStyle}>KB/s</p>
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'flex-start' }}>
+            <Checkbox
+              className='control'
+              checked={this.props.state.saved.prefs.uploadSpeedLimitEnabled}
+              label='Limit Upload:'
+              onCheck={this.handleUploadSpeedLimitToggle}
+            />
+            <TextField
+              className='control'
+              style={textFieldStyle}
+              textareaStyle={textareaStyle}
+              rows={1}
+              rowsMax={1}
+              type='number'
+              value={ULspeedLimitInKBPS}
+              onChange={this.handleUploadSpeedLimitChange}
+              disabled={!this.props.state.saved.prefs.uploadSpeedLimitEnabled}
+            />
+            <p style={unitLabelStyle}>KB/s</p>
+          </div>
+        </div>
+      </Preference>
+    )
+  }
+
+  // Download Speed Limit functions
+  handleDownloadSpeedLimitToggle (e, isChecked) {
+    // Store whether or not the limit is enabled
+    dispatch('updatePreferences', 'downloadSpeedLimitEnabled', isChecked)
+
+    // Adjust speedlimit in webtorrent (-1 means disabled)
+    dispatch('updateDownloadSpeedLimit', isChecked ? this.props.state.saved.prefs.downloadSpeedLimit : -1)
+  }
+
+  // Upload Speed Limit functions
+  handleUploadSpeedLimitToggle (e, isChecked) {
+    // Store whether or not the limit is enabled
+    dispatch('updatePreferences', 'uploadSpeedLimitEnabled', isChecked)
+
+    // Adjust speedlimit in webtorrent (-1 means disabled)
+    dispatch('updateUploadSpeedLimit', isChecked ? this.props.state.saved.prefs.uploadSpeedLimit : -1)
+  }
+
+  // This converts from KB to bytes and updates prefs and webtorrent.
+  handleDownloadSpeedLimitChange (e, speedLimitInKBPS) {
+    // First check if the number is too large. Over 1TBPS is too large.
+    if (speedLimitInKBPS > 1000000000) {
+      speedLimitInKBPS = 1000000000
+    }
+
+    const speedLimitInBPS = speedLimitInKBPS * 1000
+
+    // Store the new rate in the persistent prefstore
+    dispatch('updatePreferences', 'downloadSpeedLimit', speedLimitInBPS)
+
+    // Dispatch to call IPC
+    dispatch('updateDownloadSpeedLimit', speedLimitInBPS)
+  }
+
+  // This converts from KB to bytes and updates prefs and webtorrent.
+  handleUploadSpeedLimitChange (e, speedLimitInKBPS) {
+    // First check if the number is too large. Over 1TBPS is too large.
+    if (speedLimitInKBPS > 1000000000) {
+      speedLimitInKBPS = 1000000000
+    }
+
+    const speedLimitInBPS = speedLimitInKBPS * 1000
+
+    // Store the new rate in the persistent prefstore
+    dispatch('updatePreferences', 'uploadSpeedLimit', speedLimitInBPS)
+
+    // Dispatch to call IPC
+    dispatch('updateUploadSpeedLimit', speedLimitInBPS)
+  }
+
   render () {
     const style = {
       color: colors.grey400,
@@ -289,6 +422,9 @@ class PreferencesPage extends React.Component {
           {this.openExternalPlayerCheckbox()}
           {this.externalPlayerPathSelector()}
           {this.highestPlaybackPriorityCheckbox()}
+        </PreferencesSection>
+        <PreferencesSection title='Speed Limits'>
+          {this.speedLimits()}
         </PreferencesSection>
         <PreferencesSection title='Default torrent app'>
           {this.setDefaultAppButton()}
