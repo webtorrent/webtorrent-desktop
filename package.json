@@ -58,10 +58,10 @@
     "winreg": "1.2.4"
   },
   "devDependencies": {
-    "@babel/cli": "7.28.3",
-    "@babel/core": "7.28.5",
-    "@babel/eslint-parser": "7.28.5",
-    "@babel/plugin-transform-react-jsx": "7.27.1",
+    "@babel/cli": "7.28.6",
+    "@babel/core": "7.28.6",
+    "@babel/eslint-parser": "7.28.6",
+    "@babel/plugin-transform-react-jsx": "7.28.6",
     "cross-zip": "4.0.0",
     "depcheck": "1.4.7",
     "electron": "27.3.11",
