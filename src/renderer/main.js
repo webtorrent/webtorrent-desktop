@@ -252,8 +252,10 @@ const dispatchHandlers = {
   resumeAllTorrents: () => controllers.torrentList().resumeAllTorrents(),
   toggleTorrentFile: (infoHash, index) =>
     controllers.torrentList().toggleTorrentFile(infoHash, index),
-  confirmDeleteTorrent: (infoHash, deleteData) =>
-    controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
+  showDeleteTorrentSnackbar: (infoHash, magnetURI) =>
+    controllers.torrentList().showDeleteTorrentSnackbar(infoHash, magnetURI),
+  confirmDeleteTorrentAndData: (infoHash) =>
+    controllers.torrentList().confirmDeleteTorrentAndData(infoHash),
   deleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().deleteTorrent(infoHash, deleteData),
   openTorrentListContextMenu: () => onPaste(),
@@ -327,6 +329,7 @@ const dispatchHandlers = {
 
   // Navigation between screens (back, forward, ESC, etc)
   exitModal: () => { state.modal = null },
+  clearSnackbar: () => { state.snackbar = null },
   backToList,
   escapeBack,
   back: () => state.location.back(),
