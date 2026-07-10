@@ -117,8 +117,8 @@ const darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build x64 binary only.
-  arch: 'x64',
+  // Build Apple Silicon binary only.
+  arch: 'arm64',
 
   // The bundle identifier to use in the application's plist (Mac only).
   appBundleId: 'io.webtorrent.webtorrent',
@@ -329,7 +329,7 @@ function buildDarwin (cb) {
       console.log('Mac: Creating zip...')
 
       const inPath = path.join(buildPath[0], config.APP_NAME + '.app')
-      const outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin.zip')
+      const outPath = path.join(DIST_PATH, BUILD_NAME + '-darwin-arm64.zip')
       zip.zipSync(inPath, outPath)
 
       console.log('Mac: Created zip.')
@@ -340,7 +340,7 @@ function buildDarwin (cb) {
 
       const appDmg = require('appdmg')
 
-      const targetPath = path.join(DIST_PATH, BUILD_NAME + '.dmg')
+      const targetPath = path.join(DIST_PATH, BUILD_NAME + '-arm64.dmg')
       rimraf.sync(targetPath)
 
       // Create a .dmg (Mac disk image) file, for easy user installation.
@@ -615,7 +615,10 @@ function buildLinux (cb) {
 }
 
 function printDone (err) {
-  if (err) console.error(err.message || err)
+  if (err) {
+    console.error(err.message || err)
+    process.exitCode = 1
+  }
 }
 
 /*

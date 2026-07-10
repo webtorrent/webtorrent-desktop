@@ -48,7 +48,18 @@
   npm run package -- darwin --sign
   ```
 
-  Move the `.zip` and `.dmg` file somewhere because the next step wipes the `dist/` folder away.
+  This creates Apple Silicon-only macOS artifacts:
+  `WebTorrent-v<version>-darwin-arm64.zip` for automatic updates and
+  `WebTorrent-v<version>-arm64.dmg` for manual installation. Verify the app binary before
+  uploading:
+
+  ```
+  lipo -archs dist/WebTorrent-darwin-arm64/WebTorrent.app/Contents/MacOS/WebTorrent
+  ```
+
+  The output must be `arm64`.
+
+  Move the `.zip` and `.dmg` files somewhere because the next step wipes the `dist/` folder away.
 
   ```
   npm run package -- linux --sign
@@ -68,7 +79,8 @@
 
   Follow the URL to a newly created Github release page. Manually upload the binaries from
   `webtorrent-desktop/dist/`. Open the previous release in another tab, and make sure that you
-  are uploading the same set of files, no more, no less.
+  are uploading the same set of files for Windows and Linux. For macOS, upload only the
+  Apple Silicon `.zip` and `.dmg` artifacts.
 
 ### 3. Test it
 
@@ -81,6 +93,9 @@
   codesigning worked and is valid.
 
 - Smoke test WebTorrent Desktop on each platform. Before a release, check that the following basic use cases work correctly:
+
+  On macOS, test on Apple Silicon without Rosetta and confirm Activity Monitor reports the app
+  kind as Apple.
 
   1. Click "Play" to stream a built-in torrent (e.g. Sintel)
     - Ensure that seeking to undownloaded region works and plays immediately.
@@ -103,7 +118,8 @@
 - Update the website
 
   Create a pull request in [webtorrent.io](https://github.com/webtorrent/webtorrent.io). Update
-  `config.js`, updating the desktop app version.
+  `config.js`, updating the desktop app version. Ensure the desktop update endpoint serves the
+  macOS zip for `platform=darwin&sysarch=arm64`.
 
   Once this PR is merged and Feross redeploys the WebTorrent website,
   hundreds of thousands of users around the world will start auto updating. **Merge with care.**

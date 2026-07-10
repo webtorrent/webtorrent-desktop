@@ -39,9 +39,15 @@ jobs:
           ${{ runner.os }}-node-
     - run: npm install
     - run: npm run package -- darwin
+    - name: Verify macOS Apple Silicon binary
+      run: |
+        APP_BINARY="$(find dist -path '*/WebTorrent.app/Contents/MacOS/WebTorrent' -type f -print -quit)"
+        test -n "$APP_BINARY"
+        file "$APP_BINARY"
+        test "$(lipo -archs "$APP_BINARY")" = "arm64"
     - uses: actions/upload-artifact@v3
       with:
-        name: macos
+        name: macos-arm64
         path: |
           dist/*.dmg
           dist/*.zip
