@@ -31,6 +31,7 @@ const argv = minimist(process.argv.slice(2), {
     sign: false
   },
   string: [
+    'arch',
     'package'
   ]
 })
@@ -117,8 +118,8 @@ const darwin = {
   // Build for Mac
   platform: 'darwin',
 
-  // Build x64 binary only.
-  arch: 'x64',
+  // Build x64 by default, or a user-requested supported Electron architecture.
+  arch: argv.arch || 'x64',
 
   // The bundle identifier to use in the application's plist (Mac only).
   appBundleId: 'io.webtorrent.webtorrent',
