@@ -122,6 +122,7 @@ Where `[platform]` is `darwin`, `linux`, `win32`, or `all` (default).
 
 The following optional arguments are available:
 
+- `--arch=[arch]` - Build a specific architecture, e.g. `arm64` for Apple Silicon Macs.
 - `--sign` - Sign the application (Mac, Windows)
 - `--package=[type]` - Package single output type.
    - `deb` - Debian package
