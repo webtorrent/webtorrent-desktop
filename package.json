@@ -97,6 +97,9 @@
   ],
   "license": "MIT",
   "main": "index.js",
+  "bin": {
+    "webtorrent": "bin/webtorrent.js"
+  },
   "optionalDependencies": {
     "appdmg": "^0.6.0",
     "electron-installer-debian": "^3.2.0",
