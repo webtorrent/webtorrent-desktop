@@ -240,17 +240,19 @@ function updateElectron () {
 
 const dispatchHandlers = {
   // Torrent list: creating, deleting, selecting torrents
-  openTorrentFile: () => ipcRenderer.send('openTorrentFile'),
-  openFiles: () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
-  openTorrentAddress: () => { state.modal = { id: 'open-torrent-address-modal' } },
+  'openTorrentFile': () => ipcRenderer.send('openTorrentFile'),
+  'openFiles': () => ipcRenderer.send('openFiles'), /* shows the open file dialog */
+  'openTorrentAddress': () => { state.modal = { id: 'open-torrent-address-modal' } },
+  'viewList': () => { state.compactListView = false },
+  'compactViewList': () => { state.compactListView = true },
 
-  addTorrent: (torrentId) => controllers.torrentList().addTorrent(torrentId),
-  showCreateTorrent: (paths) => controllers.torrentList().showCreateTorrent(paths),
-  createTorrent: (options) => controllers.torrentList().createTorrent(options),
-  toggleTorrent: (infoHash) => controllers.torrentList().toggleTorrent(infoHash),
-  pauseAllTorrents: () => controllers.torrentList().pauseAllTorrents(),
-  resumeAllTorrents: () => controllers.torrentList().resumeAllTorrents(),
-  toggleTorrentFile: (infoHash, index) =>
+  'addTorrent': (torrentId) => controllers.torrentList().addTorrent(torrentId),
+  'showCreateTorrent': (paths) => controllers.torrentList().showCreateTorrent(paths),
+  'createTorrent': (options) => controllers.torrentList().createTorrent(options),
+  'toggleTorrent': (infoHash) => controllers.torrentList().toggleTorrent(infoHash),
+  'pauseAllTorrents': () => controllers.torrentList().pauseAllTorrents(),
+  'resumeAllTorrents': () => controllers.torrentList().resumeAllTorrents(),
+  'toggleTorrentFile': (infoHash, index) =>
     controllers.torrentList().toggleTorrentFile(infoHash, index),
   confirmDeleteTorrent: (infoHash, deleteData) =>
     controllers.torrentList().confirmDeleteTorrent(infoHash, deleteData),
