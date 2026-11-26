@@ -247,7 +247,7 @@ module.exports = class TorrentList extends React.Component {
           key='delete-button'
           className='icon delete'
           title='Remove torrent'
-          onClick={dispatcher('confirmDeleteTorrent', infoHash, false)}
+          onClick={dispatcher('showDeleteTorrentSnackbar', infoHash, torrentSummary.magnetURI)}
         >
           close
         </i>
